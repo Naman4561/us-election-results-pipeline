@@ -58,6 +58,22 @@ def main(argv: list[str] | None = None) -> int:
         type=Path,
         help="Independent contest-total CSV to compare",
     )
+    loading = commands.add_parser(
+        "load",
+        help="Load one verified parser output into PostgreSQL",
+    )
+    loading.add_argument(
+        "--config", type=Path, default=Path("config/sources.toml")
+    )
+    loading.add_argument(
+        "--data-dir", type=Path, default=Path("data")
+    )
+    loading.add_argument(
+        "--env-file", type=Path, default=Path(".env")
+    )
+    loading.add_argument("--source", required=True)
+    loading.add_argument("--parsed-dir", type=Path, required=True)
+    
     args = parser.parse_args(argv)
     try:
         settings, sources = load_config(args.config)
@@ -76,6 +92,27 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.source and args.source not in sources:
             raise ValueError(f"Unknown source: {args.source}; use list-sources")
+        if args.command == "load":
+            try:
+                from election_pipeline.database import (
+                    connection_settings,
+                    load_parsed,
+                )
+            except ImportError as error:
+                raise ValueError(
+                    'Install PostgreSQL dependencies: pip install -e ".[postgres]"'
+                ) from error
+
+            result = load_parsed(
+                sources[args.source],
+                settings,
+                args.data_dir,
+                args.parsed_dir,
+                connection_settings(args.env_file),
+            )
+
+            print(json.dumps(result, sort_keys=True))
+            return int(result["outcome"] == "failed")
         if args.command == "parse":
             result = parse_source(
                 sources[args.source],
