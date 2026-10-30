@@ -1,0 +1,17 @@
+[collector]
+timeout_seconds = 30
+max_download_seconds = 60
+max_attempts = 3
+backoff_seconds = 2
+max_retry_wait_seconds = 30
+max_download_bytes = 52428800
+max_uncompressed_bytes = 268435456
+max_zip_members = 20
+user_agent = "US-Election-Results-Pipeline/0.1"
+
+[sources.nc_2026_general]
+state = "NC"
+election_date = "2026-11-03"
+url = "https://s3.amazonaws.com/dl.ncsbe.gov/ENRS/2026_11_03/results_pct_20261103.zip"
+format = "zip"
+expected_members = ["results_pct_20261103.txt"]

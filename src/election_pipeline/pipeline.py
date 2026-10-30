@@ -1,0 +1,272 @@
+"""Collect a source, record each attempt, and advance HTTP cache state only after validation."""
+
+from __future__ import annotations
+
+import hashlib
+import random
+import time
+import uuid
+from datetime import datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
+from pathlib import Path
+
+from election_pipeline import __version__
+from election_pipeline.checks import InvalidArchive, validate_archive
+from election_pipeline.collect import FetchFailure, fetch_file
+from election_pipeline.settings import CollectorSettings, Source
+from election_pipeline.storage import ArchiveStore, CollectionLocked, utc_now
+
+RETRYABLE_STATUSES = {408, 425, 429, 500, 502, 503, 504}
+
+
+def collector_code_hash() -> str:
+    """Identify the actual shipped Python sources even before a Git repository exists."""
+    digest = hashlib.sha256()
+    package_dir = Path(__file__).parent
+    for path in sorted(package_dir.rglob("*.py")):
+        name = path.relative_to(package_dir).as_posix()
+        digest.update(name.encode() + b"\0" + path.read_bytes() + b"\0")
+    return digest.hexdigest()
+
+
+def retry_after_seconds(value: str | None) -> float | None:
+    if value is None:
+        return None
+    if value.strip().isdigit():
+        return float(value.strip())
+    try:
+        when = parsedate_to_datetime(value)
+        if when.tzinfo is None:
+            when = when.replace(tzinfo=timezone.utc)
+        return max(0.0, (when - datetime.now(timezone.utc)).total_seconds())
+    except (ValueError, TypeError, OverflowError):
+        return None
+
+
+def _summary(record: dict, metadata: Path | None = None) -> dict:
+    keys = (
+        "source_id",
+        "run_id",
+        "outcome",
+        "attempt",
+        "http_status",
+        "sha256",
+        "archive_path",
+        "archive_created",
+        "changed",
+        "error",
+        "retry_not_before",
+        "verification_level",
+    )
+    result = {key: record[key] for key in keys if key in record}
+    if metadata is not None:
+        result["metadata_path"] = str(metadata)
+    return result
+
+
+def collect_source(
+    source: Source,
+    settings: CollectorSettings,
+    data_dir: Path,
+    *,
+    force_download: bool = False,
+) -> dict:
+    store = ArchiveStore(data_dir, source)
+    run_id = uuid.uuid4().hex
+    try:
+        with store.lock():
+            return _collect_locked(store, source, settings, run_id, force_download)
+    except CollectionLocked:
+        return {"source_id": source.source_id, "run_id": run_id, "outcome": "locked"}
+
+
+def _collect_locked(
+    store: ArchiveStore,
+    source: Source,
+    settings: CollectorSettings,
+    run_id: str,
+    force_download: bool,
+) -> dict:
+    signature = source.signature(settings)
+    state = store.read_state()
+    if state.get("source_signature") != signature:
+        state = {"source_signature": signature, "url": source.url}
+    store.remove_abandoned_downloads()
+    base = {
+        "schema_version": 1,
+        "run_id": run_id,
+        "source_id": source.source_id,
+        "state": source.state,
+        "election_date": source.election_date,
+        "requested_url": source.url,
+        "source_signature": signature,
+        "collector_version": __version__,
+        "collector_code_sha256": collector_code_hash(),
+        "verification_level": "archive_only",
+    }
+    not_before = state.get("retry_not_before")
+    if not_before and datetime.fromisoformat(not_before) > datetime.now(timezone.utc):
+        record = {
+            **base,
+            "fetch_id": uuid.uuid4().hex,
+            "started_at": utc_now(),
+            "finished_at": utc_now(),
+            "attempt": 0,
+            "outcome": "deferred",
+            "http_status": None,
+            "retry_not_before": not_before,
+        }
+        return _summary(record, store.write_attempt(record))
+
+    cached = store.cached_archive(state)
+    use_conditions = cached is not None and not force_download
+    for attempt in range(1, settings.max_attempts + 1):
+        conditions = {}
+        if use_conditions:
+            if state.get("etag"):
+                conditions["If-None-Match"] = state["etag"]
+            elif state.get("last_modified"):
+                conditions["If-Modified-Since"] = state["last_modified"]
+        record = {
+            **base,
+            "fetch_id": uuid.uuid4().hex,
+            "started_at": utc_now(),
+            "attempt": attempt,
+            "outcome": "in_progress",
+            "http_status": None,
+            "request_conditions": conditions,
+        }
+        metadata_path = store.write_attempt(record)
+        temporary = store.temporary_download()
+        started = time.monotonic()
+        retryable = False
+        server_wait = None
+        new_state = None
+        try:
+            fetched = fetch_file(source, settings, temporary, conditions)
+            record.update(
+                {
+                    "http_status": fetched.status,
+                    "response_headers": fetched.headers,
+                    "final_url": fetched.final_url,
+                    "bytes_received": fetched.bytes_received,
+                }
+            )
+            if fetched.status == 304:
+                if cached is None or not use_conditions:
+                    record.update(outcome="unexpected_304", error="No usable conditional cache")
+                    use_conditions = False
+                    retryable = True
+                else:
+                    record.update(
+                        {
+                            "outcome": "unchanged",
+                            "changed": False,
+                            "archive_created": False,
+                            "sha256": state["sha256"],
+                            "archive_path": store.relative(cached),
+                        }
+                    )
+                    new_state = {**state, "last_checked_at": utc_now()}
+                    for header, key in (("etag", "etag"), ("last-modified", "last_modified")):
+                        if header in fetched.headers:
+                            new_state[key] = fetched.headers[header]
+            elif fetched.status == 200:
+                record["sha256"] = fetched.sha256
+                try:
+                    record["zip_members"] = validate_archive(temporary, source, settings)
+                except InvalidArchive as error:
+                    rejected = store.quarantine(temporary, fetched.sha256)
+                    record.update(
+                        {
+                            "outcome": "invalid_archive",
+                            "error": str(error),
+                            "quarantine_path": store.relative(rejected),
+                        }
+                    )
+                else:
+                    path, created = store.commit_download(temporary, fetched.sha256)
+                    changed = state.get("sha256") != fetched.sha256
+                    record.update(
+                        {
+                            "outcome": "downloaded" if changed else "unchanged",
+                            "changed": changed,
+                            "archive_created": created,
+                            "archive_path": store.relative(path),
+                        }
+                    )
+                    previous_modified = state.get("last_modified")
+                    current_modified = fetched.headers.get("last-modified")
+                    if previous_modified and current_modified:
+                        try:
+                            record["source_time_regressed"] = parsedate_to_datetime(
+                                current_modified
+                            ) < parsedate_to_datetime(previous_modified)
+                        except (ValueError, TypeError):
+                            record["source_time_regressed"] = None
+                    new_state = {
+                        "source_signature": signature,
+                        "url": source.url,
+                        "sha256": fetched.sha256,
+                        "etag": fetched.headers.get("etag"),
+                        "last_modified": fetched.headers.get("last-modified"),
+                        "last_checked_at": utc_now(),
+                        "last_changed_at": utc_now() if changed else state.get("last_changed_at"),
+                    }
+            else:
+                record.update(outcome="http_error", error=f"HTTP {fetched.status}")
+                retryable = fetched.status in RETRYABLE_STATUSES
+                if retryable:
+                    server_wait = retry_after_seconds(fetched.headers.get("retry-after"))
+        except FetchFailure as error:
+            record.update(
+                {
+                    "outcome": "network_error",
+                    "error": str(error),
+                    "http_status": error.status,
+                    "response_headers": error.headers,
+                    "bytes_received": error.bytes_received,
+                }
+            )
+            retryable = error.retryable
+        except (OSError, ValueError) as error:
+            record.update(outcome="storage_or_validation_error", error=str(error))
+        finally:
+            temporary.unlink(missing_ok=True)
+            record["finished_at"] = utc_now()
+            record["elapsed_seconds"] = round(time.monotonic() - started, 6)
+
+        if server_wait is not None:
+            try:
+                when = datetime.now(timezone.utc) + timedelta(seconds=server_wait)
+            except (OverflowError, ValueError):
+                when = datetime.max.replace(tzinfo=timezone.utc)
+            not_before = when.isoformat(timespec="milliseconds")
+            record["retry_not_before"] = not_before
+            store.write_state({**state, "retry_not_before": not_before})
+            if server_wait > settings.max_retry_wait_seconds:
+                record["outcome"] = "deferred"
+                record["error"] = "Retry-After exceeds this run's wait budget; retry later"
+                retryable = False
+
+        # Record the observed response before advancing validators. If either write fails,
+        # the CLI exits nonzero. A later unconditional/old-validator fetch can recover.
+        store.write_attempt(record)
+        if new_state is not None:
+            new_state.pop("retry_not_before", None)
+            store.write_state(new_state)
+            return _summary(record, metadata_path)
+        if retryable and attempt < settings.max_attempts:
+            delay = min(
+                settings.max_retry_wait_seconds,
+                settings.backoff_seconds * 2 ** (attempt - 1)
+                + random.uniform(0, settings.backoff_seconds),
+            )
+            if server_wait is not None:
+                delay = max(delay, server_wait)
+            time.sleep(delay)
+            if record["outcome"] == "unexpected_304":
+                cached = None
+            continue
+        return _summary(record, metadata_path)
+    raise AssertionError("A bounded collection loop must return a result")
