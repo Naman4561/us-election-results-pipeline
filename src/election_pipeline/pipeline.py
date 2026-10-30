@@ -11,7 +11,7 @@ from email.utils import parsedate_to_datetime
 from pathlib import Path
 
 from election_pipeline import __version__
-from election_pipeline.checks import InvalidArchive, validate_archive
+from election_pipeline.checks import InvalidPayload, validate_payload
 from election_pipeline.collect import FetchFailure, fetch_file
 from election_pipeline.settings import CollectorSettings, Source
 from election_pipeline.storage import ArchiveStore, CollectionLocked, utc_now
@@ -57,6 +57,8 @@ def _summary(record: dict, metadata: Path | None = None) -> dict:
         "error",
         "retry_not_before",
         "verification_level",
+        "dataset",
+        "next_check_at",
     )
     result = {key: record[key] for key in keys if key in record}
     if metadata is not None:
@@ -102,7 +104,12 @@ def _collect_locked(
         "source_signature": signature,
         "collector_version": __version__,
         "collector_code_sha256": collector_code_hash(),
-        "verification_level": "archive_only",
+        "verification_level": (
+            "archive_only"
+            if source.format == "zip"
+            else "file_structure_only"
+        ),
+        "dataset": source.dataset,
     }
     not_before = state.get("retry_not_before")
     if not_before and datetime.fromisoformat(not_before) > datetime.now(timezone.utc):
@@ -119,6 +126,32 @@ def _collect_locked(
         return _summary(record, store.write_attempt(record))
 
     cached = store.cached_archive(state)
+    if (
+        source.min_interval_seconds
+        and not force_download
+        and state.get("last_checked_at")
+        and (
+            cached is not None
+            or state.get("availability") == "awaiting_publication"
+        )
+    ):
+        next_check = datetime.fromisoformat(
+            state["last_checked_at"]
+        ) + timedelta(seconds=source.min_interval_seconds)
+
+        if datetime.now(timezone.utc) < next_check:
+            record = {
+                **base,
+                "fetch_id": uuid.uuid4().hex,
+                "started_at": utc_now(),
+                "finished_at": utc_now(),
+                "attempt": 0,
+                "outcome": "not_due",
+                "http_status": None,
+                "next_check_at": next_check.isoformat(),
+            }
+
+            return _summary(record, store.write_attempt(record))
     use_conditions = cached is not None and not force_download
     for attempt in range(1, settings.max_attempts + 1):
         conditions = {}
@@ -174,12 +207,18 @@ def _collect_locked(
             elif fetched.status == 200:
                 record["sha256"] = fetched.sha256
                 try:
-                    record["zip_members"] = validate_archive(temporary, source, settings)
-                except InvalidArchive as error:
+                    record.update(
+                        validate_payload(temporary, source, settings)
+                    )
+                except InvalidPayload as error:
                     rejected = store.quarantine(temporary, fetched.sha256)
                     record.update(
                         {
-                            "outcome": "invalid_archive",
+                            "outcome": (
+                                "invalid_archive"
+                                if source.format == "zip"
+                                else "invalid_payload"
+                            ),
                             "error": str(error),
                             "quarantine_path": store.relative(rejected),
                         }
@@ -212,7 +251,22 @@ def _collect_locked(
                         "last_modified": fetched.headers.get("last-modified"),
                         "last_checked_at": utc_now(),
                         "last_changed_at": utc_now() if changed else state.get("last_changed_at"),
+                        "availability": "available",
                     }
+            elif (
+                fetched.status == 404
+                and source.allow_missing
+                and not state.get("sha256")
+            ):
+                # Expected only before this source's first valid download.
+                # Disappearance of an established file remains an error.
+                record.update(outcome="awaiting_publication")
+
+                new_state = {
+                    **state,
+                    "last_checked_at": utc_now(),
+                    "availability": "awaiting_publication",
+                }
             else:
                 record.update(outcome="http_error", error=f"HTTP {fetched.status}")
                 retryable = fetched.status in RETRYABLE_STATUSES

@@ -68,7 +68,12 @@ def main(argv: list[str] | None = None) -> int:
                     "error": str(error),
                 }
             print(json.dumps(result, sort_keys=True))
-            if result["outcome"] not in {"downloaded", "unchanged"}:
+            if result["outcome"] not in {
+                "downloaded",
+                "unchanged",
+                "not_due",
+                "awaiting_publication",
+            }:
                 exit_code = 1
         return exit_code
     except (OSError, ValueError, TypeError) as error:

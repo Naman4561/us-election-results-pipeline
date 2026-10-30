@@ -50,7 +50,7 @@ def fetch_file(
         source.url,
         headers={
             "User-Agent": settings.user_agent,
-            "Accept": "application/zip, application/octet-stream;q=0.9, */*;q=0.1",
+            "Accept": "application/zip, text/csv, application/octet-stream;q=0.9, */*;q=0.1",
             "Accept-Encoding": "identity",
             **conditional_headers,
         },

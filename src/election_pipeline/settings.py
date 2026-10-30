@@ -35,6 +35,7 @@ class CollectorSettings:
     max_download_bytes: int = 50 * 1024 * 1024
     max_uncompressed_bytes: int = 256 * 1024 * 1024
     max_zip_members: int = 20
+    max_csv_rows: int = 2_000_000
     user_agent: str = "US-Election-Results-Pipeline/0.1"
 
     def __post_init__(self) -> None:
@@ -56,6 +57,7 @@ class CollectorSettings:
             "max_download_bytes",
             "max_uncompressed_bytes",
             "max_zip_members",
+            "max_csv_rows",
         ):
             value = getattr(self, name)
             if type(value) is not int or value <= 0:
@@ -81,32 +83,83 @@ class Source:
     url: str
     format: str = "zip"
     expected_members: tuple[str, ...] = ()
+    expected_columns: tuple[str, ...] = ()
+    dataset: str = "election_results"
+    min_interval_seconds: int = 0
+    allow_missing: bool = False
 
     def __post_init__(self) -> None:
         if not re.fullmatch(r"[a-z][a-z0-9_-]{0,79}", self.source_id):
-            raise ValueError("source_id must be a lowercase identifier of at most 80 characters")
+            raise ValueError(
+                "source_id must be a lowercase identifier of at most 80 characters"
+            )
+
         if not re.fullmatch(r"[A-Z]{2}", self.state):
             raise ValueError("state must be a two-letter uppercase code")
+
         if date.fromisoformat(self.election_date).isoformat() != self.election_date:
             raise ValueError("election_date must use YYYY-MM-DD")
+
         validate_url(self.url)
-        if self.format != "zip":
-            raise ValueError("Only ZIP validation is implemented in this collection milestone")
+
+        if self.format not in {"zip", "csv"}:
+            raise ValueError("Only ZIP and CSV file checks are implemented")
+
         if not isinstance(self.expected_members, tuple) or not all(
-            isinstance(name, str) and name for name in self.expected_members
+            isinstance(name, str) and name
+            for name in self.expected_members
         ):
-            raise ValueError("expected_members must be a tuple of nonempty member names")
+            raise ValueError(
+                "expected_members must be a tuple of nonempty member names"
+            )
+
+        if not isinstance(self.expected_columns, tuple) or not all(
+            isinstance(name, str) and name.strip()
+            for name in self.expected_columns
+        ):
+            raise ValueError(
+                "expected_columns must be a tuple of nonempty column names"
+            )
+
+        if self.format == "csv" and (
+            not self.expected_columns or self.expected_members
+        ):
+            raise ValueError(
+                "CSV sources need expected_columns and cannot specify ZIP members"
+            )
+
+        if self.format == "zip" and self.expected_columns:
+            raise ValueError(
+                "ZIP member row checks belong to a later source parser"
+            )
+
+        if not re.fullmatch(r"[a-z][a-z0-9_]{0,79}", self.dataset):
+            raise ValueError("dataset must be a lowercase identifier")
+
+        if (
+            type(self.min_interval_seconds) is not int
+            or self.min_interval_seconds < 0
+        ):
+            raise ValueError(
+                "min_interval_seconds must be a nonnegative integer"
+            )
+
+        if type(self.allow_missing) is not bool:
+            raise ValueError("allow_missing must be true or false")
 
     def signature(self, settings: CollectorSettings) -> str:
-        # HTTP validators are reusable only for this URL and these validation rules.
         contract = {
             "source": asdict(self),
             "validator_version": __version__,
             "max_download_bytes": settings.max_download_bytes,
             "max_uncompressed_bytes": settings.max_uncompressed_bytes,
             "max_zip_members": settings.max_zip_members,
+            "max_csv_rows": settings.max_csv_rows,
         }
-        return hashlib.sha256(json.dumps(contract, sort_keys=True).encode()).hexdigest()
+
+        return hashlib.sha256(
+            json.dumps(contract, sort_keys=True).encode()
+        ).hexdigest()
 
 
 def load_config(path: Path) -> tuple[CollectorSettings, dict[str, Source]]:
@@ -125,10 +178,17 @@ def load_config(path: Path) -> tuple[CollectorSettings, dict[str, Source]]:
         item = dict(raw)
         if isinstance(item.get("election_date"), date):
             item["election_date"] = item["election_date"].isoformat()
-        names = item.get("expected_members", [])
-        if not isinstance(names, list) or not all(isinstance(name, str) for name in names):
-            raise ValueError(f"expected_members must be an array of strings: {source_id}")
-        item["expected_members"] = tuple(names)
+        for key in ("expected_members", "expected_columns"):
+            names = item.get(key, [])
+
+            if not isinstance(names, list) or not all(
+                isinstance(name, str) for name in names
+            ):
+                raise ValueError(
+                    f"{key} must be an array of strings: {source_id}"
+                )
+
+            item[key] = tuple(names)
         sources[source_id] = Source(source_id=source_id, **item)
     if not sources:
         raise ValueError("Configure at least one source")
