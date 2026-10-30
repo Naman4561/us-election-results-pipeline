@@ -10,6 +10,7 @@ from pathlib import Path
 from election_pipeline import __version__
 from election_pipeline.pipeline import collect_source
 from election_pipeline.settings import load_config
+from election_pipeline.parsing import parse_source
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -33,6 +34,30 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Skip conditional headers; still honor persisted Retry-After deferrals",
     )
+    parsing = commands.add_parser(
+        "parse",
+        help="Parse and reconcile an archived source; no HTTP",
+    )
+    parsing.add_argument(
+        "--config",
+        type=Path,
+        default=Path("config/sources.toml"),
+    )
+    parsing.add_argument(
+        "--data-dir",
+        type=Path,
+        default=Path("data"),
+    )
+    parsing.add_argument("--source", required=True)
+    parsing.add_argument(
+        "--sha256",
+        help="Replay this archived SHA-256 instead of the latest",
+    )
+    parsing.add_argument(
+        "--reference",
+        type=Path,
+        help="Independent contest-total CSV to compare",
+    )
     args = parser.parse_args(argv)
     try:
         settings, sources = load_config(args.config)
@@ -51,6 +76,21 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.source and args.source not in sources:
             raise ValueError(f"Unknown source: {args.source}; use list-sources")
+        if args.command == "parse":
+            result = parse_source(
+                sources[args.source],
+                settings,
+                args.data_dir,
+                sha256=args.sha256,
+                reference=args.reference,
+            )
+
+            print(json.dumps(result, sort_keys=True))
+
+            return int(
+                result["outcome"] == "validation_failed"
+                or result.get("reference_comparison", {}).get("status") == "mismatch"
+            )
         selected = [sources[args.source]] if args.source else list(sources.values())
         exit_code = 0
         for source in selected:
