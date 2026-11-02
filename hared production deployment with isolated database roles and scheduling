@@ -1,0 +1,28 @@
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mindex 8e214bc..e870c37 100644[m
+[1m--- a/.gitignore[m
+[1m+++ b/.gitignore[m
+[36m@@ -14,4 +14,5 @@[m [m__pycache__/[m
+ dbt/target/[m
+ dbt/logs/[m
+ dbt/dbt_packages/[m
+[31m-dbt/.user.yml[m
+\ No newline at end of file[m
+[32m+[m[32mdbt/.user.yml[m
+[32m+[m[32m*.pem[m
+\ No newline at end of file[m
+[1mdiff --git a/src/election_pipeline/publication.py b/src/election_pipeline/publication.py[m
+[1mindex 2153ad2..c178e5f 100644[m
+[1m--- a/src/election_pipeline/publication.py[m
+[1m+++ b/src/election_pipeline/publication.py[m
+[36m@@ -59,8 +59,8 @@[m [mdef project_hash(root):[m
+         root / "scripts/publish.py",[m
+         Path(__file__).resolve(),[m
+     ][m
+[31m-    paths += list((root / "dbt").glob("*.yml"))[m
+[31m-[m
+[32m+[m[32m    paths += [p for p in (root / "dbt").glob("*.yml") if not p.name.startswith(".")][m
+[32m+[m[41m    [m
+     for directory in ("models", "macros", "tests"):[m
+         paths += [[m
+             p[m

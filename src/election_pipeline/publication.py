@@ -59,8 +59,8 @@ def project_hash(root):
         root / "scripts/publish.py",
         Path(__file__).resolve(),
     ]
-    paths += list((root / "dbt").glob("*.yml"))
-
+    paths += [p for p in (root / "dbt").glob("*.yml") if not p.name.startswith(".")]
+    
     for directory in ("models", "macros", "tests"):
         paths += [
             p

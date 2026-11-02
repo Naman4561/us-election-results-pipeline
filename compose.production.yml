@@ -1,0 +1,137 @@
+name: election-production
+
+x-app: &app
+  image: election-pipeline:${IMAGE_TAG:?Set IMAGE_TAG to the deployed Git commit}
+  build:
+    context: .
+    args:
+      VCS_REF: ${IMAGE_TAG}
+  init: true
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+x-database: &database
+  POSTGRES_HOST: db
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: ${POSTGRES_DB:-election_pipeline}
+
+services:
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-election_pipeline}
+      POSTGRES_USER: ${POSTGRES_USER:-election_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set the administrator password}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  bootstrap:
+    <<: *app
+    profiles: [tools]
+    environment:
+      <<: *database
+      POSTGRES_USER: ${POSTGRES_USER:-election_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      PIPELINE_DB_USER: ${PIPELINE_DB_USER:-election_pipeline_writer}
+      PIPELINE_DB_PASSWORD: ${PIPELINE_DB_PASSWORD:?Set the pipeline password}
+      DASHBOARD_DB_USER: ${DASHBOARD_DB_USER:-election_dashboard_app}
+      DASHBOARD_DB_PASSWORD: ${DASHBOARD_DB_PASSWORD:?Set the dashboard password}
+    command: ["python", "scripts/bootstrap_production.py"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  pipeline:
+    <<: *app
+    profiles: [tools]
+    environment:
+      <<: *database
+      POSTGRES_USER: ${PIPELINE_DB_USER:-election_pipeline_writer}
+      POSTGRES_PASSWORD: ${PIPELINE_DB_PASSWORD}
+      PIPELINE_SOURCES: ${PIPELINE_SOURCES:-nc_2026_general}
+      PIPELINE_STATUS: ${PIPELINE_STATUS:-test}
+    command: ["python", "scripts/run_production.py"]
+    volumes:
+      - type: bind
+        source: ${DATA_DIR:-/srv/election-pipeline/data}
+        target: /app/data
+        bind:
+          create_host_path: false
+    depends_on:
+      db:
+        condition: service_healthy
+
+  dashboard:
+    <<: *app
+    restart: unless-stopped
+    environment:
+      DASHBOARD_POSTGRES_HOST: db
+      DASHBOARD_POSTGRES_PORT: "5432"
+      DASHBOARD_POSTGRES_DB: ${POSTGRES_DB:-election_pipeline}
+      DASHBOARD_POSTGRES_USER: ${DASHBOARD_DB_USER:-election_dashboard_app}
+      DASHBOARD_POSTGRES_PASSWORD: ${DASHBOARD_DB_PASSWORD}
+    ports:
+      - "127.0.0.1:8000:8000"
+    read_only: true
+    tmpfs:
+      - /tmp
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/snapshot', timeout=8).close()"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      db:
+        condition: service_healthy
+
+  caddy:
+    image: caddy:2
+    profiles: [public]
+    restart: unless-stopped
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      dashboard:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:

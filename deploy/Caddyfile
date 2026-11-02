@@ -1,0 +1,10 @@
+{$SITE_DOMAIN} {
+    encode zstd gzip
+
+    reverse_proxy dashboard:8000
+
+    log {
+        output stdout
+        format json
+    }
+}
