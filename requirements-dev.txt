@@ -1,0 +1,3 @@
+# Optional: runtime and the unittest suite need no third-party dependencies.
+ruff==0.14.0
+httpx2==2.16.0

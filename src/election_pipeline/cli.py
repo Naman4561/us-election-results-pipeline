@@ -74,6 +74,35 @@ def main(argv: list[str] | None = None) -> int:
     loading.add_argument("--source", required=True)
     loading.add_argument("--parsed-dir", type=Path, required=True)
     
+    running = commands.add_parser(
+        "run",
+        help="Collect, parse, load, validate and publish one source",
+    )
+    running.add_argument(
+        "--config",
+        type=Path,
+        default=Path("config/sources.toml"),
+    )
+    running.add_argument("--data-dir", type=Path, default=Path("data"))
+    running.add_argument("--env-file", type=Path, default=Path(".env"))
+    running.add_argument("--project-root", type=Path, default=Path.cwd())
+    running.add_argument("--source", required=True)
+    running.add_argument(
+        "--status",
+        choices=("test", "unofficial"),
+        required=True,
+    )
+    running.add_argument("--reference", type=Path)
+    running.add_argument(
+        "--replay-sha256",
+        help="Process archived bytes without HTTP or publication",
+    )
+    running.add_argument(
+        "--publish-replay",
+        action="store_true",
+        help="Also publish this replay",
+    )
+    
     args = parser.parse_args(argv)
     try:
         settings, sources = load_config(args.config)
@@ -92,6 +121,32 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.source and args.source not in sources:
             raise ValueError(f"Unknown source: {args.source}; use list-sources")
+        if args.command == "run":
+            from election_pipeline.workflow import run_source
+
+            result = run_source(
+                sources[args.source],
+                settings,
+                args.data_dir,
+                root=args.project_root,
+                env_file=args.env_file,
+                status=args.status,
+                replay_sha256=args.replay_sha256,
+                publish_replay=args.publish_replay,
+                reference=args.reference,
+            )
+
+            print(json.dumps(result, sort_keys=True))
+
+            successful_outcomes = {
+                "succeeded",
+                "already_current",
+                "replayed_not_published",
+                "not_due",
+                "awaiting_publication",
+            }
+            return int(result["outcome"] not in successful_outcomes)
+        
         if args.command == "load":
             try:
                 from election_pipeline.database import (

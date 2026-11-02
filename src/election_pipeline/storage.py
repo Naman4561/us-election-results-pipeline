@@ -54,8 +54,12 @@ class ArchiveStore:
         self.state_path = self.root / "state" / f"{source.source_id}.json"
 
     @contextmanager
-    def lock(self) -> Iterator[None]:
-        lock_path = self.root / "locks" / f"{self.source.source_id}.lock"
+    def lock(self, *, stage: str = "collection") -> Iterator[None]:
+        if stage not in ("collection", "pipeline"):
+            raise ValueError("Unknown lock stage")
+
+        suffix = "" if stage == "collection" else ".pipeline"
+        lock_path = self.root / "locks" / f"{self.source.source_id}{suffix}.lock"
         lock_path.parent.mkdir(parents=True, exist_ok=True)
         with lock_path.open("a+b") as handle:
             if os.name == "nt":

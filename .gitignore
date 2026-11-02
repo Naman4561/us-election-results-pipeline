@@ -11,3 +11,7 @@ __pycache__/
 /build/
 /dist/
 /coverage/
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+dbt/.user.yml

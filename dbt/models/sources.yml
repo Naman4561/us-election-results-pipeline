@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: ops
+    schema: ops
+    tables:
+      - name: sources
+      - name: snapshots
+      - name: processing_releases
+
+  - name: landing
+    schema: landing
+    tables:
+      - name: nc_results
+      - name: nc_absentee_demographics
