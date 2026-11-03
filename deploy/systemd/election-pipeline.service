@@ -3,6 +3,7 @@ Description=Collect and publish configured election result sources
 Requires=docker.service
 After=docker.service network-online.target
 Wants=network-online.target
+OnFailure=election-monitor.service
 
 [Service]
 Type=oneshot

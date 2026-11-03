@@ -1,0 +1,14 @@
+[Unit]
+Description=Check election pipeline health and send notifications
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/election-pipeline
+StateDirectory=election-pipeline-monitor
+StateDirectoryMode=0700
+UMask=0077
+ExecStart=/opt/election-pipeline/.venv/bin/python scripts/monitor_production.py
+TimeoutStartSec=2min
