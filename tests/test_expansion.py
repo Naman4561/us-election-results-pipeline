@@ -22,6 +22,7 @@ from election_pipeline.database import (
     load_parsed,
     verify,
 )
+from election_pipeline.parsers import mn
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
 from election_pipeline.states import state_adapter
@@ -122,6 +123,71 @@ class ExpansionTests(unittest.TestCase):
 
         result = self.parse("MN", missing)
         self.assertEqual(result["outcome"], "validation_failed")
+
+    def test_mn_media_bundle_needs_no_web_index_and_rejects_html_data(self):
+        def media_only(members):
+            members.pop("election.html")
+
+        result = self.parse("MN", media_only)
+        self.assertEqual(result["outcome"], "parsed", result)
+        self.assertEqual(result["county_counts"], {"MN-SEN": 87, "MN-01": 21})
+
+        def blocked_data(members):
+            media_only(members)
+            members["senate.txt"] = b"<html><title>Radware Captcha Page</title></html>"
+
+        result = self.parse("MN", blocked_data)
+        self.assertEqual(result["outcome"], "validation_failed")
+        self.assertIn("received HTML", result["error"])
+
+    def test_mn_legacy_captcha_cannot_be_replayed_as_valid_results(self):
+        def blocked_index(members):
+            members["election.html"] = (
+                b"<html><title>Radware Captcha Page</title>Tuesday, November 3, 2026</html>"
+            )
+
+        result = self.parse("MN", blocked_index)
+        self.assertEqual(result["outcome"], "validation_failed")
+        self.assertIn("CAPTCHA", result["error"])
+
+    def test_mn_election_paths_and_official_host_are_required(self):
+        source = self.sources["mn_2026_general"]
+        for bad in (
+            replace(source, election_date="2024-11-05"),
+            replace(source, url=source.url.replace("20261103", "20241105")),
+            replace(
+                source, url=source.url.replace("electionresultsfiles.sos.mn.gov", "example.com")
+            ),
+            replace(
+                source,
+                files=tuple(
+                    (name, url.replace("20261103", "20241105")) for name, url in source.files
+                ),
+            ),
+        ):
+            with self.subTest(url=bad.url), self.assertRaisesRegex(ValueError, "election-dated"):
+                mn.validate_source(bad)
+
+    def test_mn_collector_fetches_exactly_five_data_files(self):
+        source = self.sources["mn_2026_general"]
+        members = self.members("MN")
+        by_url = {
+            url: members[name]
+            for name, url in (*source.files, (source.primary_filename, source.url))
+        }
+
+        def fetch(source, settings, path, headers, *, url):
+            body = by_url[url]
+            path.write_bytes(body)
+            return FetchResponse(200, {}, url, len(body), hashlib.sha256(body).hexdigest())
+
+        with patch.object(bundles, "fetch_file", side_effect=fetch) as request:
+            path = self.root / "media.zip"
+            bundles.fetch_bundle(source, self.settings, path)
+            self.assertEqual(request.call_count, 5)
+            with zipfile.ZipFile(path) as archive:
+                self.assertEqual(set(archive.namelist()), set(source.expected_members))
+                self.assertNotIn("election.html", archive.namelist())
 
     def test_each_source_rejects_duplicates_missing_races_and_wrong_elections(self):
         for code in ("MN", "NE", "TX"):

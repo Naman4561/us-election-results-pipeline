@@ -9,11 +9,33 @@ from collections import defaultdict
 from election_pipeline.parsers.common import integer
 from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
 
+MEDIA_BASE = "https://electionresultsfiles.sos.mn.gov/20261103/"
+MEDIA_FILES = {
+    "senate.txt": MEDIA_BASE + "ussenate.txt",
+    "house-county.txt": MEDIA_BASE + "USHouseCty.txt",
+    "house.txt": MEDIA_BASE + "USHouse.txt",
+    "counties.txt": MEDIA_BASE + "Cntytbl.txt",
+}
+
+
+def validate_source(source):
+    if (
+        source.state != "MN"
+        or source.dataset != "election_results"
+        or source.format != "bundle"
+        or source.election_date != "2026-11-03"
+        or source.primary_filename != "senate-county.txt"
+        or source.url != MEDIA_BASE + "ussenatecty.txt"
+        or dict(source.files) != MEDIA_FILES
+    ):
+        raise ValueError("Minnesota requires the verified 2026 election-dated media-file URLs")
+
 
 def flat(archive, name, fields, limit):
-    reader = csv.reader(
-        io.StringIO(archive.read(name).decode("utf-8-sig")), delimiter=";", strict=True
-    )
+    text = archive.read(name).decode("utf-8-sig")
+    if re.search(r"<!doctype\s+html|<html\b", text[:4096], re.IGNORECASE):
+        raise ValueError(f"Minnesota {name}: received HTML instead of a semicolon data file")
+    reader = csv.reader(io.StringIO(text), delimiter=";", strict=True)
     for index, values in enumerate(reader, 1):
         if len(values) != fields or index > limit:
             raise ValueError(f"Minnesota {name}: unexpected field count/row limit")
@@ -21,13 +43,19 @@ def flat(archive, name, fields, limit):
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
-    if source.format != "bundle" or source.election_date != "2026-11-03":
-        raise ValueError("Unsupported Minnesota source/election")
+    validate_source(source)
     rows, expected, actual = [], {}, defaultdict(lambda: [0, 0])
     with zipfile.ZipFile(archive_path) as archive:
-        index = archive.read("election.html").decode("utf-8-sig")
-        if "Tuesday, November 3, 2026" not in index:
-            raise ValueError("Minnesota index belongs to another election")
+        # New bundles contain only the official data files. Keep legacy index validation
+        # when replaying an older bundle; never reinterpret a CAPTCHA as election evidence.
+        if "election.html" in archive.namelist():
+            index = archive.read("election.html").decode("utf-8-sig")
+            if "radware captcha page" in index.lower():
+                raise ValueError(
+                    "Minnesota legacy index contains a CAPTCHA; collect a fresh media bundle"
+                )
+            if "Tuesday, November 3, 2026" not in index:
+                raise ValueError("Minnesota index belongs to another election")
         counties = {}
         for identity, name, precincts in flat(archive, "counties.txt", 3, settings.max_csv_rows):
             if identity in counties or not name:

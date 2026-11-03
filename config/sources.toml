@@ -55,14 +55,13 @@ url = "https://electionresultsfiles.sos.mn.gov/20261103/ussenatecty.txt"
 format = "bundle"
 primary_filename = "senate-county.txt"
 min_interval_seconds = 300
-expected_members = ["senate-county.txt", "senate.txt", "house-county.txt", "house.txt", "counties.txt", "election.html"]
+expected_members = ["senate-county.txt", "senate.txt", "house-county.txt", "house.txt", "counties.txt"]
 
 [sources.mn_2026_general.files]
 "senate.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/ussenate.txt"
 "house-county.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/USHouseCty.txt"
 "house.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/USHouse.txt"
 "counties.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/Cntytbl.txt"
-"election.html" = "https://electionresults.sos.mn.gov/Select/MediaFiles/Index?ersElectionId=201"
 
 [sources.ne_2026_general]
 state = "NE"
