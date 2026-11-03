@@ -59,16 +59,19 @@ class PublicationArtifactTests(unittest.TestCase):
             for invocation, rows, accepted in cases:
                 with self.subTest(invocation=invocation, rows=rows):
                     (path / "run_results.json").write_text(
-                        json.dumps({
-                            "metadata": {"invocation_id": invocation},
-                            "results": rows,
-                        })
+                        json.dumps(
+                            {
+                                "metadata": {"invocation_id": invocation},
+                                "results": rows,
+                            }
+                        )
                     )
                     if accepted:
                         checked_results(path)
                     else:
                         with self.assertRaises(ValueError):
                             checked_results(path)
+
     def test_runner_fast_path_requires_the_same_release_transform_and_status(self):
         conn = MagicMock()
         conn.__enter__.return_value = conn
@@ -80,22 +83,18 @@ class PublicationArtifactTests(unittest.TestCase):
         }
 
         with (
-            patch.object(
-                publication, "connect", return_value=conn
-            ),
+            patch.object(publication, "connect", return_value=conn),
             patch.object(
                 publication,
                 "release_metadata",
-                return_value={"source_id": "nc"},
+                return_value={"source_id": "nc", "state": "NC"},
             ),
             patch.object(
                 publication,
                 "project_hash",
                 return_value="code-hash",
             ),
-            patch.object(
-                publication, "build_candidate"
-            ) as build,
+            patch.object(publication, "build_candidate") as build,
         ):
             result = publish(
                 Path(__file__).resolve().parents[1],
@@ -105,17 +104,14 @@ class PublicationArtifactTests(unittest.TestCase):
                 skip_current=True,
             )
 
-        self.assertEqual(
-            result["outcome"], "already_current"
-        )
-        self.assertEqual(
-            result["publication_id"], str(identifier)
-        )
+        self.assertEqual(result["outcome"], "already_current")
+        self.assertEqual(result["publication_id"], str(identifier))
         self.assertEqual(
             conn.execute.call_args.args[1],
             ("nc", 12, "code-hash", "test"),
         )
         build.assert_not_called()
+
 
 @unittest.skipUnless(
     os.getenv("ELECTION_TEST_DATABASE"),
@@ -126,9 +122,7 @@ class PublicationDatabaseTests(unittest.TestCase):
     def setUpClass(cls):
         name = os.environ["ELECTION_TEST_DATABASE"]
         if not name.endswith("_test"):
-            raise ValueError(
-                "Publication tests require a disposable *_test database"
-            )
+            raise ValueError("Publication tests require a disposable *_test database")
 
         cls.root = Path(__file__).resolve().parents[1]
         cls.db = {**connection_settings(), "dbname": name}
@@ -137,14 +131,11 @@ class PublicationDatabaseTests(unittest.TestCase):
             for relation, filename in [
                 ("ops.sources", "001_initial.sql"),
                 ("serving.publications", "002_publication.sql"),
+                ("ky.results", "003_state_schemas.sql"),
             ]:
-                exists = conn.execute(
-                    "SELECT to_regclass(%s) AS t", (relation,)
-                ).fetchone()["t"]
+                exists = conn.execute("SELECT to_regclass(%s) AS t", (relation,)).fetchone()["t"]
                 if exists is None:
-                    conn.execute(
-                        (cls.root / "migrations" / filename).read_text()
-                    )
+                    conn.execute((cls.root / "migrations" / filename).read_text())
 
     def setUp(self):
         self.f = fixtures.ParsingTests()
@@ -177,9 +168,9 @@ class PublicationDatabaseTests(unittest.TestCase):
 
     def current(self):
         return str(
-            self.query(
-                "SELECT publication_id FROM serving.current_publications"
-            )[0]["publication_id"]
+            self.query("SELECT publication_id FROM serving.current_publications")[0][
+                "publication_id"
+            ]
         )
 
     def test_publication_failure_idempotency_corrections_and_restore(self):
@@ -192,9 +183,7 @@ class PublicationDatabaseTests(unittest.TestCase):
         self.assertEqual(repeat["outcome"], "skipped")
         self.assertEqual(repeat["publication_id"], first_id)
         self.assertEqual(
-            self.query(
-                "SELECT count(*) AS n FROM serving.publications"
-            )[0]["n"],
+            self.query("SELECT count(*) AS n FROM serving.publications")[0]["n"],
             1,
         )
 
@@ -216,9 +205,7 @@ class PublicationDatabaseTests(unittest.TestCase):
 
         self.assertEqual(self.current(), first_id)
         self.assertEqual(
-            self.query(
-                "SELECT count(*) AS n FROM serving.publications"
-            )[0]["n"],
+            self.query("SELECT count(*) AS n FROM serving.publications")[0]["n"],
             1,
         )
 
@@ -256,17 +243,13 @@ class PublicationDatabaseTests(unittest.TestCase):
             original(*args, **kwargs)
             raise RuntimeError("Simulated failure after copying outputs")
 
-        with patch.object(
-            publication, "promote", side_effect=fail_after_copy
-        ):
+        with patch.object(publication, "promote", side_effect=fail_after_copy):
             with self.assertRaisesRegex(RuntimeError, "after copying"):
                 publish(self.root, self.db, second_release, "unofficial")
 
         self.assertEqual(self.current(), second["publication_id"])
         self.assertEqual(
-            self.query(
-                "SELECT count(*) AS n FROM serving.publications"
-            )[0]["n"],
+            self.query("SELECT count(*) AS n FROM serving.publications")[0]["n"],
             2,
         )
         self.assertEqual(
@@ -290,9 +273,7 @@ class PublicationDatabaseTests(unittest.TestCase):
         with connect(self.db) as conn, conn.transaction():
             conn.execute("SET LOCAL ROLE election_dashboard")
             self.assertEqual(
-                conn.execute(
-                    "SELECT count(*) AS n FROM serving.publications"
-                ).fetchone()["n"],
+                conn.execute("SELECT count(*) AS n FROM serving.publications").fetchone()["n"],
                 2,
             )
             self.assertFalse(

@@ -12,25 +12,26 @@ import zipfile
 from pathlib import Path
 
 from election_pipeline.checks import validate_payload
-from election_pipeline.parsers.nc import (
-    DEMO_FIELDS,
-    RESULT_FIELDS,
-    VOTES,
-    demographic_rows,
-    integer,
-    records,
-    result_rows,
-)
+from election_pipeline.parsers.common import integer, records
 from election_pipeline.pipeline import collector_code_hash
 from election_pipeline.settings import CollectorSettings, Source
 from election_pipeline.storage import ArchiveStore, atomic_json, file_hash, utc_now
 
 RESULT_COUNTY = (
-    "election_date", "state", "county", "contest_id", "choice", "choice_party",
+    "election_date",
+    "state",
+    "county",
+    "contest_id",
+    "choice",
+    "choice_party",
 )
 
 RESULT_CONTEST = (
-    "election_date", "state", "contest_id", "choice", "choice_party",
+    "election_date",
+    "state",
+    "contest_id",
+    "choice",
+    "choice_party",
 )
 
 DEMO_STATE = (
@@ -104,84 +105,10 @@ def reference_check(path, source, totals, limit):
 
 
 def _parse(archive, source, settings, output, stats, reference):
-    results = source.dataset == "election_results" and source.format == "zip"
-    demographics = (
-        source.dataset == "absentee_early_demographics" and source.format == "csv"
-    )
-
-    if source.state != "NC" or not (results or demographics):
-        raise ValueError("No parser registered for this state/dataset/format")
-
-    if reference is not None and not results:
-        raise ValueError("Candidate-vote reference comparisons apply only to election results")
+    from election_pipeline.states import parser_for
 
     validate_payload(archive, source, settings)
-
-    fields = RESULT_FIELDS if results else DEMO_FIELDS
-    measures = VOTES if results else ("ballot_count",)
-    iterator = result_rows if results else demographic_rows
-    county, statewide = {}, {}
-    raw_totals = [0] * len(measures)
-
-    name = "precinct_results.csv" if results else "county_demographics.csv"
-
-    with (output / name).open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
-        writer.writeheader()
-
-        for row in iterator(archive, source, settings.max_csv_rows, stats):
-            writer.writerow(row)
-
-            for index, measure in enumerate(measures):
-                raw_totals[index] += row[measure]
-
-            if results:
-                accumulate(county, row, RESULT_COUNTY, measures)
-            else:
-                accumulate(statewide, row, DEMO_STATE, measures)
-
-    if results:
-        for key, values in county.items():
-            row = dict(zip((*RESULT_COUNTY, *measures), (*key, *values)))
-            accumulate(statewide, row, RESULT_CONTEST, measures)
-
-        write_groups(output / "county_results.csv", county, RESULT_COUNTY, measures)
-        write_groups(output / "contest_results.csv", statewide, RESULT_CONTEST, measures)
-    else:
-        write_groups(output / "state_demographics.csv", statewide, DEMO_STATE, measures)
-
-    # Internal transformation checks, not independent official validation.
-    for groups in (county, statewide) if results else (statewide,):
-        aggregated = [
-            sum(values[index] for values in groups.values())
-            for index in range(len(measures))
-        ]
-
-        if aggregated != raw_totals:
-            raise ValueError("Aggregation did not preserve input counts")
-
-    stats["internal_reconciliation"] = "passed"
-    stats["all_counts_zero"] = not any(raw_totals)
-
-    stats["reference_comparison"] = (
-        reference_check(reference, source, statewide, settings.max_csv_rows)
-        if reference is not None
-        else {"status": "not_provided" if results else "not_applicable"}
-    )
-
-    stats["warnings"] = []
-
-    if stats["all_counts_zero"]:
-        stats["warnings"].append(
-            "All counts are zero; this does not establish live reporting."
-        )
-
-    if results:
-        stats["warnings"].append(
-            "Candidate votes are not unique ballots or demographic turnout."
-        )
-
-    stats["election_status"] = "not determined by parser"
+    return parser_for(source)(archive, source, settings, output, stats, reference)
 
 
 def parse_source(
@@ -257,15 +184,11 @@ def parse_source(
             report.update(
                 outcome="parsed",
                 finished_at=utc_now(),
-                output_sha256={
-                    path.name: file_hash(path)
-                    for path in sorted(output.glob("*.csv"))
-                },
+                output_sha256={path.name: file_hash(path) for path in sorted(output.glob("*.csv"))},
             )
 
             if file_hash(archive) != sha256 or (
-                reference is not None
-                and file_hash(reference) != identity["reference_sha256"]
+                reference is not None and file_hash(reference) != identity["reference_sha256"]
             ):
                 raise ValueError("An input changed during parsing")
 
@@ -274,20 +197,14 @@ def parse_source(
 
         return {**report, "output_dir": str(target)}
 
-    except (OSError, ValueError, csv.Error, zipfile.BadZipFile) as error:
+    except (OSError, ValueError, KeyError, TypeError, csv.Error, zipfile.BadZipFile) as error:
         report.update(
             outcome="validation_failed",
             error=str(error),
             finished_at=utc_now(),
         )
 
-        path = (
-            store.root
-            / "reports"
-            / "parsing"
-            / source.source_id
-            / f"{uuid.uuid4().hex}.json"
-        )
+        path = store.root / "reports" / "parsing" / source.source_id / f"{uuid.uuid4().hex}.json"
 
         atomic_json(path, report)
         return {**report, "report_path": str(path)}

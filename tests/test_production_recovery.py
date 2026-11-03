@@ -38,9 +38,7 @@ class ProductionRecoveryTests(unittest.TestCase):
             self.bundle / "manifest.json",
             {
                 "schema_version": 1,
-                "database_inventory": {
-                    "ops.sources": {"rows": 1, "sha256": "fixture"}
-                },
+                "database_inventory": {"ops.sources": {"rows": 1, "sha256": "fixture"}},
                 "files": {
                     "database.dump": {
                         "bytes": dump.stat().st_size,
@@ -52,9 +50,7 @@ class ProductionRecoveryTests(unittest.TestCase):
 
         self.project = self.root / "project"
         self.project.mkdir()
-        for name in (
-            "Dockerfile", "compose.production.yml", "README.md"
-        ):
+        for name in ("Dockerfile", "compose.production.yml", "README.md"):
             (self.project / name).write_text("fixture\n")
 
         with (
@@ -65,15 +61,11 @@ class ProductionRecoveryTests(unittest.TestCase):
                 return_value="abcdef1234567\n",
             ),
         ):
-            self.archive, self.receipt = job.pack_bundle(
-                self.bundle, "deployed-commit"
-            )
+            self.archive, self.receipt = job.pack_bundle(self.bundle, "deployed-commit")
 
     def test_round_trip_preserves_data_and_deployed_identity(self):
         destination = self.root / "download"
-        job.unpack_bundle(
-            self.archive, destination, self.receipt
-        )
+        job.unpack_bundle(self.archive, destination, self.receipt)
         manifest = recovery.verify_bundle(destination)
         self.assertEqual(
             manifest["deployment"]["image_tag"],
@@ -88,12 +80,8 @@ class ProductionRecoveryTests(unittest.TestCase):
     def test_corrupt_download_is_rejected_before_extraction(self):
         self.archive.write_bytes(b"corrupt")
         destination = self.root / "download"
-        with self.assertRaisesRegex(
-            ValueError, "completion record"
-        ):
-            job.unpack_bundle(
-                self.archive, destination, self.receipt
-            )
+        with self.assertRaisesRegex(ValueError, "completion record"):
+            job.unpack_bundle(self.archive, destination, self.receipt)
         self.assertFalse(destination.exists())
 
     def test_traversal_is_rejected_with_matching_outer_checksum(self):
@@ -107,12 +95,8 @@ class ProductionRecoveryTests(unittest.TestCase):
             "expanded_bytes": 3,
         }
         with self.assertRaises(ValueError):
-            job.unpack_bundle(
-                self.archive, self.root / "download", receipt
-            )
-        self.assertFalse(
-            (self.root / "escaped.txt").exists()
-        )
+            job.unpack_bundle(self.archive, self.root / "download", receipt)
+        self.assertFalse((self.root / "escaped.txt").exists())
 
     def test_failed_upload_cannot_publish_completion_record(self):
         config = {
@@ -120,19 +104,20 @@ class ProductionRecoveryTests(unittest.TestCase):
             "BACKUP_PREFIX": "election-pipeline",
         }
         with patch.object(
-            job, "aws_copy",
+            job,
+            "aws_copy",
             side_effect=RuntimeError("upload failed"),
         ) as copy:
             with self.assertRaises(RuntimeError):
                 job.upload_bundle(
-                    config, self.bundle,
-                    self.archive, self.receipt,
+                    config,
+                    self.bundle,
+                    self.archive,
+                    self.receipt,
                 )
 
         self.assertEqual(copy.call_count, 1)
-        self.assertTrue(
-            copy.call_args.args[-1].endswith("bundle.zip")
-        )
+        self.assertTrue(copy.call_args.args[-1].endswith("bundle.zip"))
 
     def test_restore_downloads_fresh_copy_without_printing_bucket(self):
         prod_file = self.root / "production.env"
@@ -145,38 +130,33 @@ class ProductionRecoveryTests(unittest.TestCase):
             f"DATA_DIR={self.root / 'live'}\n"
         )
         config_file = self.root / "backup.env"
-        config_file.write_text(
-            "BACKUP_BUCKET=private-bucket\n"
-        )
+        config_file.write_text("BACKUP_BUCKET=private-bucket\n")
         receipt_path = self.root / "receipt.json"
         atomic_json(receipt_path, self.receipt)
 
         def copy(config, source, destination):
-            self.assertTrue(source.startswith(
-                "s3://private-bucket/election-pipeline/rolling/"
-            ))
-            original = (
-                receipt_path
-                if source.endswith("complete.json")
-                else self.archive
-            )
+            self.assertTrue(source.startswith("s3://private-bucket/election-pipeline/rolling/"))
+            original = receipt_path if source.endswith("complete.json") else self.archive
             Path(destination).write_bytes(original.read_bytes())
 
         arguments = [
             "production_recovery.py",
             "check-restore",
-            "--backup-id", self.bundle.name,
-            "--env-file", str(prod_file),
-            "--backup-env-file", str(config_file),
-            "--destination", str(self.root / "work"),
+            "--backup-id",
+            self.bundle.name,
+            "--env-file",
+            str(prod_file),
+            "--backup-env-file",
+            str(config_file),
+            "--destination",
+            str(self.root / "work"),
         ]
         with (
             patch.object(sys, "argv", arguments),
+            patch.object(job, "aws_copy", side_effect=copy) as download,
             patch.object(
-                job, "aws_copy", side_effect=copy
-            ) as download,
-            patch.object(
-                job, "check_restore",
+                job,
+                "check_restore",
                 return_value={"outcome": "passed"},
             ) as restore,
             patch.object(job.os, "umask"),
@@ -195,9 +175,7 @@ class ProductionRecoveryTests(unittest.TestCase):
             restore.call_args.kwargs["writer_role"],
             "pipeline_writer",
         )
-        self.assertNotIn(
-            "private-bucket", output.getvalue()
-        )
+        self.assertNotIn("private-bucket", output.getvalue())
 
     def test_restore_uses_production_compose_and_writer_ownership(self):
         conn = MagicMock()
@@ -205,13 +183,8 @@ class ProductionRecoveryTests(unittest.TestCase):
 
         def execute(query, parameters=None):
             result = MagicMock()
-            if (
-                isinstance(query, str)
-                and "pg_get_userbyid" in query
-            ):
-                result.fetchone.return_value = {
-                    "owner": "pipeline_writer"
-                }
+            if isinstance(query, str) and "pg_get_userbyid" in query:
+                result.fetchone.return_value = {"owner": "pipeline_writer"}
             else:
                 result.fetchone.return_value = {"ok": False}
             result.fetchall.return_value = []
@@ -224,35 +197,33 @@ class ProductionRecoveryTests(unittest.TestCase):
             "password": "secret",
         }
         compose = (
-            "--env-file", "/private/production.env",
-            "--file", "/app/compose.production.yml",
+            "--env-file",
+            "/private/production.env",
+            "--file",
+            "/app/compose.production.yml",
         )
-        manifest = json.loads(
-            (self.bundle / "manifest.json").read_text()
-        )
+        manifest = json.loads((self.bundle / "manifest.json").read_text())
 
         with (
+            patch.object(recovery, "connect", return_value=conn),
             patch.object(
-                recovery, "connect", return_value=conn
-            ),
-            patch.object(
-                recovery, "inventory",
+                recovery,
+                "inventory",
                 return_value=manifest["database_inventory"],
             ),
-            patch.object(
-                recovery, "docker_command"
-            ) as transport,
+            patch.object(recovery, "docker_command") as transport,
         ):
             result = recovery.check_restore(
-                self.root, db, self.bundle, "db",
+                self.root,
+                db,
+                self.bundle,
+                "db",
                 compose_args=compose,
                 writer_role="pipeline_writer",
                 reader_role="dashboard_reader",
             )
 
-        self.assertEqual(
-            result["outcome"], "passed", result
-        )
+        self.assertEqual(result["outcome"], "passed", result)
         self.assertNotEqual(
             transport.call_args.args[2]["dbname"],
             "live_elections",
@@ -265,12 +236,8 @@ class ProductionRecoveryTests(unittest.TestCase):
             transport.call_args.kwargs["compose_args"],
             compose,
         )
-        self.assertTrue(
-            result["temporary_database_removed"]
-        )
-        self.assertTrue(
-            result["writer_permissions_verified"]
-        )
+        self.assertTrue(result["temporary_database_removed"])
+        self.assertTrue(result["writer_permissions_verified"])
 
     def test_local_marker_requires_both_remote_uploads(self):
         config = {
@@ -284,22 +251,22 @@ class ProductionRecoveryTests(unittest.TestCase):
             [None, RuntimeError("receipt failed")],
         )
         for responses in failures:
-            with patch.object(
-                job, "aws_copy", side_effect=responses
-            ):
+            with patch.object(job, "aws_copy", side_effect=responses):
                 with self.assertRaises(RuntimeError):
                     job.upload_bundle(
-                        config, self.bundle,
-                        self.archive, self.receipt,
+                        config,
+                        self.bundle,
+                        self.archive,
+                        self.receipt,
                     )
             self.assertFalse(marker.exists())
 
-        with patch.object(
-            job, "aws_copy", return_value=None
-        ):
+        with patch.object(job, "aws_copy", return_value=None):
             job.upload_bundle(
-                config, self.bundle,
-                self.archive, self.receipt,
+                config,
+                self.bundle,
+                self.archive,
+                self.receipt,
             )
 
         self.assertEqual(

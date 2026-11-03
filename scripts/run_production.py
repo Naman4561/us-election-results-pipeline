@@ -2,6 +2,7 @@
 
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from election_pipeline.settings import load_config
@@ -17,9 +18,7 @@ def selected_sources(configured, names):
 
     selected = [configured[key] for key in keys]
     if any(source.dataset != "election_results" for source in selected):
-        raise ValueError(
-            "The recurring job selects results only; collect demographics manually"
-        )
+        raise ValueError("The recurring job selects results only; collect demographics manually")
     return selected
 
 
@@ -34,9 +33,12 @@ def main():
     if status not in ("test", "unofficial"):
         raise ValueError("PIPELINE_STATUS must be test or unofficial")
 
+    workers = int(os.environ.get("PIPELINE_WORKERS", "2"))
+    if not 1 <= workers <= 8:
+        raise ValueError("PIPELINE_WORKERS must be between 1 and 8")
     code = 0
-    for source in sources:
-        # Publication currently uses a shared lock, so process serially.
+
+    def run(source):
         try:
             result = run_source(
                 source,
@@ -56,14 +58,20 @@ def main():
                 "error": message,
             }
 
-        print(json.dumps(result, sort_keys=True), flush=True)
-        if result["outcome"] not in {
-            "succeeded",
-            "already_current",
-            "not_due",
-            "awaiting_publication",
-        }:
-            code = 1
+        return result
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = [pool.submit(run, source) for source in sources]
+        for future in as_completed(futures):
+            result = future.result()
+            print(json.dumps(result, sort_keys=True), flush=True)
+            if result["outcome"] not in {
+                "succeeded",
+                "already_current",
+                "not_due",
+                "awaiting_publication",
+            }:
+                code = 1
 
     return code
 

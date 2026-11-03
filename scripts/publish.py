@@ -7,7 +7,7 @@ import uuid
 from pathlib import Path
 
 from election_pipeline.database import connection_settings
-from election_pipeline.publication import publish, restore
+from election_pipeline.publication import prepare, publish, publish_prepared, restore
 
 
 def main():
@@ -16,11 +16,12 @@ def main():
     parser.add_argument("--env-file", type=Path, default=root / ".env")
     commands = parser.add_subparsers(dest="action", required=True)
 
-    candidate = commands.add_parser("publish")
-    candidate.add_argument("--release-id", type=int, required=True)
-    candidate.add_argument(
-        "--status", choices=("test", "unofficial"), required=True
-    )
+    for action in ("publish", "transform"):
+        candidate = commands.add_parser(action)
+        candidate.add_argument("--release-id", type=int, required=True)
+        candidate.add_argument("--status", choices=("test", "unofficial"), required=True)
+    promotion = commands.add_parser("promote")
+    promotion.add_argument("--candidate-id", type=uuid.UUID, required=True)
 
     previous = commands.add_parser("restore")
     previous.add_argument("--publication-id", type=uuid.UUID, required=True)
@@ -29,11 +30,14 @@ def main():
     db = connection_settings(args.env_file)
 
     try:
-        result = (
-            publish(root, db, args.release_id, args.status)
-            if args.action == "publish"
-            else restore(db, args.publication_id)
-        )
+        if args.action == "promote":
+            result = publish_prepared(root, db, args.candidate_id)
+        elif args.action == "restore":
+            result = restore(db, args.publication_id)
+        else:
+            function = prepare if args.action == "transform" else publish
+            result = function(root, db, args.release_id, args.status)
+
     except Exception as exc:
         print(
             str(exc).replace(db["password"], "[redacted]"),

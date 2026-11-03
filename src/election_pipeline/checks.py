@@ -10,13 +10,17 @@ from pathlib import Path, PurePosixPath
 
 from election_pipeline.settings import CollectorSettings, Source
 
+
 class InvalidPayload(ValueError):
     pass
+
+
 class InvalidArchive(InvalidPayload):
     pass
 
+
 def validate_archive(path: Path, source: Source, settings: CollectorSettings) -> list[dict]:
-    if source.format != "zip":
+    if source.format not in {"zip", "bundle"}:
         raise InvalidArchive(f"No validator implemented for {source.format}")
     try:
         with zipfile.ZipFile(path) as archive:
@@ -61,7 +65,8 @@ def validate_archive(path: Path, source: Source, settings: CollectorSettings) ->
             return inspected
     except (zipfile.BadZipFile, RuntimeError, NotImplementedError, EOFError, zlib.error) as error:
         raise InvalidArchive(f"ZIP could not be read or failed its CRC: {error}") from error
-    
+
+
 def validate_csv(
     path: Path,
     source: Source,
@@ -82,13 +87,8 @@ def validate_csv(
 
             normalized = [name.strip() for name in header]
 
-            if (
-                any(not name for name in normalized)
-                or len(set(normalized)) != len(normalized)
-            ):
-                raise InvalidPayload(
-                    "CSV has blank or duplicate column names"
-                )
+            if any(not name for name in normalized) or len(set(normalized)) != len(normalized):
+                raise InvalidPayload("CSV has blank or duplicate column names")
 
             if not set(source.expected_columns) <= set(normalized):
                 raise InvalidPayload("CSV is missing required columns")
@@ -102,14 +102,10 @@ def validate_csv(
                 count += 1
 
                 if len(row) != len(header):
-                    raise InvalidPayload(
-                        f"CSV record {count} has an unexpected field count"
-                    )
+                    raise InvalidPayload(f"CSV record {count} has an unexpected field count")
 
                 if count > settings.max_csv_rows:
-                    raise InvalidPayload(
-                        "CSV exceeds the configured row limit"
-                    )
+                    raise InvalidPayload("CSV exceeds the configured row limit")
 
         return {
             "columns": header,
@@ -120,9 +116,7 @@ def validate_csv(
         }
 
     except (UnicodeError, csv.Error) as error:
-        raise InvalidPayload(
-            f"CSV could not be decoded/read: {error}"
-        ) from error
+        raise InvalidPayload(f"CSV could not be decoded/read: {error}") from error
 
 
 def validate_payload(
@@ -130,16 +124,10 @@ def validate_payload(
     source: Source,
     settings: CollectorSettings,
 ) -> dict:
-    if source.format == "zip":
-        return {
-            "zip_members": validate_archive(path, source, settings)
-        }
+    if source.format in {"zip", "bundle"}:
+        return {"zip_members": validate_archive(path, source, settings)}
 
     if source.format == "csv":
-        return {
-            "csv_structure": validate_csv(path, source, settings)
-        }
+        return {"csv_structure": validate_csv(path, source, settings)}
 
-    raise InvalidPayload(
-        f"No validator implemented for {source.format}"
-    )
+    raise InvalidPayload(f"No validator implemented for {source.format}")

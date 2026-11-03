@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import tempfile
 from contextlib import contextmanager
 from datetime import datetime, timezone
@@ -124,11 +125,15 @@ class ArchiveStore:
         if self.raw_dir.exists():
             for path in self.raw_dir.glob(".download-*.part"):
                 path.unlink()
+            for path in self.raw_dir.glob(".bundle-*"):
+                if path.is_dir() and not path.is_symlink():
+                    shutil.rmtree(path)
 
     def archive_path(self, digest: str) -> Path:
         if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
             raise ValueError("Invalid cached SHA-256")
-        return self.raw_dir / f"{digest}.{self.source.format}"
+        suffix = "zip" if self.source.format == "bundle" else self.source.format
+        return self.raw_dir / f"{digest}.{suffix}"
 
     def cached_archive(self, state: dict) -> Path | None:
         if not state.get("sha256"):

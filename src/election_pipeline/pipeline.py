@@ -104,11 +104,7 @@ def _collect_locked(
         "source_signature": signature,
         "collector_version": __version__,
         "collector_code_sha256": collector_code_hash(),
-        "verification_level": (
-            "archive_only"
-            if source.format == "zip"
-            else "file_structure_only"
-        ),
+        "verification_level": ("archive_only" if source.format == "zip" else "file_structure_only"),
         "dataset": source.dataset,
     }
     not_before = state.get("retry_not_before")
@@ -130,14 +126,11 @@ def _collect_locked(
         source.min_interval_seconds
         and not force_download
         and state.get("last_checked_at")
-        and (
-            cached is not None
-            or state.get("availability") == "awaiting_publication"
-        )
+        and (cached is not None or state.get("availability") == "awaiting_publication")
     ):
-        next_check = datetime.fromisoformat(
-            state["last_checked_at"]
-        ) + timedelta(seconds=source.min_interval_seconds)
+        next_check = datetime.fromisoformat(state["last_checked_at"]) + timedelta(
+            seconds=source.min_interval_seconds
+        )
 
         if datetime.now(timezone.utc) < next_check:
             record = {
@@ -152,7 +145,7 @@ def _collect_locked(
             }
 
             return _summary(record, store.write_attempt(record))
-    use_conditions = cached is not None and not force_download
+    use_conditions = cached is not None and not force_download and source.format != "bundle"
     for attempt in range(1, settings.max_attempts + 1):
         conditions = {}
         if use_conditions:
@@ -176,13 +169,19 @@ def _collect_locked(
         server_wait = None
         new_state = None
         try:
-            fetched = fetch_file(source, settings, temporary, conditions)
+            if source.format == "bundle":
+                from election_pipeline.bundles import fetch_bundle
+
+                fetched = fetch_bundle(source, settings, temporary)
+            else:
+                fetched = fetch_file(source, settings, temporary, conditions)
             record.update(
                 {
                     "http_status": fetched.status,
                     "response_headers": fetched.headers,
                     "final_url": fetched.final_url,
                     "bytes_received": fetched.bytes_received,
+                    "components": list(fetched.components),
                 }
             )
             if fetched.status == 304:
@@ -207,17 +206,13 @@ def _collect_locked(
             elif fetched.status == 200:
                 record["sha256"] = fetched.sha256
                 try:
-                    record.update(
-                        validate_payload(temporary, source, settings)
-                    )
+                    record.update(validate_payload(temporary, source, settings))
                 except InvalidPayload as error:
                     rejected = store.quarantine(temporary, fetched.sha256)
                     record.update(
                         {
                             "outcome": (
-                                "invalid_archive"
-                                if source.format == "zip"
-                                else "invalid_payload"
+                                "invalid_archive" if source.format == "zip" else "invalid_payload"
                             ),
                             "error": str(error),
                             "quarantine_path": store.relative(rejected),
@@ -253,11 +248,7 @@ def _collect_locked(
                         "last_changed_at": utc_now() if changed else state.get("last_changed_at"),
                         "availability": "available",
                     }
-            elif (
-                fetched.status == 404
-                and source.allow_missing
-                and not state.get("sha256")
-            ):
+            elif fetched.status == 404 and source.allow_missing and not state.get("sha256"):
                 # Expected only before this source's first valid download.
                 # Disappearance of an established file remains an error.
                 record.update(outcome="awaiting_publication")

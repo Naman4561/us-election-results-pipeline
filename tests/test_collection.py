@@ -426,10 +426,7 @@ class ConfigurationAndCheckTests(unittest.TestCase):
         config = str(root / "config" / "sources.toml")
         with patch("sys.stdout", new_callable=io.StringIO) as output:
             self.assertEqual(main(["list-sources", "--config", config]), 0)
-            listed = [
-                json.loads(line)["source_id"]
-                for line in output.getvalue().splitlines()
-            ]
+            listed = [json.loads(line)["source_id"] for line in output.getvalue().splitlines()]
             self.assertIn("nc_2026_general", listed)
         with patch("sys.stderr", new_callable=io.StringIO) as output:
             self.assertEqual(main(["collect", "--source", "unknown", "--config", config]), 2)

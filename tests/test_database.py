@@ -107,30 +107,32 @@ class DatabaseTests(unittest.TestCase):
         name = os.environ["ELECTION_TEST_DATABASE"]
 
         if not name.endswith("_test"):
-            raise ValueError(
-                "Integration tests require a database name ending in _test"
-            )
+            raise ValueError("Integration tests require a database name ending in _test")
 
         cls.db = {**connection_settings(), "dbname": name}
 
         with connect(cls.db) as conn:
-            actual = conn.execute(
-                "SELECT current_database() AS name"
-            ).fetchone()["name"]
+            actual = conn.execute("SELECT current_database() AS name").fetchone()["name"]
 
             if actual != name:
                 raise ValueError("Unexpected test database")
 
-            exists = conn.execute(
-                "SELECT to_regclass('ops.sources') AS t"
-            ).fetchone()["t"]
+            exists = conn.execute("SELECT to_regclass('ops.sources') AS t").fetchone()["t"]
 
             if exists is None:
-                migration = (
-                    Path(__file__).resolve().parents[1]
-                    / "migrations/001_initial.sql"
-                )
+                migration = Path(__file__).resolve().parents[1] / "migrations/001_initial.sql"
                 conn.execute(migration.read_text(encoding="utf-8"))
+
+            for relation, filename in [
+                ("serving.publications", "002_publication.sql"),
+                ("ky.results", "003_state_schemas.sql"),
+            ]:
+                if conn.execute("SELECT to_regclass(%s) AS t", (relation,)).fetchone()["t"] is None:
+                    conn.execute(
+                        (Path(__file__).resolve().parents[1] / "migrations" / filename).read_text(
+                            encoding="utf-8"
+                        )
+                    )
 
     def setUp(self):
         self.fixture = fixtures.ParsingTests()
@@ -159,9 +161,7 @@ class DatabaseTests(unittest.TestCase):
 
     def load(self, directory):
         f = self.fixture
-        return load_parsed(
-            f.source, f.settings, f.root, directory, self.db
-        )
+        return load_parsed(f.source, f.settings, f.root, directory, self.db)
 
     def edit_csv(self, directory, edit):
         report_path = directory / "report.json"
@@ -196,19 +196,13 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual(second["outcome"], "skipped")
         self.assertEqual(first["release_id"], second["release_id"])
 
-        count = self.query(
-            "SELECT count(*) AS n FROM landing.nc_results"
-        )[0]["n"]
+        count = self.query("SELECT count(*) AS n FROM landing.nc_results")[0]["n"]
 
-        total = self.query(
-            "SELECT sum(total_votes) AS n FROM landing.nc_results"
-        )[0]["n"]
+        total = self.query("SELECT sum(total_votes) AS n FROM landing.nc_results")[0]["n"]
 
         self.assertEqual(count, 10)
         self.assertEqual(total, 100)
-        self.assertEqual(
-            len(self.query("SELECT * FROM ops.load_attempts")), 2
-        )
+        self.assertEqual(len(self.query("SELECT * FROM ops.load_attempts")), 2)
 
     def test_failing_copy_rolls_back_and_preserves_previous_release(self):
         _, first_dir = self.parsed()
@@ -227,9 +221,7 @@ class DatabaseTests(unittest.TestCase):
 
         self.assertEqual(failed["outcome"], "failed")
         self.assertEqual(
-            self.query(
-                "SELECT count(*) AS n FROM landing.nc_results"
-            )[0]["n"],
+            self.query("SELECT count(*) AS n FROM landing.nc_results")[0]["n"],
             10,
         )
 
@@ -241,9 +233,7 @@ class DatabaseTests(unittest.TestCase):
             """
         )
 
-        self.assertEqual(
-            loaded, [{"release_id": first["release_id"]}]
-        )
+        self.assertEqual(loaded, [{"release_id": first["release_id"]}])
 
         attempt = self.query(
             """
@@ -267,9 +257,7 @@ class DatabaseTests(unittest.TestCase):
         second = self.load(directory)
 
         self.assertEqual(second["outcome"], "succeeded")
-        self.assertNotEqual(
-            first["release_id"], second["release_id"]
-        )
+        self.assertNotEqual(first["release_id"], second["release_id"])
 
         totals = self.query(
             """
@@ -292,44 +280,32 @@ class DatabaseTests(unittest.TestCase):
         self.assertIn("SHA-256", result["error"])
 
         self.assertEqual(
-            self.query(
-                "SELECT count(*) AS n FROM landing.nc_results"
-            )[0]["n"],
+            self.query("SELECT count(*) AS n FROM landing.nc_results")[0]["n"],
             0,
         )
 
         self.assertEqual(
-            self.query(
-                "SELECT outcome FROM ops.load_attempts"
-            )[0]["outcome"],
+            self.query("SELECT outcome FROM ops.load_attempts")[0]["outcome"],
             "failed",
         )
 
     def test_identical_release_identity_cannot_hide_different_output(self):
         _, directory = self.parsed()
 
-        self.assertEqual(
-            self.load(directory)["outcome"], "succeeded"
-        )
+        self.assertEqual(self.load(directory)["outcome"], "succeeded")
 
         self.edit_csv(
             directory,
-            lambda rows: rows[0].update(
-                election_day="1", total_votes="9"
-            ),
+            lambda rows: rows[0].update(election_day="1", total_votes="9"),
         )
 
-        self.assertIn(
-            "different output", self.load(directory)["error"]
-        )
+        self.assertIn("different output", self.load(directory)["error"])
 
     def test_fetch_logs_are_imported_once_and_reused_on_304(self):
         raw, directory = self.parsed()
         f = self.fixture
 
-        metadata = (
-            f.root / "metadata" / f.source.source_id / "2026-10-30"
-        )
+        metadata = f.root / "metadata" / f.source.source_id / "2026-10-30"
         metadata.mkdir(parents=True)
 
         for status, outcome in (
@@ -352,19 +328,13 @@ class DatabaseTests(unittest.TestCase):
                 outcome=outcome,
             )
 
-            (metadata / (identifier + ".json")).write_text(
-                json.dumps(record)
-            )
+            (metadata / (identifier + ".json")).write_text(json.dumps(record))
 
         self.load(directory)
         self.load(directory)
 
-        self.assertEqual(
-            len(self.query("SELECT * FROM ops.fetch_attempts")), 2
-        )
-        self.assertEqual(
-            len(self.query("SELECT * FROM ops.snapshots")), 1
-        )
+        self.assertEqual(len(self.query("SELECT * FROM ops.fetch_attempts")), 2)
+        self.assertEqual(len(self.query("SELECT * FROM ops.snapshots")), 1)
 
     def demographics(self):
         f = self.fixture
@@ -426,9 +396,7 @@ class DatabaseTests(unittest.TestCase):
             lambda rows: rows[1].update(county="WAKE"),
         )
 
-        self.assertEqual(
-            self.load(directory)["outcome"], "failed"
-        )
+        self.assertEqual(self.load(directory)["outcome"], "failed")
 
         self.assertEqual(
             self.query(
@@ -444,9 +412,7 @@ class DatabaseTests(unittest.TestCase):
         _, directory = self.parsed()
 
         with ThreadPoolExecutor(max_workers=2) as pool:
-            results = list(
-                pool.map(self.load, [directory, directory])
-            )
+            results = list(pool.map(self.load, [directory, directory]))
 
         self.assertEqual(
             sorted(row["outcome"] for row in results),
@@ -454,8 +420,6 @@ class DatabaseTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.query(
-                "SELECT count(*) AS n FROM landing.nc_results"
-            )[0]["n"],
+            self.query("SELECT count(*) AS n FROM landing.nc_results")[0]["n"],
             10,
         )

@@ -87,12 +87,11 @@ class Source:
     dataset: str = "election_results"
     min_interval_seconds: int = 0
     allow_missing: bool = False
+    files: tuple[tuple[str, str], ...] = ()
 
     def __post_init__(self) -> None:
         if not re.fullmatch(r"[a-z][a-z0-9_-]{0,79}", self.source_id):
-            raise ValueError(
-                "source_id must be a lowercase identifier of at most 80 characters"
-            )
+            raise ValueError("source_id must be a lowercase identifier of at most 80 characters")
 
         if not re.fullmatch(r"[A-Z]{2}", self.state):
             raise ValueError("state must be a two-letter uppercase code")
@@ -102,47 +101,48 @@ class Source:
 
         validate_url(self.url)
 
-        if self.format not in {"zip", "csv"}:
-            raise ValueError("Only ZIP and CSV file checks are implemented")
+        if self.format not in {"zip", "csv", "bundle"}:
+            raise ValueError("Supported formats are zip, csv and bundle")
 
         if not isinstance(self.expected_members, tuple) or not all(
-            isinstance(name, str) and name
-            for name in self.expected_members
+            isinstance(name, str) and name for name in self.expected_members
         ):
-            raise ValueError(
-                "expected_members must be a tuple of nonempty member names"
-            )
+            raise ValueError("expected_members must be a tuple of nonempty member names")
 
         if not isinstance(self.expected_columns, tuple) or not all(
-            isinstance(name, str) and name.strip()
-            for name in self.expected_columns
+            isinstance(name, str) and name.strip() for name in self.expected_columns
         ):
-            raise ValueError(
-                "expected_columns must be a tuple of nonempty column names"
-            )
+            raise ValueError("expected_columns must be a tuple of nonempty column names")
 
-        if self.format == "csv" and (
-            not self.expected_columns or self.expected_members
-        ):
-            raise ValueError(
-                "CSV sources need expected_columns and cannot specify ZIP members"
-            )
+        if self.format == "csv" and (not self.expected_columns or self.expected_members):
+            raise ValueError("CSV sources need expected_columns and cannot specify ZIP members")
 
-        if self.format == "zip" and self.expected_columns:
-            raise ValueError(
-                "ZIP member row checks belong to a later source parser"
-            )
+        if self.format in {"zip", "bundle"} and self.expected_columns:
+            raise ValueError("ZIP member row checks belong to a later source parser")
+
+        if not isinstance(self.files, tuple):
+            raise ValueError("files must be a tuple of filename/URL pairs")
+        names = []
+        for entry in self.files:
+            if not isinstance(entry, tuple) or len(entry) != 2:
+                raise ValueError("files must be filename/URL pairs")
+            name, url = entry
+            if not isinstance(name, str) or not isinstance(url, str):
+                raise ValueError("files must contain strings")
+            if not re.fullmatch(r"[a-z][a-z0-9_.-]{0,79}", name) or name == "results.xml":
+                raise ValueError("Invalid bundle reference filename")
+            validate_url(url)
+            names.append(name)
+        if len(names) != len(set(names)) or (self.files and self.format != "bundle"):
+            raise ValueError("Reference files require bundle format and unique names")
+        if self.format == "bundle" and set(self.expected_members) != {"results.xml", *names}:
+            raise ValueError("Bundle members must match results.xml and its reference files")
 
         if not re.fullmatch(r"[a-z][a-z0-9_]{0,79}", self.dataset):
             raise ValueError("dataset must be a lowercase identifier")
 
-        if (
-            type(self.min_interval_seconds) is not int
-            or self.min_interval_seconds < 0
-        ):
-            raise ValueError(
-                "min_interval_seconds must be a nonnegative integer"
-            )
+        if type(self.min_interval_seconds) is not int or self.min_interval_seconds < 0:
+            raise ValueError("min_interval_seconds must be a nonnegative integer")
 
         if type(self.allow_missing) is not bool:
             raise ValueError("allow_missing must be true or false")
@@ -157,9 +157,7 @@ class Source:
             "max_csv_rows": settings.max_csv_rows,
         }
 
-        return hashlib.sha256(
-            json.dumps(contract, sort_keys=True).encode()
-        ).hexdigest()
+        return hashlib.sha256(json.dumps(contract, sort_keys=True).encode()).hexdigest()
 
 
 def load_config(path: Path) -> tuple[CollectorSettings, dict[str, Source]]:
@@ -181,14 +179,16 @@ def load_config(path: Path) -> tuple[CollectorSettings, dict[str, Source]]:
         for key in ("expected_members", "expected_columns"):
             names = item.get(key, [])
 
-            if not isinstance(names, list) or not all(
-                isinstance(name, str) for name in names
-            ):
-                raise ValueError(
-                    f"{key} must be an array of strings: {source_id}"
-                )
+            if not isinstance(names, list) or not all(isinstance(name, str) for name in names):
+                raise ValueError(f"{key} must be an array of strings: {source_id}")
 
             item[key] = tuple(names)
+        files = item.get("files", {})
+        if not isinstance(files, dict) or not all(
+            isinstance(k, str) and isinstance(v, str) for k, v in files.items()
+        ):
+            raise ValueError("files must map filenames to public URLs")
+        item["files"] = tuple(sorted(files.items()))
         sources[source_id] = Source(source_id=source_id, **item)
     if not sources:
         raise ValueError("Configure at least one source")

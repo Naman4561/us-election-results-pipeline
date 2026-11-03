@@ -16,6 +16,7 @@ from psycopg import sql
 
 from election_pipeline.database import connect
 from election_pipeline.settings import load_config
+from election_pipeline.states import STATES
 from election_pipeline.storage import (
     ArchiveStore,
     atomic_json,
@@ -23,7 +24,7 @@ from election_pipeline.storage import (
     utc_now,
 )
 
-SCHEMAS = ("ops", "landing", "serving")
+SCHEMAS = ("ops", "landing", "serving", *(s.schema for s in STATES.values()))
 
 DATA_DIRECTORIES = (
     "raw",
@@ -45,10 +46,7 @@ def safe_child(root, relative):
     if (
         not parts.parts
         or parts.is_absolute()
-        or any(
-            part in ("..", ".") or "\\" in part or ":" in part
-            for part in parts.parts
-        )
+        or any(part in ("..", ".") or "\\" in part or ":" in part for part in parts.parts)
     ):
         raise ValueError("Unsafe backup path")
 
@@ -78,10 +76,8 @@ def inventory(conn):
 
     found = {row["table_schema"] for row in tables}
 
-    if not set(SCHEMAS).issubset(found):
-        raise ValueError(
-            "Apply the ingestion and publication migrations first"
-        )
+    if not {"ops", "serving"}.issubset(found) or not ({"landing", "nc", "ky"} & found):
+        raise ValueError("Apply the ingestion and publication migrations first")
 
     result = {}
 
@@ -130,24 +126,24 @@ def docker_command(
     compose_args=(),
 ):
     """Stream binary files without a shell or password arguments."""
-    if not re.fullmatch(
-        r"[A-Za-z_][A-Za-z0-9_-]{0,62}", db["dbname"]
-    ):
-        raise ValueError(
-            "Backup expects a simple PostgreSQL database name"
-        )
+    if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_-]{0,62}", db["dbname"]):
+        raise ValueError("Backup expects a simple PostgreSQL database name")
 
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", service):
         raise ValueError("Invalid Compose service name")
 
     command = [
-        "docker", "compose", *compose_args,
-        "exec", "-T", service, program,
+        "docker",
+        "compose",
+        *compose_args,
+        "exec",
+        "-T",
+        service,
+        program,
     ]
 
-    needs_connection = (
-        program == "pg_dump"
-        or (program == "pg_restore" and "--list" not in arguments)
+    needs_connection = program == "pg_dump" or (
+        program == "pg_restore" and "--list" not in arguments
     )
 
     if needs_connection:
@@ -169,14 +165,10 @@ def docker_command(
         check=False,
     )
 
-    message = result.stderr.decode(
-        "utf-8", errors="replace"
-    ).replace(db["password"], "[redacted]")
+    message = result.stderr.decode("utf-8", errors="replace").replace(db["password"], "[redacted]")
 
     if result.returncode:
-        raise ValueError(
-            f"{program} failed: {message[-4000:]}"
-        )
+        raise ValueError(f"{program} failed: {message[-4000:]}")
 
     return message.strip()
 
@@ -196,9 +188,7 @@ def copy_files(source, destination):
             continue
 
         if path.is_symlink():
-            raise ValueError(
-                f"Refusing symlink in backup: {relative}"
-            )
+            raise ValueError(f"Refusing symlink in backup: {relative}")
 
         if path.is_file():
             target = destination / relative
@@ -212,13 +202,8 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=())
     data_dir = Path(data_dir).resolve()
     destination = Path(destination).resolve()
 
-    if (
-        destination.is_relative_to(data_dir)
-        or data_dir.is_relative_to(destination)
-    ):
-        raise ValueError(
-            "Choose a backup destination outside the live data directory"
-        )
+    if destination.is_relative_to(data_dir) or data_dir.is_relative_to(destination):
+        raise ValueError("Choose a backup destination outside the live data directory")
 
     _, sources = load_config(config)
 
@@ -235,34 +220,32 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=())
     }
 
     with ExitStack() as stack:
-        for source in sorted(
-            sources.values(), key=lambda item: item.source_id
-        ):
+        for source in sorted(sources.values(), key=lambda item: item.source_id):
             store = ArchiveStore(data_dir, source)
             stack.enter_context(store.lock(stage="pipeline"))
             stack.enter_context(store.lock())
 
         conn = stack.enter_context(connect(db))
 
-        locked = conn.execute(
-            "SELECT pg_try_advisory_lock(20261103, 1) AS ok"
-        ).fetchone()["ok"]
+        locked = conn.execute("SELECT pg_try_advisory_lock(20261103, 1) AS ok").fetchone()["ok"]
 
         if not locked:
-            raise ValueError(
-                "Publication or restore is running; retry backup later"
-            )
+            raise ValueError("Publication or restore is running; retry backup later")
 
         stack.enter_context(conn.transaction())
-        conn.execute(
-            "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY"
-        )
+        conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
 
-        snapshot = conn.execute(
-            "SELECT pg_export_snapshot() AS id"
-        ).fetchone()["id"]
+        snapshot = conn.execute("SELECT pg_export_snapshot() AS id").fetchone()["id"]
 
         manifest["database_inventory"] = inventory(conn)
+        manifest["database_schemas"] = [
+            row["schema_name"]
+            for row in conn.execute(
+                "SELECT schema_name FROM information_schema.schemata WHERE schema_name=ANY(%s) "
+                "ORDER BY schema_name",
+                (list(SCHEMAS),),
+            ).fetchall()
+        ]
 
         for directory in DATA_DIRECTORIES:
             copy_files(
@@ -270,23 +253,13 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=())
                 temporary / "data" / directory,
             )
 
-        snapshots = conn.execute(
-            "SELECT raw_path, raw_sha256 FROM ops.snapshots"
-        ).fetchall()
+        snapshots = conn.execute("SELECT raw_path, raw_sha256 FROM ops.snapshots").fetchall()
 
         for row in snapshots:
-            archived = safe_child(
-                temporary / "data", row["raw_path"]
-            )
+            archived = safe_child(temporary / "data", row["raw_path"])
 
-            if (
-                not archived.is_file()
-                or file_hash(archived) != row["raw_sha256"]
-            ):
-                raise ValueError(
-                    "Missing/corrupt raw archive for snapshot: "
-                    + row["raw_sha256"]
-                )
+            if not archived.is_file() or file_hash(archived) != row["raw_sha256"]:
+                raise ValueError("Missing/corrupt raw archive for snapshot: " + row["raw_sha256"])
 
         shutil.copy2(config, temporary / "sources.toml")
 
@@ -304,15 +277,11 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=())
 
         for path in (root / "dbt").glob("*.yml"):
             if not path.name.startswith("."):
-                shutil.copy2(
-                    path, temporary / "code/dbt" / path.name
-                )
+                shutil.copy2(path, temporary / "code/dbt" / path.name)
 
         for filename in ("pyproject.toml", "requirements-dev.txt"):
             if (root / filename).is_file():
-                shutil.copy2(
-                    root / filename, temporary / filename
-                )
+                shutil.copy2(root / filename, temporary / filename)
 
         dump = temporary / "database.dump"
 
@@ -327,7 +296,7 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=())
                     "--no-owner",
                     "--no-privileges",
                     "--snapshot=" + snapshot,
-                    *["--schema=" + schema for schema in SCHEMAS],
+                    *["--schema=" + schema for schema in manifest["database_schemas"]],
                 ],
                 stdout=handle,
                 compose_args=compose_args,
@@ -371,28 +340,19 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=())
 def verify_bundle(directory):
     directory = Path(directory).resolve()
 
-    manifest = json.loads(
-        (directory / "manifest.json").read_text(encoding="utf-8")
-    )
+    manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
 
-    if (
-        manifest.get("schema_version") != 1
-        or "database.dump" not in manifest.get("files", {})
-    ):
+    if manifest.get("schema_version") != 1 or "database.dump" not in manifest.get("files", {}):
         raise ValueError("Unsupported/incomplete backup manifest")
 
     for relative, expected in manifest["files"].items():
         path = safe_child(directory, relative)
 
-        if (
-            path.stat().st_size != expected["bytes"]
-            or file_hash(path) != expected["sha256"]
-        ):
-            raise ValueError(
-                f"Backup checksum failed: {relative}"
-            )
+        if path.stat().st_size != expected["bytes"] or file_hash(path) != expected["sha256"]:
+            raise ValueError(f"Backup checksum failed: {relative}")
 
     return manifest
+
 
 def check_restore(
     root,
@@ -427,23 +387,17 @@ def check_restore(
     try:
         with connect({**db, "dbname": "postgres"}) as admin:
             admin.execute(
-                sql.SQL("CREATE DATABASE {} TEMPLATE template0").format(
-                    sql.Identifier(name)
-                )
+                sql.SQL("CREATE DATABASE {} TEMPLATE template0").format(sql.Identifier(name))
             )
             created = True
 
         if writer_role:
             with connect(temporary_db) as admin:
                 admin.execute(
-                    sql.SQL("REVOKE ALL ON DATABASE {} FROM PUBLIC").format(
-                        sql.Identifier(name)
-                    )
+                    sql.SQL("REVOKE ALL ON DATABASE {} FROM PUBLIC").format(sql.Identifier(name))
                 )
                 admin.execute(
-                    sql.SQL(
-                        "GRANT CONNECT, CREATE, TEMPORARY ON DATABASE {} TO {}"
-                    ).format(
+                    sql.SQL("GRANT CONNECT, CREATE, TEMPORARY ON DATABASE {} TO {}").format(
                         sql.Identifier(name),
                         sql.Identifier(writer_role),
                     )
@@ -477,11 +431,7 @@ def check_restore(
                 connect(temporary_db) as restored,
                 restored.transaction(force_rollback=True),
             ):
-                restored.execute(
-                    sql.SQL("SET LOCAL ROLE {}").format(
-                        sql.Identifier(writer_role)
-                    )
-                )
+                restored.execute(sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(writer_role)))
                 for table in manifest["database_inventory"]:
                     schema, relation = table.split(".", 1)
                     owner = restored.execute(
@@ -492,27 +442,19 @@ def check_restore(
                         (schema, relation),
                     ).fetchone()
                     if owner["owner"] != writer_role:
-                        raise ValueError(
-                            "Restored table ownership does not match the writer"
-                        )
+                        raise ValueError("Restored table ownership does not match the writer")
 
-                restored.execute(
-                    "UPDATE ops.sources SET source_id=source_id WHERE false"
-                )
+                restored.execute("UPDATE ops.sources SET source_id=source_id WHERE false")
                 restored.execute(
                     "UPDATE serving.current_publications "
                     "SET publication_id=publication_id WHERE false"
                 )
 
         with connect(temporary_db) as restored, restored.transaction():
-            restored.execute(
-                "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY"
-            )
+            restored.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
             actual = inventory(restored)
             if actual != manifest["database_inventory"]:
-                raise ValueError(
-                    "Restored table counts/hashes do not match the backup snapshot"
-                )
+                raise ValueError("Restored table counts/hashes do not match the backup snapshot")
 
             snapshots = restored.execute(
                 "SELECT raw_path, raw_sha256 FROM ops.snapshots"
@@ -520,23 +462,33 @@ def check_restore(
 
             for snapshot in snapshots:
                 raw = safe_child(directory / "data", snapshot["raw_path"])
-                if (
-                    not raw.is_file()
-                    or file_hash(raw) != snapshot["raw_sha256"]
-                ):
+                if not raw.is_file() or file_hash(raw) != snapshot["raw_sha256"]:
                     raise ValueError(
-                        "Raw archive unavailable for snapshot: "
-                        + snapshot["raw_sha256"]
+                        "Raw archive unavailable for snapshot: " + snapshot["raw_sha256"]
                     )
 
         with connect(temporary_db) as restored, restored.transaction():
-            restored.execute(
-                "GRANT USAGE ON SCHEMA serving TO election_dashboard"
-            )
-            restored.execute(
-                "GRANT SELECT ON ALL TABLES IN SCHEMA serving "
-                "TO election_dashboard"
-            )
+            restored.execute("GRANT USAGE ON SCHEMA serving TO election_dashboard")
+            restored.execute("GRANT SELECT ON ALL TABLES IN SCHEMA serving TO election_dashboard")
+            for state in STATES.values():
+                for table in (
+                    "county_candidate_results",
+                    "contest_candidate_results",
+                    "county_absentee_demographics",
+                    "state_absentee_demographics",
+                ):
+                    relation = state.schema + "." + table
+                    if relation in manifest["database_inventory"]:
+                        restored.execute(
+                            sql.SQL("GRANT USAGE ON SCHEMA {} TO election_dashboard").format(
+                                sql.Identifier(state.schema)
+                            )
+                        )
+                        restored.execute(
+                            sql.SQL("GRANT SELECT ON {} TO election_dashboard").format(
+                                sql.Identifier(state.schema, table)
+                            )
+                        )
             if writer_role:
                 restored.execute(
                     sql.SQL(
@@ -546,29 +498,20 @@ def check_restore(
                 )
 
             restored.execute(
-                sql.SQL("SET LOCAL ROLE {}")
-                .format(sql.Identifier(reader_role))
-                .as_string()
+                sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(reader_role)).as_string()
             )
-            restored.execute(
-                "SELECT count(*) FROM serving.current_publications"
-            ).fetchone()
+            restored.execute("SELECT count(*) FROM serving.current_publications").fetchone()
 
             if restored.execute(
                 "SELECT has_table_privilege(current_user, "
                 "'serving.current_publications', 'UPDATE') AS ok"
             ).fetchone()["ok"]:
-                raise ValueError(
-                    "Restored dashboard role can change the current publication"
-                )
+                raise ValueError("Restored dashboard role can change the current publication")
 
             if restored.execute(
-                "SELECT has_schema_privilege("
-                "current_user, 'landing', 'USAGE') AS ok"
+                "SELECT has_schema_privilege(current_user, 'landing', 'USAGE') AS ok"
             ).fetchone()["ok"]:
-                raise ValueError(
-                    "Restored dashboard role can access landing data"
-                )
+                raise ValueError("Restored dashboard role can access landing data")
 
         report.update(
             outcome="passed",
@@ -588,146 +531,11 @@ def check_restore(
         if created:
             try:
                 with connect({**db, "dbname": "postgres"}) as admin:
-                    admin.execute(
-                        sql.SQL("DROP DATABASE {}").format(sql.Identifier(name))
-                    )
+                    admin.execute(sql.SQL("DROP DATABASE {}").format(sql.Identifier(name)))
                 report["temporary_database_removed"] = True
             except Exception as error:
                 report["outcome"] = "failed"
-                report["cleanup_error"] = str(error).replace(
-                    db["password"], "[redacted]"
-                )
-
-        report["finished_at"] = utc_now()
-        report["report_path"] = str(path)
-        atomic_json(path, report)
-
-    return report
-    """Restore into this call's new temporary database, then remove it."""
-    directory = Path(directory).resolve()
-    manifest = verify_bundle(directory)
-
-    name = "election_restore_" + uuid.uuid4().hex[:16] + "_test"
-    temporary_db = {**db, "dbname": name}
-
-    report = {
-        "outcome": "running",
-        "started_at": utc_now(),
-        "temporary_database": name,
-        "backup_dir": str(directory),
-    }
-
-    path = Path(root) / "data/recovery_checks" / f"{name}.json"
-    created = False
-
-    try:
-        with connect({**db, "dbname": "postgres"}) as admin:
-            admin.execute(
-                sql.SQL(
-                    "CREATE DATABASE {} TEMPLATE template0"
-                ).format(sql.Identifier(name))
-            )
-            created = True
-
-        with (directory / "database.dump").open("rb") as handle:
-            docker_command(
-                root,
-                service,
-                temporary_db,
-                "pg_restore",
-                [
-                    "--exit-on-error",
-                    "--single-transaction",
-                    "--no-owner",
-                    "--no-privileges",
-                ],
-                stdin=handle,
-            )
-
-        with connect(temporary_db) as restored, restored.transaction():
-            restored.execute(
-                "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY"
-            )
-
-            actual = inventory(restored)
-
-            if actual != manifest["database_inventory"]:
-                raise ValueError(
-                    "Restored table counts/hashes do not match the backup snapshot"
-                )
-
-            snapshots = restored.execute(
-                "SELECT raw_path, raw_sha256 FROM ops.snapshots"
-            ).fetchall()
-
-            for snapshot in snapshots:
-                raw = safe_child(
-                    directory / "data", snapshot["raw_path"]
-                )
-
-                if (
-                    not raw.is_file()
-                    or file_hash(raw) != snapshot["raw_sha256"]
-                ):
-                    raise ValueError(
-                        "Raw archive unavailable for snapshot: "
-                        + snapshot["raw_sha256"]
-                    )
-
-        with connect(temporary_db) as restored, restored.transaction():
-            restored.execute(
-                "GRANT USAGE ON SCHEMA serving TO election_dashboard"
-            )
-            restored.execute(
-                "GRANT SELECT ON ALL TABLES IN SCHEMA serving "
-                "TO election_dashboard"
-            )
-            restored.execute("SET LOCAL ROLE election_dashboard")
-            restored.execute(
-                "SELECT count(*) FROM serving.current_publications"
-            ).fetchone()
-
-            can_update = restored.execute(
-                "SELECT has_table_privilege(current_user, "
-                "'serving.current_publications', 'UPDATE') AS ok"
-            ).fetchone()["ok"]
-
-            if can_update:
-                raise ValueError(
-                    "Restored dashboard role can change the current publication"
-                )
-
-        report.update(
-            outcome="passed",
-            database_inventory=actual,
-            raw_archives_verified=len(snapshots),
-        )
-
-    except Exception as error:
-        report.update(
-            outcome="failed",
-            error=str(error).replace(
-                db["password"], "[redacted]"
-            ),
-        )
-
-    finally:
-        if created:
-            try:
-                with connect({**db, "dbname": "postgres"}) as admin:
-                    admin.execute(
-                        sql.SQL("DROP DATABASE {}").format(
-                            sql.Identifier(name)
-                        )
-                    )
-
-                report["temporary_database_removed"] = True
-
-            except Exception as error:
-                report["outcome"] = "failed"
-                report["cleanup_error"] = str(error).replace(
-                    db["password"], "[redacted]"
-                )
+                report["cleanup_error"] = str(error).replace(db["password"], "[redacted]")
 
         report["finished_at"] = utc_now()
         report["report_path"] = str(path)

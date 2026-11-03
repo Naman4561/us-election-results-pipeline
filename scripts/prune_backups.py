@@ -27,9 +27,7 @@ def prune_backups(destination, keep=3, apply=False):
 
         marker = bundle / "uploaded.json"
         if bundle.is_symlink() or marker.is_symlink():
-            raise ValueError(
-                "Backup bundles and markers must not be symlinks"
-            )
+            raise ValueError("Backup bundles and markers must not be symlinks")
         if not bundle.is_dir() or not marker.is_file():
             continue
 
@@ -39,41 +37,26 @@ def prune_backups(destination, keep=3, apply=False):
         if (
             receipt.get("schema_version") != 1
             or receipt.get("backup_id") != bundle.name
-            or not re.fullmatch(
-                r"[0-9a-f]{64}", receipt.get("sha256", "")
-            )
+            or not re.fullmatch(r"[0-9a-f]{64}", receipt.get("sha256", ""))
             or timestamp.tzinfo is None
         ):
-            raise ValueError(
-                "Invalid upload marker; cleanup stopped"
-            )
+            raise ValueError("Invalid upload marker; cleanup stopped")
 
         candidates.append((timestamp, bundle.name, bundle))
 
     candidates.sort(reverse=True)
-    removed = [
-        bundle for _, _, bundle in candidates[keep:]
-    ]
+    removed = [bundle for _, _, bundle in candidates[keep:]]
 
     if apply:
         for bundle in removed:
-            if (
-                bundle.is_symlink()
-                or bundle.resolve().parent != destination
-            ):
-                raise ValueError(
-                    "Backup path changed; cleanup stopped"
-                )
+            if bundle.is_symlink() or bundle.resolve().parent != destination:
+                raise ValueError("Backup path changed; cleanup stopped")
             shutil.rmtree(bundle)
 
     return {
         "outcome": "cleaned" if apply else "planned",
-        "kept": [
-            name for _, name, _ in candidates[:keep]
-        ],
-        "removed" if apply else "would_remove": [
-            bundle.name for bundle in removed
-        ],
+        "kept": [name for _, name, _ in candidates[:keep]],
+        "removed" if apply else "would_remove": [bundle.name for bundle in removed],
     }
 
 
@@ -89,14 +72,16 @@ def main():
     args = parser.parse_args()
 
     try:
-        result = prune_backups(
-            args.destination, args.keep, args.apply
-        )
+        result = prune_backups(args.destination, args.keep, args.apply)
     except Exception as error:
-        print(json.dumps({
-            "outcome": "failed",
-            "error": str(error),
-        }))
+        print(
+            json.dumps(
+                {
+                    "outcome": "failed",
+                    "error": str(error),
+                }
+            )
+        )
         return 1
 
     print(json.dumps(result, indent=2))

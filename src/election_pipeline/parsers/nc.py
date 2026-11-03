@@ -4,19 +4,16 @@ from __future__ import annotations
 
 import csv
 import io
-import re
 import zipfile
 from datetime import datetime
 from pathlib import Path
 
+from election_pipeline.parsers.common import integer, records
 from election_pipeline.settings import Source
 
 COVERAGE = {
     "US SENATE": "NC-SEN",
-    **{
-        f"US HOUSE OF REPRESENTATIVES DISTRICT {n:02d}": f"NC-{n:02d}"
-        for n in (1, 3, 4, 11)
-    },
+    **{f"US HOUSE OF REPRESENTATIVES DISTRICT {n:02d}": f"NC-{n:02d}" for n in (1, 3, 4, 11)},
 }
 
 VOTES = (
@@ -86,41 +83,6 @@ DEMO_FIELDS = (
 )
 
 
-def records(handle, required, delimiter, limit):
-    """Read by column name; reject malformed shape."""
-    reader = csv.reader(handle, delimiter=delimiter, strict=True)
-    header = [name.strip() for name in next(reader, [])]
-
-    if not header or any(not name for name in header) or len(set(header)) != len(header):
-        raise ValueError("Missing, blank, or duplicate column names")
-
-    if not set(required) <= set(header):
-        raise ValueError(f"Missing columns: {sorted(set(required) - set(header))}")
-
-    count = 0
-
-    for values in reader:
-        if not values:
-            continue
-
-        count += 1
-
-        if count > limit or len(values) != len(header):
-            raise ValueError(f"Line {reader.line_num}: row limit or field-count violation")
-
-        yield reader.line_num, dict(zip(header, (value.strip() for value in values)))
-
-    if not count:
-        raise ValueError("File contains no data records")
-
-
-def integer(value, label):
-    if not re.fullmatch(r"[0-9]+", value):
-        raise ValueError(f"{label}: expected a nonnegative integer, got {value!r}")
-
-    return int(value)
-
-
 def unique(seen, key, line):
     if key in seen:
         raise ValueError(f"Line {line}: duplicate record key {key!r}")
@@ -153,9 +115,7 @@ def result_rows(path: Path, source: Source, limit: int, stats: dict):
                     if not row[name]:
                         raise ValueError(f"Line {line}: empty {name}")
 
-                election = datetime.strptime(
-                    row["Election Date"], "%m/%d/%Y"
-                ).date().isoformat()
+                election = datetime.strptime(row["Election Date"], "%m/%d/%Y").date().isoformat()
 
                 if election != source.election_date:
                     raise ValueError(f"Line {line}: unexpected election date {election}")
@@ -166,15 +126,10 @@ def result_rows(path: Path, source: Source, limit: int, stats: dict):
                 if vote_for < 1 or row["Real Precinct"] not in {"Y", "N"}:
                     raise ValueError(f"Line {line}: invalid vote-for or real-precinct flag")
 
-                votes = [
-                    integer(row[name], f"Line {line}: {name}")
-                    for name in RESULT_HEADER[9:14]
-                ]
+                votes = [integer(row[name], f"Line {line}: {name}") for name in RESULT_HEADER[9:14]]
 
                 if sum(votes[:4]) != votes[4]:
-                    raise ValueError(
-                        f"Line {line}: voting-method counts do not equal Total Votes"
-                    )
+                    raise ValueError(f"Line {line}: voting-method counts do not equal Total Votes")
 
                 county = row["County"].upper()
 
@@ -191,9 +146,7 @@ def result_rows(path: Path, source: Source, limit: int, stats: dict):
                     continue
 
                 if vote_for != 1:
-                    raise ValueError(
-                        f"Line {line}: tracked federal contest must be vote-for-one"
-                    )
+                    raise ValueError(f"Line {line}: tracked federal contest must be vote-for-one")
 
                 choice_key = (contest, row["Choice"])
                 party = row["Choice Party"]
@@ -271,3 +224,150 @@ def demographic_rows(path: Path, source: Source, limit: int, stats: dict):
 
     stats.update(counties_seen=len(counties), request_types=sorted(kinds))
     stats["date_basis"] = "configured source; the CSV contains no election-date column"
+
+
+def parse(archive, source, settings, output, stats, reference):
+    from election_pipeline.parsing import (
+        DEMO_STATE,
+        RESULT_CONTEST,
+        RESULT_COUNTY,
+        accumulate,
+        reference_check,
+        write_groups,
+    )
+
+    results = source.dataset == "election_results" and source.format == "zip"
+    demographics = source.dataset == "absentee_early_demographics" and source.format == "csv"
+
+    if source.state != "NC" or not (results or demographics):
+        raise ValueError("No parser registered for this state/dataset/format")
+
+    if reference is not None and not results:
+        raise ValueError("Candidate-vote reference comparisons apply only to election results")
+
+    fields = RESULT_FIELDS if results else DEMO_FIELDS
+    measures = VOTES if results else ("ballot_count",)
+    iterator = result_rows if results else demographic_rows
+    county, statewide = {}, {}
+    raw_totals = [0] * len(measures)
+
+    name = "precinct_results.csv" if results else "county_demographics.csv"
+
+    with (output / name).open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fields)
+        writer.writeheader()
+
+        for row in iterator(archive, source, settings.max_csv_rows, stats):
+            writer.writerow(row)
+
+            for index, measure in enumerate(measures):
+                raw_totals[index] += row[measure]
+
+            if results:
+                accumulate(county, row, RESULT_COUNTY, measures)
+            else:
+                accumulate(statewide, row, DEMO_STATE, measures)
+
+    if results:
+        for key, values in county.items():
+            row = dict(zip((*RESULT_COUNTY, *measures), (*key, *values)))
+            accumulate(statewide, row, RESULT_CONTEST, measures)
+
+        write_groups(output / "county_results.csv", county, RESULT_COUNTY, measures)
+        write_groups(output / "contest_results.csv", statewide, RESULT_CONTEST, measures)
+    else:
+        write_groups(output / "state_demographics.csv", statewide, DEMO_STATE, measures)
+
+    # Internal transformation checks, not independent official validation.
+    for groups in (county, statewide) if results else (statewide,):
+        aggregated = [
+            sum(values[index] for values in groups.values()) for index in range(len(measures))
+        ]
+
+        if aggregated != raw_totals:
+            raise ValueError("Aggregation did not preserve input counts")
+
+    stats["internal_reconciliation"] = "passed"
+    stats["all_counts_zero"] = not any(raw_totals)
+
+    stats["reference_comparison"] = (
+        reference_check(reference, source, statewide, settings.max_csv_rows)
+        if reference is not None
+        else {"status": "not_provided" if results else "not_applicable"}
+    )
+
+    stats["warnings"] = []
+
+    if stats["all_counts_zero"]:
+        stats["warnings"].append("All counts are zero; this does not establish live reporting.")
+
+    if results:
+        stats["warnings"].append("Candidate votes are not unique ballots or demographic turnout.")
+
+    stats["election_status"] = "not determined by parser"
+
+
+def load_contract(dataset):
+    from election_pipeline.states import LoadContract
+
+    if dataset == "election_results":
+        return LoadContract(
+            "results",
+            "precinct_results.csv",
+            RESULT_FIELDS,
+            ("precinct_results.csv", "county_results.csv", "contest_results.csv"),
+            "zip",
+        )
+    if dataset == "absentee_early_demographics":
+        return LoadContract(
+            "absentee_demographics",
+            "county_demographics.csv",
+            DEMO_FIELDS,
+            ("county_demographics.csv", "state_demographics.csv"),
+            "csv",
+        )
+    raise ValueError("Unsupported NC dataset")
+
+
+def database_row(row, source, release):
+    from election_pipeline.database import number
+
+    prefix = (
+        release,
+        number(row["source_line"]),
+        row["county"],
+    )
+
+    if source.dataset == "election_results":
+        if row["real_precinct"] not in {"Y", "N"}:
+            raise ValueError("Invalid real-precinct flag")
+
+        return (
+            *prefix,
+            row["precinct"],
+            row["contest_id"],
+            row["contest_name"],
+            row["source_contest_group_id"],
+            row["contest_type"],
+            row["choice"],
+            row["choice_party"] or None,
+            number(row["vote_for"]),
+            row["real_precinct"] == "Y",
+            *(number(row[name]) for name in VOTES),
+        )
+
+    else:
+        return (
+            *prefix,
+            row["request_type"],
+            *(
+                row[name] or None
+                for name in (
+                    "party_registration",
+                    "sex",
+                    "race",
+                    "ethnicity",
+                )
+            ),
+            number(row["ballot_count"]),
+        )

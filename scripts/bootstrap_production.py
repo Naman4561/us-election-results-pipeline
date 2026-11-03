@@ -43,16 +43,11 @@ def ensure_login(conn, name, password):
 
 def migrate(conn, root, writer):
     paths = sorted((root / "migrations").glob("*.sql"))
-    ledger = conn.execute(
-        "SELECT to_regclass('ops.schema_migrations') AS t"
-    ).fetchone()["t"]
+    ledger = conn.execute("SELECT to_regclass('ops.schema_migrations') AS t").fetchone()["t"]
 
-    if not ledger and conn.execute(
-        "SELECT to_regclass('ops.sources') AS t"
-    ).fetchone()["t"]:
+    if not ledger and conn.execute("SELECT to_regclass('ops.sources') AS t").fetchone()["t"]:
         raise ValueError(
-            "Existing schemas have no production migration ledger; "
-            "review before adoption"
+            "Existing schemas have no production migration ledger; review before adoption"
         )
     if not paths:
         raise ValueError("No migration files found")
@@ -69,15 +64,11 @@ def migrate(conn, root, writer):
         )
         if applied:
             if applied["sha256"] != fingerprint:
-                raise ValueError(
-                    f"Applied migration changed: {path.name}; add a new migration"
-                )
+                raise ValueError(f"Applied migration changed: {path.name}; add a new migration")
             continue
 
         with conn.transaction():
-            conn.execute(
-                sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(writer))
-            )
+            conn.execute(sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(writer)))
             conn.execute(migration_body(path.read_text(encoding="utf-8")))
             if not ledger:
                 conn.execute("""
@@ -122,9 +113,9 @@ def main():
                 )
             )
             conn.execute(
-                sql.SQL(
-                    "GRANT CONNECT, CREATE, TEMPORARY ON DATABASE {} TO {}"
-                ).format(sql.Identifier(db["dbname"]), sql.Identifier(writer))
+                sql.SQL("GRANT CONNECT, CREATE, TEMPORARY ON DATABASE {} TO {}").format(
+                    sql.Identifier(db["dbname"]), sql.Identifier(writer)
+                )
             )
             conn.execute(
                 sql.SQL("GRANT CONNECT ON DATABASE {} TO {}").format(
@@ -141,15 +132,11 @@ def main():
                     "GRANT SELECT ON TABLES TO election_dashboard"
                 ).format(sql.Identifier(writer))
             )
+            conn.execute(sql.SQL("GRANT election_dashboard TO {}").format(sql.Identifier(reader)))
             conn.execute(
-                sql.SQL("GRANT election_dashboard TO {}").format(
+                sql.SQL("ALTER ROLE {} SET default_transaction_read_only=on").format(
                     sql.Identifier(reader)
                 )
-            )
-            conn.execute(
-                sql.SQL(
-                    "ALTER ROLE {} SET default_transaction_read_only=on"
-                ).format(sql.Identifier(reader))
             )
 
         print("Production roles and migrations are ready.")

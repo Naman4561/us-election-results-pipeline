@@ -1,24 +1,40 @@
 name: election_analytics
-version: '1.0.0'
+version: 1.0.0
 config-version: 2
 profile: election_analytics
-
-require-dbt-version: [">=1.12.6", "<1.13.0"]
-
-model-paths: [models]
-test-paths: [tests]
-macro-paths: [macros]
-clean-targets: [target, dbt_packages]
-
+require-dbt-version:
+- '>=1.12.6'
+- <1.13.0
+model-paths:
+- models
+test-paths:
+- tests
+macro-paths:
+- macros
+clean-targets:
+- target
+- dbt_packages
 vars:
   nc_results_source: nc_2026_general
   nc_demographics_source: nc_absentee_early_demographics_2026
   election_date: '2026-11-03'
-
+  ky_results_source: ky_2026_general
 models:
   election_analytics:
-    +materialized: "{{ var('publication_materialization', 'view') }}"
+    +materialized: '{{ var(''publication_materialization'', ''view'') }}'
     staging:
       +schema: staging
+      nc:
+        +tags:
+        - state_nc
+      ky:
+        +tags:
+        - state_ky
     marts:
       +schema: marts
+      nc:
+        +tags:
+        - state_nc
+      ky:
+        +tags:
+        - state_ky

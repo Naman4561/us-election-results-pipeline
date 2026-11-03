@@ -89,19 +89,12 @@ class WorkflowTests(unittest.TestCase):
             [stage["stage"] for stage in result["stages"]],
             ["collect", "parse", "load", "validate_and_publish"],
         )
-        self.assertTrue(
-            all(
-                stage["duration_seconds"] >= 0
-                for stage in result["stages"]
-            )
-        )
+        self.assertTrue(all(stage["duration_seconds"] >= 0 for stage in result["stages"]))
         self.assertEqual(
             json.loads(Path(result["report_path"]).read_text()),
             result,
         )
-        self.assertTrue(
-            self.publish.call_args.kwargs["skip_current"]
-        )
+        self.assertTrue(self.publish.call_args.kwargs["skip_current"])
         self.assertEqual(self.publish.call_args.args[2], 7)
 
     def test_unchanged_snapshot_recovers_failed_load_then_failed_publication(self):
@@ -127,45 +120,35 @@ class WorkflowTests(unittest.TestCase):
             },
         ]
 
-        self.assertEqual(
-            self.run_source()["outcome"], "failed"
-        )
-        self.assertEqual(
-            self.run_source()["outcome"], "succeeded"
-        )
+        self.assertEqual(self.run_source()["outcome"], "failed")
+        self.assertEqual(self.run_source()["outcome"], "succeeded")
         self.assertEqual(self.load.call_count, 3)
 
     def test_not_due_and_deferred_can_resume_cached_downstream_work_without_http(self):
         store = ArchiveStore(self.f.root, self.f.source)
         state = store.read_state()
 
-        store.write_state({
-            **state,
-            "source_signature": self.f.source.signature(
-                self.f.settings
-            ),
-        })
+        store.write_state(
+            {
+                **state,
+                "source_signature": self.f.source.signature(self.f.settings),
+            }
+        )
 
         for outcome in ("not_due", "deferred"):
             self.collect.return_value = {"outcome": outcome}
-            self.assertEqual(
-                self.run_source()["outcome"], "succeeded"
-            )
+            self.assertEqual(self.run_source()["outcome"], "succeeded")
 
     def test_missing_or_changed_cached_identity_cannot_resume_not_due(self):
         self.collect.return_value = {"outcome": "not_due"}
 
-        self.assertEqual(
-            self.run_source()["outcome"], "not_due"
-        )
+        self.assertEqual(self.run_source()["outcome"], "not_due")
         self.load.assert_not_called()
 
     def test_invalid_input_and_reference_mismatch_block_publication(self):
         self.raw.write_bytes(b"corrupt")
 
-        self.assertEqual(
-            self.run_source()["outcome"], "failed"
-        )
+        self.assertEqual(self.run_source()["outcome"], "failed")
         self.load.assert_not_called()
 
         self.sha = file_hash(self.f.archive())
@@ -178,12 +161,8 @@ class WorkflowTests(unittest.TestCase):
 
         with reference.open("w", newline="") as handle:
             writer = csv.writer(handle)
-            writer.writerow(
-                ("election_date", "contest_id", "choice", "total_votes")
-            )
-            writer.writerow(
-                ("2026-11-03", "NC-SEN", "Candidate A", 19)
-            )
+            writer.writerow(("election_date", "contest_id", "choice", "total_votes"))
+            writer.writerow(("2026-11-03", "NC-SEN", "Candidate A", 19))
 
         result = self.run_source(reference=reference)
 
@@ -192,21 +171,15 @@ class WorkflowTests(unittest.TestCase):
         self.publish.assert_not_called()
 
     def test_bad_fetch_never_loads_previous_good_snapshot(self):
-        self.collect.return_value = {
-            "outcome": "invalid_archive"
-        }
+        self.collect.return_value = {"outcome": "invalid_archive"}
 
-        self.assertEqual(
-            self.run_source()["outcome"], "failed"
-        )
+        self.assertEqual(self.run_source()["outcome"], "failed")
         self.load.assert_not_called()
 
     def test_replay_makes_no_http_request_or_implicit_publication(self):
         result = self.run_source(replay_sha256=self.sha)
 
-        self.assertEqual(
-            result["outcome"], "replayed_not_published"
-        )
+        self.assertEqual(result["outcome"], "replayed_not_published")
         self.collect.assert_not_called()
         self.load.assert_called_once()
         self.publish.assert_not_called()
@@ -223,9 +196,7 @@ class WorkflowTests(unittest.TestCase):
         first = self.run_source()
         latest = Path(first["report_path"]).parent / "latest.json"
 
-        with ArchiveStore(
-            self.f.root, self.f.source
-        ).lock(stage="pipeline"):
+        with ArchiveStore(self.f.root, self.f.source).lock(stage="pipeline"):
             result = self.run_source()
 
         self.assertEqual(result["outcome"], "locked")
@@ -236,9 +207,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(self.collect.call_count, 1)
 
     def test_failure_redacts_password_and_releases_lock(self):
-        self.publish.side_effect = RuntimeError(
-            "could not connect: sensitive-password"
-        )
+        self.publish.side_effect = RuntimeError("could not connect: sensitive-password")
 
         result = self.run_source()
 
@@ -247,9 +216,7 @@ class WorkflowTests(unittest.TestCase):
             Path(result["report_path"]).read_text(),
         )
 
-        with ArchiveStore(
-            self.f.root, self.f.source
-        ).lock(stage="pipeline"):
+        with ArchiveStore(self.f.root, self.f.source).lock(stage="pipeline"):
             pass
 
     def test_process_interruption_is_recorded_and_next_run_can_recover(self):
@@ -258,12 +225,7 @@ class WorkflowTests(unittest.TestCase):
         with self.assertRaises(KeyboardInterrupt):
             self.run_source()
 
-        latest = (
-            self.f.root
-            / "runs"
-            / self.f.source.source_id
-            / "latest.json"
-        )
+        latest = self.f.root / "runs" / self.f.source.source_id / "latest.json"
 
         self.assertEqual(
             json.loads(latest.read_text())["outcome"],
@@ -271,9 +233,7 @@ class WorkflowTests(unittest.TestCase):
         )
 
         self.load.side_effect = None
-        self.assertEqual(
-            self.run_source()["outcome"], "succeeded"
-        )
+        self.assertEqual(self.run_source()["outcome"], "succeeded")
 
 
 @unittest.skipUnless(
@@ -285,9 +245,7 @@ class IntegratedWorkflowTests(unittest.TestCase):
         name = os.environ["ELECTION_TEST_DATABASE"]
 
         if not name.endswith("_test"):
-            raise ValueError(
-                "Integration requires a disposable *_test database"
-            )
+            raise ValueError("Integration requires a disposable *_test database")
 
         db = {
             **database.connection_settings(),
@@ -299,6 +257,7 @@ class IntegratedWorkflowTests(unittest.TestCase):
             for relation, filename in [
                 ("ops.sources", "001_initial.sql"),
                 ("serving.publications", "002_publication.sql"),
+                ("ky.results", "003_state_schemas.sql"),
             ]:
                 exists = conn.execute(
                     "SELECT to_regclass(%s) AS t",
@@ -306,9 +265,7 @@ class IntegratedWorkflowTests(unittest.TestCase):
                 ).fetchone()["t"]
 
                 if exists is None:
-                    conn.execute(
-                        (root / "migrations" / filename).read_text()
-                    )
+                    conn.execute((root / "migrations" / filename).read_text())
 
             conn.execute("TRUNCATE ops.sources CASCADE")
 
@@ -316,12 +273,8 @@ class IntegratedWorkflowTests(unittest.TestCase):
         f.setUp()
         self.addCleanup(f.doCleanups)
 
-        server = ThreadingHTTPServer(
-            ("127.0.0.1", 0), Handler
-        )
-        thread = threading.Thread(
-            target=server.serve_forever, daemon=True
-        )
+        server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
 
         self.addCleanup(thread.join)
@@ -331,10 +284,7 @@ class IntegratedWorkflowTests(unittest.TestCase):
         f.source = replace(
             f.source,
             source_id="workflow_" + uuid.uuid4().hex,
-            url=(
-                f"http://127.0.0.1:{server.server_port}"
-                "/results.zip"
-            ),
+            url=(f"http://127.0.0.1:{server.server_port}/results.zip"),
         )
 
         Handler.responses = []
@@ -364,15 +314,15 @@ class IntegratedWorkflowTests(unittest.TestCase):
                 ).fetchone()
                 return str(row["publication_id"])
 
-        Handler.responses = [{
-            "body": f.archive().read_bytes(),
-            "headers": {"ETag": '"v1"'},
-        }]
+        Handler.responses = [
+            {
+                "body": f.archive().read_bytes(),
+                "headers": {"ETag": '"v1"'},
+            }
+        ]
 
         first = run()
-        self.assertEqual(
-            first["outcome"], "succeeded", first
-        )
+        self.assertEqual(first["outcome"], "succeeded", first)
 
         Handler.responses = [{"status": 304}]
 
@@ -382,9 +332,7 @@ class IntegratedWorkflowTests(unittest.TestCase):
             wraps=publication.build_candidate,
         ) as build:
             repeat = run()
-            self.assertEqual(
-                repeat["outcome"], "already_current", repeat
-            )
+            self.assertEqual(repeat["outcome"], "already_current", repeat)
             build.assert_not_called()
 
         self.assertEqual(
@@ -395,10 +343,12 @@ class IntegratedWorkflowTests(unittest.TestCase):
         rows = [row.copy() for row in f.rows]
         rows[0][9], rows[0][13] = "1", "9"
 
-        Handler.responses = [{
-            "body": f.archive(rows).read_bytes(),
-            "headers": {"ETag": '"v2"'},
-        }]
+        Handler.responses = [
+            {
+                "body": f.archive(rows).read_bytes(),
+                "headers": {"ETag": '"v2"'},
+            }
+        ]
 
         with patch.object(
             publication,
@@ -407,16 +357,12 @@ class IntegratedWorkflowTests(unittest.TestCase):
         ):
             self.assertEqual(run()["outcome"], "failed")
 
-        self.assertEqual(
-            current(), first["publication_id"]
-        )
+        self.assertEqual(current(), first["publication_id"])
 
         Handler.responses = [{"status": 304}]
         corrected = run()
 
-        self.assertEqual(
-            corrected["outcome"], "succeeded", corrected
-        )
+        self.assertEqual(corrected["outcome"], "succeeded", corrected)
         self.assertNotEqual(
             corrected["publication_id"],
             first["publication_id"],
@@ -457,19 +403,14 @@ class IntegratedWorkflowTests(unittest.TestCase):
             ).fetchall()
 
             self.assertEqual(
-                {
-                    str(row["publication_id"]): row["n"]
-                    for row in totals
-                },
+                {str(row["publication_id"]): row["n"] for row in totals},
                 {
                     first["publication_id"]: 100,
                     corrected["publication_id"]: 99,
                 },
             )
 
-            count = conn.execute(
-                "SELECT count(*) AS n FROM landing.nc_results"
-            ).fetchone()["n"]
+            count = conn.execute("SELECT count(*) AS n FROM landing.nc_results").fetchone()["n"]
 
             self.assertEqual(count, 20)
 
@@ -501,21 +442,15 @@ class IntegratedWorkflowTests(unittest.TestCase):
                 replay_sha256=first["raw_sha256"],
             )
 
-        self.assertEqual(
-            replay["outcome"], "replayed_not_published", replay
-        )
+        self.assertEqual(replay["outcome"], "replayed_not_published", replay)
         self.assertEqual(len(Handler.requests), requests)
-        self.assertEqual(
-            current(), corrected["publication_id"]
-        )
+        self.assertEqual(current(), corrected["publication_id"])
 
         original_publish = publication.publish
 
         def lose_acknowledgement(*args, **kwargs):
             original_publish(*args, **kwargs)
-            raise OSError(
-                "injected lost acknowledgement after commit"
-            )
+            raise OSError("injected lost acknowledgement after commit")
 
         Handler.responses = [{"status": 304}]
 
@@ -530,23 +465,15 @@ class IntegratedWorkflowTests(unittest.TestCase):
             )
 
         committed = current()
-        self.assertNotEqual(
-            committed, corrected["publication_id"]
-        )
+        self.assertNotEqual(committed, corrected["publication_id"])
 
         Handler.responses = [{"status": 304}]
 
-        with patch.object(
-            publication, "build_candidate"
-        ) as build:
+        with patch.object(publication, "build_candidate") as build:
             resumed = run(status="unofficial")
 
-        self.assertEqual(
-            resumed["outcome"], "already_current", resumed
-        )
-        self.assertEqual(
-            resumed["publication_id"], committed
-        )
+        self.assertEqual(resumed["outcome"], "already_current", resumed)
+        self.assertEqual(resumed["publication_id"], committed)
         build.assert_not_called()
 
         requests = len(Handler.requests)
@@ -571,7 +498,5 @@ class IntegratedWorkflowTests(unittest.TestCase):
             "succeeded",
             complete_replay,
         )
-        self.assertEqual(
-            current(), corrected["publication_id"]
-        )
+        self.assertEqual(current(), corrected["publication_id"])
         self.assertEqual(len(Handler.requests), requests)

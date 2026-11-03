@@ -73,9 +73,7 @@ def pack_bundle(bundle, deployed_tag):
     paths = ["manifest.json", *sorted(manifest["files"])]
     archive = bundle / "bundle.zip"
 
-    with zipfile.ZipFile(
-        archive, "w", zipfile.ZIP_DEFLATED, compresslevel=1
-    ) as zipped:
+    with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED, compresslevel=1) as zipped:
         for name in paths:
             zipped.write(safe_child(bundle, name), arcname=name)
 
@@ -85,17 +83,12 @@ def pack_bundle(bundle, deployed_tag):
         "created_at": utc_now(),
         "sha256": file_hash(archive),
         "bytes": archive.stat().st_size,
-        "expanded_bytes": sum(
-            (bundle / name).stat().st_size for name in paths
-        ),
+        "expanded_bytes": sum((bundle / name).stat().st_size for name in paths),
     }
 
 
 def upload_bundle(config, bundle, archive, receipt):
-    location = (
-        f"s3://{config['BACKUP_BUCKET']}/"
-        f"{config['BACKUP_PREFIX']}/rolling/{bundle.name}/"
-    )
+    location = f"s3://{config['BACKUP_BUCKET']}/{config['BACKUP_PREFIX']}/rolling/{bundle.name}/"
     receipt_path = bundle / "upload.json"
     atomic_json(receipt_path, receipt)
 
@@ -110,15 +103,11 @@ def unpack_bundle(archive, destination, receipt):
     if (
         receipt.get("schema_version") != 1
         or not re.fullmatch(ID_PATTERN, receipt.get("backup_id", ""))
-        or not re.fullmatch(
-            r"[0-9a-f]{64}", receipt.get("sha256", "")
-        )
+        or not re.fullmatch(r"[0-9a-f]{64}", receipt.get("sha256", ""))
         or archive.stat().st_size != receipt.get("bytes")
         or file_hash(archive) != receipt["sha256"]
     ):
-        raise ValueError(
-            "Downloaded archive does not match its completion record"
-        )
+        raise ValueError("Downloaded archive does not match its completion record")
 
     destination.mkdir()
 
@@ -126,37 +115,27 @@ def unpack_bundle(archive, destination, receipt):
         members = zipped.infolist()
         names = [member.filename for member in members]
 
-        if (
-            len(names) != len(set(names))
-            or sum(member.file_size for member in members)
-            != receipt.get("expanded_bytes")
-        ):
-            raise ValueError(
-                "Unexpected archive entries or expanded size"
-            )
+        if len(names) != len(set(names)) or sum(
+            member.file_size for member in members
+        ) != receipt.get("expanded_bytes"):
+            raise ValueError("Unexpected archive entries or expanded size")
 
         for member in members:
             target = safe_child(destination, member.filename)
             if member.is_dir() or stat.S_ISLNK(member.external_attr >> 16):
-                raise ValueError(
-                    "Backup archive must contain regular files"
-                )
+                raise ValueError("Backup archive must contain regular files")
             target.parent.mkdir(parents=True, exist_ok=True)
             with zipped.open(member) as source, target.open("xb") as output:
                 shutil.copyfileobj(source, output)
 
     manifest = verify_bundle(destination)
     if set(names) != set(manifest["files"]) | {"manifest.json"}:
-        raise ValueError(
-            "Archive files do not match the verified manifest"
-        )
+        raise ValueError("Archive files do not match the verified manifest")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "action", choices=("backup", "check-restore")
-    )
+    parser.add_argument("action", choices=("backup", "check-restore"))
     parser.add_argument("--backup-id")
     parser.add_argument(
         "--env-file",
@@ -175,28 +154,17 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.action == "check-restore" and not re.fullmatch(
-        ID_PATTERN, args.backup_id or ""
-    ):
-        parser.error(
-            "check-restore requires --backup-id "
-            "backup_<32 hexadecimal characters>"
-        )
+    if args.action == "check-restore" and not re.fullmatch(ID_PATTERN, args.backup_id or ""):
+        parser.error("check-restore requires --backup-id backup_<32 hexadecimal characters>")
 
     os.umask(0o077)
     prod = dict(dotenv_values(args.env_file, interpolate=False))
-    config = dict(
-        dotenv_values(args.backup_env_file, interpolate=False)
-    )
+    config = dict(dotenv_values(args.backup_env_file, interpolate=False))
     config.setdefault("AWS_PROFILE", "election-backup")
     config.setdefault("AWS_DEFAULT_REGION", "us-east-2")
     config.setdefault("BACKUP_PREFIX", "election-pipeline")
 
-    secrets = [
-        value
-        for name, value in prod.items()
-        if "PASSWORD" in name and value
-    ]
+    secrets = [value for name, value in prod.items() if "PASSWORD" in name and value]
     if config.get("BACKUP_BUCKET"):
         secrets.append(config["BACKUP_BUCKET"])
 
@@ -208,10 +176,7 @@ def main():
             r"[A-Za-z0-9][A-Za-z0-9/_-]*",
             config["BACKUP_PREFIX"],
         ):
-            raise ValueError(
-                "Set BACKUP_BUCKET and a valid BACKUP_PREFIX "
-                "in backup.env"
-            )
+            raise ValueError("Set BACKUP_BUCKET and a valid BACKUP_PREFIX in backup.env")
 
         db = {
             "host": prod.get("POSTGRES_HOST", "127.0.0.1"),
@@ -227,9 +192,7 @@ def main():
             "--file",
             str(ROOT / "compose.production.yml"),
         )
-        args.destination.mkdir(
-            parents=True, exist_ok=True, mode=0o700
-        )
+        args.destination.mkdir(parents=True, exist_ok=True, mode=0o700)
         data = Path(prod["DATA_DIR"])
 
         if args.action == "backup":
@@ -244,9 +207,7 @@ def main():
             )
             bundle = Path(result["backup_dir"])
             result["backup_id"] = bundle.name
-            archive, receipt = pack_bundle(
-                bundle, prod["IMAGE_TAG"]
-            )
+            archive, receipt = pack_bundle(bundle, prod["IMAGE_TAG"])
             upload_bundle(config, bundle, archive, receipt)
             result = {
                 "outcome": "uploaded",
@@ -255,11 +216,7 @@ def main():
             }
 
         else:
-            work = Path(
-                tempfile.mkdtemp(
-                    prefix="restore-", dir=args.destination
-                )
-            )
+            work = Path(tempfile.mkdtemp(prefix="restore-", dir=args.destination))
             location = (
                 f"s3://{config['BACKUP_BUCKET']}/"
                 f"{config['BACKUP_PREFIX']}/rolling/"
@@ -270,20 +227,12 @@ def main():
                 location + "complete.json",
                 work / "complete.json",
             )
-            receipt = json.loads(
-                (work / "complete.json").read_text()
-            )
+            receipt = json.loads((work / "complete.json").read_text())
             if receipt.get("backup_id") != args.backup_id:
-                raise ValueError(
-                    "Downloaded completion record has the wrong backup ID"
-                )
+                raise ValueError("Downloaded completion record has the wrong backup ID")
 
-            aws_copy(
-                config, location + "bundle.zip", work / "bundle.zip"
-            )
-            unpack_bundle(
-                work / "bundle.zip", work / "bundle", receipt
-            )
+            aws_copy(config, location + "bundle.zip", work / "bundle.zip")
+            unpack_bundle(work / "bundle.zip", work / "bundle", receipt)
 
             result = check_restore(
                 ROOT,
@@ -300,9 +249,7 @@ def main():
     except Exception as error:
         result.update(outcome="failed", error=str(error))
 
-    result["duration_seconds"] = round(
-        time.monotonic() - started, 3
-    )
+    result["duration_seconds"] = round(time.monotonic() - started, 3)
     result["finished_at"] = utc_now()
 
     text = json.dumps(result, indent=2)

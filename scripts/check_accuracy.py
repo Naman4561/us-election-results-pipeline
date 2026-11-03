@@ -14,12 +14,8 @@ def main():
     root = Path(__file__).resolve().parents[1]
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--env-file", type=Path, default=root / ".env"
-    )
-    parser.add_argument(
-        "--publication-id", type=uuid.UUID, required=True
-    )
+    parser.add_argument("--env-file", type=Path, default=root / ".env")
+    parser.add_argument("--publication-id", type=uuid.UUID, required=True)
     parser.add_argument("--reference", type=Path, required=True)
     parser.add_argument("--reference-url", required=True)
     parser.add_argument(
@@ -27,9 +23,7 @@ def main():
         required=True,
         help="ISO timestamp with time-zone offset",
     )
-    parser.add_argument(
-        "--same-reporting-cutoff", action="store_true"
-    )
+    parser.add_argument("--same-reporting-cutoff", action="store_true")
     parser.add_argument(
         "--evidence-dir",
         type=Path,

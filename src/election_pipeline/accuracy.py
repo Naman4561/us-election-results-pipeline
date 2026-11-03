@@ -9,9 +9,11 @@ from pathlib import Path
 from types import SimpleNamespace
 from urllib.parse import urlsplit
 
+from psycopg import sql
+
 from election_pipeline.database import connect
-from election_pipeline.parsers.nc import COVERAGE
 from election_pipeline.parsing import reference_check
+from election_pipeline.states import state_adapter
 from election_pipeline.storage import atomic_json, file_hash, utc_now
 
 
@@ -28,20 +30,13 @@ def compare_publication(
     """Require agreement for every choice in all five covered races."""
     url = urlsplit(reference_url)
 
-    if (
-        url.scheme != "https"
-        or not url.netloc
-        or url.username
-        or url.password
-    ):
+    if url.scheme != "https" or not url.netloc or url.username or url.password:
         raise ValueError("Supply the HTTPS URL of the official reference")
 
     timestamp = datetime.fromisoformat(observed_at.replace("Z", "+00:00"))
 
     if timestamp.utcoffset() is None:
-        raise ValueError(
-            "Reference observed_at must include its time-zone offset"
-        )
+        raise ValueError("Reference observed_at must include its time-zone offset")
 
     publication_id = uuid.UUID(str(publication_id))
     directory = Path(evidence_dir) / uuid.uuid4().hex
@@ -51,9 +46,7 @@ def compare_publication(
     shutil.copyfile(reference, captured)
 
     with connect(db) as conn, conn.transaction():
-        conn.execute(
-            "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY"
-        )
+        conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
 
         metadata = conn.execute(
             """
@@ -64,32 +57,26 @@ def compare_publication(
             (publication_id,),
         ).fetchone()
 
-        if (
-            not metadata
-            or metadata["dataset"] != "election_results"
-            or metadata["state"] != "NC"
-        ):
-            raise ValueError("Choose an NC results publication")
+        if not metadata or metadata["dataset"] != "election_results":
+            raise ValueError("Choose a results publication")
 
+        adapter = state_adapter(metadata["state"])
         rows = conn.execute(
-            """
-            SELECT contest_id, choice, choice_party, total_votes
-            FROM serving.nc_contest_candidate_results
-            WHERE publication_id = %s
-            """,
+            sql.SQL(
+                "SELECT contest_id, choice, choice_party, total_votes FROM {} "
+                "WHERE publication_id=%s"
+            ).format(sql.Identifier(adapter.schema, "contest_candidate_results")),
             (publication_id,),
         ).fetchall()
 
-    if {row["contest_id"] for row in rows} != set(COVERAGE.values()):
-        raise ValueError(
-            "Publication does not contain the complete five-race watchlist"
-        )
+    if {row["contest_id"] for row in rows} != set(adapter.races):
+        raise ValueError("Publication does not contain the complete state watchlist")
 
     date = str(metadata["election_date"])
     totals = {
         (
             date,
-            "NC",
+            metadata["state"],
             row["contest_id"],
             row["choice"],
             row["choice_party"],
@@ -129,9 +116,7 @@ def compare_publication(
         "same_reporting_cutoff_attested": same_reporting_cutoff,
         "all_counts_zero": all_zero,
         "comparison": result,
-        "official_origin": (
-            "supplied by operator; URL ownership not verified by this command"
-        ),
+        "official_origin": ("supplied by operator; URL ownership not verified by this command"),
         "report_path": str(directory / "report.json"),
     }
 

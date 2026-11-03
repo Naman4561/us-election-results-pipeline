@@ -27,9 +27,7 @@ def main():
     args, extra = parser.parse_known_args()
 
     if not re.fullmatch(r"[a-z][a-z0-9_]{0,39}", args.schema):
-        parser.error(
-            "Schema must be a lowercase identifier of at most 40 characters"
-        )
+        parser.error("Schema must be a lowercase identifier of at most 40 characters")
 
     db = connection_settings(args.env_file)
 

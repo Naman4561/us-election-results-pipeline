@@ -100,9 +100,7 @@ class MonitorTests(unittest.TestCase):
         self.assertNotIn("pipeline/nc_test", self.assess())
 
     def test_slow_source_poll_interval_does_not_relax_run_monitoring(self):
-        self.sources["nc_test"] = replace(
-            self.sources["nc_test"], min_interval_seconds=86400
-        )
+        self.sources["nc_test"] = replace(self.sources["nc_test"], min_interval_seconds=86400)
         atomic_json(
             self.root / "data/runs/nc_test/latest.json",
             {
@@ -132,8 +130,7 @@ class MonitorTests(unittest.TestCase):
             free=5,
         )
         self.assertTrue(
-            {"backup", "dashboard", "timer/election-backup.timer", "disk//"}
-            <= set(issues)
+            {"backup", "dashboard", "timer/election-backup.timer", "disk//"} <= set(issues)
         )
 
     def test_alert_deduplication_reminder_and_recovery(self):
@@ -201,9 +198,7 @@ class MonitorTests(unittest.TestCase):
 
     def test_failed_notification_is_not_saved_as_sent_and_no_heartbeat_is_emitted(self):
         code, _, heartbeat, output = self.invoke(
-            publishing_error=RuntimeError(
-                "private-password arn:private-test-topic denied"
-            )
+            publishing_error=RuntimeError("private-password arn:private-test-topic denied")
         )
         self.assertEqual(code, 1)
         heartbeat.assert_not_called()

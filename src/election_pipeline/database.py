@@ -19,26 +19,11 @@ from psycopg import sql
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
-from election_pipeline.parsers.nc import DEMO_FIELDS, RESULT_FIELDS, VOTES
 from election_pipeline.pipeline import collector_code_hash
+from election_pipeline.states import state_adapter
 from election_pipeline.storage import ArchiveStore, atomic_json, file_hash, utc_now
 
 LOAD_CONTRACT_VERSION = 1
-
-TARGETS = {
-    "election_results": (
-        "nc_results",
-        "precinct_results.csv",
-        RESULT_FIELDS,
-        ("precinct_results.csv", "county_results.csv", "contest_results.csv"),
-    ),
-    "absentee_early_demographics": (
-        "nc_absentee_demographics",
-        "county_demographics.csv",
-        DEMO_FIELDS,
-        ("county_demographics.csv", "state_demographics.csv"),
-    ),
-}
 
 
 def connection_settings(env_file=Path(".env")):
@@ -57,9 +42,7 @@ def connection_settings(env_file=Path(".env")):
     }
 
     if not all(required.values()):
-        raise ValueError(
-            "Set POSTGRES_DB, POSTGRES_USER, and POSTGRES_PASSWORD in .env"
-        )
+        raise ValueError("Set POSTGRES_DB, POSTGRES_USER, and POSTGRES_PASSWORD in .env")
 
     return {
         **required,
@@ -74,11 +57,7 @@ def connect(settings):
         **settings,
         autocommit=True,
         row_factory=dict_row,
-        options=(
-            "-c timezone=UTC "
-            "-c lock_timeout=15000 "
-            "-c statement_timeout=120000"
-        ),
+        options=("-c timezone=UTC -c lock_timeout=15000 -c statement_timeout=120000"),
     )
 
 
@@ -109,22 +88,17 @@ def timestamp(value):
 
 
 def verify(source, settings, store, directory):
-    report = json.loads(
-        (directory / "report.json").read_text(encoding="utf-8")
-    )
+    report = json.loads((directory / "report.json").read_text(encoding="utf-8"))
 
     if not isinstance(report, dict):
         raise ValueError("Parser report must be a JSON object")
 
-    if source.state != "NC" or source.dataset not in TARGETS:
-        raise ValueError("No database target for this state/dataset")
-
-    expected_format = "zip" if source.dataset == "election_results" else "csv"
-
-    if source.format != expected_format:
+    adapter = state_adapter(source.state)
+    contract = adapter.contract(source.dataset)
+    if source.format != contract.format:
         raise ValueError("Unsupported source format for this dataset")
-
-    table, filename, fields, files = TARGETS[source.dataset]
+    table = adapter.schema + "_" + contract.table
+    filename, fields, files = contract.filename, contract.fields, contract.files
 
     expected = {
         "source_id": source.source_id,
@@ -137,9 +111,7 @@ def verify(source, settings, store, directory):
     }
 
     if any(report.get(key) != value for key, value in expected.items()):
-        raise ValueError(
-            "Parser report identity, contract, or validation status does not match"
-        )
+        raise ValueError("Parser report identity, contract, or validation status does not match")
 
     comparison = report.get("reference_comparison")
 
@@ -148,9 +120,7 @@ def verify(source, settings, store, directory):
 
     status = comparison.get("status")
     allowed = (
-        {"matched", "not_provided"}
-        if table == "nc_results"
-        else {"not_applicable"}
+        {"matched", "not_provided"} if source.dataset == "election_results" else {"not_applicable"}
     )
 
     if status not in allowed:
@@ -178,10 +148,7 @@ def verify(source, settings, store, directory):
 
     raw = store.archive_path(identity["raw_sha256"])
 
-    if (
-        report["raw_archive"] != store.relative(raw)
-        or file_hash(raw) != identity["raw_sha256"]
-    ):
+    if report["raw_archive"] != store.relative(raw) or file_hash(raw) != identity["raw_sha256"]:
         raise ValueError("Raw archive path or SHA-256 mismatch")
 
     hashes = report["output_sha256"]
@@ -202,9 +169,7 @@ def verify(source, settings, store, directory):
     ):
         raise ValueError("Invalid expected row count")
 
-    fingerprint = hashlib.sha256(
-        json.dumps(identity, sort_keys=True).encode()
-    ).hexdigest()
+    fingerprint = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
 
     return report, raw, fingerprint, table, filename, fields
 
@@ -231,9 +196,7 @@ def register_source(conn, source):
     ).fetchone()
 
     if row is None:
-        raise ValueError(
-            "A source ID cannot change its state, election, dataset, or format"
-        )
+        raise ValueError("A source ID cannot change its state, election, dataset, or format")
 
 
 def register_snapshot(conn, store, sha):
@@ -339,51 +302,10 @@ def converted_rows(path, fields, source, release, expected_rows):
             if None in row or any(value is None for value in row.values()):
                 raise ValueError("Malformed detailed CSV record")
 
-            if (
-                row["state"] != source.state
-                or row["election_date"] != source.election_date
-            ):
+            if row["state"] != source.state or row["election_date"] != source.election_date:
                 raise ValueError("Detailed CSV election/state mismatch")
 
-            prefix = (
-                release,
-                number(row["source_line"]),
-                row["county"],
-            )
-
-            if source.dataset == "election_results":
-                if row["real_precinct"] not in {"Y", "N"}:
-                    raise ValueError("Invalid real-precinct flag")
-
-                yield (
-                    *prefix,
-                    row["precinct"],
-                    row["contest_id"],
-                    row["contest_name"],
-                    row["source_contest_group_id"],
-                    row["contest_type"],
-                    row["choice"],
-                    row["choice_party"] or None,
-                    number(row["vote_for"]),
-                    row["real_precinct"] == "Y",
-                    *(number(row[name]) for name in VOTES),
-                )
-
-            else:
-                yield (
-                    *prefix,
-                    row["request_type"],
-                    *(
-                        row[name] or None
-                        for name in (
-                            "party_registration",
-                            "sex",
-                            "race",
-                            "ethnicity",
-                        )
-                    ),
-                    number(row["ballot_count"]),
-                )
+            yield state_adapter(source.state).parser.database_row(row, source, release)
 
 
 def load_parsed(source, settings, data_dir, parsed_dir, db):
@@ -424,9 +346,7 @@ def load_parsed(source, settings, data_dir, parsed_dir, db):
             register_source(conn, source)
             fetches = import_fetches(conn, store)
 
-            snapshot = register_snapshot(
-                conn, store, report["identity"]["raw_sha256"]
-            )
+            snapshot = register_snapshot(conn, store, report["identity"]["raw_sha256"])
 
             conn.execute(
                 """
@@ -460,13 +380,10 @@ def load_parsed(source, settings, data_dir, parsed_dir, db):
             release = record["release_id"]
 
             if (
-                record["parser_report"]["output_sha256"]
-                != report["output_sha256"]
+                record["parser_report"]["output_sha256"] != report["output_sha256"]
                 or record["expected_rows"] != report["output_rows"]
             ):
-                raise ValueError(
-                    "Same release identity produced different output; investigate"
-                )
+                raise ValueError("Same release identity produced different output; investigate")
 
         conn.execute(
             """
@@ -488,57 +405,51 @@ def load_parsed(source, settings, data_dir, parsed_dir, db):
                 (release,),
             ).fetchone()
 
-            target = sql.Identifier("landing", table)
-
-            count_sql = sql.SQL(
-                "SELECT count(*) AS n FROM {} WHERE release_id=%s"
-            ).format(target)
-
-            count = conn.execute(count_sql, (release,)).fetchone()["n"]
+            adapter = state_adapter(source.state)
+            contract = adapter.contract(source.dataset)
             skipped = record["loaded_at"] is not None
-
-            if skipped:
-                if count != report["output_rows"]:
-                    raise ValueError(
-                        "Previously loaded release has an unexpected database row count"
-                    )
-
-            else:
-                if count:
-                    raise ValueError("Unfinished release already contains rows")
-
-                columns = ["release_id", "source_line"] + [
-                    name
-                    for name in fields
-                    if name not in {"source_line", "election_date", "state"}
-                ]
-
-                copy_sql = sql.SQL("COPY {} ({}) FROM STDIN").format(
-                    target,
-                    sql.SQL(",").join(map(sql.Identifier, columns)),
+            rows_to_load = [(contract.table, filename, fields, report["output_rows"])]
+            for relation, artifact, columns, count_key in contract.auxiliary:
+                expected_count = report.get(count_key)
+                if (
+                    type(expected_count) is not int
+                    or not 0 < expected_count <= settings.max_csv_rows
+                ):
+                    raise ValueError("Invalid auxiliary row count")
+                rows_to_load.append((relation, artifact, columns, expected_count))
+            for relation, artifact, columns, expected_count in rows_to_load:
+                target = sql.Identifier(adapter.schema, relation)
+                count_sql = sql.SQL("SELECT count(*) AS n FROM {} WHERE release_id=%s").format(
+                    target
                 )
-
-                with conn.cursor().copy(copy_sql) as copy:
-                    for row in converted_rows(
-                        directory / filename,
-                        fields,
-                        source,
-                        release,
-                        report["output_rows"],
-                    ):
-                        copy.write_row(row)
-
                 count = conn.execute(count_sql, (release,)).fetchone()["n"]
-
-                if count != report["output_rows"]:
-                    raise ValueError("Loaded row count does not match parser report")
-
+                if skipped:
+                    if count != expected_count:
+                        raise ValueError(
+                            "Previously loaded release has an unexpected database row count"
+                        )
+                else:
+                    if count:
+                        raise ValueError("Unfinished release already contains rows")
+                    copied = ["release_id", "source_line"] + [
+                        k for k in columns if k not in {"source_line", "state", "election_date"}
+                    ]
+                    copy_sql = sql.SQL("COPY {} ({}) FROM STDIN").format(
+                        target, sql.SQL(",").join(map(sql.Identifier, copied))
+                    )
+                    with conn.cursor().copy(copy_sql) as copy:
+                        for row in converted_rows(
+                            directory / artifact, columns, source, release, expected_count
+                        ):
+                            copy.write_row(row)
+                    count = conn.execute(count_sql, (release,)).fetchone()["n"]
+                    if count != expected_count:
+                        raise ValueError("Loaded row count does not match parser report")
+            count = report["output_rows"]
+            if not skipped:
                 conn.execute(
-                    """
-                    UPDATE ops.processing_releases
-                    SET loaded_rows=%s, loaded_at=clock_timestamp()
-                    WHERE release_id=%s
-                    """,
+                    "UPDATE ops.processing_releases SET loaded_rows=%s,loaded_at=clock_timestamp() "
+                    "WHERE release_id=%s",
                     (count, release),
                 )
 
@@ -602,21 +513,13 @@ def load_parsed(source, settings, data_dir, parsed_dir, db):
             except psycopg.Error:
                 pass
 
-        path = (
-            store.root
-            / "reports"
-            / "loading"
-            / source.source_id
-            / f"{attempt.hex}.json"
-        )
+        path = store.root / "reports" / "loading" / source.source_id / f"{attempt.hex}.json"
 
         atomic_json(
             path,
             {
                 **result,
-                "traceback": traceback.format_exc().replace(
-                    secret, "[redacted]"
-                ),
+                "traceback": traceback.format_exc().replace(secret, "[redacted]"),
             },
         )
 

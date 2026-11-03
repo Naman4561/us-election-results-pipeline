@@ -1,3 +1,4 @@
+{{ config(tags=['state_nc']) }}
 with results as (
     select
         release_id,

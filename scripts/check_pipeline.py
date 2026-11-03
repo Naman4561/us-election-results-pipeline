@@ -15,11 +15,7 @@ def main():
     root = Path(__file__).resolve().parents[1]
     db = connection_settings(root / ".env")
 
-    name = (
-        "election_acceptance_"
-        + uuid.uuid4().hex[:16]
-        + "_test"
-    )
+    name = "election_acceptance_" + uuid.uuid4().hex[:16] + "_test"
 
     created = False
     code = 1
@@ -27,9 +23,7 @@ def main():
     try:
         with connect({**db, "dbname": "postgres"}) as conn:
             conn.execute(
-                sql.SQL(
-                    "CREATE DATABASE {} TEMPLATE template0"
-                ).format(sql.Identifier(name))
+                sql.SQL("CREATE DATABASE {} TEMPLATE template0").format(sql.Identifier(name))
             )
             created = True
 
@@ -64,22 +58,14 @@ def main():
     finally:
         if created:
             try:
-                with connect(
-                    {**db, "dbname": "postgres"}
-                ) as conn:
-                    conn.execute(
-                        sql.SQL("DROP DATABASE {}").format(
-                            sql.Identifier(name)
-                        )
-                    )
+                with connect({**db, "dbname": "postgres"}) as conn:
+                    conn.execute(sql.SQL("DROP DATABASE {}").format(sql.Identifier(name)))
 
             except Exception as error:
                 code = 1
                 print(
                     f"Temporary DB {name} needs cleanup: "
-                    + str(error).replace(
-                        db["password"], "[redacted]"
-                    ),
+                    + str(error).replace(db["password"], "[redacted]"),
                     file=sys.stderr,
                 )
 

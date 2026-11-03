@@ -41,36 +41,28 @@ class AccuracyTests(unittest.TestCase):
 
         self.conn = MagicMock()
         self.conn.__enter__.return_value = self.conn
-        self.conn.execute.return_value.fetchone.return_value = (
-            self.metadata
-        )
-        self.conn.execute.return_value.fetchall.side_effect = (
-            lambda: self.rows
-        )
+        self.conn.execute.return_value.fetchone.return_value = self.metadata
+        self.conn.execute.return_value.fetchall.side_effect = lambda: self.rows
 
-        self.enterContext(
-            patch.object(
-                accuracy, "connect", return_value=self.conn
-            )
-        )
+        self.enterContext(patch.object(accuracy, "connect", return_value=self.conn))
         self.write_reference()
 
     def write_reference(self, omit=False):
         with self.reference.open("w", newline="") as handle:
             writer = csv.writer(handle)
-            writer.writerow(
-                ("election_date", "contest_id", "choice", "total_votes")
-            )
+            writer.writerow(("election_date", "contest_id", "choice", "total_votes"))
 
             rows = self.rows[:-1] if omit else self.rows
 
             for row in rows:
-                writer.writerow((
-                    "2026-11-03",
-                    row["contest_id"],
-                    row["choice"],
-                    row["total_votes"],
-                ))
+                writer.writerow(
+                    (
+                        "2026-11-03",
+                        row["contest_id"],
+                        row["choice"],
+                        row["total_votes"],
+                    )
+                )
 
     def compare(self, **kwargs):
         return accuracy.compare_publication(
@@ -89,26 +81,20 @@ class AccuracyTests(unittest.TestCase):
 
         self.reference.write_text("changed after the check")
 
-        captured = (
-            Path(result["report_path"]).parent / "reference.csv"
-        )
+        captured = Path(result["report_path"]).parent / "reference.csv"
         self.assertEqual(
             accuracy.file_hash(captured),
             result["reference_sha256"],
         )
 
-        saved = json.loads(
-            Path(result["report_path"]).read_text()
-        )
+        saved = json.loads(Path(result["report_path"]).read_text())
         self.assertEqual(saved["release_id"], 8)
 
     def test_missing_choice_and_wrong_total_cannot_pass(self):
         self.write_reference(omit=True)
 
         self.assertEqual(
-            self.compare(
-                same_reporting_cutoff=True
-            )["outcome"],
+            self.compare(same_reporting_cutoff=True)["outcome"],
             "mismatch",
         )
 
@@ -116,9 +102,7 @@ class AccuracyTests(unittest.TestCase):
         self.rows[0]["total_votes"] = 19
 
         self.assertEqual(
-            self.compare(
-                same_reporting_cutoff=True
-            )["outcome"],
+            self.compare(same_reporting_cutoff=True)["outcome"],
             "mismatch",
         )
 
@@ -129,9 +113,7 @@ class AccuracyTests(unittest.TestCase):
         self.write_reference()
 
         self.assertEqual(
-            self.compare(
-                same_reporting_cutoff=True
-            )["outcome"],
+            self.compare(same_reporting_cutoff=True)["outcome"],
             "pre_reporting_only",
         )
 

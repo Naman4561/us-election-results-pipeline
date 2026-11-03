@@ -1,4 +1,3 @@
-
 """Check production reports, publish SNS alerts and a CloudWatch heartbeat."""
 
 import argparse
@@ -94,8 +93,7 @@ def assess(prod, config, now):
             issues[f"poll/{name}"] = "Collector state is missing or invalid"
 
     problem = report_problem(
-        Path(config.get("BACKUP_DIR", "/srv/election-pipeline/backups"))
-        / "latest-backup.json",
+        Path(config.get("BACKUP_DIR", "/srv/election-pipeline/backups")) / "latest-backup.json",
         {"uploaded"},
         int(config.get("MAX_BACKUP_AGE_SECONDS", "7200")),
         now,
@@ -115,7 +113,19 @@ def assess(prod, config, now):
         payload = dashboard_payload(
             config.get("DASHBOARD_URL", "http://127.0.0.1:8000/api/snapshot")
         )
-        if (
+        if "states" in payload:
+            if payload.get("mode") != "published":
+                issues["dashboard"] = "Dashboard is not serving published returns"
+            for name in names:
+                code = configured[name].state
+                state = payload["states"].get(code, {})
+                if state.get("availability") != "available" or not state.get("races"):
+                    issues[f"dashboard/{code}"] = "State dashboard results are unavailable"
+                elif config.get("REQUIRE_PUBLICATION", "true").lower() == "true" and not state.get(
+                    "publication"
+                ):
+                    issues[f"dashboard/{code}"] = "State dashboard has no approved publication"
+        elif (
             payload.get("mode") != "published"
             or not isinstance(payload.get("races"), dict)
             or not payload["races"]
@@ -165,9 +175,7 @@ def aws(config, *arguments):
         env={**os.environ, "AWS_MAX_ATTEMPTS": "2", "AWS_PAGER": ""},
     )
     if result.returncode:
-        raise RuntimeError(
-            "AWS notification/heartbeat request failed: " + result.stderr[-1500:]
-        )
+        raise RuntimeError("AWS notification/heartbeat request failed: " + result.stderr[-1500:])
 
 
 def publish(config, subject, body):
@@ -188,8 +196,7 @@ def notify_changes(config, issues, previous, now):
     old_issues = previous.get("issues", {})
     last_sent = previous.get("last_sent")
     reminder_due = issues and (
-        not last_sent
-        or age_seconds(last_sent, now) >= int(config.get("REMINDER_SECONDS", "1800"))
+        not last_sent or age_seconds(last_sent, now) >= int(config.get("REMINDER_SECONDS", "1800"))
     )
 
     if issues == old_issues and not reminder_due:

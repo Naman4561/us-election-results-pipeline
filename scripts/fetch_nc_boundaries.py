@@ -117,7 +117,8 @@ def main():
     temporary.write_text(json.dumps(result, separators=(",", ":")), encoding="utf-8")
     temporary.replace(OUTPUT)
     print(
-        f"Validated 100 counties and 14 districts; wrote {OUTPUT.name} ({OUTPUT.stat().st_size:,} bytes)"
+        f"Validated 100 counties and 14 districts; wrote {OUTPUT.name} "
+        f"({OUTPUT.stat().st_size:,} bytes)"
     )
 
 

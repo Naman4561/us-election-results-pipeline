@@ -70,6 +70,7 @@ services:
       POSTGRES_PASSWORD: ${PIPELINE_DB_PASSWORD}
       PIPELINE_SOURCES: ${PIPELINE_SOURCES:-nc_2026_general}
       PIPELINE_STATUS: ${PIPELINE_STATUS:-test}
+      PIPELINE_WORKERS: ${PIPELINE_WORKERS:-2}
     command: ["python", "scripts/run_production.py"]
     volumes:
       - type: bind

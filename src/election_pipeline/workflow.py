@@ -124,9 +124,7 @@ def run_source(
                         return report
 
                     else:
-                        raise ValueError(
-                            f"Collection stopped: {outcome}; inspect fetch metadata"
-                        )
+                        raise ValueError(f"Collection stopped: {outcome}; inspect fetch metadata")
 
                 report["raw_sha256"] = digest
 
@@ -142,17 +140,13 @@ def run_source(
                 )
 
                 if parsed["outcome"] not in ("parsed", "already_parsed"):
-                    raise ValueError(
-                        f"Parsing failed: {parsed.get('error', parsed['outcome'])}"
-                    )
+                    raise ValueError(f"Parsing failed: {parsed.get('error', parsed['outcome'])}")
 
                 if parsed.get("internal_reconciliation") != "passed":
                     raise ValueError("Parser reconciliation did not pass")
 
                 if parsed.get("reference_comparison", {}).get("status") == "mismatch":
-                    raise ValueError(
-                        "Independent reference mismatch; load/publication blocked"
-                    )
+                    raise ValueError("Independent reference mismatch; load/publication blocked")
 
                 # Capture the raw snapshot before requiring database availability.
                 def load():
@@ -176,9 +170,7 @@ def run_source(
                 loaded = stage("load", load)
 
                 if loaded["outcome"] not in ("succeeded", "skipped"):
-                    raise ValueError(
-                        f"Load failed: {loaded.get('error', loaded['outcome'])}"
-                    )
+                    raise ValueError(f"Load failed: {loaded.get('error', loaded['outcome'])}")
 
                 report["release_id"] = loaded["release_id"]
 
@@ -201,9 +193,7 @@ def run_source(
 
                 report["publication_id"] = published["publication_id"]
                 report["outcome"] = (
-                    "already_current"
-                    if published["outcome"] == "already_current"
-                    else "succeeded"
+                    "already_current" if published["outcome"] == "already_current" else "succeeded"
                 )
 
             except KeyboardInterrupt:
@@ -213,16 +203,12 @@ def run_source(
             except Exception as error:
                 report["outcome"] = "failed"
                 report["error"] = (
-                    str(error).replace(db["password"], "[redacted]")
-                    if db
-                    else str(error)
+                    str(error).replace(db["password"], "[redacted]") if db else str(error)
                 )
 
             finally:
                 report["finished_at"] = utc_now()
-                report["duration_seconds"] = round(
-                    time.monotonic() - started, 3
-                )
+                report["duration_seconds"] = round(time.monotonic() - started, 3)
                 save()
 
     except CollectionLocked:

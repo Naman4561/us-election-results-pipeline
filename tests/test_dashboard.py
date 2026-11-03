@@ -3,14 +3,14 @@
 import copy
 import json
 import unittest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 try:
     from fastapi.testclient import TestClient
+
     from election_pipeline.dashboard.server import (
-        STATIC,
         RACES,
+        STATIC,
         PublishedResults,
         create_app,
         demo_payload,

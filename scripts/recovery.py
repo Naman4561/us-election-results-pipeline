@@ -13,26 +13,18 @@ def main():
     root = Path(__file__).resolve().parents[1]
 
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--env-file", type=Path, default=root / ".env"
-    )
+    parser.add_argument("--env-file", type=Path, default=root / ".env")
     parser.add_argument(
         "--service",
         required=True,
         help="PostgreSQL service from docker compose config --services",
     )
 
-    commands = parser.add_subparsers(
-        dest="action", required=True
-    )
+    commands = parser.add_subparsers(dest="action", required=True)
 
     create = commands.add_parser("backup")
-    create.add_argument(
-        "--destination", type=Path, required=True
-    )
-    create.add_argument(
-        "--data-dir", type=Path, default=root / "data"
-    )
+    create.add_argument("--destination", type=Path, required=True)
+    create.add_argument("--data-dir", type=Path, default=root / "data")
     create.add_argument(
         "--config",
         type=Path,
@@ -40,9 +32,7 @@ def main():
     )
 
     restore = commands.add_parser("check-restore")
-    restore.add_argument(
-        "--backup-dir", type=Path, required=True
-    )
+    restore.add_argument("--backup-dir", type=Path, required=True)
 
     args = parser.parse_args()
     db = connection_settings(args.env_file)

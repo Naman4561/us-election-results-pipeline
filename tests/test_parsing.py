@@ -34,8 +34,21 @@ class ParsingTests(unittest.TestCase):
 
         self.rows = [
             [
-                "WAKE", "11/03/2026", precinct, "1383", "S", contest,
-                "Candidate A", "DEM", "1", "2", "3", "4", "1", "10", real,
+                "WAKE",
+                "11/03/2026",
+                precinct,
+                "1383",
+                "S",
+                contest,
+                "Candidate A",
+                "DEM",
+                "1",
+                "2",
+                "3",
+                "4",
+                "1",
+                "10",
+                real,
             ]
             for contest in COVERAGE
             for precinct, real in (("001", "Y"), ("ABSENTEE", "N"))
@@ -67,9 +80,7 @@ class ParsingTests(unittest.TestCase):
         return parse_source(self.source, self.settings, self.root, **kwargs)
 
     def read_output(self, result, name):
-        with (Path(result["output_dir"]) / name).open(
-            newline="", encoding="utf-8"
-        ) as handle:
+        with (Path(result["output_dir"]) / name).open(newline="", encoding="utf-8") as handle:
             return list(csv.DictReader(handle))
 
     def test_known_totals_and_administrative_units(self):
@@ -152,9 +163,7 @@ class ParsingTests(unittest.TestCase):
         def write_reference(value, omit=False):
             with reference.open("w", newline="", encoding="utf-8") as handle:
                 writer = csv.writer(handle)
-                writer.writerow(
-                    ("election_date", "contest_id", "choice", "total_votes")
-                )
+                writer.writerow(("election_date", "contest_id", "choice", "total_votes"))
 
                 contests = list(COVERAGE.values())[:-1] if omit else COVERAGE.values()
 
@@ -204,8 +213,13 @@ class ParsingTests(unittest.TestCase):
             expected_members=(),
             dataset="absentee_early_demographics",
             expected_columns=(
-                "county_name", "abs_request_type", "party_cd",
-                "gender", "race", "ethnicity", "0",
+                "county_name",
+                "abs_request_type",
+                "party_cd",
+                "gender",
+                "race",
+                "ethnicity",
+                "0",
             ),
         )
 
@@ -227,9 +241,7 @@ class ParsingTests(unittest.TestCase):
         self.assertEqual(totals[0]["ballot_count"], "10")
         self.assertIn("party_registration", totals[0])
 
-        self.assertFalse(
-            (Path(result["output_dir"]) / "contest_results.csv").exists()
-        )
+        self.assertFalse((Path(result["output_dir"]) / "contest_results.csv").exists())
 
     def test_cli_reference_mismatch_has_nonzero_exit_status(self):
         self.archive()
@@ -244,9 +256,12 @@ class ParsingTests(unittest.TestCase):
 
         arguments = [
             "parse",
-            "--source", "nc_test",
-            "--config", str(config),
-            "--data-dir", str(self.root),
+            "--source",
+            "nc_test",
+            "--config",
+            str(config),
+            "--data-dir",
+            str(self.root),
         ]
 
         with redirect_stdout(io.StringIO()):
@@ -256,9 +271,7 @@ class ParsingTests(unittest.TestCase):
 
         with reference.open("w", encoding="utf-8", newline="") as handle:
             writer = csv.writer(handle)
-            writer.writerow(
-                ("election_date", "contest_id", "choice", "total_votes")
-            )
+            writer.writerow(("election_date", "contest_id", "choice", "total_votes"))
 
             for contest in COVERAGE.values():
                 writer.writerow(("2026-11-03", contest, "Candidate A", "19"))

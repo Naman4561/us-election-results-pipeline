@@ -8,9 +8,9 @@ import sys
 from pathlib import Path
 
 from election_pipeline import __version__
+from election_pipeline.parsing import parse_source
 from election_pipeline.pipeline import collect_source
 from election_pipeline.settings import load_config
-from election_pipeline.parsing import parse_source
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -62,18 +62,12 @@ def main(argv: list[str] | None = None) -> int:
         "load",
         help="Load one verified parser output into PostgreSQL",
     )
-    loading.add_argument(
-        "--config", type=Path, default=Path("config/sources.toml")
-    )
-    loading.add_argument(
-        "--data-dir", type=Path, default=Path("data")
-    )
-    loading.add_argument(
-        "--env-file", type=Path, default=Path(".env")
-    )
+    loading.add_argument("--config", type=Path, default=Path("config/sources.toml"))
+    loading.add_argument("--data-dir", type=Path, default=Path("data"))
+    loading.add_argument("--env-file", type=Path, default=Path(".env"))
     loading.add_argument("--source", required=True)
     loading.add_argument("--parsed-dir", type=Path, required=True)
-    
+
     running = commands.add_parser(
         "run",
         help="Collect, parse, load, validate and publish one source",
@@ -102,7 +96,7 @@ def main(argv: list[str] | None = None) -> int:
         action="store_true",
         help="Also publish this replay",
     )
-    
+
     args = parser.parse_args(argv)
     try:
         settings, sources = load_config(args.config)
@@ -146,7 +140,7 @@ def main(argv: list[str] | None = None) -> int:
                 "awaiting_publication",
             }
             return int(result["outcome"] not in successful_outcomes)
-        
+
         if args.command == "load":
             try:
                 from election_pipeline.database import (

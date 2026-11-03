@@ -15,41 +15,9 @@ from psycopg import sql
 from psycopg.types.json import Jsonb
 
 from election_pipeline.database import connect
+from election_pipeline.states import publication_lock, state_adapter
 
-VOTES = "election_day early_voting absentee_by_mail provisional total_votes"
 GROUPS = "request_type party_registration sex race ethnicity ballot_count"
-
-# dataset -> (candidate layer, candidate model, serving table, copied columns)
-TARGETS = {
-    "election_results": [
-        (
-            "marts",
-            "nc_county_candidate_results",
-            "nc_county_candidate_results",
-            f"county contest_id choice choice_party {VOTES}",
-        ),
-        (
-            "marts",
-            "nc_contest_candidate_results",
-            "nc_contest_candidate_results",
-            f"contest_id choice choice_party {VOTES} contest_votes vote_share",
-        ),
-    ],
-    "absentee_early_demographics": [
-        (
-            "staging",
-            "stg_nc_absentee_demographics",
-            "nc_county_absentee_demographics",
-            f"county {GROUPS}",
-        ),
-        (
-            "marts",
-            "nc_state_absentee_demographics",
-            "nc_state_absentee_demographics",
-            GROUPS,
-        ),
-    ],
-}
 
 
 def project_hash(root):
@@ -58,9 +26,11 @@ def project_hash(root):
         root / "scripts/run_dbt.py",
         root / "scripts/publish.py",
         Path(__file__).resolve(),
+        root / "src/election_pipeline/states.py",
+        root / "src/election_pipeline/database.py",
     ]
     paths += [p for p in (root / "dbt").glob("*.yml") if not p.name.startswith(".")]
-    
+
     for directory in ("models", "macros", "tests"):
         paths += [
             p
@@ -70,9 +40,7 @@ def project_hash(root):
 
     digest = hashlib.sha256()
 
-    for package in (
-        "dbt-core", "dbt-postgres", "dbt-adapters", "dbt-common", "psycopg"
-    ):
+    for package in ("dbt-core", "dbt-postgres", "dbt-adapters", "dbt-common", "psycopg"):
         digest.update(f"{package}={version(package)}".encode() + b"\0")
 
     for path in sorted(set(paths)):
@@ -101,58 +69,67 @@ def release_metadata(conn, release_id):
         (release_id,),
     ).fetchone()
 
-    if (
-        not row
-        or row["loaded_at"] is None
-        or row["loaded_rows"] != row["expected_rows"]
-    ):
+    if not row or row["loaded_at"] is None or row["loaded_rows"] != row["expected_rows"]:
         raise ValueError("Choose a completed ingestion release")
 
-    if row["state"] != "NC" or row["dataset"] not in TARGETS:
-        raise ValueError("Publication currently supports the two NC datasets only")
+    state_adapter(row["state"]).contract(row["dataset"])
 
     return row
 
 
-def checked_results(path):
-    manifest = json.loads(
-        (path / "manifest.json").read_text(encoding="utf-8")
-    )
-    results = json.loads(
-        (path / "run_results.json").read_text(encoding="utf-8")
-    )
+def checked_results(path, state=None):
+    manifest = json.loads((path / "manifest.json").read_text(encoding="utf-8"))
+    results = json.loads((path / "run_results.json").read_text(encoding="utf-8"))
 
     invocation = results["metadata"]["invocation_id"]
     if not invocation or invocation != manifest["metadata"]["invocation_id"]:
         raise ValueError("dbt artifacts do not belong to one invocation")
 
+    nodes = manifest["nodes"]
+    units = manifest.get("unit_tests", {})
+    if state:
+        tag = "state_" + state.lower()
+        models = {
+            k
+            for k, n in nodes.items()
+            if n["resource_type"] == "model" and tag in n.get("tags", [])
+        }
+        selected = {
+            k: n
+            for k, n in nodes.items()
+            if k in models
+            or (
+                n["resource_type"] == "test"
+                and (
+                    tag in n.get("tags", [])
+                    or bool(set(n.get("depends_on", {}).get("nodes", [])) & models)
+                )
+            )
+        }
+        units = {
+            k: n
+            for k, n in units.items()
+            if tag in n.get("tags", [])
+            or bool(set(n.get("depends_on", {}).get("nodes", [])) & models)
+        }
+    else:
+        selected = nodes
     if any(
-        node["resource_type"] == "model"
-        and node["config"]["materialized"] != "table"
-        for node in manifest["nodes"].values()
+        n["resource_type"] == "model" and n["config"]["materialized"] != "table"
+        for n in selected.values()
     ):
         raise ValueError("Publication candidates must be materialized as tables")
-
-    if not manifest.get("unit_tests") or not any(
-        node["resource_type"] == "test"
-        and node.get("name") == "release_completeness"
-        for node in manifest["nodes"].values()
+    required = "release_completeness"
+    if not units or not any(
+        n["resource_type"] == "test" and n.get("name", "").endswith(required)
+        for n in selected.values()
     ):
         raise ValueError("Required publication checks are missing from the project")
-
-    expected = {
-        key
-        for key, node in manifest["nodes"].items()
-        if node["resource_type"] in ("model", "test")
-    }
-    expected.update(manifest.get("unit_tests", {}))
+    expected = {k for k, n in selected.items() if n["resource_type"] in ("model", "test")}
+    expected.update(units)
     actual = {r["unique_id"]: r for r in results["results"]}
 
-    if (
-        not expected
-        or set(actual) != expected
-        or len(actual) != len(results["results"])
-    ):
+    if not expected or set(actual) != expected or len(actual) != len(results["results"]):
         raise ValueError("The complete dbt build did not run")
 
     if any(r["status"] not in ("success", "pass") for r in actual.values()):
@@ -163,9 +140,9 @@ def checked_results(path):
 
 def build_candidate(root, db, metadata, schema, artifacts):
     source_variable = (
-        "nc_results_source"
+        metadata["state"].lower() + "_results_source"
         if metadata["dataset"] == "election_results"
-        else "nc_demographics_source"
+        else metadata["state"].lower() + "_demographics_source"
     )
     variables = {
         "publication_materialization": "table",
@@ -195,6 +172,8 @@ def build_candidate(root, db, metadata, schema, artifacts):
             "build",
             "--schema",
             schema,
+            "--select",
+            "tag:state_" + metadata["state"].lower(),
             "--vars",
             json.dumps(variables),
             "--target-path",
@@ -206,6 +185,7 @@ def build_candidate(root, db, metadata, schema, artifacts):
         ],
         cwd=root,
         env=environment,
+        stdout=sys.stderr,
         check=False,
         timeout=900,
     )
@@ -213,7 +193,7 @@ def build_candidate(root, db, metadata, schema, artifacts):
     if completed.returncode:
         raise ValueError(f"dbt build failed; inspect {artifacts}")
 
-    return checked_results(artifacts)
+    return checked_results(artifacts, metadata["state"])
 
 
 def activate(conn, publication_id, source_id):
@@ -244,15 +224,17 @@ def promote(conn, metadata, attempt_id, schema, code_hash, status):
     if current and current["release_id"] > metadata["release_id"]:
         raise ValueError("An earlier release requires an explicit restore")
 
-    relation = sql.Identifier(schema + "_staging", "stg_nc_releases")
+    relation = sql.Identifier(schema + "_staging", "stg_" + metadata["state"].lower() + "_releases")
     candidate = conn.execute(
         sql.SQL("SELECT release_id, source_id FROM {}").format(relation)
     ).fetchall()
 
-    if candidate != [{
-        "release_id": metadata["release_id"],
-        "source_id": metadata["source_id"],
-    }]:
+    if candidate != [
+        {
+            "release_id": metadata["release_id"],
+            "source_id": metadata["source_id"],
+        }
+    ]:
         raise ValueError("Candidate must contain exactly the requested release")
 
     existing = conn.execute(
@@ -294,16 +276,14 @@ def promote(conn, metadata, attempt_id, schema, code_hash, status):
             ],
         )
 
-        for layer, model, target, columns in TARGETS[metadata["dataset"]]:
-            identifiers = sql.SQL(", ").join(
-                map(sql.Identifier, columns.split())
-            )
+        for layer, model, target, columns in targets(metadata):
+            identifiers = sql.SQL(", ").join(map(sql.Identifier, columns.split()))
             count = conn.execute(
                 sql.SQL("""
-                    INSERT INTO serving.{} (publication_id, {})
+                    INSERT INTO {} (publication_id, {})
                     SELECT %s, {} FROM {} WHERE release_id = %s
                 """).format(
-                    sql.Identifier(target),
+                    sql.Identifier(metadata["state"].lower(), target),
                     identifiers,
                     identifiers,
                     sql.Identifier(schema + "_" + layer, model),
@@ -315,11 +295,7 @@ def promote(conn, metadata, attempt_id, schema, code_hash, status):
                 raise ValueError(f"No rows copied from {model}")
 
     activate(conn, publication_id, metadata["source_id"])
-    outcome = (
-        "skipped"
-        if current and current["publication_id"] == publication_id
-        else "published"
-    )
+    outcome = "skipped" if current and current["publication_id"] == publication_id else "published"
 
     conn.execute(
         """
@@ -339,121 +315,188 @@ def promote(conn, metadata, attempt_id, schema, code_hash, status):
     return {"outcome": outcome, "publication_id": str(publication_id)}
 
 
-def publish(root, db, release_id, status, *, skip_current=False):
+def targets(metadata):
+    adapter = state_adapter(metadata["state"])
+    if metadata["dataset"] == "election_results":
+        votes = " ".join(adapter.methods)
+        return [
+            (
+                "marts",
+                adapter.schema + "_county_candidate_results",
+                "county_candidate_results",
+                "county contest_id choice choice_party " + votes,
+            ),
+            (
+                "marts",
+                adapter.schema + "_contest_candidate_results",
+                "contest_candidate_results",
+                "contest_id choice choice_party " + votes + " contest_votes vote_share",
+            ),
+        ]
+    return [
+        (
+            "staging",
+            "stg_" + adapter.schema + "_absentee_demographics",
+            "county_absentee_demographics",
+            "county " + GROUPS,
+        ),
+        (
+            "marts",
+            adapter.schema + "_state_absentee_demographics",
+            "state_absentee_demographics",
+            GROUPS,
+        ),
+    ]
+
+
+def cleanup_candidate(conn, schema):
+    for layer in ("marts", "staging"):
+        conn.execute(
+            sql.SQL("DROP SCHEMA IF EXISTS {} CASCADE").format(sql.Identifier(schema + "_" + layer))
+        )
+
+
+def candidate_fingerprints(conn, schema, *, lock=False):
+    relations = conn.execute(
+        "SELECT table_schema, table_name FROM information_schema.tables "
+        "WHERE table_schema = ANY(%s) AND table_type='BASE TABLE' "
+        "ORDER BY table_schema, table_name",
+        ([schema + "_staging", schema + "_marts"],),
+    ).fetchall()
+    if not relations:
+        raise ValueError("Candidate tables are missing")
+    result = {}
+    for row in relations:
+        relation = sql.Identifier(row["table_schema"], row["table_name"])
+        if lock:
+            conn.execute(sql.SQL("LOCK TABLE {} IN SHARE MODE").format(relation))
+        digest = hashlib.sha256()
+        count = 0
+        with conn.cursor(name="candidate_" + uuid.uuid4().hex) as cursor:
+            cursor.execute(
+                sql.SQL(
+                    "SELECT to_jsonb(t)::text AS value FROM {} t "
+                    'ORDER BY to_jsonb(t)::text COLLATE "C"'
+                ).format(relation)
+            )
+            for record in cursor:
+                digest.update(record["value"].encode() + b"\n")
+                count += 1
+        result[row["table_schema"] + "." + row["table_name"]] = {
+            "rows": count,
+            "sha256": digest.hexdigest(),
+        }
+    return result
+
+
+def prepare(root, db, release_id, status, *, skip_current=False):
+    """Transform and validate one release; retain an immutable checked checkpoint."""
     if status not in ("test", "unofficial"):
         raise ValueError("Status must be test or unofficial")
-
     root = root.resolve()
     attempt_id = uuid.uuid4()
-    schema = "publish_" + attempt_id.hex
-    artifacts = root / "data/publications" / str(attempt_id)
-
     with connect(db) as conn:
-        # Session lock covers both dbt and the final publication transaction.
-        locked = conn.execute(
-            "SELECT pg_try_advisory_lock(20261103, 1) AS ok"
-        ).fetchone()["ok"]
-        if not locked:
-            raise ValueError("Another publication or restore is already running")
-
         metadata = release_metadata(conn, release_id)
+        publication_lock(conn, metadata["state"])
         code_hash = project_hash(root)
         if skip_current:
             current = conn.execute(
-                """
-                SELECT p.publication_id
-                FROM serving.current_publications c
-                JOIN serving.publications p USING (publication_id)
-                WHERE c.source_id = %s
-                  AND p.release_id = %s
-                  AND p.transform_sha256 = %s
-                  AND p.status = %s
-                """,
+                "SELECT p.publication_id FROM serving.current_publications c "
+                "JOIN serving.publications p USING (publication_id) "
+                "WHERE c.source_id=%s AND p.release_id=%s "
+                "AND p.transform_sha256=%s AND p.status=%s",
                 (metadata["source_id"], release_id, code_hash, status),
             ).fetchone()
-
             if current:
                 return {
                     "outcome": "already_current",
                     "publication_id": str(current["publication_id"]),
                     "release_id": release_id,
                 }
-
+        schema = "p_" + metadata["state"].lower() + "_" + attempt_id.hex
+        artifacts = root / "data/publications" / str(attempt_id)
         conn.execute(
-            """
-            INSERT INTO ops.publication_attempts
-                (attempt_id, release_id, action, artifacts_path)
-            VALUES (%s, %s, 'publish', %s)
-            """,
-            (attempt_id, release_id, str(artifacts)),
+            "INSERT INTO ops.publication_attempts "
+            "(attempt_id, release_id, action, artifacts_path, candidate_schema, "
+            "transform_sha256, requested_status) VALUES (%s,%s,'publish',%s,%s,%s,%s)",
+            (attempt_id, release_id, str(artifacts), schema, code_hash, status),
         )
-
         try:
             results = build_candidate(root, db, metadata, schema, artifacts)
-
             if code_hash != project_hash(root):
-                raise ValueError(
-                    "Project files changed during the candidate build; retry"
-                )
-
+                raise ValueError("Project files changed during the candidate build; retry")
             with conn.transaction():
+                fingerprints = candidate_fingerprints(conn, schema, lock=True)
                 conn.execute(
-                    """
-                    UPDATE ops.publication_attempts
-                    SET run_results = %s WHERE attempt_id = %s
-                    """,
-                    (Jsonb(results), attempt_id),
+                    "UPDATE ops.publication_attempts SET run_results=%s, "
+                    "candidate_fingerprints=%s, validated_at=clock_timestamp() WHERE attempt_id=%s",
+                    (Jsonb(results), Jsonb(fingerprints), attempt_id),
                 )
-                result = promote(
-                    conn, metadata, attempt_id, schema, code_hash, status
-                )
-
             return {
-                **result,
-                "attempt_id": str(attempt_id),
+                "outcome": "validated",
+                "candidate_id": str(attempt_id),
                 "release_id": release_id,
             }
-
         except Exception as exc:
             conn.execute(
-                """
-                UPDATE ops.publication_attempts
-                SET outcome = 'failed', finished_at = clock_timestamp(),
-                    error_message = %s
-                WHERE attempt_id = %s
-                """,
-                (
-                    str(exc).replace(db["password"], "[redacted]")[:4000],
-                    attempt_id,
-                ),
+                "UPDATE ops.publication_attempts SET outcome='failed', "
+                "finished_at=clock_timestamp(), error_message=%s WHERE attempt_id=%s",
+                (str(exc).replace(db.get("password", ""), "[redacted]")[:4000], attempt_id),
             )
+            cleanup_candidate(conn, schema)
             raise
 
-        finally:
-            for layer in ("marts", "staging"):
-                try:
-                    conn.execute(
-                        sql.SQL("DROP SCHEMA IF EXISTS {} CASCADE").format(
-                            sql.Identifier(schema + "_" + layer)
-                        )
-                    )
-                except Exception as exc:
-                    print(
-                        "Candidate cleanup needs attention: "
-                        + str(exc).replace(db["password"], "[redacted]"),
-                        file=sys.stderr,
-                    )
+
+def publish_prepared(root, db, candidate_id):
+    """Promote only the pinned release and table contents which passed validation."""
+    with connect(db) as conn:
+        attempt = conn.execute(
+            "SELECT * FROM ops.publication_attempts WHERE attempt_id=%s", (candidate_id,)
+        ).fetchone()
+        if not attempt:
+            raise ValueError("Unknown candidate ID")
+        metadata = release_metadata(conn, attempt["release_id"])
+        publication_lock(conn, metadata["state"])
+        if attempt["outcome"] in ("published", "skipped"):
+            return {
+                "outcome": "already_current",
+                "publication_id": str(attempt["publication_id"]),
+                "release_id": attempt["release_id"],
+            }
+        if attempt["outcome"] != "running" or not attempt["validated_at"]:
+            raise ValueError("Candidate has not passed validation")
+        if attempt["transform_sha256"] != project_hash(root.resolve()):
+            raise ValueError("Project changed after validation; transform again")
+        with conn.transaction():
+            actual = candidate_fingerprints(conn, attempt["candidate_schema"], lock=True)
+            if actual != attempt["candidate_fingerprints"]:
+                raise ValueError("Candidate changed after validation; transform again")
+            result = promote(
+                conn,
+                metadata,
+                candidate_id,
+                attempt["candidate_schema"],
+                attempt["transform_sha256"],
+                attempt["requested_status"],
+            )
+        # Promotion is committed before cleanup; a cleanup failure must not undo publication.
+        try:
+            cleanup_candidate(conn, attempt["candidate_schema"])
+        except Exception:
+            print("Published; candidate schema cleanup needs attention", file=sys.stderr)
+        return {**result, "attempt_id": str(candidate_id), "release_id": metadata["release_id"]}
+
+
+def publish(root, db, release_id, status, *, skip_current=False):
+    result = prepare(root, db, release_id, status, skip_current=skip_current)
+    if result["outcome"] == "already_current":
+        return result
+    return publish_prepared(root, db, result["candidate_id"])
 
 
 def restore(db, publication_id):
     """Intentionally reactivate an already validated, frozen publication."""
     with connect(db) as conn:
-        locked = conn.execute(
-            "SELECT pg_try_advisory_lock(20261103, 1) AS ok"
-        ).fetchone()["ok"]
-        if not locked:
-            raise ValueError("Another publication or restore is already running")
-
         publication = conn.execute(
             """
             SELECT * FROM serving.publications
@@ -465,6 +508,7 @@ def restore(db, publication_id):
         if not publication:
             raise ValueError("Unknown publication ID")
 
+        publication_lock(conn, publication["state"])
         attempt_id = uuid.uuid4()
 
         with conn.transaction():

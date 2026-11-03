@@ -5,118 +5,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Interactive North Carolina election results by county and congressional district."
+      content="Unofficial 2026 election returns from official state sources."
     />
-    <title>North Carolina · Election results</title>
-    <link rel="stylesheet" href="/app.css" />
-    <script type="module" src="/app.js"></script>
+    <title>2026 Election Results</title>
+    <link rel="stylesheet" href="/app.css?v=multistate1" />
+    <script type="module" src="/app.js?v=multistate1"></script>
   </head>
   <body>
-    <header class="masthead">
-      <div class="brand">
-        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span
-        >ELECTION RESULTS <span class="brand-year">2026</span>
-      </div>
-      <div class="masthead-right">
-        <span class="state-pill">NORTH CAROLINA</span
-        ><span id="connection" class="connection">Connecting</span>
-      </div>
+    <header>
+      <a class="brand" href="#senate/US"
+        ><span class="brand-icon">▥</span> ELECTION RESULTS <b>2026</b></a
+      ><span id="connection" role="status">Connecting…</span>
     </header>
     <main>
-      <div class="page-heading">
+      <div class="heading">
         <div>
-          <p class="eyebrow">GENERAL ELECTION / NOVEMBER 3, 2026</p>
-          <h1>North Carolina</h1>
+          <p class="eyebrow">GENERAL ELECTION · NOVEMBER 3, 2026</p>
+          <h1 id="page-title">United States</h1>
           <p class="intro">
-            Explore the returns. Select a county or district for a closer look.
+            Follow the returns. Explore a state, district or county.
           </p>
         </div>
-        <div class="publication-stamp">
-          <span id="publication-status" class="badge">AWAITING DATA</span
-          ><span id="published-time">Waiting for a published snapshot</span>
+        <div class="stamp">
+          <b id="publication-status">AWAITING DATA</b
+          ><span id="published-time">Each state publishes independently</span>
         </div>
       </div>
       <div id="notice" class="notice" role="status">
-        Loading the published results…
+        Loading published returns…
       </div>
-      <section class="workspace" aria-label="Election results explorer">
-        <div class="explorer">
+      <div class="workspace">
+        <section class="explorer" aria-label="Election results map">
           <div class="toolbar">
-            <div class="tabs" role="tablist" aria-label="Race type">
-              <button
-                class="tab active"
-                id="senate-tab"
-                role="tab"
-                aria-selected="true"
-              >
+            <div class="tabs" role="tablist" aria-label="Office">
+              <button data-office="senate" role="tab" aria-selected="true">
                 U.S. Senate</button
-              ><button
-                class="tab"
-                id="house-tab"
-                role="tab"
-                aria-selected="false"
-              >
-                U.S. House <span>4</span>
+              ><button data-office="house" role="tab" aria-selected="false">
+                U.S. House</button
+              ><button data-office="governor" role="tab" aria-selected="false">
+                Governor
               </button>
             </div>
-            <label class="method-label"
-              ><span>Vote method</span
-              ><select id="method">
-                <option value="total_votes">All reported votes</option>
-                <option value="election_day">Election Day</option>
-                <option value="early_voting">Early in person</option>
-                <option value="absentee_by_mail">Absentee by mail</option>
-                <option value="provisional">Provisional</option>
+            <label class="scope-control"
+              >View
+              <select id="scope" aria-label="Geographic view">
+                <option value="US">United States</option>
               </select></label
             >
           </div>
           <div class="map-heading">
             <div>
-              <h2 id="map-title">Senate · County results</h2>
+              <h2 id="map-title">Senate · National results</h2>
               <p id="map-description">
-                Color shows the leading candidate’s party, not a race call.
+                Color shows a party lead, not a race call.
               </p>
             </div>
-            <button id="statewide" class="text-button">
-              Statewide results <span aria-hidden="true">↗</span>
+            <button id="national" class="text-button" hidden>
+              ← National view
             </button>
           </div>
           <div class="map-tools">
-            <label
-              ><span class="sr-only" id="area-label">Find a county</span
-              ><select id="area" aria-labelledby="area-label">
-                <option value="">Find a county…</option>
+            <label id="area-control"
+              >Explore
+              <select id="area" aria-label="Select a geographic area">
+                <option value="">Select an area…</option>
               </select></label
-            ><label class="check-label"
-              ><input type="checkbox" id="labels" /> Labels</label
-            ><span class="map-hint">Click to explore · Scroll to zoom</span>
+            ><label id="method-control"
+              >Votes
+              <select id="method" aria-label="Vote method"></select></label
+            ><button id="overview" class="text-button" hidden>
+              Statewide results
+            </button>
           </div>
           <div class="map-stage" id="map-stage">
-            <svg
-              id="map"
-              role="group"
-              aria-label="Interactive North Carolina election map"
-            >
+            <svg id="map" role="group" aria-label="Interactive election map">
               <defs>
                 <pattern
-                  id="tie-fill"
+                  id="uncovered"
                   patternUnits="userSpaceOnUse"
-                  width="7"
-                  height="7"
+                  width="8"
+                  height="8"
                   patternTransform="rotate(35)"
                 >
-                  <rect width="7" height="7" fill="#e8edf2" />
-                  <rect width="2" height="7" fill="#909cab" />
+                  <rect width="8" height="8" fill="#e3e8f0" />
+                  <rect width="2" height="8" fill="#b9c4d3" />
                 </pattern>
                 <pattern
-                  id="outside-fill"
+                  id="tie"
                   patternUnits="userSpaceOnUse"
-                  width="7"
-                  height="7"
-                  patternTransform="rotate(35)"
+                  width="6"
+                  height="6"
                 >
-                  <rect width="7" height="7" fill="#f4f5f7" />
-                  <rect width="1" height="7" fill="#d8dde4" />
+                  <rect width="6" height="6" fill="#eee8f9" />
+                  <circle cx="2" cy="2" r="1" fill="#9b85b8" />
+                </pattern>
+                <pattern
+                  id="unavailable"
+                  patternUnits="userSpaceOnUse"
+                  width="8"
+                  height="8"
+                >
+                  <rect width="8" height="8" fill="#ffe6c6" />
+                  <path
+                    d="M0 0L8 8M8 0L0 8"
+                    stroke="#d39045"
+                    stroke-width="1"
+                  />
                 </pattern>
               </defs>
               <g id="shapes"></g>
@@ -125,88 +119,71 @@
             <div class="zoom-controls">
               <button id="zoom-in" aria-label="Zoom in">+</button
               ><button id="zoom-out" aria-label="Zoom out">−</button
-              ><button id="reset-map" aria-label="Reset map view">⌖</button>
+              ><button id="reset-map" aria-label="Reset map">⌖</button>
             </div>
             <div id="tooltip" class="tooltip" hidden></div>
           </div>
           <div class="legend" aria-label="Map legend">
-            <span><i class="swatch rep"></i>Republican lead</span
-            ><span><i class="swatch dem"></i>Democratic lead</span
-            ><span><i class="swatch other"></i>Other lead</span
-            ><span><i class="swatch unreported"></i>No votes reported</span
-            ><span><i class="swatch tie"></i>Tie / party unavailable</span
-            ><span class="outside-legend" hidden
-              ><i class="swatch outside"></i>Outside coverage</span
+            <span><i class="rep"></i>Republican lead</span
+            ><span><i class="dem"></i>Democratic lead</span
+            ><span><i class="other"></i>Other lead</span
+            ><span><i class="blank"></i>Awaiting votes</span
+            ><span><i class="no-election"></i>No election</span
+            ><span><i class="uncovered"></i>Outside coverage</span
+            ><span><i class="tie"></i>Tie / party unknown</span
+            ><span><i class="unavailable"></i>Data unavailable</span>
+          </div>
+          <div class="map-footer">
+            <span id="coverage-label"></span
+            ><span
+              >Geographic area does not represent votes or population.</span
             >
-          </div>
-          <div id="map-footer" class="map-footer">
-            <span id="coverage-label">100 counties</span
-            ><span>County area does not represent population.</span>
-          </div>
-          <div id="house-races" class="house-races" hidden></div>
-        </div>
-        <aside class="results-panel" aria-label="Selected race results">
-          <div class="results-heading">
-            <p id="result-scope" class="eyebrow">STATEWIDE</p>
-            <h2 id="result-title">U.S. Senate</h2>
-            <p id="result-subtitle">North Carolina</p>
-          </div>
-          <div class="vote-total">
-            <span id="total-label">Reported candidate votes</span
-            ><strong id="vote-total">—</strong>
-            <div id="lead-summary">Waiting for a publication</div>
           </div>
           <div
-            id="candidate-results"
-            class="candidate-results"
-            aria-live="polite"
+            id="race-list"
+            class="race-list"
+            aria-label="Covered races"
           ></div>
-          <div id="method-breakdown" class="method-breakdown"></div>
-          <div class="results-footnote">
-            <span class="small-dot"></span
-            ><span id="result-note"
-              >Results are unofficial. Candidate vote totals are not ballot
-              turnout.</span
-            >
+        </section>
+        <aside class="results-panel" aria-label="Selected race results">
+          <p id="result-scope" class="eyebrow">OUR COVERAGE</p>
+          <h2 id="result-title">U.S. Senate</h2>
+          <p id="result-subtitle">United States</p>
+          <div id="result-content" aria-live="polite"></div>
+          <div class="results-note">
+            Reported candidate votes are not ballot turnout. These are
+            unofficial returns; no projections or race calls.
           </div>
         </aside>
-      </section>
-      <section
-        class="snapshot-footer"
-        aria-label="Source and publication information"
-      >
+      </div>
+      <section class="snapshot-footer" aria-label="Publication information">
         <div>
-          <span class="footer-label">RESULTS SOURCE</span
+          <span class="footer-label">SOURCE</span
           ><a
-            href="https://er.ncsbe.gov/"
+            id="source-link"
             target="_blank"
             rel="noopener noreferrer"
-            >NC State Board of Elections ↗</a
+            href="https://www.fec.gov/"
+            >Official state election agencies ↗</a
           >
         </div>
         <div>
-          <span class="footer-label">SOURCE MODIFIED</span
-          ><span id="source-time">Unavailable</span>
+          <span class="footer-label">FIRST OBSERVED</span
+          ><span id="observed-time">Per-state timestamps</span>
         </div>
         <div>
           <span class="footer-label">PUBLICATION</span
-          ><span id="publication-id">—</span>
+          ><span id="publication-id">Independent state releases</span>
         </div>
-        <div class="refresh-box">
-          <span id="checked-time">Checks every 15 seconds</span
-          ><button id="refresh" aria-label="Refresh results">↻ Refresh</button>
-        </div>
+        <button id="refresh">↻ Refresh</button>
       </section>
-      <footer class="page-footer">
-        <span>Official-source returns · No projections or race calls</span
+      <footer>
+        <span
+          >Refreshes every 15 seconds · Coverage: North Carolina &amp;
+          Kentucky</span
         ><span
-          >Boundaries: NCDOT / NC General Assembly ·
-          <a
-            href="https://www.ncleg.gov/Redistricting/DistrictPlanMap/C2025E"
-            target="_blank"
-            rel="noopener noreferrer"
-            >2026 House plan ↗</a
-          ></span
+          >Boundaries: U.S. Census, 120th Congress; Missouri uses 119th. AK
+          &amp; HI main-island insets.</span
         >
       </footer>
     </main>

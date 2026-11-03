@@ -38,6 +38,7 @@ class FetchResponse:
     final_url: str
     bytes_received: int = 0
     sha256: str | None = None
+    components: tuple[dict, ...] = ()
 
 
 def fetch_file(
@@ -45,9 +46,12 @@ def fetch_file(
     settings: CollectorSettings,
     temporary: Path,
     conditional_headers: dict[str, str],
+    *,
+    url: str | None = None,
 ) -> FetchResponse:
+    validate_url(url or source.url)
     request = Request(
-        source.url,
+        url or source.url,
         headers={
             "User-Agent": settings.user_agent,
             "Accept": "application/zip, text/csv, application/octet-stream;q=0.9, */*;q=0.1",

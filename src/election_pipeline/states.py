@@ -1,0 +1,87 @@
+"""State adapters and the stable result contract shared by jobs and the dashboard."""
+
+from dataclasses import dataclass
+from importlib import import_module
+
+
+@dataclass(frozen=True)
+class LoadContract:
+    table: str
+    filename: str
+    fields: tuple[str, ...]
+    files: tuple[str, ...]
+    format: str
+    auxiliary: tuple = ()
+
+
+@dataclass(frozen=True)
+class State:
+    code: str
+    name: str
+    source_id: str
+    house: tuple[int, ...]
+    methods: tuple[str, ...]
+    senate: bool = True
+    governor: bool = False
+
+    @property
+    def schema(self):
+        return self.code.lower()
+
+    @property
+    def races(self):
+        return {
+            **({f"{self.code}-SEN": "U.S. Senate"} if self.senate else {}),
+            **({f"{self.code}-GOV": "Governor"} if self.governor else {}),
+            **{
+                (
+                    identity := self.code + ("-AL" if n == 0 else f"-{n:02}")
+                ): f"U.S. House · {identity}"
+                for n in self.house
+            },
+        }
+
+    @property
+    def parser(self):
+        return import_module(f"election_pipeline.parsers.{self.schema}")
+
+    def contract(self, dataset):
+        return self.parser.load_contract(dataset)
+
+
+STATES = {
+    "NC": State(
+        "NC",
+        "North Carolina",
+        "nc_2026_general",
+        (1, 3, 4, 11),
+        ("total_votes", "election_day", "early_voting", "absentee_by_mail", "provisional"),
+    ),
+    "KY": State(
+        "KY",
+        "Kentucky",
+        "ky_2026_general",
+        tuple(range(1, 7)),
+        ("total_votes", "election_day", "absentee_combined"),
+    ),
+}
+
+
+def state_adapter(code):
+    if code not in STATES:
+        raise ValueError(f"No state adapter registered for {code}")
+    return STATES[code]
+
+
+def parser_for(source):
+    adapter = state_adapter(source.state)
+    return adapter.parser.parse
+
+
+def publication_lock(conn, state):
+    # A shared maintenance lock allows state jobs to overlap while backups stay exclusive.
+    if not conn.execute("SELECT pg_try_advisory_lock_shared(20261103, 1) AS ok").fetchone()["ok"]:
+        raise ValueError("Backup is already running; retry this state later")
+    key = int.from_bytes(state.encode("ascii"), "big")
+    if not conn.execute("SELECT pg_try_advisory_lock(20261104, %s) AS ok", (key,)).fetchone()["ok"]:
+        raise ValueError(f"Another {state} publication or restore is running")
