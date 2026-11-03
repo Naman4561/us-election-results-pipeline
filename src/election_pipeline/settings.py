@@ -88,6 +88,7 @@ class Source:
     min_interval_seconds: int = 0
     allow_missing: bool = False
     files: tuple[tuple[str, str], ...] = ()
+    primary_filename: str = "results.xml"
 
     def __post_init__(self) -> None:
         if not re.fullmatch(r"[a-z][a-z0-9_-]{0,79}", self.source_id):
@@ -123,20 +124,25 @@ class Source:
         if not isinstance(self.files, tuple):
             raise ValueError("files must be a tuple of filename/URL pairs")
         names = []
+        if not re.fullmatch(r"[a-z][a-z0-9_.-]{0,79}", self.primary_filename):
+            raise ValueError("Invalid primary bundle filename")
         for entry in self.files:
             if not isinstance(entry, tuple) or len(entry) != 2:
                 raise ValueError("files must be filename/URL pairs")
             name, url = entry
             if not isinstance(name, str) or not isinstance(url, str):
                 raise ValueError("files must contain strings")
-            if not re.fullmatch(r"[a-z][a-z0-9_.-]{0,79}", name) or name == "results.xml":
+            if not re.fullmatch(r"[a-z][a-z0-9_.-]{0,79}", name) or name == self.primary_filename:
                 raise ValueError("Invalid bundle reference filename")
             validate_url(url)
             names.append(name)
         if len(names) != len(set(names)) or (self.files and self.format != "bundle"):
             raise ValueError("Reference files require bundle format and unique names")
-        if self.format == "bundle" and set(self.expected_members) != {"results.xml", *names}:
-            raise ValueError("Bundle members must match results.xml and its reference files")
+        if self.format == "bundle" and set(self.expected_members) != {
+            self.primary_filename,
+            *names,
+        }:
+            raise ValueError("Bundle members must match its primary file and reference files")
 
         if not re.fullmatch(r"[a-z][a-z0-9_]{0,79}", self.dataset):
             raise ValueError("dataset must be a lowercase identifier")
@@ -148,8 +154,11 @@ class Source:
             raise ValueError("allow_missing must be true or false")
 
     def signature(self, settings: CollectorSettings) -> str:
+        source_contract = asdict(self)
+        if self.primary_filename == "results.xml":
+            source_contract.pop("primary_filename")
         contract = {
-            "source": asdict(self),
+            "source": source_contract,
             "validator_version": __version__,
             "max_download_bytes": settings.max_download_bytes,
             "max_uncompressed_bytes": settings.max_uncompressed_bytes,

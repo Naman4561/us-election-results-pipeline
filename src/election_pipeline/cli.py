@@ -88,6 +88,11 @@ def main(argv: list[str] | None = None) -> int:
     )
     running.add_argument("--reference", type=Path)
     running.add_argument(
+        "--prepare-only",
+        action="store_true",
+        help="Collect, parse, load and validate a candidate without changing public results",
+    )
+    running.add_argument(
         "--replay-sha256",
         help="Process archived bytes without HTTP or publication",
     )
@@ -128,6 +133,7 @@ def main(argv: list[str] | None = None) -> int:
                 replay_sha256=args.replay_sha256,
                 publish_replay=args.publish_replay,
                 reference=args.reference,
+                prepare_only=args.prepare_only,
             )
 
             print(json.dumps(result, sort_keys=True))
@@ -138,6 +144,7 @@ def main(argv: list[str] | None = None) -> int:
                 "replayed_not_published",
                 "not_due",
                 "awaiting_publication",
+                "validated",
             }
             return int(result["outcome"] not in successful_outcomes)
 

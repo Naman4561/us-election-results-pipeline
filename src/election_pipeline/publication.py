@@ -319,13 +319,19 @@ def targets(metadata):
     adapter = state_adapter(metadata["state"])
     if metadata["dataset"] == "election_results":
         votes = " ".join(adapter.methods)
-        return [
-            (
-                "marts",
-                adapter.schema + "_county_candidate_results",
-                "county_candidate_results",
-                "county contest_id choice choice_party " + votes,
-            ),
+        county_target = (
+            [
+                (
+                    "marts",
+                    adapter.schema + "_county_candidate_results",
+                    "county_candidate_results",
+                    "county contest_id choice choice_party " + votes,
+                ),
+            ]
+            if adapter.county_results
+            else []
+        )
+        return county_target + [
             (
                 "marts",
                 adapter.schema + "_contest_candidate_results",

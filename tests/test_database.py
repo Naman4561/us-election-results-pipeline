@@ -126,6 +126,7 @@ class DatabaseTests(unittest.TestCase):
             for relation, filename in [
                 ("serving.publications", "002_publication.sql"),
                 ("ky.results", "003_state_schemas.sql"),
+                ("tx.results", "004_mn_ne_tx.sql"),
             ]:
                 if conn.execute("SELECT to_regclass(%s) AS t", (relation,)).fetchone()["t"] is None:
                     conn.execute(

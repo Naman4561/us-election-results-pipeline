@@ -99,7 +99,7 @@ def reference_check(path, source, totals, limit):
     return {
         "status": "mismatch" if differences else "matched",
         "differences": differences,
-        "scope": "complete totals for all five tracked contests, including write-ins",
+        "scope": "complete totals for all configured contests, including write-ins",
         "origin_and_publication_timing": "not verified automatically",
     }
 

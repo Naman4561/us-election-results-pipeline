@@ -15,7 +15,7 @@ def fetch_bundle(source, settings, destination):
     started = time.monotonic()
     with tempfile.TemporaryDirectory(prefix=".bundle-", dir=destination.parent) as directory:
         paths = {}
-        for name, url in (*source.files, ("results.xml", source.url)):
+        for name, url in (*source.files, (source.primary_filename, source.url)):
             path = Path(directory) / name
             remaining = settings.max_download_seconds - (time.monotonic() - started)
             if received >= settings.max_download_bytes:

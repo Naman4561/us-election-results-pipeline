@@ -27,7 +27,7 @@ def compare_publication(
     observed_at,
     same_reporting_cutoff=False,
 ):
-    """Require agreement for every choice in all five covered races."""
+    """Require agreement for every choice in the state's complete watchlist."""
     url = urlsplit(reference_url)
 
     if url.scheme != "https" or not url.netloc or url.username or url.password:
@@ -71,6 +71,8 @@ def compare_publication(
 
     if {row["contest_id"] for row in rows} != set(adapter.races):
         raise ValueError("Publication does not contain the complete state watchlist")
+    if any(row["total_votes"] is None for row in rows):
+        raise ValueError("Unknown vote counts cannot be verified against a numerical reference")
 
     date = str(metadata["election_date"])
     totals = {

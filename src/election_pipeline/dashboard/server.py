@@ -39,7 +39,7 @@ def county_key(name):
 
 def party_group(party, choice):
     value = (party or "").strip().upper()
-    if value in ("DEM", "D", "DEMOCRATIC", "DEMOCRAT"):
+    if value in ("DEM", "D", "DEMOCRATIC", "DEMOCRAT", "DFL"):
         return "DEM"
     if value in ("REP", "R", "REPUBLICAN"):
         return "REP"
@@ -51,8 +51,11 @@ def party_group(party, choice):
 def summarize(rows, method):
     grouped = defaultdict(int)
     for row in rows:
-        grouped[(row["choice"], row.get("choice_party"))] += int(row[method])
-    total = sum(grouped.values())
+        key = (row["choice"], row.get("choice_party"))
+        value = row[method]
+        grouped[key] = None if value is None or grouped[key] is None else grouped[key] + int(value)
+    known = all(value is not None for value in grouped.values())
+    total = sum(grouped.values()) if known else None
     candidates = sorted(
         (
             {
@@ -64,9 +67,9 @@ def summarize(rows, method):
             }
             for (name, party), votes in grouped.items()
         ),
-        key=lambda c: (-c["votes"], c["name"]),
+        key=lambda c: (-(c["votes"] or 0), c["name"]),
     )
-    tie = total > 0 and len(candidates) > 1 and candidates[0]["votes"] == candidates[1]["votes"]
+    tie = bool(total) and len(candidates) > 1 and candidates[0]["votes"] == candidates[1]["votes"]
     status = "unreported" if not total else "tie" if tie else "leading"
     margin = (
         None
@@ -99,14 +102,20 @@ def make_payload(geography, metadata, county_rows, contest_rows, demo=False, sta
         for field in methods:
             if type(row[field]) is not int or row[field] < 0:
                 raise ValueError("Invalid published vote count")
-        if sum(row[field] for field in methods[1:]) != row["total_votes"]:
+        if len(methods) > 1 and sum(row[field] for field in methods[1:]) != row["total_votes"]:
             raise ValueError("Published vote methods do not reconcile")
         by_race[row["contest_id"]].append(row)
         by_county[row["contest_id"]][key].append(row)
     for row in contest_rows:
+        if row["contest_id"] not in races_config:
+            raise ValueError("Published contest is outside coverage")
+        for method in methods:
+            if row[method] is not None and (type(row[method]) is not int or row[method] < 0):
+                raise ValueError("Invalid published contest vote count")
         totals[row["contest_id"]].append(row)
     if metadata is not None and (
-        set(totals) != set(races_config) or set(by_race) != set(races_config)
+        set(totals) != set(races_config)
+        or (adapter.county_results and set(by_race) != set(races_config))
     ):
         raise ValueError(
             "A published snapshot must contain all five tracked NC contests "
@@ -116,7 +125,7 @@ def make_payload(geography, metadata, county_rows, contest_rows, demo=False, sta
     for identity, name in races_config.items():
         stats = {m: summarize(totals[identity], m) for m in methods}
         for method in methods:
-            if summarize(by_race[identity], method) != stats[method]:
+            if adapter.county_results and summarize(by_race[identity], method) != stats[method]:
                 raise ValueError("Published county and contest results disagree")
         races[identity] = {
             "name": name,
@@ -129,6 +138,8 @@ def make_payload(geography, metadata, county_rows, contest_rows, demo=False, sta
     return {
         "state": state,
         "methods": methods,
+        "county_detail": adapter.county_results,
+        "source_page": adapter.source_page,
         "mode": "demo" if demo else "published",
         "publication": metadata,
         "map_version": geography["version"],
@@ -143,10 +154,8 @@ def demo_payload(geography, state="NC"):
     for feature in geography["counties"]:
         seed = int(hashlib.sha256(feature["id"].encode()).hexdigest()[:8], 16)
         for race in races_config:
-            if (
-                race != state + "-SEN"
-                and seed % len(state_adapter(state).house) != list(races_config).index(race) - 1
-            ):
+            house = [r for r in races_config if not r.endswith(("-SEN", "-GOV"))]
+            if race in house and seed % len(house) != house.index(race):
                 continue
             base = 0 if seed % 9 == 0 else 1200 + seed % 28000
             shares = (0.34, 0.62, 0.04) if seed % 3 else (0.61, 0.35, 0.04)
@@ -201,10 +210,17 @@ def demo_payload(geography, state="NC"):
         "source_modified_at": None,
         "first_observed_at": None,
         "activated_at": None,
-        "source_url": "https://er.ncsbe.gov/",
+        "source_url": state_adapter(state).source_page,
         "release_id": None,
     }
-    return make_payload(geography, metadata, rows, list(grouped.values()), demo=True, state=state)
+    return make_payload(
+        geography,
+        metadata,
+        rows if state_adapter(state).county_results else [],
+        list(grouped.values()),
+        demo=True,
+        state=state,
+    )
 
 
 def dashboard_settings(env_file):
@@ -265,12 +281,16 @@ class PublishedResults:
                 return make_payload(self.geography, None, [], [], state=self.state.code)
             identity = str(metadata["publication_id"])
             if identity not in self.cache:
-                counties = conn.execute(
-                    sql.SQL("SELECT * FROM {} WHERE publication_id=%s").format(
-                        sql.Identifier(self.state.schema, "county_candidate_results")
-                    ),
-                    (identity,),
-                ).fetchall()
+                counties = (
+                    conn.execute(
+                        sql.SQL("SELECT * FROM {} WHERE publication_id=%s").format(
+                            sql.Identifier(self.state.schema, "county_candidate_results")
+                        ),
+                        (identity,),
+                    ).fetchall()
+                    if self.state.county_results
+                    else []
+                )
                 contests = conn.execute(
                     sql.SQL("SELECT * FROM {} WHERE publication_id=%s").format(
                         sql.Identifier(self.state.schema, "contest_candidate_results")
@@ -302,6 +322,9 @@ def national_payload(providers, demo=False):
                 "state": code,
                 "name": adapter.name,
                 "availability": "unavailable",
+                "county_detail": adapter.county_results,
+                "source_page": adapter.source_page,
+                "methods": adapter.methods,
                 "publication": None,
                 "races": {},
             }

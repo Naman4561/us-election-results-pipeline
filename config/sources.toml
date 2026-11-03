@@ -47,3 +47,40 @@ expected_members = ["results.xml", "election.xml", "parties.xml", "units.xml", "
 "units.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/GeopoliticalUnits"
 "contests.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/Contests"
 "candidates.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/Candidates"
+
+[sources.mn_2026_general]
+state = "MN"
+election_date = "2026-11-03"
+url = "https://electionresultsfiles.sos.mn.gov/20261103/ussenatecty.txt"
+format = "bundle"
+primary_filename = "senate-county.txt"
+min_interval_seconds = 300
+expected_members = ["senate-county.txt", "senate.txt", "house-county.txt", "house.txt", "counties.txt", "election.html"]
+
+[sources.mn_2026_general.files]
+"senate.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/ussenate.txt"
+"house-county.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/USHouseCty.txt"
+"house.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/USHouse.txt"
+"counties.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/Cntytbl.txt"
+"election.html" = "https://electionresults.sos.mn.gov/Select/MediaFiles/Index?ersElectionId=201"
+
+[sources.ne_2026_general]
+state = "NE"
+election_date = "2026-11-03"
+url = "https://electionresults.nebraska.gov/resultsCSV.aspx?map=CTY&text=All&type=SW"
+format = "bundle"
+primary_filename = "results.csv"
+min_interval_seconds = 300
+expected_members = ["results.csv", "election.html"]
+
+[sources.ne_2026_general.files]
+"election.html" = "https://electionresults.nebraska.gov/ResultsMedia.aspx"
+
+[sources.tx_2026_general]
+state = "TX"
+election_date = "2026-11-03"
+url = "https://electionresults.sos.state.tx.us/results.html"
+format = "bundle"
+primary_filename = "results.html"
+min_interval_seconds = 300
+expected_members = ["results.html"]

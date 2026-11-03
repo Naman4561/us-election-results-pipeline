@@ -68,7 +68,7 @@ class MultiStateTests(unittest.TestCase):
         payload = response.json()
         self.assertEqual(len(payload["calendar"]["senate_states"]), 35)
         self.assertEqual(len(payload["calendar"]["governor_states"]), 36)
-        self.assertEqual(set(payload["states"]), {"NC", "KY"})
+        self.assertEqual(set(payload["states"]), {"NC", "KY", "MN", "NE", "TX"})
         self.assertEqual(len(payload["coverage"]["KY"]), 7)
         self.assertNotIn("early_voting", payload["states"]["KY"]["methods"])
         self.assertEqual(client.get("/api/states/GA").status_code, 404)
@@ -129,6 +129,7 @@ class MultiStateDatabaseTests(unittest.TestCase):
                 ("ops.sources", "001_initial.sql"),
                 ("serving.publications", "002_publication.sql"),
                 ("ky.results", "003_state_schemas.sql"),
+                ("tx.results", "004_mn_ne_tx.sql"),
             ]:
                 if conn.execute("SELECT to_regclass(%s) AS t", (relation,)).fetchone()["t"] is None:
                     conn.execute((cls.root / "migrations" / filename).read_text())

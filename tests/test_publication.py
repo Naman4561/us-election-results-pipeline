@@ -132,6 +132,7 @@ class PublicationDatabaseTests(unittest.TestCase):
                 ("ops.sources", "001_initial.sql"),
                 ("serving.publications", "002_publication.sql"),
                 ("ky.results", "003_state_schemas.sql"),
+                ("tx.results", "004_mn_ne_tx.sql"),
             ]:
                 exists = conn.execute("SELECT to_regclass(%s) AS t", (relation,)).fetchone()["t"]
                 if exists is None:

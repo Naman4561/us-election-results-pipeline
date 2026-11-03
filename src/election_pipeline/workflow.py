@@ -27,6 +27,7 @@ def run_source(
     replay_sha256=None,
     publish_replay=False,
     reference=None,
+    prepare_only=False,
 ):
     """Retry committed stages idempotently. Replay does not publish by default."""
     if status not in ("test", "unofficial"):
@@ -34,6 +35,8 @@ def run_source(
 
     if publish_replay and not replay_sha256:
         raise ValueError("--publish-replay requires --replay-sha256")
+    if prepare_only and publish_replay:
+        raise ValueError("--prepare-only cannot publish a replay")
 
     store = ArchiveStore(Path(data_dir), source)
 
@@ -173,6 +176,17 @@ def run_source(
                     raise ValueError(f"Load failed: {loaded.get('error', loaded['outcome'])}")
 
                 report["release_id"] = loaded["release_id"]
+
+                if prepare_only:
+                    from election_pipeline.publication import prepare
+
+                    candidate = stage(
+                        "validate_candidate",
+                        lambda: prepare(Path(root), db, loaded["release_id"], status),
+                    )
+                    report["candidate_id"] = candidate["candidate_id"]
+                    report["outcome"] = "validated"
+                    return report
 
                 if replay_sha256 and not publish_replay:
                     report["outcome"] = "replayed_not_published"

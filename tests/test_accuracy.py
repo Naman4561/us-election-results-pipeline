@@ -122,3 +122,8 @@ class AccuracyTests(unittest.TestCase):
             self.compare()["outcome"],
             "counts_match_cutoff_unverified",
         )
+
+    def test_unknown_counts_cannot_pass_as_zero_data(self):
+        self.rows[0]["total_votes"] = None
+        with self.assertRaisesRegex(ValueError, "Unknown vote counts"):
+            self.compare(same_reporting_cutoff=True)

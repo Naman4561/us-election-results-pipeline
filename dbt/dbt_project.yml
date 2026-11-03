@@ -19,6 +19,9 @@ vars:
   nc_demographics_source: nc_absentee_early_demographics_2026
   election_date: '2026-11-03'
   ky_results_source: ky_2026_general
+  mn_results_source: mn_2026_general
+  ne_results_source: ne_2026_general
+  tx_results_source: tx_2026_general
 models:
   election_analytics:
     +materialized: '{{ var(''publication_materialization'', ''view'') }}'
@@ -30,6 +33,15 @@ models:
       ky:
         +tags:
         - state_ky
+      mn:
+        +tags:
+        - state_mn
+      ne:
+        +tags:
+        - state_ne
+      tx:
+        +tags:
+        - state_tx
     marts:
       +schema: marts
       nc:
@@ -38,3 +50,12 @@ models:
       ky:
         +tags:
         - state_ky
+      mn:
+        +tags:
+        - state_mn
+      ne:
+        +tags:
+        - state_ne
+      tx:
+        +tags:
+        - state_tx

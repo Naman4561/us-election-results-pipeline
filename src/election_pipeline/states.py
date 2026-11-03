@@ -23,6 +23,8 @@ class State:
     methods: tuple[str, ...]
     senate: bool = True
     governor: bool = False
+    county_results: bool = True
+    source_page: str = ""
 
     @property
     def schema(self):
@@ -56,6 +58,7 @@ STATES = {
         "nc_2026_general",
         (1, 3, 4, 11),
         ("total_votes", "election_day", "early_voting", "absentee_by_mail", "provisional"),
+        source_page="https://er.ncsbe.gov/",
     ),
     "KY": State(
         "KY",
@@ -63,6 +66,35 @@ STATES = {
         "ky_2026_general",
         tuple(range(1, 7)),
         ("total_votes", "election_day", "absentee_combined"),
+        source_page="https://vrsws.sos.ky.gov/liveresults/",
+    ),
+    "MN": State(
+        "MN",
+        "Minnesota",
+        "mn_2026_general",
+        (1,),
+        ("total_votes",),
+        source_page="https://electionresults.sos.mn.gov/",
+    ),
+    "NE": State(
+        "NE",
+        "Nebraska",
+        "ne_2026_general",
+        (),
+        ("total_votes",),
+        governor=True,
+        county_results=False,
+        source_page="https://electionresults.nebraska.gov/",
+    ),
+    "TX": State(
+        "TX",
+        "Texas",
+        "tx_2026_general",
+        (15, 23, 28, 34, 35),
+        ("total_votes",),
+        governor=True,
+        county_results=False,
+        source_page="https://electionresults.sos.state.tx.us/results.html",
     ),
 }
 

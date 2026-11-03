@@ -18,3 +18,15 @@ sources:
   tables:
   - name: results
   - name: reporting_units
+- name: mn
+  schema: mn
+  tables:
+  - name: results
+- name: ne
+  schema: ne
+  tables:
+  - name: results
+- name: tx
+  schema: tx
+  tables:
+  - name: results

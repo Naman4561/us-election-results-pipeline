@@ -82,6 +82,51 @@ test("national/state map navigation and coverage statuses", async (t) => {
   assert.equal(status("NC"), "no_election");
   assert.equal(status("CA"), "not_covered");
   click('[data-office="senate"]');
+  click('path[data-id="MN"]');
+  await settle();
+  assert.equal(d.querySelectorAll("path.feature").length, 87);
+  click('[data-office="governor"]');
+  assert(
+    d
+      .querySelector("#result-content")
+      .textContent.includes("outside our coverage"),
+  );
+  click("#national");
+  click('path[data-id="NE"]');
+  await settle();
+  assert.equal(d.querySelectorAll("path.feature").length, 1);
+  assert.equal(d.querySelector("#area").disabled, true);
+  assert(
+    d.querySelector("#result-content").textContent.includes("Race totals only"),
+  );
+  click('[data-office="house"]');
+  assert(
+    d
+      .querySelector("#result-content")
+      .textContent.includes("outside our coverage"),
+  );
+  click("#national");
+  click('path[data-id="TX-35"]');
+  await settle();
+  assert.equal(d.querySelector("#result-title").textContent, "TX-35");
+  click('[data-office="senate"]');
+  for (const stats of Object.values(payload.states.TX.races["TX-SEN"].stats)) {
+    Object.assign(stats, {
+      total: null,
+      status: "unreported",
+      leader: null,
+      margin: null,
+    });
+    for (const c of stats.candidates)
+      Object.assign(c, { votes: null, share: null });
+  }
+  click("#refresh");
+  await settle();
+  assert.equal(d.querySelectorAll("path.feature").length, 1);
+  assert.equal(d.querySelector(".total strong").textContent, "—");
+  assert.equal(d.querySelector(".candidate-votes").firstChild.textContent, "—");
+  assert.equal(status("TX"), "awaiting_votes");
+  click("#national");
   const stats = payload.states.NC.races["NC-SEN"].stats.total_votes;
   for (const leader of ["DEM", "REP", "OTHER", "UNKNOWN"]) {
     Object.assign(stats, { total: 100, status: "leading", leader });

@@ -1,0 +1,25 @@
+MN;;;0104;U.S. Representative District 1;1;0401;Jake Johnson;;;DFL;0;750;0;0.00;0
+MN;;;0104;U.S. Representative District 1;1;0302;Brad Finstad;;;R;0;750;0;0.00;0
+MN;;;0104;U.S. Representative District 1;1;9901;WRITE-IN;;;WI;0;750;0;0.00;0
+MN;;;0105;U.S. Representative District 2;2;0401;Matt Little;;;DFL;0;260;0;0.00;0
+MN;;;0105;U.S. Representative District 2;2;0302;Eric Pratt;;;R;0;260;0;0.00;0
+MN;;;0105;U.S. Representative District 2;2;9901;WRITE-IN;;;WI;0;260;0;0.00;0
+MN;;;0106;U.S. Representative District 3;3;0301;Tyler Bass;;;R;0;229;0;0.00;0
+MN;;;0106;U.S. Representative District 3;3;0402;Kelly Morrison;;;DFL;0;229;0;0.00;0
+MN;;;0106;U.S. Representative District 3;3;9901;WRITE-IN;;;WI;0;229;0;0.00;0
+MN;;;0107;U.S. Representative District 4;4;0401;Betty McCollum;;;DFL;0;212;0;0.00;0
+MN;;;0107;U.S. Representative District 4;4;0302;Paul Wikstrom;;;R;0;212;0;0.00;0
+MN;;;0107;U.S. Representative District 4;4;9901;WRITE-IN;;;WI;0;212;0;0.00;0
+MN;;;0108;U.S. Representative District 5;5;0401;Ilhan Omar;;;DFL;0;217;0;0.00;0
+MN;;;0108;U.S. Representative District 5;5;0302;John Nagel;;;R;0;217;0;0.00;0
+MN;;;0108;U.S. Representative District 5;5;1003;DeVelle L. Jackson;;;IND;0;217;0;0.00;0
+MN;;;0108;U.S. Representative District 5;5;9901;WRITE-IN;;;WI;0;217;0;0.00;0
+MN;;;0109;U.S. Representative District 6;6;0301;Tom Emmer;;;R;0;276;0;0.00;0
+MN;;;0109;U.S. Representative District 6;6;0402;Doug Chapin;;;DFL;0;276;0;0.00;0
+MN;;;0109;U.S. Representative District 6;6;9901;WRITE-IN;;;WI;0;276;0;0.00;0
+MN;;;0110;U.S. Representative District 7;7;0301;Michelle Fischbach;;;R;0;1327;0;0.00;0
+MN;;;0110;U.S. Representative District 7;7;0402;Erik Osberg;;;DFL;0;1327;0;0.00;0
+MN;;;0110;U.S. Representative District 7;7;9901;WRITE-IN;;;WI;0;1327;0;0.00;0
+MN;;;0111;U.S. Representative District 8;8;0301;Pete Stauber;;;R;0;834;0;0.00;0
+MN;;;0111;U.S. Representative District 8;8;0402;Trina Swanson;;;DFL;0;834;0;0.00;0
+MN;;;0111;U.S. Representative District 8;8;9901;WRITE-IN;;;WI;0;834;0;0.00;0

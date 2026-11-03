@@ -2,3 +2,7 @@
 *.service text eol=lf
 *.timer text eol=lf
 Dockerfile text eol=lf
+
+# Preserve captured official bytes across Windows/Linux checkouts.
+tests/fixtures/expansion/*.txt -text whitespace=-blank-at-eol
+tests/fixtures/expansion/*.csv -text whitespace=-blank-at-eol

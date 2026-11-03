@@ -192,6 +192,23 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(result["outcome"], "succeeded")
         self.publish.assert_called_once()
 
+    def test_prepare_only_validates_live_and_archived_inputs_without_promoting(self):
+        with patch.object(
+            publication,
+            "prepare",
+            return_value={"outcome": "validated", "candidate_id": "candidate-7", "release_id": 7},
+        ) as prepare:
+            for replay in (None, self.sha):
+                result = self.run_source(prepare_only=True, replay_sha256=replay)
+                self.assertEqual(result["outcome"], "validated")
+                self.assertEqual(result["candidate_id"], "candidate-7")
+                self.assertEqual(result["stages"][-1]["stage"], "validate_candidate")
+                self.assertNotIn("publication_id", result)
+            self.assertEqual(prepare.call_count, 2)
+            self.publish.assert_not_called()
+        with self.assertRaisesRegex(ValueError, "cannot publish"):
+            self.run_source(prepare_only=True, replay_sha256=self.sha, publish_replay=True)
+
     def test_full_run_lock_rejects_overlap_without_overwriting_latest_report(self):
         first = self.run_source()
         latest = Path(first["report_path"]).parent / "latest.json"
@@ -258,6 +275,7 @@ class IntegratedWorkflowTests(unittest.TestCase):
                 ("ops.sources", "001_initial.sql"),
                 ("serving.publications", "002_publication.sql"),
                 ("ky.results", "003_state_schemas.sql"),
+                ("tx.results", "004_mn_ne_tx.sql"),
             ]:
                 exists = conn.execute(
                     "SELECT to_regclass(%s) AS t",

@@ -110,10 +110,11 @@ function statusFor(code, race, county = null) {
   if (!state || state.availability !== "available")
     return { status: "unavailable" };
   const contest = state.races[race];
+  if (county && state.county_detail === false) return { status: "unavailable" };
   const stats = county
     ? contest?.counties[county]?.stats[view.method]
     : contest?.stats[view.scope === "US" ? "total_votes" : view.method];
-  if (!state.publication || !stats || stats.total === 0)
+  if (!state.publication || !stats || stats.total == null || stats.total === 0)
     return { status: "awaiting_votes", stats };
   return {
     status: stats.status === "tie" ? "tie" : stats.leader || "UNKNOWN",
@@ -124,7 +125,7 @@ async function loadGeometry(code) {
   if (geometry[code]) return true;
   try {
     const response = await fetch(
-      "/" + code.toLowerCase() + "-map.json?v=multistate1",
+      "/" + code.toLowerCase() + "-map.json?v=expansion2",
     );
     if (!response.ok) throw Error("Map unavailable");
     geometry[code] = await response.json();
@@ -159,6 +160,11 @@ function featureStatus(f) {
         : code + (view.office === "senate" ? "-SEN" : "-GOV");
     return statusFor(code, race);
   }
+  if (
+    data.states[view.scope].county_detail === false &&
+    view.office !== "house"
+  )
+    return statusFor(view.scope, raceFor(view.scope));
   return statusFor(
     view.scope,
     view.office === "house" ? f.id : raceFor(view.scope),
@@ -181,6 +187,7 @@ function activateFeature(f) {
       render();
     }
   } else {
+    if (data.states[view.scope].county_detail === false) return;
     view.county = f.id;
     writeLocation();
     render();
@@ -195,7 +202,9 @@ function drawMap() {
         : geo.states
       : view.office === "house"
         ? geo.districts
-        : geo.counties;
+        : data.states[view.scope].county_detail === false
+          ? [geo.outline]
+          : geo.counties;
   const [x, y, w, h] = geo.viewBox;
   $("map").setAttribute(
     "viewBox",
@@ -222,7 +231,7 @@ function drawMap() {
           : !!data.coverage[f.id]
         : view.office === "house"
           ? racesFor(view.scope).includes(f.id)
-          : true;
+          : data.states[view.scope].county_detail !== false;
     p.setAttribute("d", f.path);
     p.setAttribute("fill", colors[result.status]);
     p.setAttribute(
@@ -336,7 +345,9 @@ function renderNationalPanel() {
         "span",
         ids.length
           ? `${ids.length} covered ${ids.length === 1 ? "race" : "races"} · ${state.availability === "unavailable" ? "Data unavailable" : state.publication ? (state.publication.status === "test" ? "Test publication" : "Unofficial publication") : "Awaiting first publication"}`
-          : "No election for this office",
+          : isElection(code)
+            ? "Election held · outside our coverage"
+            : "No election for this office",
       ),
     );
     b.addEventListener("click", () => selectState(code));
@@ -372,6 +383,16 @@ function renderStatePanel() {
     );
     return;
   }
+  if (result.status === "not_covered") {
+    target.append(
+      element(
+        "p",
+        "This office is outside our coverage in this state.",
+        "empty",
+      ),
+    );
+    return;
+  }
   if (result.status === "unavailable") {
     target.append(
       element(
@@ -395,7 +416,7 @@ function renderStatePanel() {
   const total = element("div", undefined, "total");
   total.append(
     element("span", methodNames[view.method] + " · candidate votes"),
-    element("strong", stats ? number(stats.total) : "—"),
+    element("strong", stats?.total == null ? "—" : number(stats.total)),
   );
   const leadText =
     result.status === "awaiting_votes"
@@ -409,7 +430,11 @@ function renderStatePanel() {
     const box = element("div", undefined, "candidate"),
       head = element("div", undefined, "candidate-head"),
       name = element("div", candidate.name, "candidate-name"),
-      votes = element("div", number(candidate.votes), "candidate-votes");
+      votes = element(
+        "div",
+        candidate.votes == null ? "—" : number(candidate.votes),
+        "candidate-votes",
+      );
     name.append(
       element("div", candidate.party || "Party unavailable", "party"),
     );
@@ -435,6 +460,14 @@ function renderStatePanel() {
       element(
         "p",
         "Kentucky combines absentee votes. Separate early, mail and provisional counts are unavailable. Precinct reporting status is not a percentage of votes counted.",
+        "empty",
+      ),
+    );
+  if (state.county_detail === false)
+    target.append(
+      element(
+        "p",
+        "Race totals only. County results and vote-method breakdowns are unavailable in this adapter.",
         "empty",
       ),
     );
@@ -482,18 +515,17 @@ function renderMetadata() {
     : publication?.publication_id || "None yet";
   $("source-link").textContent = national
     ? "Official state election agencies ↗"
-    : view.scope === "NC"
-      ? "NC State Board of Elections ↗"
-      : "Kentucky Secretary of State ↗";
+    : state.name + " election results ↗";
   $("source-link").href = national
     ? "https://www.fec.gov/introduction-campaign-finance/election-results-and-voting-information/"
-    : view.scope === "NC"
-      ? "https://er.ncsbe.gov/"
-      : "https://vrsws.sos.ky.gov/liveresults/";
+    : state.source_page;
 }
 function renderControls() {
   const national = view.scope === "US",
     state = data.states[view.scope];
+  const aggregate =
+    !national && state.county_detail === false && view.office !== "house";
+  if (aggregate) view.county = null;
   $("page-title").textContent = national ? "United States" : state.name;
   document.title = `${national ? "United States" : state.name} · ${offices[view.office]} · 2026 Results`;
   for (const b of document.querySelectorAll("[data-office]"))
@@ -502,7 +534,7 @@ function renderControls() {
   $("national").hidden = national;
   $("overview").hidden = national || !view.county;
   $("map-title").textContent =
-    `${offices[view.office]} · ${national ? "National results" : view.office === "house" ? "District results" : "County results"}`;
+    `${offices[view.office]} · ${national ? "National results" : view.office === "house" ? "District results" : aggregate ? "State totals · county detail unavailable" : "County results"}`;
   $("map-description").textContent = national
     ? "Select a covered state to explore its returns."
     : "Color shows the leading candidate’s party, not a race call.";
@@ -539,6 +571,10 @@ function renderControls() {
     : view.office === "house"
       ? raceFor(view.scope)
       : view.county || "";
+  $("area").disabled = aggregate;
+  $("coverage-footer").textContent =
+    "Refreshes every 15 seconds · Coverage: " +
+    Object.keys(data.coverage).join(", ");
   $("coverage-label").textContent = national
     ? `${Object.keys(data.coverage).length} states covered · ${Object.keys(data.coverage).flatMap(racesFor).length} races for this office`
     : `${state.name} · ${racesFor(view.scope).length} covered races for this office`;
@@ -602,7 +638,7 @@ async function refresh() {
 }
 async function start() {
   try {
-    const response = await fetch("/us-map.json?v=multistate1");
+    const response = await fetch("/us-map.json?v=expansion2");
     if (!response.ok) throw Error("Map unavailable");
     geometry.US = await response.json();
     await refresh();

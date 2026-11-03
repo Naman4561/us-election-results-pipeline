@@ -208,6 +208,7 @@ def main():
                 "viewBox": [0, 0, 1200, 680],
                 "plan": national["plan"],
                 "state": code,
+                "outline": {"id": code, "name": feature["attributes"]["NAME"], **draw(feature)},
                 "sources": {"counties": county_source, "districts": sources["districts"]},
                 "counties": [
                     {
