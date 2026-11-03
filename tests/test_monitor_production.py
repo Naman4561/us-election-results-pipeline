@@ -91,6 +91,68 @@ class MonitorTests(unittest.TestCase):
     def test_two_states_with_unchanged_votes_and_recent_checks_are_healthy(self):
         self.assertEqual(self.assess(), {})
 
+    def test_catalog_adds_enabled_states_and_ignores_registered_pending_states(self):
+        from election_pipeline.deployment import catalog
+        from election_pipeline.settings import CollectorSettings
+
+        identity, revision = "sha256:" + "a" * 64, "b" * 40
+        value = {
+            "version": 1,
+            "generation": 0,
+            "sources": {},
+            "baseline": {
+                "source_ids": list(self.sources),
+                "image_id": identity,
+                "revision": revision,
+            },
+        }
+        for name, source in self.sources.items():
+            value["sources"][name] = catalog.entry(
+                source,
+                CollectorSettings(),
+                image_id=identity,
+                revision=revision,
+                release_path=self.root,
+                worker="baseline",
+                status="test",
+            )
+        extra = Source("ga_test", "GA", "2026-11-03", "https://example.com/ga.zip")
+        value["sources"]["ga_test"] = catalog.entry(
+            extra,
+            CollectorSettings(),
+            image_id=identity,
+            revision=revision,
+            release_path=self.root,
+            worker="expansion",
+            status="test",
+        )
+        path = self.root / "catalog.json"
+        catalog.write(path, value)
+        self.prod["IMAGE_TAG"] = revision
+        self.config["DEPLOYMENT_CATALOG"] = str(path)
+        payload = {
+            "mode": "published",
+            "states": {
+                code: {
+                    "availability": "available",
+                    "races": {"sample": {}},
+                    "publication": {"id": "p"},
+                }
+                for code in ("NC", "MN")
+            },
+        }
+        with patch(
+            "election_pipeline.deployment.containers.inspect_image",
+            return_value=(identity, revision),
+        ):
+            self.assertEqual(self.assess(dashboard=payload), {})
+            value["sources"]["ga_test"].update(enabled=True, public=True)
+            catalog.write(path, value)
+            issues = self.assess(dashboard=payload)
+        self.assertIn("pipeline/ga_test", issues)
+        self.assertIn("poll/ga_test", issues)
+        self.assertIn("dashboard/GA", issues)
+
     def test_cached_run_success_does_not_hide_stale_official_poll(self):
         atomic_json(
             self.root / "data/state/nc_test.json",

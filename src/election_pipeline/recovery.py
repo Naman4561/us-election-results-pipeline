@@ -61,7 +61,7 @@ def safe_child(root, relative):
     return result
 
 
-def inventory(conn):
+def inventory(conn, schemas=SCHEMAS):
     """Fingerprint every business/audit table in one DB transaction."""
     tables = conn.execute(
         """
@@ -71,7 +71,7 @@ def inventory(conn):
           AND table_type = 'BASE TABLE'
         ORDER BY table_schema, table_name
         """,
-        (list(SCHEMAS),),
+        (list(schemas),),
     ).fetchall()
 
     found = {row["table_schema"] for row in tables}
@@ -196,7 +196,7 @@ def copy_files(source, destination):
             shutil.copy2(path, target)
 
 
-def backup(root, data_dir, config, db, destination, service, *, compose_args=()):
+def backup(root, data_dir, config, db, destination, service, *, compose_args=(), catalog=None):
     """Capture files and a dump using the inventory's DB snapshot."""
     root = Path(root).resolve()
     data_dir = Path(data_dir).resolve()
@@ -206,6 +206,13 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=())
         raise ValueError("Choose a backup destination outside the live data directory")
 
     _, sources = load_config(config)
+    database_schemas = SCHEMAS
+    if catalog is not None:
+        from election_pipeline.deployment import catalog as registry
+
+        registry.validate(catalog)
+        sources = registry.sources(catalog)
+        database_schemas = registry.schemas(catalog)
 
     identity = "backup_" + uuid.uuid4().hex
 
@@ -237,13 +244,13 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=())
 
         snapshot = conn.execute("SELECT pg_export_snapshot() AS id").fetchone()["id"]
 
-        manifest["database_inventory"] = inventory(conn)
+        manifest["database_inventory"] = inventory(conn, database_schemas)
         manifest["database_schemas"] = [
             row["schema_name"]
             for row in conn.execute(
                 "SELECT schema_name FROM information_schema.schemata WHERE schema_name=ANY(%s) "
                 "ORDER BY schema_name",
-                (list(SCHEMAS),),
+                (list(database_schemas),),
             ).fetchall()
         ]
 
@@ -262,6 +269,55 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=())
                 raise ValueError("Missing/corrupt raw archive for snapshot: " + row["raw_sha256"])
 
         shutil.copy2(config, temporary / "sources.toml")
+
+        if catalog is not None:
+            atomic_json(temporary / "deployment-catalog.json", catalog)
+            # Preserve all pinned collector releases, not just the maintenance checkout.
+            releases = {}
+            for entry in catalog["sources"].values():
+                revision, release = entry["revision"], Path(entry["release_path"])
+                if revision in releases:
+                    continue
+                actual = subprocess.check_output(
+                    ["git", "-C", str(release), "rev-parse", "HEAD"], text=True
+                ).strip()
+                if actual != revision:
+                    raise ValueError("Registered release checkout changed")
+                from election_pipeline.deployment.containers import release_hash
+
+                if release_hash(release) != entry["release_sha256"]:
+                    raise ValueError("Registered release files changed")
+                releases[revision] = str(release)
+                target = temporary / "releases" / revision
+                for directory in (
+                    "src",
+                    "scripts",
+                    "migrations",
+                    "config",
+                    "dbt/models",
+                    "dbt/macros",
+                    "dbt/tests",
+                    "deploy",
+                ):
+                    copy_files(release / directory, target / directory)
+                for pattern in (
+                    "pyproject.toml",
+                    "requirements-dev.txt",
+                    "Dockerfile",
+                    "compose.production.yml",
+                    "dbt/*.yml",
+                ):
+                    for file in release.glob(pattern):
+                        destination_file = target / file.relative_to(release)
+                        destination_file.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(file, destination_file)
+            manifest["collector_releases"] = releases
+            for dashboard in (catalog.get("dashboard", {}), catalog.get("previous_dashboard", {})):
+                if dashboard.get("coverage_dir"):
+                    coverage = Path(dashboard["coverage_dir"]) / "catalog.json"
+                    target = temporary / "dashboard-coverage" / dashboard["name"] / "catalog.json"
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(coverage, target)
 
         for directory in ("src", "scripts", "migrations"):
             copy_files(
@@ -452,7 +508,7 @@ def check_restore(
 
         with connect(temporary_db) as restored, restored.transaction():
             restored.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
-            actual = inventory(restored)
+            actual = inventory(restored, manifest.get("database_schemas", SCHEMAS))
             if actual != manifest["database_inventory"]:
                 raise ValueError("Restored table counts/hashes do not match the backup snapshot")
 
@@ -466,27 +522,35 @@ def check_restore(
                     raise ValueError(
                         "Raw archive unavailable for snapshot: " + snapshot["raw_sha256"]
                     )
+            restored_publications = {
+                row["source_id"]: str(row["publication_id"])
+                for row in restored.execute(
+                    "SELECT source_id, publication_id FROM serving.current_publications"
+                ).fetchall()
+            }
 
         with connect(temporary_db) as restored, restored.transaction():
             restored.execute("GRANT USAGE ON SCHEMA serving TO election_dashboard")
             restored.execute("GRANT SELECT ON ALL TABLES IN SCHEMA serving TO election_dashboard")
-            for state in STATES.values():
+            for schema in manifest.get("database_schemas", SCHEMAS):
+                if not re.fullmatch(r"[a-z]{2}", schema):
+                    continue
                 for table in (
                     "county_candidate_results",
                     "contest_candidate_results",
                     "county_absentee_demographics",
                     "state_absentee_demographics",
                 ):
-                    relation = state.schema + "." + table
+                    relation = schema + "." + table
                     if relation in manifest["database_inventory"]:
                         restored.execute(
                             sql.SQL("GRANT USAGE ON SCHEMA {} TO election_dashboard").format(
-                                sql.Identifier(state.schema)
+                                sql.Identifier(schema)
                             )
                         )
                         restored.execute(
                             sql.SQL("GRANT SELECT ON {} TO election_dashboard").format(
-                                sql.Identifier(state.schema, table)
+                                sql.Identifier(schema, table)
                             )
                         )
             if writer_role:
@@ -501,6 +565,28 @@ def check_restore(
                 sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(reader_role)).as_string()
             )
             restored.execute("SELECT count(*) FROM serving.current_publications").fetchone()
+            published_tables = {
+                "county_candidate_results",
+                "contest_candidate_results",
+                "county_absentee_demographics",
+                "state_absentee_demographics",
+            }
+            for relation in manifest["database_inventory"]:
+                schema, table = relation.split(".", 1)
+                if not re.fullmatch(r"[a-z]{2}", schema):
+                    continue
+                if table in published_tables:
+                    restored.execute(
+                        sql.SQL("SELECT count(*) FROM {}").format(sql.Identifier(schema, table))
+                    ).fetchone()
+                    if restored.execute(
+                        "SELECT has_table_privilege(current_user, %s, 'UPDATE') AS ok", (relation,)
+                    ).fetchone()["ok"]:
+                        raise ValueError("Restored dashboard can change state publications")
+                elif restored.execute(
+                    "SELECT has_table_privilege(current_user, %s, 'SELECT') AS ok", (relation,)
+                ).fetchone()["ok"]:
+                    raise ValueError("Restored dashboard can read state ingestion tables")
 
             if restored.execute(
                 "SELECT has_table_privilege(current_user, "
@@ -517,6 +603,7 @@ def check_restore(
             outcome="passed",
             database_inventory=actual,
             raw_archives_verified=len(snapshots),
+            current_publications=restored_publications,
             writer_permissions_verified=bool(writer_role),
             reader_permissions_verified=True,
         )

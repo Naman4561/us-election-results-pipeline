@@ -1,5 +1,6 @@
 """Run the suite in a newly created disposable PostgreSQL database."""
 
+import argparse
 import os
 import subprocess
 import sys
@@ -12,6 +13,9 @@ from election_pipeline.database import connect, connection_settings
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--pattern", default="test*.py", help="Run only matching test modules")
+    args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     db = connection_settings(root / ".env")
 
@@ -40,6 +44,8 @@ def main():
                 "discover",
                 "-s",
                 "tests",
+                "--pattern",
+                args.pattern,
                 "-v",
             ],
             cwd=root,

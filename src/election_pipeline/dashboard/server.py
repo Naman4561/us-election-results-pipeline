@@ -332,11 +332,18 @@ def national_payload(providers, demo=False):
         "mode": "demo" if demo else "published",
         "calendar": calendar,
         "states": states,
-        "coverage": {code: list(state.races) for code, state in STATES.items()},
+        "coverage": {code: list(STATES[code].races) for code in providers},
     }
 
 
-def create_app(provider=None, demo=False, env_file=Path(".env.dashboard"), state_providers=None):
+def create_app(
+    provider=None,
+    demo=False,
+    env_file=Path(".env.dashboard"),
+    state_providers=None,
+    catalog_file=None,
+):
+    catalog_file = catalog_file or os.environ.get("DASHBOARD_CATALOG")
     if state_providers is None:
         settings = None if provider is not None or demo else dashboard_settings(env_file)
         state_providers = {}
@@ -352,6 +359,17 @@ def create_app(provider=None, demo=False, env_file=Path(".env.dashboard"), state
     if provider is not None:
         state_providers = {**state_providers, "NC": provider}
     provider = state_providers["NC"]
+
+    def approved_providers():
+        if not catalog_file:
+            return state_providers
+        from election_pipeline.deployment import catalog as registry
+
+        codes = registry.public_states(registry.read(catalog_file))
+        if not codes <= state_providers.keys():
+            raise ValueError("This dashboard image cannot serve all approved states")
+        return {code: state_providers[code] for code in sorted(codes)}
+
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
     app.add_middleware(GZipMiddleware, minimum_size=1000)
 
@@ -387,19 +405,28 @@ def create_app(provider=None, demo=False, env_file=Path(".env.dashboard"), state
 
     @app.get("/api/snapshot")
     def snapshot(request: Request):
-        return api_response(request, provider)
+        return api_response(request, lambda: approved_providers()["NC"]())
 
     @app.get("/api/national")
     def national(request: Request):
-        return api_response(request, lambda: national_payload(state_providers, demo))
+        return api_response(request, lambda: national_payload(approved_providers(), demo))
 
     @app.get("/api/states/{code}")
     def state_snapshot(code: str, request: Request):
-        if code not in state_providers:
+        try:
+            approved = approved_providers()
+        except Exception:
+            return Response(
+                '{"error":"Coverage configuration unavailable"}',
+                status_code=503,
+                media_type="application/json",
+                headers={"Cache-Control": "no-store"},
+            )
+        if code not in approved:
             return Response(
                 '{"error":"State outside coverage"}', status_code=404, media_type="application/json"
             )
-        return api_response(request, state_providers[code])
+        return api_response(request, approved[code])
 
     app.mount("/", StaticFiles(directory=STATIC, html=True), name="dashboard")
     return app

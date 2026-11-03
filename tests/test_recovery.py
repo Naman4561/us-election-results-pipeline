@@ -103,12 +103,18 @@ class RecoveryTests(unittest.TestCase):
     def test_restore_creates_and_drops_only_its_own_new_database(self):
         conn = MagicMock()
         conn.__enter__.return_value = conn
-        conn.execute.return_value.fetchall.return_value = [
+        snapshots = [
             {
                 "raw_path": "raw/example.zip",
                 "raw_sha256": hashlib.sha256(b"raw bytes").hexdigest(),
             }
         ]
+        conn.execute.side_effect = lambda statement, *args: MagicMock(
+            fetchall=lambda: []
+            if "SELECT source_id, publication_id" in str(statement)
+            else snapshots,
+            fetchone=lambda: {"ok": False},
+        )
         conn.execute.return_value.fetchone.return_value = {"ok": False}
 
         with (
@@ -167,6 +173,50 @@ class RecoveryTests(unittest.TestCase):
         self.assertEqual(result["outcome"], "failed")
         self.assertEqual(conn.execute.call_count, 1)
         self.assertNotIn("temporary_database_removed", result)
+
+    def test_restore_uses_manifest_schemas_and_verifies_future_state_reader_access(self):
+        manifest = json.loads((self.root / "manifest.json").read_text())
+        manifest["database_schemas"] = ["ops", "landing", "serving", "ga"]
+        expected = {
+            **self.inventory,
+            "ga.contest_candidate_results": {"rows": 3, "sha256": "abc"},
+            "ga.results": {"rows": 3, "sha256": "def"},
+        }
+        manifest["database_inventory"] = expected
+        (self.root / "manifest.json").write_text(json.dumps(manifest))
+        conn = MagicMock()
+        conn.__enter__.return_value = conn
+
+        def execute(statement, *args):
+            statement = statement if isinstance(statement, str) else statement.as_string()
+            return MagicMock(
+                fetchone=lambda: {"ok": False},
+                fetchall=lambda: (
+                    [{"source_id": "ga_2026_general", "publication_id": "future-publication"}]
+                    if "SELECT source_id, publication_id" in statement
+                    else []
+                ),
+            )
+
+        conn.execute.side_effect = execute
+        with (
+            patch.object(recovery, "connect", return_value=conn),
+            patch.object(recovery, "inventory", return_value=expected) as inventory,
+            patch.object(recovery, "docker_command"),
+        ):
+            result = recovery.check_restore(self.root, self.db, self.root, "postgres")
+        self.assertEqual(result["outcome"], "passed", result)
+        self.assertIn("ga", inventory.call_args.args[1])
+        self.assertEqual(result["current_publications"]["ga_2026_general"], "future-publication")
+        statements = [
+            c.args[0] if isinstance(c.args[0], str) else c.args[0].as_string()
+            for c in conn.execute.call_args_list
+        ]
+        self.assertIn(
+            'GRANT SELECT ON "ga"."contest_candidate_results" TO election_dashboard', statements
+        )
+        self.assertIn('SELECT count(*) FROM "ga"."contest_candidate_results"', statements)
+        self.assertNotIn('GRANT SELECT ON "ga"."results" TO election_dashboard', statements)
 
     def test_bad_bundle_cannot_create_a_database(self):
         self.dump.write_bytes(b"bad")

@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 import time
 import zipfile
+from contextlib import nullcontext
 from pathlib import Path
 
 from dotenv import dotenv_values
@@ -137,6 +138,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("backup", "check-restore"))
     parser.add_argument("--backup-id")
+    parser.add_argument("--catalog-file", type=Path)
     parser.add_argument(
         "--env-file",
         type=Path,
@@ -196,15 +198,20 @@ def main():
         data = Path(prod["DATA_DIR"])
 
         if args.action == "backup":
-            result = backup(
-                ROOT,
-                data,
-                ROOT / "config/sources.toml",
-                db,
-                args.destination,
-                "db",
-                compose_args=compose,
-            )
+            from election_pipeline.deployment import catalog as registry
+
+            with registry.locked(args.catalog_file) if args.catalog_file else nullcontext():
+                catalog = registry.read(args.catalog_file) if args.catalog_file else None
+                result = backup(
+                    ROOT,
+                    data,
+                    ROOT / "config/sources.toml",
+                    db,
+                    args.destination,
+                    "db",
+                    compose_args=compose,
+                    catalog=catalog,
+                )
             bundle = Path(result["backup_dir"])
             result["backup_id"] = bundle.name
             archive, receipt = pack_bundle(bundle, prod["IMAGE_TAG"])

@@ -1,0 +1,15 @@
+[Unit]
+Description=Collect admitted expansion states using individually pinned images
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+OnFailure=election-monitor.service
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=@CONTROL_ROOT@
+UMask=0077
+Nice=10
+ExecStart=@CONTROL_ROOT@/.venv/bin/python @CONTROL_ROOT@/scripts/deploy.py run
+TimeoutStartSec=6min
