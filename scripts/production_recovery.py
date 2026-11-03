@@ -103,6 +103,7 @@ def upload_bundle(config, bundle, archive, receipt):
 
     # Uploaded last: a partial upload has no completion record.
     aws_copy(config, receipt_path, location + "complete.json")
+    atomic_json(bundle / "uploaded.json", receipt)
 
 
 def unpack_bundle(archive, destination, receipt):

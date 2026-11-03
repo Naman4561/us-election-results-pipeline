@@ -1,0 +1,10 @@
+[Unit]
+Description=Upload an election backup every hour
+
+[Timer]
+OnCalendar=*-*-* *:02:00
+Persistent=true
+AccuracySec=1s
+
+[Install]
+WantedBy=timers.target

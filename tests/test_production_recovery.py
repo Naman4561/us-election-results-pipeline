@@ -272,6 +272,41 @@ class ProductionRecoveryTests(unittest.TestCase):
             result["writer_permissions_verified"]
         )
 
+    def test_local_marker_requires_both_remote_uploads(self):
+        config = {
+            "BACKUP_BUCKET": "private-bucket",
+            "BACKUP_PREFIX": "election-pipeline",
+        }
+        marker = self.bundle / "uploaded.json"
+
+        failures = (
+            [RuntimeError("archive failed")],
+            [None, RuntimeError("receipt failed")],
+        )
+        for responses in failures:
+            with patch.object(
+                job, "aws_copy", side_effect=responses
+            ):
+                with self.assertRaises(RuntimeError):
+                    job.upload_bundle(
+                        config, self.bundle,
+                        self.archive, self.receipt,
+                    )
+            self.assertFalse(marker.exists())
+
+        with patch.object(
+            job, "aws_copy", return_value=None
+        ):
+            job.upload_bundle(
+                config, self.bundle,
+                self.archive, self.receipt,
+            )
+
+        self.assertEqual(
+            json.loads(marker.read_text()),
+            self.receipt,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,19 @@
+[Unit]
+Description=Upload an election backup and retain three uploaded local bundles
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/election-pipeline
+UMask=0077
+Nice=10
+ExecStart=/opt/election-pipeline/.venv/bin/python scripts/production_recovery.py backup
+ExecStartPost=/opt/election-pipeline/.venv/bin/python scripts/prune_backups.py --keep 3 --apply
+Restart=on-failure
+RestartSec=30s
+TimeoutStartSec=40min
