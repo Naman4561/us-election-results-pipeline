@@ -1,7 +1,29 @@
 {$SITE_DOMAIN} {
     encode zstd gzip
 
-    reverse_proxy dashboard:8000
+    @unsupported not method GET HEAD
+    @assets path /*.js /*.css /*-map.json
+
+    route {
+        respond @unsupported "Method not allowed" 405
+
+        handle /api/* {
+            header >Cache-Control "no-store"
+            reverse_proxy dashboard:8000
+        }
+
+        handle @assets {
+            header Cache-Control "public, max-age=300" {
+                match status 2xx
+            }
+            reverse_proxy dashboard:8000
+        }
+
+        handle {
+            header >Cache-Control "no-cache"
+            reverse_proxy dashboard:8000
+        }
+    }
 
     log {
         output stdout
