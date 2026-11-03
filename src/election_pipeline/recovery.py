@@ -127,6 +127,7 @@ def docker_command(
     *,
     stdin=None,
     stdout=None,
+    compose_args=(),
 ):
     """Stream binary files without a shell or password arguments."""
     if not re.fullmatch(
@@ -140,7 +141,8 @@ def docker_command(
         raise ValueError("Invalid Compose service name")
 
     command = [
-        "docker", "compose", "exec", "-T", service, program
+        "docker", "compose", *compose_args,
+        "exec", "-T", service, program,
     ]
 
     needs_connection = (
@@ -204,7 +206,7 @@ def copy_files(source, destination):
             shutil.copy2(path, target)
 
 
-def backup(root, data_dir, config, db, destination, service):
+def backup(root, data_dir, config, db, destination, service, *, compose_args=()):
     """Capture files and a dump using the inventory's DB snapshot."""
     root = Path(root).resolve()
     data_dir = Path(data_dir).resolve()
@@ -328,6 +330,7 @@ def backup(root, data_dir, config, db, destination, service):
                     *["--schema=" + schema for schema in SCHEMAS],
                 ],
                 stdout=handle,
+                compose_args=compose_args,
             )
             handle.flush()
             os.fsync(handle.fileno())
@@ -343,6 +346,7 @@ def backup(root, data_dir, config, db, destination, service):
                 "pg_restore",
                 ["--list"],
                 stdin=handle,
+                compose_args=compose_args,
             )
 
     manifest["finished_at"] = utc_now()
@@ -390,8 +394,215 @@ def verify_bundle(directory):
 
     return manifest
 
+def check_restore(
+    root,
+    db,
+    directory,
+    service,
+    *,
+    compose_args=(),
+    writer_role=None,
+    reader_role="election_dashboard",
+    report_dir=None,
+):
+    """Restore into a new temporary database, verify it, then remove it."""
+    directory = Path(directory).resolve()
+    manifest = verify_bundle(directory)
 
-def check_restore(root, db, directory, service):
+    for role in (writer_role, reader_role):
+        if role is not None and not re.fullmatch(r"[a-z][a-z0-9_]{0,62}", role):
+            raise ValueError("Invalid restore role name")
+
+    name = "election_restore_" + uuid.uuid4().hex[:16] + "_test"
+    temporary_db = {**db, "dbname": name}
+    report = {
+        "outcome": "running",
+        "started_at": utc_now(),
+        "temporary_database": name,
+        "backup_dir": str(directory),
+    }
+    path = Path(report_dir or Path(root) / "data/recovery_checks") / f"{name}.json"
+    created = False
+
+    try:
+        with connect({**db, "dbname": "postgres"}) as admin:
+            admin.execute(
+                sql.SQL("CREATE DATABASE {} TEMPLATE template0").format(
+                    sql.Identifier(name)
+                )
+            )
+            created = True
+
+        if writer_role:
+            with connect(temporary_db) as admin:
+                admin.execute(
+                    sql.SQL("REVOKE ALL ON DATABASE {} FROM PUBLIC").format(
+                        sql.Identifier(name)
+                    )
+                )
+                admin.execute(
+                    sql.SQL(
+                        "GRANT CONNECT, CREATE, TEMPORARY ON DATABASE {} TO {}"
+                    ).format(
+                        sql.Identifier(name),
+                        sql.Identifier(writer_role),
+                    )
+                )
+                admin.execute(
+                    sql.SQL("GRANT CONNECT ON DATABASE {} TO {}").format(
+                        sql.Identifier(name),
+                        sql.Identifier(reader_role),
+                    )
+                )
+
+        with (directory / "database.dump").open("rb") as handle:
+            docker_command(
+                root,
+                service,
+                temporary_db,
+                "pg_restore",
+                [
+                    "--exit-on-error",
+                    "--single-transaction",
+                    "--no-owner",
+                    "--no-privileges",
+                    *(["--role=" + writer_role] if writer_role else []),
+                ],
+                stdin=handle,
+                compose_args=compose_args,
+            )
+
+        if writer_role:
+            with (
+                connect(temporary_db) as restored,
+                restored.transaction(force_rollback=True),
+            ):
+                restored.execute(
+                    sql.SQL("SET LOCAL ROLE {}").format(
+                        sql.Identifier(writer_role)
+                    )
+                )
+                for table in manifest["database_inventory"]:
+                    schema, relation = table.split(".", 1)
+                    owner = restored.execute(
+                        "SELECT pg_get_userbyid(c.relowner) AS owner "
+                        "FROM pg_class c "
+                        "JOIN pg_namespace n ON n.oid=c.relnamespace "
+                        "WHERE n.nspname=%s AND c.relname=%s",
+                        (schema, relation),
+                    ).fetchone()
+                    if owner["owner"] != writer_role:
+                        raise ValueError(
+                            "Restored table ownership does not match the writer"
+                        )
+
+                restored.execute(
+                    "UPDATE ops.sources SET source_id=source_id WHERE false"
+                )
+                restored.execute(
+                    "UPDATE serving.current_publications "
+                    "SET publication_id=publication_id WHERE false"
+                )
+
+        with connect(temporary_db) as restored, restored.transaction():
+            restored.execute(
+                "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY"
+            )
+            actual = inventory(restored)
+            if actual != manifest["database_inventory"]:
+                raise ValueError(
+                    "Restored table counts/hashes do not match the backup snapshot"
+                )
+
+            snapshots = restored.execute(
+                "SELECT raw_path, raw_sha256 FROM ops.snapshots"
+            ).fetchall()
+
+            for snapshot in snapshots:
+                raw = safe_child(directory / "data", snapshot["raw_path"])
+                if (
+                    not raw.is_file()
+                    or file_hash(raw) != snapshot["raw_sha256"]
+                ):
+                    raise ValueError(
+                        "Raw archive unavailable for snapshot: "
+                        + snapshot["raw_sha256"]
+                    )
+
+        with connect(temporary_db) as restored, restored.transaction():
+            restored.execute(
+                "GRANT USAGE ON SCHEMA serving TO election_dashboard"
+            )
+            restored.execute(
+                "GRANT SELECT ON ALL TABLES IN SCHEMA serving "
+                "TO election_dashboard"
+            )
+            if writer_role:
+                restored.execute(
+                    sql.SQL(
+                        "ALTER DEFAULT PRIVILEGES FOR ROLE {} IN SCHEMA serving "
+                        "GRANT SELECT ON TABLES TO election_dashboard"
+                    ).format(sql.Identifier(writer_role))
+                )
+
+            restored.execute(
+                sql.SQL("SET LOCAL ROLE {}")
+                .format(sql.Identifier(reader_role))
+                .as_string()
+            )
+            restored.execute(
+                "SELECT count(*) FROM serving.current_publications"
+            ).fetchone()
+
+            if restored.execute(
+                "SELECT has_table_privilege(current_user, "
+                "'serving.current_publications', 'UPDATE') AS ok"
+            ).fetchone()["ok"]:
+                raise ValueError(
+                    "Restored dashboard role can change the current publication"
+                )
+
+            if restored.execute(
+                "SELECT has_schema_privilege("
+                "current_user, 'landing', 'USAGE') AS ok"
+            ).fetchone()["ok"]:
+                raise ValueError(
+                    "Restored dashboard role can access landing data"
+                )
+
+        report.update(
+            outcome="passed",
+            database_inventory=actual,
+            raw_archives_verified=len(snapshots),
+            writer_permissions_verified=bool(writer_role),
+            reader_permissions_verified=True,
+        )
+
+    except Exception as error:
+        report.update(
+            outcome="failed",
+            error=str(error).replace(db["password"], "[redacted]"),
+        )
+
+    finally:
+        if created:
+            try:
+                with connect({**db, "dbname": "postgres"}) as admin:
+                    admin.execute(
+                        sql.SQL("DROP DATABASE {}").format(sql.Identifier(name))
+                    )
+                report["temporary_database_removed"] = True
+            except Exception as error:
+                report["outcome"] = "failed"
+                report["cleanup_error"] = str(error).replace(
+                    db["password"], "[redacted]"
+                )
+
+        report["finished_at"] = utc_now()
+        report["report_path"] = str(path)
+        atomic_json(path, report)
+
+    return report
     """Restore into this call's new temporary database, then remove it."""
     directory = Path(directory).resolve()
     manifest = verify_bundle(directory)
