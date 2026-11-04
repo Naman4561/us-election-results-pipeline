@@ -17,7 +17,8 @@ COPY pyproject.toml README.md requirements-dev.txt ./
 COPY src ./src
 
 # Publication fingerprints expect source files underneath /app.
-RUN python -m pip install --no-cache-dir \
+RUN --mount=type=cache,target=/root/.cache/pip \
+    PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=8 python -m pip install \
     -e '.[postgres,transform,dashboard,deployment]' \
     -r requirements-dev.txt
 
