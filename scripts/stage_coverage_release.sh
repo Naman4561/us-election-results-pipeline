@@ -28,7 +28,9 @@ if [[ "$(git -C "$release" rev-parse HEAD)" != "$revision" || -n "$(git -C "$rel
     exit 1
 fi
 
+python3 -m venv "$release/.venv"
 PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=8 "$release/.venv/bin/python" -m pip install -e "${release}[postgres,deployment]"
+docker build --build-arg "VCS_REF=$revision" --tag "election-pipeline:$revision" "$release"
 
 # Run the Linux-only controls tests with no production mounts, credentials or network.
 docker run --rm --network none --cpus 0.5 --memory 768m --memory-swap 768m --cap-drop ALL --security-opt no-new-privileges "election-pipeline:$revision" python -m unittest discover -s tests -v

@@ -24,11 +24,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 COPY config ./config
 COPY dbt ./dbt
-COPY migrations ./migrations
-COPY scripts ./scripts
-COPY tests ./tests
-COPY config ./config
-COPY dbt ./dbt
 COPY deploy ./deploy
 COPY migrations ./migrations
 COPY scripts ./scripts
