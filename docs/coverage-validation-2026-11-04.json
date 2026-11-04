@@ -1,0 +1,215 @@
+{
+  "checked_at": "2026-11-04T19:50:40.163382+00:00",
+  "base_commit": "47a6fbe4df5a0253b26fa9253416d0c031dbfe5f",
+  "scope": "Senate, U.S. House and governor races only",
+  "official_file_checks": {
+    "NC": {
+      "source_id": "nc_2026_general_all",
+      "source_signature": "935b5e01e8d8afaa4a509960fa6a222299edeac70d15183728ae9c9d7c0877fa",
+      "races": 15,
+      "result": {
+        "outcome": "parsed",
+        "output_rows": 19656,
+        "contests": [
+          "NC-01",
+          "NC-02",
+          "NC-03",
+          "NC-04",
+          "NC-05",
+          "NC-06",
+          "NC-07",
+          "NC-08",
+          "NC-09",
+          "NC-10",
+          "NC-11",
+          "NC-12",
+          "NC-13",
+          "NC-14",
+          "NC-SEN"
+        ],
+        "internal_reconciliation": "passed",
+        "county_reconciliation": null,
+        "county_counts": null,
+        "reference_comparison": {
+          "status": "not_provided"
+        }
+      },
+      "files": [
+        {
+          "url": "https://s3.amazonaws.com/dl.ncsbe.gov/ENRS/2026_11_03/results_pct_20261103.zip",
+          "status": 200,
+          "content_type": "application/x-zip-compressed",
+          "last_modified": "Wed, 04 Nov 2026 11:40:40 GMT",
+          "bytes": 2091833,
+          "sha256": "5d9ac397a8d8dc6b8b2f2bb5faf120361edc0de5aaaf707540bc7357040101d9"
+        }
+      ]
+    },
+    "MN": {
+      "source_id": "mn_2026_general_all",
+      "source_signature": "3a5a4f70dffa986d7c5e3dab8605283d05076cedfb08001d9bec457cd074a8da",
+      "races": 10,
+      "result": {
+        "outcome": "parsed",
+        "output_rows": 1117,
+        "contests": [
+          "MN-01",
+          "MN-02",
+          "MN-03",
+          "MN-04",
+          "MN-05",
+          "MN-06",
+          "MN-07",
+          "MN-08",
+          "MN-GOV",
+          "MN-SEN"
+        ],
+        "internal_reconciliation": "passed",
+        "county_reconciliation": "passed",
+        "county_counts": {
+          "MN-SEN": 87,
+          "MN-08": 21,
+          "MN-03": 2,
+          "MN-05": 3,
+          "MN-06": 7,
+          "MN-07": 38,
+          "MN-01": 21,
+          "MN-02": 5,
+          "MN-04": 2,
+          "MN-GOV": 87
+        },
+        "reference_comparison": {
+          "status": "not_provided"
+        }
+      },
+      "files": [
+        {
+          "bundle_member": "senate-county.txt",
+          "url": "https://electionresultsfiles.sos.mn.gov/20261103/ussenatecty.txt",
+          "status": 200,
+          "content_type": "text/plain",
+          "last_modified": "Wed, 04 Nov 2026 19:18:13 GMT",
+          "bytes": 31787,
+          "sha256": "eeeee22f136e614814a4f47437de564bcc3ee176c2f14d2f3f57d084770f3cf9"
+        },
+        {
+          "bundle_member": "senate.txt",
+          "url": "https://electionresultsfiles.sos.mn.gov/20261103/ussenate.txt",
+          "status": 200,
+          "content_type": "text/plain",
+          "last_modified": "Wed, 04 Nov 2026 19:18:12 GMT",
+          "bytes": 399,
+          "sha256": "b2325d2b12210594de5d96a1a2fbaabaf76fddd52d0c60d750ea312fbb2715c0"
+        },
+        {
+          "bundle_member": "house-county.txt",
+          "url": "https://electionresultsfiles.sos.mn.gov/20261103/USHouseCty.txt",
+          "status": 200,
+          "content_type": "text/plain",
+          "last_modified": "Wed, 04 Nov 2026 19:18:13 GMT",
+          "bytes": 26997,
+          "sha256": "1a9169132794a634d0a02e526b2845d1d81c90ef66960a29297c5a9c761bf073"
+        },
+        {
+          "bundle_member": "house.txt",
+          "url": "https://electionresultsfiles.sos.mn.gov/20261103/USHouse.txt",
+          "status": 200,
+          "content_type": "text/plain",
+          "last_modified": "Wed, 04 Nov 2026 19:18:13 GMT",
+          "bytes": 2318,
+          "sha256": "7af63eda35baf1ee6ec6cc419dd0bb28dee48e0e91c81f2d759ec58009a9580b"
+        },
+        {
+          "bundle_member": "counties.txt",
+          "url": "https://electionresultsfiles.sos.mn.gov/20261103/Cntytbl.txt",
+          "status": 200,
+          "content_type": "text/plain",
+          "last_modified": "Mon, 02 Nov 2026 15:41:27 GMT",
+          "bytes": 1319,
+          "sha256": "1830c4b1993606049c397c7f318cf36db33219d660b1528ba4df074ab8e5a570"
+        },
+        {
+          "bundle_member": "governor.txt",
+          "url": "https://electionresultsfiles.sos.mn.gov/20261103/Governor.txt",
+          "status": 200,
+          "content_type": "text/plain",
+          "last_modified": "Wed, 04 Nov 2026 19:18:15 GMT",
+          "bytes": 397,
+          "sha256": "62982b77e3c465b721e2ff907d1bc11841b7ac11d6d75bcff89b0f9666067bb7"
+        },
+        {
+          "bundle_member": "governor-precinct.txt",
+          "url": "https://electionresultsfiles.sos.mn.gov/20261103/governorpct.txt",
+          "status": 200,
+          "content_type": "text/plain",
+          "last_modified": "Wed, 04 Nov 2026 19:18:16 GMT",
+          "bytes": 1501373,
+          "sha256": "1c21920e8065720bc5411e328f25d0587d31a3bd1a576cbd17ecac2f14209dd2"
+        }
+      ]
+    },
+    "NE": {
+      "source_id": "ne_2026_general_all",
+      "source_signature": "237f95f5213bbb5d2bde2a698fcbc549bf493f070825346becc41dc2dcc2f619",
+      "races": 5,
+      "result": {
+        "outcome": "parsed",
+        "output_rows": 21,
+        "contests": [
+          "NE-01",
+          "NE-02",
+          "NE-03",
+          "NE-GOV",
+          "NE-SEN"
+        ],
+        "internal_reconciliation": "passed",
+        "county_reconciliation": "not_available",
+        "county_counts": {},
+        "reference_comparison": {
+          "status": "not_provided"
+        }
+      },
+      "files": [
+        {
+          "bundle_member": "results.csv",
+          "url": "https://electionresults.nebraska.gov/resultsCSV.aspx?text=All&type=All&map=CTY",
+          "status": 200,
+          "bytes": 104736,
+          "sha256": "c0436872e3029d3b93fe5dde47f8079cf6fb7ad7cfa56ab4ded0d016f94f2455"
+        },
+        {
+          "bundle_member": "election.html",
+          "url": "https://electionresults.nebraska.gov/ResultsMedia.aspx",
+          "status": 200,
+          "content_type": "text/html; charset=utf-8",
+          "last_modified": null,
+          "bytes": 29285,
+          "sha256": "d4e456a078a952e168204407af00b883fcb78b4e45073b5a38a6b4b24487a9b7"
+        }
+      ]
+    }
+  },
+  "limits": [
+    "Internal reconciliation does not establish independent agreement with another publisher.",
+    "Native PostgreSQL/dbt builds must pass the disposable-database acceptance check locally and preparation on Lightsail.",
+    "Full Texas validation requires the Lightsail source; development request returned HTTP 403."
+  ],
+  "texas": {
+    "source_id": "tx_2026_general_all",
+    "races": 40,
+    "development_http_status": 403,
+    "offline_coverage_test": "passed with documented synthetic additions",
+    "production_gate": "Lightsail preparation plus isolated restore before activation"
+  },
+  "checks": {
+    "python_suite": {
+      "total": 221,
+      "passed": 203,
+      "skipped_postgresql": 18
+    },
+    "ruff": "passed",
+    "dashboard_node_tests": "passed",
+    "dbt_parse": "passed",
+    "bash_syntax": "passed"
+  }
+}

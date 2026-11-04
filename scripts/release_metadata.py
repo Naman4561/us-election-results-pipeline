@@ -17,7 +17,9 @@ def main():
     settings, sources = load_config(Path(__file__).resolve().parents[1] / "config/sources.toml")
     source = sources[args.source]
     state = state_adapter(source.state)
-    if source.dataset != "election_results" or state.source_id != source.source_id:
+    if source.dataset != "election_results" or (
+        state.source_id != source.source_id and not source.contests
+    ):
         raise ValueError("Expansion accepts registered result adapters only")
     print(
         json.dumps(
@@ -25,7 +27,7 @@ def main():
                 "source": asdict(source),
                 "settings": asdict(settings),
                 "code_sha256": collector_code_hash(),
-                "races": list(state.races),
+                "races": list(state.selected_races(source)),
             }
         )
     )

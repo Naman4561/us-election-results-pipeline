@@ -45,6 +45,30 @@ class State:
         }
 
     @property
+    def available_races(self):
+        """All supported offices; an explicit source contract selects its coverage."""
+        seats = {"NC": 14, "MN": 8, "NE": 3, "TX": 38}.get(self.code)
+        if seats is None:
+            return self.races
+        return {
+            **{f"{self.code}-SEN": "U.S. Senate"},
+            **({f"{self.code}-GOV": "Governor"} if self.code != "NC" else {}),
+            **{
+                f"{self.code}-{n:02}": f"U.S. House · {self.code}-{n:02}"
+                for n in range(1, seats + 1)
+            },
+        }
+
+    def selected_races(self, source):
+        if source.state != self.code:
+            raise ValueError("Race contract belongs to another state")
+        if not source.contests:
+            return self.races
+        if not set(source.contests) <= self.available_races.keys():
+            raise ValueError("Source selects an unsupported contest")
+        return {identity: self.available_races[identity] for identity in source.contests}
+
+    @property
     def parser(self):
         return import_module(f"election_pipeline.parsers.{self.schema}")
 

@@ -18,7 +18,7 @@ COPY src ./src
 
 # Publication fingerprints expect source files underneath /app.
 RUN python -m pip install --no-cache-dir \
-    -e '.[postgres,transform,dashboard]' \
+    -e '.[postgres,transform,dashboard,deployment]' \
     -r requirements-dev.txt
 
 COPY config ./config

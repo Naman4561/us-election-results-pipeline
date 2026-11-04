@@ -19,9 +19,12 @@ RACES = {
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
+    from election_pipeline.states import state_adapter
+
     if source.format != "bundle" or source.election_date != "2026-11-03":
         raise ValueError("Unsupported Nebraska source/election")
     rows, races = [], {}
+    wanted = state_adapter("NE").selected_races(source)
     with zipfile.ZipFile(archive_path) as archive:
         index = archive.read("election.html").decode("utf-8-sig")
         if "General Election November 3, 2026" not in re.sub(r"<[^>]*>", "", index):
@@ -37,10 +40,18 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             if len(values) != len(HEADER) or line > settings.max_csv_rows + 1:
                 raise ValueError("Unexpected Nebraska field count/row limit")
             raw = dict(zip(HEADER, (v.strip() for v in values)))
-            race = RACES.get(" ".join(raw["RaceName"].split()))
-            if not race:
+            title = " ".join(raw["RaceName"].split())
+            race = RACES.get(title)
+            if title == "For Representative in Congress - 2 Year Term":
+                match = re.fullmatch(r"District (0[1-3])", raw["AreaNum"])
+                if raw["AreaType"] != "CG" or not match:
+                    raise ValueError("Unexpected Nebraska congressional geography")
+                race = "NE-" + match[1]
+            if race not in wanted:
                 continue
-            if raw["AreaType"] != "SW" or raw["AreaNum"] or raw["VoteFor"] != "1":
+            if (
+                race in ("NE-SEN", "NE-GOV") and (raw["AreaType"] != "SW" or raw["AreaNum"])
+            ) or raw["VoteFor"] != "1":
                 raise ValueError("Nebraska result is not a single-choice statewide total")
             if race in races and races[race] != raw["RaceID"]:
                 raise ValueError("Duplicate Nebraska contest identity")

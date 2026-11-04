@@ -99,6 +99,8 @@ def initialize(path, root, prod):
         },
     }
     for name, source in sources.items():
+        if source.contests and name not in names:
+            continue
         value["sources"][name] = catalog.entry(
             source,
             settings,
@@ -152,7 +154,7 @@ def install_controls(config, unit_root=Path("/etc/systemd/system")):
     return {"outcome": "installed", "note": "Existing running jobs were left untouched"}
 
 
-def register(path, release, image, name, status, prod, config):
+def register(path, release, image, name, status, prod, config, *, replaces=None):
     controls_ready(config)
     identity, revision = containers.verify_release(release, image)
     metadata = containers.metadata(identity, name)
@@ -179,13 +181,36 @@ def register(path, release, image, name, status, prod, config):
     )
     entry["races"] = metadata["races"]
     entry["release_sha256"] = containers.release_hash(release)
+    if replaces:
+        entry["replaces"] = replaces
 
     def change(value):
         catalog.verify_baseline(value, prod)
-        if name in value["sources"] or any(
-            e["source"]["state"] == source.state for e in value["sources"].values()
-        ):
+        if name in value["sources"]:
             raise ValueError("Source/state is already owned; existing states cannot be replaced")
+        existing = [
+            (n, e)
+            for n, e in value["sources"].items()
+            if e["source"]["state"] == source.state and e["source"]["dataset"] == "election_results"
+        ]
+        if replaces:
+            if len(existing) != 1 or existing[0][0] != replaces:
+                raise ValueError("Replacement must name the state's one existing results source")
+            old = catalog.source_from_json(existing[0][1]["source"])
+            if (
+                any(
+                    getattr(old, k) != getattr(source, k)
+                    for k in ("state", "election_date", "dataset", "format")
+                )
+                or not source.contests
+                or not set(existing[0][1]["races"]) < set(entry["races"])
+                or status != existing[0][1]["status"]
+            ):
+                raise ValueError(
+                    "Replacement must preserve election/status and expand existing races"
+                )
+        elif existing:
+            raise ValueError("Source/state is already owned; use an explicit coverage replacement")
         # A legacy backup already in flight may not hold the new catalog lock.
         active = containers.command(
             ["systemctl", "show", "--value", "-p", "ActiveState", "election-backup.service"]
@@ -521,7 +546,7 @@ def activate(path, candidate, report, prod, config):
             raise ValueError("Catalog changed; create and check a fresh dashboard candidate")
         if candidate["name"] != "election-expansion-dashboard-" + candidate["id"]:
             raise ValueError("Invalid candidate identity")
-        prospective = json.loads(json.dumps(value))
+        prospective = catalog.prospective(value, candidate["sources"])
         for name in candidate["sources"]:
             entry = prospective["sources"][name]
             if (
@@ -530,7 +555,6 @@ def activate(path, candidate, report, prod, config):
             ):
                 raise ValueError("Only managed result sources may be activated")
             recovery_gate(entry, report, datetime.now(timezone.utc))
-            entry.update(enabled=True, public=True)
         payload = dashboard.check(candidate["url"], expected_states(prospective))
         for name in candidate["sources"]:
             entry = prospective["sources"][name]
@@ -542,7 +566,14 @@ def activate(path, candidate, report, prod, config):
                     "The privately checked publication changed; validate and back up again"
                 )
         old = Path(config["CADDYFILE"]).read_text(encoding="utf-8")
-        prospective["previous_dashboard"] = {**value["dashboard"], "caddyfile": old}
+        prospective["previous_dashboard"] = {
+            **value["dashboard"],
+            "caddyfile": old,
+            "source_flags": {
+                name: {key: entry[key] for key in ("enabled", "public")}
+                for name, entry in value["sources"].items()
+            },
+        }
         prospective["dashboard"] = candidate
         prospective["generation"] += 1
         switch_dashboard(path, value, prospective, candidate["name"], config)
@@ -554,18 +585,20 @@ def rollback(path, config):
         before = catalog.read(path)
         value = json.loads(json.dumps(before))
         previous = value["previous_dashboard"]
+        for name, entry in value["sources"].items():
+            if name in previous.get("source_flags", {}):
+                entry.update(previous["source_flags"][name])
+            if entry["source"]["state"] not in previous["states"] and entry["worker"] in (
+                "expansion",
+                "manual",
+            ):
+                entry.update(public=False, enabled=False)
         desired = {
             code: entry
             for code, entry in expected_states(value).items()
             if code in previous["states"]
         }
         dashboard.check(previous["url"], desired)
-        for entry in value["sources"].values():
-            if entry["source"]["state"] not in previous["states"] and entry["worker"] in (
-                "expansion",
-                "manual",
-            ):
-                entry.update(public=False, enabled=False)
         value["dashboard"] = {k: v for k, v in previous.items() if k != "caddyfile"}
         value.pop("previous_dashboard")
         value["generation"] += 1

@@ -86,11 +86,8 @@ test("national/state map navigation and coverage statuses", async (t) => {
   await settle();
   assert.equal(d.querySelectorAll("path.feature").length, 87);
   click('[data-office="governor"]');
-  assert(
-    d
-      .querySelector("#result-content")
-      .textContent.includes("outside our coverage"),
-  );
+  assert.equal(d.querySelector("#result-title").textContent, "Governor");
+  assert.equal(d.querySelectorAll("path.feature").length, 87);
   click("#national");
   click('path[data-id="NE"]');
   await settle();
@@ -100,15 +97,18 @@ test("national/state map navigation and coverage statuses", async (t) => {
     d.querySelector("#result-content").textContent.includes("Race totals only"),
   );
   click('[data-office="house"]');
-  assert(
-    d
-      .querySelector("#result-content")
-      .textContent.includes("outside our coverage"),
-  );
+  assert.equal(d.querySelectorAll("path.feature").length, 3);
+  click('path[data-id="NE-02"]');
+  assert.equal(d.querySelector("#result-title").textContent, "NE-02");
   click("#national");
   click('path[data-id="TX-35"]');
   await settle();
   assert.equal(d.querySelector("#result-title").textContent, "TX-35");
+  assert.equal(d.querySelectorAll("path.feature").length, 38);
+  const expandedCalls = calls;
+  click('path[data-id="TX-01"]');
+  assert.equal(d.querySelector("#result-title").textContent, "TX-01");
+  assert.equal(calls, expandedCalls, "Newly covered districts use cached results");
   click('[data-office="senate"]');
   for (const stats of Object.values(payload.states.TX.races["TX-SEN"].stats)) {
     Object.assign(stats, {

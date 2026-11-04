@@ -37,7 +37,10 @@ def configure(path, release, image, name, prod, config, max_age_seconds=21600):
             raise ValueError(
                 "Only an existing disabled, private expansion source can be configured"
             )
-        if meta["source"] != old["source"] or meta["races"] != old["races"]:
+        if (
+            catalog.source_from_json(meta["source"]) != catalog.source_from_json(old["source"])
+            or meta["races"] != old["races"]
+        ):
             raise ValueError("Manual mode cannot change source identity or watched races")
         entry = catalog.entry(
             source,

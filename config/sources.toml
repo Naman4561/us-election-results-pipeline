@@ -124,3 +124,53 @@ expected_members = ["index.html", "results.xlsx"]
 
 [sources.sc_2026_general.files]
 "index.html" = "https://scvotes.gov/2026-general-election-results/"
+
+[sources.tx_2026_general_all]
+state = "TX"
+election_date = "2026-11-03"
+url = "https://goelect.txelections.civixapps.com/api-ivis-system/api/s3/enr/election/53815"
+format = "bundle"
+primary_filename = "results.json"
+expected_members = ["results.json"]
+min_interval_seconds = 300
+contests = ["TX-SEN", "TX-GOV", "TX-01", "TX-02", "TX-03", "TX-04", "TX-05", "TX-06", "TX-07", "TX-08", "TX-09", "TX-10", "TX-11", "TX-12", "TX-13", "TX-14", "TX-15", "TX-16", "TX-17", "TX-18", "TX-19", "TX-20", "TX-21", "TX-22", "TX-23", "TX-24", "TX-25", "TX-26", "TX-27", "TX-28", "TX-29", "TX-30", "TX-31", "TX-32", "TX-33", "TX-34", "TX-35", "TX-36", "TX-37", "TX-38"]
+
+[sources.mn_2026_general_all]
+state = "MN"
+election_date = "2026-11-03"
+url = "https://electionresultsfiles.sos.mn.gov/20261103/ussenatecty.txt"
+format = "bundle"
+primary_filename = "senate-county.txt"
+expected_members = ["senate-county.txt", "senate.txt", "house-county.txt", "house.txt", "counties.txt", "governor.txt", "governor-precinct.txt"]
+min_interval_seconds = 300
+contests = ["MN-SEN", "MN-GOV", "MN-01", "MN-02", "MN-03", "MN-04", "MN-05", "MN-06", "MN-07", "MN-08"]
+
+[sources.mn_2026_general_all.files]
+"senate.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/ussenate.txt"
+"house-county.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/USHouseCty.txt"
+"house.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/USHouse.txt"
+"counties.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/Cntytbl.txt"
+"governor.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/Governor.txt"
+"governor-precinct.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/governorpct.txt"
+
+[sources.nc_2026_general_all]
+state = "NC"
+election_date = "2026-11-03"
+url = "https://s3.amazonaws.com/dl.ncsbe.gov/ENRS/2026_11_03/results_pct_20261103.zip"
+format = "zip"
+expected_members = ["results_pct_20261103.txt"]
+min_interval_seconds = 300
+contests = ["NC-SEN", "NC-01", "NC-02", "NC-03", "NC-04", "NC-05", "NC-06", "NC-07", "NC-08", "NC-09", "NC-10", "NC-11", "NC-12", "NC-13", "NC-14"]
+
+[sources.ne_2026_general_all]
+state = "NE"
+election_date = "2026-11-03"
+url = "https://electionresults.nebraska.gov/resultsCSV.aspx?text=All&type=All&map=CTY"
+format = "bundle"
+primary_filename = "results.csv"
+expected_members = ["results.csv", "election.html"]
+min_interval_seconds = 300
+contests = ["NE-SEN", "NE-GOV", "NE-01", "NE-02", "NE-03"]
+
+[sources.ne_2026_general_all.files]
+"election.html" = "https://electionresults.nebraska.gov/ResultsMedia.aspx"

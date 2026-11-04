@@ -84,7 +84,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         raise ValueError("Missing Texas source update text")
     datetime.strptime(updated, "%b %d, %Y %H:%M:%S")
 
-    wanted, selected, rows = state_adapter("TX").races, set(), []
+    wanted, selected, rows = state_adapter("TX").selected_races(source), set(), []
     for name, office in (("Federal", "FEDERAL OFFICES"), ("StateWide", "STATEWIDE OFFICES")):
         block = section(envelope, name)
         races = block.get("Races")
@@ -103,7 +103,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             if not race_id:
                 raise ValueError("Missing Texas race ID")
             candidates = race.get("Candidates")
-            if not isinstance(candidates, list) or len(candidates) < 2:
+            if not isinstance(candidates, list) or len(candidates) < (1 if source.contests else 2):
                 raise ValueError("Incomplete Texas candidate list")
             total = 0
             for candidate in candidates:

@@ -57,7 +57,15 @@ from {{ ref('stg_nc_releases') }} as r
 left join results as v
     on r.release_id = v.release_id
 where r.dataset = 'election_results'
-  and coalesce(v.contests, 0) <> 5
+  and coalesce(v.contests, 0) <> {{ var('nc_races') | length }}
+
+union all
+
+select release_id, 'unexpected_contest'
+from {{ ref('stg_nc_results') }}
+where contest_id not in (
+{% for race in var('nc_races') %}'{{ race }}'{% if not loop.last %},{% endif %}{% endfor %}
+)
 
 union all
 

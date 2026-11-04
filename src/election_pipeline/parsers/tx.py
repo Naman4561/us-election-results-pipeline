@@ -82,7 +82,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     ):
         raise ValueError("Texas page is incomplete or belongs to another election")
     selected, rows = set(), []
-    wanted = state_adapter("TX").races
+    wanted = state_adapter("TX").selected_races(source)
     for title, polling, table in parser.tables:
         race = {"U. S. SENATOR": "TX-SEN", "GOVERNOR": "TX-GOV"}.get(title)
         match = re.fullmatch(r"U\. S\. REPRESENTATIVE DISTRICT ([0-9]+)", title)

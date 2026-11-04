@@ -54,7 +54,7 @@ def release_metadata(conn, release_id):
     row = conn.execute(
         """
         SELECT r.release_id, r.snapshot_id, r.loaded_at, r.expected_rows,
-               r.loaded_rows, s.source_id, s.state, s.election_date,
+               r.loaded_rows, r.parser_report, s.source_id, s.state, s.election_date,
                s.dataset, s.source_url, f.raw_sha256,
                (SELECT min(a.finished_at) FROM ops.fetch_attempts a
                 WHERE a.snapshot_id = r.snapshot_id
@@ -150,6 +150,19 @@ def build_candidate(root, db, metadata, schema, artifacts):
         "election_date": str(metadata["election_date"]),
         source_variable: metadata["source_id"],
     }
+    if metadata["dataset"] == "election_results":
+        state = state_adapter(metadata["state"])
+        races = metadata.get("parser_report", {}).get("contests", list(state.races))
+        if (
+            not races
+            or len(races) != len(set(races))
+            or not set(races) <= state.available_races.keys()
+        ):
+            raise ValueError("Ingestion release has an invalid contest contract")
+        variables[state.schema + "_races"] = races
+        variables["allow_uncontested"] = (
+            metadata.get("parser_report", {}).get("minimum_candidates") == 1
+        )
 
     environment = {
         **os.environ,

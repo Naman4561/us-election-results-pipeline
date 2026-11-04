@@ -8,7 +8,7 @@ from pathlib import Path
 
 from dotenv import dotenv_values
 
-from election_pipeline.deployment import catalog, control, dashboard
+from election_pipeline.deployment import catalog, control, coverage, dashboard
 from election_pipeline.storage import atomic_json
 
 
@@ -24,11 +24,20 @@ def main():
     sub.add_parser("run")
     sub.add_parser("rollback-dashboard")
     sub.add_parser("recover-handoff")
+    sub.add_parser("recover-coverage-retirement")
+    expand = sub.add_parser("coverage")
+    expand.add_argument("phase", choices=("prepare", "activate", "retire"))
+    expand.add_argument("--states", nargs="+", required=True, choices=sorted(coverage.STATES))
+    expand.add_argument("--release", type=Path)
+    expand.add_argument("--image")
     register = sub.add_parser("register")
     register.add_argument("--release", type=Path, required=True)
     register.add_argument("--image", required=True)
     register.add_argument("--source", required=True)
     register.add_argument("--status", choices=("test", "unofficial"), required=True)
+    register.add_argument(
+        "--replaces", help="Existing source whose race coverage is being expanded"
+    )
     transfer = sub.add_parser("transfer-source")
     transfer.add_argument("--release", type=Path, required=True)
     transfer.add_argument("--image", required=True)
@@ -78,8 +87,24 @@ def main():
             }
         elif action == "register":
             result = control.register(
-                path, args.release, args.image, args.source, args.status, prod, config
+                path,
+                args.release,
+                args.image,
+                args.source,
+                args.status,
+                prod,
+                config,
+                replaces=args.replaces,
             )
+        elif action == "coverage":
+            if args.phase == "prepare":
+                if not args.release or not args.image:
+                    raise ValueError("Coverage preparation requires --release and --image")
+                result = coverage.prepare(path, args.states, args.release, args.image, prod, config)
+            else:
+                result = getattr(coverage, args.phase)(path, args.states, prod, config)
+        elif action == "recover-coverage-retirement":
+            result = coverage.recover_retirement(path, config)
         elif action == "transfer-source":
             result = control.transfer_source(
                 path,

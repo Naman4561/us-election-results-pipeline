@@ -18,7 +18,7 @@ REVISION = re.compile(r"[0-9a-f]{40}")
 
 def source_from_json(value):
     raw = dict(value)
-    for key in ("expected_members", "expected_columns"):
+    for key in ("expected_members", "expected_columns", "contests"):
         raw[key] = tuple(raw.get(key, ()))
     raw["files"] = tuple(tuple(pair) for pair in raw.get("files", ()))
     return Source(**raw)
@@ -42,13 +42,13 @@ def validate(value):
         if entry["public"] and not entry["enabled"]:
             raise ValueError("Public sources must be enabled")
         if source.dataset == "election_results":
+            if source.contests and list(source.contests) != entry.get("races"):
+                raise ValueError("Catalog races differ from the source's explicit contest contract")
             if entry["worker"] == "manual":
                 age = entry.get("manual_max_age_seconds", 21600)
                 if type(age) is not int or not 900 <= age <= 604800:
                     raise ValueError("Invalid manual snapshot freshness limit")
-            if source.state in owners:
-                raise ValueError("A state can have only one results owner")
-            owners[source.state] = name
+            owners.setdefault(source.state, []).append((name, entry))
         elif entry["enabled"] or entry["public"]:
             raise ValueError("Ancillary sources run manually")
         if not IMAGE.fullmatch(entry["image_id"]) or not REVISION.fullmatch(entry["revision"]):
@@ -57,6 +57,24 @@ def validate(value):
             raise ValueError("Release paths must be absolute")
         if entry["status"] not in ("test", "unofficial"):
             raise ValueError("Publication status must be explicit")
+    for entries in owners.values():
+        if len(entries) == 1:
+            if entries[0][1].get("replaces"):
+                raise ValueError("Replacement target is missing")
+            continue
+        replacements = [(name, entry) for name, entry in entries if entry.get("replaces")]
+        if len(entries) != 2 or len(replacements) != 1:
+            raise ValueError("A state can have only one results owner and one explicit replacement")
+        name, replacement = replacements[0]
+        old_name, old = next(pair for pair in entries if pair[0] != name)
+        if (
+            replacement["replaces"] != old_name
+            or replacement["worker"] != "expansion"
+            or replacement["source"]["election_date"] != old["source"]["election_date"]
+            or not set(old["races"]) < set(replacement["races"])
+            or sum(entry["public"] for _, entry in entries) > 1
+        ):
+            raise ValueError("Invalid coverage replacement or multiple public results owners")
     expected = sorted(name for name, e in sources.items() if e["worker"] == "baseline")
     if expected != sorted(baseline["source_ids"]):
         raise ValueError("Baseline source selection changed")
@@ -130,6 +148,25 @@ def sources(value):
 
 def public_states(value):
     return {e["source"]["state"] for e in value["sources"].values() if e["public"]}
+
+
+def prospective(value, names):
+    """Select replacement snapshots without changing a running legacy collector."""
+    result = json.loads(json.dumps(value))
+    for name in names:
+        entry = result["sources"][name]
+        if (
+            entry["worker"] not in ("expansion", "manual")
+            or entry["source"]["dataset"] != "election_results"
+        ):
+            raise ValueError("Only managed result sources may be activated")
+        if old_name := entry.get("replaces"):
+            old = result["sources"][old_name]
+            old["public"] = False
+            if old["worker"] != "baseline":
+                old["enabled"] = False
+        entry.update(public=True, enabled=True)
+    return validate(result)
 
 
 def schemas(value):

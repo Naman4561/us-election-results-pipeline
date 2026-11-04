@@ -86,9 +86,13 @@ def summarize(rows, method):
     }
 
 
-def make_payload(geography, metadata, county_rows, contest_rows, demo=False, state="NC"):
+def make_payload(
+    geography, metadata, county_rows, contest_rows, demo=False, state="NC", races=None
+):
     adapter = state_adapter(state)
-    races_config, methods = adapter.races, adapter.methods
+    races_config, methods = races if races is not None else adapter.races, adapter.methods
+    if not races_config or not races_config.keys() <= adapter.available_races.keys():
+        raise ValueError("Dashboard coverage is outside the supported state contests")
     names = {f["id"]: f["name"] for f in geography["counties"]}
     by_race, by_county, totals = (
         defaultdict(list),
@@ -149,7 +153,7 @@ def make_payload(geography, metadata, county_rows, contest_rows, demo=False, sta
 
 def demo_payload(geography, state="NC"):
     """Synthetic fixtures, explicitly labelled; never a database fallback."""
-    races_config, methods = state_adapter(state).races, state_adapter(state).methods
+    races_config, methods = state_adapter(state).available_races, state_adapter(state).methods
     rows = []
     for feature in geography["counties"]:
         seed = int(hashlib.sha256(feature["id"].encode()).hexdigest()[:8], 16)
@@ -220,6 +224,7 @@ def demo_payload(geography, state="NC"):
         list(grouped.values()),
         demo=True,
         state=state,
+        races=races_config,
     )
 
 
@@ -242,9 +247,10 @@ def dashboard_settings(env_file):
 
 
 class PublishedResults:
-    def __init__(self, settings, geography, source_id, state="NC"):
+    def __init__(self, settings, geography, source_id, state="NC", races=None):
         self.state = state_adapter(state)
         self.settings, self.geography, self.source_id = settings, geography, source_id
+        self.races = races if races is not None else self.state.races
         self.cache, self.lock = {}, Lock()
 
     def __call__(self):
@@ -278,7 +284,9 @@ class PublishedResults:
                 (self.source_id,),
             ).fetchone()
             if not metadata:
-                return make_payload(self.geography, None, [], [], state=self.state.code)
+                return make_payload(
+                    self.geography, None, [], [], state=self.state.code, races=self.races
+                )
             identity = str(metadata["publication_id"])
             if identity not in self.cache:
                 counties = (
@@ -298,7 +306,12 @@ class PublishedResults:
                     (identity,),
                 ).fetchall()
                 payload = make_payload(
-                    self.geography, metadata, counties, contests, state=self.state.code
+                    self.geography,
+                    metadata,
+                    counties,
+                    contests,
+                    state=self.state.code,
+                    races=self.races,
                 )
                 self.cache = {identity: payload}
             payload = {**self.cache[identity], "publication": metadata}
@@ -332,7 +345,12 @@ def national_payload(providers, demo=False):
         "mode": "demo" if demo else "published",
         "calendar": calendar,
         "states": states,
-        "coverage": {code: list(STATES[code].races) for code in providers},
+        "coverage": {
+            code: list(
+                states[code].get("races") or getattr(providers[code], "races", STATES[code].races)
+            )
+            for code in providers
+        },
     }
 
 
@@ -359,6 +377,7 @@ def create_app(
     if provider is not None:
         state_providers = {**state_providers, "NC": provider}
     provider = state_providers["NC"]
+    configured_providers = {}
 
     def approved_providers():
         if not catalog_file:
@@ -372,6 +391,21 @@ def create_app(
         approved = {code: state_providers[code] for code in sorted(codes)}
         for entry in deployment["sources"].values():
             code = entry["source"]["state"]
+            original = state_providers.get(code)
+            if entry["public"] and isinstance(original, PublishedResults):
+                identity = (code, entry["source"]["source_id"], tuple(entry["races"]))
+                if identity not in configured_providers:
+                    supported = state_adapter(code).available_races
+                    if not set(entry["races"]) <= supported.keys():
+                        raise ValueError("Catalog selects unsupported dashboard contests")
+                    configured_providers[identity] = PublishedResults(
+                        original.settings,
+                        original.geography,
+                        identity[1],
+                        code,
+                        {race: supported[race] for race in entry["races"]},
+                    )
+                approved[code] = configured_providers[identity]
             if entry["public"] and entry["worker"] == "manual":
 
                 def manual_provider(provider=approved[code]):

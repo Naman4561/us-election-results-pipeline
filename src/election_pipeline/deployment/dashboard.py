@@ -36,21 +36,17 @@ def start(value, names, prod, config, directory, *, port, image):
     if not 8001 <= port <= 8099:
         raise ValueError("Candidate port must be localhost 8001–8099")
     image_id, revision = containers.inspect_image(image)
-    prospective = json.loads(json.dumps(value))
-    for name in names:
-        entry = prospective["sources"][name]
-        if (
-            entry["worker"] not in ("expansion", "manual")
-            or entry["source"]["dataset"] != "election_results"
-        ):
-            raise ValueError("Only managed result sources may be added to dashboard coverage")
-        entry.update(public=True, enabled=True)
+    prospective = catalog.prospective(value, names)
     codes = catalog.public_states(prospective)
     # The candidate image must describe exactly the registered adapter contracts.
     for entry in prospective["sources"].values():
         if entry["public"]:
             meta = containers.metadata(image_id, entry["source"]["source_id"])
-            if meta["source"] != entry["source"] or meta["races"] != entry["races"]:
+            if (
+                catalog.source_from_json(meta["source"])
+                != catalog.source_from_json(entry["source"])
+                or meta["races"] != entry["races"]
+            ):
                 raise ValueError("Dashboard image changed an existing adapter's coverage/source")
     directory = Path(directory)
     directory.mkdir(parents=True, mode=0o755)

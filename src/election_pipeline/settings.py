@@ -89,6 +89,7 @@ class Source:
     allow_missing: bool = False
     files: tuple[tuple[str, str], ...] = ()
     primary_filename: str = "results.xml"
+    contests: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
         if not re.fullmatch(r"[a-z][a-z0-9_-]{0,79}", self.source_id):
@@ -147,6 +148,17 @@ class Source:
         if not re.fullmatch(r"[a-z][a-z0-9_]{0,79}", self.dataset):
             raise ValueError("dataset must be a lowercase identifier")
 
+        if (
+            not isinstance(self.contests, tuple)
+            or any(
+                not isinstance(contest, str)
+                or not re.fullmatch(self.state + r"-(?:SEN|GOV|AL|[0-9]{2})", contest)
+                for contest in self.contests
+            )
+            or len(self.contests) != len(set(self.contests))
+        ):
+            raise ValueError("contests must contain distinct race IDs for this state")
+
         if type(self.min_interval_seconds) is not int or self.min_interval_seconds < 0:
             raise ValueError("min_interval_seconds must be a nonnegative integer")
 
@@ -155,6 +167,8 @@ class Source:
 
     def signature(self, settings: CollectorSettings) -> str:
         source_contract = asdict(self)
+        if not self.contests:
+            source_contract.pop("contests")
         if self.primary_filename == "results.xml":
             source_contract.pop("primary_filename")
         contract = {
@@ -185,7 +199,7 @@ def load_config(path: Path) -> tuple[CollectorSettings, dict[str, Source]]:
         item = dict(raw)
         if isinstance(item.get("election_date"), date):
             item["election_date"] = item["election_date"].isoformat()
-        for key in ("expected_members", "expected_columns"):
+        for key in ("expected_members", "expected_columns", "contests"):
             names = item.get(key, [])
 
             if not isinstance(names, list) or not all(isinstance(name, str) for name in names):
