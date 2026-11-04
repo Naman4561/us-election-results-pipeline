@@ -63,6 +63,14 @@ class ExpansionTests(unittest.TestCase):
 
     def parse(self, code, mutate=None):
         self.source = self.sources[code.lower() + "_2026_general"]
+        if code == "TX":
+            # Archived legacy fixtures retain their original source contract.
+            self.source = replace(
+                self.source,
+                url="https://electionresults.sos.state.tx.us/results.html",
+                primary_filename="results.html",
+                expected_members=("results.html",),
+            )
         self.store = ArchiveStore(self.root, self.source)
         members = self.members(code)
         if mutate:

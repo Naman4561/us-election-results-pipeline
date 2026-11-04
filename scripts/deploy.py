@@ -29,6 +29,13 @@ def main():
     register.add_argument("--image", required=True)
     register.add_argument("--source", required=True)
     register.add_argument("--status", choices=("test", "unofficial"), required=True)
+    transfer = sub.add_parser("transfer-source")
+    transfer.add_argument("--release", type=Path, required=True)
+    transfer.add_argument("--image", required=True)
+    transfer.add_argument("--source", required=True)
+    transfer.add_argument("--status", choices=("test", "unofficial"), required=True)
+    transfer.add_argument("--evidence-file", type=Path, required=True)
+    transfer.add_argument("--validation-report", type=Path, required=True)
     for name in ("migrate", "prepare", "promote"):
         command = sub.add_parser(name)
         command.add_argument("--source", required=True)
@@ -72,6 +79,17 @@ def main():
         elif action == "register":
             result = control.register(
                 path, args.release, args.image, args.source, args.status, prod, config
+            )
+        elif action == "transfer-source":
+            result = control.transfer_source(
+                path,
+                args.release,
+                args.image,
+                args.source,
+                args.status,
+                args.evidence_file,
+                args.validation_report,
+                config,
             )
         elif action == "migrate":
             result = control.migrate_source(path, args.source, args.file, prod)

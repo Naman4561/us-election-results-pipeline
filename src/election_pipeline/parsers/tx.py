@@ -1,4 +1,4 @@
-"""Texas server-rendered results tables. Never infer votes from blank cells."""
+"""Texas Civix results and replay support for archived legacy HTML."""
 
 import re
 import zipfile
@@ -66,6 +66,10 @@ def parse(archive_path, source, settings, output, stats, reference=None):
 
     if source.format != "bundle" or source.election_date != "2026-11-03":
         raise ValueError("Unsupported Texas source/election")
+    if source.primary_filename == "results.json":
+        from election_pipeline.parsers.tx_civix import parse as parse_civix
+
+        return parse_civix(archive_path, source, settings, output, stats, reference)
     parser = ResultsHTML()
     with zipfile.ZipFile(archive_path) as archive:
         parser.feed(archive.read(source.primary_filename).decode("utf-8-sig"))

@@ -6,16 +6,19 @@ import hashlib
 import json
 import os
 import re
+import tempfile
 import time
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
+from dotenv import dotenv_values
+
 from election_pipeline.database import connect
 from election_pipeline.deployment import catalog, containers, dashboard, migrations
 from election_pipeline.settings import CollectorSettings, load_config
 from election_pipeline.states import state_adapter
-from election_pipeline.storage import atomic_json, utc_now
+from election_pipeline.storage import ArchiveStore, atomic_json, file_hash, utc_now
 
 GOOD = {"succeeded", "already_current", "not_due", "awaiting_publication"}
 
@@ -210,6 +213,156 @@ def register(path, release, image, name, status, prod, config):
 
     catalog.update(path, change)
     return {"outcome": "registered", "source_id": name, "enabled": False, "public": False}
+
+
+def private_text(path, text):
+    """Replace one private configuration file without exposing its contents in argv."""
+    path = Path(path)
+    descriptor, temporary = tempfile.mkstemp(dir=path.parent, prefix=".source-handoff-")
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8", newline="") as handle:
+            handle.write(text)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
+
+
+def transfer_source(path, release, image, name, status, evidence, report_file, config):
+    """Move one existing source to the independent worker; leave other images pinned."""
+    controls_ready(config)
+    containers.limits(config)
+    identity, revision = containers.verify_release(release, image)
+    meta = containers.metadata(identity, name)
+    if meta["code_sha256"] != containers.package_hash(release):
+        raise ValueError("Image sources differ from the release checkout")
+    source = catalog.source_from_json(meta["source"])
+    settings = CollectorSettings(**meta["settings"])
+    report = json.loads(Path(report_file).read_text(encoding="utf-8"))
+    checked_at = datetime.fromisoformat(report["checked_at"])
+    if not 0 <= (datetime.now(timezone.utc) - checked_at).total_seconds() <= 1800:
+        raise ValueError("Run the saved-response parser check within 30 minutes of transfer")
+    if any(
+        (
+            report.get("outcome") != "parsed",
+            report.get("source_id") != name,
+            report.get("source_signature") != source.signature(settings),
+            report.get("collector_code_sha256") != meta["code_sha256"],
+            report.get("raw_sha256") != file_hash(Path(evidence)),
+            report.get("internal_reconciliation") != "passed",
+            report.get("contest_total_reconciliation") != "passed",
+            report.get("contest_count") != len(meta["races"]),
+            report.get("all_counts_zero") is not False,
+        )
+    ):
+        raise ValueError("Transfer requires a matching successful nonzero saved-response check")
+    new = catalog.entry(
+        source,
+        settings,
+        image_id=identity,
+        revision=revision,
+        release_path=release,
+        worker="expansion",
+        status=status,
+    )
+    new.update(races=meta["races"], release_sha256=containers.release_hash(release))
+    prod_file = Path(config.get("PRODUCTION_ENV", "/etc/election-pipeline/production.env"))
+    journal = Path(config["CONTROL_STATE_DIR"]) / "source-handoff.json"
+    with catalog.locked(path, exclusive=True, nonblocking=True):
+        before = catalog.read(path)
+        old = before["sources"][name]
+        if old["worker"] != "baseline":
+            raise ValueError("Only a currently baseline-owned source may be transferred")
+        old_source = catalog.source_from_json(old["source"])
+        if (
+            name != source.source_id
+            or any(
+                getattr(source, key) != getattr(old_source, key)
+                for key in ("state", "election_date", "dataset")
+            )
+            or source.dataset != "election_results"
+            or meta["races"] != old["races"]
+        ):
+            raise ValueError("Transfer cannot change source identity or watched race coverage")
+        original = prod_file.read_bytes().decode("utf-8")
+        prod = dict(dotenv_values(prod_file, interpolate=False))
+        catalog.verify_baseline(before, prod)
+        remaining = [
+            item.strip()
+            for item in prod["PIPELINE_SOURCES"].split(",")
+            if item.strip() and item.strip() != name
+        ]
+        if not remaining:
+            raise ValueError("Retiring the last baseline source needs a separate worker retirement")
+        changed, matches = re.subn(
+            r"(?m)^PIPELINE_SOURCES[ \t]*=[^\r\n]*",
+            "PIPELINE_SOURCES=" + ",".join(remaining),
+            original,
+        )
+        if matches != 1:
+            raise ValueError("Expected exactly one PIPELINE_SOURCES assignment")
+        if (
+            journal.exists()
+            and json.loads(journal.read_text(encoding="utf-8"))["outcome"] == "pending"
+        ):
+            raise ValueError("A previous source handoff needs inspection before another transfer")
+
+        def require_idle():
+            state = containers.command(
+                ["systemctl", "show", "--value", "-p", "ActiveState", "election-pipeline.service"]
+            )
+            if state not in ("inactive", "failed"):
+                raise ValueError("The baseline cycle is running; retry transfer after it finishes")
+
+        require_idle()
+        with (
+            ArchiveStore(Path(prod["DATA_DIR"]), old_source).lock(stage="pipeline"),
+            ArchiveStore(Path(prod["DATA_DIR"]), old_source).lock(),
+        ):
+            evidence_dir = Path(prod["DATA_DIR"]) / "accuracy/adapter_checks" / name
+            evidence_dir.mkdir(parents=True, exist_ok=True)
+            saved = evidence_dir / (report["raw_sha256"] + ".json")
+            saved.write_bytes(Path(evidence).read_bytes())
+            atomic_json(evidence_dir / (report["raw_sha256"] + ".check.json"), report)
+            after = json.loads(json.dumps(before))
+            new.update(enabled=old["enabled"], public=old["public"], previous_release=old)
+            after["sources"][name] = new
+            after["baseline"]["source_ids"] = remaining
+            after["generation"] += 1
+            catalog.validate(after)
+            backup = prod_file.with_name(prod_file.name + ".before-source-" + uuid.uuid4().hex)
+            private_text(backup, original)
+            record = {
+                "outcome": "pending",
+                "source_id": name,
+                "started_at": utc_now(),
+                "production_env_backup": str(backup),
+                "catalog_before": before,
+                "catalog_after": after,
+            }
+            atomic_json(journal, record)
+            if prod_file.read_bytes().decode("utf-8") != original:
+                atomic_json(journal, {**record, "outcome": "cancelled"})
+                raise ValueError("Production configuration changed during transfer; retry")
+            try:
+                private_text(prod_file, changed)
+                require_idle()
+                catalog.write(path, after)
+                atomic_json(journal, {**record, "outcome": "applied"})
+            except Exception:
+                catalog.write(path, before)
+                private_text(prod_file, original)
+                atomic_json(journal, {**record, "outcome": "rolled_back"})
+                raise
+    return {
+        "outcome": "transferred",
+        "source_id": name,
+        "worker": "expansion",
+        "remaining_baseline_sources": remaining,
+        "image_id": identity,
+        "note": "The independent worker performs its normal validation before publication",
+    }
 
 
 def run_one(entry, prod, config, *, prepare=False):

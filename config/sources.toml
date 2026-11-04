@@ -78,8 +78,8 @@ expected_members = ["results.csv", "election.html"]
 [sources.tx_2026_general]
 state = "TX"
 election_date = "2026-11-03"
-url = "https://electionresults.sos.state.tx.us/results.html"
+url = "https://goelect.txelections.civixapps.com/api-ivis-system/api/s3/enr/election/53815"
 format = "bundle"
-primary_filename = "results.html"
+primary_filename = "results.json"
 min_interval_seconds = 300
-expected_members = ["results.html"]
+expected_members = ["results.json"]

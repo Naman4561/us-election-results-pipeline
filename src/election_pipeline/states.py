@@ -94,7 +94,7 @@ STATES = {
         ("total_votes",),
         governor=True,
         county_results=False,
-        source_page="https://electionresults.sos.state.tx.us/results.html",
+        source_page="https://goelect.txelections.civixapps.com/ivis-enr-ui/races",
     ),
 }
 
