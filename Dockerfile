@@ -26,6 +26,12 @@ COPY dbt ./dbt
 COPY migrations ./migrations
 COPY scripts ./scripts
 COPY tests ./tests
+COPY config ./config
+COPY dbt ./dbt
+COPY deploy ./deploy
+COPY migrations ./migrations
+COPY scripts ./scripts
+COPY tests ./tests
 
 RUN mkdir -p /app/data \
     && chown -R 10001:10001 /app/data /app/dbt
