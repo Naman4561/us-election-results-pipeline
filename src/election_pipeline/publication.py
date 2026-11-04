@@ -58,7 +58,7 @@ def release_metadata(conn, release_id):
                s.dataset, s.source_url, f.raw_sha256,
                (SELECT min(a.finished_at) FROM ops.fetch_attempts a
                 WHERE a.snapshot_id = r.snapshot_id
-                  AND a.outcome = 'downloaded') AS first_observed_at,
+                  AND a.outcome IN ('downloaded', 'manual_imported')) AS first_observed_at,
                (SELECT max(a.source_modified_at) FROM ops.fetch_attempts a
                 WHERE a.snapshot_id = r.snapshot_id) AS source_modified_at
         FROM ops.processing_releases r

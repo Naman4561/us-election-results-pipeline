@@ -168,6 +168,19 @@ test("national/state map navigation and coverage statuses", async (t) => {
   click("#refresh");
   await settle();
   assert.equal(status("NC"), "unavailable");
+  payload.mode = "published";
+  for (const s of Object.values(payload.states))
+    if (s.publication) s.publication.status = "unofficial";
+  payload.states.OH.acquisition = { method: "manual" };
+  payload.states.OH.publication.source_modified_at = "2026-11-04T02:42:36Z";
+  click("#refresh");
+  await settle();
+  assert(d.querySelector("#notice").textContent.includes("manually updated states"));
+  click('path[data-id="OH"]');
+  await settle();
+  assert(d.querySelector("#publication-status").textContent.includes("MANUAL SNAPSHOT"));
+  assert(d.querySelector("#notice").textContent.includes("new file is imported"));
+  assert(d.querySelector("#connection").textContent.includes("updated manually"));
   w.fetch = async () => {
     throw Error("Network offline");
   };

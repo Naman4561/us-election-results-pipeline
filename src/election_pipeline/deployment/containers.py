@@ -18,7 +18,12 @@ def command(args, *, timeout=30, env=None, input=None):
         args, capture_output=True, text=True, timeout=timeout, check=False, env=env, input=input
     )
     if result.returncode:
-        raise RuntimeError(f"Command failed ({Path(args[0]).name}): {result.stderr[-2000:]}")
+        detail = result.stderr[-2000:]
+        # Worker failure JSON is printed to stdout; preserve it for diagnosis.
+        detail += "\n" + result.stdout[-4000:]
+        raise RuntimeError(
+            f"Command failed ({Path(args[0]).name}, exit {result.returncode}): {detail.strip()}"
+        )
     return result.stdout.strip()
 
 

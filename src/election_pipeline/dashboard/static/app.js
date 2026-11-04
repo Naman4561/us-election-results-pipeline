@@ -475,7 +475,11 @@ function renderStatePanel() {
 function renderMetadata() {
   const national = view.scope === "US",
     state = national ? null : data.states[view.scope],
-    publication = state?.publication;
+    publication = state?.publication,
+    manual = state?.acquisition?.method === "manual",
+    anyManual = Object.values(data.states).some(
+      (s) => s.acquisition?.method === "manual",
+    );
   const test =
     data.mode === "demo" ||
     (national
@@ -487,7 +491,7 @@ function renderMetadata() {
       : test
         ? "TEST PUBLICATIONS"
         : publication
-          ? "UNOFFICIAL RETURNS"
+          ? manual ? "UNOFFICIAL · MANUAL SNAPSHOT" : "UNOFFICIAL RETURNS"
           : national
             ? "OFFICIAL-SOURCE RETURNS"
             : "AWAITING PUBLICATION";
@@ -502,11 +506,14 @@ function renderMetadata() {
       ? "SIMULATED DEMO — All vote counts and candidate names are examples."
       : test
         ? "TEST DATA — These publications are for pipeline validation. Do not interpret them as live Election Day returns."
-        : "Unofficial returns from official state sources. A party lead is not a race call. Gray and patterned regions are explained in the legend.";
+        : manual
+          ? "Manually imported official results. Source report: " + date(publication?.source_modified_at) + ". Results update when a new file is imported. A party lead is not a race call."
+          : "Unofficial returns from official state sources. A party lead is not a race call. Gray and patterned regions are explained in the legend." +
+            (national && anyManual ? " Includes manually updated states; select a state for its report timestamp." : "");
   $("notice").classList.toggle("alert", stale || test);
   $("connection").textContent = stale
     ? "Refresh failed · stale view"
-    : "Updated " + new Date().toLocaleTimeString();
+    : manual ? "Connected · results updated manually" : "Updated " + new Date().toLocaleTimeString();
   $("observed-time").textContent = national
     ? "Per-state timestamps"
     : date(publication?.first_observed_at);

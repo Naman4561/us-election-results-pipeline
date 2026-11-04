@@ -42,6 +42,10 @@ def validate(value):
         if entry["public"] and not entry["enabled"]:
             raise ValueError("Public sources must be enabled")
         if source.dataset == "election_results":
+            if entry["worker"] == "manual":
+                age = entry.get("manual_max_age_seconds", 21600)
+                if type(age) is not int or not 900 <= age <= 604800:
+                    raise ValueError("Invalid manual snapshot freshness limit")
             if source.state in owners:
                 raise ValueError("A state can have only one results owner")
             owners[source.state] = name

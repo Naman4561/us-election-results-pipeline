@@ -405,9 +405,14 @@ def prepare(path, name, prod, config):
     return result
 
 
-def promote(path, name, prod, config):
+def promote(path, name, prod, config, *, allow_manual=False):
     value = catalog.read(path)
-    entry = expansion(value, name)
+    entry = value["sources"][name]
+    if entry["worker"] == "manual" and allow_manual:
+        if entry.get("manual_candidate", {}).get("candidate_id") != entry.get("candidate_id"):
+            raise ValueError("Manual acquisition receipt does not match the prepared candidate")
+    else:
+        entry = expansion(value, name)
     candidate = entry["candidate_id"]
     with connect(db_settings(prod, writer=True)) as conn:
         row = conn.execute(
@@ -427,11 +432,16 @@ def promote(path, name, prod, config):
         raise ValueError("Publication promotion failed")
 
     def change(value):
-        current = expansion(value, name)
+        current = value["sources"][name]
         if current.get("candidate_id") != candidate:
             raise ValueError("Candidate changed while being promoted")
         current["published_at"] = utc_now()
         current["publication_id"] = result["publication_id"]
+        if entry["worker"] == "manual":
+            current["manual_snapshot"] = {
+                **current["manual_candidate"],
+                "publication_id": result["publication_id"],
+            }
 
     catalog.update(path, change)
     latest = Path(prod["DATA_DIR"]) / "runs" / name / "latest.json"
@@ -513,7 +523,12 @@ def activate(path, candidate, report, prod, config):
             raise ValueError("Invalid candidate identity")
         prospective = json.loads(json.dumps(value))
         for name in candidate["sources"]:
-            entry = expansion(prospective, name)
+            entry = prospective["sources"][name]
+            if (
+                entry["worker"] not in ("expansion", "manual")
+                or entry["source"]["dataset"] != "election_results"
+            ):
+                raise ValueError("Only managed result sources may be activated")
             recovery_gate(entry, report, datetime.now(timezone.utc))
             entry.update(enabled=True, public=True)
         payload = dashboard.check(candidate["url"], expected_states(prospective))
@@ -546,9 +561,9 @@ def rollback(path, config):
         }
         dashboard.check(previous["url"], desired)
         for entry in value["sources"].values():
-            if (
-                entry["source"]["state"] not in previous["states"]
-                and entry["worker"] == "expansion"
+            if entry["source"]["state"] not in previous["states"] and entry["worker"] in (
+                "expansion",
+                "manual",
             ):
                 entry.update(public=False, enabled=False)
         value["dashboard"] = {k: v for k, v in previous.items() if k != "caddyfile"}

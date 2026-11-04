@@ -240,7 +240,7 @@ def import_fetches(conn, store):
 
         snapshot = None
 
-        if record["outcome"] in {"downloaded", "unchanged"}:
+        if record["outcome"] in {"downloaded", "unchanged", "manual_imported"}:
             snapshot = register_snapshot(conn, store, record["sha256"])
 
         modified = record.get("response_headers", {}).get("last-modified")
@@ -253,6 +253,11 @@ def import_fetches(conn, store):
 
         except (ValueError, TypeError, OverflowError):
             modified = None
+
+        if record["outcome"] == "manual_imported":
+            # This is a report timestamp extracted from the validated document,
+            # not an invented HTTP Last-Modified response header.
+            modified = timestamp(record["source_generated_at"])
 
         conn.execute(
             """

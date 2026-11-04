@@ -100,6 +100,21 @@ def assess(prod, config, now):
                 issues["deployment/handoff"] = "Dashboard handoff journal is invalid"
     for name in names:
         source = configured[name]
+        if catalog and catalog["sources"][name]["worker"] == "manual":
+            entry = catalog["sources"][name]
+            try:
+                receipt = entry["manual_snapshot"]
+                if age_seconds(receipt["downloaded_at"], now) > entry.get(
+                    "manual_max_age_seconds", 21600
+                ):
+                    issues[f"manual/{name}"] = "Manual snapshot is overdue for an operator update"
+                if receipt["publication_id"] != entry["publication_id"]:
+                    issues[f"manual/{name}"] = (
+                        "Manual receipt does not match the approved publication"
+                    )
+            except (KeyError, ValueError, TypeError):
+                issues[f"manual/{name}"] = "Manual publication receipt is missing or invalid"
+            continue
         run_limit = int(config.get("MAX_RUN_AGE_SECONDS", "900"))
         poll_limit = max(run_limit, source.min_interval_seconds * 3)
 

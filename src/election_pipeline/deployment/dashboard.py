@@ -39,8 +39,11 @@ def start(value, names, prod, config, directory, *, port, image):
     prospective = json.loads(json.dumps(value))
     for name in names:
         entry = prospective["sources"][name]
-        if entry["worker"] != "expansion":
-            raise ValueError("Only expansion states may be added to dashboard coverage")
+        if (
+            entry["worker"] not in ("expansion", "manual")
+            or entry["source"]["dataset"] != "election_results"
+        ):
+            raise ValueError("Only managed result sources may be added to dashboard coverage")
         entry.update(public=True, enabled=True)
     codes = catalog.public_states(prospective)
     # The candidate image must describe exactly the registered adapter contracts.

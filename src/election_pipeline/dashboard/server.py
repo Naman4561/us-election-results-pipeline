@@ -365,10 +365,20 @@ def create_app(
             return state_providers
         from election_pipeline.deployment import catalog as registry
 
-        codes = registry.public_states(registry.read(catalog_file))
+        deployment = registry.read(catalog_file)
+        codes = registry.public_states(deployment)
         if not codes <= state_providers.keys():
             raise ValueError("This dashboard image cannot serve all approved states")
-        return {code: state_providers[code] for code in sorted(codes)}
+        approved = {code: state_providers[code] for code in sorted(codes)}
+        for entry in deployment["sources"].values():
+            code = entry["source"]["state"]
+            if entry["public"] and entry["worker"] == "manual":
+
+                def manual_provider(provider=approved[code]):
+                    return {**provider(), "acquisition": {"method": "manual"}}
+
+                approved[code] = manual_provider
+        return approved
 
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
     app.add_middleware(GZipMiddleware, minimum_size=1000)
