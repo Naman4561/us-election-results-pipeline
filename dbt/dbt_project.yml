@@ -22,6 +22,62 @@ vars:
   mn_results_source: mn_2026_general
   ne_results_source: ne_2026_general
   tx_results_source: tx_2026_general
+  ga_results_source: ga_2026_general
+  ga_races:
+  - GA-SEN
+  - GA-GOV
+  - GA-01
+  - GA-02
+  - GA-03
+  - GA-04
+  - GA-05
+  - GA-06
+  - GA-07
+  - GA-08
+  - GA-09
+  - GA-10
+  - GA-11
+  - GA-12
+  - GA-13
+  - GA-14
+  sc_results_source: sc_2026_general
+  sc_races:
+  - SC-SEN
+  - SC-GOV
+  - SC-01
+  - SC-02
+  - SC-03
+  - SC-04
+  - SC-05
+  - SC-06
+  - SC-07
+  ks_results_source: ks_2026_general
+  ks_races:
+  - KS-SEN
+  - KS-GOV
+  - KS-01
+  - KS-02
+  - KS-03
+  - KS-04
+  oh_results_source: oh_2026_general
+  oh_races:
+  - OH-SEN
+  - OH-GOV
+  - OH-01
+  - OH-02
+  - OH-03
+  - OH-04
+  - OH-05
+  - OH-06
+  - OH-07
+  - OH-08
+  - OH-09
+  - OH-10
+  - OH-11
+  - OH-12
+  - OH-13
+  - OH-14
+  - OH-15
 models:
   election_analytics:
     +materialized: '{{ var(''publication_materialization'', ''view'') }}'
@@ -42,6 +98,18 @@ models:
       tx:
         +tags:
         - state_tx
+      ga:
+        +tags:
+        - state_ga
+      sc:
+        +tags:
+        - state_sc
+      ks:
+        +tags:
+        - state_ks
+      oh:
+        +tags:
+        - state_oh
     marts:
       +schema: marts
       nc:
@@ -59,3 +127,15 @@ models:
       tx:
         +tags:
         - state_tx
+      ga:
+        +tags:
+        - state_ga
+      sc:
+        +tags:
+        - state_sc
+      ks:
+        +tags:
+        - state_ks
+      oh:
+        +tags:
+        - state_oh

@@ -1,0 +1,32 @@
+{
+  "ga-results.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/data",
+    "sha256": "d3f82ee9c6eeba29d00578afbc6e0e98e39a19b94b450ca90271705cef8dd92f",
+    "bytes": 1319428,
+    "downloaded_at": "2026-11-04T02:47:24.633921+00:00"
+  },
+  "ks.html": {
+    "url": "https://ent.sos.ks.gov/kssos_ent.html",
+    "sha256": "533939153ebc8669492c50ee3fb0df2fdd2d14d6f103d259f8e4fc6786316ded",
+    "bytes": 700984,
+    "downloaded_at": "2026-11-04T02:43:16.445626+00:00"
+  },
+  "oh-results.xml": {
+    "url": "https://liveresults.ohiosos.gov/Api/v1/download?filename=VSSC1622XmlFileBlob",
+    "sha256": "485692273cd21e7bf8943f4578de12bb69214dda966c34ea49b546b605fbe403",
+    "bytes": 1232124,
+    "downloaded_at": "2026-11-04T02:44:46.280162+00:00"
+  },
+  "sc-general.html": {
+    "url": "https://scvotes.gov/2026-general-election-results/",
+    "sha256": "05bb04d81f64d70584f7a02d6b0466ceee98bdbbd0bed7b21d7ecb4ab7d9bb27",
+    "bytes": 57711,
+    "downloaded_at": "2026-11-04T02:44:02.742414+00:00"
+  },
+  "sc-results.xlsx": {
+    "url": "https://scvotes.gov/wp-content/uploads/2026/11/2026-11-03-930-PM-General-Election-Results-.xlsx",
+    "sha256": "70bfd4c472deda15ec0c3b8090a5330a9e10bfe1b9d9e1b445f27bb586470960",
+    "bytes": 298521,
+    "downloaded_at": "2026-11-04T02:45:26.789165+00:00"
+  }
+}

@@ -13,7 +13,7 @@ test("national/state map navigation and coverage statuses", async (t) => {
         "-c",
         "from fastapi.testclient import TestClient; from election_pipeline.dashboard.server import create_app; print(TestClient(create_app(demo=True)).get('/api/national').text)",
       ],
-      { encoding: "utf8" },
+      { encoding: "utf8", maxBuffer: 10 * 1024 * 1024 },
     ),
   );
   const dom = new JSDOM(fs.readFileSync(base + "index.html", "utf8"), {
@@ -50,7 +50,7 @@ test("national/state map navigation and coverage statuses", async (t) => {
     d.querySelector(`path[data-id="${id}"]`).dataset.status;
   assert.equal(d.querySelectorAll("path.feature").length, 50);
   assert.equal(status("CA"), "no_election");
-  assert.equal(status("GA"), "not_covered");
+  assert.equal(status("ME"), "not_covered");
   click('path[data-id="KY"]');
   await settle();
   assert.equal(d.querySelector("h1").textContent, "Kentucky");
@@ -127,6 +127,28 @@ test("national/state map navigation and coverage statuses", async (t) => {
   assert.equal(d.querySelector(".candidate-votes").firstChild.textContent, "—");
   assert.equal(status("TX"), "awaiting_votes");
   click("#national");
+  for (const [code, name, counties, districts] of [
+    ["GA", "Georgia", 1, 14],
+    ["SC", "South Carolina", 46, 7],
+    ["KS", "Kansas", 105, 4],
+    ["OH", "Ohio", 88, 15],
+  ]) {
+    click('[data-office="senate"]');
+    click(`path[data-id="${code}"]`);
+    await settle();
+    assert.equal(d.querySelector("h1").textContent, name);
+    assert.equal(d.querySelectorAll("path.feature").length, counties);
+    const stateCalls = calls;
+    click('[data-office="governor"]');
+    assert.equal(d.querySelector("h1").textContent, name);
+    click('[data-office="house"]');
+    assert.equal(d.querySelectorAll("path.feature").length, districts);
+    click(`path[data-id="${code}-01"]`);
+    assert.equal(d.querySelector("#result-title").textContent, `${code}-01`);
+    assert.equal(calls, stateCalls, "State tabs and race clicks use cached results");
+    click("#national");
+  }
+  click('[data-office="senate"]');
   const stats = payload.states.NC.races["NC-SEN"].stats.total_votes;
   for (const leader of ["DEM", "REP", "OTHER", "UNKNOWN"]) {
     Object.assign(stats, { total: 100, status: "leading", leader });

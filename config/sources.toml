@@ -83,3 +83,44 @@ format = "bundle"
 primary_filename = "results.json"
 min_interval_seconds = 300
 expected_members = ["results.json"]
+
+[sources.ga_2026_general]
+state = "GA"
+election_date = "2026-11-03"
+url = "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/data"
+format = "bundle"
+primary_filename = "results.json"
+min_interval_seconds = 300
+expected_members = ["results.json"]
+
+[sources.ks_2026_general]
+state = "KS"
+election_date = "2026-11-03"
+url = "https://ent.sos.ks.gov/kssos_ent.html"
+format = "bundle"
+primary_filename = "results.html"
+min_interval_seconds = 300
+expected_members = ["results.html"]
+
+[sources.oh_2026_general]
+state = "OH"
+election_date = "2026-11-03"
+url = "https://liveresults.ohiosos.gov/Api/v1/download?filename=VSSC1622XmlFileBlob"
+format = "bundle"
+primary_filename = "results.xml"
+min_interval_seconds = 300
+expected_members = ["results.xml"]
+
+# The SC resolver selects the newest dated workbook linked by this official page.
+# Both the index and exact workbook bytes are archived for offline replay.
+[sources.sc_2026_general]
+state = "SC"
+election_date = "2026-11-03"
+url = "https://scvotes.gov/2026-general-election-results/"
+format = "bundle"
+primary_filename = "results.xlsx"
+min_interval_seconds = 300
+expected_members = ["index.html", "results.xlsx"]
+
+[sources.sc_2026_general.files]
+"index.html" = "https://scvotes.gov/2026-general-election-results/"

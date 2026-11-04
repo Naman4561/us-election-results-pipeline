@@ -68,10 +68,12 @@ class MultiStateTests(unittest.TestCase):
         payload = response.json()
         self.assertEqual(len(payload["calendar"]["senate_states"]), 35)
         self.assertEqual(len(payload["calendar"]["governor_states"]), 36)
-        self.assertEqual(set(payload["states"]), {"NC", "KY", "MN", "NE", "TX"})
+        self.assertEqual(
+            set(payload["states"]), {"NC", "KY", "MN", "NE", "TX", "GA", "SC", "KS", "OH"}
+        )
         self.assertEqual(len(payload["coverage"]["KY"]), 7)
         self.assertNotIn("early_voting", payload["states"]["KY"]["methods"])
-        self.assertEqual(client.get("/api/states/GA").status_code, 404)
+        self.assertEqual(client.get("/api/states/ME").status_code, 404)
         self.assertEqual(client.get("/api/states/KY").status_code, 200)
         cached = client.get("/api/national", headers={"If-None-Match": response.headers["etag"]})
         self.assertEqual(cached.status_code, 304)

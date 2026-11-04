@@ -30,3 +30,19 @@ sources:
   schema: tx
   tables:
   - name: results
+- name: ga
+  schema: ga
+  tables:
+  - name: results
+- name: sc
+  schema: sc
+  tables:
+  - name: results
+- name: ks
+  schema: ks
+  tables:
+  - name: results
+- name: oh
+  schema: oh
+  tables:
+  - name: results

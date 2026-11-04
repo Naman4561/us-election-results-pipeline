@@ -25,6 +25,7 @@ class State:
     governor: bool = False
     county_results: bool = True
     source_page: str = ""
+    bundle_resolver: str = ""
 
     @property
     def schema(self):
@@ -95,6 +96,44 @@ STATES = {
         governor=True,
         county_results=False,
         source_page="https://goelect.txelections.civixapps.com/ivis-enr-ui/races",
+    ),
+    "GA": State(
+        "GA",
+        "Georgia",
+        "ga_2026_general",
+        tuple(range(1, 15)),
+        ("total_votes",),
+        governor=True,
+        county_results=False,
+        source_page="https://results.sos.ga.gov/results/public/Georgia/elections/11032026GeneralAndSpecialElection",
+    ),
+    "SC": State(
+        "SC",
+        "South Carolina",
+        "sc_2026_general",
+        tuple(range(1, 8)),
+        ("total_votes",),
+        governor=True,
+        source_page="https://scvotes.gov/2026-general-election-results/",
+        bundle_resolver="sc",
+    ),
+    "KS": State(
+        "KS",
+        "Kansas",
+        "ks_2026_general",
+        tuple(range(1, 5)),
+        ("total_votes",),
+        governor=True,
+        source_page="https://ent.sos.ks.gov/kssos_ent.html",
+    ),
+    "OH": State(
+        "OH",
+        "Ohio",
+        "oh_2026_general",
+        tuple(range(1, 16)),
+        ("total_votes",),
+        governor=True,
+        source_page="https://liveresults.ohiosos.gov/",
     ),
 }
 

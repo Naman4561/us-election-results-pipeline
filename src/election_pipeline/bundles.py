@@ -5,9 +5,11 @@ import tempfile
 import time
 import zipfile
 from dataclasses import replace
+from importlib import import_module
 from pathlib import Path
 
 from election_pipeline.collect import FetchFailure, FetchResponse, fetch_file
+from election_pipeline.states import STATES
 
 
 def fetch_bundle(source, settings, destination):
@@ -16,6 +18,13 @@ def fetch_bundle(source, settings, destination):
     with tempfile.TemporaryDirectory(prefix=".bundle-", dir=destination.parent) as directory:
         paths = {}
         for name, url in (*source.files, (source.primary_filename, source.url)):
+            adapter = STATES.get(source.state)
+            if name == source.primary_filename and adapter and adapter.bundle_resolver:
+                resolver = import_module("election_pipeline.collectors." + adapter.bundle_resolver)
+                try:
+                    url = resolver.resolve(source, paths)
+                except (ValueError, UnicodeError) as error:
+                    raise FetchFailure(str(error), retryable=False) from error
             path = Path(directory) / name
             remaining = settings.max_download_seconds - (time.monotonic() - started)
             if received >= settings.max_download_bytes:
@@ -39,6 +48,7 @@ def fetch_bundle(source, settings, destination):
                 {
                     "name": name,
                     "url": url,
+                    "final_url": result.final_url,
                     "sha256": result.sha256,
                     "bytes": result.bytes_received,
                     "headers": result.headers,
