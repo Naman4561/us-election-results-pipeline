@@ -109,6 +109,7 @@ def result_rows(path: Path, source: Source, limit: int, stats: dict):
         input_rows=0,
         output_rows=0,
         administrative_rows_retained=0,
+        nul_party_values_normalized=0,
     )
 
     with zipfile.ZipFile(path) as archive:
@@ -152,6 +153,15 @@ def result_rows(path: Path, source: Source, limit: int, stats: dict):
 
                 if contest is None:
                     continue
+
+                # The official NC file uses a single NUL for a missing party on some write-ins.
+                # Normalize that one field only; the original ZIP remains unchanged.
+                if row["Choice Party"] == "\x00":
+                    row["Choice Party"] = ""
+                    stats["nul_party_values_normalized"] += 1
+                bad_fields = [name for name in RESULT_HEADER if "\x00" in row[name]]
+                if bad_fields:
+                    raise ValueError(f"Line {line}: unexpected NUL in {', '.join(bad_fields)}")
 
                 if vote_for != 1:
                     raise ValueError(f"Line {line}: tracked federal contest must be vote-for-one")
@@ -310,6 +320,11 @@ def parse(archive, source, settings, output, stats, reference):
         stats["warnings"].append("All counts are zero; this does not establish live reporting.")
 
     if results:
+        if stats["nul_party_values_normalized"]:
+            stats["warnings"].append(
+                f"Normalized {stats['nul_party_values_normalized']} NUL-only party values "
+                "to missing."
+            )
         stats["warnings"].append("Candidate votes are not unique ballots or demographic turnout.")
 
     stats["election_status"] = "not determined by parser"

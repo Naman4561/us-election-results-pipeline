@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import socket
@@ -14,6 +15,7 @@ from pathlib import Path
 from dotenv import dotenv_values
 
 from election_pipeline.deployment import catalog, containers, control, dashboard
+from election_pipeline.settings import CollectorSettings
 from election_pipeline.storage import ArchiveStore, atomic_json, utc_now
 
 STATES = {"TX", "MN", "NC", "NE"}
@@ -75,22 +77,79 @@ def prepare(path, states, release, image, prod, config):
             )
         else:
             entry = value["sources"][name]
-            if (
-                entry["image_id"] != identity
-                or entry["revision"] != revision
-                or entry.get("replaces") != old_name
-            ):
-                raise ValueError(
-                    "Existing replacement belongs to another release; inspect it first"
-                )
             if entry["enabled"] or entry["public"]:
                 raise ValueError("This expanded source is already active")
+            if entry.get("replaces") != old_name:
+                raise ValueError("Existing source has a different replacement target")
+            if entry["image_id"] != identity or entry["revision"] != revision:
+                repin_private(path, release, identity, revision, name, prod)
         progress("prepare", source_id=name)
         result = control.prepare(path, name, prod, config)
         progress("validated", source_id=name, release_id=result["release_id"])
         result = control.promote(path, name, prod, config)
         progress("private_publication", source_id=name, publication_id=result["publication_id"])
     return {"outcome": "prepared", "sources": selected, "public_coverage_changed": False}
+
+
+def repin_private(path, release, identity, revision, name, prod):
+    """Replace an inactive preparation image while keeping live sources untouched."""
+    before = catalog.read(path)["sources"][name]
+    if (
+        before["worker"] != "expansion"
+        or before["enabled"]
+        or before["public"]
+        or not before.get("replaces")
+    ):
+        raise ValueError("Only a disabled, private coverage replacement may be re-pinned")
+    meta = containers.metadata(identity, name)
+    if meta["code_sha256"] != containers.package_hash(release):
+        raise ValueError("Image Python sources differ from the release checkout")
+    if (
+        catalog.source_from_json(meta["source"]) != catalog.source_from_json(before["source"])
+        or CollectorSettings(**meta["settings"]) != CollectorSettings(**before["settings"])
+        or meta["races"] != before["races"]
+    ):
+        raise ValueError("A private re-pin cannot change source, settings or race coverage")
+    with control.connect(control.db_settings(prod, writer=True)) as conn:
+        for migration in conn.execute("SELECT name, sha256 FROM ops.schema_migrations").fetchall():
+            file = Path(release) / "migrations" / migration["name"]
+            if (
+                not file.is_file()
+                or hashlib.sha256(file.read_bytes()).hexdigest() != migration["sha256"]
+            ):
+                raise ValueError("Corrected release changed or omitted an applied migration")
+    fingerprint = containers.release_hash(release)
+
+    def change(value):
+        catalog.verify_baseline(value, prod)
+        entry = value["sources"][name]
+        if entry != before:
+            raise ValueError("Private source changed during re-pin; retry preparation")
+        entry["previous_preparation"] = {
+            key: before[key]
+            for key in (
+                "image_id",
+                "revision",
+                "release_path",
+                "release_sha256",
+                "candidate_id",
+                "publication_id",
+                "published_at",
+            )
+            if key in before
+        }
+        entry.update(
+            image_id=identity,
+            revision=revision,
+            release_path=str(Path(release).resolve()),
+            release_sha256=fingerprint,
+        )
+        # Keep historical DB publications; require fresh validation for this image.
+        for key in ("candidate_id", "publication_id", "published_at"):
+            entry.pop(key, None)
+
+    catalog.update(path, change)
+    progress("repinned_private_source", source_id=name, revision=revision)
 
 
 def free_port():

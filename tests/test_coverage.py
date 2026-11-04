@@ -61,6 +61,25 @@ def members(code):
                         "Y",
                     ]
                 )
+        rows.append(
+            [
+                "WAKE",
+                "11/03/2026",
+                "001",
+                "1",
+                "S",
+                "US HOUSE OF REPRESENTATIVES DISTRICT 02",
+                "Write-In (Miscellaneous)",
+                "\x00",
+                "1",
+                "1",
+                "2",
+                "3",
+                "4",
+                "10",
+                "Y",
+            ]
+        )
         output = io.StringIO(newline="")
         writer = csv.writer(output, delimiter="\t")
         writer.writerow(RESULT_HEADER)
@@ -418,6 +437,90 @@ class CoverageDeploymentTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             catalog.validate(self.value)
 
+    def repin(self, mutate_meta=None, migrations=None):
+        meta = {
+            "source": json.loads(json.dumps(asdict(self.sources[self.name]))),
+            "settings": asdict(self.settings),
+            "races": list(self.sources[self.name].contests),
+            "code_sha256": "c" * 64,
+        }
+        if mutate_meta:
+            mutate_meta(meta)
+        with (
+            patch.object(containers, "metadata", return_value=meta),
+            patch.object(containers, "package_hash", return_value="c" * 64),
+            patch.object(containers, "release_hash", return_value="b" * 64),
+            patch.object(control, "db_settings", return_value={}),
+            patch.object(control, "connect") as connect,
+        ):
+            connection = connect.return_value.__enter__.return_value
+            connection.execute.return_value.fetchall.return_value = migrations or []
+            coverage.repin_private(
+                self.path, self.root, "sha256:" + "f" * 64, "a" * 40, self.name, self.prod
+            )
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_corrected_image_can_repin_only_private_sources_and_requires_fresh_validation(self):
+        self.add()
+        self.value["sources"][self.name].update(
+            candidate_id="old-candidate",
+            publication_id="old-private",
+            published_at="2026-11-04T20:00:00+00:00",
+        )
+        catalog.write(self.path, self.value)
+        self.repin()
+        after = catalog.read(self.path)
+        current = after["sources"][self.name]
+        self.assertEqual(current["image_id"], "sha256:" + "f" * 64)
+        self.assertEqual(current["revision"], "a" * 40)
+        self.assertFalse(current["public"])
+        self.assertFalse(current["enabled"])
+        self.assertNotIn("candidate_id", current)
+        self.assertNotIn("publication_id", current)
+        self.assertNotIn("published_at", current)
+        self.assertEqual(current["previous_preparation"]["publication_id"], "old-private")
+        for name in self.value["sources"]:
+            if name != self.name:
+                self.assertEqual(after["sources"][name], self.value["sources"][name])
+        self.assertEqual(self.prod_file.read_text(), self.original)
+
+    def test_repin_rejects_an_enabled_or_public_source_before_inspecting_an_image(self):
+        self.add()
+        for public in (False, True):
+            value = copy.deepcopy(self.value)
+            if public:
+                value = catalog.prospective(value, [self.name])
+            else:
+                value["sources"][self.name]["enabled"] = True
+            catalog.write(self.path, value)
+            before = self.path.read_bytes()
+            with patch.object(containers, "metadata") as metadata:
+                with self.assertRaisesRegex(ValueError, "disabled, private"):
+                    coverage.repin_private(
+                        self.path, self.root, "sha256:" + "f" * 64, "a" * 40, self.name, self.prod
+                    )
+            metadata.assert_not_called()
+            self.assertEqual(self.path.read_bytes(), before)
+
+    def test_repin_rejects_changed_source_settings_and_race_coverage(self):
+        self.add()
+        before = self.path.read_bytes()
+        for mutate in (
+            lambda meta: meta["source"].update(url="https://example.com/changed.zip"),
+            lambda meta: meta["settings"].update(max_csv_rows=1),
+            lambda meta: meta["races"].pop(),
+        ):
+            with self.assertRaisesRegex(ValueError, "cannot change"):
+                self.repin(mutate)
+            self.assertEqual(self.path.read_bytes(), before)
+
+    def test_repin_rejects_changed_applied_migrations(self):
+        self.add()
+        before = self.path.read_bytes()
+        with self.assertRaisesRegex(ValueError, "applied migration"):
+            self.repin(migrations=[{"name": "001_initial.sql", "sha256": "0" * 64}])
+        self.assertEqual(self.path.read_bytes(), before)
+
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_register_stages_separate_source_without_modifying_the_live_owner(self):
         source = self.sources[self.name]
@@ -729,6 +832,13 @@ class CoverageDatabaseTests(unittest.TestCase):
                         (published["publication_id"],),
                     ).fetchall()
                     self.assertEqual(len({row["contest_id"] for row in rows}), count)
+                    if code == "NC":
+                        write_ins = [
+                            row for row in rows if row["choice"] == "Write-In (Miscellaneous)"
+                        ]
+                        self.assertEqual(len(write_ins), 1)
+                        self.assertIsNone(write_ins[0]["choice_party"])
+                        self.assertEqual(write_ins[0]["total_votes"], 10)
                     self.assertFalse(
                         conn.execute(
                             "SELECT has_table_privilege(current_user,%s,'SELECT') AS ok",

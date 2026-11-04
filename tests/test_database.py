@@ -96,6 +96,19 @@ class DatabaseArtifactTests(unittest.TestCase):
                 )
             )
 
+    def test_nul_in_parsed_text_is_rejected_before_database_copy(self):
+        report, _, _, _, name, fields = self.verified()
+        path = self.directory / name
+        with path.open(encoding="utf-8", newline="") as handle:
+            rows = list(csv.DictReader(handle))
+        rows[0]["choice_party"] = "\x00"
+        with path.open("w", encoding="utf-8", newline="") as handle:
+            writer = csv.DictWriter(handle, fields)
+            writer.writeheader()
+            writer.writerows(rows)
+        with self.assertRaisesRegex(ValueError, "NUL bytes in choice_party"):
+            list(converted_rows(path, fields, self.f.source, 1, report["output_rows"]))
+
 
 @unittest.skipUnless(
     psycopg and os.getenv("ELECTION_TEST_DATABASE"),

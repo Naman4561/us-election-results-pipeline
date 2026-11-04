@@ -123,6 +123,61 @@ class ParsingTests(unittest.TestCase):
 
         self.assertEqual(list(self.root.glob("parsed/*/*/report.json")), [])
 
+    def test_nul_only_party_is_missing_and_raw_bytes_and_votes_are_preserved(self):
+        from election_pipeline.database import converted_rows
+
+        rows = [row.copy() for row in self.rows]
+        rows[0][6:8] = ["Write-In (Miscellaneous)", "\x00"]
+        archive = self.archive(rows)
+        original = archive.read_bytes()
+        result = self.parse()
+        self.assertEqual(result["outcome"], "parsed", result)
+        self.assertEqual(result["nul_party_values_normalized"], 1)
+        self.assertEqual(result["output_rows"], len(rows))
+        self.assertEqual(archive.read_bytes(), original)
+        with zipfile.ZipFile(archive) as zipped:
+            self.assertIn(b"\x00", zipped.read("results.txt"))
+        directory = Path(result["output_dir"])
+        for name in ("precinct_results.csv", "county_results.csv", "contest_results.csv"):
+            self.assertNotIn(b"\x00", (directory / name).read_bytes())
+        parsed = self.read_output(result, "precinct_results.csv")
+        self.assertEqual(parsed[0]["choice"], "Write-In (Miscellaneous)")
+        self.assertEqual(parsed[0]["choice_party"], "")
+        self.assertEqual(parsed[0]["total_votes"], "10")
+        from election_pipeline.parsers.nc import RESULT_FIELDS
+
+        converted = list(
+            converted_rows(
+                directory / "precinct_results.csv", RESULT_FIELDS, self.source, 7, len(rows)
+            )
+        )
+        self.assertIsNone(converted[0][9])
+        self.assertEqual(converted[0][-1], 10)
+
+    def test_embedded_party_nul_and_nuls_in_retained_identifiers_are_rejected(self):
+        for column, value in (
+            (7, "D\x00EM"),
+            (6, "Candidate\x00 A"),
+            (0, "WA\x00KE"),
+            (2, "00\x001"),
+        ):
+            with self.subTest(column=column):
+                rows = [row.copy() for row in self.rows]
+                rows[0][column] = value
+                self.archive(rows)
+                result = self.parse()
+                self.assertEqual(result["outcome"], "validation_failed", result)
+                self.assertIn("NUL", result["error"])
+
+    def test_nul_choice_in_an_untracked_local_race_is_not_retained(self):
+        ignored = self.rows[0].copy()
+        ignored[5:8] = ["LOCAL OFFICE OUTSIDE COVERAGE", "\x00", "\x00"]
+        self.archive([*self.rows, ignored])
+        result = self.parse()
+        self.assertEqual(result["outcome"], "parsed", result)
+        self.assertEqual(result["output_rows"], len(self.rows))
+        self.assertEqual(result["nul_party_values_normalized"], 0)
+
     def test_duplicates_and_missing_contests_are_rejected(self):
         for rows in (self.rows + [self.rows[0]], self.rows[:-2]):
             self.archive(rows)

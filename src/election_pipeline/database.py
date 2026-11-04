@@ -307,6 +307,13 @@ def converted_rows(path, fields, source, release, expected_rows):
             if None in row or any(value is None for value in row.values()):
                 raise ValueError("Malformed detailed CSV record")
 
+            bad_fields = [name for name, value in row.items() if "\x00" in value]
+            if bad_fields:
+                raise ValueError(
+                    f"Detailed CSV row {position}: NUL bytes in {', '.join(bad_fields)}; "
+                    "reparse the original source with the corrected parser"
+                )
+
             if row["state"] != source.state or row["election_date"] != source.election_date:
                 raise ValueError("Detailed CSV election/state mismatch")
 
