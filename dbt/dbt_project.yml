@@ -16,14 +16,33 @@ clean-targets:
 - dbt_packages
 vars:
   ak_results_source: ak_2026_general
-  ak_races: [AK-SEN, AK-GOV, AK-AL]
+  ak_races:
+  - AK-SEN
+  - AK-GOV
+  - AK-AL
   nc_results_source: nc_2026_general
   nc_demographics_source: nc_absentee_early_demographics_2026
   election_date: '2026-11-03'
-  nc_races: [NC-SEN, NC-01, NC-03, NC-04, NC-11]
-  mn_races: [MN-SEN, MN-01]
-  ne_races: [NE-SEN, NE-GOV]
-  tx_races: [TX-SEN, TX-GOV, TX-15, TX-23, TX-28, TX-34, TX-35]
+  nc_races:
+  - NC-SEN
+  - NC-01
+  - NC-03
+  - NC-04
+  - NC-11
+  mn_races:
+  - MN-SEN
+  - MN-01
+  ne_races:
+  - NE-SEN
+  - NE-GOV
+  tx_races:
+  - TX-SEN
+  - TX-GOV
+  - TX-15
+  - TX-23
+  - TX-28
+  - TX-34
+  - TX-35
   ky_results_source: ky_2026_general
   mn_results_source: mn_2026_general
   ne_results_source: ne_2026_general
@@ -84,6 +103,9 @@ vars:
   - OH-13
   - OH-14
   - OH-15
+  ms_results_source: ms_2026_general
+  ms_races:
+  - MS-SEN
 models:
   election_analytics:
     +materialized: '{{ var(''publication_materialization'', ''view'') }}'
@@ -119,6 +141,9 @@ models:
       oh:
         +tags:
         - state_oh
+      ms:
+        +tags:
+        - state_ms
     marts:
       +schema: marts
       ak:
@@ -151,3 +176,6 @@ models:
       oh:
         +tags:
         - state_oh
+      ms:
+        +tags:
+        - state_ms

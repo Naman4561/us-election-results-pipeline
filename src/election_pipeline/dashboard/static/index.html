@@ -8,8 +8,8 @@
       content="Unofficial 2026 election returns from official state sources."
     />
     <title>2026 Election Results</title>
-    <link rel="stylesheet" href="/app.css?v=expansion2" />
-    <script type="module" src="/app.js?v=alaska1"></script>
+    <link rel="stylesheet" href="/app.css?v=mississippi1" />
+    <script type="module" src="/app.js?v=mississippi1"></script>
   </head>
   <body>
     <header>
@@ -81,6 +81,15 @@
             <svg id="map" role="group" aria-label="Interactive election map">
               <defs>
                 <pattern
+                  id="partial"
+                  patternUnits="userSpaceOnUse"
+                  width="8"
+                  height="8"
+                >
+                  <rect width="8" height="8" fill="#d5e1ed" />
+                  <path d="M0 4H8" stroke="#627f9d" stroke-width="2" />
+                </pattern>
+                <pattern
                   id="uncovered"
                   patternUnits="userSpaceOnUse"
                   width="8"
@@ -131,7 +140,8 @@
             ><span><i class="no-election"></i>No election</span
             ><span><i class="uncovered"></i>Outside coverage</span
             ><span><i class="tie"></i>Tie / party unknown</span
-            ><span><i class="unavailable"></i>Data unavailable</span>
+            ><span><i class="unavailable"></i>Data unavailable</span
+            ><span><i class="partial"></i>Partial county coverage</span>
           </div>
           <div class="map-footer">
             <span id="coverage-label"></span

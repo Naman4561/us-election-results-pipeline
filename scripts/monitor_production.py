@@ -183,6 +183,14 @@ def assess(prod, config, now):
                     "publication"
                 ):
                     issues[f"dashboard/{code}"] = "State dashboard has no approved publication"
+                for county, record in state.get("county_feeds", {}).items():
+                    if record.get("collection_status") in {"stale", "unavailable"}:
+                        issues[f"county/{code}/{county}"] = (
+                            "County source requires scan review"
+                            if record.get("issue") == "review_required"
+                            else "County source check is overdue or failed; "
+                            "last accepted votes retained"
+                        )
         elif catalog:
             issues["dashboard"] = "Deployment monitoring requires the national dashboard API"
         elif (

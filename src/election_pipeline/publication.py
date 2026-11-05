@@ -344,14 +344,33 @@ def targets(metadata):
             if adapter.county_results
             else []
         )
-        return county_target + [
-            (
-                "marts",
-                adapter.schema + "_contest_candidate_results",
-                "contest_candidate_results",
-                "contest_id choice choice_party " + votes + " contest_votes vote_share",
-            ),
-        ]
+        feed_target = (
+            [
+                (
+                    "marts",
+                    adapter.schema + "_county_feed_status",
+                    "county_feed_status",
+                    "county county_fips collection_status source_url raw_sha256 last_attempt_at "
+                    "last_success_at report_generated_at report_date "
+                    "precincts_reporting precincts_total "
+                    "absentee_scope affidavit_scope write_in_votes write_in_label issue",
+                )
+            ]
+            if adapter.county_feed_status
+            else []
+        )
+        return (
+            county_target
+            + feed_target
+            + [
+                (
+                    "marts",
+                    adapter.schema + "_contest_candidate_results",
+                    "contest_candidate_results",
+                    "contest_id choice choice_party " + votes + " contest_votes vote_share",
+                ),
+            ]
+        )
     return [
         (
             "staging",

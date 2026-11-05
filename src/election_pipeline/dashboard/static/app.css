@@ -321,6 +321,13 @@ h2 {
   font-size: 10px;
   color: #51667c;
 }
+.legend .partial {
+  background: repeating-linear-gradient(0deg, #d5e1ed 0 4px, #627f9d 4px 6px);
+}
+.feature[data-stale="true"] {
+  stroke: #a46c22;
+  stroke-dasharray: 4 3;
+}
 .legend span {
   display: flex;
   align-items: center;

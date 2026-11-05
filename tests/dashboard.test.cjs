@@ -51,13 +51,90 @@ test("national/state map navigation and coverage statuses", async (t) => {
   assert.equal(d.querySelectorAll("path.feature").length, 50);
   assert.equal(status("CA"), "no_election");
   assert.equal(status("ME"), "not_covered");
-  assert(d.querySelector('path[data-id="AK"] title').textContent.includes("first choice only"));
-  assert(d.querySelector("#notice").textContent.includes("Alaska shows first-choice votes"));
+  assert.equal(status("MS"), "partial");
+  assert(
+    d.querySelector('path[data-id="MS"] title').textContent.includes("10/82"),
+  );
+  click('path[data-id="MS"]');
+  await settle();
+  assert.equal(d.querySelector("h1").textContent, "Mississippi");
+  assert.equal(d.querySelectorAll("path.feature").length, 82);
+  assert.equal(
+    d.querySelector("#result-scope").textContent,
+    "COLLECTED COUNTY TOTALS",
+  );
+  assert(
+    d
+      .querySelector("#result-content")
+      .textContent.includes("not a statewide total"),
+  );
+  const msCalls = calls;
+  click('path[data-id="JACKSON"]');
+  assert.equal(status("JACKSON"), "not_covered");
+  assert(d.querySelector("#result-subtitle").textContent.includes("Jackson"));
+  assert(
+    d
+      .querySelector("#result-content")
+      .textContent.includes("votes are unknown"),
+  );
+  click('path[data-id="HINDS"]');
+  assert(d.querySelector(".candidate-votes"));
+  assert(
+    d
+      .querySelector("#result-content")
+      .textContent.includes("Last successful check"),
+  );
+  payload.states.MS.county_feeds.HINDS.collection_status = "stale";
+  payload.states.MS.county_feeds.HINDS.issue = "review_required";
+  click("#refresh");
+  await settle();
+  assert.equal(d.querySelector('path[data-id="HINDS"]').dataset.stale, "true");
+  assert(
+    d.querySelector("#result-content").textContent.includes("STALE SOURCE"),
+  );
+  assert(
+    d.querySelector("#result-content").textContent.includes("requires review"),
+  );
+  assert.equal(calls, msCalls + 1, "Mississippi county clicks use cached data");
+  delete payload.states.MS.races["MS-SEN"].counties.HINDS;
+  payload.states.MS.county_feeds.HINDS.collection_status = "unavailable";
+  click("#refresh");
+  await settle();
+  assert.equal(status("HINDS"), "unavailable");
+  assert(!d.querySelector(".candidate-votes"));
+  assert(
+    d
+      .querySelector("#result-content")
+      .textContent.includes("no accepted report"),
+  );
+  click('[data-office="governor"]');
+  assert.equal(d.querySelector("h1").textContent, "Mississippi");
+  assert(
+    d
+      .querySelector("#result-content")
+      .textContent.includes("has no governor election"),
+  );
+  click("#national");
+  click('[data-office="senate"]');
+  assert(
+    d
+      .querySelector('path[data-id="AK"] title')
+      .textContent.includes("first choice only"),
+  );
+  assert(
+    d
+      .querySelector("#notice")
+      .textContent.includes("Alaska shows first-choice votes"),
+  );
   click('path[data-id="AK"]');
   await settle();
   assert.equal(d.querySelector("h1").textContent, "Alaska");
   assert.equal(d.querySelectorAll("path.feature").length, 1);
-  assert(d.querySelector("#result-content").textContent.includes("CSV-listed candidates"));
+  assert(
+    d
+      .querySelector("#result-content")
+      .textContent.includes("CSV-listed candidates"),
+  );
   assert(d.querySelector("#result-content").textContent.includes("Round 1"));
   const alaskaCalls = calls;
   click('[data-office="governor"]');
@@ -124,7 +201,11 @@ test("national/state map navigation and coverage statuses", async (t) => {
   const expandedCalls = calls;
   click('path[data-id="TX-01"]');
   assert.equal(d.querySelector("#result-title").textContent, "TX-01");
-  assert.equal(calls, expandedCalls, "Newly covered districts use cached results");
+  assert.equal(
+    calls,
+    expandedCalls,
+    "Newly covered districts use cached results",
+  );
   click('[data-office="senate"]');
   for (const stats of Object.values(payload.states.TX.races["TX-SEN"].stats)) {
     Object.assign(stats, {
@@ -161,7 +242,11 @@ test("national/state map navigation and coverage statuses", async (t) => {
     assert.equal(d.querySelectorAll("path.feature").length, districts);
     click(`path[data-id="${code}-01"]`);
     assert.equal(d.querySelector("#result-title").textContent, `${code}-01`);
-    assert.equal(calls, stateCalls, "State tabs and race clicks use cached results");
+    assert.equal(
+      calls,
+      stateCalls,
+      "State tabs and race clicks use cached results",
+    );
     click("#national");
   }
   click('[data-office="senate"]');
@@ -191,12 +276,22 @@ test("national/state map navigation and coverage statuses", async (t) => {
   payload.states.OH.publication.source_modified_at = "2026-11-04T02:42:36Z";
   click("#refresh");
   await settle();
-  assert(d.querySelector("#notice").textContent.includes("manually updated states"));
+  assert(
+    d.querySelector("#notice").textContent.includes("manually updated states"),
+  );
   click('path[data-id="OH"]');
   await settle();
-  assert(d.querySelector("#publication-status").textContent.includes("MANUAL SNAPSHOT"));
-  assert(d.querySelector("#notice").textContent.includes("new file is imported"));
-  assert(d.querySelector("#connection").textContent.includes("updated manually"));
+  assert(
+    d
+      .querySelector("#publication-status")
+      .textContent.includes("MANUAL SNAPSHOT"),
+  );
+  assert(
+    d.querySelector("#notice").textContent.includes("new file is imported"),
+  );
+  assert(
+    d.querySelector("#connection").textContent.includes("updated manually"),
+  );
   w.fetch = async () => {
     throw Error("Network offline");
   };

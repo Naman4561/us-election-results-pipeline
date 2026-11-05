@@ -1,0 +1,4356 @@
+{
+  "inventory_version": 1,
+  "state": "MS",
+  "election_date": "2026-11-03",
+  "priority_contest": "MS-SEN",
+  "checked_at_utc": "2026-11-05T02:20:32.633737+00:00",
+  "runtime_enabled": false,
+  "statewide_coverage_complete": false,
+  "expected_counties": 82,
+  "verified_current_sources": 10,
+  "counties_without_verified_current_source": 72,
+  "identifier_note": "ms_sos_county_code is Mississippi's alphabetical 01-82 county code, not a Census FIPS code.",
+  "scope_note": "Source research inventory, not a runtime source configuration. Captured count examples are unofficial county snapshots, not statewide totals or a statement that all ballots are counted. Unknown write-ins and reporting denominators remain null.",
+  "authority_urls": [
+    "https://www.sos.ms.gov/MSCountyElectionInfo/",
+    "https://www.mssupervisors.org/mississippi-counties",
+    "https://www.sos.ms.gov/news/official-statement-election-update"
+  ],
+  "counties": [
+    {
+      "county": "Adams",
+      "ms_sos_county_code": "01",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)446-6326"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/adams",
+      "directory_website_leads": [
+        "http://www.adamscountyms.net"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.adamscountyms.net",
+          "checked_at": "2026-11-05T02:07:29.134643+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "\"Adams County\" Mississippi election results 2026 official -site:sos.ms.gov",
+        "site:adamscountyms.net election results 2026"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Elections - Adams County, Mississippi",
+          "url": "https://www.adamscountyms.net/county-departments/elections/"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://www.adamscountyms.net/wp-content/uploads/2025/10/Precinct-List-2025.pdf"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Alcorn",
+      "ms_sos_county_code": "02",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)286-7740"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/alcorn",
+      "directory_website_leads": [
+        "http://alcorncounty.org/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://alcorncounty.org/",
+          "checked_at": "2026-11-05T02:07:29.135478+00:00",
+          "http_status": 200,
+          "final_url": "http://www.alcorncounty.org/",
+          "title": [
+            "Alcorn County, Mississippi"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "\"Alcorn County\" Mississippi election results 2026 official -site:sos.ms.gov",
+        "site:alcorncounty.org election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk - Alcorn County",
+          "url": "https://www.alcorncounty.org/circuit-clerk/"
+        },
+        {
+          "label": "Election Commission - Alcorn County",
+          "url": "https://www.alcorncounty.org/election-commission/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Amite",
+      "ms_sos_county_code": "03",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)657-8932"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/amite",
+      "directory_website_leads": [
+        "http://www.amitecounty.ms/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.amitecounty.ms/",
+          "checked_at": "2026-11-05T02:07:29.136079+00:00",
+          "http_status": 200,
+          "final_url": "https://www.amitecounty.ms/",
+          "title": [
+            "Amite County - Coming Soon"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "\"Amite County\" Mississippi election results 2026 official -site:sos.ms.gov"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commissioners | Amite County, Mississippi",
+          "url": "https://www.amitecounty.ms/election-commissioners"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Attala",
+      "ms_sos_county_code": "04",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)289-1471"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/attala",
+      "directory_website_leads": [
+        "http://www.attalacounty.net/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.attalacounty.net/",
+          "checked_at": "2026-11-05T02:07:29.136890+00:00",
+          "http_status": 200,
+          "final_url": "https://www.attalacounty.net/",
+          "title": [
+            "Attala County Board of Supervisors - Coming Soon"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "\"Attala County\" Mississippi election results 2026 official -site:sos.ms.gov"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commission | Attala County",
+          "url": "https://www.attalacounty.net/election-commission"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Benton",
+      "ms_sos_county_code": "05",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)224-6310"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/benton",
+      "directory_website_leads": [
+        "https://bentoncountyms.gov/"
+      ],
+      "discovery_status": "landing_only",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://bentoncountyms.gov/",
+          "checked_at": "2026-11-05T02:07:29.137639+00:00",
+          "http_status": 200,
+          "final_url": "https://www.bentoncountyms.gov/",
+          "title": [
+            "Home | Benton County MS"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.bentoncountyms.gov/tools-and-tips",
+          "checked_at": "2026-11-05T02:07:41.496713+00:00",
+          "http_status": 200,
+          "final_url": "https://www.bentoncountyms.gov/tools-and-tips",
+          "title": [
+            "Election Results | Benton County MS"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.bentoncountyms.gov/cloud-desktop",
+          "checked_at": "2026-11-05T02:07:46.127897+00:00",
+          "http_status": 200,
+          "final_url": "https://www.bentoncountyms.gov/cloud-desktop",
+          "title": [
+            "Circuit Clerk | Benton County MS"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "\"Benton County\" Mississippi election results 2026 official -site:sos.ms.gov"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://www.bentoncountyms.gov/cloud-desktop"
+        },
+        {
+          "label": "Elections",
+          "url": "https://www.bentoncountyms.gov/support-consulting"
+        },
+        {
+          "label": "Election Results",
+          "url": "https://www.bentoncountyms.gov/tools-and-tips"
+        },
+        {
+          "label": "Tax Assessor/Collector",
+          "url": "https://www.bentoncountyms.gov/copy-of-elections"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "follow_up_url": "https://www.bentoncountyms.gov/tools-and-tips",
+      "notes": "The results page is a placeholder with no current result file found."
+    },
+    {
+      "county": "Bolivar",
+      "ms_sos_county_code": "06",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)759-6521"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/bolivar",
+      "directory_website_leads": [
+        "https://www.co.bolivar.ms.us/"
+      ],
+      "discovery_status": "older_results_only",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.co.bolivar.ms.us/",
+          "checked_at": "2026-11-05T02:07:36.843131+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "\"Bolivar County\" Mississippi election results 2026 official -site:sos.ms.gov"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "follow_up_url": "https://bolivar-circuit-clerk.ms/election-results/",
+      "notes": "The clerk page currently links the November 2024 general result."
+    },
+    {
+      "county": "Calhoun",
+      "ms_sos_county_code": "07",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)412-3101"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/calhoun",
+      "directory_website_leads": [
+        "http://www.calhouncoms.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.calhouncoms.com/",
+          "checked_at": "2026-11-05T02:07:38.778450+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "\"Calhoun County\" Mississippi election results 2026 official -site:sos.ms.gov",
+        "site:calhouncoms.com election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Carroll",
+      "ms_sos_county_code": "08",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)237-9274",
+        "(662)464-5476"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/carroll",
+      "directory_website_leads": [
+        "http://www.carrollcountyms.org"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.carrollcountyms.org",
+          "checked_at": "2026-11-05T02:07:41.127839+00:00",
+          "http_status": 200,
+          "final_url": "https://www.carrollcountyms.org",
+          "title": [],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "\"Carroll County\" Mississippi election results 2026 official -site:sos.ms.gov",
+        "site:carrollcountyms.org election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Chickasaw",
+      "ms_sos_county_code": "09",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)447-2838",
+        "(662)456-2331"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/chickasaw",
+      "directory_website_leads": [
+        "http://www.chickasawcoms.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.chickasawcoms.com/",
+          "checked_at": "2026-11-05T02:07:41.566582+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:chickasawcoms.com election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Choctaw",
+      "ms_sos_county_code": "10",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)285-6245"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/choctaw",
+      "directory_website_leads": [],
+      "discovery_status": "official_contact_only",
+      "probe_status": "directory_has_no_website",
+      "probed_pages": [],
+      "search_queries": [
+        "\"Choctaw County\" \"Mississippi\" election results official"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Claiborne",
+      "ms_sos_county_code": "11",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)437-5841"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/claiborne",
+      "directory_website_leads": [
+        "https://www.ccmsgov.us/board-of-supervisors/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.ccmsgov.us/board-of-supervisors/",
+          "checked_at": "2026-11-05T02:07:41.753439+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:ccmsgov.us election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commission - Claiborne County",
+          "url": "https://www.ccmsgov.us/election-commission/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Clarke",
+      "ms_sos_county_code": "12",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)616-1714"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/clarke",
+      "directory_website_leads": [
+        "https://clarkecountyms.gov/board-of-supervisors/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://clarkecountyms.gov/board-of-supervisors/",
+          "checked_at": "2026-11-05T02:07:43.835648+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:clarkecountyms.gov election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commission - Clarke County, Mississippi",
+          "url": "https://www.clarkecountyms.gov/election-commission/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Clay",
+      "ms_sos_county_code": "13",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)494-3384"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/clay",
+      "directory_website_leads": [
+        "http://www.claycountyms.com/"
+      ],
+      "discovery_status": "website_placeholder",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.claycountyms.com/",
+          "checked_at": "2026-11-05T02:07:45.213908+00:00",
+          "http_status": 200,
+          "final_url": "https://www.claycountyms.com/",
+          "title": [
+            "Clay County - Coming Soon"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:claycountyms.com election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Information - Clay County, Mississippi",
+          "url": "https://www.claycountyms.com/circuit-clerk/election-information/"
+        },
+        {
+          "label": "Election Results - Clay County, Mississippi",
+          "url": "https://www.claycountyms.com/election-results/"
+        },
+        {
+          "label": "Election Commission - Clay County, Mississippi",
+          "url": "https://www.claycountyms.com/election-commission/"
+        },
+        {
+          "label": "SAMPLE Official Election Ballot",
+          "url": "https://www.claycountyms.com/wp-content/uploads/2024/10/2024-Genereal-Sample-Ballot.pdf"
+        },
+        {
+          "label": "Official Recapitulation",
+          "url": "https://www.claycountyms.com/wp-content/uploads/2024/02/Democrat_Primary_Results_2023.pdf"
+        },
+        {
+          "label": "Circuit Clerk - Clay County, Mississippi",
+          "url": "https://www.claycountyms.com/circuit-clerk/"
+        },
+        {
+          "label": "BOARD ORDER TO FILL VACANT POSITION AND SET SPECIAL ELECTION",
+          "url": "https://www.claycountyms.com/wp-content/uploads/2024/02/1-10-2023.pdf"
+        },
+        {
+          "label": "Links - Clay County, Mississippi",
+          "url": "https://www.claycountyms.com/circuit-clerk/links/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "follow_up_url": "https://www.claycountyms.com/election-results/",
+      "notes": "Indexed results are older; the current site probe serves Coming Soon."
+    },
+    {
+      "county": "Coahoma",
+      "ms_sos_county_code": "14",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)624-3014"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/coahoma",
+      "directory_website_leads": [
+        "http://www.coahomacounty.net/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.coahomacounty.net/",
+          "checked_at": "2026-11-05T02:07:45.961678+00:00",
+          "http_status": 200,
+          "final_url": "https://coahomacounty.net/",
+          "title": [
+            "Coahoma County, Mississippi &#8211; Coahoma County, Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://coahomacounty.net/circuit-clerk/",
+          "checked_at": "2026-11-05T02:07:54.660427+00:00",
+          "http_status": 200,
+          "final_url": "https://coahomacounty.net/circuit-clerk/",
+          "title": [
+            "Circuit Clerk &#8211; Coahoma County, Mississippi"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:coahomacounty.net election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://coahomacounty.net/circuit-clerk/"
+        },
+        {
+          "label": "Election Information",
+          "url": "https://coahomacounty.net/circuit-court/election-information/"
+        },
+        {
+          "label": "Election Information – Coahoma County, Mississippi",
+          "url": "https://coahomacounty.net/circuit-clerk/election-information/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Copiah",
+      "ms_sos_county_code": "15",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)894-1241"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/copiah",
+      "directory_website_leads": [
+        "https://www.copiahcountyms.gov/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.copiahcountyms.gov/",
+          "checked_at": "2026-11-05T02:07:47.433837+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:copiahcountyms.gov election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commission - Copiah County",
+          "url": "https://www.copiahcountyms.gov/elected-officials/election-commission/"
+        },
+        {
+          "label": "Elections - Copiah County",
+          "url": "https://www.copiahcountyms.gov/ufaq-category/elections/"
+        },
+        {
+          "label": "Circuit Clerk - Copiah County",
+          "url": "https://www.copiahcountyms.gov/elected-officials/circuit-clerk/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Covington",
+      "ms_sos_county_code": "16",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)765-6506"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/covington",
+      "directory_website_leads": [
+        "https://www.covingtoncountyms.gov/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.covingtoncountyms.gov/",
+          "checked_at": "2026-11-05T02:07:50.416051+00:00",
+          "http_status": 200,
+          "final_url": "https://www.covingtoncountyms.gov/",
+          "title": [
+            "Home | Covington County - Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.covingtoncountyms.gov/government/circuit-clerk",
+          "checked_at": "2026-11-05T02:07:55.901425+00:00",
+          "http_status": 200,
+          "final_url": "https://www.covingtoncountyms.gov/government/circuit-clerk",
+          "title": [
+            "Circuit Clerk | Covington County - Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.covingtoncountyms.gov/election-commission",
+          "checked_at": "2026-11-05T02:08:00.072599+00:00",
+          "http_status": 200,
+          "final_url": "https://www.covingtoncountyms.gov/election-commission",
+          "title": [
+            "Election Commission | Covington County - Mississippi"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:covingtoncountyms.gov election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://www.covingtoncountyms.gov/government/circuit-clerk"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://www.covingtoncountyms.gov/election-commission"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "DeSoto",
+      "ms_sos_county_code": "17",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)469-8007"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/desoto",
+      "directory_website_leads": [
+        "https://www.desotocountyms.gov/"
+      ],
+      "discovery_status": "verified_current_source",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.desotocountyms.gov/",
+          "checked_at": "2026-11-05T02:07:50.655215+00:00",
+          "http_status": 200,
+          "final_url": "https://www.desotocountyms.gov/",
+          "title": [
+            "DeSoto County, MS - Official Website | Official Website",
+            "Arrow Left",
+            "Arrow Right",
+            "Slideshow Left Arrow",
+            "Slideshow Right Arrow"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.desotocountyms.gov/AlertCenter.aspx?AID=Unoffical-Election-Results-for-November--360",
+          "checked_at": "2026-11-05T02:07:55.497633+00:00",
+          "http_status": 200,
+          "final_url": "https://www.desotocountyms.gov/AlertCenter.aspx?AID=Unoffical-Election-Results-for-November--360",
+          "title": [
+            "Alert Center • Unoffical Election Results for November 3, 20",
+            "Arrow Left",
+            "Arrow Right",
+            "Slideshow Left Arrow",
+            "Slideshow Right Arrow"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.desotocountyms.gov/AlertCenter.aspx?AID=Election-Commission-Statement-Re-Affidav-379",
+          "checked_at": "2026-11-05T02:07:59.650093+00:00",
+          "http_status": 200,
+          "final_url": "https://www.desotocountyms.gov/AlertCenter.aspx?AID=Election-Commission-Statement-Re-Affidav-379",
+          "title": [
+            "Alert Center • Election Commission Statement Re: Affidavit B",
+            "Arrow Left",
+            "Arrow Right",
+            "Slideshow Left Arrow",
+            "Slideshow Right Arrow"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [],
+      "election_page_leads": [
+        {
+          "label": "Election Commission Statement Re: Affidavit Ballots Read On...",
+          "url": "https://www.desotocountyms.gov/AlertCenter.aspx?AID=Election-Commission-Statement-Re-Affidav-379"
+        },
+        {
+          "label": "Unoffical Election Results for November 3, 2026 Read On...",
+          "url": "https://www.desotocountyms.gov/AlertCenter.aspx?AID=Unoffical-Election-Results-for-November--360"
+        },
+        {
+          "label": "Elections",
+          "url": "https://www.desotocountyms.gov/120/Elections"
+        },
+        {
+          "label": "",
+          "url": "https://www.desotocountyms.gov/Search/Results"
+        },
+        {
+          "label": "Unoffical Election Results for November 3, 2026",
+          "url": "https://www.desotocountyms.gov/DocumentCenter/View/11878/Results-Summary"
+        },
+        {
+          "label": "Elections",
+          "url": "https://www.desotocountyms.gov/AlertCenter.aspx?CID=Elections-10"
+        }
+      ],
+      "current_source": {
+        "landing_url": "https://www.desotocountyms.gov/AlertCenter.aspx?AID=Unoffical-Election-Results-for-November--360",
+        "download_url": "https://www.desotocountyms.gov/DocumentCenter/View/11878/Results-Summary",
+        "format": "pdf_text_electionware",
+        "report_generated_local": "2026-11-03T22:24:00",
+        "precincts_reporting": 47,
+        "precincts_total": 47,
+        "senate_choices": {
+          "Scott Colom": 28103,
+          "Cindy Hyde-Smith": 24780,
+          "Ty Pinkins": 1301
+        },
+        "write_in_votes": 68,
+        "reported_candidate_vote_total": null,
+        "notes": "County totals only. The report does not identify which outstanding ballot categories remain.",
+        "capture_sha256": "5c641703dd104077d574c41de317883c0739c1e9f0201e52d185d929c253275b",
+        "capture_bytes": 30855,
+        "captured_at_utc": "2026-11-05T01:50:43.105957+00:00",
+        "report_timezone": "America/Chicago",
+        "election_date_verified": "2026-11-03",
+        "result_status": "unofficial",
+        "discovery_validation": "County, general election date and Senate race reviewed in captured primary source.",
+        "automated_parser_validation": "not_run",
+        "independent_comparison": "not_run",
+        "capture_archive_member": "desoto.pdf",
+        "ballot_scope": {
+          "absentee": "unspecified",
+          "affidavit": "unspecified"
+        },
+        "all_ballots_counted": null,
+        "write_in_label": "Write-In Totals"
+      },
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+    },
+    {
+      "county": "Forrest",
+      "ms_sos_county_code": "18",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)582-3213"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/forrest",
+      "directory_website_leads": [
+        "https://forrestcountyms.us/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://forrestcountyms.us/",
+          "checked_at": "2026-11-05T02:07:52.392357+00:00",
+          "http_status": 200,
+          "final_url": "https://forrestcountyms.us/",
+          "title": [
+            "Welcome to Forrest County Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://forrestcountyms.us/forrest-county-voter-registration/",
+          "checked_at": "2026-11-05T02:07:56.314845+00:00",
+          "http_status": 200,
+          "final_url": "https://forrestcountyms.us/forrest-county-voter-registration/",
+          "title": [
+            "Forrest County Voter Registration"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "Forrest County Mississippi 2026 election results official",
+        "site:forrestcountyms.us election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Franklin",
+      "ms_sos_county_code": "19",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)384-2320"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/franklin",
+      "directory_website_leads": [
+        "https://franklincoms.weebly.com/county-government.html"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://franklincoms.weebly.com/county-government.html",
+          "checked_at": "2026-11-05T02:07:52.889328+00:00",
+          "http_status": 404,
+          "error": "HTTP Error 404: Not Found"
+        }
+      ],
+      "search_queries": [
+        "\"Franklin County\" \"Mississippi\" \"election results\""
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "George",
+      "ms_sos_county_code": "20",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)947-4881"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/george",
+      "directory_website_leads": [
+        "http://www.georgecountyms.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.georgecountyms.com/",
+          "checked_at": "2026-11-05T02:07:56.907676+00:00",
+          "http_status": 200,
+          "final_url": "https://www.georgecountyms.com/",
+          "title": [
+            "George County, Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.georgecountyms.com/circuit_clerk.html",
+          "checked_at": "2026-11-05T02:08:00.836246+00:00",
+          "http_status": 200,
+          "final_url": "https://www.georgecountyms.com/circuit_clerk.html",
+          "title": [
+            "George County, MS : Circuit Clerk"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.georgecountyms.com/election_commission.html",
+          "checked_at": "2026-11-05T02:08:05.527722+00:00",
+          "http_status": 200,
+          "final_url": "https://www.georgecountyms.com/election_commission.html",
+          "title": [
+            "George County, MS : Election Commission"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:georgecountyms.com election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://www.georgecountyms.com/circuit_clerk.html"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://www.georgecountyms.com/election_commission.html"
+        },
+        {
+          "label": "For full election calendar, please visit www.sos.ms.gov",
+          "url": "http://www.sos.ms.gov"
+        },
+        {
+          "label": "George County, MS : Search Results",
+          "url": "https://www.georgecountyms.com/results.html"
+        },
+        {
+          "label": "WHEREAS, the Board determines that the redistricting plan designated “George County Redistricting Plan, Justice Courts Alternative 1, April 18, 2022” as described and depicted in the attached Exhibit “A” to this Order, satisfies the adopted redistricting criteria and complies with all state and federal laws, and should therefore be immediately adopted and become effective January 1, 2023, to allow ample time for the updating of voter information by the Circuit Clerk’s office and election commissioners and compliance with the publication requirements, as each described below.",
+          "url": "https://www.georgecountyms.com/George%20County%20-%20Final%20Order%20Adopting%20Redistricting%20of%20JC_Constables%20%28publication%20version%29.pdf"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Greene",
+      "ms_sos_county_code": "21",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)394-2379"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/greene",
+      "directory_website_leads": [
+        "http://www.greenecountyms.gov/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.greenecountyms.gov/",
+          "checked_at": "2026-11-05T02:08:00.275641+00:00",
+          "http_status": 200,
+          "final_url": "https://www.greenecountyms.gov/",
+          "title": [
+            "Greene County Mississippi | Greene County MS Courthouse"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.greenecountyms.gov/about-5-1",
+          "checked_at": "2026-11-05T02:08:05.048021+00:00",
+          "http_status": 200,
+          "final_url": "https://www.greenecountyms.gov/about-5-1",
+          "title": [
+            "Circuit clerk | Greene County MS"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.greenecountyms.gov/about-5-8",
+          "checked_at": "2026-11-05T02:08:11.608400+00:00",
+          "http_status": 200,
+          "final_url": "https://www.greenecountyms.gov/about-5-8",
+          "title": [
+            "Election Commissioners | Greene County MS"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:greenecountyms.gov election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit clerk",
+          "url": "https://www.greenecountyms.gov/about-5-1"
+        },
+        {
+          "label": "Election Commissioners",
+          "url": "https://www.greenecountyms.gov/about-5-8"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Grenada",
+      "ms_sos_county_code": "22",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)226-1941"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/grenada",
+      "directory_website_leads": [],
+      "discovery_status": "official_contact_only",
+      "probe_status": "directory_has_no_website",
+      "probed_pages": [],
+      "search_queries": [
+        "\"Grenada County\" election results official 2026"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Hancock",
+      "ms_sos_county_code": "23",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(228)467-5265"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/hancock",
+      "directory_website_leads": [
+        "https://www.hancockcounty.ms.gov/"
+      ],
+      "discovery_status": "verified_current_source",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.hancockcounty.ms.gov/",
+          "checked_at": "2026-11-05T02:08:01.559335+00:00",
+          "http_status": 200,
+          "final_url": "https://www.hancockcounty.ms.gov/",
+          "title": [
+            "Hancock County, MS | Official Website",
+            "Arrow Left",
+            "Arrow Right",
+            "Slideshow Left Arrow",
+            "Slideshow Right Arrow"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.hancockcounty.ms.gov/CivicAlerts.aspx?AID=20",
+          "checked_at": "2026-11-05T02:08:06.178256+00:00",
+          "http_status": 200,
+          "final_url": "https://www.hancockcounty.ms.gov/m/newsflash/home/detail/20",
+          "title": [
+            "2026 Hancock County General Election Results &#x2022; Hancock County, MS",
+            "Arrow Left",
+            "Arrow Right",
+            "Slideshow Left Arrow",
+            "Slideshow Right Arrow"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.hancockcounty.ms.gov/215/Elections-Voting",
+          "checked_at": "2026-11-05T02:08:16.604224+00:00",
+          "http_status": 200,
+          "final_url": "https://www.hancockcounty.ms.gov/215/Elections-Voting",
+          "title": [
+            "Elections &amp; Voting | Hancock County, MS",
+            "Arrow Left",
+            "Arrow Right",
+            "Slideshow Left Arrow",
+            "Slideshow Right Arrow"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:hancockcounty.ms.gov 2026 general results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Elections Fulfill your civic duty.",
+          "url": "https://www.hancockcounty.ms.gov/215/Elections-Voting"
+        },
+        {
+          "label": "2026 Hancock County General Election Results",
+          "url": "https://www.hancockcounty.ms.gov/CivicAlerts.aspx?AID=20"
+        },
+        {
+          "label": "",
+          "url": "https://www.hancockcounty.ms.gov/Search/Results"
+        },
+        {
+          "label": "2026 General Election Results",
+          "url": "https://www.hancockcounty.ms.gov/DocumentCenter/Index/164"
+        },
+        {
+          "label": "Election Commissioners",
+          "url": "https://www.hancockcounty.ms.gov/214/Circuit-Clerk"
+        },
+        {
+          "label": "Unofficial Results",
+          "url": "https://hancockcounty.ms.gov/DocumentCenter/View/535/Unofficial_Results-Primary-Election-2023?bidId="
+        }
+      ],
+      "current_source": {
+        "landing_url": "https://www.hancockcounty.ms.gov/DocumentCenter/Index/164",
+        "download_url": "https://www.hancockcounty.ms.gov/DocumentCenter/View/1224/Unofficial-Results",
+        "format": "pdf_text_electionware",
+        "report_generated_local": "2026-11-03T21:31:00",
+        "precincts_reporting": 26,
+        "precincts_total": 26,
+        "senate_choices": {
+          "Scott Colom": 4538,
+          "Cindy Hyde-Smith": 11441,
+          "Ty Pinkins": 753
+        },
+        "write_in_votes": 28,
+        "reported_candidate_vote_total": 16760,
+        "notes": "The county notice links folder 164. Its public frontend listing contains 28 documents, including the county summary and precinct files. Two files share the Lakeshore label; do not sum all folder documents. Precincts Complete is 0 of 26 although Precincts Reporting is 26 of 26.",
+        "capture_sha256": "95c3086e0091d95c5396eaa10d3d399619bb0d3832a96a4aada5f7ed09b79f97",
+        "capture_bytes": 27665,
+        "captured_at_utc": "2026-11-05T02:14:00.102316+00:00",
+        "report_timezone": "America/Chicago",
+        "election_date_verified": "2026-11-03",
+        "result_status": "unofficial",
+        "discovery_validation": "County, general election date and Senate race reviewed in captured primary source.",
+        "automated_parser_validation": "not_run",
+        "independent_comparison": "not_run",
+        "capture_archive_member": "hancock.pdf",
+        "ballot_scope": {
+          "absentee": "unspecified",
+          "affidavit": "unspecified"
+        },
+        "all_ballots_counted": null,
+        "write_in_label": "Write-In Totals"
+      },
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+    },
+    {
+      "county": "Harrison",
+      "ms_sos_county_code": "24",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(228)865-4051"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/harrison",
+      "directory_website_leads": [
+        "http://co.harrison.ms.us/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://co.harrison.ms.us/",
+          "checked_at": "2026-11-05T02:08:03.992860+00:00",
+          "http_status": 200,
+          "final_url": "https://harrisoncountyms.gov/",
+          "title": [
+            "Harrison County, MS"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/index.php",
+          "checked_at": "2026-11-05T02:08:15.440399+00:00",
+          "http_status": 200,
+          "final_url": "https://harrisoncountyms.gov/government/circuit_clerk/index.php",
+          "title": [
+            "Harrison County, MS"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/elections_and_voting.php",
+          "checked_at": "2026-11-05T02:08:23.194706+00:00",
+          "http_status": 200,
+          "final_url": "https://harrisoncountyms.gov/government/circuit_clerk/elections_and_voting.php",
+          "title": [
+            "Harrison County, MS"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "Harrison County Mississippi official November 3 2026 election results",
+        "site:co.harrison.ms.us election results 2026",
+        "\"Harrison County\" \"Mississippi\" \"election results\" official -site:sos.ms.gov",
+        "site:harrisoncountyms.gov \"2026\" results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/index.php"
+        },
+        {
+          "label": "Elections and Voting",
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/elections_and_voting.php"
+        },
+        {
+          "label": "Judgment Roll Search",
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/judgement_roll_search.php"
+        },
+        {
+          "label": "Voter Registration",
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/voter_registration.php"
+        },
+        {
+          "label": "Voter Precinct Locator",
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/precinct_locator.php"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://harrisoncountyms.gov/government/election_commission/index.php"
+        },
+        {
+          "label": "Circuit Court Payment Portal",
+          "url": "http://harrisoncircuitclerkpayments.com/"
+        },
+        {
+          "label": "Harrison County Election Commission Meeting - 11/10/2026 - 10AM read more >",
+          "url": "https://harrisoncountyms.gov/news_detail_T11_R221.php"
+        },
+        {
+          "label": "Harrison County Election Commission Meeting - 11/5/2026 - 12PM read more >",
+          "url": "https://harrisoncountyms.gov/news_detail_T11_R222.php"
+        },
+        {
+          "label": "Elections and Voting",
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/government/circuit_clerk/elections_and_voting.php"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/government/election_commission/index.php"
+        },
+        {
+          "label": "Employment Application",
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/personnel/Employment Application_2026.pdf"
+        },
+        {
+          "label": "Public Records Request Form",
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/Public Records Request Form and Policy.pdf"
+        },
+        {
+          "label": "Election Calendar",
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/government/circuit_clerk/election_calendar.php"
+        },
+        {
+          "label": "Qualified Candidates",
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/circuit clerk/QUALIFIED CANDIDATES GENERAL ELECTION.docx"
+        },
+        {
+          "label": "How Do I Get a Court Appointed Attorney?",
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/circuit clerk/20250731121917.pdf"
+        },
+        {
+          "label": "Skip to main content",
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/government/circuit_clerk/elections_and_voting.php#main"
+        },
+        {
+          "label": "Complete List of Precincts",
+          "url": "https://harrisoncountyms.gov/government/circuit_clerk/circuit clerk/2025 Prim Precinct Polling List.pdf?t=202601091346570"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "follow_up_url": "https://harrisoncountyms.gov/government/election_commission/index.php",
+      "notes": "Government site and election pages checked; no November 2026 Senate file verified."
+    },
+    {
+      "county": "Hinds",
+      "ms_sos_county_code": "25",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)857-8038",
+        "(601)968-6628"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/hinds",
+      "directory_website_leads": [
+        "http://www.hindscountyms.com/"
+      ],
+      "discovery_status": "verified_current_source",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.hindscountyms.com/",
+          "checked_at": "2026-11-05T02:08:04.145808+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "Hinds County Mississippi official November 3 2026 election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Results | Hinds County, Mississippi",
+          "url": "https://www.hindscountyms.com/election-results-0"
+        }
+      ],
+      "current_source": {
+        "landing_url": "https://www.co.hinds.ms.us/pgs/results/ElectionNightResults.asp",
+        "download_url": "https://www.co.hinds.ms.us/pgs/results/Unofficial%20Summary%20Report.pdf",
+        "format": "pdf_text_electionware",
+        "report_generated_local": "2026-11-03T23:00:00",
+        "precincts_reporting": 108,
+        "precincts_total": 108,
+        "senate_choices": {
+          "Scott Colom": 61793,
+          "Cindy Hyde-Smith": 14702,
+          "Ty Pinkins": 970
+        },
+        "write_in_votes": 69,
+        "reported_candidate_vote_total": 77534,
+        "notes": "The newer county site's indexed results page points to the legacy county host. The legacy landing heading says Primary Election; the linked PDF itself explicitly identifies the 2026 General Election. Require PDF identity validation on each changed capture.",
+        "capture_sha256": "344413bf01f6c4838fa40438a0a46d10794ea60f5037942c3f7158e6fddacfe5",
+        "capture_bytes": 13485,
+        "captured_at_utc": "2026-11-05T02:09:00.393970+00:00",
+        "report_timezone": "America/Chicago",
+        "election_date_verified": "2026-11-03",
+        "result_status": "unofficial",
+        "discovery_validation": "County, general election date and Senate race reviewed in captured primary source.",
+        "automated_parser_validation": "not_run",
+        "independent_comparison": "not_run",
+        "capture_archive_member": "hinds.pdf",
+        "ballot_scope": {
+          "absentee": "unspecified",
+          "affidavit": "unspecified"
+        },
+        "all_ballots_counted": null,
+        "write_in_label": "Write-In Totals"
+      },
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+    },
+    {
+      "county": "Holmes",
+      "ms_sos_county_code": "26",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)834-2476"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/holmes",
+      "directory_website_leads": [
+        "https://holmescountyms.org/board-supervisors"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://holmescountyms.org/board-supervisors",
+          "checked_at": "2026-11-05T02:08:10.207517+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:holmescountyms.org election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commission | Holmes County",
+          "url": "https://holmescountyms.org/election-commission"
+        },
+        {
+          "label": "Elections | Holmes County",
+          "url": "https://holmescountyms.org/how-do-i/elections"
+        },
+        {
+          "label": "Circuit Clerk | Holmes County",
+          "url": "https://holmescountyms.org/circuit-clerk"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Humphreys",
+      "ms_sos_county_code": "27",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)247-3065"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/humphreys",
+      "directory_website_leads": [
+        "https://www.humphreyscountyms.com/supervisors/index.php"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.humphreyscountyms.com/supervisors/index.php",
+          "checked_at": "2026-11-05T02:08:11.570426+00:00",
+          "http_status": 200,
+          "final_url": "https://www.humphreyscountyms.com/supervisors/index.php",
+          "title": [
+            "Welcome to Humphreys County, MS"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:humphreyscountyms.com election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Issaquena",
+      "ms_sos_county_code": "28",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)873-2761"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/issaquena",
+      "directory_website_leads": [],
+      "discovery_status": "official_contact_only",
+      "probe_status": "directory_has_no_website",
+      "probed_pages": [],
+      "search_queries": [
+        "\"Issaquena County\" \"Mississippi\" election results official"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Itawamba",
+      "ms_sos_county_code": "29",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)862-3511"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/itawamba",
+      "directory_website_leads": [],
+      "discovery_status": "official_contact_only",
+      "probe_status": "directory_has_no_website",
+      "probed_pages": [],
+      "search_queries": [
+        "\"Itawamba County\" \"Mississippi\" election results official"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Jackson",
+      "ms_sos_county_code": "30",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(228)769-3040"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/jackson",
+      "directory_website_leads": [
+        "https://www.co.jackson.ms.us/"
+      ],
+      "discovery_status": "older_results_only",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.co.jackson.ms.us/",
+          "checked_at": "2026-11-05T02:08:15.873380+00:00",
+          "http_status": 200,
+          "final_url": "https://www.co.jackson.ms.us/",
+          "title": [
+            "Jackson County, MS | Official Website",
+            "Arrow Left",
+            "Arrow Right",
+            "Slideshow Left Arrow",
+            "Slideshow Right Arrow"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "Jackson County Mississippi official November 3 2026 election results",
+        "site:co.jackson.ms.us \"November 3\" \"2026\" results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Elections & Voting | Jackson County, MS",
+          "url": "https://www.co.jackson.ms.us/449/Elections-Voting"
+        },
+        {
+          "label": "Election Results | Jackson County, MS",
+          "url": "https://co.jackson.ms.us/550/Election-Results"
+        },
+        {
+          "label": "Elections & Voting | Jackson County, MS",
+          "url": "https://co.jackson.ms.us/449/Elections-Voting"
+        },
+        {
+          "label": "official Results",
+          "url": "https://co.jackson.ms.us/ArchiveCenter/ViewFile/Item/267"
+        },
+        {
+          "label": "Official Results",
+          "url": "https://www.co.jackson.ms.us/Archive.aspx?ADID=248"
+        },
+        {
+          "label": "Official Results",
+          "url": "https://www.co.jackson.ms.us/Archive.aspx?ADID=249"
+        },
+        {
+          "label": "Archive Center • Election Summaries",
+          "url": "https://www.co.jackson.ms.us/Archive.aspx?AMID=42"
+        },
+        {
+          "label": "Election Commission | Jackson County, MS",
+          "url": "https://co.jackson.ms.us/334/Election-Commission"
+        },
+        {
+          "label": "Archive Center • Election Summaries",
+          "url": "https://co.jackson.ms.us/Archive.aspx?AMID=42"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "follow_up_url": "https://co.jackson.ms.us/Archive.aspx?AMID=42",
+      "notes": "The current archive lists March 2026 primary files and November 2024 general files, not a verified November 2026 general report."
+    },
+    {
+      "county": "Jasper",
+      "ms_sos_county_code": "31",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)727-4941"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/jasper",
+      "directory_website_leads": [
+        "https://www.co.jasper.ms.us/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.co.jasper.ms.us/",
+          "checked_at": "2026-11-05T02:08:16.520752+00:00",
+          "http_status": 200,
+          "final_url": "https://co.jasper.ms.us/",
+          "title": [
+            "Jasper County MS &#8211; Flowing with Opportunity",
+            "Accessibility Tools",
+            "Increase Text",
+            "Decrease Text",
+            "Grayscale",
+            "High Contrast",
+            "Negative Contrast",
+            "Light Background",
+            "Links Underline",
+            "Readable Font",
+            "Reset"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://co.jasper.ms.us/circuit-clerk/",
+          "checked_at": "2026-11-05T02:08:27.778078+00:00",
+          "error": "<urlopen error timed out>"
+        }
+      ],
+      "search_queries": [
+        "site:co.jasper.ms.us election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://co.jasper.ms.us/circuit-clerk/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Jefferson",
+      "ms_sos_county_code": "32",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)786-3422"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/jefferson",
+      "directory_website_leads": [
+        "http://www.jeffersoncountyms.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.jeffersoncountyms.com/",
+          "checked_at": "2026-11-05T02:08:16.981319+00:00",
+          "http_status": 200,
+          "final_url": "https://www.jeffersoncountyms.com/",
+          "title": [
+            "Jefferson County - Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.jeffersoncountyms.com/circuit-clerk/",
+          "checked_at": "2026-11-05T02:08:30.817384+00:00",
+          "error": "<urlopen error timed out>"
+        },
+        {
+          "url": "https://www.jeffersoncountyms.com/election-commission/",
+          "checked_at": "2026-11-05T02:08:45.833029+00:00",
+          "http_status": 200,
+          "final_url": "https://www.jeffersoncountyms.com/election-commission/",
+          "title": [
+            "Election Commission - Jefferson County"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:jeffersoncountyms.com election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://www.jeffersoncountyms.com/circuit-clerk/"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://www.jeffersoncountyms.com/election-commission/"
+        },
+        {
+          "label": "Voter Registration",
+          "url": "https://www.sos.ms.gov/elections-voting/county-election-information"
+        },
+        {
+          "label": "Election Commission - Jefferson County",
+          "url": "https://jeffersoncountyms.com/election-commission/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Jefferson Davis",
+      "ms_sos_county_code": "33",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)792-4231"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/jefferson-davis",
+      "directory_website_leads": [
+        "http://www.jeffersondaviscountyms.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.jeffersondaviscountyms.com/",
+          "checked_at": "2026-11-05T02:08:19.711478+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:jeffersondaviscountyms.com election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Jones",
+      "ms_sos_county_code": "34",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)425-2556"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/jones",
+      "directory_website_leads": [
+        "https://jonescounty.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://jonescounty.com/",
+          "checked_at": "2026-11-05T02:08:22.159455+00:00",
+          "http_status": 200,
+          "final_url": "https://www.jonescounty.com/",
+          "title": [],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "\"Jones County\" \"Mississippi\" election results official 2026"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Kemper",
+      "ms_sos_county_code": "35",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)743-8375"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/kemper",
+      "directory_website_leads": [
+        "https://kempercountyms.gov/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://kempercountyms.gov/",
+          "checked_at": "2026-11-05T02:08:28.035765+00:00",
+          "http_status": 200,
+          "final_url": "https://kempercountyms.gov/",
+          "title": [
+            "Kemper County, Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://kempercountyms.gov/circuit-clerk/",
+          "checked_at": "2026-11-05T02:08:31.825898+00:00",
+          "error": "<urlopen error timed out>"
+        },
+        {
+          "url": "https://kempercountyms.gov/election-commission/",
+          "checked_at": "2026-11-05T02:08:46.841555+00:00",
+          "http_status": 200,
+          "final_url": "https://kempercountyms.gov/election-commission/",
+          "title": [
+            "Election Commission &#8211; Kemper County, Mississippi"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:kempercountyms.gov election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://kempercountyms.gov/circuit-clerk/"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://kempercountyms.gov/election-commission/"
+        },
+        {
+          "label": "Voter Registration",
+          "url": "https://www.sos.ms.gov/elections-voting/voter-registration-information"
+        },
+        {
+          "label": "Find Your Polling Place",
+          "url": "https://myelectionday.sos.state.ms.us/VoterOutreach/Pages/VOSearch.aspx"
+        },
+        {
+          "label": "How do I find out where to vote in an election? - Kemper County, Mississippi",
+          "url": "https://kempercountyms.gov/ufaq/how-do-i-find-out-where-to-vote-in-an-election/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Lafayette",
+      "ms_sos_county_code": "36",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)234-4951"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/lafayette",
+      "directory_website_leads": [
+        "https://lafayettems.com/"
+      ],
+      "discovery_status": "official_social_lead",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://lafayettems.com/",
+          "checked_at": "2026-11-05T02:08:30.880276+00:00",
+          "http_status": 200,
+          "final_url": "https://lafayettems.com/",
+          "title": [
+            "Home - Lafayette County"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://lafayettems.com/voting/",
+          "checked_at": "2026-11-05T02:08:35.685045+00:00",
+          "error": "<urlopen error timed out>"
+        },
+        {
+          "url": "https://lafayettems.com/circuit-clerk/",
+          "checked_at": "2026-11-05T02:08:50.701137+00:00",
+          "http_status": 200,
+          "final_url": "https://lafayettems.com/circuit-clerk/",
+          "title": [
+            "Circuit Clerk - Lafayette County"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:lafayettems.com election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Voting and Elections",
+          "url": "https://lafayettems.com/voting/"
+        },
+        {
+          "label": "Circuit Clerk",
+          "url": "https://lafayettems.com/circuit-clerk/"
+        },
+        {
+          "label": "Voting and Elections Calendar",
+          "url": "https://lafayettems.com/voting-and-elections-calendar/"
+        },
+        {
+          "label": "Election Results - Lafayette County",
+          "url": "https://lafayettems.com/election-results/"
+        },
+        {
+          "label": "A Day in the Life: Clocking in with Circuit Clerk - Lafayette County",
+          "url": "https://lafayettems.com/a-day-in-the-life-clocking-in-with-circuit-clerk/"
+        },
+        {
+          "label": "Vote in an Election - Lafayette County",
+          "url": "https://lafayettems.com/how-do-i/vote-in-an-election/"
+        },
+        {
+          "label": "Election Commission - Lafayette County",
+          "url": "https://lafayettems.com/election-commission/"
+        },
+        {
+          "label": "Election Commission - Lafayette County",
+          "url": "https://www.lafayettems.com/election-commission/"
+        },
+        {
+          "label": "2024 Lafayette County General Election Results* - Lafayette County",
+          "url": "https://www.lafayettems.com/circuit-clerk/2024-general-election-results/"
+        },
+        {
+          "label": "Circuit Clerk - Lafayette County",
+          "url": "https://www.lafayettems.com/circuit-clerk/"
+        },
+        {
+          "label": "LAFAYETTE COUNTY QUALIFIED CANDIDATES FOR 2023 ELECTION",
+          "url": "https://www.lafayettems.com/wp-content/uploads/2023/05/Qualified-Candidates-for-2023-Election-2.pdf"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "follow_up_url": "https://lafayettems.com/election-results/",
+      "notes": "The county results post is dated 2023 and points to clerk social accounts. No current post admitted."
+    },
+    {
+      "county": "Lamar",
+      "ms_sos_county_code": "37",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)794-3478"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/lamar",
+      "directory_website_leads": [
+        "https://lamarcountyms.gov/ms/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://lamarcountyms.gov/ms/",
+          "checked_at": "2026-11-05T02:08:31.034234+00:00",
+          "error": "<urlopen error timed out>"
+        }
+      ],
+      "search_queries": [
+        "site:lamarcountyms.gov election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Unofficial Results 24 OF 24 PRECINCTS REPORTING",
+          "url": "https://lamarcountyms.gov/ms/wp-content/uploads/2024/11/Summary_results_24_of_24_report.pdf"
+        },
+        {
+          "label": "Summary Results Report",
+          "url": "https://lamarcountyms.gov/ms/wp-content/uploads/2024/11/Summary_results_8_of_24_report.pdf"
+        },
+        {
+          "label": "IMG_1736.heic",
+          "url": "https://lamarcountyms.gov/ms/wp-content/uploads/2026/03/Election-All_Reporting.pdf"
+        },
+        {
+          "label": "Summary Results Report",
+          "url": "https://lamarcountyms.gov/ms/wp-content/uploads/2023/11/23GE_16_24.pdf"
+        },
+        {
+          "label": "Summary Results Report",
+          "url": "https://lamarcountyms.gov/ms/wp-content/uploads/2024/11/Summary_results_16_of_24_report.pdf"
+        },
+        {
+          "label": "Election Commission | Lamar County Mississippi",
+          "url": "https://lamarcountyms.gov/ms/election-commission/"
+        },
+        {
+          "label": "County Election | Lamar County Mississippi",
+          "url": "https://lamarcountyms.gov/ms/county-election/"
+        },
+        {
+          "label": "2019 General Election Results | Lamar County Mississippi",
+          "url": "https://lamarcountyms.gov/ms/2019-general-election-results/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Lauderdale",
+      "ms_sos_county_code": "38",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)482-9731"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/lauderdale",
+      "directory_website_leads": [
+        "http://www.lauderdalecounty.org/"
+      ],
+      "discovery_status": "verified_current_source",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.lauderdalecounty.org/",
+          "checked_at": "2026-11-05T02:08:42.782959+00:00",
+          "error": "<urlopen error timed out>"
+        }
+      ],
+      "search_queries": [
+        "Lauderdale County Mississippi 2026 election results official"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Results - Lauderdale County",
+          "url": "https://www.lauderdalecounty.org/election-results/"
+        },
+        {
+          "label": "Tate wins Circuit Clerk; other races too close to call - Lauderdale County",
+          "url": "https://www.lauderdalecounty.org/tate-wins-circuit-clerk-other-races-too-close-to-call/"
+        }
+      ],
+      "current_source": {
+        "landing_url": "https://www.lauderdalecounty.org/tate-wins-circuit-clerk-other-races-too-close-to-call/",
+        "download_url": "https://www.lauderdalecounty.org/wp-content/uploads/2026/11/2026-election-with-absentee.pdf",
+        "format": "pdf_scanned_electionware",
+        "report_generated_local": "2026-11-04T10:06:00",
+        "precincts_reporting": 37,
+        "precincts_total": 37,
+        "senate_choices": {
+          "Scott Colom": 10528,
+          "Cindy Hyde-Smith": 10892,
+          "Ty Pinkins": 454
+        },
+        "write_in_votes": 23,
+        "reported_candidate_vote_total": 21897,
+        "notes": "Scanned PDF: source image reviewed. The county article says in-person and mail absentee votes are included, affidavit votes are not. Its generic /election-results/ link still opens a 2019 runoff and must not be used for 2026.",
+        "capture_sha256": "1cd5d9a72c5373ecec9fab0cfab431eef3da401416513eacf09b03e99078ceb0",
+        "capture_bytes": 120170,
+        "captured_at_utc": "2026-11-05T02:07:42.528400+00:00",
+        "report_timezone": "America/Chicago",
+        "election_date_verified": "2026-11-03",
+        "result_status": "unofficial",
+        "discovery_validation": "County, general election date and Senate race reviewed in captured primary source.",
+        "automated_parser_validation": "not_run",
+        "independent_comparison": "not_run",
+        "capture_archive_member": "lauderdale.pdf",
+        "ballot_scope": {
+          "absentee": "included",
+          "affidavit": "excluded"
+        },
+        "all_ballots_counted": null,
+        "write_in_label": "Write-In Totals"
+      },
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+    },
+    {
+      "county": "Lawrence",
+      "ms_sos_county_code": "39",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)587-4791"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/lawrence",
+      "directory_website_leads": [
+        "https://lawrencecountyms.com/board-of-superviors/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://lawrencecountyms.com/board-of-superviors/",
+          "checked_at": "2026-11-05T02:08:46.052307+00:00",
+          "http_status": 200,
+          "final_url": "https://www.DropCatch.com/domain/lawrencecountyms.com",
+          "title": [
+            "DropCatch.com"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:lawrencecountyms.com election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Leake",
+      "ms_sos_county_code": "40",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)267-8357"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/leake",
+      "directory_website_leads": [
+        "https://leakecountyms.org/"
+      ],
+      "discovery_status": "older_results_only",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://leakecountyms.org/",
+          "checked_at": "2026-11-05T02:08:57.799908+00:00",
+          "http_status": 200,
+          "final_url": "https://leakecountyms.org/",
+          "title": [
+            "Home"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://leakecountyms.org/election-results/",
+          "checked_at": "2026-11-05T02:09:04.289221+00:00",
+          "http_status": 200,
+          "final_url": "https://leakecountyms.org/election-results/",
+          "title": [
+            "Election Results"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://leakecountyms.org/election-results/",
+          "checked_at": "2026-11-05T02:09:09.020533+00:00",
+          "http_status": 200,
+          "final_url": "https://leakecountyms.org/election-results/",
+          "title": [
+            "Election Results"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:leakecountyms.org 2026 results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://leakecountyms.org/circuit-clerk/"
+        },
+        {
+          "label": "Frequently Asked Questions",
+          "url": "https://leakecountyms.org/frequently-asked-questions-circuit-clerk/"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://leakecountyms.org/election-commission/"
+        },
+        {
+          "label": "Election Results",
+          "url": "https://leakecountyms.org/election-results/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "follow_up_url": "https://leakecountyms.org/election-results/",
+      "notes": "The current results page contains a 2019 general link. Current November 2026 totals not verified."
+    },
+    {
+      "county": "Lee",
+      "ms_sos_county_code": "41",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)432-2300"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/lee",
+      "directory_website_leads": [
+        "http://leecoms.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://leecoms.com/",
+          "checked_at": "2026-11-05T02:08:58.850131+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "Lee County Mississippi 2026 election results official",
+        "site:leecountycircuitclerk.com election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Leflore",
+      "ms_sos_county_code": "42",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)453-1435"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/leflore",
+      "directory_website_leads": [
+        "https://www.leflorecounty.ms/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.leflorecounty.ms/",
+          "checked_at": "2026-11-05T02:08:59.023902+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:leflorecounty.ms election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commission | Elected Offices",
+          "url": "https://www.leflorecounty.ms/elected-offices/election-commission"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Lincoln",
+      "ms_sos_county_code": "43",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)835-3435"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/lincoln",
+      "directory_website_leads": [
+        "http://www.golincolnms.com"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.golincolnms.com",
+          "checked_at": "2026-11-05T02:10:04.180816+00:00",
+          "http_status": 200,
+          "final_url": "https://www.golincolnms.com",
+          "title": [
+            "Welcome to Lincoln County | Lincoln County"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.golincolnms.com/circuit-clerk",
+          "checked_at": "2026-11-05T02:10:11.246752+00:00",
+          "http_status": 200,
+          "final_url": "https://www.golincolnms.com/circuit-clerk",
+          "title": [
+            "Circuit Clerk | Lincoln County"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.golincolnms.com/election-commission",
+          "checked_at": "2026-11-05T02:10:14.927704+00:00",
+          "http_status": 200,
+          "final_url": "https://www.golincolnms.com/election-commission",
+          "title": [
+            "Election Commission | Lincoln County"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:golincolnms.com election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://www.golincolnms.com/circuit-clerk"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://www.golincolnms.com/election-commission"
+        },
+        {
+          "label": "ELECTION CENTRAL",
+          "url": "http://www.dustinbairfield.com/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Lowndes",
+      "ms_sos_county_code": "44",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)329-5900"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/lowndes",
+      "directory_website_leads": [
+        "http://lowndescountyms.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://lowndescountyms.com/",
+          "checked_at": "2026-11-05T02:10:04.182083+00:00",
+          "http_status": 200,
+          "final_url": "https://lowndescountyms.com/",
+          "title": [
+            "Lowndes County, MS | Official Website",
+            "Arrow Left",
+            "Arrow Right",
+            "Slideshow Left Arrow",
+            "Slideshow Right Arrow"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:lowndescountyms.com election results",
+        "site:lowndescountyms.com \"2026\" election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Staff Directory • Circuit Clerk",
+          "url": "https://www.lowndescountyms.com/m/directory/department?did=18"
+        },
+        {
+          "label": "Circuit Clerk | Lowndes County, MS",
+          "url": "https://www.lowndescountyms.com/178/Circuit-Clerk"
+        },
+        {
+          "label": "Circuit Clerk | Lowndes County, MS",
+          "url": "https://lowndescountyms.com/178/Circuit-Clerk"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Madison",
+      "ms_sos_county_code": "45",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)859-4365"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/madison",
+      "directory_website_leads": [
+        "https://www.madison-co.com/"
+      ],
+      "discovery_status": "verified_current_source",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.madison-co.com/",
+          "checked_at": "2026-11-05T02:10:04.182524+00:00",
+          "http_status": 200,
+          "final_url": "https://www.madison-co.com/",
+          "title": [
+            "Madison County Mississippi"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "Madison County Mississippi 2026 election results official"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Find Your Precinct",
+          "url": "https://myelectionday.sos.state.ms.us/VoterOutreach/Pages/VOSearch.aspx"
+        },
+        {
+          "label": "Election Results Updated Nov. 4, 3:48 PM",
+          "url": "https://www.madison-co.com/elections/election_results.pdf?20261104201009"
+        },
+        {
+          "label": "Elections | Madison County Mississippi",
+          "url": "https://www.madison-co.com/elected-offices/election-commission/elections"
+        },
+        {
+          "label": "2026 Primary Election | Madison County Mississippi",
+          "url": "https://www.madison-co.com/2026-primary-election"
+        },
+        {
+          "label": "OFFICIAL RESULTS",
+          "url": "https://www.madison-co.com/sites/default/files/offical_precinct_results_2023.pdf"
+        }
+      ],
+      "current_source": {
+        "landing_url": "https://www.madison-co.com/",
+        "download_url": "https://www.madison-co.com/elections/election_results.pdf?20261104192738=",
+        "format": "pdf_scanned_electionware",
+        "report_generated_local": "2026-11-04T14:33:00",
+        "precincts_reporting": 46,
+        "precincts_total": 46,
+        "senate_choices": {
+          "Scott Colom": 22712,
+          "Cindy Hyde-Smith": 22364,
+          "Ty Pinkins": 690
+        },
+        "write_in_votes": 65,
+        "reported_candidate_vote_total": 45831,
+        "notes": "Scanned PDF: source image reviewed. The outage landing page still supplies a working results link. The page says updated November 4 at 3:48 PM; the captured PDF says 2:33 PM. Resolve future links from the county page because its cache query changes. Do not equate page and report times.",
+        "capture_sha256": "43e6f72c8fed3d1fd131ab8fdc16884090b213582a5842a0f2bde0351e784a62",
+        "capture_bytes": 118965,
+        "captured_at_utc": "2026-11-05T02:07:38.090823+00:00",
+        "report_timezone": "America/Chicago",
+        "election_date_verified": "2026-11-03",
+        "result_status": "unofficial",
+        "discovery_validation": "County, general election date and Senate race reviewed in captured primary source.",
+        "automated_parser_validation": "not_run",
+        "independent_comparison": "not_run",
+        "capture_archive_member": "madison.pdf",
+        "ballot_scope": {
+          "absentee": "included",
+          "affidavit": "unspecified"
+        },
+        "all_ballots_counted": null,
+        "write_in_label": "Write-In Totals"
+      },
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+    },
+    {
+      "county": "Marion",
+      "ms_sos_county_code": "46",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)736-8246"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/marion",
+      "directory_website_leads": [
+        "http://www.marioncountyms.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.marioncountyms.com/",
+          "checked_at": "2026-11-05T02:10:04.183228+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:marioncountyms.com election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commission | Marion County, MS",
+          "url": "https://www.marioncountyms.com/election-commission"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Marshall",
+      "ms_sos_county_code": "47",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)252-3434"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/marshall",
+      "directory_website_leads": [
+        "http://www.marshall-county.com/"
+      ],
+      "discovery_status": "website_placeholder",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.marshall-county.com/",
+          "checked_at": "2026-11-05T02:10:04.183733+00:00",
+          "http_status": 200,
+          "final_url": "https://www.marshall-county.com/",
+          "title": [
+            " Marshall County - Coming Soon"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:marshall-county.com election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Summary Report",
+          "url": "https://www.marshall-county.com/sites/default/files/Election%20Summary%20Report%2011.5.2024.pdf"
+        },
+        {
+          "label": "Election Summary Report",
+          "url": "https://www.marshall-county.com/sites/default/files/Election%20Summary%20Report%20-%20Marshall%20County%20General%20Election%20Official%20Results.pdf"
+        },
+        {
+          "label": "Election Commission | Marshall County",
+          "url": "https://www.marshall-county.com/node/64"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "follow_up_url": "https://www.marshall-county.com/",
+      "notes": "Current homepage probe serves Coming Soon; indexed results PDFs are historical."
+    },
+    {
+      "county": "Monroe",
+      "ms_sos_county_code": "48",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)369-8695"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/monroe",
+      "directory_website_leads": [
+        "http://www.monroems.com/"
+      ],
+      "discovery_status": "verified_current_source",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.monroems.com/",
+          "checked_at": "2026-11-05T02:10:08.841584+00:00",
+          "http_status": 200,
+          "final_url": "https://www.monroems.com/",
+          "title": [
+            "Monroe County"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.monroems.com/circuitclerk/circuit_clerk.html",
+          "checked_at": "2026-11-05T02:10:12.362477+00:00",
+          "http_status": 200,
+          "final_url": "https://www.monroems.com/circuitclerk/circuit_clerk.html",
+          "title": [
+            "Circuit Clerk"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.monroems.com/circuitclerk/circuit_court.html",
+          "checked_at": "2026-11-05T02:10:19.152750+00:00",
+          "http_status": 200,
+          "final_url": "https://www.monroems.com/circuitclerk/circuit_court.html",
+          "title": [
+            "Circuit Court"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:monroems.com election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://www.monroems.com/circuitclerk/circuit_clerk.html"
+        },
+        {
+          "label": "Circuit Court",
+          "url": "https://www.monroems.com/circuitclerk/circuit_court.html"
+        },
+        {
+          "label": "Register to Vote",
+          "url": "https://www.monroems.com/circuitclerk/vote.php"
+        },
+        {
+          "label": "Jury Duty",
+          "url": "https://www.monroems.com/circuitclerk/jury.html"
+        },
+        {
+          "label": "Marriage License",
+          "url": "https://www.monroems.com/circuitclerk/marriage.html"
+        },
+        {
+          "label": "Monroe County Voting - District and Precinct Maps",
+          "url": "https://www.monroems.com/circuitclerk/vote.php#LG-vote_maps"
+        },
+        {
+          "label": "ELECTION RESULTS PAGE",
+          "url": "https://www.monroems.com/circuitclerk/results.php"
+        },
+        {
+          "label": "Elections",
+          "url": "https://www.monroems.com/circuitclerk/elections.html"
+        },
+        {
+          "label": "Visit My Election Day at MS Secretary of State",
+          "url": "https://myelectionday.sos.state.ms.us/"
+        },
+        {
+          "label": "Election Results",
+          "url": "https://monroems.com/circuitclerk/results.php"
+        },
+        {
+          "label": "Election Results",
+          "url": "https://www.monroems.com/circuitclerk/results.html"
+        },
+        {
+          "label": "Summary Results Report",
+          "url": "https://www.monroems.com/circuitclerk/results/ALL_PRECINCTS.pdf"
+        },
+        {
+          "label": "SAMPLE Official Election Ballot",
+          "url": "https://www.monroems.com/circuitclerk/sample_ballot_nov_8_2022.pdf"
+        },
+        {
+          "label": "Summary Results Report",
+          "url": "https://www.monroems.com/circuitclerk/results/4H3_DARRACOTT.pdf"
+        }
+      ],
+      "current_source": {
+        "landing_url": "https://www.monroems.com/circuitclerk/results.php",
+        "download_url": "https://www.monroems.com/circuitclerk/results/CUMMULATIVE_RESULTS_ALL_PRECINCTS.pdf",
+        "format": "pdf_text_electionware",
+        "report_generated_local": "2026-11-04T00:10:00",
+        "precincts_reporting": 27,
+        "precincts_total": 27,
+        "senate_choices": {
+          "Scott Colom": 5441,
+          "Cindy Hyde-Smith": 7150,
+          "Ty Pinkins": 174
+        },
+        "write_in_votes": 6,
+        "reported_candidate_vote_total": 12771,
+        "notes": "The source explicitly excludes absentee and affidavit ballots. The large cumulative-results button points to an ALL_PRECINCTS.pdf URL that returns 404; the directory listing links the working CUMMULATIVE_RESULTS_ALL_PRECINCTS.pdf file. Do not add the summary to its constituent precinct reports.",
+        "capture_sha256": "d83295632b893aee5b968c2859bd01ab17842e038eed5428bc8229186e3c192a",
+        "capture_bytes": 27341,
+        "captured_at_utc": "2026-11-05T02:14:04.165669+00:00",
+        "report_timezone": "America/Chicago",
+        "election_date_verified": "2026-11-03",
+        "result_status": "unofficial",
+        "discovery_validation": "County, general election date and Senate race reviewed in captured primary source.",
+        "automated_parser_validation": "not_run",
+        "independent_comparison": "not_run",
+        "capture_archive_member": "monroe.pdf",
+        "ballot_scope": {
+          "absentee": "excluded",
+          "affidavit": "excluded"
+        },
+        "all_ballots_counted": null,
+        "write_in_label": "Write-In Totals"
+      },
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+    },
+    {
+      "county": "Montgomery",
+      "ms_sos_county_code": "49",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)283-4161"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/montgomery",
+      "directory_website_leads": [
+        "http://www.montgomerycountyms.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.montgomerycountyms.com/",
+          "checked_at": "2026-11-05T02:10:08.878122+00:00",
+          "http_status": 200,
+          "final_url": "https://www.montgomerycountyms.com/",
+          "title": [
+            " Montgomery County - Coming Soon"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:montgomerycountyms.com election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Neshoba",
+      "ms_sos_county_code": "50",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)656-4781"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/neshoba",
+      "directory_website_leads": [
+        "http://www.neshobacounty.net/"
+      ],
+      "discovery_status": "verified_current_source",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.neshobacounty.net/",
+          "checked_at": "2026-11-05T02:10:09.647578+00:00",
+          "http_status": 200,
+          "final_url": "https://neshobacounty.net/",
+          "title": [
+            "Neshoba County, Mississippi &#8211; Official website of Neshoba County, Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://neshobacounty.net/news/general-election-results-from-november-3-2026/",
+          "checked_at": "2026-11-05T02:10:17.287693+00:00",
+          "http_status": 200,
+          "final_url": "https://neshobacounty.net/news/general-election-results-from-november-3-2026/",
+          "title": [
+            "General Election Results from November 3, 2026 &#8211; Neshoba County, Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://neshobacounty.net/elected-offices/circuit-clerk/",
+          "checked_at": "2026-11-05T02:10:22.588391+00:00",
+          "http_status": 200,
+          "final_url": "https://neshobacounty.net/elected-offices/circuit-clerk/",
+          "title": [
+            "Circuit Clerk &#8211; Neshoba County, Mississippi"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:neshobacounty.net election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://neshobacounty.net/elected-offices/circuit-clerk/"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://neshobacounty.net/elected-offices/election-commission/"
+        },
+        {
+          "label": "General Election Results from November 3, 2026",
+          "url": "https://neshobacounty.net/news/general-election-results-from-november-3-2026/"
+        },
+        {
+          "label": "Election Commission | Neshoba County Board of Supervisors",
+          "url": "https://www.neshobacounty.net/node/18"
+        },
+        {
+          "label": "General Election Day (Auditorium) | Neshoba County Board of Supervisors",
+          "url": "https://www.neshobacounty.net/general-election-day-auditorium"
+        },
+        {
+          "label": "General Election Day (Arena & Multi-Purpose Room) | Neshoba County Board of Supervisors",
+          "url": "https://www.neshobacounty.net/general-election-day-arena-multi-purpose-room"
+        },
+        {
+          "label": "Mississippi Secretary of State’s Office",
+          "url": "https://www.neshobacounty.net/sites/default/files/2023%20Elections%20Calendar%20Final.pdf"
+        },
+        {
+          "label": "4th  INDEPENDENCE DAY",
+          "url": "https://www.neshobacounty.net/sites/default/files/2022%20Elections%20Calendar.pdf"
+        },
+        {
+          "label": "UNOFFICIAL RESULTS",
+          "url": "https://www.neshobacounty.net/sites/default/files/Neshoba%20Co%20Primary%20Results%2003102020.pdf"
+        }
+      ],
+      "current_source": {
+        "landing_url": "https://neshobacounty.net/",
+        "download_url": "https://neshobacounty.net/news/general-election-results-from-november-3-2026/",
+        "format": "html_county_news",
+        "report_generated_local": null,
+        "report_date_local": "2026-11-03",
+        "precincts_reporting": null,
+        "precincts_total": null,
+        "senate_choices": {
+          "Scott Colom": 2825,
+          "Cindy Hyde-Smith": 5099,
+          "Ty Pinkins": 137
+        },
+        "write_in_votes": null,
+        "reported_candidate_vote_total": null,
+        "notes": "The official county home page links this post, which calls the contested-race results complete but unofficial. No precinct denominator, write-in total, or ballot-method coverage is supplied. Those values remain unknown.",
+        "capture_sha256": "d1616b1c3fc730b4db0f5c067fd6d72625de78ce328b574ed89cce81a9bc2314",
+        "capture_bytes": 243290,
+        "captured_at_utc": "2026-11-05T02:11:41.372584+00:00",
+        "report_timezone": "America/Chicago",
+        "election_date_verified": "2026-11-03",
+        "result_status": "unofficial",
+        "discovery_validation": "County, general election date and Senate race reviewed in captured primary source.",
+        "automated_parser_validation": "not_run",
+        "independent_comparison": "not_run",
+        "capture_archive_member": "neshoba.html",
+        "ballot_scope": {
+          "absentee": "unspecified",
+          "affidavit": "unspecified"
+        },
+        "all_ballots_counted": null,
+        "write_in_label": null
+      },
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+    },
+    {
+      "county": "Newton",
+      "ms_sos_county_code": "51",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)635-2368"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/newton",
+      "directory_website_leads": [
+        "http://www.newtoncountyms.net/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.newtoncountyms.net/",
+          "checked_at": "2026-11-05T02:10:12.198722+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:newtoncountyms.net election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commission - Newton County",
+          "url": "https://www.newtoncountyms.net/election-commission/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Noxubee",
+      "ms_sos_county_code": "52",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)726-5737"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/noxubee",
+      "directory_website_leads": [
+        "https://noxubeealliance.com/quality-of-life-noxubee-mississipp/noxubee-county-government/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://noxubeealliance.com/quality-of-life-noxubee-mississipp/noxubee-county-government/",
+          "checked_at": "2026-11-05T02:10:12.934822+00:00",
+          "http_status": 200,
+          "final_url": "https://noxubeealliance.com/quality-of-life-noxubee-mississipp/noxubee-county-government/",
+          "title": [
+            "Noxubee County, Mississippi and City Government: Mayors, Boards of Aldermen, Board of Supervisors, and other County Officials"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "\"Noxubee County\" \"Mississippi\" election results official"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Oktibbeha",
+      "ms_sos_county_code": "53",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)323-1356"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/oktibbeha",
+      "directory_website_leads": [
+        "http://www.oktibbehacountyms.org/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.oktibbehacountyms.org/",
+          "checked_at": "2026-11-05T02:10:15.524616+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:oktibbehacountyms.org election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Panola",
+      "ms_sos_county_code": "54",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)563-6210"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/panola",
+      "directory_website_leads": [
+        "http://panolams.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://panolams.com/",
+          "checked_at": "2026-11-05T02:10:19.185304+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:panolams.com election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Pearl River",
+      "ms_sos_county_code": "55",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)403-2328"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/pearl-river",
+      "directory_website_leads": [
+        "http://www.pearlrivercounty.net/"
+      ],
+      "discovery_status": "application_needs_investigation",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.pearlrivercounty.net/",
+          "checked_at": "2026-11-05T02:10:19.273390+00:00",
+          "http_status": 200,
+          "final_url": "https://www.pearlrivercounty.net/",
+          "title": [
+            "Pearl River County, MS | Official Website",
+            "Arrow Left",
+            "Arrow Right",
+            "Slideshow Left Arrow",
+            "Slideshow Right Arrow"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.pearlrivercounty.net/AlertCenter.aspx",
+          "checked_at": "2026-11-05T02:10:22.929861+00:00",
+          "http_status": 200,
+          "final_url": "https://www.pearlrivercounty.net/AlertCenter.aspx",
+          "title": [
+            "Alert Center • Pearl River County, MS • CivicEngage",
+            "Arrow Left",
+            "Arrow Right",
+            "Slideshow Left Arrow",
+            "Slideshow Right Arrow"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.pearlrivercounty.net/CivicAlerts.aspx?AID=42",
+          "checked_at": "2026-11-05T02:10:26.674462+00:00",
+          "http_status": 200,
+          "final_url": "https://www.pearlrivercounty.net/m/newsflash/home/detail/42",
+          "title": [
+            "Board Adopts New Poplarville School Board Election Districts &#x2022; Pearl River County, MS",
+            "Arrow Left",
+            "Arrow Right",
+            "Slideshow Left Arrow",
+            "Slideshow Right Arrow"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:pearlrivercounty.net election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Results",
+          "url": "https://www.pearlrivercounty.net/AlertCenter.aspx"
+        },
+        {
+          "label": "Live election results will be available as precincts report after polls close at 7pm. View Results...",
+          "url": "https://experience.arcgis.com/experience/4ed615cba73e41dc898ef1825f8c0fee"
+        },
+        {
+          "label": "Board Adopts New Poplarville School Board Election Districts",
+          "url": "https://www.pearlrivercounty.net/CivicAlerts.aspx?AID=42"
+        },
+        {
+          "label": "Elections & Voting",
+          "url": "https://pearlrivercounty.net/200/Elections"
+        },
+        {
+          "label": "",
+          "url": "https://www.pearlrivercounty.net/Search/Results"
+        },
+        {
+          "label": "Live election results will be available as precincts report after polls close at 7pm.",
+          "url": "https://www.pearlrivercounty.net/AlertCenter.aspx?AID=Live-election-results-will-be-available--27"
+        },
+        {
+          "label": "Lamar County School Board District C runoff election results will be posted after polls close at 7:00 PM",
+          "url": "https://www.pearlrivercounty.net/AlertCenter.aspx?AID=Lamar-County-School-Board-District-C-run-20"
+        },
+        {
+          "label": "Special Election Official Results",
+          "url": "https://www.pearlrivercounty.net/AlertCenter.aspx?AID=Special-Election-Official-Results-19"
+        },
+        {
+          "label": "Important Voting Notice for Special Election for PRC Tax Collector/Assessor",
+          "url": "https://www.pearlrivercounty.net/AlertCenter.aspx?AID=Important-Voting-Notice-for-Special-Elec-18"
+        },
+        {
+          "label": "Poplarville School Board of Trustees Election Districts Map (PDF)",
+          "url": "https://pearlrivercounty.net/DocumentCenter/View/1952/Poplarville-School-Board-of-Trustees-Election-Districts-Map-PDF"
+        },
+        {
+          "label": "Quick Links • Government - Circuit Clerk - Voter Registratio",
+          "url": "https://pearlrivercounty.net/QuickLinks.aspx?CID=27"
+        },
+        {
+          "label": "Elections & Voting | Pearl River County, MS",
+          "url": "https://pearlrivercounty.net/251/Elections-Voting"
+        },
+        {
+          "label": "Election Commission | Pearl River County, MS",
+          "url": "https://pearlrivercounty.net/208/Election-Commission"
+        },
+        {
+          "label": "Summary Results Report",
+          "url": "https://www.pearlrivercounty.net/DocumentCenter/View/673/Carriere-1-PDF"
+        },
+        {
+          "label": "Unofficial Results – Pearl River County Special Election – Tax Assessor/Collector",
+          "url": "https://pearlrivercounty.net/DocumentCenter/View/1785/Tax-AssessorCollector-Race---Unofficial-Results-PDF"
+        },
+        {
+          "label": "Quick Links • Government - Circuit Clerk - Elections",
+          "url": "https://pearlrivercounty.net/QuickLinks.aspx?CID=25"
+        },
+        {
+          "label": "Summary Results Report",
+          "url": "https://www.pearlrivercounty.net/DocumentCenter/View/674/Carriere-3-PDF"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "follow_up_url": "https://www.pearlrivercounty.net/AlertCenter.aspx?AID=Live-election-results-will-be-available--27",
+      "notes": "The November 3, 2026 county alert links ArcGIS experience 4ed615cba73e41dc898ef1825f8c0fee. Its config still names primary/local races and the referenced election_results FeatureServer returned Invalid URL. No Senate data verified."
+    },
+    {
+      "county": "Perry",
+      "ms_sos_county_code": "56",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)964-8663"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/perry",
+      "directory_website_leads": [
+        "https://members.theadp.com/list/member/perry-county-board-of-supervisors-new-augusta-744"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://members.theadp.com/list/member/perry-county-board-of-supervisors-new-augusta-744",
+          "checked_at": "2026-11-05T02:10:19.809664+00:00",
+          "http_status": 200,
+          "final_url": "https://members.theadp.com/list/member/perry-county-board-of-supervisors-new-augusta-744",
+          "title": [
+            "Perry County Board of Supervisors | City Council/Board of Supervisors Members | Economic Development"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "\"Perry County\" \"Mississippi\" election results official 2026"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Pike",
+      "ms_sos_county_code": "57",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)783-2581"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/pike",
+      "directory_website_leads": [
+        "http://co.pike.ms.us/"
+      ],
+      "discovery_status": "verified_current_source",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://co.pike.ms.us/",
+          "checked_at": "2026-11-05T02:10:23.385077+00:00",
+          "http_status": 200,
+          "final_url": "https://pikecountyelectionresults.org/services.html",
+          "title": [
+            "Pike County, Mississippi - Online Services"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://pikecountyelectionresults.org/form/form.html",
+          "checked_at": "2026-11-05T02:10:31.761590+00:00",
+          "http_status": 200,
+          "final_url": "https://pikecountyelectionresults.org/form/form.html",
+          "title": [
+            "Poll Manager Application"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:pikecountyelectionresults.org 2026 general"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Homestead Records Search",
+          "url": "https://www.pikecountyelectionresults.org/hs_database/index.php"
+        },
+        {
+          "label": "Pike County Election Results",
+          "url": "https://www.pikecountyelectionresults.org/"
+        },
+        {
+          "label": "Poll Worker Application",
+          "url": "https://pikecountyelectionresults.org/form/form.html"
+        },
+        {
+          "label": "Voting Information and Polling Places",
+          "url": "https://www.sos.ms.gov/elections-voting"
+        },
+        {
+          "label": "Archived Election Results (Secretary of State)",
+          "url": "https://www.sos.ms.gov/elections-voting/election-results"
+        },
+        {
+          "label": "Election Results",
+          "url": "https://www.pikecountyelectionresults.org/2024_general/2024_general.php"
+        },
+        {
+          "label": "Certified Results",
+          "url": "https://www.pikecountyelectionresults.org/2024_general/12.pdf"
+        },
+        {
+          "label": "Certified Results",
+          "url": "https://www.pikecountyelectionresults.org/2024_general/19.pdf"
+        },
+        {
+          "label": "Certified Results",
+          "url": "https://www.pikecountyelectionresults.org/2024_general/18.pdf"
+        },
+        {
+          "label": "Certified Results",
+          "url": "https://www.pikecountyelectionresults.org/2024_general/23.pdf"
+        },
+        {
+          "label": "Certified Results",
+          "url": "https://www.pikecountyelectionresults.org/2024_general/21.pdf"
+        },
+        {
+          "label": "Certified Results",
+          "url": "https://www.pikecountyelectionresults.org/2024_general/15.pdf"
+        },
+        {
+          "label": "Election Results",
+          "url": "https://www.pikecountyelectionresults.org/2024_general/2019_primary.php"
+        },
+        {
+          "label": "Election Results",
+          "url": "https://www.pikecountyelectionresults.org/2019_general.php"
+        },
+        {
+          "label": "GEMS ELECTION RESULTS",
+          "url": "https://www.pikecountyelectionresults.org/2020_general/results-District.htm"
+        },
+        {
+          "label": "Election Results",
+          "url": "https://www.pikecountyelectionresults.org/2015_general.php"
+        },
+        {
+          "label": "GEMS ELECTION RESULTS",
+          "url": "https://pikecountyelectionresults.org/2019_general/results-District.htm"
+        },
+        {
+          "label": "GEMS ELECTION RESULTS",
+          "url": "https://www.pikecountyelectionresults.org/2019_general/results-05.htm"
+        }
+      ],
+      "current_source": {
+        "landing_url": "https://www.pikecountyelectionresults.org/2026_general.php",
+        "download_url": "https://www.pikecountyelectionresults.org/2026_general/DW.pdf",
+        "format": "pdf_text_electionware",
+        "report_generated_local": "2026-11-03T21:39:00",
+        "precincts_reporting": 25,
+        "precincts_total": 25,
+        "senate_choices": {
+          "Scott Colom": 7333,
+          "Cindy Hyde-Smith": 5150,
+          "Ty Pinkins": 197
+        },
+        "write_in_votes": 4,
+        "reported_candidate_vote_total": 12684,
+        "notes": "The county government site links its dedicated election-results domain. The district-wide report explicitly includes absentee votes. Preserve its 25-precinct contract; do not add precinct PDFs to this aggregate.",
+        "capture_sha256": "fe20c3a7f8715648f739fa2a484c3969097fc8a29666b5644ed01df7d4ea984e",
+        "capture_bytes": 47585,
+        "captured_at_utc": "2026-11-05T02:14:08.233731+00:00",
+        "report_timezone": "America/Chicago",
+        "election_date_verified": "2026-11-03",
+        "result_status": "unofficial",
+        "discovery_validation": "County, general election date and Senate race reviewed in captured primary source.",
+        "automated_parser_validation": "not_run",
+        "independent_comparison": "not_run",
+        "capture_archive_member": "pike.pdf",
+        "ballot_scope": {
+          "absentee": "included",
+          "affidavit": "unspecified"
+        },
+        "all_ballots_counted": null,
+        "write_in_label": "Write-In Totals"
+      },
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+    },
+    {
+      "county": "Pontotoc",
+      "ms_sos_county_code": "58",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)489-3908"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/pontotoc",
+      "directory_website_leads": [
+        "http://pontotoccoms.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://pontotoccoms.com/",
+          "checked_at": "2026-11-05T02:10:24.011380+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:pontotoccoms.com election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Prentiss",
+      "ms_sos_county_code": "59",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)728-4611"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/prentiss",
+      "directory_website_leads": [
+        "http://www.prentisscounty.org/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.prentisscounty.org/",
+          "checked_at": "2026-11-05T02:10:25.734212+00:00",
+          "http_status": 200,
+          "final_url": "https://www.prentisscounty.org/",
+          "title": [
+            "Welcome to Prentiss County | Prentiss County"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.prentisscounty.org/circuit-clerk",
+          "checked_at": "2026-11-05T02:10:31.900705+00:00",
+          "http_status": 200,
+          "final_url": "https://www.prentisscounty.org/circuit-clerk",
+          "title": [
+            "Circuit Clerk | Prentiss County"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:prentisscounty.org election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://www.prentisscounty.org/circuit-clerk"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://www.prentisscounty.org/election-commission"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Quitman",
+      "ms_sos_county_code": "60",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)326-8003"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/quitman",
+      "directory_website_leads": [
+        "https://quitmancountyms.org/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://quitmancountyms.org/",
+          "checked_at": "2026-11-05T02:10:26.332707+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:quitmancountyms.org election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commissioners – Quitman County, Mississippi",
+          "url": "https://quitmancountyms.org/government/election-comission/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Rankin",
+      "ms_sos_county_code": "61",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)825-1466"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/rankin",
+      "directory_website_leads": [
+        "https://www.rankincounty.org/"
+      ],
+      "discovery_status": "verified_current_source",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.rankincounty.org/",
+          "checked_at": "2026-11-05T02:10:33.098741+00:00",
+          "http_status": 200,
+          "final_url": "https://www.rankincounty.org/",
+          "title": [
+            "Home / Rankin County, Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.rankincounty.org/topic/index.php?topicid=76&structureid=3",
+          "checked_at": "2026-11-05T02:10:37.466116+00:00",
+          "http_status": 200,
+          "final_url": "https://www.rankincounty.org/topic/index.php?topicid=76&structureid=3",
+          "title": [
+            "Elections Results Archive / Rankin County, Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item&id=813",
+          "checked_at": "2026-11-05T02:10:41.913374+00:00",
+          "http_status": 200,
+          "final_url": "https://www.rankincounty.org/egov/documents/1793767944_72381.pdf",
+          "title": [],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "Rankin County Mississippi official November 3 2026 election results",
+        "site:rankincounty.org election results November 2026"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Results",
+          "url": "https://www2.rankincounty.org/results/index.html"
+        },
+        {
+          "label": "Circuit Clerk",
+          "url": "https://www.rankincounty.org/department/index.php?structureid=3"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://www.rankincounty.org/department/index.php?structureid=12"
+        },
+        {
+          "label": "Elections Results Archive",
+          "url": "https://www.rankincounty.org/topic/index.php?topicid=76&structureid=3"
+        },
+        {
+          "label": "Elections",
+          "url": "https://www.rankincounty.org/department/division.php?structureid=19"
+        },
+        {
+          "label": "November 3, 2026 Election Results – Canvass Results",
+          "url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item&id=813"
+        },
+        {
+          "label": "November 3, 2026 Election Results – Cumulative Results",
+          "url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item&id=812"
+        },
+        {
+          "label": "November 3, 2026 Election Results – District Results",
+          "url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item&id=811"
+        },
+        {
+          "label": "November 3, 2026 Election Results – Precinct Results",
+          "url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item&id=810"
+        },
+        {
+          "label": "2026 Election Results",
+          "url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item&id=759"
+        },
+        {
+          "label": "2025 Election Results",
+          "url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item&id=741"
+        },
+        {
+          "label": "2024 Election Results",
+          "url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item&id=687"
+        },
+        {
+          "label": "2023 Election Results",
+          "url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item&id=653"
+        },
+        {
+          "label": "2022 Election Results",
+          "url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item&id=670"
+        },
+        {
+          "label": "2020 Election Results",
+          "url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item;id=548"
+        },
+        {
+          "label": "2019 Election Results",
+          "url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item;id=521"
+        },
+        {
+          "label": "2018 Election Results",
+          "url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item;id=442"
+        },
+        {
+          "label": "2017 Election Results",
+          "url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item;id=371"
+        }
+      ],
+      "current_source": {
+        "landing_url": "https://www.rankincounty.org/topic/index.php?topicid=76&structureid=3",
+        "download_url": "https://www2.rankincounty.org/results/index.html",
+        "format": "html_hart_cumulative",
+        "report_generated_local": "2026-11-03T22:18:19",
+        "precincts_reporting": 46,
+        "precincts_total": 46,
+        "senate_choices": {
+          "Scott Colom": 18513,
+          "Cindy Hyde-Smith": 31654,
+          "Ty Pinkins": 1164
+        },
+        "write_in_votes": null,
+        "reported_candidate_vote_total": 51331,
+        "notes": "The official archive links the HTML result host and a November 2026 cumulative PDF. The PDF reports the same Senate candidate totals, with a generation time 94 seconds later. This is agreement between renderings, not independent evidence of all ballots counted. Write-ins are not supplied; no residual should be assigned to a candidate.",
+        "alternate_download_url": "https://www.rankincounty.org/egov/apps/document/center.egov?view=item&id=812",
+        "capture_sha256": "86d4cb95b9047423a5e41fdf1d4119dde8434c2086adeeae4b996abc9ccf9a1f",
+        "capture_bytes": 146135,
+        "captured_at_utc": "2026-11-05T02:13:45.782480+00:00",
+        "alternate_capture_sha256": "a28a2c22679efcf9d1d6d3bddf937b58945b99226ed7f17a8ffcd47e7aee9d31",
+        "report_timezone": "America/Chicago",
+        "election_date_verified": "2026-11-03",
+        "result_status": "unofficial",
+        "discovery_validation": "County, general election date and Senate race reviewed in captured primary source.",
+        "automated_parser_validation": "not_run",
+        "independent_comparison": "not_run",
+        "capture_archive_member": "rankin.html",
+        "ballot_scope": {
+          "absentee": "included",
+          "affidavit": "column_present_zero_in_capture"
+        },
+        "all_ballots_counted": null,
+        "write_in_label": null,
+        "alternate_capture_archive_member": "rankin-cumulative.pdf"
+      },
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+    },
+    {
+      "county": "Scott",
+      "ms_sos_county_code": "62",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)469-3601"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/scott",
+      "directory_website_leads": [
+        "https://www.scottcountyms.gov/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.scottcountyms.gov/",
+          "checked_at": "2026-11-05T02:10:35.139387+00:00",
+          "http_status": 200,
+          "final_url": "https://scottcountyms.gov/",
+          "title": [
+            "Scott County, Mississippi | Official website of Scott County, Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://scottcountyms.gov/government/circuit-clerk/",
+          "checked_at": "2026-11-05T02:10:46.571159+00:00",
+          "http_status": 200,
+          "final_url": "https://scottcountyms.gov/government/circuit-clerk/",
+          "title": [
+            "Circuit Clerk | Scott County, Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://scottcountyms.gov/services/register-to-vote-and-elections/",
+          "checked_at": "2026-11-05T02:10:52.082647+00:00",
+          "http_status": 200,
+          "final_url": "https://scottcountyms.gov/services/register-to-vote-and-elections/",
+          "title": [
+            "Voting and elections | Scott County, Mississippi"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:scottcountyms.gov election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://scottcountyms.gov/government/circuit-clerk/"
+        },
+        {
+          "label": "Voting & elections",
+          "url": "https://scottcountyms.gov/services/register-to-vote-and-elections/"
+        },
+        {
+          "label": "Mississippi Secretary of State polling place locator",
+          "url": "https://www.sos.ms.gov/elections-voting/polling-place-locator"
+        },
+        {
+          "label": "Leer en español",
+          "url": "https://scottcountyms.gov/es/servicios/register-to-vote-and-elections/"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://scottcountyms.gov/government/election-commission/"
+        },
+        {
+          "label": "Election Commission | Scott County, Mississippi",
+          "url": "https://www.scottcountyms.gov/election-commission"
+        },
+        {
+          "label": "SAMPLE Official Election Ballot",
+          "url": "https://www.scottcountyms.gov/sites/default/files/2024%20General%20Election%20Sample%20Ballot.pdf"
+        },
+        {
+          "label": "ActiveReports Document",
+          "url": "https://www.scottcountyms.gov/sites/default/files/Sample%20Ballot%202022%20General%20Election%20-%20Scott%20County.pdf"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Sharkey",
+      "ms_sos_county_code": "63",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)873-2755"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/sharkey",
+      "directory_website_leads": [
+        "http://www.sharkeycounty.net/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.sharkeycounty.net/",
+          "checked_at": "2026-11-05T02:10:35.491568+00:00",
+          "http_status": 200,
+          "final_url": "https://www.sharkeycounty.net/",
+          "title": [
+            " Sharkey County - Coming Soon"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:sharkeycounty.net election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commission - Sharkey County, Mississippi",
+          "url": "https://www.sharkeycounty.net/election-commission/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Simpson",
+      "ms_sos_county_code": "64",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)847-2474"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/simpson",
+      "directory_website_leads": [
+        "http://simpsoncountyms.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://simpsoncountyms.com/",
+          "checked_at": "2026-11-05T02:10:36.637021+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:simpsoncountyms.com election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Simpson County",
+          "url": "https://simpsoncountyms.com/how-do-i/elections/"
+        },
+        {
+          "label": "Simpson County",
+          "url": "https://simpsoncountyms.com/circuit-clerk/"
+        },
+        {
+          "label": "Simpson County",
+          "url": "https://simpsoncountyms.com/election-commission/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Smith",
+      "ms_sos_county_code": "65",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)782-4751"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/smith",
+      "directory_website_leads": [
+        "https://www.smithcountyms.gov/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.smithcountyms.gov/",
+          "checked_at": "2026-11-05T02:10:38.537149+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:smithcountyms.gov election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commission - Smith County, Mississippi",
+          "url": "https://www.smithcountyms.gov/election-commission/"
+        },
+        {
+          "label": "Circuit Clerk - Smith County, Mississippi",
+          "url": "https://www.smithcountyms.gov/circuit-clerk/"
+        },
+        {
+          "label": "Elections - Smith County, Mississippi",
+          "url": "https://www.smithcountyms.gov/ufaq-category/elections/"
+        },
+        {
+          "label": "How do I qualify as a candidate in the upcoming election? - Smith County, Mississippi",
+          "url": "https://www.smithcountyms.gov/ufaq/how-do-i-qualify-as-a-candidate-in-the-upcoming-election/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Stone",
+      "ms_sos_county_code": "66",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)928-5246"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/stone",
+      "directory_website_leads": [
+        "https://www.stonecountyms.gov/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.stonecountyms.gov/",
+          "checked_at": "2026-11-05T02:10:40.222918+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:stonecountyms.gov election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commission - Stone County - Mississippi",
+          "url": "https://www.stonecountyms.gov/election-commission/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Sunflower",
+      "ms_sos_county_code": "67",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)887-1252"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/sunflower",
+      "directory_website_leads": [
+        "https://www.sunflowercounty.ms.gov/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.sunflowercounty.ms.gov/",
+          "checked_at": "2026-11-05T02:10:40.754503+00:00",
+          "http_status": 200,
+          "final_url": "https://www.sunflowercounty.ms.gov/",
+          "title": [
+            "Home | Sunflower County, MS"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:sunflowercounty.ms.gov election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Tallahatchie",
+      "ms_sos_county_code": "68",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)375-8515",
+        "(662)647-8758"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/tallahatchie",
+      "directory_website_leads": [],
+      "discovery_status": "official_contact_only",
+      "probe_status": "directory_has_no_website",
+      "probed_pages": [],
+      "search_queries": [
+        "\"Tallahatchie County\" \"Mississippi\" election results official 2026"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Tate",
+      "ms_sos_county_code": "69",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)562-5211"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/tate",
+      "directory_website_leads": [
+        "https://tatecounty.ms/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://tatecounty.ms/",
+          "checked_at": "2026-11-05T02:10:42.112032+00:00",
+          "http_status": 200,
+          "final_url": "https://tatecountyms.gov/",
+          "title": [
+            "Tate County MS - Tate County Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://tatecountyms.gov/circuit-clerk/",
+          "checked_at": "2026-11-05T02:10:54.214576+00:00",
+          "http_status": 200,
+          "final_url": "https://tatecountyms.gov/circuit-clerk/",
+          "title": [
+            "Circuit Clerk - Tate County Mississippi"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:tatecounty.ms election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://tatecountyms.gov/circuit-clerk/"
+        },
+        {
+          "label": "Elections",
+          "url": "https://tatecountyms.gov/circuit-clerk/#e036422db6af3c5fe"
+        },
+        {
+          "label": "https://myelectionday.sos.state.ms.us/VoterOutreach/Pages/VOSearch.aspx",
+          "url": "https://myelectionday.sos.state.ms.us/VoterOutreach/Pages/VOSearch.aspx"
+        },
+        {
+          "label": "When is the next Election?",
+          "url": "https://tatecountyms.gov/circuit-clerk/#24d239dd2343ba56b"
+        },
+        {
+          "label": "HERE",
+          "url": "https://www.sos.ms.gov/sites/default/files/election_and_voting/Voter_Registration.pdf"
+        },
+        {
+          "label": "What forms of photo ID are required on Election Day?",
+          "url": "https://tatecountyms.gov/circuit-clerk/#collapse-1-269"
+        },
+        {
+          "label": "Where do I find a sample ballot for the upcoming election?",
+          "url": "https://tatecountyms.gov/circuit-clerk/#collapse-1-265"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Tippah",
+      "ms_sos_county_code": "70",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)837-7370"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/tippah",
+      "directory_website_leads": [],
+      "discovery_status": "fetch_unavailable",
+      "probe_status": "directory_has_no_website",
+      "probed_pages": [],
+      "search_queries": [
+        "\"Tippah County\" \"Mississippi\" election results official 2026",
+        "site:co.tippah.ms.us \"2026\" results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "follow_up_url": "https://www.co.tippah.ms.us/election-results/",
+      "notes": "An official results page is indexed, but this research environment received 502/503 when opening it. Contents and election identity remain unverified; do not assume a production-host failure."
+    },
+    {
+      "county": "Tishomingo",
+      "ms_sos_county_code": "71",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)423-7026"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/tishomingo",
+      "directory_website_leads": [
+        "https://www.co.tishomingo.ms.us/board-of-supervisors/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.co.tishomingo.ms.us/board-of-supervisors/",
+          "checked_at": "2026-11-05T02:10:46.860408+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:co.tishomingo.ms.us election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commission - Tishomingo County, Mississippi",
+          "url": "https://www.co.tishomingo.ms.us/election-commission/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Tunica",
+      "ms_sos_county_code": "72",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)363-2842"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/tunica",
+      "directory_website_leads": [
+        "https://tunicacountyms.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://tunicacountyms.com/",
+          "checked_at": "2026-11-05T02:10:46.981126+00:00",
+          "http_status": 200,
+          "final_url": "https://www.tunicacountymississippi.com/",
+          "title": [
+            "Tunica County, MS  | Government | 1058 South Court Street, Tunica, MS 38676, USA"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:tunicacountyms.com election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Union",
+      "ms_sos_county_code": "73",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)534-1910"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/union",
+      "directory_website_leads": [
+        "http://www.unioncoms.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.unioncoms.com/",
+          "checked_at": "2026-11-05T02:10:51.199724+00:00",
+          "http_status": 200,
+          "final_url": "https://www.unioncoms.com/",
+          "title": [
+            "Union County, MS"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:unioncoms.com election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Walthall",
+      "ms_sos_county_code": "74",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)876-5677"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/walthall",
+      "directory_website_leads": [
+        "https://www.co.walthall.ms.us/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.co.walthall.ms.us/",
+          "checked_at": "2026-11-05T02:10:53.944384+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:co.walthall.ms.us election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Warren",
+      "ms_sos_county_code": "75",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)636-3961"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/warren",
+      "directory_website_leads": [
+        "https://co.warren.ms.us/"
+      ],
+      "discovery_status": "verified_current_source",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://co.warren.ms.us/",
+          "checked_at": "2026-11-05T02:10:55.635212+00:00",
+          "http_status": 200,
+          "final_url": "https://warrencountyms.gov/",
+          "title": [
+            "Warren County, Mississippi &#8211; Official website of Warren County, Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://warrencountyms.gov/?post_type=document&p=694&preview=true",
+          "checked_at": "2026-11-05T02:11:10.416460+00:00",
+          "http_status": 200,
+          "final_url": "https://warrencountyms.gov/documents/unofficial-election-results-november-3-2026/",
+          "title": [
+            "Unofficial Election Results &#8211; November 3, 2026 &#8211; Warren County, Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://warrencountyms.gov/elected-officials/circuit-clerk/",
+          "checked_at": "2026-11-05T02:11:18.814954+00:00",
+          "http_status": 200,
+          "final_url": "https://warrencountyms.gov/elected-officials/circuit-clerk/",
+          "title": [
+            "Circuit Clerk &#8211; Warren County, Mississippi"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [],
+      "election_page_leads": [
+        {
+          "label": "Details : Unofficial Election Results from November 3, 2026",
+          "url": "https://warrencountyms.gov/?post_type=document&p=694&preview=true"
+        },
+        {
+          "label": "Circuit Clerk",
+          "url": "https://warrencountyms.gov/elected-officials/circuit-clerk/"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://warrencountyms.gov/elected-officials/election-commission/"
+        },
+        {
+          "label": "Download Unofficial Election Results – November 3, 2026 (PDF, 72 KB)",
+          "url": "https://warrencountyms.gov/wp-content/uploads/2026/11/General-Unofficial-November-3-Election-Results.pdf"
+        },
+        {
+          "label": "Request an alternate format",
+          "url": "https://warrencountyms.gov/accessibility/?doc=Unofficial%20Election%20Results%20%26%238211%3B%20November%203%2C%202026#request"
+        }
+      ],
+      "current_source": {
+        "landing_url": "https://warrencountyms.gov/documents/",
+        "download_url": "https://warrencountyms.gov/wp-content/uploads/2026/11/General-Unofficial-November-3-Election-Results.pdf",
+        "format": "pdf_scanned_votingworks",
+        "report_generated_local": "2026-11-04T10:12:44",
+        "precincts_reporting": null,
+        "precincts_total": null,
+        "senate_choices": {
+          "Scott Colom": 8117,
+          "Cindy Hyde-Smith": 6148,
+          "Ty Pinkins": 378
+        },
+        "write_in_votes": 16,
+        "reported_candidate_vote_total": null,
+        "notes": "Scanned PDF: source image reviewed. The 16 votes are explicitly Unadjudicated Write-In. Keep that label and adjudication status. OCR/text extraction misses several House and judicial values; it must not be accepted without image review. No precinct denominator is supplied.",
+        "capture_sha256": "38bd7566ecbe5f1a3463fbb0d991d9a49d8eef96db3a45188dd8a21fa36263b9",
+        "capture_bytes": 74110,
+        "captured_at_utc": "2026-11-05T02:14:12.224363+00:00",
+        "report_timezone": "America/Chicago",
+        "election_date_verified": "2026-11-03",
+        "result_status": "unofficial",
+        "discovery_validation": "County, general election date and Senate race reviewed in captured primary source.",
+        "automated_parser_validation": "not_run",
+        "independent_comparison": "not_run",
+        "capture_archive_member": "warren.pdf",
+        "ballot_scope": {
+          "absentee": "unspecified",
+          "affidavit": "unspecified"
+        },
+        "all_ballots_counted": null,
+        "write_in_label": "Unadjudicated Write-In"
+      },
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+    },
+    {
+      "county": "Washington",
+      "ms_sos_county_code": "76",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)378-2747"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/washington",
+      "directory_website_leads": [
+        "http://www.washingtoncounty.ms/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.washingtoncounty.ms/",
+          "checked_at": "2026-11-05T02:10:56.840569+00:00",
+          "http_status": 200,
+          "final_url": "https://www.washingtoncounty.ms/",
+          "title": [
+            "Welcome to Washington County | Washington County"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.washingtoncounty.ms/circuit-clerk",
+          "checked_at": "2026-11-05T02:11:02.573913+00:00",
+          "http_status": 200,
+          "final_url": "https://www.washingtoncounty.ms/circuit-clerk",
+          "title": [
+            "Circuit Clerk | Washington County"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.washingtoncounty.ms/election-commission",
+          "checked_at": "2026-11-05T02:11:10.705378+00:00",
+          "error": "<urlopen error timed out>"
+        }
+      ],
+      "search_queries": [
+        "site:washingtoncounty.ms election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://www.washingtoncounty.ms/circuit-clerk"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://www.washingtoncounty.ms/election-commission"
+        },
+        {
+          "label": "click here",
+          "url": "https://www.sos.ms.gov/elections-voting/county-election-information"
+        },
+        {
+          "label": "Official Recapitulation",
+          "url": "https://www.washingtoncounty.ms/sites/default/files/official_recapitulation_for_november_7_2023_general_election.pdf"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Wayne",
+      "ms_sos_county_code": "77",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)735-1171"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/wayne",
+      "directory_website_leads": [
+        "http://www.waynecounty.ms/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.waynecounty.ms/",
+          "checked_at": "2026-11-05T02:10:57.150085+00:00",
+          "http_status": 200,
+          "final_url": "https://www.waynecounty.ms/",
+          "title": [
+            " Wayne County - Coming Soon"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:waynecounty.ms election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Commission - Wayne County",
+          "url": "https://www.waynecounty.ms/election-commission/"
+        },
+        {
+          "label": "How do I register to vote in Wayne County for local, state and federal elections? - Wayne County",
+          "url": "https://www.waynecounty.ms/ufaq/how-do-i-register-to-vote-in-wayne-county-for-local-state-and-federal-elections/"
+        },
+        {
+          "label": "Circuit Clerk - Wayne County",
+          "url": "https://www.waynecounty.ms/circuit-clerk/"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Webster",
+      "ms_sos_county_code": "78",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)258-6287"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/webster",
+      "directory_website_leads": [
+        "http://www.webstercountyms.org/node/11"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.webstercountyms.org/node/11",
+          "checked_at": "2026-11-05T02:10:57.740907+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:webstercountyms.org election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Election Information | Webster County",
+          "url": "https://www.webstercountyms.org/node/35"
+        },
+        {
+          "label": "SAMPLE Official Election Ballot STATE OF MISSISSIPPI WEBSTER COUNTY November General Election for 11/7/2023 Tuesday, November 7, 2023 TO VOTE: YOU MUST DARKEN THE OVAL( ) COMPLETELY USING A BLACK OR BLUE PEN. |",
+          "url": "https://www.webstercountyms.org/sites/Webster/files/Sample%20Ballot%2011.7.23.pdf"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Wilkinson",
+      "ms_sos_county_code": "79",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(601)888-6697"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/wilkinson",
+      "directory_website_leads": [
+        "http://www.wilkinson.co.ms.gov/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.wilkinson.co.ms.gov/",
+          "checked_at": "2026-11-05T02:10:59.026629+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "site:wilkinson.co.ms.gov election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Voter Registration/ELECTIONS | Wilkinson County - Mississippi",
+          "url": "https://www.wilkinson.co.ms.gov/voter-registrationelections"
+        },
+        {
+          "label": "Election Commission | Wilkinson County - Mississippi",
+          "url": "https://www.wilkinson.co.ms.gov/election-commission"
+        },
+        {
+          "label": "Circuit Clerk | Wilkinson County - Mississippi",
+          "url": "https://www.wilkinson.co.ms.gov/node/15"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Winston",
+      "ms_sos_county_code": "80",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)773-3581"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/winston",
+      "directory_website_leads": [
+        "http://www.winstonms.com/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "website_unavailable_in_probe",
+      "probed_pages": [
+        {
+          "url": "https://www.winstonms.com/",
+          "checked_at": "2026-11-05T02:11:03.718897+00:00",
+          "http_status": 503,
+          "error": "HTTP Error 503: Service Unavailable"
+        }
+      ],
+      "search_queries": [
+        "\"Winston County\" \"Mississippi\" election results official 2026"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Yalobusha",
+      "ms_sos_county_code": "81",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)473-1341",
+        "(662)675-8187"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/yalobusha",
+      "directory_website_leads": [
+        "http://www.yalobushaonline.org/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.yalobushaonline.org/",
+          "checked_at": "2026-11-05T02:11:03.790658+00:00",
+          "http_status": 200,
+          "final_url": "https://www.yalobushaonline.org/",
+          "title": [
+            "Yalobusha County - Coming Soon"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:yalobushaonline.org election results"
+      ],
+      "election_page_leads": [],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    },
+    {
+      "county": "Yazoo",
+      "ms_sos_county_code": "82",
+      "official_contact_directory_url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+      "state_directory_circuit_clerk_phones": [
+        "(662)746-1872"
+      ],
+      "county_directory_referral_url": "https://www.mssupervisors.org/ms-counties/yazoo",
+      "directory_website_leads": [
+        "http://www.yazoocounty.net/"
+      ],
+      "discovery_status": "current_report_not_located",
+      "probe_status": "site_inspected",
+      "probed_pages": [
+        {
+          "url": "https://www.yazoocounty.net/",
+          "checked_at": "2026-11-05T02:11:06.072039+00:00",
+          "http_status": 200,
+          "final_url": "https://www.yazoocounty.net/",
+          "title": [
+            "Yazoo County, Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.yazoocounty.net/circuit-clerk/",
+          "checked_at": "2026-11-05T02:11:10.522707+00:00",
+          "http_status": 200,
+          "final_url": "https://www.yazoocounty.net/circuit-clerk/",
+          "title": [
+            "Circuit Clerk - Yazoo County, Mississippi"
+          ],
+          "challenge": false
+        },
+        {
+          "url": "https://www.yazoocounty.net/election-commission/",
+          "checked_at": "2026-11-05T02:11:14.372770+00:00",
+          "http_status": 200,
+          "final_url": "https://www.yazoocounty.net/election-commission/",
+          "title": [
+            "Election Commission - Yazoo County, Mississippi"
+          ],
+          "challenge": false
+        }
+      ],
+      "search_queries": [
+        "site:yazoocounty.net election results"
+      ],
+      "election_page_leads": [
+        {
+          "label": "Circuit Clerk",
+          "url": "https://www.yazoocounty.net/circuit-clerk/"
+        },
+        {
+          "label": "Election Commission",
+          "url": "https://www.yazoocounty.net/election-commission/"
+        },
+        {
+          "label": "Voting Information",
+          "url": "https://www.sos.ms.gov/elections-voting/county-election-information"
+        }
+      ],
+      "current_source": null,
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+    }
+  ],
+  "capture_archive": {
+    "relative_path": "../../tests/fixtures/mississippi/reports.zip",
+    "sha256": "f54c9ee693f59ced4899a987e9ffe5f7e661a7013aee6b1bbf3541cdc3c270e9",
+    "bytes": 648052,
+    "original_source_files": 11,
+    "note": "Original public county source captures for offline parser development; fixed snapshots, not current live statewide results."
+  }
+}

@@ -186,3 +186,25 @@ contests = ["NE-SEN", "NE-GOV", "NE-01", "NE-02", "NE-03"]
 
 [sources.ne_2026_general_all.files]
 "election.html" = "https://electionresults.nebraska.gov/ResultsMedia.aspx"
+
+[sources.ms_2026_general]
+state = "MS"
+election_date = "2026-11-03"
+url = "https://www.sos.ms.gov/MSCountyElectionInfo/"
+format = "bundle"
+primary_filename = "county-status.json"
+contests = ["MS-SEN"]
+min_interval_seconds = 300
+expected_members = ["county-status.json", "desoto.pdf", "hancock.pdf", "hinds.pdf", "lauderdale.pdf", "madison.pdf", "monroe.pdf", "neshoba.html", "pike.pdf", "rankin.html", "warren.pdf"]
+
+[sources.ms_2026_general.files]
+"desoto.pdf" = "https://www.desotocountyms.gov/DocumentCenter/View/11878/Results-Summary"
+"hancock.pdf" = "https://www.hancockcounty.ms.gov/DocumentCenter/View/1224/Unofficial-Results"
+"hinds.pdf" = "https://www.co.hinds.ms.us/pgs/results/Unofficial%20Summary%20Report.pdf"
+"lauderdale.pdf" = "https://www.lauderdalecounty.org/wp-content/uploads/2026/11/2026-election-with-absentee.pdf"
+"madison.pdf" = "https://www.madison-co.com/elections/election_results.pdf"
+"monroe.pdf" = "https://www.monroems.com/circuitclerk/results/CUMMULATIVE_RESULTS_ALL_PRECINCTS.pdf"
+"neshoba.html" = "https://neshobacounty.net/news/general-election-results-from-november-3-2026/"
+"pike.pdf" = "https://www.pikecountyelectionresults.org/2026_general/DW.pdf"
+"rankin.html" = "https://www2.rankincounty.org/results/index.html"
+"warren.pdf" = "https://warrencountyms.gov/wp-content/uploads/2026/11/General-Unofficial-November-3-Election-Results.pdf"

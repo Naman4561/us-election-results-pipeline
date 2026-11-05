@@ -9,3 +9,4 @@ tests/fixtures/expansion/*.csv -text whitespace=-blank-at-eol
 # These resources are pinned by their exact bytes, including line endings.
 src/election_pipeline/resources/alaska-issuers.pem text eol=lf
 src/election_pipeline/resources/ak_2026_scope.json text eol=lf
+src/election_pipeline/resources/ms_2026_counties.json text eol=lf

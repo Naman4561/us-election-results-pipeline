@@ -50,3 +50,8 @@ sources:
   schema: oh
   tables:
   - name: results
+- name: ms
+  schema: ms
+  tables:
+  - name: results
+  - name: county_feeds

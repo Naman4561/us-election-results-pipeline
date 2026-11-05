@@ -61,6 +61,19 @@ def compare_publication(
             raise ValueError("Choose a results publication")
 
         adapter = state_adapter(metadata["state"])
+        if adapter.county_feed_status:
+            coverage = conn.execute(
+                sql.SQL(
+                    "SELECT count(*) AS n FROM {} WHERE publication_id=%s "
+                    "AND collection_status='current'"
+                ).format(sql.Identifier(adapter.schema, "county_feed_status")),
+                (publication_id,),
+            ).fetchone()
+            if coverage["n"] != 82:
+                raise ValueError(
+                    "Partial county collection cannot establish statewide independent agreement; "
+                    "compare each accepted county against its official report instead"
+                )
         rows = conn.execute(
             sql.SQL(
                 "SELECT contest_id, choice, choice_party, total_votes FROM {} "

@@ -12,7 +12,18 @@ from election_pipeline.collect import FetchFailure, FetchResponse, fetch_file
 from election_pipeline.states import STATES
 
 
-def fetch_bundle(source, settings, destination):
+def fetch_bundle(source, settings, destination, *, previous=None, store=None, force_download=False):
+    adapter = STATES.get(source.state)
+    if adapter and adapter.collection_backend:
+        backend = import_module("election_pipeline.collectors." + adapter.collection_backend)
+        return backend.fetch_bundle(
+            source,
+            settings,
+            destination,
+            previous=previous,
+            store=store,
+            force_download=force_download,
+        )
     components, received = [], 0
     started = time.monotonic()
     with tempfile.TemporaryDirectory(prefix=".bundle-", dir=destination.parent) as directory:

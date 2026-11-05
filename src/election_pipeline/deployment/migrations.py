@@ -125,6 +125,7 @@ def validate_migration(text, schema):
                         "contest_candidate_results",
                         "county_absentee_demographics",
                         "state_absentee_demographics",
+                        "county_feed_status",
                     }
                     for p in objects
                 )

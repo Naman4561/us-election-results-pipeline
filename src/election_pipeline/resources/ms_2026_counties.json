@@ -1,0 +1,523 @@
+{
+  "contract_version": 1,
+  "state": "MS",
+  "election_date": "2026-11-03",
+  "contest_id": "MS-SEN",
+  "candidates": {
+    "Scott Colom": "DEM",
+    "Cindy Hyde-Smith": "REP",
+    "Ty Pinkins": "IND"
+  },
+  "counties": [
+    {
+      "name": "Adams",
+      "key": "ADAMS",
+      "fips": "28001"
+    },
+    {
+      "name": "Alcorn",
+      "key": "ALCORN",
+      "fips": "28003"
+    },
+    {
+      "name": "Amite",
+      "key": "AMITE",
+      "fips": "28005"
+    },
+    {
+      "name": "Attala",
+      "key": "ATTALA",
+      "fips": "28007"
+    },
+    {
+      "name": "Benton",
+      "key": "BENTON",
+      "fips": "28009"
+    },
+    {
+      "name": "Bolivar",
+      "key": "BOLIVAR",
+      "fips": "28011"
+    },
+    {
+      "name": "Calhoun",
+      "key": "CALHOUN",
+      "fips": "28013"
+    },
+    {
+      "name": "Carroll",
+      "key": "CARROLL",
+      "fips": "28015"
+    },
+    {
+      "name": "Chickasaw",
+      "key": "CHICKASAW",
+      "fips": "28017"
+    },
+    {
+      "name": "Choctaw",
+      "key": "CHOCTAW",
+      "fips": "28019"
+    },
+    {
+      "name": "Claiborne",
+      "key": "CLAIBORNE",
+      "fips": "28021"
+    },
+    {
+      "name": "Clarke",
+      "key": "CLARKE",
+      "fips": "28023"
+    },
+    {
+      "name": "Clay",
+      "key": "CLAY",
+      "fips": "28025"
+    },
+    {
+      "name": "Coahoma",
+      "key": "COAHOMA",
+      "fips": "28027"
+    },
+    {
+      "name": "Copiah",
+      "key": "COPIAH",
+      "fips": "28029"
+    },
+    {
+      "name": "Covington",
+      "key": "COVINGTON",
+      "fips": "28031"
+    },
+    {
+      "name": "DeSoto",
+      "key": "DESOTO",
+      "fips": "28033",
+      "member": "desoto.pdf",
+      "format": "pdf_text_electionware",
+      "url": "https://www.desotocountyms.gov/DocumentCenter/View/11878/Results-Summary",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
+    },
+    {
+      "name": "Forrest",
+      "key": "FORREST",
+      "fips": "28035"
+    },
+    {
+      "name": "Franklin",
+      "key": "FRANKLIN",
+      "fips": "28037"
+    },
+    {
+      "name": "George",
+      "key": "GEORGE",
+      "fips": "28039"
+    },
+    {
+      "name": "Greene",
+      "key": "GREENE",
+      "fips": "28041"
+    },
+    {
+      "name": "Grenada",
+      "key": "GRENADA",
+      "fips": "28043"
+    },
+    {
+      "name": "Hancock",
+      "key": "HANCOCK",
+      "fips": "28045",
+      "member": "hancock.pdf",
+      "format": "pdf_text_electionware",
+      "url": "https://www.hancockcounty.ms.gov/DocumentCenter/View/1224/Unofficial-Results",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
+    },
+    {
+      "name": "Harrison",
+      "key": "HARRISON",
+      "fips": "28047"
+    },
+    {
+      "name": "Hinds",
+      "key": "HINDS",
+      "fips": "28049",
+      "member": "hinds.pdf",
+      "format": "pdf_text_electionware",
+      "url": "https://www.co.hinds.ms.us/pgs/results/Unofficial%20Summary%20Report.pdf",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
+    },
+    {
+      "name": "Holmes",
+      "key": "HOLMES",
+      "fips": "28051"
+    },
+    {
+      "name": "Humphreys",
+      "key": "HUMPHREYS",
+      "fips": "28053"
+    },
+    {
+      "name": "Issaquena",
+      "key": "ISSAQUENA",
+      "fips": "28055"
+    },
+    {
+      "name": "Itawamba",
+      "key": "ITAWAMBA",
+      "fips": "28057"
+    },
+    {
+      "name": "Jackson",
+      "key": "JACKSON",
+      "fips": "28059"
+    },
+    {
+      "name": "Jasper",
+      "key": "JASPER",
+      "fips": "28061"
+    },
+    {
+      "name": "Jefferson",
+      "key": "JEFFERSON",
+      "fips": "28063"
+    },
+    {
+      "name": "Jefferson Davis",
+      "key": "JEFFERSONDAVIS",
+      "fips": "28065"
+    },
+    {
+      "name": "Jones",
+      "key": "JONES",
+      "fips": "28067"
+    },
+    {
+      "name": "Kemper",
+      "key": "KEMPER",
+      "fips": "28069"
+    },
+    {
+      "name": "Lafayette",
+      "key": "LAFAYETTE",
+      "fips": "28071"
+    },
+    {
+      "name": "Lamar",
+      "key": "LAMAR",
+      "fips": "28073"
+    },
+    {
+      "name": "Lauderdale",
+      "key": "LAUDERDALE",
+      "fips": "28075",
+      "member": "lauderdale.pdf",
+      "format": "pdf_scanned_electionware",
+      "url": "https://www.lauderdalecounty.org/wp-content/uploads/2026/11/2026-election-with-absentee.pdf",
+      "absentee_scope": "included",
+      "affidavit_scope": "excluded"
+    },
+    {
+      "name": "Lawrence",
+      "key": "LAWRENCE",
+      "fips": "28077"
+    },
+    {
+      "name": "Leake",
+      "key": "LEAKE",
+      "fips": "28079"
+    },
+    {
+      "name": "Lee",
+      "key": "LEE",
+      "fips": "28081"
+    },
+    {
+      "name": "Leflore",
+      "key": "LEFLORE",
+      "fips": "28083"
+    },
+    {
+      "name": "Lincoln",
+      "key": "LINCOLN",
+      "fips": "28085"
+    },
+    {
+      "name": "Lowndes",
+      "key": "LOWNDES",
+      "fips": "28087"
+    },
+    {
+      "name": "Madison",
+      "key": "MADISON",
+      "fips": "28089",
+      "member": "madison.pdf",
+      "format": "pdf_scanned_electionware",
+      "url": "https://www.madison-co.com/elections/election_results.pdf",
+      "absentee_scope": "included",
+      "affidavit_scope": "unspecified"
+    },
+    {
+      "name": "Marion",
+      "key": "MARION",
+      "fips": "28091"
+    },
+    {
+      "name": "Marshall",
+      "key": "MARSHALL",
+      "fips": "28093"
+    },
+    {
+      "name": "Monroe",
+      "key": "MONROE",
+      "fips": "28095",
+      "member": "monroe.pdf",
+      "format": "pdf_text_electionware",
+      "url": "https://www.monroems.com/circuitclerk/results/CUMMULATIVE_RESULTS_ALL_PRECINCTS.pdf",
+      "absentee_scope": "excluded",
+      "affidavit_scope": "excluded"
+    },
+    {
+      "name": "Montgomery",
+      "key": "MONTGOMERY",
+      "fips": "28097"
+    },
+    {
+      "name": "Neshoba",
+      "key": "NESHOBA",
+      "fips": "28099",
+      "member": "neshoba.html",
+      "format": "html_county_news",
+      "url": "https://neshobacounty.net/news/general-election-results-from-november-3-2026/",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
+    },
+    {
+      "name": "Newton",
+      "key": "NEWTON",
+      "fips": "28101"
+    },
+    {
+      "name": "Noxubee",
+      "key": "NOXUBEE",
+      "fips": "28103"
+    },
+    {
+      "name": "Oktibbeha",
+      "key": "OKTIBBEHA",
+      "fips": "28105"
+    },
+    {
+      "name": "Panola",
+      "key": "PANOLA",
+      "fips": "28107"
+    },
+    {
+      "name": "Pearl River",
+      "key": "PEARLRIVER",
+      "fips": "28109"
+    },
+    {
+      "name": "Perry",
+      "key": "PERRY",
+      "fips": "28111"
+    },
+    {
+      "name": "Pike",
+      "key": "PIKE",
+      "fips": "28113",
+      "member": "pike.pdf",
+      "format": "pdf_text_electionware",
+      "url": "https://www.pikecountyelectionresults.org/2026_general/DW.pdf",
+      "absentee_scope": "included",
+      "affidavit_scope": "unspecified"
+    },
+    {
+      "name": "Pontotoc",
+      "key": "PONTOTOC",
+      "fips": "28115"
+    },
+    {
+      "name": "Prentiss",
+      "key": "PRENTISS",
+      "fips": "28117"
+    },
+    {
+      "name": "Quitman",
+      "key": "QUITMAN",
+      "fips": "28119"
+    },
+    {
+      "name": "Rankin",
+      "key": "RANKIN",
+      "fips": "28121",
+      "member": "rankin.html",
+      "format": "html_hart_cumulative",
+      "url": "https://www2.rankincounty.org/results/index.html",
+      "absentee_scope": "included",
+      "affidavit_scope": "column_present_zero_in_capture"
+    },
+    {
+      "name": "Scott",
+      "key": "SCOTT",
+      "fips": "28123"
+    },
+    {
+      "name": "Sharkey",
+      "key": "SHARKEY",
+      "fips": "28125"
+    },
+    {
+      "name": "Simpson",
+      "key": "SIMPSON",
+      "fips": "28127"
+    },
+    {
+      "name": "Smith",
+      "key": "SMITH",
+      "fips": "28129"
+    },
+    {
+      "name": "Stone",
+      "key": "STONE",
+      "fips": "28131"
+    },
+    {
+      "name": "Sunflower",
+      "key": "SUNFLOWER",
+      "fips": "28133"
+    },
+    {
+      "name": "Tallahatchie",
+      "key": "TALLAHATCHIE",
+      "fips": "28135"
+    },
+    {
+      "name": "Tate",
+      "key": "TATE",
+      "fips": "28137"
+    },
+    {
+      "name": "Tippah",
+      "key": "TIPPAH",
+      "fips": "28139"
+    },
+    {
+      "name": "Tishomingo",
+      "key": "TISHOMINGO",
+      "fips": "28141"
+    },
+    {
+      "name": "Tunica",
+      "key": "TUNICA",
+      "fips": "28143"
+    },
+    {
+      "name": "Union",
+      "key": "UNION",
+      "fips": "28145"
+    },
+    {
+      "name": "Walthall",
+      "key": "WALTHALL",
+      "fips": "28147"
+    },
+    {
+      "name": "Warren",
+      "key": "WARREN",
+      "fips": "28149",
+      "member": "warren.pdf",
+      "format": "pdf_scanned_votingworks",
+      "url": "https://warrencountyms.gov/wp-content/uploads/2026/11/General-Unofficial-November-3-Election-Results.pdf",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
+    },
+    {
+      "name": "Washington",
+      "key": "WASHINGTON",
+      "fips": "28151"
+    },
+    {
+      "name": "Wayne",
+      "key": "WAYNE",
+      "fips": "28153"
+    },
+    {
+      "name": "Webster",
+      "key": "WEBSTER",
+      "fips": "28155"
+    },
+    {
+      "name": "Wilkinson",
+      "key": "WILKINSON",
+      "fips": "28157"
+    },
+    {
+      "name": "Winston",
+      "key": "WINSTON",
+      "fips": "28159"
+    },
+    {
+      "name": "Yalobusha",
+      "key": "YALOBUSHA",
+      "fips": "28161"
+    },
+    {
+      "name": "Yazoo",
+      "key": "YAZOO",
+      "fips": "28163"
+    }
+  ],
+  "reviewed_scans": {
+    "LAUDERDALE": {
+      "1cd5d9a72c5373ecec9fab0cfab431eef3da401416513eacf09b03e99078ceb0": {
+        "counts": {
+          "Scott Colom": 10528,
+          "Cindy Hyde-Smith": 10892,
+          "Ty Pinkins": 454
+        },
+        "write_in_votes": 23,
+        "write_in_label": "Write-In Totals",
+        "reported_candidate_vote_total": 21897,
+        "precincts_reporting": 37,
+        "precincts_total": 37,
+        "report_generated_local": "2026-11-04T10:06:00",
+        "review_method": "Source PDF image read and reported Senate values transcribed; independent agreement is still an operator acceptance check."
+      }
+    },
+    "MADISON": {
+      "43e6f72c8fed3d1fd131ab8fdc16884090b213582a5842a0f2bde0351e784a62": {
+        "counts": {
+          "Scott Colom": 22712,
+          "Cindy Hyde-Smith": 22364,
+          "Ty Pinkins": 690
+        },
+        "write_in_votes": 65,
+        "write_in_label": "Write-In Totals",
+        "reported_candidate_vote_total": 45831,
+        "precincts_reporting": 46,
+        "precincts_total": 46,
+        "report_generated_local": "2026-11-04T14:33:00",
+        "review_method": "Source PDF image read and reported Senate values transcribed; independent agreement is still an operator acceptance check."
+      }
+    },
+    "WARREN": {
+      "38bd7566ecbe5f1a3463fbb0d991d9a49d8eef96db3a45188dd8a21fa36263b9": {
+        "counts": {
+          "Scott Colom": 8117,
+          "Cindy Hyde-Smith": 6148,
+          "Ty Pinkins": 378
+        },
+        "write_in_votes": 16,
+        "write_in_label": "Unadjudicated Write-In",
+        "reported_candidate_vote_total": null,
+        "precincts_reporting": null,
+        "precincts_total": null,
+        "report_generated_local": "2026-11-04T10:12:44",
+        "review_method": "Source PDF image read and reported Senate values transcribed; independent agreement is still an operator acceptance check."
+      }
+    }
+  }
+}

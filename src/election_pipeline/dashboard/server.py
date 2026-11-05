@@ -9,6 +9,7 @@ import logging
 import os
 import re
 from collections import defaultdict
+from datetime import datetime, timedelta, timezone
 from importlib.resources import files
 from pathlib import Path
 from threading import Lock
@@ -87,7 +88,14 @@ def summarize(rows, method):
 
 
 def make_payload(
-    geography, metadata, county_rows, contest_rows, demo=False, state="NC", races=None
+    geography,
+    metadata,
+    county_rows,
+    contest_rows,
+    demo=False,
+    state="NC",
+    races=None,
+    county_feeds=None,
 ):
     adapter = state_adapter(state)
     races_config, methods = races if races is not None else adapter.races, adapter.methods
@@ -139,7 +147,7 @@ def make_payload(
                 for key, rows in by_county[identity].items()
             },
         }
-    return {
+    payload = {
         "state": state,
         "methods": methods,
         "county_detail": adapter.county_results,
@@ -149,6 +157,61 @@ def make_payload(
         "publication": metadata,
         "map_version": geography["version"],
         "races": races,
+    }
+    if adapter.county_feed_status and metadata is not None:
+        if county_feeds is None and not demo:
+            raise ValueError("County collection provenance is required for this state")
+        if county_feeds is not None:
+            return with_county_feeds(payload, geography, county_feeds)
+    return payload
+
+
+def with_county_feeds(payload, geography, rows, now=None):
+    """Attach frozen provenance, deriving operational age without changing vote counts."""
+    now = now or datetime.now(timezone.utc)
+    names = {f["id"]: f for f in geography["counties"]}
+    records = {}
+    accepted = set()
+    for original in rows:
+        row = dict(original)
+        key = county_key(row["county"])
+        if key not in names or key in records or row["county_fips"] != names[key]["fips"]:
+            raise ValueError("County feed provenance does not match the map")
+        status = row["collection_status"]
+        if status not in {"current", "stale", "unavailable", "not_collected"}:
+            raise ValueError("Invalid published county collection status")
+        row["name"] = names[key]["name"]
+        if status in {"current", "stale"}:
+            accepted.add(key)
+            succeeded = row["last_success_at"]
+            if isinstance(succeeded, str):
+                succeeded = datetime.fromisoformat(succeeded.replace("Z", "+00:00"))
+            if succeeded is None or succeeded.utcoffset() is None:
+                raise ValueError("Accepted county lacks its source check timestamp")
+            if payload.get("mode") != "demo" and now - succeeded > timedelta(seconds=900):
+                row["collection_status"] = "stale"
+                row["issue"] = row.get("issue") or "source_check_overdue"
+        records[key] = row
+    if set(records) != set(names):
+        raise ValueError("Published county collection register is incomplete")
+    for contest in payload["races"].values():
+        if set(contest["counties"]) != accepted:
+            raise ValueError("County result/provenance coverage disagrees")
+    counts = {
+        s: sum(r["collection_status"] == s for r in records.values())
+        for s in ("current", "stale", "unavailable", "not_collected")
+    }
+    return {
+        **payload,
+        "county_feeds": records,
+        "county_collection": {
+            "expected": len(names),
+            "configured": len(names) - counts["not_collected"],
+            "with_results": len(accepted),
+            **counts,
+            "complete": len(accepted) == len(names) and not counts["stale"],
+            "basis": "named_candidates_from_collected_counties",
+        },
     }
 
 
@@ -196,6 +259,32 @@ def demo_payload(geography, state="NC"):
     if state == "KY":
         for row in rows:
             row["absentee_combined"] = row["total_votes"] - row["election_day"]
+    feeds = None
+    if state_adapter(state).county_feed_status:
+        configured = {
+            c["key"] for c in state_adapter(state).parser.policy()["counties"] if c.get("member")
+        }
+        rows = [r for r in rows if county_key(r["county"]) in configured]
+        now = "2026-11-03T18:00:00+00:00"  # Fixed synthetic checks keep demo ETags stable.
+        feeds = [
+            {
+                "county": f["id"],
+                "county_fips": f["fips"],
+                "collection_status": "current" if f["id"] in configured else "not_collected",
+                "last_success_at": now if f["id"] in configured else None,
+                "last_attempt_at": now if f["id"] in configured else None,
+                "report_generated_at": None,
+                "report_date": None,
+                "source_url": state_adapter(state).source_page,
+                "raw_sha256": "0" * 64 if f["id"] in configured else None,
+                "absentee_scope": "unspecified",
+                "affidavit_scope": "unspecified",
+                "write_in_votes": None,
+                "write_in_label": None,
+                "issue": None,
+            }
+            for f in geography["counties"]
+        ]
     grouped = {}
     for row in rows:
         key = (row["contest_id"], row["choice"], row["choice_party"])
@@ -228,6 +317,7 @@ def demo_payload(geography, state="NC"):
         demo=True,
         state=state,
         races=races_config,
+        county_feeds=feeds,
     )
 
 
@@ -255,6 +345,7 @@ class PublishedResults:
         self.settings, self.geography, self.source_id = settings, geography, source_id
         self.races = races if races is not None else self.state.races
         self.cache, self.lock = {}, Lock()
+        self.feed_cache = []
 
     def __call__(self):
         with (
@@ -308,6 +399,16 @@ class PublishedResults:
                     ),
                     (identity,),
                 ).fetchall()
+                feeds = (
+                    conn.execute(
+                        sql.SQL("SELECT * FROM {} WHERE publication_id=%s").format(
+                            sql.Identifier(self.state.schema, "county_feed_status")
+                        ),
+                        (identity,),
+                    ).fetchall()
+                    if self.state.county_feed_status
+                    else None
+                )
                 payload = make_payload(
                     self.geography,
                     metadata,
@@ -315,9 +416,13 @@ class PublishedResults:
                     contests,
                     state=self.state.code,
                     races=self.races,
+                    county_feeds=feeds,
                 )
                 self.cache = {identity: payload}
+                self.feed_cache = feeds
             payload = {**self.cache[identity], "publication": metadata}
+            if self.state.county_feed_status:
+                payload = with_county_feeds(payload, self.geography, self.feed_cache)
             return payload
 
 

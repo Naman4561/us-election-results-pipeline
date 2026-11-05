@@ -171,8 +171,20 @@ def _collect_locked(
         try:
             if source.format == "bundle":
                 from election_pipeline.bundles import fetch_bundle
+                from election_pipeline.states import STATES
 
-                fetched = fetch_bundle(source, settings, temporary)
+                adapter = STATES.get(source.state)
+                if adapter and adapter.collection_backend:
+                    fetched = fetch_bundle(
+                        source,
+                        settings,
+                        temporary,
+                        previous=cached,
+                        store=store,
+                        force_download=force_download,
+                    )
+                else:
+                    fetched = fetch_bundle(source, settings, temporary)
             else:
                 fetched = fetch_file(source, settings, temporary, conditions)
             record.update(

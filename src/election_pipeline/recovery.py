@@ -540,6 +540,7 @@ def check_restore(
                     "contest_candidate_results",
                     "county_absentee_demographics",
                     "state_absentee_demographics",
+                    "county_feed_status",
                 ):
                     relation = schema + "." + table
                     if relation in manifest["database_inventory"]:
@@ -570,6 +571,7 @@ def check_restore(
                 "contest_candidate_results",
                 "county_absentee_demographics",
                 "state_absentee_demographics",
+                "county_feed_status",
             }
             for relation in manifest["database_inventory"]:
                 schema, table = relation.split(".", 1)

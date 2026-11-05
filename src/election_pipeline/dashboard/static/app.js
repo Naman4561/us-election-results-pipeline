@@ -23,6 +23,7 @@ const colors = {
   tie: "url(#tie)",
   UNKNOWN: "url(#tie)",
   unavailable: "url(#unavailable)",
+  partial: "url(#partial)",
 };
 const descriptions = {
   awaiting_votes: "Covered · awaiting votes",
@@ -31,6 +32,7 @@ const descriptions = {
   tie: "Tied vote",
   UNKNOWN: "Leading candidate party unavailable",
   unavailable: "Published data unavailable",
+  partial: "Partial county coverage · statewide lead unavailable",
   DEM: "Democratic lead",
   REP: "Republican lead",
   OTHER: "Other party lead",
@@ -111,14 +113,27 @@ function statusFor(code, race, county = null) {
     return { status: "unavailable" };
   const contest = state.races[race];
   if (county && state.county_detail === false) return { status: "unavailable" };
+  const feed = county ? state.county_feeds?.[county] : null;
+  if (feed?.collection_status === "not_collected")
+    return { status: "not_covered" };
+  if (feed?.collection_status === "unavailable")
+    return { status: "unavailable" };
   const stats = county
     ? contest?.counties[county]?.stats[view.method]
     : contest?.stats[view.scope === "US" ? "total_votes" : view.method];
+  if (
+    !county &&
+    state.publication &&
+    state.county_collection &&
+    !state.county_collection.complete
+  )
+    return { status: "partial", stats };
   if (!state.publication || !stats || stats.total == null || stats.total === 0)
     return { status: "awaiting_votes", stats };
   return {
     status: stats.status === "tie" ? "tie" : stats.leader || "UNKNOWN",
     stats,
+    staleCounty: feed?.collection_status === "stale",
   };
 }
 async function loadGeometry(code) {
@@ -242,9 +257,21 @@ function drawMap() {
     );
     p.dataset.id = f.id;
     p.dataset.status = result.status;
-    const code = view.scope === "US" ? (view.office === "house" ? f.state : f.id) : view.scope;
-    const firstChoice = data.states[code]?.vote_basis === "first_choice_listed_candidates";
-    const description = `${f.name}: ${descriptions[result.status]}${firstChoice ? " · listed candidates, first choice only" : ""}${result.stats?.total ? " · " + number(result.stats.total) + " votes" : ""}`;
+    if (result.staleCounty) p.dataset.stale = "true";
+    const code =
+      view.scope === "US"
+        ? view.office === "house"
+          ? f.state
+          : f.id
+        : view.scope;
+    const firstChoice =
+      data.states[code]?.vote_basis === "first_choice_listed_candidates";
+    const partial = data.states[code]?.county_collection;
+    const partialText =
+      result.status === "partial"
+        ? ` · ${partial.with_results}/${partial.expected} counties with accepted counts`
+        : "";
+    const description = `${f.name}: ${descriptions[result.status]}${partialText}${result.staleCounty ? " · stale county source" : ""}${firstChoice ? " · listed candidates, first choice only" : ""}${result.stats?.total ? " · " + number(result.stats.total) + " votes" : ""}`;
     const title = document.createElementNS(ns, "title");
     title.textContent = description;
     p.append(title);
@@ -291,7 +318,8 @@ function renderNationalPanel() {
   target.replaceChildren();
   let count = 0,
     waiting = 0,
-    unavailable = 0;
+    unavailable = 0,
+    partial = 0;
   const leads = { DEM: 0, REP: 0, OTHER: 0 };
   for (const code of Object.keys(data.coverage))
     for (const race of racesFor(code)) {
@@ -299,12 +327,13 @@ function renderNationalPanel() {
       const s = statusFor(code, race).status;
       if (s in leads) leads[s]++;
       else if (s === "unavailable") unavailable++;
+      else if (s === "partial") partial++;
       else waiting++;
     }
   target.append(
     element(
       "p",
-      `${count} covered ${count === 1 ? "race" : "races"} · ${waiting} awaiting votes or tied${unavailable ? " · " + unavailable + " unavailable" : ""}`,
+      `${count} covered ${count === 1 ? "race" : "races"} · ${waiting} awaiting votes or tied${partial ? " · " + partial + " with partial county coverage" : ""}${unavailable ? " · " + unavailable + " unavailable" : ""}`,
       "empty",
     ),
   );
@@ -327,7 +356,7 @@ function renderNationalPanel() {
     target.append(
       element(
         "p",
-        "Counts reflect only the races we cover. They do not indicate chamber control or elected winners.",
+        "Counts reflect only the races we cover. Partial county aggregates are excluded from party lead counts. These counts do not indicate chamber control or elected winners.",
         "empty",
       ),
     );
@@ -369,8 +398,13 @@ function renderStatePanel() {
       ? race || offices[view.office]
       : offices[view.office];
   const county = contest?.counties[view.county];
+  const feed = state.county_feeds?.[view.county];
+  const partial = state.county_collection;
+  if (!view.county && partial)
+    $("result-scope").textContent = "COLLECTED COUNTY TOTALS";
   $("result-subtitle").textContent =
-    (county ? county.name + " County · " : "") + state.name;
+    (county || feed ? (county?.name || feed.name) + " County · " : "") +
+    state.name;
   const target = $("result-content");
   target.replaceChildren();
   const result = statusFor(code, race, view.county),
@@ -389,7 +423,9 @@ function renderStatePanel() {
     target.append(
       element(
         "p",
-        "This office is outside our coverage in this state.",
+        feed?.collection_status === "not_collected"
+          ? "This county source has not been collected. Its votes are unknown and excluded from the displayed aggregate."
+          : "This office is outside our coverage in this state.",
         "empty",
       ),
     );
@@ -399,10 +435,33 @@ function renderStatePanel() {
     target.append(
       element(
         "p",
-        "Published results are unavailable. Retry shortly; this is not a zero-vote report.",
+        feed?.collection_status === "unavailable"
+          ? "This county has no accepted report. Its votes are unknown and excluded from the displayed aggregate."
+          : "Published results are unavailable. Retry shortly; this is not a zero-vote report.",
         "empty",
       ),
     );
+    if (feed?.collection_status === "unavailable") {
+      target.append(
+        element(
+          "p",
+          "Last attempted check: " +
+            date(feed.last_attempt_at) +
+            ". " +
+            (feed.issue === "review_required"
+              ? "Changed scanned report requires review."
+              : "County source check failed."),
+          "empty",
+        ),
+      );
+      if (feed.source_url) {
+        const link = element("a", "Original county report ↗", "text-button");
+        link.href = feed.source_url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        target.append(link);
+      }
+    }
     return;
   }
   if (!state.publication) {
@@ -417,10 +476,90 @@ function renderStatePanel() {
   }
   const total = element("div", undefined, "total");
   const firstChoice = state.vote_basis === "first_choice_listed_candidates";
+  const countyBasis = state.vote_basis === "covered_counties_named_candidates";
+  if (partial && !view.county)
+    target.append(
+      element(
+        "p",
+        `${partial.with_results} of ${partial.expected} counties have accepted counts; ${partial.current} sources currently confirmed, ${partial.stale} stale, ${partial.unavailable} unavailable. This is a partial county aggregate, not a statewide total.`,
+        "empty",
+      ),
+    );
+  if (countyBasis)
+    target.append(
+      element(
+        "p",
+        "Named Senate candidates only. Percentages exclude write-ins; reported write-in tallies are shown separately for each county. Precinct reporting is not the percentage of all ballots counted.",
+        "empty",
+      ),
+    );
+  if (feed) {
+    target.append(
+      element(
+        "p",
+        (feed.collection_status === "stale"
+          ? "STALE SOURCE · Last accepted counts retained. "
+          : "") +
+          "Last successful check: " +
+          date(feed.last_success_at) +
+          ". Report: " +
+          (feed.report_generated_at
+            ? date(feed.report_generated_at)
+            : feed.report_date || "time unavailable") +
+          ".",
+        "empty",
+      ),
+    );
+    if (feed.issue === "review_required")
+      target.append(
+        element(
+          "p",
+          "Changed scanned report requires review; these counts are from the last accepted file.",
+          "empty",
+        ),
+      );
+    const scope = [];
+    if (feed.absentee_scope === "excluded")
+      scope.push("Absentee ballots excluded");
+    else if (feed.absentee_scope === "included")
+      scope.push("Absentee votes included");
+    if (feed.affidavit_scope === "excluded")
+      scope.push("Affidavit ballots excluded");
+    if (scope.length) target.append(element("p", scope.join(" · "), "empty"));
+    target.append(
+      element(
+        "p",
+        feed.write_in_votes == null
+          ? "Write-in tally not supplied."
+          : `${feed.write_in_label || "Write-ins"}: ${number(feed.write_in_votes)} · excluded from named-candidate percentages.`,
+        "empty",
+      ),
+    );
+    if (feed.source_url) {
+      const link = element("a", "Original county report ↗", "text-button");
+      link.href = feed.source_url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      target.append(link);
+    }
+  }
   if (firstChoice)
-    target.append(element("p", "First-choice votes · Round 1 · CSV-listed candidates. Later ranked-choice tabulations are not included. Percentages use listed candidate votes; unlisted vote categories are excluded.", "empty"));
+    target.append(
+      element(
+        "p",
+        "First-choice votes · Round 1 · CSV-listed candidates. Later ranked-choice tabulations are not included. Percentages use listed candidate votes; unlisted vote categories are excluded.",
+        "empty",
+      ),
+    );
   total.append(
-    element("span", firstChoice ? "Listed first-choice candidate votes" : methodNames[view.method] + " · candidate votes"),
+    element(
+      "span",
+      firstChoice
+        ? "Listed first-choice candidate votes"
+        : countyBasis
+          ? "Named candidate votes · collected counties"
+          : methodNames[view.method] + " · candidate votes",
+    ),
     element("strong", stats?.total == null ? "—" : number(stats.total)),
   );
   const leadText =
@@ -428,7 +567,9 @@ function renderStatePanel() {
       ? "Awaiting reported votes"
       : result.status === "tie"
         ? "The leading candidates are tied"
-        : `${stats.candidates[0].name} leads${firstChoice ? " among listed candidates in first-choice votes" : ""}${stats.margin !== null ? " by " + number(stats.margin) + " votes" : ""}`;
+        : !stats?.total
+          ? "No reported votes among the collected named candidates"
+          : `${stats.candidates[0].name} leads${firstChoice ? " among listed candidates in first-choice votes" : countyBasis && !view.county ? " within the collected counties" : ""}${stats.margin !== null ? " by " + number(stats.margin) + " votes" : ""}`;
   total.append(element("p", leadText));
   target.append(total);
   for (const candidate of stats?.candidates || []) {
@@ -496,7 +637,9 @@ function renderMetadata() {
       : test
         ? "TEST PUBLICATIONS"
         : publication
-          ? manual ? "UNOFFICIAL · MANUAL SNAPSHOT" : "UNOFFICIAL RETURNS"
+          ? manual
+            ? "UNOFFICIAL · MANUAL SNAPSHOT"
+            : "UNOFFICIAL RETURNS"
           : national
             ? "OFFICIAL-SOURCE RETURNS"
             : "AWAITING PUBLICATION";
@@ -512,15 +655,37 @@ function renderMetadata() {
       : test
         ? "TEST DATA — These publications are for pipeline validation. Do not interpret them as live Election Day returns."
         : manual
-          ? "Manually imported official results. Source report: " + date(publication?.source_modified_at) + ". Results update when a new file is imported. A party lead is not a race call."
-          : "Unofficial returns from official state sources. A party lead is not a race call. Gray and patterned regions are explained in the legend." +
-            (national && anyManual ? " Includes manually updated states; select a state for its report timestamp." : "");
-  if ((national && Object.values(data.states).some(s => s.vote_basis === "first_choice_listed_candidates")) || state?.vote_basis === "first_choice_listed_candidates")
-    $("notice").textContent += " Alaska shows first-choice votes for CSV-listed candidates. Later ranked-choice results and unlisted vote categories are not included.";
+          ? "Manually imported official results. Source report: " +
+            date(publication?.source_modified_at) +
+            ". Results update when a new file is imported. A party lead is not a race call."
+          : "Unofficial returns from official election sources. A party lead is not a race call. Gray and patterned regions are explained in the legend." +
+            (national && anyManual
+              ? " Includes manually updated states; select a state for its report timestamp."
+              : "");
+  if (
+    (national &&
+      Object.values(data.states).some(
+        (s) => s.vote_basis === "first_choice_listed_candidates",
+      )) ||
+    state?.vote_basis === "first_choice_listed_candidates"
+  )
+    $("notice").textContent +=
+      " Alaska shows first-choice votes for CSV-listed candidates. Later ranked-choice results and unlisted vote categories are not included.";
+  if (
+    (national &&
+      Object.values(data.states).some(
+        (s) => s.county_collection && !s.county_collection.complete,
+      )) ||
+    state?.county_collection
+  )
+    $("notice").textContent +=
+      " Mississippi has partial county collection. The national map does not assign it a statewide party lead; select the state to inspect collected counties and source timestamps.";
   $("notice").classList.toggle("alert", stale || test);
   $("connection").textContent = stale
     ? "Refresh failed · stale view"
-    : manual ? "Connected · results updated manually" : "Updated " + new Date().toLocaleTimeString();
+    : manual
+      ? "Connected · results updated manually"
+      : "Updated " + new Date().toLocaleTimeString();
   $("observed-time").textContent = national
     ? "Per-state timestamps"
     : date(publication?.first_observed_at);
@@ -547,13 +712,18 @@ function renderControls() {
   $("scope").value = view.scope;
   $("national").hidden = national;
   $("overview").hidden = national || !view.county;
+  $("overview").textContent = state?.county_collection
+    ? "Collected county totals"
+    : "Statewide results";
   $("map-title").textContent =
     `${offices[view.office]} · ${national ? "National results" : view.office === "house" ? "District results" : aggregate ? "State totals · county detail unavailable" : "County results"}`;
   $("map-description").textContent = national
     ? "Select a covered state to explore its returns."
-    : state.vote_basis === "first_choice_listed_candidates"
-      ? "Color shows the first-choice leader among CSV-listed candidates. Later ranked-choice results are not included."
-      : "Color shows the leading candidate’s party, not a race call.";
+    : state.county_collection
+      ? "County colors show named-candidate leads in collected reports. Patterned counties are outside collection or unavailable; stale sources have dashed borders."
+      : state.vote_basis === "first_choice_listed_candidates"
+        ? "Color shows the first-choice leader among CSV-listed candidates. Later ranked-choice results are not included."
+        : "Color shows the leading candidate’s party, not a race call.";
   const methods = national ? ["total_votes"] : state.methods || ["total_votes"];
   if (!methods.includes(view.method)) view.method = "total_votes";
   $("method").replaceChildren(
@@ -593,7 +763,9 @@ function renderControls() {
     Object.keys(data.coverage).join(", ");
   $("coverage-label").textContent = national
     ? `${Object.keys(data.coverage).length} states covered · ${Object.keys(data.coverage).flatMap(racesFor).length} races for this office`
-    : `${state.name} · ${racesFor(view.scope).length} covered races for this office`;
+    : state.county_collection && view.office === "senate"
+      ? `${state.name} · ${state.county_collection.with_results}/${state.county_collection.expected} counties with accepted counts`
+      : `${state.name} · ${racesFor(view.scope).length} covered races for this office`;
   const list = $("race-list");
   list.replaceChildren();
   if (!national && view.office === "house")

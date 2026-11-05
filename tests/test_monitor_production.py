@@ -91,6 +91,36 @@ class MonitorTests(unittest.TestCase):
     def test_two_states_with_unchanged_votes_and_recent_checks_are_healthy(self):
         self.assertEqual(self.assess(), {})
 
+    def test_county_source_failures_alert_without_alerting_uncollected_counties(self):
+        self.sources["nc_test"] = replace(self.sources["nc_test"], state="MS")
+        payload = {
+            "mode": "published",
+            "states": {
+                "MS": {
+                    "availability": "available",
+                    "races": {"MS-SEN": {}},
+                    "publication": {"id": "partial"},
+                    "county_feeds": {
+                        "MADISON": {"collection_status": "stale", "issue": "review_required"},
+                        "HINDS": {
+                            "collection_status": "unavailable",
+                            "issue": "source_check_failed",
+                        },
+                        "PIKE": {"collection_status": "current"},
+                        "JACKSON": {"collection_status": "not_collected"},
+                    },
+                },
+                "MN": {
+                    "availability": "available",
+                    "races": {"MN-SEN": {}},
+                    "publication": {"id": "live"},
+                },
+            },
+        }
+        issues = self.assess(dashboard=payload)
+        self.assertEqual(set(issues), {"county/MS/MADISON", "county/MS/HINDS"})
+        self.assertIn("scan review", issues["county/MS/MADISON"])
+
     def test_catalog_adds_enabled_states_and_ignores_registered_pending_states(self):
         from election_pipeline.deployment import catalog
         from election_pipeline.settings import CollectorSettings

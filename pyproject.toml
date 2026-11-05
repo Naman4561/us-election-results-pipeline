@@ -8,7 +8,7 @@ version = "0.1.1"
 description = "Collection and provenance of official U.S. election result files"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = ["pypdf==6.21.4"]
 
 [project.optional-dependencies]
 postgres = [

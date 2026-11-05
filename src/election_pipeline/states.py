@@ -27,6 +27,8 @@ class State:
     source_page: str = ""
     bundle_resolver: str = ""
     vote_basis: str = "reported_votes"
+    collection_backend: str = ""
+    county_feed_status: bool = False
 
     @property
     def schema(self):
@@ -78,6 +80,17 @@ class State:
 
 
 STATES = {
+    "MS": State(
+        "MS",
+        "Mississippi",
+        "ms_2026_general",
+        (),
+        ("total_votes",),
+        source_page="https://www.sos.ms.gov/MSCountyElectionInfo/",
+        vote_basis="covered_counties_named_candidates",
+        collection_backend="county_files",
+        county_feed_status=True,
+    ),
     "AK": State(
         "AK",
         "Alaska",
