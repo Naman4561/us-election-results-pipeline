@@ -611,6 +611,7 @@ class RepinTests(unittest.TestCase):
     def entry(self):
         return catalog.read(self.path)["sources"]["ga_2026_general"]
 
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_validated_new_image_changes_only_the_pin_and_keeps_history(self):
         generation = catalog.read(self.path)["generation"]
         result = self.repin()
@@ -635,6 +636,7 @@ class RepinTests(unittest.TestCase):
         self.assertEqual(after["repin_candidate_id"], result["validated_candidate_id"])
         self.assertEqual(catalog.read(self.path)["generation"], generation + 1)
 
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_rollback_is_a_repin_to_the_previous_image(self):
         self.repin()
         result = self.repin(image=IMAGE, revision=REVISION)
@@ -666,6 +668,7 @@ class RepinTests(unittest.TestCase):
             self.repin(prepared=failure)
         self.assertEqual(self.entry(), self.before)
 
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_only_expansion_sources_and_no_concurrent_change_or_backup(self):
         with self.assertRaisesRegex(ValueError, "restricted to new expansion sources"):
             self.repin(name="nc_2026_general", meta=self.metadata(source_id="nc_2026_general"))

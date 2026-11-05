@@ -1,6 +1,7 @@
 """Per-host TLS compatibility never disables ordinary certificate verification."""
 
 import hashlib
+import os
 import shutil
 import socket
 import ssl
@@ -106,6 +107,49 @@ def handshake(client, server):
             thread.join(5)
 
 
+def make_test_certificate(directory, test):
+    """A throwaway localhost certificate and key in one PEM file, made by the openssl CLI.
+
+    The subject comes from a config file so no argument starts with "/": Git's MSYS
+    openssl on Windows would otherwise rewrite "/CN=..." into a filesystem path.
+    """
+    if not shutil.which("openssl"):
+        test.skipTest("openssl CLI is needed to create a throwaway test certificate")
+    config, key, cert = (directory / name for name in ("req.cnf", "key.pem", "cert.pem"))
+    config.write_text(
+        "[req]\ndistinguished_name = dn\nx509_extensions = ext\nprompt = no\n"
+        "[dn]\nCN = localhost\n[ext]\nsubjectAltName = DNS:localhost\n",
+        encoding="ascii",
+    )
+    created = subprocess.run(
+        [
+            "openssl",
+            "req",
+            "-x509",
+            "-newkey",
+            "rsa:2048",
+            "-sha256",
+            "-nodes",
+            "-days",
+            "1",
+            "-config",
+            str(config),
+            "-keyout",
+            str(key),
+            "-out",
+            str(cert),
+        ],
+        capture_output=True,
+        text=True,
+        env={**os.environ, "MSYS_NO_PATHCONV": "1", "MSYS2_ARG_CONV_EXCL": "*"},
+    )
+    if created.returncode:
+        test.skipTest("openssl could not create a test certificate: " + created.stderr.strip())
+    combined = directory / "localhost.pem"
+    combined.write_bytes(key.read_bytes() + cert.read_bytes())
+    return combined
+
+
 class HindsTLSTests(unittest.TestCase):
     def hinds_context(self):
         # Reproduce the official image, whose Python default excludes SHA-1 suites.
@@ -139,46 +183,24 @@ class HindsTLSTests(unittest.TestCase):
             with self.subTest(url=url):
                 self.assertIsNone(context_for_url(url))
 
-    @unittest.skipUnless(shutil.which("openssl"), "openssl CLI creates the test certificate")
     def test_handshake_with_a_server_offering_only_the_hinds_suite(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            key, cert = Path(temporary) / "key.pem", Path(temporary) / "cert.pem"
-            subprocess.run(
-                [
-                    "openssl",
-                    "req",
-                    "-x509",
-                    "-newkey",
-                    "rsa:2048",
-                    "-nodes",
-                    "-days",
-                    "1",
-                    "-subj",
-                    "/CN=localhost",
-                    "-addext",
-                    "subjectAltName=DNS:localhost",
-                    "-keyout",
-                    str(key),
-                    "-out",
-                    str(cert),
-                ],
-                check=True,
-                capture_output=True,
-            )
-            server = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-            server.load_cert_chain(cert, key)
-            server.maximum_version = ssl.TLSVersion.TLSv1_2
-            server.set_ciphers("ECDHE-RSA-AES256-SHA")
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        cert = make_test_certificate(Path(temporary.name), self)
+        server = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        server.load_cert_chain(cert)
+        server.maximum_version = ssl.TLSVersion.TLSv1_2
+        server.set_ciphers("ECDHE-RSA-AES256-SHA")
 
-            strict = strict_default_context()
-            strict.load_verify_locations(cert)
-            with self.assertRaises((ssl.SSLError, OSError)):
-                handshake(strict, server)  # What production's container saw.
+        strict = strict_default_context()
+        strict.load_verify_locations(cert)
+        with self.assertRaises((ssl.SSLError, OSError)):
+            handshake(strict, server)  # What production's container saw.
 
-            trusted = self.hinds_context()
-            trusted.load_verify_locations(cert)
-            self.assertEqual(handshake(trusted, server), "ECDHE-RSA-AES256-SHA")
+        trusted = self.hinds_context()
+        trusted.load_verify_locations(cert)
+        self.assertEqual(handshake(trusted, server), "ECDHE-RSA-AES256-SHA")
 
-            # Certificate verification is unchanged: an untrusted certificate fails.
-            with self.assertRaises(ssl.SSLCertVerificationError):
-                handshake(self.hinds_context(), server)
+        # Certificate verification is unchanged: an untrusted certificate fails.
+        with self.assertRaises(ssl.SSLCertVerificationError):
+            handshake(self.hinds_context(), server)
