@@ -17,6 +17,18 @@ url = "https://s3.amazonaws.com/dl.ncsbe.gov/ENRS/2026_11_03/results_pct_2026110
 format = "zip"
 expected_members = ["results_pct_20261103.txt"]
 
+[sources.ak_2026_general]
+state = "AK"
+election_date = "2026-11-03"
+url = "https://www.elections.alaska.gov/enr/26GENR/results/GA_ENR_Precinct_State_of_Alaska.csv"
+format = "bundle"
+primary_filename = "results.csv"
+min_interval_seconds = 300
+expected_members = ["election.html", "results.csv"]
+
+[sources.ak_2026_general.files]
+"election.html" = "https://www.elections.alaska.gov/election-results/e/?id=26genr"
+
 [sources.nc_absentee_early_demographics_2026]
 state = "NC"
 election_date = "2026-11-03"

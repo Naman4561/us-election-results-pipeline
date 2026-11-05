@@ -1,5 +1,9 @@
 version: 2
 sources:
+- name: ak
+  schema: ak
+  tables:
+  - name: results
 - name: ops
   schema: ops
   tables:

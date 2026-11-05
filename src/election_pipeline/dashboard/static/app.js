@@ -242,7 +242,9 @@ function drawMap() {
     );
     p.dataset.id = f.id;
     p.dataset.status = result.status;
-    const description = `${f.name}: ${descriptions[result.status]}${result.stats?.total ? " · " + number(result.stats.total) + " votes" : ""}`;
+    const code = view.scope === "US" ? (view.office === "house" ? f.state : f.id) : view.scope;
+    const firstChoice = data.states[code]?.vote_basis === "first_choice_listed_candidates";
+    const description = `${f.name}: ${descriptions[result.status]}${firstChoice ? " · listed candidates, first choice only" : ""}${result.stats?.total ? " · " + number(result.stats.total) + " votes" : ""}`;
     const title = document.createElementNS(ns, "title");
     title.textContent = description;
     p.append(title);
@@ -414,8 +416,11 @@ function renderStatePanel() {
     return;
   }
   const total = element("div", undefined, "total");
+  const firstChoice = state.vote_basis === "first_choice_listed_candidates";
+  if (firstChoice)
+    target.append(element("p", "First-choice votes · Round 1 · CSV-listed candidates. Later ranked-choice tabulations are not included. Percentages use listed candidate votes; unlisted vote categories are excluded.", "empty"));
   total.append(
-    element("span", methodNames[view.method] + " · candidate votes"),
+    element("span", firstChoice ? "Listed first-choice candidate votes" : methodNames[view.method] + " · candidate votes"),
     element("strong", stats?.total == null ? "—" : number(stats.total)),
   );
   const leadText =
@@ -423,7 +428,7 @@ function renderStatePanel() {
       ? "Awaiting reported votes"
       : result.status === "tie"
         ? "The leading candidates are tied"
-        : `${stats.candidates[0].name} leads${stats.margin !== null ? " by " + number(stats.margin) + " votes" : ""}`;
+        : `${stats.candidates[0].name} leads${firstChoice ? " among listed candidates in first-choice votes" : ""}${stats.margin !== null ? " by " + number(stats.margin) + " votes" : ""}`;
   total.append(element("p", leadText));
   target.append(total);
   for (const candidate of stats?.candidates || []) {
@@ -510,6 +515,8 @@ function renderMetadata() {
           ? "Manually imported official results. Source report: " + date(publication?.source_modified_at) + ". Results update when a new file is imported. A party lead is not a race call."
           : "Unofficial returns from official state sources. A party lead is not a race call. Gray and patterned regions are explained in the legend." +
             (national && anyManual ? " Includes manually updated states; select a state for its report timestamp." : "");
+  if ((national && Object.values(data.states).some(s => s.vote_basis === "first_choice_listed_candidates")) || state?.vote_basis === "first_choice_listed_candidates")
+    $("notice").textContent += " Alaska shows first-choice votes for CSV-listed candidates. Later ranked-choice results and unlisted vote categories are not included.";
   $("notice").classList.toggle("alert", stale || test);
   $("connection").textContent = stale
     ? "Refresh failed · stale view"
@@ -544,7 +551,9 @@ function renderControls() {
     `${offices[view.office]} · ${national ? "National results" : view.office === "house" ? "District results" : aggregate ? "State totals · county detail unavailable" : "County results"}`;
   $("map-description").textContent = national
     ? "Select a covered state to explore its returns."
-    : "Color shows the leading candidate’s party, not a race call.";
+    : state.vote_basis === "first_choice_listed_candidates"
+      ? "Color shows the first-choice leader among CSV-listed candidates. Later ranked-choice results are not included."
+      : "Color shows the leading candidate’s party, not a race call.";
   const methods = national ? ["total_votes"] : state.methods || ["total_votes"];
   if (!methods.includes(view.method)) view.method = "total_votes";
   $("method").replaceChildren(

@@ -12,6 +12,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 from election_pipeline.settings import CollectorSettings, Source, validate_url
+from election_pipeline.tls import context_for_url
 
 
 class FetchFailure(RuntimeError):
@@ -61,7 +62,12 @@ def fetch_file(
     )
     started = time.monotonic()
     try:
-        response = urlopen(request, timeout=settings.timeout_seconds)
+        context = context_for_url(url or source.url)
+    except (ValueError, OSError) as error:
+        raise FetchFailure(f"TLS configuration failed: {error}", retryable=False) from error
+    try:
+        options = {"context": context} if context is not None else {}
+        response = urlopen(request, timeout=settings.timeout_seconds, **options)
     except HTTPError as error:
         # urllib represents 304 as HTTPError; it is a normal conditional-GET result.
         response = error

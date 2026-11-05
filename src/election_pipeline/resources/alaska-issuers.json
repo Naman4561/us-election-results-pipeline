@@ -1,0 +1,19 @@
+{
+  "purpose": "Supply the issuer chain omitted by the Alaska election-results server; certificates are not private keys.",
+  "verified_against": "Existing /etc/ssl/certs/ca-certificates.crt with openssl verify; no new root was installed.",
+  "certificates": [
+    {
+      "url": "https://secure.globalsign.com/cacert/r3r46cross2019.crt",
+      "der_sha256": "a63c1398b5f8dd2d432fbe4c2c19142bea6d5d0221fae794718ae7597acca96d"
+    },
+    {
+      "url": "https://secure.globalsign.com/cacert/gsgccr46ovtlsca2025.crt",
+      "der_sha256": "d160e2de4e56cb10b66c1cb0adcb79cf93c78dcd9db30c2018220262c04063f9"
+    }
+  ],
+  "bundle_sha256": "d843cd9900279123e130f0c9ac443451f5a9963254c7f199d61df0e8628f0aa0",
+  "documentation": [
+    "https://support.globalsign.com/ssl/products/organizationssl/organizationssl-intermediate-certificates",
+    "https://support.globalsign.com/ca-certificates/globalsign-cross-certificates"
+  ]
+}

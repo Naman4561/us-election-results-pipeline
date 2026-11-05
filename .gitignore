@@ -16,4 +16,5 @@ dbt/logs/
 dbt/dbt_packages/
 dbt/.user.yml
 *.pem
+!/src/election_pipeline/resources/alaska-issuers.pem
 node_modules/

@@ -39,7 +39,7 @@ def county_key(name):
 
 def party_group(party, choice):
     value = (party or "").strip().upper()
-    if value in ("DEM", "D", "DEMOCRATIC", "DEMOCRAT", "DFL"):
+    if value in ("DEM", "D", "DEMOCRATIC", "DEMOCRAT", "DFL", "DEM/NON"):
         return "DEM"
     if value in ("REP", "R", "REPUBLICAN"):
         return "REP"
@@ -143,6 +143,7 @@ def make_payload(
         "state": state,
         "methods": methods,
         "county_detail": adapter.county_results,
+        "vote_basis": adapter.vote_basis,
         "source_page": adapter.source_page,
         "mode": "demo" if demo else "published",
         "publication": metadata,
@@ -155,7 +156,9 @@ def demo_payload(geography, state="NC"):
     """Synthetic fixtures, explicitly labelled; never a database fallback."""
     races_config, methods = state_adapter(state).available_races, state_adapter(state).methods
     rows = []
-    for feature in geography["counties"]:
+    for feature in geography["counties"] or (
+        [geography["outline"]] if not state_adapter(state).county_results else []
+    ):
         seed = int(hashlib.sha256(feature["id"].encode()).hexdigest()[:8], 16)
         for race in races_config:
             house = [r for r in races_config if not r.endswith(("-SEN", "-GOV"))]
@@ -336,6 +339,7 @@ def national_payload(providers, demo=False):
                 "name": adapter.name,
                 "availability": "unavailable",
                 "county_detail": adapter.county_results,
+                "vote_basis": adapter.vote_basis,
                 "source_page": adapter.source_page,
                 "methods": adapter.methods,
                 "publication": None,

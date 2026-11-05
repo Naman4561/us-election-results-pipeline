@@ -26,6 +26,7 @@ class State:
     county_results: bool = True
     source_page: str = ""
     bundle_resolver: str = ""
+    vote_basis: str = "reported_votes"
 
     @property
     def schema(self):
@@ -77,6 +78,17 @@ class State:
 
 
 STATES = {
+    "AK": State(
+        "AK",
+        "Alaska",
+        "ak_2026_general",
+        (0,),
+        ("total_votes",),
+        governor=True,
+        county_results=False,
+        source_page="https://www.elections.alaska.gov/election-results/e/?id=26genr",
+        vote_basis="first_choice_listed_candidates",
+    ),
     "NC": State(
         "NC",
         "North Carolina",

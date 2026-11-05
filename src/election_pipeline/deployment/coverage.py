@@ -171,10 +171,24 @@ def free_port():
 def activate(path, states, prod, config):
     selected = names(states)
     value = catalog.read(path)
+    if any(not value["sources"][name].get("replaces") for name in selected):
+        raise ValueError("Prepare every expanded source before activation")
+    return activate_sources(path, selected, prod, config)
+
+
+def activate_sources(path, selected, prod, config):
+    """Activate newly admitted sources through the existing restore and route gates."""
+    if not selected or len(selected) != len(set(selected)):
+        raise ValueError("Select distinct registered expansion sources")
+    value = catalog.read(path)
+    if any(name not in value["sources"] for name in selected):
+        raise ValueError("Register every selected source before activation")
     entries = [value["sources"][name] for name in selected]
+    if any(entry["worker"] != "expansion" for entry in entries):
+        raise ValueError("Activation accepts only registered expansion workers")
     if all(entry["enabled"] and entry["public"] for entry in entries):
         return {"outcome": "already_active", "sources": selected}
-    if any(not entry.get("publication_id") or not entry.get("replaces") for entry in entries):
+    if any(not entry.get("publication_id") for entry in entries):
         raise ValueError("Prepare every expanded source before activation")
     images = {entry["image_id"] for entry in entries}
     if len(images) != 1:

@@ -25,6 +25,8 @@ def main():
     sub.add_parser("rollback-dashboard")
     sub.add_parser("recover-handoff")
     sub.add_parser("recover-coverage-retirement")
+    admitted = sub.add_parser("activate-sources")
+    admitted.add_argument("--source", action="append", required=True)
     expand = sub.add_parser("coverage")
     expand.add_argument("phase", choices=("prepare", "activate", "retire"))
     expand.add_argument("--states", nargs="+", required=True, choices=sorted(coverage.STATES))
@@ -96,6 +98,8 @@ def main():
                 config,
                 replaces=args.replaces,
             )
+        elif action == "activate-sources":
+            result = coverage.activate_sources(path, args.source, prod, config)
         elif action == "coverage":
             if args.phase == "prepare":
                 if not args.release or not args.image:
