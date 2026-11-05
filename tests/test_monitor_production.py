@@ -145,6 +145,16 @@ class MonitorTests(unittest.TestCase):
         issues = self.assess(dashboard=payload)
         self.assertEqual(set(issues), {"county/MS/JACKSON"})
         self.assertIn("Manual county snapshot", issues["county/MS/JACKSON"])
+        # A recent import of an onboarded county whose automatic check failed afterwards.
+        record.update(
+            last_success_at=(self.now - timedelta(hours=1)).isoformat(),
+            last_attempt_at=self.recent,
+        )
+        issues = self.assess(dashboard=payload)
+        self.assertEqual(set(issues), {"county/MS/JACKSON"})
+        self.assertIn("Configured county source failed", issues["county/MS/JACKSON"])
+        record["last_attempt_at"] = record["last_success_at"]
+        self.assertEqual(self.assess(dashboard=payload), {})
 
     def test_catalog_adds_enabled_states_and_ignores_registered_pending_states(self):
         from election_pipeline.deployment import catalog

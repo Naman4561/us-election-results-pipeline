@@ -9,6 +9,7 @@ import logging
 import os
 import re
 from collections import defaultdict
+from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from importlib.resources import files
 from pathlib import Path
@@ -24,6 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from psycopg import sql
 from psycopg.rows import dict_row
 
+from election_pipeline.dashboard.analysis import NCAnalysis, demo_analysis
 from election_pipeline.states import STATES, state_adapter
 
 STATIC = Path(__file__).with_name("static")
@@ -351,6 +353,29 @@ def dashboard_settings(env_file):
     }
 
 
+@contextmanager
+def reader_connection(settings):
+    """One read-only, repeatable-read view of published relations as a non-admin reader."""
+    with (
+        psycopg.connect(
+            **settings,
+            autocommit=True,
+            row_factory=dict_row,
+            options=(
+                "-c default_transaction_read_only=on -c statement_timeout=5000 -c lock_timeout=2000"
+            ),
+        ) as conn,
+        conn.transaction(),
+    ):
+        conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
+        role = conn.execute(
+            "SELECT rolsuper, rolcreaterole, rolcreatedb FROM pg_roles WHERE rolname=current_user"
+        ).fetchone()
+        if any(role.values()):
+            raise ValueError("Dashboard requires a dedicated non-administrator reader")
+        yield conn
+
+
 class PublishedResults:
     def __init__(self, settings, geography, source_id, state="NC", races=None):
         self.state = state_adapter(state)
@@ -360,26 +385,7 @@ class PublishedResults:
         self.feed_cache = []
 
     def __call__(self):
-        with (
-            self.lock,
-            psycopg.connect(
-                **self.settings,
-                autocommit=True,
-                row_factory=dict_row,
-                options=(
-                    "-c default_transaction_read_only=on "
-                    "-c statement_timeout=5000 -c lock_timeout=2000"
-                ),
-            ) as conn,
-            conn.transaction(),
-        ):
-            conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
-            role = conn.execute(
-                "SELECT rolsuper, rolcreaterole, rolcreatedb FROM pg_roles "
-                "WHERE rolname=current_user"
-            ).fetchone()
-            if any(role.values()):
-                raise ValueError("Dashboard requires a dedicated non-administrator reader")
+        with self.lock, reader_connection(self.settings) as conn:
             metadata = conn.execute(
                 """
                 SELECT p.*, c.activated_at
@@ -592,6 +598,46 @@ def create_app(
                 '{"error":"State outside coverage"}', status_code=404, media_type="application/json"
             )
         return api_response(request, approved[code])
+
+    analyses = {}
+
+    def nc_analysis():
+        approved = approved_providers()
+        if "NC" not in approved:
+            raise LookupError("NC is outside approved coverage")
+        if demo:
+            geography = json.loads((STATIC / "nc-map.json").read_text(encoding="utf-8"))
+            return demo_analysis(geography, state_adapter("NC").available_races, party_group)
+        provider = approved["NC"]
+        if not isinstance(provider, PublishedResults):
+            raise ValueError("NC analysis requires the published database reader")
+        identity = (provider.source_id, tuple(provider.races))
+        if identity not in analyses:
+            analyses[identity] = NCAnalysis(
+                lambda settings=provider.settings: reader_connection(settings),
+                provider.source_id,
+                dict(provider.races),
+                {f["id"]: f["name"] for f in provider.geography["counties"]},
+                party_group,
+            )
+        return analyses[identity]()
+
+    @app.get("/api/analysis/nc")
+    def analysis(request: Request):
+        try:
+            approved_providers()
+        except Exception:
+            return Response(
+                '{"error":"Coverage configuration unavailable"}',
+                status_code=503,
+                media_type="application/json",
+                headers={"Cache-Control": "no-store"},
+            )
+        if "NC" not in approved_providers():
+            return Response(
+                '{"error":"State outside coverage"}', status_code=404, media_type="application/json"
+            )
+        return api_response(request, nc_analysis)
 
     app.mount("/", StaticFiles(directory=STATIC, html=True), name="dashboard")
     return app

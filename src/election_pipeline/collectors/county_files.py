@@ -110,7 +110,8 @@ def fetch_bundle(
             cached = old.get(key)
             prior = cached[1] if cached else scheduling.get(key, {})
             conditions = {}
-            if cached and not force_download:
+            # Validators belong to one URL; a manual snapshot has none for the new URL.
+            if cached and not force_download and prior.get("url") == county["url"]:
                 headers = prior.get("headers", {})
                 if headers.get("etag"):
                     conditions["If-None-Match"] = headers["etag"]
@@ -190,15 +191,20 @@ def fetch_bundle(
                         quarantine_path = store.relative(store.quarantine(path, rejected_sha))
                 finished = utc_now()
                 raw = cached[3] if cached else b""
+                # Fallback keeps the identity of the bytes it carries. A reviewed import
+                # of a newly automatic county keeps its URL, review and manual label.
+                manual = bool(cached and prior.get("review"))
                 record = {
                     "status": "stale" if cached else "unavailable",
-                    "url": county["url"],
+                    "url": prior.get("url", county["url"]) if cached else county["url"],
                     "raw_sha256": hashlib.sha256(raw).hexdigest() if cached else None,
                     "last_attempt_at": finished,
                     "last_success_at": prior.get("last_success_at") if cached else None,
-                    "issue": issue,
+                    "issue": "ManualSnapshot" if manual else issue,
                     "headers": prior.get("headers", {}) if cached else {},
                 }
+                if manual:
+                    record.update(review=prior["review"], automatic_issue=issue)
             if issue and issue.startswith("CollectionDeferred:"):
                 record["retry_priority_at"] = (
                     prior.get("retry_priority_at") or prior.get("last_attempt_at") or "1970"

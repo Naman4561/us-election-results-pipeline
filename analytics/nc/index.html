@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>North Carolina election analysis</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: system-ui, sans-serif;
+        color: #17263a;
+        background: #f1f4f7;
+      }
+      body {
+        margin: 0;
+      }
+      header {
+        background: #13263f;
+        color: #fff;
+        padding: 2rem max(1rem, calc((100vw - 1240px) / 2));
+      }
+      header p {
+        color: #cedded;
+      }
+      main {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 1rem;
+      }
+      h1 {
+        font-size: clamp(1.5rem, 4vw, 2.5rem);
+        margin: 0;
+      }
+      h2 {
+        font-size: 1.25rem;
+        margin-top: 0;
+      }
+      h3 {
+        font-size: 1rem;
+      }
+      p {
+        line-height: 1.5;
+      }
+      .panel {
+        background: #fff;
+        border: 1px solid #d6e0eb;
+        border-radius: 12px;
+        padding: 1.1rem;
+        margin: 1rem 0;
+      }
+      .controls {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        align-items: flex-end;
+      }
+      label {
+        display: grid;
+        gap: 0.35rem;
+        font-size: 0.85rem;
+        font-weight: 650;
+      }
+      select,
+      input {
+        font: inherit;
+        padding: 0.55rem;
+        max-width: 100%;
+      }
+      select {
+        border: 1px solid #a5b5c8;
+        border-radius: 6px;
+        background: #fff;
+        color: inherit;
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-variant-numeric: tabular-nums;
+        font-size: 0.87rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 0.5rem 0.6rem;
+        border-bottom: 1px solid #e1e7ef;
+        white-space: nowrap;
+      }
+      th {
+        background: #f1f5fa;
+      }
+      tr:hover td {
+        background: #f8fafc;
+      }
+      .muted {
+        color: #4d6078;
+        font-size: 0.9rem;
+      }
+      #load-status {
+        margin-bottom: 0;
+      }
+      .error {
+        color: #a52030;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 1rem;
+      }
+      #chart {
+        width: 100%;
+        display: block;
+        min-height: 180px;
+      }
+      #legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem 1.2rem;
+        margin-top: 0.5rem;
+      }
+      .legend-item {
+        font-size: 0.85rem;
+        border-left: 0.7rem solid;
+        padding-left: 0.4rem;
+      }
+      .county-link {
+        border: 0;
+        background: transparent;
+        font: inherit;
+        color: #1659a3;
+        text-decoration: underline;
+        cursor: pointer;
+        padding: 0;
+      }
+      .meta {
+        overflow-wrap: anywhere;
+      }
+      @media (max-width: 850px) {
+        .grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>North Carolina election analysis</h1>
+      <p>
+        November 3, 2026 · Results history, county comparisons and ballot
+        demographics
+      </p>
+      <label
+        >Open NC analysis export
+        <input id="file" type="file" accept=".json,application/json"
+      /></label>
+      <p id="load-status" role="status">
+        Select the JSON created by the read-only export.
+      </p>
+    </header>
+    <main id="analysis" hidden>
+      <details class="panel" open>
+        <summary><strong>Snapshot inventory</strong></summary>
+        <p class="muted">
+          Database registrations and publications by source. Times are Eastern.
+        </p>
+        <div class="table-wrap" id="inventory"></div>
+      </details>
+      <section class="panel" aria-labelledby="results-title">
+        <h2 id="results-title">Results history</h2>
+        <p id="result-empty" class="muted" hidden>
+          There are no validated unofficial results in this export.
+        </p>
+        <div id="result-content">
+          <div class="controls">
+            <label
+              >Results source
+              <select id="source"></select
+            ></label>
+            <label
+              >Contest
+              <select id="contest"></select
+            ></label>
+            <label
+              >Geography
+              <select id="county"></select
+            ></label>
+            <label
+              >Snapshot
+              <select id="snapshot"></select
+            ></label>
+            <label
+              >Measure
+              <select id="measure">
+                <option value="total">Cumulative votes</option>
+                <option value="delta">Net change</option>
+              </select></label
+            >
+          </div>
+          <p class="muted meta" id="result-meta"></p>
+          <svg
+            id="chart"
+            viewBox="0 0 900 290"
+            role="img"
+            aria-label="Candidate votes across retained snapshots"
+          ></svg>
+          <div id="legend"></div>
+          <p class="muted">
+            Net change compares adjacent retained versions of the same source.
+            Changes may include corrections. Each point uses first observation
+            time when available and publication time otherwise.
+          </p>
+          <div class="grid">
+            <div>
+              <h3>Candidate results by vote method</h3>
+              <div class="table-wrap" id="candidates"></div>
+            </div>
+            <div>
+              <h3>County comparison</h3>
+              <div class="table-wrap" id="counties"></div>
+            </div>
+          </div>
+          <p class="muted">
+            House county rows cover the portion of each county within the
+            selected district.
+          </p>
+        </div>
+      </section>
+      <section class="panel" aria-labelledby="demo-title">
+        <h2 id="demo-title">Early and absentee ballot demographics</h2>
+        <p id="demo-empty" class="muted" hidden>
+          There is no validated unofficial demographic publication in this
+          export.
+        </p>
+        <div id="demo-content">
+          <div class="controls">
+            <label
+              >Demographic source
+              <select id="demo-source"></select
+            ></label>
+            <label
+              >Geography
+              <select id="demo-county"></select
+            ></label>
+            <label
+              >Ballot request type
+              <select id="request-type"></select
+            ></label>
+            <label
+              >Breakdown
+              <select id="dimension">
+                <option value="party_registration">Party registration</option>
+                <option value="race">Race</option>
+                <option value="ethnicity">Ethnicity</option>
+                <option value="sex">Sex</option>
+              </select></label
+            >
+          </div>
+          <p id="demo-meta" class="muted meta"></p>
+          <div class="table-wrap" id="demographics"></div>
+          <p class="muted">
+            These counts describe ballots by voter characteristics across the
+            selected geography. Party registration describes the voter.
+            Candidate results are shown separately above.
+          </p>
+        </div>
+      </section>
+    </main>
+    <script>
+      "use strict";
+      const byId = (id) => document.getElementById(id);
+      const number = new Intl.NumberFormat("en-US");
+      const signed = new Intl.NumberFormat("en-US", {
+        signDisplay: "exceptZero",
+      });
+      const percent = new Intl.NumberFormat("en-US", {
+        style: "percent",
+        maximumFractionDigits: 2,
+      });
+      const time = new Intl.DateTimeFormat("en-US", {
+        timeZone: "America/New_York",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        second: "2-digit",
+        timeZoneName: "short",
+      });
+      const chartColors = [
+        "#1864ab",
+        "#be3439",
+        "#9c6500",
+        "#55834b",
+        "#7455a6",
+        "#41707a",
+      ];
+      const formatTime = (stamp) =>
+        stamp ? time.format(new Date(stamp)) : "—";
+      const snapshotTime = (snapshot) =>
+        snapshot.first_observed_at || snapshot.published_at;
+      const unique = (values) => [...new Set(values)].sort();
+      let data;
+      let sourceHistory = [];
+      let contestHistory = [];
+
+      function options(id, values, preferred) {
+        const select = byId(id);
+        select.replaceChildren(
+          ...values.map(([value, label]) => new Option(label, value)),
+        );
+        if (values.some(([value]) => value === preferred))
+          select.value = preferred;
+      }
+
+      function table(id, headers, rows) {
+        const container = byId(id);
+        container.replaceChildren();
+        if (!rows.length) {
+          container.textContent = "No rows for this selection.";
+          return;
+        }
+        const output = document.createElement("table");
+        const heading = output.createTHead().insertRow();
+        for (const header of headers) {
+          const cell = document.createElement("th");
+          cell.scope = "col";
+          cell.textContent = header;
+          heading.append(cell);
+        }
+        const body = output.createTBody();
+        for (const row of rows) {
+          const tr = body.insertRow();
+          for (const value of row) {
+            const cell = tr.insertCell();
+            if (value instanceof Node) cell.append(value);
+            else cell.textContent = String(value ?? "—");
+          }
+        }
+        container.append(output);
+      }
+
+      function matches(snapshot, county) {
+        const contest = byId("contest").value;
+        return snapshot
+          ? snapshot.rows.filter(
+              (row) => row[0] === county && row[1] === contest,
+            )
+          : [];
+      }
+
+      function candidateChanges(current, previous) {
+        const before = new Map(previous.map((row) => [row[2], row[8]]));
+        if (
+          current.length !== before.size ||
+          current.some((row) => !before.has(row[2]))
+        )
+          return new Map();
+        return new Map(
+          current.map((row) => [row[2], row[8] - before.get(row[2])]),
+        );
+      }
+
+      function drawChart(history, county) {
+        const svg = byId("chart");
+        svg.replaceChildren();
+        const legend = byId("legend");
+        legend.replaceChildren();
+        const series = new Map();
+        const netChange = byId("measure").value === "delta";
+        const timestamps = history.map((snapshot) =>
+          Date.parse(snapshotTime(snapshot)),
+        );
+        const scoped = history.map((snapshot) => matches(snapshot, county));
+        const changes = scoped.map((rows, index) =>
+          candidateChanges(rows, scoped[index - 1] || []),
+        );
+        const labels = unique(
+          scoped.flatMap((rows) => rows.map((row) => row[2])),
+        );
+        for (const candidate of labels) {
+          series.set(
+            candidate,
+            scoped.map((rows, index) => {
+              const row = rows.find((item) => item[2] === candidate);
+              if (!row) return null;
+              return netChange
+                ? (changes[index].get(candidate) ?? null)
+                : row[8];
+            }),
+          );
+        }
+        const values = [...series.values()]
+          .flat()
+          .filter((value) => value !== null);
+        function draw(tag, attributes, content) {
+          const element = document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            tag,
+          );
+          for (const [key, value] of Object.entries(attributes))
+            element.setAttribute(key, value);
+          if (content !== undefined) element.textContent = content;
+          svg.append(element);
+          return element;
+        }
+        if (!values.length) {
+          draw(
+            "text",
+            { x: 450, y: 145, "text-anchor": "middle", fill: "#4d6078" },
+            "No comparable observations for this measure.",
+          );
+          return;
+        }
+        const low = Math.min(0, ...values);
+        const high = Math.max(1, ...values);
+        const earliest = timestamps[0];
+        const latest = timestamps.at(-1);
+        const left = 78,
+          right = 860,
+          top = 20,
+          bottom = 250;
+        const x = (index) =>
+          latest === earliest
+            ? (left + right) / 2
+            : left +
+              ((right - left) * (timestamps[index] - earliest)) /
+                (latest - earliest);
+        const y = (value) =>
+          bottom - ((bottom - top) * (value - low)) / (high - low);
+        for (let tick = 0; tick <= 4; tick++) {
+          const value = low + ((high - low) * tick) / 4;
+          draw("line", {
+            x1: left,
+            x2: right,
+            y1: y(value),
+            y2: y(value),
+            stroke: "#d9e2ee",
+          });
+          draw(
+            "text",
+            {
+              x: left - 8,
+              y: y(value) + 4,
+              "text-anchor": "end",
+              "font-size": 12,
+              fill: "#4d6078",
+            },
+            number.format(Math.round(value)),
+          );
+        }
+        if (low < 0)
+          draw("line", {
+            x1: left,
+            x2: right,
+            y1: y(0),
+            y2: y(0),
+            stroke: "#5b6a7c",
+          });
+        draw(
+          "text",
+          { x: left, y: 273, "font-size": 12, fill: "#4d6078" },
+          formatTime(timestamps[0]),
+        );
+        if (latest !== earliest)
+          draw(
+            "text",
+            {
+              x: right,
+              y: 273,
+              "text-anchor": "end",
+              "font-size": 12,
+              fill: "#4d6078",
+            },
+            formatTime(latest),
+          );
+        let colorIndex = 0;
+        for (const [candidate, points] of series) {
+          const color = chartColors[colorIndex++ % chartColors.length];
+          let path = "";
+          let connected = false;
+          points.forEach((value, index) => {
+            if (value === null) {
+              connected = false;
+              return;
+            }
+            path += `${connected ? "L" : "M"}${x(index)},${y(value)} `;
+            connected = true;
+          });
+          draw("path", {
+            d: path,
+            stroke: color,
+            "stroke-width": 2.25,
+            fill: "none",
+          });
+          points.forEach((value, index) => {
+            if (value === null) return;
+            const point = draw("circle", {
+              cx: x(index),
+              cy: y(value),
+              r: 2.75,
+              fill: color,
+            });
+            const title = document.createElementNS(
+              "http://www.w3.org/2000/svg",
+              "title",
+            );
+            title.textContent = `${candidate} · ${formatTime(timestamps[index])} · ${number.format(value)}`;
+            point.append(title);
+          });
+          const item = document.createElement("span");
+          item.className = "legend-item";
+          item.style.borderColor = color;
+          item.textContent = candidate;
+          legend.append(item);
+        }
+      }
+
+      function renderResults() {
+        const index = Number(byId("snapshot").value);
+        const snapshot = contestHistory[index];
+        if (!snapshot) return;
+        const previous = contestHistory[index - 1];
+        const county = byId("county").value || null;
+        const rows = matches(snapshot, county);
+        const changes = candidateChanges(rows, matches(previous, county));
+        const total = rows.reduce((sum, row) => sum + row[8], 0);
+        byId("result-meta").textContent =
+          `${contestHistory.length} retained versions · ` +
+          `Observed ${formatTime(snapshot.first_observed_at)} · ` +
+          `Published ${formatTime(snapshot.published_at)} · ` +
+          `Source modified ${formatTime(snapshot.source_modified_at)} · Release ${snapshot.release_id} · Unofficial`;
+        table(
+          "candidates",
+          [
+            "Candidate",
+            "Total",
+            "Share",
+            "Election Day",
+            "Early",
+            "Mail",
+            "Provisional",
+            "Net change",
+          ],
+          [...rows]
+            .sort((a, b) => b[8] - a[8])
+            .map((row) => [
+              `${row[2]}${row[3] ? ` (${row[3]})` : ""}`,
+              number.format(row[8]),
+              total ? percent.format(row[8] / total) : "—",
+              ...row.slice(4, 8).map((value) => number.format(value)),
+              changes.has(row[2]) ? signed.format(changes.get(row[2])) : "—",
+            ]),
+        );
+        const counties = new Map();
+        for (const row of snapshot.rows) {
+          if (row[0] === null || row[1] !== byId("contest").value) continue;
+          if (!counties.has(row[0])) counties.set(row[0], []);
+          counties.get(row[0]).push(row);
+        }
+        const comparisons = [...counties].map(([name, candidates]) => {
+          candidates.sort((a, b) => b[8] - a[8]);
+          const votes = candidates.reduce((sum, row) => sum + row[8], 0);
+          const margin =
+            candidates.length > 1 ? candidates[0][8] - candidates[1][8] : null;
+          const link = document.createElement("button");
+          link.type = "button";
+          link.className = "county-link";
+          link.textContent = name;
+          link.addEventListener("click", () => {
+            byId("county").value = name;
+            renderResults();
+          });
+          const delta = candidateChanges(candidates, matches(previous, name));
+          return {
+            votes,
+            row: [
+              link,
+              number.format(votes),
+              !votes ? "—" : margin === 0 ? "Tie" : candidates[0][2],
+              margin === null || !votes ? "—" : number.format(margin),
+              delta.size
+                ? signed.format([...delta.values()].reduce((a, b) => a + b, 0))
+                : "—",
+            ],
+          };
+        });
+        table(
+          "counties",
+          ["County", "Contest votes", "Leader", "Margin (votes)", "Net change"],
+          comparisons.sort((a, b) => b.votes - a.votes).map((item) => item.row),
+        );
+        drawChart(contestHistory, county);
+      }
+
+      function chooseContest() {
+        const contest = byId("contest").value;
+        contestHistory = sourceHistory.filter((snapshot) =>
+          snapshot.rows.some((row) => row[1] === contest && row[0] === null),
+        );
+        const counties = unique(
+          contestHistory.flatMap((snapshot) =>
+            snapshot.rows
+              .filter((row) => row[0] !== null && row[1] === contest)
+              .map((row) => row[0]),
+          ),
+        );
+        options("county", [
+          ["", "Contest total"],
+          ...counties.map((name) => [name, name]),
+        ]);
+        options(
+          "snapshot",
+          contestHistory.map((snapshot, index) => [
+            String(index),
+            `${formatTime(snapshotTime(snapshot))} · Release ${snapshot.release_id}`,
+          ]),
+          String(contestHistory.length - 1),
+        );
+        renderResults();
+      }
+
+      function chooseSource() {
+        sourceHistory = data.results.filter(
+          (snapshot) => snapshot.source_id === byId("source").value,
+        );
+        const contests = unique(
+          sourceHistory.flatMap((snapshot) =>
+            snapshot.rows.filter((row) => row[0] === null).map((row) => row[1]),
+          ),
+        );
+        options(
+          "contest",
+          contests.map((contest) => [contest, contest]),
+          "NC-SEN",
+        );
+        chooseContest();
+      }
+
+      function selectedDemographics() {
+        return data.demographics.find(
+          (snapshot) => snapshot.source_id === byId("demo-source").value,
+        );
+      }
+
+      function renderDemographics() {
+        const snapshot = selectedDemographics();
+        const county = byId("demo-county").value;
+        const type = byId("request-type").value;
+        const dimension = byId("dimension").value;
+        if (!type) {
+          byId("demo-meta").textContent =
+            `Latest validated capture · ${formatTime(snapshotTime(snapshot))} · ` +
+            "No positive ballot counts for this geography.";
+          table("demographics", ["Group", "Ballots", "Share"], []);
+          return;
+        }
+        const groups = new Map();
+        for (const [name, request, field, value, count] of snapshot.rows) {
+          if (
+            (county && name !== county) ||
+            type !== request ||
+            dimension !== field
+          )
+            continue;
+          const group = value || "Unspecified";
+          groups.set(group, (groups.get(group) || 0) + count);
+        }
+        const total = [...groups.values()].reduce((a, b) => a + b, 0);
+        byId("demo-meta").textContent =
+          `Latest validated capture · ${formatTime(snapshotTime(snapshot))} · ` +
+          `${county || "North Carolina"} · ${number.format(total)} ballots in selected request type`;
+        table(
+          "demographics",
+          ["Group", "Ballots", "Share"],
+          [...groups]
+            .sort((a, b) => b[1] - a[1])
+            .map(([group, count]) => [
+              group,
+              number.format(count),
+              total ? percent.format(count / total) : "—",
+            ]),
+        );
+      }
+
+      function chooseDemographicCounty() {
+        const county = byId("demo-county").value;
+        const types = unique(
+          selectedDemographics()
+            .rows.filter((row) => !county || row[0] === county)
+            .map((row) => row[1]),
+        );
+        options(
+          "request-type",
+          types.map((type) => [type, type]),
+          byId("request-type").value || "EARLY VOTING",
+        );
+        renderDemographics();
+      }
+
+      function chooseDemographicSource() {
+        const counties = unique(
+          selectedDemographics().rows.map((row) => row[0]),
+        );
+        options("demo-county", [
+          ["", "North Carolina"],
+          ...counties.map((name) => [name, name]),
+        ]);
+        chooseDemographicCounty();
+      }
+
+      function loadExport(value) {
+        if (
+          value.schema_version !== 1 ||
+          value.state !== "NC" ||
+          value.election_date !== "2026-11-03" ||
+          ![value.inventory, value.results, value.demographics].every(
+            Array.isArray,
+          )
+        ) {
+          throw new Error(
+            "Select an NC analysis export created by export.sql.",
+          );
+        }
+        for (const snapshot of [...value.results, ...value.demographics]) {
+          if (
+            !Array.isArray(snapshot.rows) ||
+            !Number.isFinite(Date.parse(snapshotTime(snapshot)))
+          ) {
+            throw new Error("The export contains an invalid snapshot.");
+          }
+        }
+        data = value;
+        table(
+          "inventory",
+          [
+            "Source",
+            "Registered snapshots",
+            "Registered MiB",
+            "Loaded releases",
+            "Unofficial",
+            "Test",
+            "First capture",
+            "Last capture",
+            "Last successful check",
+          ],
+          data.inventory.map((item) => [
+            item.source_id,
+            item.snapshots,
+            number.format(item.archive_bytes / (1024 * 1024)),
+            item.loaded_releases,
+            item.unofficial_publications,
+            item.test_publications,
+            formatTime(item.first_capture),
+            formatTime(item.last_capture),
+            formatTime(item.last_successful_check),
+          ]),
+        );
+        const sources = unique(
+          data.results.map((snapshot) => snapshot.source_id),
+        );
+        byId("result-content").hidden = !sources.length;
+        byId("result-empty").hidden = !!sources.length;
+        if (sources.length) {
+          options(
+            "source",
+            sources.map((source) => [source, source]),
+            "nc_2026_general_all",
+          );
+          chooseSource();
+        }
+        byId("demo-content").hidden = !data.demographics.length;
+        byId("demo-empty").hidden = !!data.demographics.length;
+        if (data.demographics.length) {
+          options(
+            "demo-source",
+            data.demographics.map((item) => [item.source_id, item.source_id]),
+          );
+          chooseDemographicSource();
+        }
+        byId("analysis").hidden = false;
+      }
+
+      byId("source").addEventListener("change", chooseSource);
+      byId("contest").addEventListener("change", chooseContest);
+      for (const id of ["county", "snapshot", "measure"])
+        byId(id).addEventListener("change", renderResults);
+      byId("demo-source").addEventListener("change", chooseDemographicSource);
+      byId("demo-county").addEventListener("change", chooseDemographicCounty);
+      for (const id of ["request-type", "dimension"])
+        byId(id).addEventListener("change", renderDemographics);
+      byId("file").addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+        const status = byId("load-status");
+        status.classList.remove("error");
+        try {
+          loadExport(JSON.parse(await file.text()));
+          status.textContent = `${file.name} · Exported ${formatTime(data.exported_at)}`;
+        } catch (error) {
+          status.textContent = error.message;
+          status.classList.add("error");
+          byId("analysis").hidden = true;
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -111,6 +111,44 @@ observation time, until another reviewed import. They are not confirmed by polli
 other counties. Monitoring alerts after six hours. Automatic stale/unavailable
 sources still alert separately; uncollected counties are not operational failures.
 
+## Onboarding a county to an automatic source
+
+A county moves from the reviewed-file slot to a pinned automatic URL only in a new release.
+
+1. **Capture the original.** Save the exact original bytes and SHA-256 from ordinary
+   authorized access, with the official page that links it.
+2. **Add a fixture and expected counts.** Add the original to a fixture archive with
+   provenance. Check the expected counts against the report itself.
+3. **Edit the policy.** In `ms_2026_counties.json`, set `url`, `format`, `acquisition` and
+   the ballot scopes. Keep the county's existing `member` name, even when the report is a PDF
+   in a `.report` slot.
+4. **Update the fingerprint.** Move the old `POLICY_SHA256` into
+   `compatible_policy_sha256`, then set the new value. This lets earlier bundles still seed
+   fallback.
+5. **Update the source configuration.** Add the URL to the source's `files` and remove the
+   member from `supplemental_members`.
+
+Registered sources are pinned to their image and configuration, so the change needs a new
+registration. A state may hold only one owner and one explicit replacement. Check
+`deploy.py status` before choosing a source ID or `previous_source_id`.
+
+Reviewed scans keep the existing SHA-bound `reviewed_scans` rule. OCR output is never admitted
+directly.
+
+**Manual snapshots during onboarding.** If the county already has a reviewed import, that
+snapshot remains the county's fallback until a validated automatic response replaces it. A
+failed, deferred or challenge response leaves it labelled **manual snapshot**, with its
+review, original URL and observation time. The failure is recorded as `automatic_issue`, and
+no conditional validators are sent to the new URL. Monitoring alerts as soon as a manual
+snapshot has a later failed automatic attempt; it does not wait the six-hour manual threshold.
+A successful automatic response clears the review and the manual label.
+
+**Changing an existing county URL is not supported.** A changed URL does not reuse the old
+URL's snapshot: the county becomes unavailable until the new URL validates. The deployment
+catalog also refuses a replacement whose feed URLs differ from the registered source
+(`expands_coverage` requires the old `(member, url)` pairs to be kept). Re-pinning a moved
+upload needs a separate, explicit design.
+
 ## Database and presentation
 
 The existing additive `010_ms.sql` migration is unchanged. Six dbt models validate

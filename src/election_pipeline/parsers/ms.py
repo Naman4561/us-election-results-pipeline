@@ -440,13 +440,15 @@ def read_county(raw, county, contract=None):
 
 
 def read_snapshot(raw, county, contract, record):
-    if county.get("url"):
-        if record.get("url") != county["url"] or record.get("review"):
+    review = record.get("review")
+    # A reviewed import stays a manual snapshot even after its county is onboarded to
+    # an automatic URL; only a validated automatic response may replace it.
+    if county.get("url") and not review:
+        if record.get("url") != county["url"]:
             raise ValueError("Automatic county source identity changed")
         return read_county(raw, county, contract)
     from election_pipeline.parsers.county_reports import reviewed_file
 
-    review = record.get("review")
     parsed = reviewed_file(raw, county, contract, review)
     if (
         record.get("url") != review["source_url"]
@@ -556,7 +558,9 @@ def read_bundle(archive_path, source):
             else:
                 if stamp(r.get("last_attempt_at")) > checked:
                     raise ValueError("Attempt follows manifest")
-                if county.get("url") and r.get("url") != county["url"]:
+                # A manual fallback keeps its reviewed original's URL (validated by
+                # read_snapshot); every other record must name the configured URL.
+                if status != "stale" and county.get("url") and r.get("url") != county["url"]:
                     raise ValueError("County source identity mismatch")
                 if (status == "current") != (r.get("issue") is None):
                     raise ValueError("County status disagrees with its issue")
@@ -647,7 +651,9 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             }
         )
         if county.get("url") and record["status"] != "current":
-            issues[county["key"]] = record.get("issue") or record["status"]
+            issues[county["key"]] = (
+                record.get("automatic_issue") or record.get("issue") or record["status"]
+            )
         for name, value in parsed.get("counts", {}).items():
             aggregate[name] += value
             rows.append(

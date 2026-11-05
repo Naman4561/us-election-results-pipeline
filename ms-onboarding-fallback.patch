@@ -1,0 +1,1805 @@
+diff --git a/docs/mississippi-collection.md b/docs/mississippi-collection.md
+index 3d86343..9f94021 100644
+--- a/docs/mississippi-collection.md
++++ b/docs/mississippi-collection.md
+@@ -111,6 +111,44 @@ observation time, until another reviewed import. They are not confirmed by polli
+ other counties. Monitoring alerts after six hours. Automatic stale/unavailable
+ sources still alert separately; uncollected counties are not operational failures.
+ 
++## Onboarding a county to an automatic source
++
++A county moves from the reviewed-file slot to a pinned automatic URL only in a new release.
++
++1. **Capture the original.** Save the exact original bytes and SHA-256 from ordinary
++   authorized access, with the official page that links it.
++2. **Add a fixture and expected counts.** Add the original to a fixture archive with
++   provenance. Check the expected counts against the report itself.
++3. **Edit the policy.** In `ms_2026_counties.json`, set `url`, `format`, `acquisition` and
++   the ballot scopes. Keep the county's existing `member` name, even when the report is a PDF
++   in a `.report` slot.
++4. **Update the fingerprint.** Move the old `POLICY_SHA256` into
++   `compatible_policy_sha256`, then set the new value. This lets earlier bundles still seed
++   fallback.
++5. **Update the source configuration.** Add the URL to the source's `files` and remove the
++   member from `supplemental_members`.
++
++Registered sources are pinned to their image and configuration, so the change needs a new
++registration. A state may hold only one owner and one explicit replacement. Check
++`deploy.py status` before choosing a source ID or `previous_source_id`.
++
++Reviewed scans keep the existing SHA-bound `reviewed_scans` rule. OCR output is never admitted
++directly.
++
++**Manual snapshots during onboarding.** If the county already has a reviewed import, that
++snapshot remains the county's fallback until a validated automatic response replaces it. A
++failed, deferred or challenge response leaves it labelled **manual snapshot**, with its
++review, original URL and observation time. The failure is recorded as `automatic_issue`, and
++no conditional validators are sent to the new URL. Monitoring alerts as soon as a manual
++snapshot has a later failed automatic attempt; it does not wait the six-hour manual threshold.
++A successful automatic response clears the review and the manual label.
++
++**Changing an existing county URL is not supported.** A changed URL does not reuse the old
++URL's snapshot: the county becomes unavailable until the new URL validates. The deployment
++catalog also refuses a replacement whose feed URLs differ from the registered source
++(`expands_coverage` requires the old `(member, url)` pairs to be kept). Re-pinning a moved
++upload needs a separate, explicit design.
++
+ ## Database and presentation
+ 
+ The existing additive `010_ms.sql` migration is unchanged. Six dbt models validate
+diff --git a/docs/mississippi-county-sources.md b/docs/mississippi-county-sources.md
+index dc33b3d..cf0aca0 100644
+--- a/docs/mississippi-county-sources.md
++++ b/docs/mississippi-county-sources.md
+@@ -140,6 +140,30 @@ Source discovery is complete for this first pass, but implementation and admissi
+ - https://www.mssupervisors.org/mississippi-counties
+ - https://www.sos.ms.gov/news/official-statement-election-update
+ 
++## Follow-up pass, 2026-11-05T16:22Z
++
++**No new official county source was verified. Coverage remains 13 configured counties and
++69 unresolved counties.** Each of the 69 has a `followup_passes` record in the JSON inventory.
++
++- Statewide: the SOS results page still listed only the March 10, 2026 primaries. Certified
++  November results are expected around December 3. No statewide county-level download exists yet.
++- Access limits: the research session could not reach county or SOS hosts directly (egress
++  proxy refusal). Its fetch tool also accepted only URLs returned as search results. Absence of
++  a report in this pass is therefore weak evidence. It is not proof that a county published
++  nothing.
++- Statewide phrase searches for Electionware and Hart report text with the 2026 Senate
++  candidates found only counties already configured (DeSoto, Warren).
++
++| County | Outcome | Evidence and next action |
++|---|---|---|
++| Lee | requires human review | A Daily Journal story (syndicated via Yahoo News) attributes Senate counts to unofficial results from the Lee County Circuit Clerk's Office. That is a news relay, not an admissible source. Request the original report from the circuit clerk. |
++| Tippah | blocked | A directory aggregator lists `http://www.co.tippah.ms.us/election-results`. The fetch was refused here (the earlier pass got HTTP 502/503). Open it from an ordinary browser. |
++| Harrison, Jackson, Forrest, Lowndes, Jones, Pearl River, Oktibbeha | not found | Searched individually. Only news or older-election pages surfaced. Pearl River's ArcGIS lead is still unverified. |
++| The other 60 unresolved counties | not found | Covered only by the statewide phrase searches. They need a direct check of the county or circuit clerk site from an unrestricted network. |
++
++Adding a county still requires its original official report, captured with exact bytes and a
++SHA-256. See *Onboarding a county* in [collection and intake](mississippi-collection.md).
++
+ ## Expansion checkpoint
+ 
+ Lafayette, Lamar and Sunflower were added to the configured reports. See [collection and intake](mississippi-collection.md) for exact source limitations and the reviewed-file process for the remaining 69 counties. Historical probe outcomes above retain their original timestamps; absence of a report in that pass does not prove that none exists. The machine-readable `intake` field is the current implementation status for each county.
+diff --git a/docs/source-research/ms-2026-county-sources.json b/docs/source-research/ms-2026-county-sources.json
+index 599a64f..550571a 100644
+--- a/docs/source-research/ms-2026-county-sources.json
++++ b/docs/source-research/ms-2026-county-sources.json
+@@ -62,7 +62,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Alcorn",
+@@ -113,7 +123,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Amite",
+@@ -159,7 +179,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Attala",
+@@ -205,7 +235,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Benton",
+@@ -285,7 +325,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Bolivar",
+@@ -324,7 +374,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Calhoun",
+@@ -362,7 +422,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Carroll",
+@@ -403,7 +473,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Chickasaw",
+@@ -441,7 +521,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Choctaw",
+@@ -469,7 +559,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Claiborne",
+@@ -511,7 +611,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Clarke",
+@@ -553,7 +663,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Clay",
+@@ -629,7 +749,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Coahoma",
+@@ -693,7 +823,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Copiah",
+@@ -743,7 +883,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Covington",
+@@ -813,7 +963,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "DeSoto",
+@@ -992,7 +1152,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": true,
++          "notes": "Targeted search returned only county directory pages and older news; no 2026 report.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Franklin",
+@@ -1029,7 +1199,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "George",
+@@ -1111,7 +1291,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Greene",
+@@ -1181,7 +1371,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Grenada",
+@@ -1209,7 +1409,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Hancock",
+@@ -1477,7 +1687,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": true,
++          "notes": "Targeted searches (county site, circuit clerk) returned only news judicial totals (WXXV, WLOX); no official countywide report.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Hinds",
+@@ -1601,7 +1821,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Humphreys",
+@@ -1642,7 +1872,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Issaquena",
+@@ -1670,7 +1910,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Itawamba",
+@@ -1698,7 +1948,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Jackson",
+@@ -1783,7 +2043,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": true,
++          "notes": "Targeted search found no official report; news reports affidavit counting was still under way on Nov. 4.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Jasper",
+@@ -1844,7 +2114,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Jefferson",
+@@ -1917,7 +2197,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Jefferson Davis",
+@@ -1954,7 +2244,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Jones",
+@@ -1993,7 +2293,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": true,
++          "notes": "Targeted search returned no official 2026 report.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Kemper",
+@@ -2070,7 +2380,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Lafayette",
+@@ -2363,7 +2683,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Leake",
+@@ -2443,7 +2773,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Lee",
+@@ -2481,7 +2821,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "requires_human_review",
++          "searched_individually": true,
++          "notes": "Daily Journal story (syndicated via Yahoo News) attributes Senate counts to unofficial results provided by the Lee County Circuit Clerk's Office. That is a news relay, not an official capture; request the original report from the circuit clerk. Not admissible as an ingestion source.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Leflore",
+@@ -2523,7 +2873,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Lincoln",
+@@ -2597,7 +2957,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Lowndes",
+@@ -2656,7 +3026,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": true,
++          "notes": "Targeted search returned only older Commercial Dispatch results articles; no 2026 report.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Madison",
+@@ -2791,7 +3171,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Marshall",
+@@ -2847,7 +3237,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Monroe",
+@@ -3037,7 +3437,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Neshoba",
+@@ -3209,7 +3619,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Noxubee",
+@@ -3250,7 +3670,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Oktibbeha",
+@@ -3287,7 +3717,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": true,
++          "notes": "Targeted search returned only older runoff coverage.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Panola",
+@@ -3324,7 +3764,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Pearl River",
+@@ -3468,7 +3918,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": true,
++          "notes": "Targeted search returned only older Picayune Item articles; the prior ArcGIS lead remains unverified.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Perry",
+@@ -3509,7 +3969,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Pike",
+@@ -3701,7 +4171,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Prentiss",
+@@ -3761,7 +4241,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Quitman",
+@@ -3803,7 +4293,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Rankin",
+@@ -4064,7 +4564,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Sharkey",
+@@ -4110,7 +4620,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Simpson",
+@@ -4160,7 +4680,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Smith",
+@@ -4214,7 +4744,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Stone",
+@@ -4256,7 +4796,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Sunflower",
+@@ -4328,7 +4878,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Tate",
+@@ -4408,7 +4968,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Tippah",
+@@ -4439,7 +5009,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "blocked",
++          "searched_individually": true,
++          "notes": "A directory aggregator lists the official results page http://www.co.tippah.ms.us/election-results; this session's fetch policy refused it (prior pass: HTTP 502/503). Still a lead, not a verified source.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Tishomingo",
+@@ -4481,7 +5061,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Tunica",
+@@ -4522,7 +5112,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Union",
+@@ -4563,7 +5163,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Walthall",
+@@ -4600,7 +5210,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Warren",
+@@ -4784,7 +5404,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Wayne",
+@@ -4838,7 +5468,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Webster",
+@@ -4884,7 +5524,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Wilkinson",
+@@ -4934,7 +5584,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Winston",
+@@ -4971,7 +5631,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Yalobusha",
+@@ -5013,7 +5683,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Yazoo",
+@@ -5087,7 +5767,17 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        }
++      ]
+     }
+   ],
+   "capture_archive": {
+@@ -5098,5 +5788,15 @@
+     "note": "Original public county source captures for offline parser development; fixed snapshots, not current live statewide results."
+   },
+   "intake_slots": 82,
+-  "implementation_note": "13 configured official URLs; 69 reviewed-file intake slots await original official county reports. Intake availability does not establish current vote coverage. Existing probe records retain their original check times."
++  "implementation_note": "13 configured official URLs; 69 reviewed-file intake slots await original official county reports. Intake availability does not establish current vote coverage. Existing probe records retain their original check times.",
++  "followup_passes": [
++    {
++      "checked_at_utc": "2026-11-05T16:22:07Z",
++      "counties_checked": 69,
++      "new_verified_sources": 0,
++      "statewide_source": "None. The SOS election-results page listed only the March 10, 2026 primaries; certified November results are expected around December 3.",
++      "method": "Statewide phrase searches for Electionware/Hart report text with the 2026 Senate candidates returned only already-configured counties (DeSoto, Warren).",
++      "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing."
++    }
++  ]
+ }
+diff --git a/scripts/monitor_production.py b/scripts/monitor_production.py
+index 51064d9..37721af 100644
+--- a/scripts/monitor_production.py
++++ b/scripts/monitor_production.py
+@@ -185,7 +185,16 @@ def assess(prod, config, now):
+                     issues[f"dashboard/{code}"] = "State dashboard has no approved publication"
+                 for county, record in state.get("county_feeds", {}).items():
+                     if record.get("issue") == "manual_snapshot":
+-                        if age_seconds(record.get("last_success_at"), now) > 21600:
++                        # An imported snapshot is attempted when observed. A later attempt
++                        # means a configured automatic source failed to replace it.
++                        attempted = record.get("last_attempt_at")
++                        if attempted and age_seconds(attempted, now) < age_seconds(
++                            record.get("last_success_at"), now
++                        ):
++                            issues[f"county/{code}/{county}"] = (
++                                "Configured county source failed; manual snapshot retained"
++                            )
++                        elif age_seconds(record.get("last_success_at"), now) > 21600:
+                             issues[f"county/{code}/{county}"] = (
+                                 "Manual county snapshot is over six hours old"
+                             )
+diff --git a/src/election_pipeline/collectors/county_files.py b/src/election_pipeline/collectors/county_files.py
+index 942df86..9551b04 100644
+--- a/src/election_pipeline/collectors/county_files.py
++++ b/src/election_pipeline/collectors/county_files.py
+@@ -110,7 +110,8 @@ def fetch_bundle(
+             cached = old.get(key)
+             prior = cached[1] if cached else scheduling.get(key, {})
+             conditions = {}
+-            if cached and not force_download:
++            # Validators belong to one URL; a manual snapshot has none for the new URL.
++            if cached and not force_download and prior.get("url") == county["url"]:
+                 headers = prior.get("headers", {})
+                 if headers.get("etag"):
+                     conditions["If-None-Match"] = headers["etag"]
+@@ -190,15 +191,20 @@ def fetch_bundle(
+                         quarantine_path = store.relative(store.quarantine(path, rejected_sha))
+                 finished = utc_now()
+                 raw = cached[3] if cached else b""
++                # Fallback keeps the identity of the bytes it carries. A reviewed import
++                # of a newly automatic county keeps its URL, review and manual label.
++                manual = bool(cached and prior.get("review"))
+                 record = {
+                     "status": "stale" if cached else "unavailable",
+-                    "url": county["url"],
++                    "url": prior.get("url", county["url"]) if cached else county["url"],
+                     "raw_sha256": hashlib.sha256(raw).hexdigest() if cached else None,
+                     "last_attempt_at": finished,
+                     "last_success_at": prior.get("last_success_at") if cached else None,
+-                    "issue": issue,
++                    "issue": "ManualSnapshot" if manual else issue,
+                     "headers": prior.get("headers", {}) if cached else {},
+                 }
++                if manual:
++                    record.update(review=prior["review"], automatic_issue=issue)
+             if issue and issue.startswith("CollectionDeferred:"):
+                 record["retry_priority_at"] = (
+                     prior.get("retry_priority_at") or prior.get("last_attempt_at") or "1970"
+diff --git a/src/election_pipeline/parsers/ms.py b/src/election_pipeline/parsers/ms.py
+index 67deec4..594ade5 100644
+--- a/src/election_pipeline/parsers/ms.py
++++ b/src/election_pipeline/parsers/ms.py
+@@ -440,13 +440,15 @@ def read_county(raw, county, contract=None):
+ 
+ 
+ def read_snapshot(raw, county, contract, record):
+-    if county.get("url"):
+-        if record.get("url") != county["url"] or record.get("review"):
++    review = record.get("review")
++    # A reviewed import stays a manual snapshot even after its county is onboarded to
++    # an automatic URL; only a validated automatic response may replace it.
++    if county.get("url") and not review:
++        if record.get("url") != county["url"]:
+             raise ValueError("Automatic county source identity changed")
+         return read_county(raw, county, contract)
+     from election_pipeline.parsers.county_reports import reviewed_file
+ 
+-    review = record.get("review")
+     parsed = reviewed_file(raw, county, contract, review)
+     if (
+         record.get("url") != review["source_url"]
+@@ -556,7 +558,9 @@ def read_bundle(archive_path, source):
+             else:
+                 if stamp(r.get("last_attempt_at")) > checked:
+                     raise ValueError("Attempt follows manifest")
+-                if county.get("url") and r.get("url") != county["url"]:
++                # A manual fallback keeps its reviewed original's URL (validated by
++                # read_snapshot); every other record must name the configured URL.
++                if status != "stale" and county.get("url") and r.get("url") != county["url"]:
+                     raise ValueError("County source identity mismatch")
+                 if (status == "current") != (r.get("issue") is None):
+                     raise ValueError("County status disagrees with its issue")
+@@ -647,7 +651,9 @@ def parse(archive_path, source, settings, output, stats, reference=None):
+             }
+         )
+         if county.get("url") and record["status"] != "current":
+-            issues[county["key"]] = record.get("issue") or record["status"]
++            issues[county["key"]] = (
++                record.get("automatic_issue") or record.get("issue") or record["status"]
++            )
+         for name, value in parsed.get("counts", {}).items():
+             aggregate[name] += value
+             rows.append(
+diff --git a/tests/test_monitor_production.py b/tests/test_monitor_production.py
+index 53850bc..76b35e0 100644
+--- a/tests/test_monitor_production.py
++++ b/tests/test_monitor_production.py
+@@ -145,6 +145,16 @@ class MonitorTests(unittest.TestCase):
+         issues = self.assess(dashboard=payload)
+         self.assertEqual(set(issues), {"county/MS/JACKSON"})
+         self.assertIn("Manual county snapshot", issues["county/MS/JACKSON"])
++        # A recent import of an onboarded county whose automatic check failed afterwards.
++        record.update(
++            last_success_at=(self.now - timedelta(hours=1)).isoformat(),
++            last_attempt_at=self.recent,
++        )
++        issues = self.assess(dashboard=payload)
++        self.assertEqual(set(issues), {"county/MS/JACKSON"})
++        self.assertIn("Configured county source failed", issues["county/MS/JACKSON"])
++        record["last_attempt_at"] = record["last_success_at"]
++        self.assertEqual(self.assess(dashboard=payload), {})
+ 
+     def test_catalog_adds_enabled_states_and_ignores_registered_pending_states(self):
+         from election_pipeline.deployment import catalog
+diff --git a/tests/test_ms_source_transitions.py b/tests/test_ms_source_transitions.py
+new file mode 100644
+index 0000000..c053b14
+--- /dev/null
++++ b/tests/test_ms_source_transitions.py
+@@ -0,0 +1,258 @@
++"""Configuration changes must not silently discard a county's accepted counts.
++
++Onboarding a reviewed-file county to an automatic URL changes the source contract.
++These tests use a patched policy (never the shipped one), so the transition is exercised
++without inventing a real county source.
++"""
++
++import copy
++import json
++import unittest
++from dataclasses import replace
++from unittest.mock import patch
++
++import test_mississippi as fixtures
++from test_county_scaling import synthetic_review
++
++from election_pipeline.collectors import county_files
++from election_pipeline.county_import import import_county
++from election_pipeline.deployment import catalog
++from election_pipeline.parsers import ms
++from election_pipeline.pipeline import collect_source
++
++NEW_JACKSON = "https://example.com/official/jackson-automatic.pdf"
++MOVED_HINDS = "https://example.com/official/hinds-moved.pdf"
++
++
++class SourceTransitionTests(unittest.TestCase):
++    def setUp(self):
++        self.f = fixtures.MississippiTests()
++        self.f.setUp()
++        self.addCleanup(self.f.doCleanups)
++
++    def contract(self, change):
++        value = copy.deepcopy(self.f.policy)
++        counties = {c["key"]: c for c in value["counties"]}
++        change(counties)
++        return value
++
++    def source_for(self, contract):
++        files = tuple(
++            sorted((c["member"], c["url"]) for c in contract["counties"] if c.get("url"))
++        )
++        manual = tuple(c["member"] for c in contract["counties"] if not c.get("url"))
++        return replace(self.f.source, files=files, supplemental_members=manual)
++
++    def collect_with(self, contract, previous, failures):
++        source = self.source_for(contract)
++        destination = self.f.store.temporary_download()
++        with (
++            patch.object(ms, "policy", return_value=contract),
++            patch.object(county_files, "fetch_file", side_effect=self.fetcher(contract, failures)),
++        ):
++            county_files.fetch_bundle(
++                source, self.f.settings, destination, previous=previous, store=self.f.store
++            )
++            return source, destination, ms.read_bundle(destination, source)
++
++    def fetcher(self, contract, failures):
++        # The test fetcher only knows the shipped URLs; transition URLs must fail closed.
++        shipped = self.f.fetcher(failures=failures)
++        known = {c["url"] for c in self.f.policy["counties"] if c.get("url")}
++
++        def fetch(source, limits, path, conditions, *, url):
++            if url not in known:
++                self.assertEqual(conditions, {}, "Validators from another URL were reused")
++                return county_files.FetchResponse(404, {}, url)
++            return shipped(source, limits, path, conditions, url=url)
++
++        return fetch
++
++    def imported_jackson(self):
++        f = self.f
++        with patch.object(county_files, "fetch_file", side_effect=f.fetcher()):
++            collect_source(f.source, f.settings, f.root, force_download=True)
++        raw, review = synthetic_review(f, "JACKSON")
++        original, review_path = f.root / "jackson.pdf", f.root / "jackson.json"
++        original.write_bytes(raw)
++        review_path.write_text(json.dumps(review), encoding="utf-8")
++        with patch.object(county_files, "fetch_file", side_effect=AssertionError("import HTTP")):
++            import_county(f.source, f.settings, f.root, "JACKSON", original, review_path)
++        return f.store.cached_archive(f.store.read_state()), review
++
++    def test_manual_snapshot_survives_onboarding_until_the_automatic_source_succeeds(self):
++        previous, review = self.imported_jackson()
++        contract = self.contract(
++            lambda c: c["JACKSON"].update(
++                url=NEW_JACKSON, acquisition="automatic", format="pdf_text_electionware"
++            )
++        )
++        _, _, (_, manifest, accepted) = self.collect_with(contract, previous, failures={})
++        record = manifest["counties"]["JACKSON"]
++        self.assertIn("JACKSON", set(accepted), "Accepted manual counts were discarded")
++        self.assertEqual(accepted["JACKSON"][2]["counts"], review["counts"])
++        # Provenance stays with the reviewed original, not the new automatic URL.
++        self.assertEqual(record["status"], "stale")
++        self.assertEqual(record["issue"], "ManualSnapshot")
++        self.assertEqual(record["url"], review["source_url"])
++        self.assertEqual(record["last_success_at"], review["observed_at"])
++        self.assertEqual(record["review"], review)
++        self.assertIn("HTTP 404", record["automatic_issue"])
++        self.assertEqual(manifest["counties"]["HINDS"]["status"], "current")
++
++    def test_manual_fallback_is_reported_as_a_source_issue_not_a_healthy_feed(self):
++        previous, _ = self.imported_jackson()
++        contract = self.contract(
++            lambda c: c["JACKSON"].update(
++                url=NEW_JACKSON, acquisition="automatic", format="pdf_text_electionware"
++            )
++        )
++        source, path, _ = self.collect_with(contract, previous, failures={})
++        output = self.f.root / "parsed"
++        output.mkdir()
++        stats = {}
++        with patch.object(ms, "policy", return_value=contract):
++            ms.parse(path, source, self.f.settings, output, stats)
++        self.assertIn("HTTP 404", stats["county_feed_issues"]["JACKSON"])
++        self.assertIn("Some configured county sources are stale or unavailable.", stats["warnings"])
++        with (output / "county_feeds.csv").open(encoding="utf-8", newline="") as handle:
++            feeds = {r["county"]: r for r in fixtures.csv.DictReader(handle)}
++        self.assertEqual(feeds["JACKSON"]["issue"], "manual_snapshot")
++        self.assertEqual(feeds["JACKSON"]["collection_status"], "stale")
++
++    def test_changed_automatic_url_does_not_reuse_the_old_url_snapshot(self):
++        # Re-pinning is out of scope: the catalog also refuses changed feed URLs.
++        f = self.f
++        first, _ = f.collect()
++        moved = self.contract(lambda c: c["HINDS"].update(url=MOVED_HINDS))
++        _, _, (_, manifest, accepted) = self.collect_with(moved, first, failures={})
++        self.assertNotIn("HINDS", set(accepted))
++        self.assertEqual(manifest["counties"]["HINDS"]["status"], "unavailable")
++
++    def test_manual_record_cannot_masquerade_as_a_current_automatic_check(self):
++        previous, _ = self.imported_jackson()
++        contract = self.contract(
++            lambda c: c["JACKSON"].update(
++                url=NEW_JACKSON, acquisition="automatic", format="pdf_text_electionware"
++            )
++        )
++        source, path, _ = self.collect_with(contract, previous, failures={})
++
++        def promote(members, manifest):
++            manifest["source_id"] = source.source_id
++            record = manifest["counties"]["JACKSON"]
++            record.update(
++                status="current",
++                issue=None,
++                url=NEW_JACKSON,
++                last_success_at=record["last_attempt_at"],
++            )
++
++        forged = self.f.rewrite_bundle(path, promote)
++        with (
++            patch.object(ms, "policy", return_value=contract),
++            self.assertRaisesRegex(ValueError, "manual snapshot"),
++        ):
++            ms.read_bundle(forged, source)
++
++    def test_successful_automatic_check_replaces_a_manual_snapshot_with_real_bytes(self):
++        """Hinds stands in for an onboarded county: reviewed import, then its shipped URL."""
++        f = self.f
++        hinds = f.counties["HINDS"]
++        manual_policy = self.contract(
++            lambda c: (
++                c["HINDS"].pop("url"),
++                c["HINDS"].update(acquisition="reviewed_file", format="reviewed_file"),
++            )
++        )
++        manual_source = self.source_for(manual_policy)
++        store = type(f.store)(f.root, manual_source)
++        with (
++            patch.object(ms, "policy", return_value=manual_policy),
++            patch.object(county_files, "fetch_file", side_effect=self.fetcher(manual_policy, {})),
++        ):
++            collect_source(manual_source, f.settings, f.root, force_download=True)
++        original = f.root / "hinds.pdf"
++        original.write_bytes(f.raw["HINDS"])
++        review = dict(
++            state="MS",
++            county="HINDS",
++            election_date="2026-11-03",
++            contest_id="MS-SEN",
++            raw_sha256=fixtures.hashlib.sha256(f.raw["HINDS"]).hexdigest(),
++            source_url=hinds["url"],
++            official_page_url="https://www.co.hinds.ms.us/pgs/results/ElectionNightResults.asp",
++            observed_at="2026-11-04T06:00:00+00:00",
++            reviewed_by="TEST FIXTURE: values from tests/test_mississippi.py EXPECTED",
++            countywide_report_confirmed=True,
++            report_generated_at="2026-11-03T23:00:00-06:00",
++            report_date="2026-11-03",
++            report_time_note=None,
++            counts=dict(zip(f.policy["candidates"], fixtures.EXPECTED["HINDS"])),
++            write_in_votes=None,
++            write_in_label=None,
++            reported_candidate_vote_total=None,
++            precincts_reporting=108,
++            precincts_total=108,
++            absentee_scope="unspecified",
++            affidavit_scope="unspecified",
++        )
++        review_path = f.root / "hinds.json"
++        review_path.write_text(json.dumps(review), encoding="utf-8")
++        with patch.object(ms, "policy", return_value=manual_policy):
++            import_county(manual_source, f.settings, f.root, "HINDS", original, review_path)
++        previous = store.cached_archive(store.read_state())
++
++        # Onboarded: the shipped policy gives Hinds its automatic URL. First a failure...
++        failed = f.store.temporary_download()
++        outage = f.fetcher(failures={"HINDS": 503})
++        with patch.object(county_files, "fetch_file", side_effect=outage):
++            county_files.fetch_bundle(f.source, f.settings, failed, previous=previous)
++        _, manifest, accepted = ms.read_bundle(failed, f.source)
++        self.assertEqual(manifest["counties"]["HINDS"]["issue"], "ManualSnapshot")
++        self.assertEqual(accepted["HINDS"][2]["counts"], review["counts"])
++        # ...then a validated automatic response replaces the manual label and review.
++        fixed = f.store.temporary_download()
++        with patch.object(county_files, "fetch_file", side_effect=f.fetcher()):
++            county_files.fetch_bundle(f.source, f.settings, fixed, previous=failed)
++        _, manifest, accepted = ms.read_bundle(fixed, f.source)
++        record = manifest["counties"]["HINDS"]
++        self.assertEqual(
++            (record["status"], record["url"], record["issue"]), ("current", hinds["url"], None)
++        )
++        self.assertNotIn("review", record)
++        self.assertEqual(tuple(accepted["HINDS"][2]["counts"].values()), fixtures.EXPECTED["HINDS"])
++
++
++
++    def test_catalog_admits_onboarding_but_refuses_a_changed_feed_url(self):
++        f = self.f
++
++        def entry(contract):
++            value = catalog.entry(
++                self.source_for(contract),
++                f.settings,
++                image_id="sha256:" + "a" * 64,
++                revision="b" * 40,
++                release_path=f.root,
++                worker="expansion",
++                status="unofficial",
++            )
++            value["races"] = ["MS-SEN"]
++            return value
++
++        current = entry(f.policy)
++        onboarded = entry(
++            self.contract(
++                lambda c: c["JACKSON"].update(
++                    url=NEW_JACKSON, acquisition="automatic", format="pdf_text_electionware"
++                )
++            )
++        )
++        moved = entry(self.contract(lambda c: c["HINDS"].update(url=MOVED_HINDS)))
++        self.assertTrue(catalog.expands_coverage(current, onboarded))
++        self.assertFalse(catalog.expands_coverage(current, moved))
++
++
++if __name__ == "__main__":
++    unittest.main()

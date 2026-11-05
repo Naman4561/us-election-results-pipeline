@@ -140,6 +140,30 @@ Source discovery is complete for this first pass, but implementation and admissi
 - https://www.mssupervisors.org/mississippi-counties
 - https://www.sos.ms.gov/news/official-statement-election-update
 
+## Follow-up pass, 2026-11-05T16:22Z
+
+**No new official county source was verified. Coverage remains 13 configured counties and
+69 unresolved counties.** Each of the 69 has a `followup_passes` record in the JSON inventory.
+
+- Statewide: the SOS results page still listed only the March 10, 2026 primaries. Certified
+  November results are expected around December 3. No statewide county-level download exists yet.
+- Access limits: the research session could not reach county or SOS hosts directly (egress
+  proxy refusal). Its fetch tool also accepted only URLs returned as search results. Absence of
+  a report in this pass is therefore weak evidence. It is not proof that a county published
+  nothing.
+- Statewide phrase searches for Electionware and Hart report text with the 2026 Senate
+  candidates found only counties already configured (DeSoto, Warren).
+
+| County | Outcome | Evidence and next action |
+|---|---|---|
+| Lee | requires human review | A Daily Journal story (syndicated via Yahoo News) attributes Senate counts to unofficial results from the Lee County Circuit Clerk's Office. That is a news relay, not an admissible source. Request the original report from the circuit clerk. |
+| Tippah | blocked | A directory aggregator lists `http://www.co.tippah.ms.us/election-results`. The fetch was refused here (the earlier pass got HTTP 502/503). Open it from an ordinary browser. |
+| Harrison, Jackson, Forrest, Lowndes, Jones, Pearl River, Oktibbeha | not found | Searched individually. Only news or older-election pages surfaced. Pearl River's ArcGIS lead is still unverified. |
+| The other 60 unresolved counties | not found | Covered only by the statewide phrase searches. They need a direct check of the county or circuit clerk site from an unrestricted network. |
+
+Adding a county still requires its original official report, captured with exact bytes and a
+SHA-256. See *Onboarding a county* in [collection and intake](mississippi-collection.md).
+
 ## Expansion checkpoint
 
 Lafayette, Lamar and Sunflower were added to the configured reports. See [collection and intake](mississippi-collection.md) for exact source limitations and the reviewed-file process for the remaining 69 counties. Historical probe outcomes above retain their original timestamps; absence of a report in that pass does not prove that none exists. The machine-readable `intake` field is the current implementation status for each county.

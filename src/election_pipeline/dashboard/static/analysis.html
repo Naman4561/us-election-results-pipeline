@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Analysis of North Carolina's published 2026 returns and early/absentee ballots."
+    />
+    <title>North Carolina analysis · 2026 Election Results</title>
+    <link rel="stylesheet" href="/app.css?v=analysis1" />
+    <link rel="stylesheet" href="/analysis.css?v=analysis1" />
+    <script type="module" src="/analysis.js?v=analysis1"></script>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/#senate/NC"
+        ><span class="brand-icon">▥</span> ELECTION RESULTS <b>2026</b></a
+      ><span id="connection" role="status">Connecting…</span>
+    </header>
+    <main class="analysis">
+      <div class="heading">
+        <div>
+          <p class="eyebrow">
+            NORTH CAROLINA · GENERAL ELECTION · NOVEMBER 3, 2026
+          </p>
+          <h1>Analysis</h1>
+          <p class="intro">
+            Results by race, how each voting method moved them, how the count
+            changed between published snapshots, and who cast early and absentee
+            ballots.
+          </p>
+        </div>
+        <div class="stamp">
+          <b id="mode">AWAITING DATA</b><span id="published">Loading…</span>
+        </div>
+      </div>
+      <div id="notice" class="notice" role="status">
+        Loading published data…
+      </div>
+
+      <section aria-labelledby="races-title">
+        <h2 id="races-title">All races</h2>
+        <p class="hint">
+          Select a race to see its candidates, vote methods, counties and count
+          history.
+        </p>
+        <div class="table-wrap"><table id="races" class="data"></table></div>
+      </section>
+
+      <section aria-labelledby="race-title">
+        <div class="section-head">
+          <h2 id="race-title">Race</h2>
+          <label
+            >Race
+            <select id="race" aria-label="Race"></select
+          ></label>
+        </div>
+        <div id="candidates" class="candidates"></div>
+        <div class="grid two">
+          <div>
+            <h3>How each method voted</h3>
+            <p class="hint">
+              Candidate share of the votes cast by each method.
+            </p>
+            <div id="by-method"></div>
+          </div>
+          <div>
+            <h3>How each candidate's votes arrived</h3>
+            <p class="hint">Share of each candidate's votes by method.</p>
+            <div id="by-candidate"></div>
+          </div>
+        </div>
+        <h3>Count history</h3>
+        <p class="hint" id="history-hint">
+          One point per published snapshot. A snapshot is published only when
+          the official file changes and passes validation.
+        </p>
+        <div id="history"></div>
+        <h3>Counties</h3>
+        <p class="hint">
+          Method shares and leaders by county. Rows marked ◆ have a different
+          leader by method. Select a column heading to sort.
+        </p>
+        <div class="table-wrap"><table id="counties" class="data"></table></div>
+      </section>
+
+      <section aria-labelledby="ballots-title">
+        <div class="section-head">
+          <h2 id="ballots-title">Early and absentee ballots</h2>
+          <label
+            >Request type
+            <select id="request-type" aria-label="Request type"></select
+          ></label>
+        </div>
+        <p class="hint">
+          Ballot counts from the State Board's absentee file. They describe
+          voters who cast early or absentee ballots, not votes for any
+          candidate.
+        </p>
+        <div id="ballot-totals" class="cards"></div>
+        <div id="dimensions" class="grid two"></div>
+        <h3>Counties with the most ballots</h3>
+        <div class="table-wrap">
+          <table id="ballot-counties" class="data"></table>
+        </div>
+      </section>
+
+      <section aria-labelledby="sources-title" class="sources">
+        <h2 id="sources-title">Sources</h2>
+        <dl id="provenance"></dl>
+        <ul id="notes"></ul>
+      </section>
+    </main>
+  </body>
+</html>

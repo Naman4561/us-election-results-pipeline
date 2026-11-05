@@ -1,0 +1,204 @@
+.analysis {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 26px 20px 48px;
+}
+.analysis section {
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 20px 22px;
+  margin: 18px 0;
+}
+.analysis h2 {
+  margin: 0 0 4px;
+  font-size: 19px;
+}
+.analysis h3 {
+  margin: 22px 0 2px;
+  font-size: 15px;
+}
+.hint {
+  color: var(--muted);
+  margin: 2px 0 12px;
+}
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.section-head label {
+  color: var(--muted);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.section-head select {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 7px 9px;
+  background: white;
+}
+.grid.two {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 0 28px;
+}
+.table-wrap {
+  overflow-x: auto;
+}
+table.data {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+table.data th,
+table.data td {
+  text-align: right;
+  padding: 7px 8px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+table.data th:first-child,
+table.data td:first-child {
+  text-align: left;
+}
+table.data th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 12px;
+}
+table.data th button {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-weight: 600;
+}
+table.data tr.selectable {
+  cursor: pointer;
+}
+table.data tr.selectable:hover,
+table.data tr[aria-selected="true"] {
+  background: #f0f4fa;
+}
+.chip {
+  display: inline-block;
+  min-width: 34px;
+  text-align: center;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+}
+.candidates .row,
+.bars .row {
+  display: grid;
+  grid-template-columns: minmax(150px, 220px) 1fr 120px;
+  gap: 10px;
+  align-items: center;
+  padding: 5px 0;
+}
+.candidates .name b {
+  display: block;
+}
+.candidates .name span,
+.bars .label span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.track {
+  height: 14px;
+  background: #eef2f7;
+  border-radius: 3px;
+  overflow: hidden;
+  display: flex;
+}
+.track i {
+  display: block;
+  height: 100%;
+}
+.figure {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.figure small {
+  display: block;
+  color: var(--muted);
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin: 6px 0 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.legend span::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 5px;
+  background: var(--swatch);
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+.card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.card b {
+  display: block;
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+.card span {
+  color: var(--muted);
+  font-size: 12px;
+}
+svg.history {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+svg.history text {
+  font-size: 11px;
+  fill: var(--muted);
+}
+.sources dl {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 4px 14px;
+  margin: 10px 0;
+}
+.sources dt {
+  color: var(--muted);
+}
+.sources dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.sources ul {
+  color: var(--muted);
+  padding-left: 18px;
+}
+.dimension .bars .row {
+  grid-template-columns: minmax(96px, 1fr) minmax(80px, 1.3fr) 70px;
+}
+.dimension .label b {
+  font-weight: 600;
+  font-size: 13px;
+}
+.card[aria-current="true"] {
+  border-color: #2775c7;
+  box-shadow: inset 0 0 0 1px #2775c7;
+}

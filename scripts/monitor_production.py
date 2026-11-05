@@ -185,7 +185,16 @@ def assess(prod, config, now):
                     issues[f"dashboard/{code}"] = "State dashboard has no approved publication"
                 for county, record in state.get("county_feeds", {}).items():
                     if record.get("issue") == "manual_snapshot":
-                        if age_seconds(record.get("last_success_at"), now) > 21600:
+                        # An imported snapshot is attempted when observed. A later attempt
+                        # means a configured automatic source failed to replace it.
+                        attempted = record.get("last_attempt_at")
+                        if attempted and age_seconds(attempted, now) < age_seconds(
+                            record.get("last_success_at"), now
+                        ):
+                            issues[f"county/{code}/{county}"] = (
+                                "Configured county source failed; manual snapshot retained"
+                            )
+                        elif age_seconds(record.get("last_success_at"), now) > 21600:
                             issues[f"county/{code}/{county}"] = (
                                 "Manual county snapshot is over six hours old"
                             )

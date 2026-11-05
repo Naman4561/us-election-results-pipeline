@@ -695,3 +695,10 @@ footer {
     font-size: 12px;
   }
 }
+.analysis-link {
+  margin-left: auto;
+  margin-right: 18px;
+  color: #ecf3fc;
+  font-weight: 600;
+  text-decoration: underline;
+}
