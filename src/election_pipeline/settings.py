@@ -7,7 +7,7 @@ import json
 import math
 import re
 import tomllib
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, fields, replace
 from datetime import date
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -90,6 +90,8 @@ class Source:
     files: tuple[tuple[str, str], ...] = ()
     primary_filename: str = "results.xml"
     contests: tuple[str, ...] = ()
+    supplemental_members: tuple[str, ...] = ()
+    collector_overrides: tuple[tuple[str, int], ...] = ()
 
     def __post_init__(self) -> None:
         if not re.fullmatch(r"[a-z][a-z0-9_-]{0,79}", self.source_id):
@@ -139,9 +141,24 @@ class Source:
             names.append(name)
         if len(names) != len(set(names)) or (self.files and self.format != "bundle"):
             raise ValueError("Reference files require bundle format and unique names")
+        if (
+            not isinstance(self.supplemental_members, tuple)
+            or any(
+                not isinstance(n, str)
+                or not re.fullmatch(r"[a-z][a-z0-9_.-]{0,79}", n)
+                or n == self.primary_filename
+                or n in names
+                for n in self.supplemental_members
+            )
+            or len(set(self.supplemental_members)) != len(self.supplemental_members)
+        ):
+            raise ValueError("Supplemental members must be distinct safe filenames")
+        if self.supplemental_members and self.format != "bundle":
+            raise ValueError("Only bundles support supplemental members")
         if self.format == "bundle" and set(self.expected_members) != {
             self.primary_filename,
             *names,
+            *self.supplemental_members,
         }:
             raise ValueError("Bundle members must match its primary file and reference files")
 
@@ -164,9 +181,33 @@ class Source:
 
         if type(self.allow_missing) is not bool:
             raise ValueError("allow_missing must be true or false")
+        if (
+            not isinstance(self.collector_overrides, tuple)
+            or any(
+                not isinstance(p, tuple)
+                or len(p) != 2
+                or p[0] not in {"max_download_bytes", "max_uncompressed_bytes", "max_zip_members"}
+                or type(p[1]) is not int
+                or p[1] <= 0
+                for p in self.collector_overrides
+            )
+            or len(dict(self.collector_overrides)) != len(self.collector_overrides)
+        ):
+            raise ValueError("Invalid per-source archive limits")
+
+    def effective_settings(self, settings: CollectorSettings) -> CollectorSettings:
+        return (
+            replace(settings, **dict(self.collector_overrides))
+            if self.collector_overrides
+            else settings
+        )
 
     def signature(self, settings: CollectorSettings) -> str:
+        settings = self.effective_settings(settings)
         source_contract = asdict(self)
+        for key in ("supplemental_members", "collector_overrides"):
+            if not source_contract[key]:
+                source_contract.pop(key)
         if not self.contests:
             source_contract.pop("contests")
         if self.primary_filename == "results.xml":
@@ -199,7 +240,7 @@ def load_config(path: Path) -> tuple[CollectorSettings, dict[str, Source]]:
         item = dict(raw)
         if isinstance(item.get("election_date"), date):
             item["election_date"] = item["election_date"].isoformat()
-        for key in ("expected_members", "expected_columns", "contests"):
+        for key in ("expected_members", "expected_columns", "contests", "supplemental_members"):
             names = item.get(key, [])
 
             if not isinstance(names, list) or not all(isinstance(name, str) for name in names):
@@ -212,6 +253,10 @@ def load_config(path: Path) -> tuple[CollectorSettings, dict[str, Source]]:
         ):
             raise ValueError("files must map filenames to public URLs")
         item["files"] = tuple(sorted(files.items()))
+        overrides = item.get("collector_overrides", {})
+        if not isinstance(overrides, dict):
+            raise ValueError("collector_overrides must be a table")
+        item["collector_overrides"] = tuple(sorted(overrides.items()))
         sources[source_id] = Source(source_id=source_id, **item)
     if not sources:
         raise ValueError("Configure at least one source")

@@ -89,8 +89,17 @@ def _collect_locked(
     run_id: str,
     force_download: bool,
 ) -> dict:
+    settings = source.effective_settings(settings)
     signature = source.signature(settings)
     state = store.read_state()
+    from election_pipeline.states import STATES
+
+    adapter = STATES.get(source.state)
+    previous_counties = (
+        store.cached_archive(state)
+        if adapter and adapter.collection_backend == "county_files"
+        else None
+    )
     if state.get("source_signature") != signature:
         state = {"source_signature": signature, "url": source.url}
     store.remove_abandoned_downloads()
@@ -179,7 +188,7 @@ def _collect_locked(
                         source,
                         settings,
                         temporary,
-                        previous=cached,
+                        previous=cached or previous_counties,
                         store=store,
                         force_download=force_download,
                     )

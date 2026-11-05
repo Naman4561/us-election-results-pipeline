@@ -14,7 +14,7 @@ from importlib.resources import files
 from election_pipeline.parsers import totals
 from election_pipeline.parsers.html import Tree
 
-POLICY_SHA256 = "ffa2d1119af363b9584ff9480c06758dd122a0c85d157b29ac7c5df15ab0db5e"
+POLICY_SHA256 = "7107622d0b781a8ac8091f1ff61dbbeebc167bff0c7308b2001f86ba646aa7e5"
 NUMBER = r"(?:0|[1-9][0-9]*|[1-9][0-9]{0,2}(?:,[0-9]{3})+)"
 FEED_FIELDS = (
     "source_line",
@@ -66,7 +66,7 @@ def policy():
 
 def validate_source(source):
     contract = policy()
-    feeds = {c["member"]: c["url"] for c in contract["counties"] if c.get("member")}
+    feeds = {c["member"]: c["url"] for c in contract["counties"] if c.get("url")}
     if (
         source.state != "MS"
         or source.election_date != contract["election_date"]
@@ -75,6 +75,8 @@ def validate_source(source):
         or source.primary_filename != "county-status.json"
         or source.contests != ("MS-SEN",)
         or dict(source.files) != feeds
+        or set(source.supplemental_members)
+        != {c["member"] for c in contract["counties"] if not c.get("url")}
         or source.url != "https://www.sos.ms.gov/MSCountyElectionInfo/"
     ):
         raise ValueError("Source differs from the reviewed Mississippi county contract")
@@ -140,7 +142,7 @@ class VisibleText(HTMLParser):
 def pdf_text(raw):
     from pypdf import PdfReader
 
-    if not raw.startswith(b"%PDF-") or len(raw) > 6_000_000:
+    if not raw.startswith(b"%PDF-") or len(raw) > 8_000_000:
         raise ValueError("County report is not a bounded PDF")
     try:
         reader = PdfReader(io.BytesIO(raw), strict=True)
@@ -400,8 +402,14 @@ def read_county(raw, county, contract=None):
                 "precincts_total",
             )
         }
-        generated = local_stamp(record["report_generated_local"])
-        result.update(report_generated_at=generated, report_date=generated[:10])
+        generated = (
+            local_stamp(record["report_generated_local"])
+            if record["report_generated_local"]
+            else None
+        )
+        result.update(
+            report_generated_at=generated, report_date=generated[:10] if generated else None
+        )
         reported = record["reported_candidate_vote_total"]
         if (
             reported is not None
@@ -412,6 +420,10 @@ def read_county(raw, county, contract=None):
         result = electionware(raw, county, contract)
     elif county["format"] == "html_hart_cumulative":
         result = hart_html(raw, county, contract)
+    elif county["format"] == "html_hart_sunflower":
+        from election_pipeline.parsers.county_reports import sunflower_hart
+
+        result = sunflower_hart(raw, county, contract)
     elif county["format"] == "html_county_news":
         result = county_news(raw, county, contract)
     else:
@@ -427,66 +439,136 @@ def read_county(raw, county, contract=None):
     return result
 
 
+def read_snapshot(raw, county, contract, record):
+    if county.get("url"):
+        if record.get("url") != county["url"] or record.get("review"):
+            raise ValueError("Automatic county source identity changed")
+        return read_county(raw, county, contract)
+    from election_pipeline.parsers.county_reports import reviewed_file
+
+    review = record.get("review")
+    parsed = reviewed_file(raw, county, contract, review)
+    if (
+        record.get("url") != review["source_url"]
+        or record.get("status") != "stale"
+        or record.get("issue") != "ManualSnapshot"
+        or stamp(record.get("last_success_at")) != stamp(review.get("observed_at"))
+    ):
+        raise ValueError("Imported county must remain labelled as a manual snapshot")
+    return parsed
+
+
+def checked_manifest(archive, source, contract, previous=False):
+    entries = archive.infolist()
+    if (
+        len(entries) > 100
+        or len({m.filename for m in entries}) != len(entries)
+        or sum(m.file_size for m in entries) > 134217728
+        or any(
+            m.file_size > (1_000_000 if m.filename == source.primary_filename else 8_000_000)
+            for m in entries
+        )
+    ):
+        raise ValueError("County bundle exceeds archive bounds")
+    d = json.loads(archive.read(source.primary_filename))
+    allowed = (
+        {POLICY_SHA256, *contract.get("compatible_policy_sha256", [])}
+        if previous
+        else {POLICY_SHA256}
+    )
+    source_ids = (
+        {source.source_id, contract.get("previous_source_id")} if previous else {source.source_id}
+    )
+    if (
+        not isinstance(d, dict)
+        or d.get("version") not in ((1, 2) if previous else (2,))
+        or not isinstance(d.get("counties"), dict)
+        or (d.get("state"), d.get("election_date")) != (source.state, source.election_date)
+        or d.get("source_id") not in source_ids
+        or d.get("policy_sha256") not in allowed
+    ):
+        raise ValueError("Wrong county bundle identity or unapproved policy")
+    stamp(d.get("checked_at"))
+    return d
+
+
+def accepted_county(archive, county, contract, record, checked):
+    if not isinstance(record, dict) or not isinstance(record.get("headers"), dict):
+        raise ValueError("Invalid county record")
+    raw = archive.read(county["member"])
+    if hashlib.sha256(raw).hexdigest() != record.get("raw_sha256"):
+        raise ValueError("County member fingerprint mismatch")
+    attempted, succeeded = (
+        stamp(record.get("last_attempt_at")),
+        stamp(record.get("last_success_at")),
+    )
+    if (
+        succeeded > attempted
+        or attempted > checked
+        or (record["status"] == "current" and succeeded != attempted)
+    ):
+        raise ValueError("Inconsistent county check timestamps")
+    parsed = read_snapshot(raw, county, contract, record)
+    if parsed["report_generated_at"] and stamp(parsed["report_generated_at"]) > checked + timedelta(
+        minutes=5
+    ):
+        raise ValueError("Future county report")
+    return county, record, parsed, raw
+
+
+def previous_counties(archive_path, source):
+    contract = validate_source(source)
+    accepted = {}
+    with zipfile.ZipFile(archive_path) as archive:
+        manifest = checked_manifest(archive, source, contract, previous=True)
+        checked = stamp(manifest["checked_at"])
+        for county in contract["counties"]:
+            r = manifest["counties"].get(county["key"], {})
+            if not isinstance(r, dict) or r.get("status") not in {"current", "stale"}:
+                continue
+            try:
+                accepted[county["key"]] = accepted_county(archive, county, contract, r, checked)
+            except (ValueError, OSError, KeyError, TypeError, zipfile.BadZipFile):
+                continue
+    return accepted
+
+
 def read_bundle(archive_path, source):
     contract = validate_source(source)
+    accepted = {}
     with zipfile.ZipFile(archive_path) as archive:
-        expected = {source.primary_filename, *(n for n, _ in source.files)}
-        if set(archive.namelist()) != expected or len(archive.namelist()) != len(expected):
-            raise ValueError("Unexpected Mississippi bundle members")
-        if any(
-            item.file_size > (1_000_000 if item.filename == source.primary_filename else 6_000_000)
-            for item in archive.infolist()
-        ):
-            raise ValueError("Mississippi bundle member exceeds its size budget")
-        manifest = json.loads(archive.read(source.primary_filename))
-        if (
-            manifest.get("version") != 1
-            or manifest.get("state") != "MS"
-            or manifest.get("election_date") != source.election_date
-            or manifest.get("source_id") != source.source_id
-            or manifest.get("policy_sha256") != POLICY_SHA256
-            or set(manifest.get("counties", {})) != {c["key"] for c in contract["counties"]}
-        ):
-            raise ValueError("County manifest has the wrong identity, policy or coverage")
+        manifest = checked_manifest(archive, source, contract)
+        if set(archive.namelist()) != set(source.expected_members) or set(manifest["counties"]) != {
+            c["key"] for c in contract["counties"]
+        }:
+            raise ValueError("Incomplete county manifest or unexpected bundle members")
         checked = stamp(manifest["checked_at"])
-        accepted = {}
         for county in contract["counties"]:
-            record = manifest["counties"][county["key"]]
-            if not isinstance(record, dict) or not isinstance(record.get("headers"), dict):
+            r = manifest["counties"][county["key"]]
+            if not isinstance(r, dict) or not isinstance(r.get("headers"), dict):
                 raise ValueError("Invalid county manifest record")
-            configured = bool(county.get("member"))
-            if record.get("status") not in {"current", "stale", "unavailable", "not_collected"}:
-                raise ValueError("Invalid county collection status")
-            if record.get("url") != county.get("url") or (record["status"] == "not_collected") != (
-                not configured
-            ):
-                raise ValueError("County source identity/configuration mismatch")
-            if configured:
-                attempted = stamp(record.get("last_attempt_at"))
-                if attempted > checked:
-                    raise ValueError("County attempt is later than the collection manifest")
-                if (record["status"] == "current") != (record.get("issue") is None):
-                    raise ValueError("County status disagrees with its source check issue")
-            elif record.get("last_attempt_at") or record.get("issue"):
-                raise ValueError("Uncollected county cannot have a source attempt")
-            raw = archive.read(county["member"]) if configured else b""
-            if record["status"] in {"current", "stale"}:
-                if hashlib.sha256(raw).hexdigest() != record.get("raw_sha256"):
-                    raise ValueError("County member fingerprint mismatch")
-                succeeded = stamp(record["last_success_at"])
-                if succeeded > attempted or attempted > checked:
-                    raise ValueError("County check timestamps are inconsistent")
-                if record["status"] == "current" and succeeded != attempted:
-                    raise ValueError("Current county was not confirmed in its latest attempt")
-                parsed = read_county(raw, county, contract)
-                if parsed["report_generated_at"] and stamp(
-                    parsed["report_generated_at"]
-                ) > checked + timedelta(minutes=5):
-                    raise ValueError("County report generation time is in the future")
-                accepted[county["key"]] = (county, record, parsed, raw)
-            elif raw or record.get("raw_sha256") or record.get("last_success_at"):
-                raise ValueError("Missing county must not contain a count snapshot")
-        return contract, manifest, accepted
+            status = r.get("status")
+            if status not in {"current", "stale", "unavailable", "not_collected"}:
+                raise ValueError("Invalid county status")
+            if status == "not_collected":
+                if county.get("url") or r.get("url") or r.get("last_attempt_at") or r.get("issue"):
+                    raise ValueError("Uncollected county cannot have a source attempt")
+            else:
+                if stamp(r.get("last_attempt_at")) > checked:
+                    raise ValueError("Attempt follows manifest")
+                if county.get("url") and r.get("url") != county["url"]:
+                    raise ValueError("County source identity mismatch")
+                if (status == "current") != (r.get("issue") is None):
+                    raise ValueError("County status disagrees with its issue")
+            if status in {"current", "stale"}:
+                accepted[county["key"]] = accepted_county(archive, county, contract, r, checked)
+            elif archive.read(county["member"]) or r.get("raw_sha256") or r.get("last_success_at"):
+                raise ValueError("Unknown county must not contain a count snapshot")
+    if not accepted:
+        raise ValueError("No accepted county reports")
+    if len({r[1]["raw_sha256"] for r in accepted.values()}) != len(accepted):
+        raise ValueError("The same report cannot supply multiple counties")
+    return contract, manifest, accepted
 
 
 def load_contract(dataset):
@@ -545,12 +627,18 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 "report_date": parsed.get("report_date"),
                 "precincts_reporting": parsed.get("precincts_reporting"),
                 "precincts_total": parsed.get("precincts_total"),
-                "absentee_scope": county.get("absentee_scope", "unspecified"),
-                "affidavit_scope": county.get("affidavit_scope", "unspecified"),
+                "absentee_scope": record.get("review", {}).get(
+                    "absentee_scope", county.get("absentee_scope", "unspecified")
+                ),
+                "affidavit_scope": record.get("review", {}).get(
+                    "affidavit_scope", county.get("affidavit_scope", "unspecified")
+                ),
                 "write_in_votes": parsed.get("write_in_votes"),
                 "write_in_label": parsed.get("write_in_label"),
                 "issue": (
-                    "review_required"
+                    "manual_snapshot"
+                    if record.get("issue") == "ManualSnapshot"
+                    else "review_required"
                     if (record.get("issue") or "").startswith("ReviewRequired:")
                     else "source_check_failed"
                     if record.get("issue")
@@ -558,7 +646,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 ),
             }
         )
-        if county.get("member") and record["status"] != "current":
+        if county.get("url") and record["status"] != "current":
             issues[county["key"]] = record.get("issue") or record["status"]
         for name, value in parsed.get("counts", {}).items():
             aggregate[name] += value
@@ -603,10 +691,11 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats.update(
         county_feed_rows=82,
         expected_counties=82,
-        configured_counties=len(source.files),
+        configured_counties=sum(r["collection_status"] != "not_collected" for r in health),
         counties_with_counts=len(accepted),
         county_feed_issues=issues,
-        coverage_complete=len(accepted) == 82 and not issues,
+        coverage_complete=len(accepted) == 82
+        and all(r["collection_status"] == "current" for r in health),
         vote_basis="covered_counties_named_candidates",
         warnings=[
             f"Only {len(accepted)} of 82 counties have accepted counts; "

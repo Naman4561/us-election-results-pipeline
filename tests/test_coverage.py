@@ -314,6 +314,8 @@ class CoverageParserTests(unittest.TestCase):
         raw = asdict(source)
         raw.pop("contests")
         raw.pop("primary_filename")
+        raw.pop("supplemental_members")
+        raw.pop("collector_overrides")
         old = {
             "source": raw,
             "validator_version": __version__,

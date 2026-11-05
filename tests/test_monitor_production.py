@@ -121,6 +121,31 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual(set(issues), {"county/MS/MADISON", "county/MS/HINDS"})
         self.assertIn("scan review", issues["county/MS/MADISON"])
 
+    def test_manual_county_snapshot_has_separate_freshness_without_http_failure(self):
+        self.sources["nc_test"] = replace(self.sources["nc_test"], state="MS")
+        record = dict(
+            collection_status="stale", issue="manual_snapshot", last_success_at=self.recent
+        )
+        payload = dict(
+            mode="published",
+            states={
+                "MS": dict(
+                    availability="available",
+                    races={"MS-SEN": {}},
+                    publication={"id": "county"},
+                    county_feeds={"JACKSON": record},
+                ),
+                "MN": dict(
+                    availability="available", races={"MN-SEN": {}}, publication={"id": "mn"}
+                ),
+            },
+        )
+        self.assertEqual(self.assess(dashboard=payload), {})
+        record["last_success_at"] = (self.now - timedelta(hours=7)).isoformat()
+        issues = self.assess(dashboard=payload)
+        self.assertEqual(set(issues), {"county/MS/JACKSON"})
+        self.assertIn("Manual county snapshot", issues["county/MS/JACKSON"])
+
     def test_catalog_adds_enabled_states_and_ignores_registered_pending_states(self):
         from election_pipeline.deployment import catalog
         from election_pipeline.settings import CollectorSettings

@@ -41,6 +41,18 @@ def expansion(value, name):
     return entry
 
 
+def import_county(path, name, county, report, review, prod, config):
+    with catalog.locked(path):
+        entry = expansion(catalog.read(path), name)
+        source = catalog.source_from_json(entry["source"])
+        from election_pipeline.county_import import selected
+
+        if source.state != "MS" or not entry["enabled"] or not entry["public"]:
+            raise ValueError("Select the active public Mississippi expansion source")
+        selected(source, county)
+        return json.loads(containers.import_county(entry, prod, config, county, report, review))
+
+
 def controls_ready(config):
     root = config["CONTROL_ROOT"]
     for unit, script in (
@@ -203,12 +215,10 @@ def register(path, release, image, name, status, prod, config, *, replaces=None)
                     for k in ("state", "election_date", "dataset", "format")
                 )
                 or not source.contests
-                or not set(existing[0][1]["races"]) < set(entry["races"])
+                or not catalog.expands_coverage(existing[0][1], entry)
                 or status != existing[0][1]["status"]
             ):
-                raise ValueError(
-                    "Replacement must preserve election/status and expand existing races"
-                )
+                raise ValueError("Replacement must preserve election/status and admitted coverage")
         elif existing:
             raise ValueError("Source/state is already owned; use an explicit coverage replacement")
         # A legacy backup already in flight may not hold the new catalog lock.

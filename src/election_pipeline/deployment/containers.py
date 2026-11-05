@@ -143,6 +143,43 @@ def run_job(entry, prod, config, arguments, *, timeout=240):
         subprocess.run(["docker", "rm", "-f", name], capture_output=True, timeout=20, check=False)
 
 
+def import_county(entry, prod, config, county, report, review):
+    """An offline import needs the data mount, but no database credentials or network."""
+    root = Path(prod["DATA_DIR"]).resolve()
+    paths = []
+    for original in (report, review):
+        path = Path(original).resolve(strict=True)
+        if not path.is_file():
+            raise ValueError("County input must be a file within DATA_DIR")
+        paths.append("/app/data/" + path.relative_to(root).as_posix())
+    name = "election-expansion-import-" + uuid.uuid4().hex
+    args = [
+        *base_args(name, entry["image_id"], config, network=False),
+        "--rm",
+        "--mount",
+        f"type=bind,src={root},dst=/app/data",
+        entry["image_id"],
+        "python",
+        "-m",
+        "election_pipeline",
+        "import-county",
+        "--source",
+        entry["source"]["source_id"],
+        "--county",
+        county,
+        "--data-dir",
+        "/app/data",
+        "--file",
+        paths[0],
+        "--review-json",
+        paths[1],
+    ]
+    try:
+        return command(args, timeout=120)
+    finally:
+        subprocess.run(["docker", "rm", "-f", name], capture_output=True, timeout=20, check=False)
+
+
 def metadata(image, source_id):
     return json.loads(
         command(

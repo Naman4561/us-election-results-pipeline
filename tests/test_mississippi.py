@@ -47,6 +47,9 @@ EXPECTED = {
     "PIKE": (7333, 5150, 197),
     "RANKIN": (18513, 31654, 1164),
     "WARREN": (8117, 6148, 378),
+    "LAFAYETTE": (8383, 8265, 368),
+    "LAMAR": (7481, 12914, 625),
+    "SUNFLOWER": (5296, 1655, 79),
 }
 
 
@@ -61,10 +64,18 @@ class MississippiTests(unittest.TestCase):
         self.counties = {c["key"]: c for c in self.policy["counties"]}
         with zipfile.ZipFile(FIXTURE) as archive:
             self.raw = {
-                c["key"]: archive.read(c["member"])
+                c["key"]: archive.read(c["member"]) if c["member"] in archive.namelist() else b""
                 for c in self.policy["counties"]
-                if c.get("member")
+                if c.get("url")
             }
+        with zipfile.ZipFile(ROOT / "tests/fixtures/mississippi/expansion.zip") as archive:
+            self.raw.update(
+                {
+                    c["key"]: archive.read(c["member"])
+                    for c in self.policy["counties"]
+                    if c["member"] in archive.namelist()
+                }
+            )
         self.store = ArchiveStore(self.root, self.source)
 
     def fetcher(self, failures=None, bodies=None, conditional=False):
@@ -74,7 +85,7 @@ class MississippiTests(unittest.TestCase):
             county = by_url[url]
             key = county["key"]
             self.assertLessEqual(limits.timeout_seconds, 12)
-            self.assertLessEqual(limits.max_download_bytes * 10, self.settings.max_download_bytes)
+            self.assertLessEqual(limits.max_download_bytes, 8_000_000)
             if failures and key in failures:
                 return FetchResponse(failures[key], {}, url)
             if conditional and conditions:
@@ -182,7 +193,7 @@ class MississippiTests(unittest.TestCase):
         self.assertEqual(report["outcome"], "parsed", report)
         self.assertEqual(
             (report["output_rows"], report["county_feed_rows"], report["counties_with_counts"]),
-            (33, 82, 10),
+            (42, 82, 13),
         )
         self.assertFalse(report["coverage_complete"])
         self.assertEqual(report["county_reconciliation"], "passed")
@@ -190,7 +201,7 @@ class MississippiTests(unittest.TestCase):
             r["choice"]: int(r["total_votes"]) for r in self.read(report, "contest_results.csv")
         }
         self.assertEqual(
-            contests, {"Scott Colom": 169903, "Cindy Hyde-Smith": 139380, "Ty Pinkins": 6218}
+            contests, {"Scott Colom": 191063, "Cindy Hyde-Smith": 162214, "Ty Pinkins": 7290}
         )
         feeds = {r["county"]: r for r in self.read(report, "county_feeds.csv")}
         self.assertEqual(feeds["JACKSON"]["collection_status"], "not_collected")
@@ -217,7 +228,7 @@ class MississippiTests(unittest.TestCase):
         path, _ = self.collect(failures={"HINDS": 403})
         report = self.parse(path)
         self.assertEqual(report["outcome"], "parsed", report)
-        self.assertEqual(report["counties_with_counts"], 9)
+        self.assertEqual(report["counties_with_counts"], 12)
         feeds = {r["county"]: r for r in self.read(report, "county_feeds.csv")}
         self.assertEqual(feeds["HINDS"]["collection_status"], "unavailable")
         self.assertNotIn("HINDS", {r["county"] for r in self.read(report, "county_results.csv")})
@@ -233,7 +244,7 @@ class MississippiTests(unittest.TestCase):
         self.assertEqual(new["last_success_at"], old["last_success_at"])
         self.assertEqual(updated["counties"]["PIKE"]["status"], "current")
         report = self.parse(second)
-        self.assertEqual(report["counties_with_counts"], 10)
+        self.assertEqual(report["counties_with_counts"], 13)
         self.assertIn("HINDS", report["county_feed_issues"])
 
     def test_changed_scan_is_quarantined_and_needs_review_while_other_counties_continue(self):
@@ -337,7 +348,7 @@ class MississippiTests(unittest.TestCase):
     def test_dashboard_coverage_age_and_unknowns_do_not_turn_into_statewide_totals(self):
         path, _ = self.collect()
         payload, feeds = self.payload(self.parse(path))
-        self.assertEqual(payload["county_collection"]["with_results"], 10)
+        self.assertEqual(payload["county_collection"]["with_results"], 13)
         self.assertFalse(payload["county_collection"]["complete"])
         self.assertEqual(payload["county_feeds"]["JACKSON"]["collection_status"], "not_collected")
         self.assertNotIn("JACKSON", payload["races"]["MS-SEN"]["counties"])
@@ -347,7 +358,7 @@ class MississippiTests(unittest.TestCase):
         aged = with_county_feeds(
             payload, json.loads((STATIC / "ms-map.json").read_text()), feeds, now=now
         )
-        self.assertEqual(aged["county_collection"]["stale"], 10)
+        self.assertEqual(aged["county_collection"]["stale"], 13)
         self.assertEqual(aged["races"], payload["races"])
         with self.assertRaises(ValueError):
             with_county_feeds(payload, json.loads((STATIC / "ms-map.json").read_text()), feeds[:-1])
@@ -369,7 +380,7 @@ class MississippiTests(unittest.TestCase):
         self.assertEqual(
             {c["fips"] for c in geo["counties"]}, {c["fips"] for c in self.policy["counties"]}
         )
-        self.assertEqual(demo_payload(geo, "MS")["county_collection"]["not_collected"], 72)
+        self.assertEqual(demo_payload(geo, "MS")["county_collection"]["not_collected"], 69)
 
     def test_partial_reference_cannot_claim_statewide_independent_agreement(self):
         conn = MagicMock()
@@ -422,7 +433,7 @@ class MississippiTests(unittest.TestCase):
         with patch("election_pipeline.dashboard.server.psycopg.connect", return_value=conn):
             first, second = provider(), provider()
         self.assertEqual(first["races"], second["races"])
-        self.assertEqual(first["county_collection"]["with_results"], 10)
+        self.assertEqual(first["county_collection"]["with_results"], 13)
         for call in conn.execute.call_args_list[3:6]:
             self.assertEqual(call.args[1], ("ms-frozen",))
         self.assertEqual(len(conn.execute.call_args_list), 9)
@@ -468,7 +479,7 @@ class MississippiDatabaseTests(unittest.TestCase):
                 conn.execute("SELECT count(*) AS n FROM ms.county_candidate_results").fetchone()[
                     "n"
                 ],
-                30,
+                39,
             )
             conn.execute("SET ROLE election_dashboard")
             conn.execute("SELECT * FROM ms.county_feed_status").fetchall()
@@ -498,6 +509,44 @@ class MississippiDatabaseTests(unittest.TestCase):
                 (fixture.source.source_id,),
             ).fetchone()
             self.assertEqual(str(current["publication_id"]), published["publication_id"])
+
+        # Capacity check only: the 69 additions are explicitly synthetic test reviews.
+        from test_county_scaling import all_imports
+
+        target = fixture.store.temporary_download()
+        fetched = county_files.fetch_bundle(
+            fixture.source,
+            fixture.settings,
+            target,
+            previous=path,
+            imports=all_imports(fixture),
+            offline=True,
+        )
+        complete, _ = fixture.store.commit_download(target, fetched.sha256)
+        scaled = fixture.parse(complete)
+        loaded = load_parsed(
+            fixture.source, fixture.settings, fixture.root, Path(scaled["output_dir"]), db
+        )
+        self.assertEqual(loaded["outcome"], "succeeded", loaded)
+        prepared = publication.prepare(ROOT, db, loaded["release_id"], "unofficial")
+        published = publication.publish_prepared(ROOT, db, prepared["candidate_id"])
+        self.assertEqual(published["outcome"], "published", published)
+        with connect(db) as conn:
+            self.assertEqual(
+                conn.execute(
+                    "SELECT count(*) AS n FROM ms.county_candidate_results WHERE publication_id=%s",
+                    (published["publication_id"],),
+                ).fetchone()["n"],
+                246,
+            )
+            self.assertEqual(
+                conn.execute(
+                    "SELECT count(*) AS n FROM ms.county_feed_status "
+                    "WHERE publication_id=%s AND issue='manual_snapshot'",
+                    (published["publication_id"],),
+                ).fetchone()["n"],
+                69,
+            )
 
 
 if __name__ == "__main__":

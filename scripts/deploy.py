@@ -27,6 +27,11 @@ def main():
     sub.add_parser("recover-coverage-retirement")
     admitted = sub.add_parser("activate-sources")
     admitted.add_argument("--source", action="append", required=True)
+    county = sub.add_parser("import-county")
+    county.add_argument("--source", required=True)
+    county.add_argument("--county", required=True)
+    county.add_argument("--file", type=Path, required=True)
+    county.add_argument("--review-json", type=Path, required=True)
     expand = sub.add_parser("coverage")
     expand.add_argument("phase", choices=("prepare", "activate", "retire"))
     expand.add_argument("--states", nargs="+", required=True, choices=sorted(coverage.STATES))
@@ -97,6 +102,10 @@ def main():
                 prod,
                 config,
                 replaces=args.replaces,
+            )
+        elif action == "import-county":
+            result = control.import_county(
+                path, args.source, args.county, args.file, args.review_json, prod, config
             )
         elif action == "activate-sources":
             result = coverage.activate_sources(path, args.source, prod, config)

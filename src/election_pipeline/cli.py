@@ -102,6 +102,18 @@ def main(argv: list[str] | None = None) -> int:
         help="Also publish this replay",
     )
 
+    for name in ("import-county", "county-template"):
+        command = commands.add_parser(name)
+        command.add_argument("--config", type=Path, default=Path("config/sources.toml"))
+        command.add_argument("--source", required=True)
+        command.add_argument("--county", required=True)
+        command.add_argument("--file", type=Path, required=True)
+        if name == "import-county":
+            command.add_argument("--data-dir", type=Path, default=Path("data"))
+            command.add_argument("--review-json", type=Path, required=True)
+        else:
+            command.add_argument("--output", type=Path, required=True)
+
     args = parser.parse_args(argv)
     try:
         settings, sources = load_config(args.config)
@@ -120,6 +132,22 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         if args.source and args.source not in sources:
             raise ValueError(f"Unknown source: {args.source}; use list-sources")
+        if args.command in ("import-county", "county-template"):
+            from election_pipeline.county_import import import_county, write_template
+
+            if args.command == "county-template":
+                result = write_template(sources[args.source], args.county, args.file, args.output)
+            else:
+                result = import_county(
+                    sources[args.source],
+                    settings,
+                    args.data_dir,
+                    args.county,
+                    args.file,
+                    args.review_json,
+                )
+            print(json.dumps(result, sort_keys=True))
+            return 0
         if args.command == "run":
             from election_pipeline.workflow import run_source
 

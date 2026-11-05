@@ -481,7 +481,7 @@ function renderStatePanel() {
     target.append(
       element(
         "p",
-        `${partial.with_results} of ${partial.expected} counties have accepted counts; ${partial.current} sources currently confirmed, ${partial.stale} stale, ${partial.unavailable} unavailable. This is a partial county aggregate, not a statewide total.`,
+        `${partial.with_results} of ${partial.expected} counties have accepted counts; ${partial.current} sources currently confirmed, ${partial.manual || 0} manual snapshots, ${partial.stale - (partial.manual || 0)} stale, ${partial.unavailable} unavailable. This is a partial county aggregate, not a statewide total.`,
         "empty",
       ),
     );
@@ -497,10 +497,14 @@ function renderStatePanel() {
     target.append(
       element(
         "p",
-        (feed.collection_status === "stale"
-          ? "STALE SOURCE · Last accepted counts retained. "
-          : "") +
-          "Last successful check: " +
+        (feed.acquisition === "manual"
+          ? "MANUAL SNAPSHOT · A new reviewed import is required to update these counts. "
+          : feed.collection_status === "stale"
+            ? "STALE SOURCE · Last accepted counts retained. "
+            : "") +
+          (feed.acquisition === "manual"
+            ? "Imported report observed: "
+            : "Last successful check: ") +
           date(feed.last_success_at) +
           ". Report: " +
           (feed.report_generated_at
@@ -518,6 +522,8 @@ function renderStatePanel() {
           "empty",
         ),
       );
+    if (feed.source_note)
+      target.append(element("p", feed.source_note, "empty"));
     const scope = [];
     if (feed.absentee_scope === "excluded")
       scope.push("Absentee ballots excluded");

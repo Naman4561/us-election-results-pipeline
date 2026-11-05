@@ -187,6 +187,7 @@ contests = ["NE-SEN", "NE-GOV", "NE-01", "NE-02", "NE-03"]
 [sources.ne_2026_general_all.files]
 "election.html" = "https://electionresults.nebraska.gov/ResultsMedia.aspx"
 
+
 [sources.ms_2026_general]
 state = "MS"
 election_date = "2026-11-03"
@@ -195,16 +196,56 @@ format = "bundle"
 primary_filename = "county-status.json"
 contests = ["MS-SEN"]
 min_interval_seconds = 300
-expected_members = ["county-status.json", "desoto.pdf", "hancock.pdf", "hinds.pdf", "lauderdale.pdf", "madison.pdf", "monroe.pdf", "neshoba.html", "pike.pdf", "rankin.html", "warren.pdf"]
+expected_members = ["county-status.json", "adams.report", "alcorn.report", "amite.report", "attala.report", "benton.report", "bolivar.report", "calhoun.report", "carroll.report", "chickasaw.report", "choctaw.report", "claiborne.report", "clarke.report", "clay.report", "coahoma.report", "copiah.report", "covington.report", "desoto.pdf", "forrest.report", "franklin.report", "george.report", "greene.report", "grenada.report", "hancock.pdf", "harrison.report", "hinds.pdf", "holmes.report", "humphreys.report", "issaquena.report", "itawamba.report", "jackson.report", "jasper.report", "jefferson.report", "jeffersondavis.report", "jones.report", "kemper.report", "lafayette.pdf", "lamar.pdf", "lauderdale.pdf", "lawrence.report", "leake.report", "lee.report", "leflore.report", "lincoln.report", "lowndes.report", "madison.pdf", "marion.report", "marshall.report", "monroe.pdf", "montgomery.report", "neshoba.html", "newton.report", "noxubee.report", "oktibbeha.report", "panola.report", "pearlriver.report", "perry.report", "pike.pdf", "pontotoc.report", "prentiss.report", "quitman.report", "rankin.html", "scott.report", "sharkey.report", "simpson.report", "smith.report", "stone.report", "sunflower.html", "tallahatchie.report", "tate.report", "tippah.report", "tishomingo.report", "tunica.report", "union.report", "walthall.report", "warren.pdf", "washington.report", "wayne.report", "webster.report", "wilkinson.report", "winston.report", "yalobusha.report", "yazoo.report"]
+supplemental_members = ["adams.report", "alcorn.report", "amite.report", "attala.report", "benton.report", "bolivar.report", "calhoun.report", "carroll.report", "chickasaw.report", "choctaw.report", "claiborne.report", "clarke.report", "clay.report", "coahoma.report", "copiah.report", "covington.report", "forrest.report", "franklin.report", "george.report", "greene.report", "grenada.report", "harrison.report", "holmes.report", "humphreys.report", "issaquena.report", "itawamba.report", "jackson.report", "jasper.report", "jefferson.report", "jeffersondavis.report", "jones.report", "kemper.report", "lawrence.report", "leake.report", "lee.report", "leflore.report", "lincoln.report", "lowndes.report", "marion.report", "marshall.report", "montgomery.report", "newton.report", "noxubee.report", "oktibbeha.report", "panola.report", "pearlriver.report", "perry.report", "pontotoc.report", "prentiss.report", "quitman.report", "scott.report", "sharkey.report", "simpson.report", "smith.report", "stone.report", "tallahatchie.report", "tate.report", "tippah.report", "tishomingo.report", "tunica.report", "union.report", "walthall.report", "washington.report", "wayne.report", "webster.report", "wilkinson.report", "winston.report", "yalobusha.report", "yazoo.report"]
+
+[sources.ms_2026_general.collector_overrides]
+max_zip_members = 100
+max_download_bytes = 134217728
+max_uncompressed_bytes = 134217728
 
 [sources.ms_2026_general.files]
 "desoto.pdf" = "https://www.desotocountyms.gov/DocumentCenter/View/11878/Results-Summary"
 "hancock.pdf" = "https://www.hancockcounty.ms.gov/DocumentCenter/View/1224/Unofficial-Results"
 "hinds.pdf" = "https://www.co.hinds.ms.us/pgs/results/Unofficial%20Summary%20Report.pdf"
+"lafayette.pdf" = "https://lafayettems.com/wp-content/uploads/2026/11/2026-GENERAL-ELECTION-UNOFFICIAL-RESULTS-AFFIDAVITS-NOT-COUNTED.pdf"
+"lamar.pdf" = "https://lamarcountyms.gov/ms/wp-content/uploads/2026/11/Election_Summary_Results3.pdf"
 "lauderdale.pdf" = "https://www.lauderdalecounty.org/wp-content/uploads/2026/11/2026-election-with-absentee.pdf"
 "madison.pdf" = "https://www.madison-co.com/elections/election_results.pdf"
 "monroe.pdf" = "https://www.monroems.com/circuitclerk/results/CUMMULATIVE_RESULTS_ALL_PRECINCTS.pdf"
 "neshoba.html" = "https://neshobacounty.net/news/general-election-results-from-november-3-2026/"
 "pike.pdf" = "https://www.pikecountyelectionresults.org/2026_general/DW.pdf"
 "rankin.html" = "https://www2.rankincounty.org/results/index.html"
+"sunflower.html" = "https://www.sunflowercircuitclerk.com/hart/ALL_PRECINCTS.html"
+"warren.pdf" = "https://warrencountyms.gov/wp-content/uploads/2026/11/General-Unofficial-November-3-Election-Results.pdf"
+
+[sources.ms_2026_general_all]
+state = "MS"
+election_date = "2026-11-03"
+url = "https://www.sos.ms.gov/MSCountyElectionInfo/"
+format = "bundle"
+primary_filename = "county-status.json"
+contests = ["MS-SEN"]
+min_interval_seconds = 300
+expected_members = ["county-status.json", "adams.report", "alcorn.report", "amite.report", "attala.report", "benton.report", "bolivar.report", "calhoun.report", "carroll.report", "chickasaw.report", "choctaw.report", "claiborne.report", "clarke.report", "clay.report", "coahoma.report", "copiah.report", "covington.report", "desoto.pdf", "forrest.report", "franklin.report", "george.report", "greene.report", "grenada.report", "hancock.pdf", "harrison.report", "hinds.pdf", "holmes.report", "humphreys.report", "issaquena.report", "itawamba.report", "jackson.report", "jasper.report", "jefferson.report", "jeffersondavis.report", "jones.report", "kemper.report", "lafayette.pdf", "lamar.pdf", "lauderdale.pdf", "lawrence.report", "leake.report", "lee.report", "leflore.report", "lincoln.report", "lowndes.report", "madison.pdf", "marion.report", "marshall.report", "monroe.pdf", "montgomery.report", "neshoba.html", "newton.report", "noxubee.report", "oktibbeha.report", "panola.report", "pearlriver.report", "perry.report", "pike.pdf", "pontotoc.report", "prentiss.report", "quitman.report", "rankin.html", "scott.report", "sharkey.report", "simpson.report", "smith.report", "stone.report", "sunflower.html", "tallahatchie.report", "tate.report", "tippah.report", "tishomingo.report", "tunica.report", "union.report", "walthall.report", "warren.pdf", "washington.report", "wayne.report", "webster.report", "wilkinson.report", "winston.report", "yalobusha.report", "yazoo.report"]
+supplemental_members = ["adams.report", "alcorn.report", "amite.report", "attala.report", "benton.report", "bolivar.report", "calhoun.report", "carroll.report", "chickasaw.report", "choctaw.report", "claiborne.report", "clarke.report", "clay.report", "coahoma.report", "copiah.report", "covington.report", "forrest.report", "franklin.report", "george.report", "greene.report", "grenada.report", "harrison.report", "holmes.report", "humphreys.report", "issaquena.report", "itawamba.report", "jackson.report", "jasper.report", "jefferson.report", "jeffersondavis.report", "jones.report", "kemper.report", "lawrence.report", "leake.report", "lee.report", "leflore.report", "lincoln.report", "lowndes.report", "marion.report", "marshall.report", "montgomery.report", "newton.report", "noxubee.report", "oktibbeha.report", "panola.report", "pearlriver.report", "perry.report", "pontotoc.report", "prentiss.report", "quitman.report", "scott.report", "sharkey.report", "simpson.report", "smith.report", "stone.report", "tallahatchie.report", "tate.report", "tippah.report", "tishomingo.report", "tunica.report", "union.report", "walthall.report", "washington.report", "wayne.report", "webster.report", "wilkinson.report", "winston.report", "yalobusha.report", "yazoo.report"]
+
+[sources.ms_2026_general_all.collector_overrides]
+max_zip_members = 100
+max_download_bytes = 134217728
+max_uncompressed_bytes = 134217728
+
+[sources.ms_2026_general_all.files]
+"desoto.pdf" = "https://www.desotocountyms.gov/DocumentCenter/View/11878/Results-Summary"
+"hancock.pdf" = "https://www.hancockcounty.ms.gov/DocumentCenter/View/1224/Unofficial-Results"
+"hinds.pdf" = "https://www.co.hinds.ms.us/pgs/results/Unofficial%20Summary%20Report.pdf"
+"lafayette.pdf" = "https://lafayettems.com/wp-content/uploads/2026/11/2026-GENERAL-ELECTION-UNOFFICIAL-RESULTS-AFFIDAVITS-NOT-COUNTED.pdf"
+"lamar.pdf" = "https://lamarcountyms.gov/ms/wp-content/uploads/2026/11/Election_Summary_Results3.pdf"
+"lauderdale.pdf" = "https://www.lauderdalecounty.org/wp-content/uploads/2026/11/2026-election-with-absentee.pdf"
+"madison.pdf" = "https://www.madison-co.com/elections/election_results.pdf"
+"monroe.pdf" = "https://www.monroems.com/circuitclerk/results/CUMMULATIVE_RESULTS_ALL_PRECINCTS.pdf"
+"neshoba.html" = "https://neshobacounty.net/news/general-election-results-from-november-3-2026/"
+"pike.pdf" = "https://www.pikecountyelectionresults.org/2026_general/DW.pdf"
+"rankin.html" = "https://www2.rankincounty.org/results/index.html"
+"sunflower.html" = "https://www.sunflowercircuitclerk.com/hart/ALL_PRECINCTS.html"
 "warren.pdf" = "https://warrencountyms.gov/wp-content/uploads/2026/11/General-Unofficial-November-3-Election-Results.pdf"

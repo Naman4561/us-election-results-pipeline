@@ -18,10 +18,33 @@ REVISION = re.compile(r"[0-9a-f]{40}")
 
 def source_from_json(value):
     raw = dict(value)
-    for key in ("expected_members", "expected_columns", "contests"):
+    for key in ("expected_members", "expected_columns", "contests", "supplemental_members"):
         raw[key] = tuple(raw.get(key, ()))
     raw["files"] = tuple(tuple(pair) for pair in raw.get("files", ()))
+    raw["collector_overrides"] = tuple(tuple(pair) for pair in raw.get("collector_overrides", ()))
     return Source(**raw)
+
+
+def expands_coverage(old, new):
+    """Explicit county replacements preserve prior feeds while expanding admission."""
+    if set(old["races"]) < set(new["races"]):
+        return True
+    from election_pipeline.states import STATES
+
+    previous, candidate = source_from_json(old["source"]), source_from_json(new["source"])
+    adapter = STATES.get(candidate.state)
+    return bool(
+        adapter
+        and adapter.collection_backend == "county_files"
+        and old["races"] == new["races"]
+        and previous.state == candidate.state
+        and previous.election_date == candidate.election_date
+        and previous.dataset == candidate.dataset == "election_results"
+        and previous.format == candidate.format == "bundle"
+        and set(previous.files) <= set(candidate.files)
+        and set(previous.expected_members) <= set(candidate.expected_members)
+        and candidate.supplemental_members
+    )
 
 
 def validate(value):
@@ -71,7 +94,7 @@ def validate(value):
             replacement["replaces"] != old_name
             or replacement["worker"] != "expansion"
             or replacement["source"]["election_date"] != old["source"]["election_date"]
-            or not set(old["races"]) < set(replacement["races"])
+            or not expands_coverage(old, replacement)
             or sum(entry["public"] for _, entry in entries) > 1
         ):
             raise ValueError("Invalid coverage replacement or multiple public results owners")

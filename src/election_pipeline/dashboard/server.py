@@ -170,6 +170,9 @@ def with_county_feeds(payload, geography, rows, now=None):
     """Attach frozen provenance, deriving operational age without changing vote counts."""
     now = now or datetime.now(timezone.utc)
     names = {f["id"]: f for f in geography["counties"]}
+    notes = {
+        c["key"]: c.get("source_note") for c in state_adapter("MS").parser.policy()["counties"]
+    }
     records = {}
     accepted = set()
     for original in rows:
@@ -181,6 +184,14 @@ def with_county_feeds(payload, geography, rows, now=None):
         if status not in {"current", "stale", "unavailable", "not_collected"}:
             raise ValueError("Invalid published county collection status")
         row["name"] = names[key]["name"]
+        row["source_note"] = notes.get(key)
+        row["acquisition"] = (
+            "manual"
+            if row.get("issue") == "manual_snapshot"
+            else "automatic"
+            if status != "not_collected"
+            else "not_configured"
+        )
         if status in {"current", "stale"}:
             accepted.add(key)
             succeeded = row["last_success_at"]
@@ -208,6 +219,7 @@ def with_county_feeds(payload, geography, rows, now=None):
             "expected": len(names),
             "configured": len(names) - counts["not_collected"],
             "with_results": len(accepted),
+            "manual": sum(r["acquisition"] == "manual" for r in records.values()),
             **counts,
             "complete": len(accepted) == len(names) and not counts["stale"],
             "basis": "named_candidates_from_collected_counties",
@@ -262,7 +274,7 @@ def demo_payload(geography, state="NC"):
     feeds = None
     if state_adapter(state).county_feed_status:
         configured = {
-            c["key"] for c in state_adapter(state).parser.policy()["counties"] if c.get("member")
+            c["key"] for c in state_adapter(state).parser.policy()["counties"] if c.get("url")
         }
         rows = [r for r in rows if county_key(r["county"]) in configured]
         now = "2026-11-03T18:00:00+00:00"  # Fixed synthetic checks keep demo ETags stable.

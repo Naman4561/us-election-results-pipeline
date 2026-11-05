@@ -20,6 +20,7 @@ class InvalidArchive(InvalidPayload):
 
 
 def validate_archive(path: Path, source: Source, settings: CollectorSettings) -> list[dict]:
+    settings = source.effective_settings(settings)
     if source.format not in {"zip", "bundle"}:
         raise InvalidArchive(f"No validator implemented for {source.format}")
     try:

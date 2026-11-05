@@ -1,5 +1,5 @@
 {
-  "inventory_version": 1,
+  "inventory_version": 2,
   "state": "MS",
   "election_date": "2026-11-03",
   "priority_contest": "MS-SEN",
@@ -7,8 +7,8 @@
   "runtime_enabled": false,
   "statewide_coverage_complete": false,
   "expected_counties": 82,
-  "verified_current_sources": 10,
-  "counties_without_verified_current_source": 72,
+  "verified_current_sources": 13,
+  "counties_without_verified_current_source": 69,
   "identifier_note": "ms_sos_county_code is Mississippi's alphabetical 01-82 county code, not a Census FIPS code.",
   "scope_note": "Source research inventory, not a runtime source configuration. Captured count examples are unofficial county snapshots, not statewide totals or a statement that all ballots are counted. Unknown write-ins and reporting denominators remain null.",
   "authority_urls": [
@@ -53,7 +53,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "ADAMS",
+        "fips": "28001",
+        "member": "adams.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Alcorn",
@@ -95,7 +104,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "ALCORN",
+        "fips": "28003",
+        "member": "alcorn.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Amite",
@@ -132,7 +150,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "AMITE",
+        "fips": "28005",
+        "member": "amite.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Attala",
@@ -169,7 +196,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "ATTALA",
+        "fips": "28007",
+        "member": "attala.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Benton",
@@ -240,7 +276,16 @@
       "current_source": null,
       "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
       "follow_up_url": "https://www.bentoncountyms.gov/tools-and-tips",
-      "notes": "The results page is a placeholder with no current result file found."
+      "notes": "The results page is a placeholder with no current result file found.",
+      "intake": {
+        "county_key": "BENTON",
+        "fips": "28009",
+        "member": "benton.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Bolivar",
@@ -270,7 +315,16 @@
       "current_source": null,
       "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
       "follow_up_url": "https://bolivar-circuit-clerk.ms/election-results/",
-      "notes": "The clerk page currently links the November 2024 general result."
+      "notes": "The clerk page currently links the November 2024 general result.",
+      "intake": {
+        "county_key": "BOLIVAR",
+        "fips": "28011",
+        "member": "bolivar.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Calhoun",
@@ -299,7 +353,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "CALHOUN",
+        "fips": "28013",
+        "member": "calhoun.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Carroll",
@@ -331,7 +394,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "CARROLL",
+        "fips": "28015",
+        "member": "carroll.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Chickasaw",
@@ -360,7 +432,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "CHICKASAW",
+        "fips": "28017",
+        "member": "chickasaw.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Choctaw",
@@ -379,7 +460,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "CHOCTAW",
+        "fips": "28019",
+        "member": "choctaw.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Claiborne",
@@ -412,7 +502,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "CLAIBORNE",
+        "fips": "28021",
+        "member": "claiborne.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Clarke",
@@ -445,7 +544,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "CLARKE",
+        "fips": "28023",
+        "member": "clarke.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Clay",
@@ -512,7 +620,16 @@
       "current_source": null,
       "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
       "follow_up_url": "https://www.claycountyms.com/election-results/",
-      "notes": "Indexed results are older; the current site probe serves Coming Soon."
+      "notes": "Indexed results are older; the current site probe serves Coming Soon.",
+      "intake": {
+        "county_key": "CLAY",
+        "fips": "28025",
+        "member": "clay.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Coahoma",
@@ -567,7 +684,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "COAHOMA",
+        "fips": "28027",
+        "member": "coahoma.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Copiah",
@@ -608,7 +734,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "COPIAH",
+        "fips": "28029",
+        "member": "copiah.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Covington",
@@ -669,7 +804,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "COVINGTON",
+        "fips": "28031",
+        "member": "covington.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "DeSoto",
@@ -787,7 +931,16 @@
         "all_ballots_counted": null,
         "write_in_label": "Write-In Totals"
       },
-      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet.",
+      "intake": {
+        "county_key": "DESOTO",
+        "fips": "28033",
+        "member": "desoto.pdf",
+        "method": "automatic",
+        "status": "configured_source",
+        "report_url": "https://www.desotocountyms.gov/DocumentCenter/View/11878/Results-Summary",
+        "format": "pdf_text_electionware"
+      }
     },
     {
       "county": "Forrest",
@@ -830,7 +983,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "FORREST",
+        "fips": "28035",
+        "member": "forrest.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Franklin",
@@ -858,7 +1020,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "FRANKLIN",
+        "fips": "28037",
+        "member": "franklin.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "George",
@@ -931,7 +1102,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "GEORGE",
+        "fips": "28039",
+        "member": "george.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Greene",
@@ -992,7 +1172,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "GREENE",
+        "fips": "28041",
+        "member": "greene.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Grenada",
@@ -1011,7 +1200,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "GRENADA",
+        "fips": "28043",
+        "member": "grenada.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Hancock",
@@ -1131,7 +1329,16 @@
         "all_ballots_counted": null,
         "write_in_label": "Write-In Totals"
       },
-      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet.",
+      "intake": {
+        "county_key": "HANCOCK",
+        "fips": "28045",
+        "member": "hancock.pdf",
+        "method": "automatic",
+        "status": "configured_source",
+        "report_url": "https://www.hancockcounty.ms.gov/DocumentCenter/View/1224/Unofficial-Results",
+        "format": "pdf_text_electionware"
+      }
     },
     {
       "county": "Harrison",
@@ -1261,7 +1468,16 @@
       "current_source": null,
       "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
       "follow_up_url": "https://harrisoncountyms.gov/government/election_commission/index.php",
-      "notes": "Government site and election pages checked; no November 2026 Senate file verified."
+      "notes": "Government site and election pages checked; no November 2026 Senate file verified.",
+      "intake": {
+        "county_key": "HARRISON",
+        "fips": "28047",
+        "member": "harrison.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Hinds",
@@ -1326,7 +1542,16 @@
         "all_ballots_counted": null,
         "write_in_label": "Write-In Totals"
       },
-      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet.",
+      "intake": {
+        "county_key": "HINDS",
+        "fips": "28049",
+        "member": "hinds.pdf",
+        "method": "automatic",
+        "status": "configured_source",
+        "report_url": "https://www.co.hinds.ms.us/pgs/results/Unofficial%20Summary%20Report.pdf",
+        "format": "pdf_text_electionware"
+      }
     },
     {
       "county": "Holmes",
@@ -1367,7 +1592,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "HOLMES",
+        "fips": "28051",
+        "member": "holmes.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Humphreys",
@@ -1399,7 +1633,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "HUMPHREYS",
+        "fips": "28053",
+        "member": "humphreys.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Issaquena",
@@ -1418,7 +1661,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "ISSAQUENA",
+        "fips": "28055",
+        "member": "issaquena.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Itawamba",
@@ -1437,7 +1689,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "ITAWAMBA",
+        "fips": "28057",
+        "member": "itawamba.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Jackson",
@@ -1513,7 +1774,16 @@
       "current_source": null,
       "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
       "follow_up_url": "https://co.jackson.ms.us/Archive.aspx?AMID=42",
-      "notes": "The current archive lists March 2026 primary files and November 2024 general files, not a verified November 2026 general report."
+      "notes": "The current archive lists March 2026 primary files and November 2024 general files, not a verified November 2026 general report.",
+      "intake": {
+        "county_key": "JACKSON",
+        "fips": "28059",
+        "member": "jackson.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Jasper",
@@ -1565,7 +1835,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "JASPER",
+        "fips": "28061",
+        "member": "jasper.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Jefferson",
@@ -1629,7 +1908,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "JEFFERSON",
+        "fips": "28063",
+        "member": "jefferson.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Jefferson Davis",
@@ -1657,7 +1945,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "JEFFERSONDAVIS",
+        "fips": "28065",
+        "member": "jeffersondavis.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Jones",
@@ -1687,7 +1984,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "JONES",
+        "fips": "28067",
+        "member": "jones.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Kemper",
@@ -1755,7 +2061,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "KEMPER",
+        "fips": "28069",
+        "member": "kemper.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Lafayette",
@@ -1768,7 +2083,7 @@
       "directory_website_leads": [
         "https://lafayettems.com/"
       ],
-      "discovery_status": "official_social_lead",
+      "discovery_status": "verified_current_source",
       "probe_status": "site_inspected",
       "probed_pages": [
         {
@@ -1849,7 +2164,18 @@
       "current_source": null,
       "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
       "follow_up_url": "https://lafayettems.com/election-results/",
-      "notes": "The county results post is dated 2023 and points to clerk social accounts. No current post admitted."
+      "notes": "The county results post is dated 2023 and points to clerk social accounts. No current post admitted.",
+      "intake": {
+        "county_key": "LAFAYETTE",
+        "fips": "28071",
+        "member": "lafayette.pdf",
+        "method": "automatic",
+        "status": "configured_source",
+        "report_url": "https://lafayettems.com/wp-content/uploads/2026/11/2026-GENERAL-ELECTION-UNOFFICIAL-RESULTS-AFFIDAVITS-NOT-COUNTED.pdf",
+        "format": "pdf_scanned_electionware"
+      },
+      "expansion_report_url": "https://lafayettems.com/wp-content/uploads/2026/11/2026-GENERAL-ELECTION-UNOFFICIAL-RESULTS-AFFIDAVITS-NOT-COUNTED.pdf",
+      "source_note": null
     },
     {
       "county": "Lamar",
@@ -1862,7 +2188,7 @@
       "directory_website_leads": [
         "https://lamarcountyms.gov/ms/"
       ],
-      "discovery_status": "current_report_not_located",
+      "discovery_status": "verified_current_source",
       "probe_status": "website_unavailable_in_probe",
       "probed_pages": [
         {
@@ -1909,7 +2235,18 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "LAMAR",
+        "fips": "28073",
+        "member": "lamar.pdf",
+        "method": "automatic",
+        "status": "configured_source",
+        "report_url": "https://lamarcountyms.gov/ms/wp-content/uploads/2026/11/Election_Summary_Results3.pdf",
+        "format": "pdf_scanned_electionware"
+      },
+      "expansion_report_url": "https://lamarcountyms.gov/ms/wp-content/uploads/2026/11/Election_Summary_Results3.pdf",
+      "source_note": "In-house absentees included; mail/affidavit coverage is unspecified. Election header is November 3, 2026 but the printed report clock says December 16, 2024. Report generation time is unknown."
     },
     {
       "county": "Lauderdale",
@@ -1976,7 +2313,16 @@
         "all_ballots_counted": null,
         "write_in_label": "Write-In Totals"
       },
-      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet.",
+      "intake": {
+        "county_key": "LAUDERDALE",
+        "fips": "28075",
+        "member": "lauderdale.pdf",
+        "method": "automatic",
+        "status": "configured_source",
+        "report_url": "https://www.lauderdalecounty.org/wp-content/uploads/2026/11/2026-election-with-absentee.pdf",
+        "format": "pdf_scanned_electionware"
+      }
     },
     {
       "county": "Lawrence",
@@ -2008,7 +2354,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "LAWRENCE",
+        "fips": "28077",
+        "member": "lawrence.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Leake",
@@ -2079,7 +2434,16 @@
       "current_source": null,
       "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
       "follow_up_url": "https://leakecountyms.org/election-results/",
-      "notes": "The current results page contains a 2019 general link. Current November 2026 totals not verified."
+      "notes": "The current results page contains a 2019 general link. Current November 2026 totals not verified.",
+      "intake": {
+        "county_key": "LEAKE",
+        "fips": "28079",
+        "member": "leake.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Lee",
@@ -2108,7 +2472,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "LEE",
+        "fips": "28081",
+        "member": "lee.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Leflore",
@@ -2141,7 +2514,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "LEFLORE",
+        "fips": "28083",
+        "member": "leflore.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Lincoln",
@@ -2206,7 +2588,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "LINCOLN",
+        "fips": "28085",
+        "member": "lincoln.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Lowndes",
@@ -2256,7 +2647,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "LOWNDES",
+        "fips": "28087",
+        "member": "lowndes.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Madison",
@@ -2340,7 +2740,16 @@
         "all_ballots_counted": null,
         "write_in_label": "Write-In Totals"
       },
-      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet.",
+      "intake": {
+        "county_key": "MADISON",
+        "fips": "28089",
+        "member": "madison.pdf",
+        "method": "automatic",
+        "status": "configured_source",
+        "report_url": "https://www.madison-co.com/elections/election_results.pdf",
+        "format": "pdf_scanned_electionware"
+      }
     },
     {
       "county": "Marion",
@@ -2373,7 +2782,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "MARION",
+        "fips": "28091",
+        "member": "marion.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Marshall",
@@ -2420,7 +2838,16 @@
       "current_source": null,
       "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
       "follow_up_url": "https://www.marshall-county.com/",
-      "notes": "Current homepage probe serves Coming Soon; indexed results PDFs are historical."
+      "notes": "Current homepage probe serves Coming Soon; indexed results PDFs are historical.",
+      "intake": {
+        "county_key": "MARSHALL",
+        "fips": "28093",
+        "member": "marshall.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Monroe",
@@ -2560,7 +2987,16 @@
         "all_ballots_counted": null,
         "write_in_label": "Write-In Totals"
       },
-      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet.",
+      "intake": {
+        "county_key": "MONROE",
+        "fips": "28095",
+        "member": "monroe.pdf",
+        "method": "automatic",
+        "status": "configured_source",
+        "report_url": "https://www.monroems.com/circuitclerk/results/CUMMULATIVE_RESULTS_ALL_PRECINCTS.pdf",
+        "format": "pdf_text_electionware"
+      }
     },
     {
       "county": "Montgomery",
@@ -2592,7 +3028,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "MONTGOMERY",
+        "fips": "28097",
+        "member": "montgomery.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Neshoba",
@@ -2713,7 +3158,16 @@
         "all_ballots_counted": null,
         "write_in_label": null
       },
-      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet.",
+      "intake": {
+        "county_key": "NESHOBA",
+        "fips": "28099",
+        "member": "neshoba.html",
+        "method": "automatic",
+        "status": "configured_source",
+        "report_url": "https://neshobacounty.net/news/general-election-results-from-november-3-2026/",
+        "format": "html_county_news"
+      }
     },
     {
       "county": "Newton",
@@ -2746,7 +3200,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "NEWTON",
+        "fips": "28101",
+        "member": "newton.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Noxubee",
@@ -2778,7 +3241,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "NOXUBEE",
+        "fips": "28103",
+        "member": "noxubee.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Oktibbeha",
@@ -2806,7 +3278,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "OKTIBBEHA",
+        "fips": "28105",
+        "member": "oktibbeha.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Panola",
@@ -2834,7 +3315,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "PANOLA",
+        "fips": "28107",
+        "member": "panola.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Pearl River",
@@ -2969,7 +3459,16 @@
       "current_source": null,
       "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
       "follow_up_url": "https://www.pearlrivercounty.net/AlertCenter.aspx?AID=Live-election-results-will-be-available--27",
-      "notes": "The November 3, 2026 county alert links ArcGIS experience 4ed615cba73e41dc898ef1825f8c0fee. Its config still names primary/local races and the referenced election_results FeatureServer returned Invalid URL. No Senate data verified."
+      "notes": "The November 3, 2026 county alert links ArcGIS experience 4ed615cba73e41dc898ef1825f8c0fee. Its config still names primary/local races and the referenced election_results FeatureServer returned Invalid URL. No Senate data verified.",
+      "intake": {
+        "county_key": "PEARLRIVER",
+        "fips": "28109",
+        "member": "pearlriver.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Perry",
@@ -3001,7 +3500,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "PERRY",
+        "fips": "28111",
+        "member": "perry.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Pike",
@@ -3147,7 +3655,16 @@
         "all_ballots_counted": null,
         "write_in_label": "Write-In Totals"
       },
-      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet.",
+      "intake": {
+        "county_key": "PIKE",
+        "fips": "28113",
+        "member": "pike.pdf",
+        "method": "automatic",
+        "status": "configured_source",
+        "report_url": "https://www.pikecountyelectionresults.org/2026_general/DW.pdf",
+        "format": "pdf_text_electionware"
+      }
     },
     {
       "county": "Pontotoc",
@@ -3175,7 +3692,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "PONTOTOC",
+        "fips": "28115",
+        "member": "pontotoc.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Prentiss",
@@ -3226,7 +3752,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "PRENTISS",
+        "fips": "28117",
+        "member": "prentiss.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Quitman",
@@ -3259,7 +3794,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "QUITMAN",
+        "fips": "28119",
+        "member": "quitman.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Rankin",
@@ -3417,7 +3961,16 @@
         "write_in_label": null,
         "alternate_capture_archive_member": "rankin-cumulative.pdf"
       },
-      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet.",
+      "intake": {
+        "county_key": "RANKIN",
+        "fips": "28121",
+        "member": "rankin.html",
+        "method": "automatic",
+        "status": "configured_source",
+        "report_url": "https://www2.rankincounty.org/results/index.html",
+        "format": "html_hart_cumulative"
+      }
     },
     {
       "county": "Scott",
@@ -3502,7 +4055,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "SCOTT",
+        "fips": "28123",
+        "member": "scott.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Sharkey",
@@ -3539,7 +4101,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "SHARKEY",
+        "fips": "28125",
+        "member": "sharkey.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Simpson",
@@ -3580,7 +4151,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "SIMPSON",
+        "fips": "28127",
+        "member": "simpson.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Smith",
@@ -3625,7 +4205,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "SMITH",
+        "fips": "28129",
+        "member": "smith.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Stone",
@@ -3658,7 +4247,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "STONE",
+        "fips": "28131",
+        "member": "stone.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Sunflower",
@@ -3671,7 +4269,7 @@
       "directory_website_leads": [
         "https://www.sunflowercounty.ms.gov/"
       ],
-      "discovery_status": "current_report_not_located",
+      "discovery_status": "verified_current_source",
       "probe_status": "site_inspected",
       "probed_pages": [
         {
@@ -3690,7 +4288,18 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "SUNFLOWER",
+        "fips": "28133",
+        "member": "sunflower.html",
+        "method": "automatic",
+        "status": "configured_source",
+        "report_url": "https://www.sunflowercircuitclerk.com/hart/ALL_PRECINCTS.html",
+        "format": "html_hart_sunflower"
+      },
+      "expansion_report_url": "https://www.sunflowercircuitclerk.com/hart/ALL_PRECINCTS.html",
+      "source_note": null
     },
     {
       "county": "Tallahatchie",
@@ -3710,7 +4319,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "TALLAHATCHIE",
+        "fips": "28135",
+        "member": "tallahatchie.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Tate",
@@ -3781,7 +4399,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "TATE",
+        "fips": "28137",
+        "member": "tate.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Tippah",
@@ -3803,7 +4430,16 @@
       "current_source": null,
       "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
       "follow_up_url": "https://www.co.tippah.ms.us/election-results/",
-      "notes": "An official results page is indexed, but this research environment received 502/503 when opening it. Contents and election identity remain unverified; do not assume a production-host failure."
+      "notes": "An official results page is indexed, but this research environment received 502/503 when opening it. Contents and election identity remain unverified; do not assume a production-host failure.",
+      "intake": {
+        "county_key": "TIPPAH",
+        "fips": "28139",
+        "member": "tippah.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Tishomingo",
@@ -3836,7 +4472,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "TISHOMINGO",
+        "fips": "28141",
+        "member": "tishomingo.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Tunica",
@@ -3868,7 +4513,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "TUNICA",
+        "fips": "28143",
+        "member": "tunica.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Union",
@@ -3900,7 +4554,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "UNION",
+        "fips": "28145",
+        "member": "union.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Walthall",
@@ -3928,7 +4591,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "WALTHALL",
+        "fips": "28147",
+        "member": "walthall.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Warren",
@@ -4030,7 +4702,16 @@
         "all_ballots_counted": null,
         "write_in_label": "Unadjudicated Write-In"
       },
-      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet."
+      "next_action": "Build and test the parser for this format; then verify collection from the production host. Not admitted for publication yet.",
+      "intake": {
+        "county_key": "WARREN",
+        "fips": "28149",
+        "member": "warren.pdf",
+        "method": "automatic",
+        "status": "configured_source",
+        "report_url": "https://warrencountyms.gov/wp-content/uploads/2026/11/General-Unofficial-November-3-Election-Results.pdf",
+        "format": "pdf_scanned_votingworks"
+      }
     },
     {
       "county": "Washington",
@@ -4094,7 +4775,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "WASHINGTON",
+        "fips": "28151",
+        "member": "washington.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Wayne",
@@ -4139,7 +4829,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "WAYNE",
+        "fips": "28153",
+        "member": "wayne.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Webster",
@@ -4176,7 +4875,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "WEBSTER",
+        "fips": "28155",
+        "member": "webster.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Wilkinson",
@@ -4217,7 +4925,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "WILKINSON",
+        "fips": "28157",
+        "member": "wilkinson.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Winston",
@@ -4245,7 +4962,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "WINSTON",
+        "fips": "28159",
+        "member": "winston.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Yalobusha",
@@ -4278,7 +5004,16 @@
       ],
       "election_page_leads": [],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "YALOBUSHA",
+        "fips": "28161",
+        "member": "yalobusha.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     },
     {
       "county": "Yazoo",
@@ -4343,7 +5078,16 @@
         }
       ],
       "current_source": null,
-      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time."
+      "next_action": "Obtain an official current cumulative Senate report or export from the circuit clerk/election commission; verify county, election date, included ballot categories and report time.",
+      "intake": {
+        "county_key": "YAZOO",
+        "fips": "28163",
+        "member": "yazoo.report",
+        "method": "reviewed_file",
+        "status": "awaiting_official_report",
+        "report_url": null,
+        "format": "reviewed_file"
+      }
     }
   ],
   "capture_archive": {
@@ -4352,5 +5096,7 @@
     "bytes": 648052,
     "original_source_files": 11,
     "note": "Original public county source captures for offline parser development; fixed snapshots, not current live statewide results."
-  }
+  },
+  "intake_slots": 82,
+  "implementation_note": "13 configured official URLs; 69 reviewed-file intake slots await original official county reports. Intake availability does not establish current vote coverage. Existing probe records retain their original check times."
 }

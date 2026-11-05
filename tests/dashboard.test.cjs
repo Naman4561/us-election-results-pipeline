@@ -53,7 +53,7 @@ test("national/state map navigation and coverage statuses", async (t) => {
   assert.equal(status("ME"), "not_covered");
   assert.equal(status("MS"), "partial");
   assert(
-    d.querySelector('path[data-id="MS"] title').textContent.includes("10/82"),
+    d.querySelector('path[data-id="MS"] title').textContent.includes("13/82"),
   );
   click('path[data-id="MS"]');
   await settle();
@@ -96,6 +96,28 @@ test("national/state map navigation and coverage statuses", async (t) => {
     d.querySelector("#result-content").textContent.includes("requires review"),
   );
   assert.equal(calls, msCalls + 1, "Mississippi county clicks use cached data");
+  payload.states.MS.county_feeds.HINDS.issue = "manual_snapshot";
+  payload.states.MS.county_feeds.HINDS.acquisition = "manual";
+  payload.states.MS.county_feeds.HINDS.source_note =
+    "Report generation time is unknown.";
+  click("#refresh");
+  await settle();
+  assert(
+    d.querySelector("#result-content").textContent.includes("MANUAL SNAPSHOT"),
+  );
+  assert(
+    d
+      .querySelector("#result-content")
+      .textContent.includes("Imported report observed"),
+  );
+  assert(
+    d
+      .querySelector("#result-content")
+      .textContent.includes("generation time is unknown"),
+  );
+  delete payload.states.MS.county_feeds.HINDS.acquisition;
+  delete payload.states.MS.county_feeds.HINDS.source_note;
+  payload.states.MS.county_feeds.HINDS.issue = "source_check_failed";
   delete payload.states.MS.races["MS-SEN"].counties.HINDS;
   payload.states.MS.county_feeds.HINDS.collection_status = "unavailable";
   click("#refresh");

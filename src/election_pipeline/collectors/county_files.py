@@ -14,24 +14,60 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import replace
 from datetime import timedelta
 from pathlib import Path
+from threading import Lock
 
 from election_pipeline.collect import FetchFailure, FetchResponse, fetch_file
 from election_pipeline.states import state_adapter
 from election_pipeline.storage import file_hash, utc_now
 
 
-def fetch_bundle(source, settings, destination, *, previous=None, store=None, force_download=False):
+class CollectionDeferred(ValueError):
+    """Retain queue priority when no HTTP attempt fits this cycle."""
+
+
+def fetch_bundle(
+    source,
+    settings,
+    destination,
+    *,
+    previous=None,
+    store=None,
+    force_download=False,
+    imports=None,
+    offline=False,
+):
+    settings = source.effective_settings(settings)
     adapter = state_adapter(source.state)
     parser = adapter.parser
     contract = parser.validate_source(source)
+    if previous is None and store is not None:
+        predecessor = contract.get("previous_source_id")
+        if predecessor and predecessor != source.source_id:
+            from election_pipeline.storage import ArchiveStore
+
+            legacy = ArchiveStore(store.root, replace(source, source_id=predecessor))
+            try:
+                previous = legacy.cached_archive(legacy.read_state())
+            except (ValueError, OSError):
+                previous = None
     old = {}
+    scheduling = {}
     if previous is not None:
         # Revalidate cached bytes under the current parser before they can be fallback data.
         try:
-            _, _, old = parser.read_bundle(previous, source)
+            old = parser.previous_counties(previous, source)
+            with zipfile.ZipFile(previous) as archive:
+                scheduling = json.loads(archive.read(source.primary_filename))["counties"]
         except (ValueError, OSError, KeyError, zipfile.BadZipFile):
             old = {}
-    configured = [c for c in contract["counties"] if c.get("member")]
+    old.update(imports or {})
+    configured = [c for c in contract["counties"] if c.get("url")]
+    configured.sort(
+        key=lambda c: scheduling.get(c["key"], {}).get("retry_priority_at")
+        or scheduling.get(c["key"], {}).get("last_attempt_at")
+        or "1970"
+    )
+    budget_lock, budget = Lock(), [min(32 * 1024 * 1024, settings.max_download_bytes)]
     if not configured:
         raise FetchFailure("No county feeds configured", retryable=False)
     started = time.monotonic()
@@ -51,10 +87,28 @@ def fetch_bundle(source, settings, destination, *, previous=None, store=None, fo
     with tempfile.TemporaryDirectory(prefix=".bundle-", dir=destination.parent) as directory:
         directory = Path(directory)
 
+        for county in contract["counties"]:
+            key = county["key"]
+            path = directory / county["member"]
+            cached = old.get(key)
+            if cached and (offline or not county.get("url")):
+                records[key] = dict(cached[1])
+                path.write_bytes(cached[3])
+            else:
+                path.write_bytes(b"")
+                if offline and county.get("url"):
+                    records[key].update(
+                        status="unavailable",
+                        url=county["url"],
+                        last_attempt_at=utc_now(),
+                        issue="NotChecked: offline county import",
+                    )
+            paths[path.name] = path
+
         def county_fetch(county):
             key = county["key"]
             cached = old.get(key)
-            prior = cached[1] if cached else {}
+            prior = cached[1] if cached else scheduling.get(key, {})
             conditions = {}
             if cached and not force_download:
                 headers = prior.get("headers", {})
@@ -67,17 +121,24 @@ def fetch_bundle(source, settings, destination, *, previous=None, store=None, fo
             try:
                 remaining = settings.max_download_seconds - (time.monotonic() - started)
                 if remaining <= 0:
-                    raise ValueError("County collection cycle exhausted its time budget")
-                # Allocation bounds the total received bytes even with concurrent requests.
+                    raise CollectionDeferred("County collection cycle exhausted its time budget")
+                with budget_lock:
+                    allowance = min(8_000_000, budget[0])
+                    if allowance <= 0:
+                        raise CollectionDeferred("County cycle byte budget exhausted")
+                    budget[0] -= allowance
                 limits = replace(
                     settings,
                     timeout_seconds=min(12, settings.timeout_seconds, remaining),
                     max_download_seconds=min(15, remaining),
-                    max_download_bytes=min(
-                        6_000_000, settings.max_download_bytes // len(configured)
-                    ),
+                    max_download_bytes=allowance,
                 )
-                result = fetch_file(source, limits, path, conditions, url=county["url"])
+                try:
+                    result = fetch_file(source, limits, path, conditions, url=county["url"])
+                finally:
+                    used = min(allowance, path.stat().st_size if path.exists() else 0)
+                    with budget_lock:
+                        budget[0] += allowance - used
                 if result.status == 304:
                     if not cached or not conditions:
                         raise ValueError(
@@ -134,10 +195,14 @@ def fetch_bundle(source, settings, destination, *, previous=None, store=None, fo
                     "url": county["url"],
                     "raw_sha256": hashlib.sha256(raw).hexdigest() if cached else None,
                     "last_attempt_at": finished,
-                    "last_success_at": prior.get("last_success_at"),
+                    "last_success_at": prior.get("last_success_at") if cached else None,
                     "issue": issue,
-                    "headers": prior.get("headers", {}),
+                    "headers": prior.get("headers", {}) if cached else {},
                 }
+            if issue and issue.startswith("CollectionDeferred:"):
+                record["retry_priority_at"] = (
+                    prior.get("retry_priority_at") or prior.get("last_attempt_at") or "1970"
+                )
             record["rejected_sha256"] = rejected_sha
             record["quarantine_path"] = quarantine_path
             accepted_path = directory / county["member"]
@@ -159,7 +224,9 @@ def fetch_bundle(source, settings, destination, *, previous=None, store=None, fo
             return key, record, accepted_path, component
 
         with ThreadPoolExecutor(max_workers=min(3, len(configured))) as pool:
-            futures = [pool.submit(county_fetch, county) for county in configured]
+            futures = (
+                [] if offline else [pool.submit(county_fetch, county) for county in configured]
+            )
             for future in as_completed(futures):
                 key, record, path, component = future.result()
                 records[key], paths[path.name] = record, path
@@ -170,7 +237,7 @@ def fetch_bundle(source, settings, destination, *, previous=None, store=None, fo
                 retryable=False,
             )
         manifest = {
-            "version": 1,
+            "version": 2,
             "state": source.state,
             "election_date": source.election_date,
             "source_id": source.source_id,

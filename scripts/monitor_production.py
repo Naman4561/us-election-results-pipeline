@@ -184,6 +184,12 @@ def assess(prod, config, now):
                 ):
                     issues[f"dashboard/{code}"] = "State dashboard has no approved publication"
                 for county, record in state.get("county_feeds", {}).items():
+                    if record.get("issue") == "manual_snapshot":
+                        if age_seconds(record.get("last_success_at"), now) > 21600:
+                            issues[f"county/{code}/{county}"] = (
+                                "Manual county snapshot is over six hours old"
+                            )
+                        continue
                     if record.get("collection_status") in {"stale", "unavailable"}:
                         issues[f"county/{code}/{county}"] = (
                             "County source requires scan review"

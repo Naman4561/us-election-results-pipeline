@@ -1,5 +1,5 @@
 {
-  "contract_version": 1,
+  "contract_version": 2,
   "state": "MS",
   "election_date": "2026-11-03",
   "contest_id": "MS-SEN",
@@ -12,82 +12,162 @@
     {
       "name": "Adams",
       "key": "ADAMS",
-      "fips": "28001"
+      "fips": "28001",
+      "member": "adams.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Alcorn",
       "key": "ALCORN",
-      "fips": "28003"
+      "fips": "28003",
+      "member": "alcorn.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Amite",
       "key": "AMITE",
-      "fips": "28005"
+      "fips": "28005",
+      "member": "amite.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Attala",
       "key": "ATTALA",
-      "fips": "28007"
+      "fips": "28007",
+      "member": "attala.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Benton",
       "key": "BENTON",
-      "fips": "28009"
+      "fips": "28009",
+      "member": "benton.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Bolivar",
       "key": "BOLIVAR",
-      "fips": "28011"
+      "fips": "28011",
+      "member": "bolivar.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Calhoun",
       "key": "CALHOUN",
-      "fips": "28013"
+      "fips": "28013",
+      "member": "calhoun.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Carroll",
       "key": "CARROLL",
-      "fips": "28015"
+      "fips": "28015",
+      "member": "carroll.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Chickasaw",
       "key": "CHICKASAW",
-      "fips": "28017"
+      "fips": "28017",
+      "member": "chickasaw.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Choctaw",
       "key": "CHOCTAW",
-      "fips": "28019"
+      "fips": "28019",
+      "member": "choctaw.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Claiborne",
       "key": "CLAIBORNE",
-      "fips": "28021"
+      "fips": "28021",
+      "member": "claiborne.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Clarke",
       "key": "CLARKE",
-      "fips": "28023"
+      "fips": "28023",
+      "member": "clarke.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Clay",
       "key": "CLAY",
-      "fips": "28025"
+      "fips": "28025",
+      "member": "clay.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Coahoma",
       "key": "COAHOMA",
-      "fips": "28027"
+      "fips": "28027",
+      "member": "coahoma.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Copiah",
       "key": "COPIAH",
-      "fips": "28029"
+      "fips": "28029",
+      "member": "copiah.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Covington",
       "key": "COVINGTON",
-      "fips": "28031"
+      "fips": "28031",
+      "member": "covington.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "DeSoto",
@@ -97,32 +177,58 @@
       "format": "pdf_text_electionware",
       "url": "https://www.desotocountyms.gov/DocumentCenter/View/11878/Results-Summary",
       "absentee_scope": "unspecified",
-      "affidavit_scope": "unspecified"
+      "affidavit_scope": "unspecified",
+      "acquisition": "automatic"
     },
     {
       "name": "Forrest",
       "key": "FORREST",
-      "fips": "28035"
+      "fips": "28035",
+      "member": "forrest.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Franklin",
       "key": "FRANKLIN",
-      "fips": "28037"
+      "fips": "28037",
+      "member": "franklin.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "George",
       "key": "GEORGE",
-      "fips": "28039"
+      "fips": "28039",
+      "member": "george.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Greene",
       "key": "GREENE",
-      "fips": "28041"
+      "fips": "28041",
+      "member": "greene.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Grenada",
       "key": "GRENADA",
-      "fips": "28043"
+      "fips": "28043",
+      "member": "grenada.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Hancock",
@@ -132,12 +238,18 @@
       "format": "pdf_text_electionware",
       "url": "https://www.hancockcounty.ms.gov/DocumentCenter/View/1224/Unofficial-Results",
       "absentee_scope": "unspecified",
-      "affidavit_scope": "unspecified"
+      "affidavit_scope": "unspecified",
+      "acquisition": "automatic"
     },
     {
       "name": "Harrison",
       "key": "HARRISON",
-      "fips": "28047"
+      "fips": "28047",
+      "member": "harrison.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Hinds",
@@ -147,67 +259,131 @@
       "format": "pdf_text_electionware",
       "url": "https://www.co.hinds.ms.us/pgs/results/Unofficial%20Summary%20Report.pdf",
       "absentee_scope": "unspecified",
-      "affidavit_scope": "unspecified"
+      "affidavit_scope": "unspecified",
+      "acquisition": "automatic"
     },
     {
       "name": "Holmes",
       "key": "HOLMES",
-      "fips": "28051"
+      "fips": "28051",
+      "member": "holmes.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Humphreys",
       "key": "HUMPHREYS",
-      "fips": "28053"
+      "fips": "28053",
+      "member": "humphreys.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Issaquena",
       "key": "ISSAQUENA",
-      "fips": "28055"
+      "fips": "28055",
+      "member": "issaquena.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Itawamba",
       "key": "ITAWAMBA",
-      "fips": "28057"
+      "fips": "28057",
+      "member": "itawamba.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Jackson",
       "key": "JACKSON",
-      "fips": "28059"
+      "fips": "28059",
+      "member": "jackson.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Jasper",
       "key": "JASPER",
-      "fips": "28061"
+      "fips": "28061",
+      "member": "jasper.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Jefferson",
       "key": "JEFFERSON",
-      "fips": "28063"
+      "fips": "28063",
+      "member": "jefferson.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Jefferson Davis",
       "key": "JEFFERSONDAVIS",
-      "fips": "28065"
+      "fips": "28065",
+      "member": "jeffersondavis.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Jones",
       "key": "JONES",
-      "fips": "28067"
+      "fips": "28067",
+      "member": "jones.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Kemper",
       "key": "KEMPER",
-      "fips": "28069"
+      "fips": "28069",
+      "member": "kemper.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Lafayette",
       "key": "LAFAYETTE",
-      "fips": "28071"
+      "fips": "28071",
+      "member": "lafayette.pdf",
+      "acquisition": "automatic",
+      "format": "pdf_scanned_electionware",
+      "absentee_scope": "included",
+      "affidavit_scope": "excluded",
+      "url": "https://lafayettems.com/wp-content/uploads/2026/11/2026-GENERAL-ELECTION-UNOFFICIAL-RESULTS-AFFIDAVITS-NOT-COUNTED.pdf"
     },
     {
       "name": "Lamar",
       "key": "LAMAR",
-      "fips": "28073"
+      "fips": "28073",
+      "member": "lamar.pdf",
+      "acquisition": "automatic",
+      "format": "pdf_scanned_electionware",
+      "absentee_scope": "included",
+      "affidavit_scope": "unspecified",
+      "url": "https://lamarcountyms.gov/ms/wp-content/uploads/2026/11/Election_Summary_Results3.pdf",
+      "source_note": "In-house absentees included; mail/affidavit coverage is unspecified. Election header is November 3, 2026 but the printed report clock says December 16, 2024. Report generation time is unknown."
     },
     {
       "name": "Lauderdale",
@@ -217,37 +393,68 @@
       "format": "pdf_scanned_electionware",
       "url": "https://www.lauderdalecounty.org/wp-content/uploads/2026/11/2026-election-with-absentee.pdf",
       "absentee_scope": "included",
-      "affidavit_scope": "excluded"
+      "affidavit_scope": "excluded",
+      "acquisition": "automatic"
     },
     {
       "name": "Lawrence",
       "key": "LAWRENCE",
-      "fips": "28077"
+      "fips": "28077",
+      "member": "lawrence.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Leake",
       "key": "LEAKE",
-      "fips": "28079"
+      "fips": "28079",
+      "member": "leake.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Lee",
       "key": "LEE",
-      "fips": "28081"
+      "fips": "28081",
+      "member": "lee.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Leflore",
       "key": "LEFLORE",
-      "fips": "28083"
+      "fips": "28083",
+      "member": "leflore.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Lincoln",
       "key": "LINCOLN",
-      "fips": "28085"
+      "fips": "28085",
+      "member": "lincoln.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Lowndes",
       "key": "LOWNDES",
-      "fips": "28087"
+      "fips": "28087",
+      "member": "lowndes.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Madison",
@@ -257,17 +464,28 @@
       "format": "pdf_scanned_electionware",
       "url": "https://www.madison-co.com/elections/election_results.pdf",
       "absentee_scope": "included",
-      "affidavit_scope": "unspecified"
+      "affidavit_scope": "unspecified",
+      "acquisition": "automatic"
     },
     {
       "name": "Marion",
       "key": "MARION",
-      "fips": "28091"
+      "fips": "28091",
+      "member": "marion.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Marshall",
       "key": "MARSHALL",
-      "fips": "28093"
+      "fips": "28093",
+      "member": "marshall.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Monroe",
@@ -277,12 +495,18 @@
       "format": "pdf_text_electionware",
       "url": "https://www.monroems.com/circuitclerk/results/CUMMULATIVE_RESULTS_ALL_PRECINCTS.pdf",
       "absentee_scope": "excluded",
-      "affidavit_scope": "excluded"
+      "affidavit_scope": "excluded",
+      "acquisition": "automatic"
     },
     {
       "name": "Montgomery",
       "key": "MONTGOMERY",
-      "fips": "28097"
+      "fips": "28097",
+      "member": "montgomery.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Neshoba",
@@ -292,37 +516,68 @@
       "format": "html_county_news",
       "url": "https://neshobacounty.net/news/general-election-results-from-november-3-2026/",
       "absentee_scope": "unspecified",
-      "affidavit_scope": "unspecified"
+      "affidavit_scope": "unspecified",
+      "acquisition": "automatic"
     },
     {
       "name": "Newton",
       "key": "NEWTON",
-      "fips": "28101"
+      "fips": "28101",
+      "member": "newton.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Noxubee",
       "key": "NOXUBEE",
-      "fips": "28103"
+      "fips": "28103",
+      "member": "noxubee.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Oktibbeha",
       "key": "OKTIBBEHA",
-      "fips": "28105"
+      "fips": "28105",
+      "member": "oktibbeha.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Panola",
       "key": "PANOLA",
-      "fips": "28107"
+      "fips": "28107",
+      "member": "panola.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Pearl River",
       "key": "PEARLRIVER",
-      "fips": "28109"
+      "fips": "28109",
+      "member": "pearlriver.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Perry",
       "key": "PERRY",
-      "fips": "28111"
+      "fips": "28111",
+      "member": "perry.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Pike",
@@ -332,22 +587,38 @@
       "format": "pdf_text_electionware",
       "url": "https://www.pikecountyelectionresults.org/2026_general/DW.pdf",
       "absentee_scope": "included",
-      "affidavit_scope": "unspecified"
+      "affidavit_scope": "unspecified",
+      "acquisition": "automatic"
     },
     {
       "name": "Pontotoc",
       "key": "PONTOTOC",
-      "fips": "28115"
+      "fips": "28115",
+      "member": "pontotoc.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Prentiss",
       "key": "PRENTISS",
-      "fips": "28117"
+      "fips": "28117",
+      "member": "prentiss.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Quitman",
       "key": "QUITMAN",
-      "fips": "28119"
+      "fips": "28119",
+      "member": "quitman.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Rankin",
@@ -357,72 +628,139 @@
       "format": "html_hart_cumulative",
       "url": "https://www2.rankincounty.org/results/index.html",
       "absentee_scope": "included",
-      "affidavit_scope": "column_present_zero_in_capture"
+      "affidavit_scope": "column_present_zero_in_capture",
+      "acquisition": "automatic"
     },
     {
       "name": "Scott",
       "key": "SCOTT",
-      "fips": "28123"
+      "fips": "28123",
+      "member": "scott.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Sharkey",
       "key": "SHARKEY",
-      "fips": "28125"
+      "fips": "28125",
+      "member": "sharkey.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Simpson",
       "key": "SIMPSON",
-      "fips": "28127"
+      "fips": "28127",
+      "member": "simpson.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Smith",
       "key": "SMITH",
-      "fips": "28129"
+      "fips": "28129",
+      "member": "smith.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Stone",
       "key": "STONE",
-      "fips": "28131"
+      "fips": "28131",
+      "member": "stone.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Sunflower",
       "key": "SUNFLOWER",
-      "fips": "28133"
+      "fips": "28133",
+      "member": "sunflower.html",
+      "acquisition": "automatic",
+      "format": "html_hart_sunflower",
+      "absentee_scope": "included",
+      "affidavit_scope": "unspecified",
+      "url": "https://www.sunflowercircuitclerk.com/hart/ALL_PRECINCTS.html"
     },
     {
       "name": "Tallahatchie",
       "key": "TALLAHATCHIE",
-      "fips": "28135"
+      "fips": "28135",
+      "member": "tallahatchie.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Tate",
       "key": "TATE",
-      "fips": "28137"
+      "fips": "28137",
+      "member": "tate.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Tippah",
       "key": "TIPPAH",
-      "fips": "28139"
+      "fips": "28139",
+      "member": "tippah.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Tishomingo",
       "key": "TISHOMINGO",
-      "fips": "28141"
+      "fips": "28141",
+      "member": "tishomingo.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Tunica",
       "key": "TUNICA",
-      "fips": "28143"
+      "fips": "28143",
+      "member": "tunica.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Union",
       "key": "UNION",
-      "fips": "28145"
+      "fips": "28145",
+      "member": "union.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Walthall",
       "key": "WALTHALL",
-      "fips": "28147"
+      "fips": "28147",
+      "member": "walthall.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Warren",
@@ -432,42 +770,78 @@
       "format": "pdf_scanned_votingworks",
       "url": "https://warrencountyms.gov/wp-content/uploads/2026/11/General-Unofficial-November-3-Election-Results.pdf",
       "absentee_scope": "unspecified",
-      "affidavit_scope": "unspecified"
+      "affidavit_scope": "unspecified",
+      "acquisition": "automatic"
     },
     {
       "name": "Washington",
       "key": "WASHINGTON",
-      "fips": "28151"
+      "fips": "28151",
+      "member": "washington.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Wayne",
       "key": "WAYNE",
-      "fips": "28153"
+      "fips": "28153",
+      "member": "wayne.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Webster",
       "key": "WEBSTER",
-      "fips": "28155"
+      "fips": "28155",
+      "member": "webster.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Wilkinson",
       "key": "WILKINSON",
-      "fips": "28157"
+      "fips": "28157",
+      "member": "wilkinson.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Winston",
       "key": "WINSTON",
-      "fips": "28159"
+      "fips": "28159",
+      "member": "winston.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Yalobusha",
       "key": "YALOBUSHA",
-      "fips": "28161"
+      "fips": "28161",
+      "member": "yalobusha.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     },
     {
       "name": "Yazoo",
       "key": "YAZOO",
-      "fips": "28163"
+      "fips": "28163",
+      "member": "yazoo.report",
+      "acquisition": "reviewed_file",
+      "format": "reviewed_file",
+      "absentee_scope": "unspecified",
+      "affidavit_scope": "unspecified"
     }
   ],
   "reviewed_scans": {
@@ -518,6 +892,42 @@
         "report_generated_local": "2026-11-04T10:12:44",
         "review_method": "Source PDF image read and reported Senate values transcribed; independent agreement is still an operator acceptance check."
       }
+    },
+    "LAFAYETTE": {
+      "26247e90af93bcf6deb18dc93cf57c86138864b86e89988163a6e7eca0768c15": {
+        "counts": {
+          "Scott Colom": 8383,
+          "Cindy Hyde-Smith": 8265,
+          "Ty Pinkins": 368
+        },
+        "write_in_votes": 23,
+        "write_in_label": "Write-In Totals",
+        "reported_candidate_vote_total": 17039,
+        "precincts_reporting": 18,
+        "precincts_total": 18,
+        "report_generated_local": "2026-11-03T20:43:00",
+        "review_method": "Original official county PDF visually checked, Senate counts and total reconciled. No generation time inferred where printed clock is inconsistent."
+      }
+    },
+    "LAMAR": {
+      "f6ac70091f778aff3a9b2c9f6425a671c9ff2c35bc08a1c98f59a9fd1d887e46": {
+        "counts": {
+          "Scott Colom": 7481,
+          "Cindy Hyde-Smith": 12914,
+          "Ty Pinkins": 625
+        },
+        "write_in_votes": 41,
+        "write_in_label": "Write-In Totals",
+        "reported_candidate_vote_total": 21061,
+        "precincts_reporting": 24,
+        "precincts_total": 24,
+        "report_generated_local": null,
+        "review_method": "Original official county PDF visually checked, Senate counts and total reconciled. No generation time inferred where printed clock is inconsistent."
+      }
     }
-  }
+  },
+  "compatible_policy_sha256": [
+    "ffa2d1119af363b9584ff9480c06758dd122a0c85d157b29ac7c5df15ab0db5e"
+  ],
+  "previous_source_id": "ms_2026_general"
 }

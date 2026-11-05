@@ -1,8 +1,8 @@
 # Mississippi county source inventory
 
-Research checkpoint: 2026-11-05T02:20:32.633737+00:00. Election: November 3, 2026. Priority: U.S. Senate.
+Original discovery checkpoint: 2026-11-05T02:20:32.633737+00:00. Election: November 3, 2026. Priority: U.S. Senate.
 
-All 82 counties have a contact/directory entry and a bounded discovery pass. Ten current official county result sources were verified. The other 72 remain unresolved; a failed probe or absent search result does not prove that a county has published nothing. No Mississippi worker, schema, dashboard route, or publication has been enabled.
+All 82 counties have a contact/directory entry and a bounded discovery pass. Thirteen current official county result sources were verified. The other 69 remain unresolved; a failed probe or absent search result does not prove that a county has published nothing. All 82 now have an intake slot; 13 have configured report URLs and 69 await official reports. This inventory does not attest to production activation.
 
 The machine-readable inventory is [ms-2026-county-sources.json](source-research/ms-2026-county-sources.json). It records URLs, checked times, probe outcomes, current report formats, SHA-256 hashes, exact Senate row examples, and the next action for every county. The alphabetical Mississippi SOS county codes are not Census FIPS codes.
 
@@ -86,8 +86,8 @@ Source discovery is complete for this first pass, but implementation and admissi
 | 33 | Jefferson Davis | current_report_not_located | [Source / lead](http://www.jeffersondaviscountyms.com/) |
 | 34 | Jones | current_report_not_located | [Source / lead](https://jonescounty.com/) |
 | 35 | Kemper | current_report_not_located | [Source / lead](https://kempercountyms.gov/circuit-clerk/) |
-| 36 | Lafayette | official_social_lead | [Source / lead](https://lafayettems.com/election-results/) |
-| 37 | Lamar | current_report_not_located | [Source / lead](https://lamarcountyms.gov/ms/wp-content/uploads/2024/11/Summary_results_24_of_24_report.pdf) |
+| 36 | Lafayette | verified_current_source | [Official report](https://lafayettems.com/wp-content/uploads/2026/11/2026-GENERAL-ELECTION-UNOFFICIAL-RESULTS-AFFIDAVITS-NOT-COUNTED.pdf) |
+| 37 | Lamar | verified_current_source | [Official report](https://lamarcountyms.gov/ms/wp-content/uploads/2026/11/Election_Summary_Results3.pdf) |
 | 38 | Lauderdale | verified_current_source | [Source / lead](https://www.lauderdalecounty.org/tate-wins-circuit-clerk-other-races-too-close-to-call/) |
 | 39 | Lawrence | current_report_not_located | [Source / lead](https://lawrencecountyms.com/board-of-superviors/) |
 | 40 | Leake | older_results_only | [Source / lead](https://leakecountyms.org/election-results/) |
@@ -117,7 +117,7 @@ Source discovery is complete for this first pass, but implementation and admissi
 | 64 | Simpson | current_report_not_located | [Source / lead](https://simpsoncountyms.com/how-do-i/elections/) |
 | 65 | Smith | current_report_not_located | [Source / lead](https://www.smithcountyms.gov/election-commission/) |
 | 66 | Stone | current_report_not_located | [Source / lead](https://www.stonecountyms.gov/election-commission/) |
-| 67 | Sunflower | current_report_not_located | [Source / lead](https://www.sunflowercounty.ms.gov/) |
+| 67 | Sunflower | verified_current_source | [Official report](https://www.sunflowercircuitclerk.com/hart/ALL_PRECINCTS.html) |
 | 68 | Tallahatchie | official_contact_only | [Source / lead](https://www.sos.ms.gov/MSCountyElectionInfo/) |
 | 69 | Tate | current_report_not_located | [Source / lead](https://tatecountyms.gov/circuit-clerk/) |
 | 70 | Tippah | fetch_unavailable | [Source / lead](https://www.co.tippah.ms.us/election-results/) |
@@ -139,3 +139,7 @@ Source discovery is complete for this first pass, but implementation and admissi
 - https://www.sos.ms.gov/MSCountyElectionInfo/
 - https://www.mssupervisors.org/mississippi-counties
 - https://www.sos.ms.gov/news/official-statement-election-update
+
+## Expansion checkpoint
+
+Lafayette, Lamar and Sunflower were added to the configured reports. See [collection and intake](mississippi-collection.md) for exact source limitations and the reviewed-file process for the remaining 69 counties. Historical probe outcomes above retain their original timestamps; absence of a report in that pass does not prove that none exists. The machine-readable `intake` field is the current implementation status for each county.
