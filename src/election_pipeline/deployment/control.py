@@ -166,14 +166,7 @@ def install_controls(config, unit_root=Path("/etc/systemd/system")):
     return {"outcome": "installed", "note": "Existing running jobs were left untouched"}
 
 
-def register(path, release, image, name, status, prod, config, *, replaces=None):
-    controls_ready(config)
-    identity, revision = containers.verify_release(release, image)
-    metadata = containers.metadata(identity, name)
-    if metadata["code_sha256"] != containers.package_hash(release):
-        raise ValueError("Image Python sources differ from its release checkout")
-    source = catalog.source_from_json(metadata["source"])
-    settings = CollectorSettings(**metadata["settings"])
+def require_applied_migrations(release, prod):
     with connect(db_settings(prod, writer=True)) as conn:
         for migration in conn.execute("SELECT name, sha256 FROM ops.schema_migrations").fetchall():
             file = Path(release) / "migrations" / migration["name"]
@@ -182,6 +175,26 @@ def register(path, release, image, name, status, prod, config, *, replaces=None)
                 or hashlib.sha256(file.read_bytes()).hexdigest() != migration["sha256"]
             ):
                 raise ValueError("Candidate release changed or omitted an applied migration")
+
+
+def require_no_backup():
+    # A legacy backup already in flight may not hold the new catalog lock.
+    active = containers.command(
+        ["systemctl", "show", "--value", "-p", "ActiveState", "election-backup.service"]
+    )
+    if active in ("active", "activating", "deactivating", "reloading"):
+        raise ValueError("A backup is running; retry after it finishes")
+
+
+def register(path, release, image, name, status, prod, config, *, replaces=None):
+    controls_ready(config)
+    identity, revision = containers.verify_release(release, image)
+    metadata = containers.metadata(identity, name)
+    if metadata["code_sha256"] != containers.package_hash(release):
+        raise ValueError("Image Python sources differ from its release checkout")
+    source = catalog.source_from_json(metadata["source"])
+    settings = CollectorSettings(**metadata["settings"])
+    require_applied_migrations(release, prod)
     entry = catalog.entry(
         source,
         settings,
@@ -221,12 +234,7 @@ def register(path, release, image, name, status, prod, config, *, replaces=None)
                 raise ValueError("Replacement must preserve election/status and admitted coverage")
         elif existing:
             raise ValueError("Source/state is already owned; use an explicit coverage replacement")
-        # A legacy backup already in flight may not hold the new catalog lock.
-        active = containers.command(
-            ["systemctl", "show", "--value", "-p", "ActiveState", "election-backup.service"]
-        )
-        if active in ("active", "activating", "deactivating", "reloading"):
-            raise ValueError("A backup is running; retry registration after it finishes")
+        require_no_backup()
         lock_dir = Path(prod["DATA_DIR"]) / "locks"
         lock_dir.mkdir(parents=True, exist_ok=True)
         created = []
@@ -248,6 +256,79 @@ def register(path, release, image, name, status, prod, config, *, replaces=None)
 
     catalog.update(path, change)
     return {"outcome": "registered", "source_id": name, "enabled": False, "public": False}
+
+
+PIN_KEYS = ("image_id", "revision", "release_path", "release_sha256")
+
+
+def repin(path, release, image, name, prod, config):
+    """Move one registered expansion source to a newly verified image.
+
+    Only the image pin changes. The source contract, settings, races, status, flags,
+    source ID, archives and publications stay as they are, so rolling back is the
+    same command with the previous release and image.
+    """
+    controls_ready(config)
+    containers.limits(config)
+    identity, revision = containers.verify_release(release, image)
+    meta = containers.metadata(identity, name)
+    if meta["code_sha256"] != containers.package_hash(release):
+        raise ValueError("Image Python sources differ from its release checkout")
+    require_applied_migrations(release, prod)
+    before = expansion(catalog.read(path), name)
+    candidate = catalog.entry(
+        catalog.source_from_json(meta["source"]),
+        CollectorSettings(**meta["settings"]),
+        image_id=identity,
+        revision=revision,
+        release_path=release,
+        worker="expansion",
+        status=before["status"],
+    )
+    candidate["release_sha256"] = containers.release_hash(release)
+    # Compare as stored: the catalog keeps JSON, where tuples become lists.
+    stored = json.loads(json.dumps({k: candidate[k] for k in ("source", "settings")}))
+    if (
+        stored["source"] != before["source"]
+        or stored["settings"] != before["settings"]
+        or list(meta["races"]) != before["races"]
+    ):
+        raise ValueError("Re-pinning cannot change the source contract, settings or races")
+    if identity == before["image_id"]:
+        return {"outcome": "already_pinned", "source_id": name, "image_id": identity}
+    # The new image must collect, parse, load and validate a candidate before it is
+    # pinned. Nothing is published; the recurring worker publishes as usual afterwards.
+    prepared = run_one(
+        {**before, **{k: candidate[k] for k in PIN_KEYS}}, prod, config, prepare=True
+    )
+    if prepared["outcome"] != "validated":
+        raise ValueError(
+            "The new image did not produce a validated candidate: "
+            + str(prepared.get("error") or prepared["outcome"])
+        )
+    candidate_id = str(uuid.UUID(prepared["candidate_id"]))
+
+    def change(value):
+        current = expansion(value, name)
+        if any(current.get(k) != before.get(k) for k in (*PIN_KEYS, "source", "races", "status")):
+            raise ValueError("Source deployment changed during re-pin validation; retry")
+        require_no_backup()
+        current.setdefault("previous_images", []).append(
+            {**{k: current.get(k) for k in PIN_KEYS}, "replaced_at": utc_now()}
+        )
+        current.update({k: candidate[k] for k in PIN_KEYS}, repin_candidate_id=candidate_id)
+
+    catalog.update(path, change)
+    return {
+        "outcome": "repinned",
+        "source_id": name,
+        "image_id": identity,
+        "revision": revision,
+        "previous_revision": before["revision"],
+        "previous_release": before["release_path"],
+        "validated_candidate_id": candidate_id,
+        "note": "The recurring worker uses the new image from its next cycle",
+    }
 
 
 def private_text(path, text):

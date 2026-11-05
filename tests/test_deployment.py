@@ -536,3 +536,154 @@ class DeploymentDatabaseTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+NEW_IMAGE = "sha256:" + "e" * 64
+NEW_REVISION = "f" * 40
+
+
+class RepinTests(unittest.TestCase):
+    """An active expansion source moves to a verified image; nothing else changes."""
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.path = self.root / "catalog.json"
+        value = fixture(self.root)
+        value["sources"]["ga_2026_general"].update(enabled=True, public=True)
+        value["sources"]["ga_2026_general"]["release_sha256"] = "c" * 64
+        catalog.write(self.path, value)
+        self.before = catalog.read(self.path)["sources"]["ga_2026_general"]
+        self.prod = {"DATA_DIR": str(self.root / "data")}
+        self.config = {"EXPANSION_CPUS": "0.5", "EXPANSION_MEMORY": "768m"}
+        self.release = self.root / "release-new"
+        self.prepared = []
+
+    def metadata(self, **changes):
+        meta = {
+            "code_sha256": "code",
+            "source": copy.deepcopy(self.before["source"]),
+            "settings": copy.deepcopy(self.before["settings"]),
+            "races": list(self.before["races"]),
+        }
+        for key, value in changes.items():
+            if key in ("url", "source_id"):
+                meta["source"][key] = value
+            elif key == "timeout_seconds":
+                meta["settings"][key] = value
+            else:
+                meta[key] = value
+        return meta
+
+    def repin(
+        self,
+        *,
+        image=NEW_IMAGE,
+        revision=NEW_REVISION,
+        meta=None,
+        prepared=None,
+        backup="inactive",
+        name="ga_2026_general",
+    ):
+        def run_one(entry, prod, config, *, prepare=False):
+            self.prepared.append((entry["image_id"], prepare))
+            if callable(prepared):
+                return prepared()
+            return prepared or {
+                "source_id": name,
+                "outcome": "validated",
+                "candidate_id": str(uuid.uuid4()),
+            }
+
+        with (
+            patch.object(control, "controls_ready"),
+            patch.object(control, "require_applied_migrations"),
+            patch.object(containers, "verify_release", return_value=(image, revision)),
+            patch.object(containers, "metadata", return_value=meta or self.metadata()),
+            patch.object(containers, "package_hash", return_value="code"),
+            patch.object(containers, "release_hash", return_value="d" * 64),
+            patch.object(containers, "command", return_value=backup),
+            patch.object(control, "run_one", side_effect=run_one),
+        ):
+            return control.repin(self.path, self.release, image, name, self.prod, self.config)
+
+    def entry(self):
+        return catalog.read(self.path)["sources"]["ga_2026_general"]
+
+    def test_validated_new_image_changes_only_the_pin_and_keeps_history(self):
+        generation = catalog.read(self.path)["generation"]
+        result = self.repin()
+        after = self.entry()
+        self.assertEqual(result["outcome"], "repinned")
+        self.assertEqual(self.prepared, [(NEW_IMAGE, True)])
+        self.assertEqual(
+            {k: after[k] for k in control.PIN_KEYS},
+            {
+                "image_id": NEW_IMAGE,
+                "revision": NEW_REVISION,
+                "release_path": str(self.release.resolve()),
+                "release_sha256": "d" * 64,
+            },
+        )
+        for key in ("source", "settings", "races", "status", "enabled", "public", "worker"):
+            self.assertEqual(after[key], self.before[key], key)
+        self.assertEqual(
+            {k: after["previous_images"][0][k] for k in control.PIN_KEYS},
+            {k: self.before[k] for k in control.PIN_KEYS},
+        )
+        self.assertEqual(after["repin_candidate_id"], result["validated_candidate_id"])
+        self.assertEqual(catalog.read(self.path)["generation"], generation + 1)
+
+    def test_rollback_is_a_repin_to_the_previous_image(self):
+        self.repin()
+        result = self.repin(image=IMAGE, revision=REVISION)
+        after = self.entry()
+        self.assertEqual(result["previous_revision"], NEW_REVISION)
+        self.assertEqual((after["image_id"], after["revision"]), (IMAGE, REVISION))
+        self.assertEqual([p["image_id"] for p in after["previous_images"]], [IMAGE, NEW_IMAGE])
+
+    def test_same_image_is_a_no_op_without_a_run(self):
+        result = self.repin(image=IMAGE, revision=REVISION)
+        self.assertEqual(result["outcome"], "already_pinned")
+        self.assertEqual(self.prepared, [])
+        self.assertEqual(self.entry(), self.before)
+
+    def test_contract_settings_or_race_changes_are_refused_before_any_run(self):
+        for changes in (
+            {"url": "https://example.com/moved.zip"},
+            {"timeout_seconds": 5},
+            {"races": ["GA-SEN", "GA-01"]},
+        ):
+            with self.subTest(changes=changes), self.assertRaisesRegex(ValueError, "cannot change"):
+                self.repin(meta=self.metadata(**changes))
+        self.assertEqual(self.prepared, [])
+        self.assertEqual(self.entry(), self.before)
+
+    def test_failed_validation_keeps_the_old_pin(self):
+        failure = {"source_id": "ga_2026_general", "outcome": "failed", "error": "reset"}
+        with self.assertRaisesRegex(ValueError, "did not produce a validated candidate: reset"):
+            self.repin(prepared=failure)
+        self.assertEqual(self.entry(), self.before)
+
+    def test_only_expansion_sources_and_no_concurrent_change_or_backup(self):
+        with self.assertRaisesRegex(ValueError, "restricted to new expansion sources"):
+            self.repin(name="nc_2026_general", meta=self.metadata(source_id="nc_2026_general"))
+
+        def raced():
+            catalog.update(
+                self.path,
+                lambda v: v["sources"]["ga_2026_general"].update(revision="9" * 40),
+            )
+            return {
+                "source_id": "ga_2026_general",
+                "outcome": "validated",
+                "candidate_id": str(uuid.uuid4()),
+            }
+
+        with self.assertRaisesRegex(ValueError, "changed during re-pin"):
+            self.repin(prepared=raced)
+        self.assertEqual(self.entry()["image_id"], IMAGE)
+        with self.assertRaisesRegex(ValueError, "backup is running"):
+            self.repin(backup="active")
+        self.assertEqual(self.entry()["image_id"], IMAGE)

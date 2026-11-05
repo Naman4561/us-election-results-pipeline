@@ -218,6 +218,29 @@ from running. States exceeding the cycle budget are reported as deferred, and
 monitoring checks each enabled source's freshness separately. Revisit capacity
 before adding enough states to exhaust that budget.
 
+## Move an active source to a fixed image
+
+Each registered source is pinned to one image. A code fix for an active source,
+such as a collector compatibility change, uses `repin` rather than another
+registration. A state may hold only one owner and one replacement.
+
+```bash
+sudo "$CR/.venv/bin/python" "$CR/scripts/deploy.py" repin \
+  --release "$CR" --image "election-pipeline:$REVISION" --source ms_2026_general_all
+```
+
+- **What it accepts:** registered expansion sources only. The new image must report
+  the identical source contract, collector settings and races, and the release must
+  contain every applied migration unchanged.
+- **Validation:** the new image runs a prepare-only cycle: collect, parse, load and
+  validate a candidate. Nothing is published. The pin changes only if that cycle
+  returns `validated`, the catalog entry is unchanged, and no backup is running.
+- **What changes:** only `image_id`, `revision`, `release_path` and
+  `release_sha256`. The source ID, archives, flags and publications stay the same.
+  Earlier pins are kept in `previous_images`.
+- **Rollback:** the same command with the previous release and image. Keep the
+  previous release directory and image until the new pin has published.
+
 ## Recovery and cleanup
 
 ```bash

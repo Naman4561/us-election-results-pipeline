@@ -1,8 +1,12 @@
-"""Alaska's missing issuer chain never disables ordinary certificate verification."""
+"""Per-host TLS compatibility never disables ordinary certificate verification."""
 
 import hashlib
+import shutil
+import socket
 import ssl
+import subprocess
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -10,7 +14,7 @@ from urllib.error import HTTPError
 
 from election_pipeline.collect import FetchFailure, fetch_file
 from election_pipeline.settings import CollectorSettings, Source
-from election_pipeline.tls import ISSUERS_SHA256, context_for_url
+from election_pipeline.tls import ISSUERS_SHA256, LEGACY_CBC_SUITES, context_for_url
 
 ROOT = Path(__file__).resolve().parents[1]
 URL = "https://www.elections.alaska.gov/enr/26GENR/results/GA_ENR_Precinct_State_of_Alaska.csv"
@@ -60,3 +64,121 @@ class AlaskaTLSTests(unittest.TestCase):
                     )
                 self.assertEqual(result.status, 404)
                 self.assertEqual("context" in request.call_args.kwargs, custom)
+
+
+# Python's built-in default cipher string, used by the official python:3.12 image.
+# Distribution builds (e.g. Ubuntu) may use OpenSSL's broader list instead.
+PYTHON_DEFAULT_CIPHERS = (
+    "@SECLEVEL=2:ECDH+AESGCM:ECDH+CHACHA20:ECDH+AES:DHE+AES:!aNULL:!eNULL:!aDSS:!SHA1:!AESCCM"
+)
+HINDS = "https://www.co.hinds.ms.us/pgs/results/Unofficial%20Summary%20Report.pdf"
+
+
+def strict_default_context():
+    context = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    context.load_default_certs()
+    context.set_ciphers(PYTHON_DEFAULT_CIPHERS)
+    return context
+
+
+def names(context):
+    return {c["name"] for c in context.get_ciphers()}
+
+
+def handshake(client, server):
+    """One TLS handshake with a local server; returns the negotiated cipher."""
+    with socket.create_server(("127.0.0.1", 0)) as listener:
+
+        def serve():
+            connection, _ = listener.accept()
+            try:
+                server.wrap_socket(connection, server_side=True).close()
+            except (ssl.SSLError, OSError):
+                connection.close()
+
+        thread = threading.Thread(target=serve, daemon=True)
+        thread.start()
+        try:
+            with socket.create_connection(listener.getsockname(), timeout=5) as raw:
+                with client.wrap_socket(raw, server_hostname="localhost") as tls:
+                    return tls.cipher()[0]
+        finally:
+            thread.join(5)
+
+
+class HindsTLSTests(unittest.TestCase):
+    def hinds_context(self):
+        # Reproduce the official image, whose Python default excludes SHA-1 suites.
+        with patch("election_pipeline.tls.ssl.create_default_context", strict_default_context):
+            return context_for_url(HINDS)
+
+    def test_only_two_forward_secret_suites_are_added_and_verification_stays(self):
+        context = self.hinds_context()
+        baseline = names(strict_default_context())
+        self.assertFalse(baseline & set(LEGACY_CBC_SUITES))
+        self.assertEqual(names(context) - baseline, set(LEGACY_CBC_SUITES))
+        self.assertFalse({"AES256-SHA", "AES128-SHA"} & names(context))
+        self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
+        self.assertTrue(context.check_hostname)
+        self.assertEqual(context.minimum_version, ssl.TLSVersion.TLSv1_2)
+
+    def test_only_the_configured_hinds_host_is_affected(self):
+        from election_pipeline.parsers import ms
+
+        counties = ms.policy()["counties"]
+        hinds = next(c for c in counties if c["key"] == "HINDS")
+        self.assertEqual(hinds["url"], HINDS)
+        self.assertIsNotNone(context_for_url(hinds["url"]))
+        others = [c["url"] for c in counties if c.get("url") and c["key"] != "HINDS"]
+        for url in (
+            "https://co.hinds.ms.us/pgs/results/x.pdf",
+            "https://www.co.hinds.ms.us.example.com/x.pdf",
+            "https://example.com/?host=www.co.hinds.ms.us",
+            *others,
+        ):
+            with self.subTest(url=url):
+                self.assertIsNone(context_for_url(url))
+
+    @unittest.skipUnless(shutil.which("openssl"), "openssl CLI creates the test certificate")
+    def test_handshake_with_a_server_offering_only_the_hinds_suite(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            key, cert = Path(temporary) / "key.pem", Path(temporary) / "cert.pem"
+            subprocess.run(
+                [
+                    "openssl",
+                    "req",
+                    "-x509",
+                    "-newkey",
+                    "rsa:2048",
+                    "-nodes",
+                    "-days",
+                    "1",
+                    "-subj",
+                    "/CN=localhost",
+                    "-addext",
+                    "subjectAltName=DNS:localhost",
+                    "-keyout",
+                    str(key),
+                    "-out",
+                    str(cert),
+                ],
+                check=True,
+                capture_output=True,
+            )
+            server = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            server.load_cert_chain(cert, key)
+            server.maximum_version = ssl.TLSVersion.TLSv1_2
+            server.set_ciphers("ECDHE-RSA-AES256-SHA")
+
+            strict = strict_default_context()
+            strict.load_verify_locations(cert)
+            with self.assertRaises((ssl.SSLError, OSError)):
+                handshake(strict, server)  # What production's container saw.
+
+            trusted = self.hinds_context()
+            trusted.load_verify_locations(cert)
+            self.assertEqual(handshake(trusted, server), "ECDHE-RSA-AES256-SHA")
+
+            # Certificate verification is unchanged: an untrusted certificate fails.
+            with self.assertRaises(ssl.SSLCertVerificationError):
+                handshake(self.hinds_context(), server)

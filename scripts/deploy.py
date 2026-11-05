@@ -37,6 +37,10 @@ def main():
     expand.add_argument("--states", nargs="+", required=True, choices=sorted(coverage.STATES))
     expand.add_argument("--release", type=Path)
     expand.add_argument("--image")
+    repin = sub.add_parser("repin", help="Move a registered expansion source to a new image")
+    repin.add_argument("--release", type=Path, required=True)
+    repin.add_argument("--image", required=True)
+    repin.add_argument("--source", required=True)
     register = sub.add_parser("register")
     register.add_argument("--release", type=Path, required=True)
     register.add_argument("--image", required=True)
@@ -103,6 +107,8 @@ def main():
                 config,
                 replaces=args.replaces,
             )
+        elif action == "repin":
+            result = control.repin(path, args.release, args.image, args.source, prod, config)
         elif action == "import-county":
             result = control.import_county(
                 path, args.source, args.county, args.file, args.review_json, prod, config
