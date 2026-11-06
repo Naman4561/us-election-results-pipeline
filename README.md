@@ -13,5 +13,7 @@ South Dakota, New Mexico and Florida (Senate, governor and House, with county re
 
 Virginia, Idaho, Washington, Colorado, Iowa, Oregon, California, Maryland and Hawaii (with vote methods where published; Montana deferred): [docs/nine-state-expansion.md](docs/nine-state-expansion.md).
 
+Operational hardening from the November 2026 review (backoff, retention, dashboard load, builds): [docs/hardening-2026-11.md](docs/hardening-2026-11.md).
+
 Georgia, South Carolina, Kansas and Ohio adapters, validation and isolated rollout;
 Maine official-source work remains pending: [docs/five-state-expansion.md](docs/five-state-expansion.md).

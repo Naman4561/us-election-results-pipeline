@@ -237,13 +237,14 @@ sudo "$CR/.venv/bin/python" "$CR/scripts/deploy.py" repin \
 ```
 
 - **What it accepts:** registered expansion sources only. The new image must report
-  the identical source contract, collector settings and races, and the release must
-  contain every applied migration unchanged.
+  the identical source contract, collector settings and races (only the identifying
+  `user_agent` may differ), and the release must contain every applied migration
+  unchanged.
 - **Validation:** the new image runs a prepare-only cycle: collect, parse, load and
   validate a candidate. Nothing is published. The pin changes only if that cycle
   returns `validated`, the catalog entry is unchanged, and no backup is running.
 - **What changes:** only `image_id`, `revision`, `release_path` and
-  `release_sha256`. The source ID, archives, flags and publications stay the same.
+  `release_sha256` (and the recorded `user_agent`, if the image's differs). The source ID, archives, flags and publications stay the same.
   Earlier pins are kept in `previous_images`.
 - **Rollback:** the same command with the previous release and image. Keep the
   previous release directory and image until the new pin has published.
