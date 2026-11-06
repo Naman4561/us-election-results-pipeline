@@ -113,6 +113,9 @@ function statusFor(code, race, county = null) {
     return { status: "unavailable" };
   const contest = state.races[race];
   if (county && state.county_detail === false) return { status: "unavailable" };
+  // The state hid a small count here for voter privacy; the county is left blank.
+  if (county && contest?.county_privacy_masked && !contest.counties[county])
+    return { status: "unavailable", masked: true };
   const feed = county ? state.county_feeds?.[county] : null;
   if (feed?.collection_status === "not_collected")
     return { status: "not_covered" };
@@ -435,9 +438,11 @@ function renderStatePanel() {
     target.append(
       element(
         "p",
-        feed?.collection_status === "unavailable"
-          ? "This county has no accepted report. Its votes are unknown and excluded from the displayed aggregate."
-          : "Published results are unavailable. Retry shortly; this is not a zero-vote report.",
+        result.masked
+          ? `${state.name} hid a small vote count in this county for voter privacy, so its county result for this race is not shown. The statewide total includes it.`
+          : feed?.collection_status === "unavailable"
+            ? "This county has no accepted report. Its votes are unknown and excluded from the displayed aggregate."
+            : "Published results are unavailable. Retry shortly; this is not a zero-vote report.",
         "empty",
       ),
     );
@@ -482,6 +487,14 @@ function renderStatePanel() {
       element(
         "p",
         `${partial.with_results} of ${partial.expected} counties have accepted counts; ${partial.current} sources currently confirmed, ${partial.manual || 0} manual snapshots, ${partial.stale - (partial.manual || 0)} stale, ${partial.unavailable} unavailable. This is a partial county aggregate, not a statewide total.`,
+        "empty",
+      ),
+    );
+  if (contest?.county_privacy_masked && !view.county)
+    target.append(
+      element(
+        "p",
+        `${state.name} hides some small county counts for voter privacy. Counties with a hidden count are left out of this race's county detail, so they add up to less than the statewide total shown here.`,
         "empty",
       ),
     );

@@ -1,0 +1,119 @@
+{
+  "fl-results.txt": {
+    "bytes": 365462,
+    "content_type": "application/octet-stream",
+    "downloaded_at": "2026-11-06T00:51:19.158034+00:00",
+    "member": "results.txt",
+    "method": "GET",
+    "sha256": "9ff281712df0381ed2896299a0d505ec7c23d8c2fbd8ca72ebccc0f47fef562b",
+    "url": "https://flelectionfiles.floridados.gov/enightfilespublic/20261103_ElecResultsFL.txt"
+  },
+  "nm-county-nm-01.xlsx": {
+    "bytes": 12076,
+    "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "downloaded_at": "2026-11-06T00:51:16.476830+00:00",
+    "member": "county-nm-01.xlsx",
+    "method": "POST",
+    "sha256": "11efb711e332c3839d5d0c7dd1de54919e20226e2dc6b955938b9ac292003596",
+    "url": "https://electionresults.sos.nm.gov/resultsSW.aspx?type=FED&map=CTY"
+  },
+  "nm-county-nm-02.xlsx": {
+    "bytes": 12503,
+    "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "downloaded_at": "2026-11-06T00:51:16.476830+00:00",
+    "member": "county-nm-02.xlsx",
+    "method": "POST",
+    "sha256": "82314c8d768facab860da306be96ff4cf5feff6550a855e6553054e061e2d8bb",
+    "url": "https://electionresults.sos.nm.gov/resultsSW.aspx?type=FED&map=CTY"
+  },
+  "nm-county-nm-03.xlsx": {
+    "bytes": 12749,
+    "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "downloaded_at": "2026-11-06T00:51:16.476830+00:00",
+    "member": "county-nm-03.xlsx",
+    "method": "POST",
+    "sha256": "3c3e8a493233cdf426bc264fd6a1e413159751ec40f339b8b19ae0ad409d8dd9",
+    "url": "https://electionresults.sos.nm.gov/resultsSW.aspx?type=FED&map=CTY"
+  },
+  "nm-county-nm-gov.xlsx": {
+    "bytes": 14177,
+    "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "downloaded_at": "2026-11-06T00:51:16.476830+00:00",
+    "member": "county-nm-gov.xlsx",
+    "method": "POST",
+    "sha256": "a5cf1e702863ca215b5e0faf2dd6f545204416686d575eec7cc3c7b4c514875a",
+    "url": "https://electionresults.sos.nm.gov/resultsSW.aspx?type=SW&map=CTY"
+  },
+  "nm-county-nm-sen.xlsx": {
+    "bytes": 14095,
+    "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "downloaded_at": "2026-11-06T00:51:16.476830+00:00",
+    "member": "county-nm-sen.xlsx",
+    "method": "POST",
+    "sha256": "24b1966d4746d82611cc413c5347b7ff413d4a4335be9fcdd89b7a9607d15686",
+    "url": "https://electionresults.sos.nm.gov/resultsSW.aspx?type=FED&map=CTY"
+  },
+  "nm-fed.csv": {
+    "bytes": 1150,
+    "content_type": "application/text",
+    "downloaded_at": "2026-11-06T00:51:16.476830+00:00",
+    "member": "fed.csv",
+    "method": "GET",
+    "sha256": "a2f477ce5fdafb19f205c34fcfcb337b089b7936551590c6af16cd8020122805",
+    "url": "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=FED&map=CTY"
+  },
+  "nm-fed.html": {
+    "bytes": 83766,
+    "content_type": "text/html; charset=utf-8",
+    "downloaded_at": "2026-11-06T00:51:16.476830+00:00",
+    "member": "fed.html",
+    "method": "GET",
+    "sha256": "1fc8c6f79396747862a862b061b7e1441b39475f33ad0854405a5d6132bb6742",
+    "url": "https://electionresults.sos.nm.gov/resultsSW.aspx?type=FED&map=CTY"
+  },
+  "nm-sw.csv": {
+    "bytes": 10868,
+    "content_type": "application/text",
+    "downloaded_at": "2026-11-06T00:51:16.476830+00:00",
+    "member": "sw.csv",
+    "method": "GET",
+    "sha256": "a19d64a2feefc0e0efd84054b13683db02dec88c237599e8b0cb19068278fa7a",
+    "url": "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=SW&map=CTY"
+  },
+  "nm-sw.html": {
+    "bytes": 214764,
+    "content_type": "text/html; charset=utf-8",
+    "downloaded_at": "2026-11-06T00:51:16.476830+00:00",
+    "member": "sw.html",
+    "method": "GET",
+    "sha256": "a40b4c65664a8708d5a95f83486210cc009b5ae871bdf30e64989522f4dc87ec",
+    "url": "https://electionresults.sos.nm.gov/resultsSW.aspx?type=SW&map=CTY"
+  },
+  "sd-export.html": {
+    "bytes": 39661,
+    "content_type": "text/html; charset=utf-8",
+    "downloaded_at": "2026-11-06T00:51:14.853792+00:00",
+    "member": "export.html",
+    "method": "GET",
+    "sha256": "72a47a9678615d3780a555b43d9491d534569843d61553adc2852291d1a0f8cb",
+    "url": "https://electionresults.sd.gov/ResultsExport.aspx"
+  },
+  "sd-results.csv": {
+    "bytes": 2639,
+    "content_type": "application/text",
+    "downloaded_at": "2026-11-06T00:51:14.853792+00:00",
+    "member": "results.csv",
+    "method": "GET",
+    "sha256": "e403691fb0b2f3032aaa90c6b2f5ecc931b2ead3f63a70eda6a2a7a3cf318ae2",
+    "url": "https://electionresults.sd.gov/resultsCSV.aspx?text=All&type=SWR&map=CTY"
+  },
+  "sd-statewide.xlsx": {
+    "bytes": 38346,
+    "content_type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "downloaded_at": "2026-11-06T00:51:14.853792+00:00",
+    "member": "statewide.xlsx",
+    "method": "POST",
+    "sha256": "f4d724388fe5231cfb9d18da63b130ab7e8ddcd90337c5eefc1fc925343bef50",
+    "url": "https://electionresults.sd.gov/ResultsExport.aspx"
+  }
+}

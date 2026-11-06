@@ -249,3 +249,40 @@ max_uncompressed_bytes = 134217728
 "rankin.html" = "https://www2.rankincounty.org/results/index.html"
 "sunflower.html" = "https://www.sunflowercircuitclerk.com/hart/ALL_PRECINCTS.html"
 "warren.pdf" = "https://warrencountyms.gov/wp-content/uploads/2026/11/General-Unofficial-November-3-Election-Results.pdf"
+
+[sources.sd_2026_general]
+state = "SD"
+election_date = "2026-11-03"
+url = "https://electionresults.sd.gov/resultsCSV.aspx?text=All&type=SWR&map=CTY"
+format = "bundle"
+primary_filename = "results.csv"
+min_interval_seconds = 300
+expected_members = ["results.csv", "export.html", "statewide.xlsx"]
+supplemental_members = ["statewide.xlsx"]
+
+[sources.sd_2026_general.files]
+"export.html" = "https://electionresults.sd.gov/ResultsExport.aspx"
+
+[sources.nm_2026_general]
+state = "NM"
+election_date = "2026-11-03"
+url = "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=FED&map=CTY"
+format = "bundle"
+primary_filename = "fed.csv"
+min_interval_seconds = 300
+expected_members = ["fed.csv", "sw.csv", "fed.html", "sw.html", "county-nm-01.xlsx", "county-nm-02.xlsx", "county-nm-03.xlsx", "county-nm-gov.xlsx", "county-nm-sen.xlsx"]
+supplemental_members = ["county-nm-01.xlsx", "county-nm-02.xlsx", "county-nm-03.xlsx", "county-nm-gov.xlsx", "county-nm-sen.xlsx"]
+
+[sources.nm_2026_general.files]
+"sw.csv" = "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=SW&map=CTY"
+"fed.html" = "https://electionresults.sos.nm.gov/resultsSW.aspx?type=FED&map=CTY"
+"sw.html" = "https://electionresults.sos.nm.gov/resultsSW.aspx?type=SW&map=CTY"
+
+[sources.fl_2026_general]
+state = "FL"
+election_date = "2026-11-03"
+url = "https://flelectionfiles.floridados.gov/enightfilespublic/20261103_ElecResultsFL.txt"
+format = "bundle"
+primary_filename = "results.txt"
+min_interval_seconds = 300
+expected_members = ["results.txt"]

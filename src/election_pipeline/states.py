@@ -29,6 +29,9 @@ class State:
     vote_basis: str = "reported_votes"
     collection_backend: str = ""
     county_feed_status: bool = False
+    # The state hides small county counts for voter privacy (printed as "*"). Its county
+    # rows may then add up to less than an official total, never more.
+    county_privacy_masking: bool = False
 
     @property
     def schema(self):
@@ -183,6 +186,37 @@ STATES = {
         ("total_votes",),
         governor=True,
         source_page="https://liveresults.ohiosos.gov/",
+    ),
+    "SD": State(
+        "SD",
+        "South Dakota",
+        "sd_2026_general",
+        (0,),
+        ("total_votes",),
+        governor=True,
+        source_page="https://electionresults.sd.gov/",
+        collection_backend="enr_export",
+    ),
+    "NM": State(
+        "NM",
+        "New Mexico",
+        "nm_2026_general",
+        (1, 2, 3),
+        ("total_votes",),
+        governor=True,
+        source_page="https://electionresults.sos.nm.gov/",
+        collection_backend="enr_export",
+        county_privacy_masking=True,
+    ),
+    # District 10 was uncontested, so Florida omitted it from the ballot and its results.
+    "FL": State(
+        "FL",
+        "Florida",
+        "fl_2026_general",
+        tuple(n for n in range(1, 29) if n != 10),
+        ("total_votes",),
+        governor=True,
+        source_page="https://floridaelectionwatch.gov/",
     ),
 }
 

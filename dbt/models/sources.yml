@@ -55,3 +55,15 @@ sources:
   tables:
   - name: results
   - name: county_feeds
+- name: sd
+  schema: sd
+  tables:
+  - name: results
+- name: nm
+  schema: nm
+  tables:
+  - name: results
+- name: fl
+  schema: fl
+  tables:
+  - name: results

@@ -70,7 +70,7 @@ class MultiStateTests(unittest.TestCase):
         self.assertEqual(len(payload["calendar"]["governor_states"]), 36)
         self.assertEqual(
             set(payload["states"]),
-            {"NC", "KY", "MN", "NE", "TX", "GA", "SC", "KS", "OH", "AK", "MS"},
+            {"NC", "KY", "MN", "NE", "TX", "GA", "SC", "KS", "OH", "AK", "MS", "SD", "NM", "FL"},
         )
         self.assertEqual(len(payload["coverage"]["KY"]), 7)
         self.assertNotIn("early_voting", payload["states"]["KY"]["methods"])

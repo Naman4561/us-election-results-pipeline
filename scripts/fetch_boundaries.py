@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import json
 import re
+import unicodedata
 import urllib.parse
 import urllib.request
 from pathlib import Path
@@ -97,7 +98,9 @@ def layout(features, box):
 
 
 def county_key(name):
-    return re.sub(r"[^A-Z0-9]", "", name.upper())
+    # Fold accents so Census "Doña Ana" keys like the state's "Dona Ana" (DONAANA).
+    plain = "".join(c for c in unicodedata.normalize("NFKD", name) if not unicodedata.combining(c))
+    return re.sub(r"[^A-Z0-9]", "", plain.upper())
 
 
 def save(name, value):

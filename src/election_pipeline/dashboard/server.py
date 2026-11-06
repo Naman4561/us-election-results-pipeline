@@ -87,6 +87,18 @@ def summarize(rows, method):
     }
 
 
+def within_official(county_rows, contest_rows, method):
+    """True when no candidate's county sum exceeds its official total (privacy masking)."""
+    official = {(r["choice"], r.get("choice_party")): r[method] for r in contest_rows}
+    counted = defaultdict(int)
+    for row in county_rows:
+        key = (row["choice"], row.get("choice_party"))
+        if official.get(key) is None:
+            return False
+        counted[key] += row[method]
+    return all(votes <= official[key] for key, votes in counted.items())
+
+
 def make_payload(
     geography,
     metadata,
@@ -136,9 +148,16 @@ def make_payload(
     races = {}
     for identity, name in races_config.items():
         stats = {m: summarize(totals[identity], m) for m in methods}
+        masked = False
         for method in methods:
-            if adapter.county_results and summarize(by_race[identity], method) != stats[method]:
+            if not adapter.county_results or summarize(by_race[identity], method) == stats[method]:
+                continue
+            if not (
+                adapter.county_privacy_masking
+                and within_official(by_race[identity], totals[identity], method)
+            ):
                 raise ValueError("Published county and contest results disagree")
+            masked = True
         races[identity] = {
             "name": name,
             "stats": stats,
@@ -147,6 +166,8 @@ def make_payload(
                 for key, rows in by_county[identity].items()
             },
         }
+        if masked:
+            races[identity]["county_privacy_masked"] = True
     payload = {
         "state": state,
         "methods": methods,

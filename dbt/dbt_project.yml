@@ -106,6 +106,49 @@ vars:
   ms_results_source: ms_2026_general
   ms_races:
   - MS-SEN
+  sd_results_source: sd_2026_general
+  sd_races:
+  - SD-SEN
+  - SD-GOV
+  - SD-AL
+  nm_results_source: nm_2026_general
+  nm_races:
+  - NM-SEN
+  - NM-GOV
+  - NM-01
+  - NM-02
+  - NM-03
+  fl_results_source: fl_2026_general
+  fl_races:
+  - FL-SEN
+  - FL-GOV
+  - FL-01
+  - FL-02
+  - FL-03
+  - FL-04
+  - FL-05
+  - FL-06
+  - FL-07
+  - FL-08
+  - FL-09
+  - FL-11
+  - FL-12
+  - FL-13
+  - FL-14
+  - FL-15
+  - FL-16
+  - FL-17
+  - FL-18
+  - FL-19
+  - FL-20
+  - FL-21
+  - FL-22
+  - FL-23
+  - FL-24
+  - FL-25
+  - FL-26
+  - FL-27
+  - FL-28
 models:
   election_analytics:
     +materialized: '{{ var(''publication_materialization'', ''view'') }}'
@@ -144,6 +187,15 @@ models:
       ms:
         +tags:
         - state_ms
+      sd:
+        +tags:
+        - state_sd
+      nm:
+        +tags:
+        - state_nm
+      fl:
+        +tags:
+        - state_fl
     marts:
       +schema: marts
       ak:
@@ -179,3 +231,12 @@ models:
       ms:
         +tags:
         - state_ms
+      sd:
+        +tags:
+        - state_sd
+      nm:
+        +tags:
+        - state_nm
+      fl:
+        +tags:
+        - state_fl

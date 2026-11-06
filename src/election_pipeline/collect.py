@@ -9,7 +9,7 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.request import Request, urlopen
+from urllib.request import HTTPCookieProcessor, HTTPSHandler, Request, build_opener, urlopen
 
 from election_pipeline.settings import CollectorSettings, Source, validate_url
 from election_pipeline.tls import context_for_url
@@ -49,14 +49,21 @@ def fetch_file(
     conditional_headers: dict[str, str],
     *,
     url: str | None = None,
+    form: bytes | None = None,
+    cookies=None,
 ) -> FetchResponse:
+    """GET by default. ``form`` posts an official page's own form back to it; ``cookies``
+    is a per-collection jar so that post reaches the session that rendered the page."""
     validate_url(url or source.url)
     request = Request(
         url or source.url,
+        data=form,
+        method="GET" if form is None else "POST",
         headers={
             "User-Agent": settings.user_agent,
             "Accept": "application/zip, text/csv, application/octet-stream;q=0.9, */*;q=0.1",
             "Accept-Encoding": "identity",
+            **({} if form is None else {"Content-Type": "application/x-www-form-urlencoded"}),
             **conditional_headers,
         },
     )
@@ -66,8 +73,16 @@ def fetch_file(
     except (ValueError, OSError) as error:
         raise FetchFailure(f"TLS configuration failed: {error}", retryable=False) from error
     try:
-        options = {"context": context} if context is not None else {}
-        response = urlopen(request, timeout=settings.timeout_seconds, **options)
+        if cookies is None:
+            options = {"context": context} if context is not None else {}
+            response = urlopen(request, timeout=settings.timeout_seconds, **options)
+        else:
+            # HTTPSHandler() without a context still uses verified default TLS.
+            opener = build_opener(
+                HTTPCookieProcessor(cookies),
+                HTTPSHandler(context=context) if context is not None else HTTPSHandler(),
+            )
+            response = opener.open(request, timeout=settings.timeout_seconds)
     except HTTPError as error:
         # urllib represents 304 as HTTPError; it is a normal conditional-GET result.
         response = error
