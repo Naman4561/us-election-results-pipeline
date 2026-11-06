@@ -675,7 +675,9 @@ def rollback(path, config):
     with catalog.locked(path, exclusive=True):
         before = catalog.read(path)
         value = json.loads(json.dumps(before))
-        previous = value["previous_dashboard"]
+        previous = value.get("previous_dashboard")
+        if previous is None:
+            raise ValueError("No previous dashboard is eligible for rollback")
         for name, entry in value["sources"].items():
             if name in previous.get("source_flags", {}):
                 entry.update(previous["source_flags"][name])

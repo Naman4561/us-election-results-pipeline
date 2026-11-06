@@ -6,9 +6,10 @@ import hashlib
 import json
 import re
 import socket
+import subprocess
 import time
 import uuid
-from contextlib import ExitStack
+from contextlib import ExitStack, suppress
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -239,29 +240,29 @@ def activate_sources(path, selected, prod, config):
     candidate["id"] = candidate_id
     atomic_json(state / ("candidate-" + candidate_id + ".json"), candidate)
     expected = control.expected_states(catalog.prospective(current, selected))
+    wait_for_dashboard(candidate["url"], expected)
+    return control.activate(path, candidate, restored, prod, config)
+
+
+def wait_for_dashboard(url, expected):
     deadline = time.monotonic() + 30
     while True:
         try:
-            dashboard.check(candidate["url"], expected)
-            break
+            dashboard.check(url, expected)
+            return
         except OSError:
             if time.monotonic() >= deadline:
                 raise ValueError("Candidate dashboard did not become ready in 30 seconds") from None
             time.sleep(1)
-    return control.activate(path, candidate, restored, prod, config)
 
 
 def retire(path, states, prod, config):
     """Remove replaced sources from future baseline cycles after their public switch."""
     selected = names(states)
     control.controls_ready(config)
-    prod_file = Path(config.get("PRODUCTION_ENV", "/etc/election-pipeline/production.env"))
-    journal = Path(config["CONTROL_STATE_DIR"]) / "source-handoff.json"
     with catalog.locked(path, exclusive=True, nonblocking=True):
         before = catalog.read(path)
-        original = prod_file.read_bytes().decode("utf-8")
-        actual_prod = dict(dotenv_values(prod_file, interpolate=False))
-        catalog.verify_baseline(before, actual_prod)
+        catalog.verify_baseline(before, prod)
         old_names = []
         for name in selected:
             new = before["sources"][name]
@@ -275,72 +276,170 @@ def retire(path, states, prod, config):
                 old_names.append(old_name)
         if not old_names:
             return {"outcome": "already_retired", "sources": selected}
-        remaining = [name for name in before["baseline"]["source_ids"] if name not in old_names]
-        if not remaining:
-            raise ValueError(
-                "Retiring the last baseline source requires separate worker retirement"
-            )
-        changed, count = re.subn(
-            r"(?m)^PIPELINE_SOURCES[ \t]*=[^\r\n]*",
-            "PIPELINE_SOURCES=" + ",".join(remaining),
-            original,
-        )
-        if count != 1:
-            raise ValueError("Expected exactly one PIPELINE_SOURCES assignment")
-        if (
-            journal.exists()
-            and json.loads(journal.read_text(encoding="utf-8"))["outcome"] == "pending"
-        ):
-            raise ValueError("Recover the pending source handoff before retiring collectors")
+        return retire_baseline(path, before, old_names, config)
 
-        def idle():
-            state = containers.command(
-                ["systemctl", "show", "--value", "-p", "ActiveState", "election-pipeline.service"]
-            )
-            if state not in ("inactive", "failed"):
-                raise ValueError("Baseline cycle is running; retry retirement after it finishes")
 
-        idle()
-        with ExitStack() as stack:
-            for name in sorted(old_names):
-                source = catalog.source_from_json(before["sources"][name]["source"])
-                store = ArchiveStore(Path(actual_prod["DATA_DIR"]), source)
-                stack.enter_context(store.lock(stage="pipeline"))
-                stack.enter_context(store.lock())
-            after = json.loads(json.dumps(before))
-            for name in old_names:
-                # A dashboard rollback can re-enable this immutable image in the independent worker.
-                after["sources"][name].update(worker="expansion", enabled=False, public=False)
-            after["baseline"]["source_ids"] = remaining
-            after["generation"] += 1
-            catalog.validate(after)
-            backup = prod_file.with_name(prod_file.name + ".before-source-" + uuid.uuid4().hex)
-            control.private_text(backup, original)
-            record = {
-                "kind": "coverage_retirement",
-                "outcome": "pending",
-                "started_at": utc_now(),
-                "source_ids": old_names,
-                "production_env_backup": str(backup),
-                "production_env_path": str(prod_file),
-                "catalog_before": before,
-                "catalog_after": after,
-            }
-            atomic_json(journal, record)
-            if prod_file.read_bytes().decode("utf-8") != original:
-                atomic_json(journal, {**record, "outcome": "cancelled"})
-                raise ValueError("Production settings changed during retirement")
-            try:
-                control.private_text(prod_file, changed)
-                idle()
-                catalog.write(path, after)
-                atomic_json(journal, {**record, "outcome": "applied"})
-            except Exception:
-                catalog.write(path, before)
-                control.private_text(prod_file, original)
-                atomic_json(journal, {**record, "outcome": "rolled_back"})
-                raise
+def pending_handoff(path):
+    return path.exists() and json.loads(path.read_text(encoding="utf-8"))["outcome"] == "pending"
+
+
+def require_baseline_idle():
+    state = containers.command(
+        ["systemctl", "show", "--value", "-p", "ActiveState", "election-pipeline.service"]
+    )
+    if state not in ("inactive", "failed"):
+        raise ValueError("Baseline cycle is running; retry retirement after it finishes")
+
+
+def retire_baseline(path, before, old_names, config):
+    """Retire private sources while holding the exclusive catalog lock."""
+    prod_file = Path(config.get("PRODUCTION_ENV", "/etc/election-pipeline/production.env"))
+    journal = Path(config["CONTROL_STATE_DIR"]) / "source-handoff.json"
+    original = prod_file.read_bytes().decode("utf-8")
+    actual_prod = dict(dotenv_values(prod_file, interpolate=False))
+    catalog.verify_baseline(before, actual_prod)
+    if any(before["sources"][name]["public"] for name in old_names):
+        raise ValueError("Remove sources from public coverage before retiring them")
+    remaining = [name for name in before["baseline"]["source_ids"] if name not in old_names]
+    if not remaining:
+        raise ValueError("Retiring the last baseline source requires separate worker retirement")
+    changed, count = re.subn(
+        r"(?m)^PIPELINE_SOURCES[ \t]*=[^\r\n]*",
+        "PIPELINE_SOURCES=" + ",".join(remaining),
+        original,
+    )
+    if count != 1:
+        raise ValueError("Expected exactly one PIPELINE_SOURCES assignment")
+    if pending_handoff(journal):
+        raise ValueError("Recover the pending source handoff before retiring collectors")
+
+    require_baseline_idle()
+    with ExitStack() as stack:
+        for name in sorted(old_names):
+            source = catalog.source_from_json(before["sources"][name]["source"])
+            store = ArchiveStore(Path(actual_prod["DATA_DIR"]), source)
+            stack.enter_context(store.lock(stage="pipeline"))
+            stack.enter_context(store.lock())
+        after = json.loads(json.dumps(before))
+        for name in old_names:
+            # A dashboard rollback can re-enable this immutable image in the independent worker.
+            after["sources"][name].update(worker="expansion", enabled=False, public=False)
+        after["baseline"]["source_ids"] = remaining
+        after["generation"] += 1
+        catalog.validate(after)
+        backup = prod_file.with_name(prod_file.name + ".before-source-" + uuid.uuid4().hex)
+        control.private_text(backup, original)
+        record = {
+            "kind": "coverage_retirement",
+            "outcome": "pending",
+            "started_at": utc_now(),
+            "source_ids": old_names,
+            "production_env_backup": str(backup),
+            "production_env_path": str(prod_file),
+            "catalog_before": before,
+            "catalog_after": after,
+        }
+        atomic_json(journal, record)
+        if prod_file.read_bytes().decode("utf-8") != original:
+            atomic_json(journal, {**record, "outcome": "cancelled"})
+            raise ValueError("Production settings changed during retirement")
+        try:
+            control.private_text(prod_file, changed)
+            require_baseline_idle()
+            catalog.write(path, after)
+            atomic_json(journal, {**record, "outcome": "applied"})
+        except Exception:
+            catalog.write(path, before)
+            control.private_text(prod_file, original)
+            atomic_json(journal, {**record, "outcome": "rolled_back"})
+            raise
     return {"outcome": "retired", "sources": old_names, "remaining_baseline_sources": remaining}
+
+
+def disable_baseline(path, name, prod, config):
+    """Hide a state's results and retire its sole enabled baseline source."""
+    control.controls_ready(config)
+    before = catalog.read(path)
+    catalog.verify_baseline(before, prod)
+    entry = before["sources"].get(name)
+    if entry is None or entry["source"]["dataset"] != "election_results":
+        raise ValueError("Select a registered results source")
+    state_code = entry["source"]["state"]
+    if any(
+        other_name != name and other["enabled"] and other["source"]["state"] == state_code
+        for other_name, other in before["sources"].items()
+    ):
+        raise ValueError("Another source is still enabled for this state")
+    if not entry["enabled"] and not entry["public"] and entry["worker"] != "baseline":
+        return {
+            "outcome": "already_disabled",
+            "source_id": name,
+            "remaining_baseline_sources": before["baseline"]["source_ids"],
+            "dashboard_states": before["dashboard"]["states"],
+        }
+    if entry["worker"] != "baseline":
+        raise ValueError("Select a baseline results source")
+    if len(before["baseline"]["source_ids"]) < 2:
+        raise ValueError("Disabling the last baseline source requires separate worker retirement")
+
+    directory = Path(config["CONTROL_STATE_DIR"])
+    handoff = directory / "handoff.json"
+    if pending_handoff(handoff) or pending_handoff(directory / "source-handoff.json"):
+        raise ValueError("Recover the pending handoff before disabling a source")
+
+    hidden = json.loads(json.dumps(before))
+    hidden["sources"][name]["public"] = False
+    candidate_name = None
+    switched = False
+    try:
+        if entry["public"]:
+            identity = uuid.uuid4().hex
+            candidate_name = "election-expansion-dashboard-" + identity
+            active_image = before["dashboard"].get("image_id") or before["baseline"]["image_id"]
+            candidate = dashboard.start(
+                hidden,
+                [],
+                prod,
+                config,
+                directory / ("dashboard-" + identity),
+                port=free_port(),
+                image=active_image,
+            )
+            wait_for_dashboard(candidate["url"], control.expected_states(hidden))
+            hidden["dashboard"] = {**candidate, "id": identity}
+            # The prior dashboard includes the removed state and its enabled flags.
+            hidden.pop("previous_dashboard", None)
+            hidden["generation"] += 1
+
+        with catalog.locked(path, exclusive=True, nonblocking=True):
+            if catalog.read(path) != before:
+                raise ValueError("Catalog changed; retry disabling the source")
+            if pending_handoff(handoff) or pending_handoff(directory / "source-handoff.json"):
+                raise ValueError("Recover the pending handoff before disabling a source")
+            control.require_no_backup()
+            require_baseline_idle()
+            if candidate_name:
+                control.switch_dashboard(path, before, hidden, candidate_name, config)
+                switched = True
+                progress("dashboard_switched", states=hidden["dashboard"]["states"])
+            try:
+                result = retire_baseline(path, hidden, [name], config)
+            except Exception as error:
+                raise ValueError(
+                    f"{name} is off the dashboard; collector retirement did not finish. "
+                    f"Retry when the baseline worker is idle. {error}"
+                ) from error
+    except Exception:
+        if candidate_name and not switched and not pending_handoff(handoff):
+            with suppress(OSError, subprocess.SubprocessError, ValueError):
+                dashboard.stop_unused(candidate_name, catalog.read(path))
+        raise
+    return {
+        **result,
+        "outcome": "disabled",
+        "source_id": name,
+        "dashboard_states": hidden["dashboard"]["states"],
+    }
 
 
 def recover_retirement(path, config):
@@ -356,11 +455,7 @@ def recover_retirement(path, config):
         prod_file = Path(config.get("PRODUCTION_ENV", "/etc/election-pipeline/production.env"))
         if str(prod_file) != record["production_env_path"]:
             raise ValueError("Recovery refers to another production configuration")
-        state = containers.command(
-            ["systemctl", "show", "--value", "-p", "ActiveState", "election-pipeline.service"]
-        )
-        if state not in ("inactive", "failed"):
-            raise ValueError("Baseline cycle is running; retry recovery after it finishes")
+        require_baseline_idle()
         original = Path(record["production_env_backup"]).read_bytes().decode("utf-8")
         changed = re.sub(
             r"(?m)^PIPELINE_SOURCES[ \t]*=[^\r\n]*",

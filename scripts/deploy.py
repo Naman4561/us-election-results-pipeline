@@ -25,6 +25,10 @@ def main():
     sub.add_parser("rollback-dashboard")
     sub.add_parser("recover-handoff")
     sub.add_parser("recover-coverage-retirement")
+    disable = sub.add_parser(
+        "disable-baseline", help="Remove a baseline state's public coverage and schedule"
+    )
+    disable.add_argument("--source", required=True)
     admitted = sub.add_parser("activate-sources")
     admitted.add_argument("--source", action="append", required=True)
     county = sub.add_parser("import-county")
@@ -124,6 +128,8 @@ def main():
                 result = getattr(coverage, args.phase)(path, args.states, prod, config)
         elif action == "recover-coverage-retirement":
             result = coverage.recover_retirement(path, config)
+        elif action == "disable-baseline":
+            result = coverage.disable_baseline(path, args.source, prod, config)
         elif action == "transfer-source":
             result = control.transfer_source(
                 path,

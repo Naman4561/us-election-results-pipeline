@@ -722,6 +722,100 @@ class CoverageDeploymentTests(unittest.TestCase):
             self.assertEqual(catalog.read(self.path), self.value)
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_disable_baseline_keeps_other_states_and_can_resume_after_a_racing_cycle(self):
+        name = "ky_2026_general"
+        self.value["previous_dashboard"] = copy.deepcopy(self.value["dashboard"])
+        catalog.write(self.path, self.value)
+        before = catalog.read(self.path)
+        caddyfile = self.root / "Caddyfile"
+        original_route = (ROOT / "deploy/Caddyfile").read_text(encoding="utf-8")
+        caddyfile.write_text(original_route, encoding="utf-8")
+        config = {**self.config, "CADDYFILE": str(caddyfile), "CADDY_CONTAINER": "caddy"}
+
+        def start(value, sources, prod, config, directory, **kwargs):
+            self.assertEqual(sources, [])
+            self.assertEqual(catalog.public_states(value), {"NC"})
+            self.assertEqual(kwargs["image"], self.value["baseline"]["image_id"])
+            return {
+                "name": "election-expansion-dashboard-" + directory.name.removeprefix("dashboard-"),
+                "url": "http://localhost:8001",
+                "states": ["NC"],
+            }
+
+        with (
+            patch.object(control, "controls_ready"),
+            patch.object(control, "require_no_backup"),
+            patch.object(containers, "command", side_effect=["inactive", "inactive", "active"]),
+            patch.object(coverage, "free_port", return_value=8001),
+            patch.object(control.dashboard, "start", side_effect=start),
+            patch.object(control.dashboard, "check") as check,
+            patch.object(control.dashboard, "reload"),
+        ):
+            with self.assertRaisesRegex(ValueError, "collector retirement did not finish"):
+                coverage.disable_baseline(self.path, name, self.prod, config)
+        hidden = catalog.read(self.path)
+        self.assertEqual(catalog.public_states(hidden), {"NC"})
+        self.assertTrue(hidden["sources"][name]["enabled"])
+        self.assertEqual(self.prod_file.read_text(encoding="utf-8"), self.original)
+        self.assertNotIn("previous_dashboard", hidden)
+        self.assertIn(hidden["dashboard"]["name"] + ":8000", caddyfile.read_text())
+        self.assertEqual([set(call.args[1]) for call in check.call_args_list], [{"NC"}, {"NC"}])
+
+        with (
+            patch.object(control, "controls_ready"),
+            patch.object(control, "require_no_backup"),
+            patch.object(containers, "command", return_value="inactive"),
+            patch.object(control.dashboard, "start") as start_dashboard,
+        ):
+            result = coverage.disable_baseline(self.path, name, self.prod, config)
+            start_dashboard.assert_not_called()
+            self.assertEqual(result["outcome"], "disabled")
+            self.assertEqual(result["remaining_baseline_sources"], ["nc_2026_general"])
+            prod = {**self.prod, "PIPELINE_SOURCES": "nc_2026_general"}
+            repeated = coverage.disable_baseline(self.path, name, prod, config)
+            self.assertEqual(repeated["outcome"], "already_disabled")
+        after = catalog.read(self.path)
+        self.assertEqual(after["dashboard"], hidden["dashboard"])
+        self.assertEqual(
+            after["sources"][name],
+            {
+                **before["sources"][name],
+                "worker": "expansion",
+                "enabled": False,
+                "public": False,
+            },
+        )
+        self.assertEqual(after["sources"]["nc_2026_general"], before["sources"]["nc_2026_general"])
+        self.assertEqual(
+            self.prod_file.read_text(encoding="utf-8"),
+            self.original.replace("nc_2026_general,ky_2026_general", "nc_2026_general"),
+        )
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_failed_disable_handoff_keeps_public_dashboard_and_schedule(self):
+        before = catalog.read(self.path)
+        caddyfile = self.root / "Caddyfile"
+        route = (ROOT / "deploy/Caddyfile").read_text(encoding="utf-8")
+        caddyfile.write_text(route, encoding="utf-8")
+        config = {**self.config, "CADDYFILE": str(caddyfile), "CADDY_CONTAINER": "caddy"}
+        with (
+            patch.object(control, "controls_ready"),
+            patch.object(control, "require_no_backup"),
+            patch.object(containers, "command", return_value="inactive"),
+            patch.object(coverage, "free_port", return_value=8001),
+            patch.object(control.dashboard, "start", return_value={"url": "http://localhost:8001"}),
+            patch.object(control.dashboard, "check", side_effect=[{}, ValueError("bad origin")]),
+            patch.object(control.dashboard, "reload"),
+            patch.object(control.dashboard, "stop_unused") as stop,
+        ):
+            with self.assertRaisesRegex(ValueError, "bad origin"):
+                coverage.disable_baseline(self.path, "ky_2026_general", self.prod, config)
+        stop.assert_called_once()
+        self.assertEqual(catalog.read(self.path), before)
+        self.assertEqual(self.prod_file.read_text(encoding="utf-8"), self.original)
+        self.assertEqual(caddyfile.read_text(encoding="utf-8"), route)
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_dashboard_rollback_restores_old_source_flags_after_retirement(self):
         self.add()
         self.value["previous_dashboard"] = {
