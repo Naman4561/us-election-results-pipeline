@@ -151,31 +151,40 @@ class ProductionRecoveryTests(unittest.TestCase):
             "--destination",
             str(self.root / "work"),
         ]
-        with (
-            patch.object(sys, "argv", arguments),
-            patch.object(job, "aws_copy", side_effect=copy) as download,
-            patch.object(
-                job,
-                "check_restore",
-                return_value={"outcome": "passed"},
-            ) as restore,
-            patch.object(job.os, "umask"),
-            redirect_stdout(io.StringIO()) as output,
-        ):
-            self.assertEqual(job.main(), 0)
+        for passed in (True, False):
+            with self.subTest(passed=passed):
+                report = self.root / "live/recovery_checks/restore.json"
 
-        self.assertEqual(download.call_count, 2)
-        restored_bundle = restore.call_args.args[2]
-        self.assertNotEqual(restored_bundle, self.bundle)
-        self.assertEqual(
-            (restored_bundle / "database.dump").read_bytes(),
-            b"synthetic database archive\x00\xff",
-        )
-        self.assertEqual(
-            restore.call_args.kwargs["writer_role"],
-            "pipeline_writer",
-        )
-        self.assertNotIn("private-bucket", output.getvalue())
+                def restore_check(root, db, restored_bundle, service, **kwargs):
+                    self.assertNotEqual(restored_bundle, self.bundle)
+                    self.assertEqual(
+                        (restored_bundle / "database.dump").read_bytes(),
+                        b"synthetic database archive\x00\xff",
+                    )
+                    self.assertEqual(kwargs["writer_role"], "pipeline_writer")
+                    self.assertEqual(kwargs["report_dir"], report.parent)
+                    result = {
+                        "outcome": "passed" if passed else "failed",
+                        "temporary_database_removed": True,
+                        "report_path": str(report),
+                    }
+                    atomic_json(report, result)
+                    return result
+
+                with (
+                    patch.object(sys, "argv", arguments),
+                    patch.object(job, "aws_copy", side_effect=copy) as download,
+                    patch.object(job, "check_restore", side_effect=restore_check) as restore,
+                    patch.object(job.os, "umask"),
+                    redirect_stdout(io.StringIO()) as output,
+                ):
+                    self.assertEqual(job.main(), 0 if passed else 1)
+
+                self.assertEqual(download.call_count, 2)
+                self.assertEqual(restore.call_args.args[2].parent.exists(), not passed)
+                self.assertTrue(report.exists())
+                self.assertTrue(self.bundle.exists())
+                self.assertNotIn("private-bucket", output.getvalue())
 
     def test_restore_uses_production_compose_and_writer_ownership(self):
         conn = MagicMock()

@@ -5,6 +5,9 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+
+from scripts import prune_restore_work
 
 ROOT = Path(__file__).resolve().parents[1]
 spec = importlib.util.spec_from_file_location(
@@ -79,6 +82,44 @@ class RetentionTests(unittest.TestCase):
     def test_zero_retention_is_rejected(self):
         with self.assertRaises(ValueError):
             module.prune_backups(self.root, keep=0, apply=True)
+        self.assertTrue(all(bundle.exists() for bundle in self.bundles))
+
+    def test_restore_pruning_requires_a_passed_report_and_a_matching_remote_backup(self):
+        report_dir = self.root / "reports"
+        report_dir.mkdir()
+        receipt = {
+            "schema_version": 1,
+            "backup_id": self.bundles[0].name,
+            "sha256": "a" * 64,
+            "bytes": 100,
+        }
+        for index, passed in enumerate((True, True, False)):
+            work = self.root / f"restore-{index:08}"
+            (work / "bundle").mkdir(parents=True)
+            local = {**receipt, "backup_id": self.bundles[index].name}
+            (work / "complete.json").write_text(json.dumps(local))
+            (report_dir / f"election_restore_{index}_test.json").write_text(
+                json.dumps(
+                    {
+                        "outcome": "passed" if passed else "failed",
+                        "temporary_database_removed": True,
+                        "backup_dir": str(work / "bundle"),
+                    }
+                )
+            )
+        config = {"BACKUP_BUCKET": "private-fixture"}
+        responses = [json.dumps(receipt), "100", json.dumps(receipt)]
+        with patch.object(prune_restore_work.subprocess, "check_output", side_effect=responses):
+            plan = prune_restore_work.prune(self.root, report_dir, config)
+        self.assertEqual(plan["would_remove"], ["restore-00000000"])
+        self.assertTrue((self.root / "restore-00000000").exists())
+        with patch.object(prune_restore_work.subprocess, "check_output", side_effect=responses):
+            result = prune_restore_work.prune(self.root, report_dir, config, apply=True)
+        self.assertEqual(result["removed"], ["restore-00000000"])
+        self.assertFalse((self.root / "restore-00000000").exists())
+        self.assertTrue((self.root / "restore-00000001").exists())
+        self.assertTrue((self.root / "restore-00000002").exists())
+        self.assertEqual(len(list(report_dir.iterdir())), 3)
         self.assertTrue(all(bundle.exists() for bundle in self.bundles))
 
     def test_link_cannot_remove_outside_directory(self):

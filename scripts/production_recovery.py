@@ -252,6 +252,14 @@ def main():
                 report_dir=data / "recovery_checks",
             )
             result["backup_id"] = args.backup_id
+            if result.get("outcome") == "passed" and result.get("temporary_database_removed"):
+                # The persistent restore report has already been written outside this directory.
+                try:
+                    shutil.rmtree(work)
+                except OSError as error:
+                    result.update(restore_work_removed=False, restore_cleanup_error=str(error))
+                else:
+                    result["restore_work_removed"] = True
 
     except Exception as error:
         result.update(outcome="failed", error=str(error))
