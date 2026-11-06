@@ -15,6 +15,7 @@ try:
         create_app,
         demo_payload,
         make_payload,
+        national_payload,
         party_group,
         summarize,
     )
@@ -123,6 +124,32 @@ class DashboardTests(unittest.TestCase):
         self.assertEqual(result["publication"]["publication_id"], "old")
         for call in conn.execute.call_args_list[-2:]:
             self.assertEqual(call.args[1], ("old",))
+
+    def test_reader_reuses_a_recent_payload_without_reconnecting(self):
+        reader = PublishedResults({}, self.geo, "nc_2026_general")
+        with patch.object(reader, "read", return_value={"races": {}}) as read:
+            first, second = reader(), reader()
+            self.assertIs(first, second)
+            self.assertEqual(read.call_count, 1)
+            reader.recent = (reader.recent[0] - reader.TTL_SECONDS - 1, reader.recent[1])
+            reader()
+            self.assertEqual(read.call_count, 2)
+
+    def test_national_summary_omits_county_detail_served_per_state(self):
+        full = demo_payload(self.geo)
+        self.assertTrue(any(c.get("counties") for c in full["races"].values()))
+        national = national_payload({"NC": lambda: full})["states"]["NC"]
+        for race, contest in national["races"].items():
+            self.assertNotIn("counties", contest)
+            self.assertEqual(contest["stats"], full["races"][race]["stats"])
+        self.assertNotIn("county_feeds", national)
+        with TestClient(create_app(demo=True)) as client:
+            whole = client.get("/api/national")
+            state = client.get("/api/states/NC").json()
+            self.assertTrue(any(c.get("counties") for c in state["races"].values()))
+            self.assertLess(len(whole.content), 1_000_000)
+            self.assertEqual(client.get("/nc-map.json").headers["cache-control"], "no-cache")
+            self.assertIn("no-cache", whole.headers["cache-control"])
 
     def test_boundary_coverage_and_demo_categories(self):
         self.assertEqual(len(self.geo["counties"]), 100)
