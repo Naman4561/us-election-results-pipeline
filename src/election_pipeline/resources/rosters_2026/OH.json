@@ -1,0 +1,441 @@
+{
+ "state": "OH",
+ "provenance": "Reviewed from the official responses in tests/fixtures/five_states (see its README.md and provenance.json).",
+ "races": {
+  "OH-GOV": {
+   "candidates": [
+    "_BS55A742EA542B09A3E0633390EE0AE290",
+    "_BS55A742EA5F7909A3E0633390EE0AE290",
+    "_BS576292D859D073A6E0633390EE0A943A",
+    "_BS59434A42701E7F04E0633390EE0A7DE4",
+    "_BS59F4F0CBC2572408E0633390EE0A0E4A",
+    "_BS59F4F0CBC2B12408E0633390EE0A0E4A"
+   ],
+   "counties": [
+    "ADAMS",
+    "ALLEN",
+    "ASHLAND",
+    "ASHTABULA",
+    "ATHENS",
+    "AUGLAIZE",
+    "BELMONT",
+    "BROWN",
+    "BUTLER",
+    "CARROLL",
+    "CHAMPAIGN",
+    "CLARK",
+    "CLERMONT",
+    "CLINTON",
+    "COLUMBIANA",
+    "COSHOCTON",
+    "CRAWFORD",
+    "CUYAHOGA",
+    "DARKE",
+    "DEFIANCE",
+    "DELAWARE",
+    "ERIE",
+    "FAIRFIELD",
+    "FAYETTE",
+    "FRANKLIN",
+    "FULTON",
+    "GALLIA",
+    "GEAUGA",
+    "GREENE",
+    "GUERNSEY",
+    "HAMILTON",
+    "HANCOCK",
+    "HARDIN",
+    "HARRISON",
+    "HENRY",
+    "HIGHLAND",
+    "HOCKING",
+    "HOLMES",
+    "HURON",
+    "JACKSON",
+    "JEFFERSON",
+    "KNOX",
+    "LAKE",
+    "LAWRENCE",
+    "LICKING",
+    "LOGAN",
+    "LORAIN",
+    "LUCAS",
+    "MADISON",
+    "MAHONING",
+    "MARION",
+    "MEDINA",
+    "MEIGS",
+    "MERCER",
+    "MIAMI",
+    "MONROE",
+    "MONTGOMERY",
+    "MORGAN",
+    "MORROW",
+    "MUSKINGUM",
+    "NOBLE",
+    "OTTAWA",
+    "PAULDING",
+    "PERRY",
+    "PICKAWAY",
+    "PIKE",
+    "PORTAGE",
+    "PREBLE",
+    "PUTNAM",
+    "RICHLAND",
+    "ROSS",
+    "SANDUSKY",
+    "SCIOTO",
+    "SENECA",
+    "SHELBY",
+    "STARK",
+    "SUMMIT",
+    "TRUMBULL",
+    "TUSCARAWAS",
+    "UNION",
+    "VAN WERT",
+    "VINTON",
+    "WARREN",
+    "WASHINGTON",
+    "WAYNE",
+    "WILLIAMS",
+    "WOOD",
+    "WYANDOT"
+   ]
+  },
+  "OH-SEN": {
+   "candidates": [
+    "_BS55A742EA56A809A3E0633390EE0AE290",
+    "_BS55A742EA61EF09A3E0633390EE0AE290",
+    "_BS55A742EA672809A3E0633390EE0AE290",
+    "_BS576274EE440573A4E0633390EE0A591D",
+    "_BS5993067779935D6FE0633390EE0ADD86",
+    "_BS59F4DEB13FEC0F04E0633390EE0A01BC",
+    "_BS59F4DEB140460F04E0633390EE0A01BC"
+   ],
+   "counties": [
+    "ADAMS",
+    "ALLEN",
+    "ASHLAND",
+    "ASHTABULA",
+    "ATHENS",
+    "AUGLAIZE",
+    "BELMONT",
+    "BROWN",
+    "BUTLER",
+    "CARROLL",
+    "CHAMPAIGN",
+    "CLARK",
+    "CLERMONT",
+    "CLINTON",
+    "COLUMBIANA",
+    "COSHOCTON",
+    "CRAWFORD",
+    "CUYAHOGA",
+    "DARKE",
+    "DEFIANCE",
+    "DELAWARE",
+    "ERIE",
+    "FAIRFIELD",
+    "FAYETTE",
+    "FRANKLIN",
+    "FULTON",
+    "GALLIA",
+    "GEAUGA",
+    "GREENE",
+    "GUERNSEY",
+    "HAMILTON",
+    "HANCOCK",
+    "HARDIN",
+    "HARRISON",
+    "HENRY",
+    "HIGHLAND",
+    "HOCKING",
+    "HOLMES",
+    "HURON",
+    "JACKSON",
+    "JEFFERSON",
+    "KNOX",
+    "LAKE",
+    "LAWRENCE",
+    "LICKING",
+    "LOGAN",
+    "LORAIN",
+    "LUCAS",
+    "MADISON",
+    "MAHONING",
+    "MARION",
+    "MEDINA",
+    "MEIGS",
+    "MERCER",
+    "MIAMI",
+    "MONROE",
+    "MONTGOMERY",
+    "MORGAN",
+    "MORROW",
+    "MUSKINGUM",
+    "NOBLE",
+    "OTTAWA",
+    "PAULDING",
+    "PERRY",
+    "PICKAWAY",
+    "PIKE",
+    "PORTAGE",
+    "PREBLE",
+    "PUTNAM",
+    "RICHLAND",
+    "ROSS",
+    "SANDUSKY",
+    "SCIOTO",
+    "SENECA",
+    "SHELBY",
+    "STARK",
+    "SUMMIT",
+    "TRUMBULL",
+    "TUSCARAWAS",
+    "UNION",
+    "VAN WERT",
+    "VINTON",
+    "WARREN",
+    "WASHINGTON",
+    "WAYNE",
+    "WILLIAMS",
+    "WOOD",
+    "WYANDOT"
+   ]
+  },
+  "OH-01": {
+   "candidates": [
+    "_BS55A742EA574A09A3E0633390EE0AE290",
+    "_BS55A742EA628A09A3E0633390EE0AE290",
+    "_BS5A1D2856A2CCD7BEE0633390EE0A2FBB"
+   ],
+   "counties": [
+    "CLINTON",
+    "HAMILTON",
+    "WARREN"
+   ]
+  },
+  "OH-02": {
+   "candidates": [
+    "_BS55A742EA575009A3E0633390EE0AE290",
+    "_BS55A742EA629409A3E0633390EE0AE290"
+   ],
+   "counties": [
+    "ADAMS",
+    "ATHENS",
+    "BROWN",
+    "CLERMONT",
+    "GALLIA",
+    "HOCKING",
+    "JACKSON",
+    "LAWRENCE",
+    "MEIGS",
+    "MORGAN",
+    "PERRY",
+    "PIKE",
+    "ROSS",
+    "SCIOTO",
+    "VINTON",
+    "WASHINGTON"
+   ]
+  },
+  "OH-03": {
+   "candidates": [
+    "_BS55A742EA570D09A3E0633390EE0AE290",
+    "_BS55A742EA62A909A3E0633390EE0AE290"
+   ],
+   "counties": [
+    "FRANKLIN"
+   ]
+  },
+  "OH-04": {
+   "candidates": [
+    "_BS55A742EA578609A3E0633390EE0AE290",
+    "_BS55A742EA627509A3E0633390EE0AE290",
+    "_BS5A08529E54511322E0633390EE0AE6D6"
+   ],
+   "counties": [
+    "ALLEN",
+    "AUGLAIZE",
+    "CHAMPAIGN",
+    "CLARK",
+    "DELAWARE",
+    "HARDIN",
+    "LOGAN",
+    "MARION",
+    "MERCER",
+    "MORROW",
+    "RICHLAND",
+    "SHELBY",
+    "UNION",
+    "VAN WERT"
+   ]
+  },
+  "OH-05": {
+   "candidates": [
+    "_BS55A742EA573609A3E0633390EE0AE290",
+    "_BS55A742EA624909A3E0633390EE0AE290",
+    "_BS5A08529ED6D91322E0633390EE0AE6D6"
+   ],
+   "counties": [
+    "CRAWFORD",
+    "HANCOCK",
+    "HURON",
+    "LORAIN",
+    "RICHLAND",
+    "SANDUSKY",
+    "SENECA",
+    "WOOD",
+    "WYANDOT"
+   ]
+  },
+  "OH-06": {
+   "candidates": [
+    "_BS55A742EA576309A3E0633390EE0AE290",
+    "_BS55A742EA625C09A3E0633390EE0AE290"
+   ],
+   "counties": [
+    "BELMONT",
+    "CARROLL",
+    "COLUMBIANA",
+    "HARRISON",
+    "HOLMES",
+    "JEFFERSON",
+    "MAHONING",
+    "STARK",
+    "TUSCARAWAS",
+    "WAYNE"
+   ]
+  },
+  "OH-07": {
+   "candidates": [
+    "_BS55A742EA571B09A3E0633390EE0AE290",
+    "_BS55A742EA626809A3E0633390EE0AE290",
+    "_BS5A1B6CF22B69CCE5E0633390EE0A89D7",
+    "_BS5A1B6CF22B6FCCE5E0633390EE0A89D7"
+   ],
+   "counties": [
+    "ASHLAND",
+    "CUYAHOGA",
+    "MEDINA",
+    "WAYNE"
+   ]
+  },
+  "OH-08": {
+   "candidates": [
+    "_BS55A742EA574209A3E0633390EE0AE290",
+    "_BS55A742EA626E09A3E0633390EE0AE290"
+   ],
+   "counties": [
+    "BUTLER",
+    "DARKE",
+    "HAMILTON",
+    "MIAMI",
+    "PREBLE"
+   ]
+  },
+  "OH-09": {
+   "candidates": [
+    "_BS55A742EA577909A3E0633390EE0AE290",
+    "_BS55A742EA62AC09A3E0633390EE0AE290",
+    "_BS5A1B6CF22B85CCE5E0633390EE0A89D7"
+   ],
+   "counties": [
+    "DEFIANCE",
+    "ERIE",
+    "FULTON",
+    "HENRY",
+    "LUCAS",
+    "OTTAWA",
+    "PAULDING",
+    "PUTNAM",
+    "WILLIAMS",
+    "WOOD"
+   ]
+  },
+  "OH-10": {
+   "candidates": [
+    "_BS55A742EA571109A3E0633390EE0AE290",
+    "_BS55A742EA628509A3E0633390EE0AE290",
+    "_BS55A742EA678209A3E0633390EE0AE290"
+   ],
+   "counties": [
+    "BUTLER",
+    "GREENE",
+    "MONTGOMERY"
+   ]
+  },
+  "OH-11": {
+   "candidates": [
+    "_BS55A742EA571709A3E0633390EE0AE290",
+    "_BS55A742EA62A609A3E0633390EE0AE290"
+   ],
+   "counties": [
+    "CUYAHOGA"
+   ]
+  },
+  "OH-12": {
+   "candidates": [
+    "_BS55A742EA572209A3E0633390EE0AE290",
+    "_BS55A742EA62B809A3E0633390EE0AE290"
+   ],
+   "counties": [
+    "COSHOCTON",
+    "DELAWARE",
+    "FAIRFIELD",
+    "GUERNSEY",
+    "HOLMES",
+    "KNOX",
+    "LICKING",
+    "MONROE",
+    "MUSKINGUM",
+    "NOBLE",
+    "PERRY"
+   ]
+  },
+  "OH-13": {
+   "candidates": [
+    "_BS55A742EA573009A3E0633390EE0AE290",
+    "_BS55A742EA628F09A3E0633390EE0AE290",
+    "_BS5A58EBEB13D5CFF2E0633390EE0ABEAC"
+   ],
+   "counties": [
+    "PORTAGE",
+    "STARK",
+    "SUMMIT"
+   ]
+  },
+  "OH-14": {
+   "candidates": [
+    "_BS55A742EA577009A3E0633390EE0AE290",
+    "_BS55A742EA625409A3E0633390EE0AE290"
+   ],
+   "counties": [
+    "ASHTABULA",
+    "GEAUGA",
+    "LAKE",
+    "MAHONING",
+    "PORTAGE",
+    "TRUMBULL"
+   ]
+  },
+  "OH-15": {
+   "candidates": [
+    "_BS55A742EA570309A3E0633390EE0AE290",
+    "_BS55A742EA62C509A3E0633390EE0AE290",
+    "_BS55A742EA678C09A3E0633390EE0AE290",
+    "_BS5A1D285617CED7BEE0633390EE0A2FBB",
+    "_BS5A1D285617D7D7BEE0633390EE0A2FBB"
+   ],
+   "counties": [
+    "CLARK",
+    "FAYETTE",
+    "FRANKLIN",
+    "HIGHLAND",
+    "MADISON",
+    "MIAMI",
+    "PICKAWAY"
+   ]
+  }
+ }
+}

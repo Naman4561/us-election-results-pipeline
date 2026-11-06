@@ -37,10 +37,12 @@ def failure_backoff(failures: int, blocked: bool) -> float:
 
 
 def collector_code_hash() -> str:
-    """Identify the actual shipped Python sources even before a Git repository exists."""
+    """Identify the shipped Python sources and reviewed parser data, without needing Git."""
     digest = hashlib.sha256()
     package_dir = Path(__file__).parent
-    for path in sorted(package_dir.rglob("*.py")):
+    # Reviewed data the parsers check against (rosters, county lists) counts as code.
+    sources = [*package_dir.rglob("*.py"), *(package_dir / "resources").rglob("*.json")]
+    for path in sorted(sources):
         name = path.relative_to(package_dir).as_posix()
         digest.update(name.encode() + b"\0" + path.read_bytes() + b"\0")
     return digest.hexdigest()

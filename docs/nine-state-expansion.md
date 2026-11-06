@@ -138,7 +138,7 @@ detail is not collected (no precinct-to-county guessing). Governor tickets are s
   collector and default settings on 2026-11-06 between 05:10 and 05:12 UTC;
   `provenance.json` records each component's URL, SHA-256, size, content type and
   method, and each archive's SHA-256. Candidate and county rosters in
-  `parsers/scope_2026.py` were reviewed from those captures.
+  `resources/rosters_2026/` were reviewed from those captures.
 - `tests/test_nine_states.py` parses, verifies, converts and replays all nine states;
   checks maps (unique county keys), dashboard payloads, method sums and national
   coverage; rejects altered county counts, methods that do not reconcile, unknown or

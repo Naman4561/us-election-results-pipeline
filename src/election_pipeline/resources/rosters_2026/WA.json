@@ -1,0 +1,146 @@
+{
+ "state": "WA",
+ "provenance": "Enhanced Voting ballot-option IDs and counties. Reviewed from the official captures recorded in tests/fixtures/nine_states/provenance.json (November 6, 2026 UTC).",
+ "races": {
+  "WA-01": {
+   "candidates": [
+    "54c40000-9064-bbec-27d0-08df15c0a82a",
+    "54c40000-9064-bbec-c919-08df15c0a829",
+    "54c40000-9064-bbec-c37b-08df15c0a829"
+   ],
+   "counties": [
+    "King",
+    "Snohomish"
+   ]
+  },
+  "WA-02": {
+   "candidates": [
+    "54c40000-9064-bbec-3d49-08df15c0a82a",
+    "54c40000-9064-bbec-41f0-08df15c0a82a",
+    "54c40000-9064-bbec-37b7-08df15c0a82a"
+   ],
+   "counties": [
+    "Island",
+    "San Juan",
+    "Skagit",
+    "Snohomish",
+    "Whatcom"
+   ]
+  },
+  "WA-03": {
+   "candidates": [
+    "54c40000-9064-bbec-56e1-08df15c0a82a",
+    "54c40000-9064-bbec-51e8-08df15c0a82a",
+    "54c40000-9064-bbec-4cec-08df15c0a82a"
+   ],
+   "counties": [
+    "Clark",
+    "Cowlitz",
+    "Lewis",
+    "Pacific",
+    "Skamania",
+    "Thurston",
+    "Wahkiakum"
+   ]
+  },
+  "WA-04": {
+   "candidates": [
+    "54c40000-9064-bbec-6583-08df15c0a82a",
+    "54c40000-9064-bbec-6a14-08df15c0a82a",
+    "54c40000-9064-bbec-611a-08df15c0a82a"
+   ],
+   "counties": [
+    "Adams",
+    "Benton",
+    "Douglas",
+    "Franklin",
+    "Grant",
+    "Klickitat",
+    "Okanogan",
+    "Yakima"
+   ]
+  },
+  "WA-05": {
+   "candidates": [
+    "54c40000-9064-bbec-7fed-08df15c0a82a",
+    "54c40000-9064-bbec-78b8-08df15c0a82a",
+    "54c40000-9064-bbec-742a-08df15c0a82a"
+   ],
+   "counties": [
+    "Adams",
+    "Asotin",
+    "Columbia",
+    "Ferry",
+    "Franklin",
+    "Garfield",
+    "Lincoln",
+    "Pend Oreille",
+    "Spokane",
+    "Stevens",
+    "Walla Walla",
+    "Whitman"
+   ]
+  },
+  "WA-06": {
+   "candidates": [
+    "54c40000-9064-bbec-8e8a-08df15c0a82a",
+    "54c40000-9064-bbec-92e2-08df15c0a82a",
+    "54c40000-9064-bbec-8a17-08df15c0a82a"
+   ],
+   "counties": [
+    "Clallam",
+    "Grays Harbor",
+    "Jefferson",
+    "Kitsap",
+    "Mason",
+    "Pierce"
+   ]
+  },
+  "WA-07": {
+   "candidates": [
+    "54c40000-9064-bbec-a211-08df15c0a82a",
+    "54c40000-9064-bbec-a699-08df15c0a82a",
+    "54c40000-9064-bbec-9d06-08df15c0a82a"
+   ],
+   "counties": [
+    "King"
+   ]
+  },
+  "WA-08": {
+   "candidates": [
+    "54c40000-9064-bbec-b8e0-08df15c0a82a",
+    "54c40000-9064-bbec-b482-08df15c0a82a",
+    "54c40000-9064-bbec-b056-08df15c0a82a"
+   ],
+   "counties": [
+    "Chelan",
+    "Douglas",
+    "King",
+    "Kittitas",
+    "Pierce",
+    "Snohomish"
+   ]
+  },
+  "WA-09": {
+   "candidates": [
+    "54c40000-9064-bbec-caaf-08df15c0a82a",
+    "54c40000-9064-bbec-c66d-08df15c0a82a",
+    "54c40000-9064-bbec-c253-08df15c0a82a"
+   ],
+   "counties": [
+    "King"
+   ]
+  },
+  "WA-10": {
+   "candidates": [
+    "54c40000-9064-bbec-dda2-08df15c0a82a",
+    "54c40000-9064-bbec-d959-08df15c0a82a",
+    "54c40000-9064-bbec-d527-08df15c0a82a"
+   ],
+   "counties": [
+    "Pierce",
+    "Thurston"
+   ]
+  }
+ }
+}

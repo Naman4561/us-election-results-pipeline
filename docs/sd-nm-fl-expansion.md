@@ -56,7 +56,7 @@ South Dakota's CSV restamps itself about every 15 minutes, so it refreshes at th
   official county rows (Florida Election Watch's statewide pages show the same sums).
   Every county must list every candidate, with consistent precinct counts.
 - All three: election identity checks, pinned candidate and county rosters in
-  `parsers/scope_2026.py` (from the recorded captures), and dbt release-completeness,
+  `resources/rosters_2026/` (from the recorded captures), and dbt release-completeness,
   candidate-count and county-reconciliation tests.
 
 **New Mexico's voter-privacy masking.** New Mexico prints `*` instead of a small county

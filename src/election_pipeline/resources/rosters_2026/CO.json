@@ -1,0 +1,322 @@
+{
+ "state": "CO",
+ "provenance": "Clarity choice keys and counties. Reviewed from the official captures recorded in tests/fixtures/nine_states/provenance.json (November 6, 2026 UTC).",
+ "races": {
+  "CO-SEN": {
+   "candidates": [
+    "20-1",
+    "20-2",
+    "20-3",
+    "20-4",
+    "20-5",
+    "20-6"
+   ],
+   "counties": [
+    "Adams",
+    "Alamosa",
+    "Arapahoe",
+    "Archuleta",
+    "Baca",
+    "Bent",
+    "Boulder",
+    "Broomfield",
+    "Chaffee",
+    "Cheyenne",
+    "Clear Creek",
+    "Conejos",
+    "Costilla",
+    "Crowley",
+    "Custer",
+    "Delta",
+    "Denver",
+    "Dolores",
+    "Douglas",
+    "Eagle",
+    "El Paso",
+    "Elbert",
+    "Fremont",
+    "Garfield",
+    "Gilpin",
+    "Grand",
+    "Gunnison",
+    "Hinsdale",
+    "Huerfano",
+    "Jackson",
+    "Jefferson",
+    "Kiowa",
+    "Kit Carson",
+    "La Plata",
+    "Lake",
+    "Larimer",
+    "Las Animas",
+    "Lincoln",
+    "Logan",
+    "Mesa",
+    "Mineral",
+    "Moffat",
+    "Montezuma",
+    "Montrose",
+    "Morgan",
+    "Otero",
+    "Ouray",
+    "Park",
+    "Phillips",
+    "Pitkin",
+    "Prowers",
+    "Pueblo",
+    "Rio Blanco",
+    "Rio Grande",
+    "Routt",
+    "Saguache",
+    "San Juan",
+    "San Miguel",
+    "Sedgwick",
+    "Summit",
+    "Teller",
+    "Washington",
+    "Weld",
+    "Yuma"
+   ]
+  },
+  "CO-01": {
+   "candidates": [
+    "110-7",
+    "110-8",
+    "110-9",
+    "110-10",
+    "110-11"
+   ],
+   "counties": [
+    "Arapahoe",
+    "Denver",
+    "Jefferson"
+   ]
+  },
+  "CO-02": {
+   "candidates": [
+    "120-7",
+    "120-8",
+    "120-9"
+   ],
+   "counties": [
+    "Boulder",
+    "Clear Creek",
+    "Eagle",
+    "Gilpin",
+    "Grand",
+    "Jackson",
+    "Jefferson",
+    "Larimer",
+    "Routt",
+    "Summit",
+    "Weld"
+   ]
+  },
+  "CO-03": {
+   "candidates": [
+    "130-7",
+    "130-8",
+    "130-9",
+    "130-10"
+   ],
+   "counties": [
+    "Alamosa",
+    "Archuleta",
+    "Conejos",
+    "Costilla",
+    "Delta",
+    "Dolores",
+    "Eagle",
+    "Garfield",
+    "Gunnison",
+    "Hinsdale",
+    "Huerfano",
+    "La Plata",
+    "Las Animas",
+    "Mesa",
+    "Mineral",
+    "Moffat",
+    "Montezuma",
+    "Montrose",
+    "Otero",
+    "Ouray",
+    "Pitkin",
+    "Pueblo",
+    "Rio Blanco",
+    "Rio Grande",
+    "Saguache",
+    "San Juan",
+    "San Miguel"
+   ]
+  },
+  "CO-04": {
+   "candidates": [
+    "140-7",
+    "140-8",
+    "140-9"
+   ],
+   "counties": [
+    "Adams",
+    "Arapahoe",
+    "Baca",
+    "Bent",
+    "Cheyenne",
+    "Crowley",
+    "Douglas",
+    "El Paso",
+    "Elbert",
+    "Kiowa",
+    "Kit Carson",
+    "Larimer",
+    "Lincoln",
+    "Logan",
+    "Morgan",
+    "Phillips",
+    "Prowers",
+    "Sedgwick",
+    "Washington",
+    "Weld",
+    "Yuma"
+   ]
+  },
+  "CO-05": {
+   "candidates": [
+    "150-10",
+    "150-11",
+    "150-12",
+    "150-13"
+   ],
+   "counties": [
+    "El Paso"
+   ]
+  },
+  "CO-06": {
+   "candidates": [
+    "160-10",
+    "160-11",
+    "160-12",
+    "160-13",
+    "160-14"
+   ],
+   "counties": [
+    "Adams",
+    "Arapahoe",
+    "Denver",
+    "Douglas",
+    "Jefferson"
+   ]
+  },
+  "CO-07": {
+   "candidates": [
+    "170-15",
+    "170-16",
+    "170-17",
+    "170-18",
+    "170-19",
+    "170-20"
+   ],
+   "counties": [
+    "Adams",
+    "Broomfield",
+    "Chaffee",
+    "Custer",
+    "El Paso",
+    "Fremont",
+    "Jefferson",
+    "Lake",
+    "Park",
+    "Teller",
+    "Weld"
+   ]
+  },
+  "CO-08": {
+   "candidates": [
+    "180-21",
+    "180-22",
+    "180-23"
+   ],
+   "counties": [
+    "Adams",
+    "Larimer",
+    "Weld"
+   ]
+  },
+  "CO-GOV": {
+   "candidates": [
+    "210-24",
+    "210-25",
+    "210-26",
+    "210-27",
+    "210-28",
+    "210-29",
+    "210-30"
+   ],
+   "counties": [
+    "Adams",
+    "Alamosa",
+    "Arapahoe",
+    "Archuleta",
+    "Baca",
+    "Bent",
+    "Boulder",
+    "Broomfield",
+    "Chaffee",
+    "Cheyenne",
+    "Clear Creek",
+    "Conejos",
+    "Costilla",
+    "Crowley",
+    "Custer",
+    "Delta",
+    "Denver",
+    "Dolores",
+    "Douglas",
+    "Eagle",
+    "El Paso",
+    "Elbert",
+    "Fremont",
+    "Garfield",
+    "Gilpin",
+    "Grand",
+    "Gunnison",
+    "Hinsdale",
+    "Huerfano",
+    "Jackson",
+    "Jefferson",
+    "Kiowa",
+    "Kit Carson",
+    "La Plata",
+    "Lake",
+    "Larimer",
+    "Las Animas",
+    "Lincoln",
+    "Logan",
+    "Mesa",
+    "Mineral",
+    "Moffat",
+    "Montezuma",
+    "Montrose",
+    "Morgan",
+    "Otero",
+    "Ouray",
+    "Park",
+    "Phillips",
+    "Pitkin",
+    "Prowers",
+    "Pueblo",
+    "Rio Blanco",
+    "Rio Grande",
+    "Routt",
+    "Saguache",
+    "San Juan",
+    "San Miguel",
+    "Sedgwick",
+    "Summit",
+    "Teller",
+    "Washington",
+    "Weld",
+    "Yuma"
+   ]
+  }
+ }
+}

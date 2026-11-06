@@ -1,0 +1,243 @@
+{
+ "state": "SC",
+ "provenance": "Reviewed from the official responses in tests/fixtures/five_states (see its README.md and provenance.json).",
+ "races": {
+  "SC-GOV": {
+   "candidates": [
+    "DEM Jermaine Johnson / Sam Skardon",
+    "GRN Walid Hakim / Arnold E Karr",
+    "REP Alan Wilson / Mike Reichenbach",
+    "UNC Michael Addison / Candace Brewer",
+    "Write-In"
+   ],
+   "counties": [
+    "ABBEVILLE",
+    "AIKEN",
+    "ALLENDALE",
+    "ANDERSON",
+    "BAMBERG",
+    "BARNWELL",
+    "BEAUFORT",
+    "BERKELEY",
+    "CALHOUN",
+    "CHARLESTON",
+    "CHEROKEE",
+    "CHESTER",
+    "CHESTERFIELD",
+    "CLARENDON",
+    "COLLETON",
+    "DARLINGTON",
+    "DILLON",
+    "DORCHESTER",
+    "EDGEFIELD",
+    "FAIRFIELD",
+    "FLORENCE",
+    "GEORGETOWN",
+    "GREENVILLE",
+    "GREENWOOD",
+    "HAMPTON",
+    "HORRY",
+    "JASPER",
+    "KERSHAW",
+    "LANCASTER",
+    "LAURENS",
+    "LEE",
+    "LEXINGTON",
+    "MARION",
+    "MARLBORO",
+    "MCCORMICK",
+    "NEWBERRY",
+    "OCONEE",
+    "ORANGEBURG",
+    "PICKENS",
+    "RICHLAND",
+    "SALUDA",
+    "SPARTANBURG",
+    "SUMTER",
+    "UNION",
+    "WILLIAMSBURG",
+    "YORK"
+   ]
+  },
+  "SC-SEN": {
+   "candidates": [
+    "CON Mark Hackett",
+    "DEM Annie Andrews",
+    "LIB Kasie Whitener",
+    "REP Darline Graham",
+    "Write-In"
+   ],
+   "counties": [
+    "ABBEVILLE",
+    "AIKEN",
+    "ALLENDALE",
+    "ANDERSON",
+    "BAMBERG",
+    "BARNWELL",
+    "BEAUFORT",
+    "BERKELEY",
+    "CALHOUN",
+    "CHARLESTON",
+    "CHEROKEE",
+    "CHESTER",
+    "CHESTERFIELD",
+    "CLARENDON",
+    "COLLETON",
+    "DARLINGTON",
+    "DILLON",
+    "DORCHESTER",
+    "EDGEFIELD",
+    "FAIRFIELD",
+    "FLORENCE",
+    "GEORGETOWN",
+    "GREENVILLE",
+    "GREENWOOD",
+    "HAMPTON",
+    "HORRY",
+    "JASPER",
+    "KERSHAW",
+    "LANCASTER",
+    "LAURENS",
+    "LEE",
+    "LEXINGTON",
+    "MARION",
+    "MARLBORO",
+    "MCCORMICK",
+    "NEWBERRY",
+    "OCONEE",
+    "ORANGEBURG",
+    "PICKENS",
+    "RICHLAND",
+    "SALUDA",
+    "SPARTANBURG",
+    "SUMTER",
+    "UNION",
+    "WILLIAMSBURG",
+    "YORK"
+   ]
+  },
+  "SC-01": {
+   "candidates": [
+    "DEM Nancy Lacore",
+    "LIB Bill Reeside",
+    "REP Jenny Costa Honeycutt",
+    "Write-In"
+   ],
+   "counties": [
+    "BEAUFORT",
+    "BERKELEY",
+    "CHARLESTON",
+    "COLLETON",
+    "DORCHESTER",
+    "JASPER"
+   ]
+  },
+  "SC-02": {
+   "candidates": [
+    "DEM Zyon Khalifa",
+    "REP Joe Wilson",
+    "WRK Dayna Alane Smith",
+    "Write-In"
+   ],
+   "counties": [
+    "AIKEN",
+    "BARNWELL",
+    "LEXINGTON",
+    "ORANGEBURG",
+    "RICHLAND"
+   ]
+  },
+  "SC-03": {
+   "candidates": [
+    "DEM Eunice Lehmacher",
+    "LIB Brian Corriea",
+    "REP Sheri Biggs",
+    "Write-In"
+   ],
+   "counties": [
+    "ABBEVILLE",
+    "ANDERSON",
+    "EDGEFIELD",
+    "GREENVILLE",
+    "GREENWOOD",
+    "LAURENS",
+    "MCCORMICK",
+    "NEWBERRY",
+    "OCONEE",
+    "PICKENS",
+    "SALUDA"
+   ]
+  },
+  "SC-04": {
+   "candidates": [
+    "DEM Courtney McClain",
+    "LIB Jessica Ethridge",
+    "REP William Timmons",
+    "Write-In"
+   ],
+   "counties": [
+    "GREENVILLE",
+    "SPARTANBURG"
+   ]
+  },
+  "SC-05": {
+   "candidates": [
+    "DEM Mallory Dittmer",
+    "REP Wes Climer",
+    "Write-In"
+   ],
+   "counties": [
+    "CHEROKEE",
+    "CHESTER",
+    "FAIRFIELD",
+    "KERSHAW",
+    "LANCASTER",
+    "LEE",
+    "SPARTANBURG",
+    "SUMTER",
+    "UNION",
+    "YORK"
+   ]
+  },
+  "SC-06": {
+   "candidates": [
+    "DEM James E Jim Clyburn",
+    "REP John Peterson",
+    "Write-In"
+   ],
+   "counties": [
+    "ALLENDALE",
+    "BAMBERG",
+    "CALHOUN",
+    "CHARLESTON",
+    "CLARENDON",
+    "COLLETON",
+    "DORCHESTER",
+    "FLORENCE",
+    "HAMPTON",
+    "JASPER",
+    "ORANGEBURG",
+    "RICHLAND",
+    "SUMTER",
+    "WILLIAMSBURG"
+   ]
+  },
+  "SC-07": {
+   "candidates": [
+    "DEM John Gregory Vincent",
+    "REP Russell Fry",
+    "Write-In"
+   ],
+   "counties": [
+    "CHESTERFIELD",
+    "DARLINGTON",
+    "DILLON",
+    "FLORENCE",
+    "GEORGETOWN",
+    "HORRY",
+    "MARION",
+    "MARLBORO"
+   ]
+  }
+ }
+}
