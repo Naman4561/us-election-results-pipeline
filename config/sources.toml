@@ -353,6 +353,8 @@ supplemental_members = ["statewide.csv", "governor.csv", "county-baker.csv", "co
 max_zip_members = 64
 
 # California's results API serves one JSON document per contest (no county detail here).
+# Every document is regenerated together, so the collector skips the other 52 when
+# governor.json is unchanged (refreshing at least hourly).
 [sources.ca_2026_general]
 state = "CA"
 election_date = "2026-11-03"

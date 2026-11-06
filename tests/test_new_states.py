@@ -554,7 +554,7 @@ class EnrCollectorTests(unittest.TestCase):
                 calls = []
                 source, fetch = self.serve(code, calls)
                 destination = self.root / f"{code}.zip"
-                with patch("election_pipeline.collectors.enr_export.fetch_file", side_effect=fetch):
+                with patch("election_pipeline.collectors.common.fetch_file", side_effect=fetch):
                     result = bundles.fetch_bundle(source, self.settings, destination)
                 with zipfile.ZipFile(destination) as archive:
                     self.assertEqual(
@@ -572,7 +572,7 @@ class EnrCollectorTests(unittest.TestCase):
         calls = []
         source, fetch = self.serve("SD", calls)
         first = self.root / "first.zip"
-        with patch("election_pipeline.collectors.enr_export.fetch_file", side_effect=fetch):
+        with patch("election_pipeline.collectors.common.fetch_file", side_effect=fetch):
             original = bundles.fetch_bundle(source, self.settings, first)
             calls.clear()
             again = bundles.fetch_bundle(source, self.settings, self.root / "b.zip", previous=first)
@@ -592,7 +592,7 @@ class EnrCollectorTests(unittest.TestCase):
     def test_non_workbook_export_and_foreign_form_action_fail_closed(self):
         calls = []
         source, fetch = self.serve("SD", calls, workbook="text/html")
-        with patch("election_pipeline.collectors.enr_export.fetch_file", side_effect=fetch):
+        with patch("election_pipeline.collectors.common.fetch_file", side_effect=fetch):
             with self.assertRaises(FetchFailure):
                 bundles.fetch_bundle(source, self.settings, self.root / "x.zip")
         page = (

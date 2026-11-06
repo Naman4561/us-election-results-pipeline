@@ -1,10 +1,13 @@
 """Artifact checks offline; publication checks in an opt-in *_test database."""
 
+import csv
+import io
 import json
 import os
 import tempfile
 import unittest
 import uuid
+import zipfile
 from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
@@ -134,6 +137,7 @@ class PublicationArtifactTests(unittest.TestCase):
             patch.object(publication, "current_publication", return_value=current),
             patch.object(publication, "project_hash", return_value="code-hash"),
             patch.object(publication, "equivalent_iowa_release", return_value=True) as equivalent,
+            patch.object(publication, "same_results") as same,
             patch.object(publication, "build_candidate") as build,
         ):
             root = Path(__file__).resolve().parents[1]
@@ -153,6 +157,7 @@ class PublicationArtifactTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "earlier release"):
                 publish(root, {}, 7479, "test", skip_current=True)
         build.assert_not_called()
+        same.assert_not_called()
 
     def test_florida_orders_distinct_snapshots_by_separated_file_time_ranges(self):
         earlier = datetime(2026, 11, 4, 15, 0, 3, tzinfo=timezone.utc)
@@ -234,11 +239,13 @@ class PublicationArtifactTests(unittest.TestCase):
             patch.object(publication, "current_publication", return_value=current),
             patch.object(publication, "florida_file_modified_range", return_value=(later, later)),
             patch.object(publication, "project_hash", return_value="code-hash"),
+            patch.object(publication, "same_results") as same,
             patch.object(publication, "build_candidate") as build,
         ):
             with self.assertRaisesRegex(ValueError, "earlier Florida source file"):
                 publish(Path(__file__).resolve().parents[1], {}, 13, "test", skip_current=True)
         build.assert_not_called()
+        same.assert_not_called()
 
     def test_florida_file_time_range_requires_valid_past_headers(self):
         conn = MagicMock()
@@ -315,6 +322,37 @@ class PublicationDatabaseTests(unittest.TestCase):
                 "publication_id"
             ]
         )
+
+    def test_identical_results_from_a_new_snapshot_are_not_republished(self):
+        first_release = self.load(self.f.rows)
+        first = publish(self.root, self.db, first_release, "test", skip_current=True)
+
+        # Same rows, different raw bytes (as when a file embeds its download time).
+        output = io.StringIO(newline="")
+        writer = csv.writer(output, delimiter="\t")
+        writer.writerow(fixtures.RESULT_HEADER)
+        writer.writerows(self.f.rows)
+        path = self.f.root / "input.zip"
+        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr("results.txt", output.getvalue())
+        self.f.install(path)
+        directory = Path(self.f.parse()["output_dir"])
+        second_release = load_parsed(
+            self.f.source, self.f.settings, self.f.root, directory, self.db
+        )["release_id"]
+        self.assertNotEqual(first_release, second_release)
+
+        repeat = publish(self.root, self.db, second_release, "test", skip_current=True)
+        self.assertEqual(repeat["outcome"], "already_current")
+        self.assertEqual(repeat["publication_id"], first["publication_id"])
+        self.assertEqual(repeat["identical_to_release"], first_release)
+        self.assertEqual(self.query("SELECT count(*) AS n FROM serving.publications")[0]["n"], 1)
+
+        # A real change publishes normally.
+        rows = [row.copy() for row in self.f.rows]
+        rows[0][9], rows[0][13] = "1", "9"
+        changed = publish(self.root, self.db, self.load(rows), "test", skip_current=True)
+        self.assertNotEqual(changed["publication_id"], first["publication_id"])
 
     def test_publication_failure_idempotency_corrections_and_restore(self):
         first_release = self.load(self.f.rows)

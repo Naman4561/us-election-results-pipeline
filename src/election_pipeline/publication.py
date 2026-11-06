@@ -539,6 +539,37 @@ def candidate_fingerprints(conn, schema, *, lock=False):
     return result
 
 
+def same_results(conn, metadata, current):
+    """The live publication, if this release parsed to byte-identical outputs.
+
+    Some official files embed their download time, so every collection is a new raw
+    snapshot even when no vote changed. Publishing it again would rebuild identical
+    tables, so the scheduled runner keeps the live publication instead. The new raw
+    snapshot and its release stay recorded; only the redundant publication is skipped.
+    """
+    report = metadata.get("parser_report") or {}
+    if not report.get("output_sha256"):
+        return None
+    previous = (
+        conn.execute(
+            "SELECT parser_report FROM ops.processing_releases WHERE release_id=%s",
+            (current["release_id"],),
+        ).fetchone()["parser_report"]
+        or {}
+    )
+    if any(
+        previous.get(key) != report.get(key)
+        for key in ("output_sha256", "output_rows", "contests", "minimum_candidates")
+    ):
+        return None
+    return {
+        "outcome": "already_current",
+        "publication_id": str(current["publication_id"]),
+        "release_id": metadata["release_id"],
+        "identical_to_release": current["release_id"],
+    }
+
+
 def prepare(root, db, release_id, status, *, skip_current=False):
     """Transform and validate one release; retain an immutable checked checkpoint."""
     if status not in ("test", "unofficial"):
@@ -551,20 +582,21 @@ def prepare(root, db, release_id, status, *, skip_current=False):
         code_hash = project_hash(root)
         if skip_current:
             current = current_publication(conn, metadata["source_id"])
-            if (
-                current
-                and current["transform_sha256"] == code_hash
-                and current["status"] == status
-                and (
-                    current["release_id"] == release_id
-                    or equivalent_iowa_release(conn, current, metadata)
-                )
-            ):
-                return {
-                    "outcome": "already_current",
-                    "publication_id": str(current["publication_id"]),
-                    "release_id": current["release_id"],
-                }
+            if current and current["transform_sha256"] == code_hash and current["status"] == status:
+                if current["release_id"] == release_id or equivalent_iowa_release(
+                    conn, current, metadata
+                ):
+                    return {
+                        "outcome": "already_current",
+                        "publication_id": str(current["publication_id"]),
+                        "release_id": current["release_id"],
+                    }
+                # Florida needs to advance the published file timestamp. Iowa
+                # requires matching Clarity markers and a full loaded-row comparison.
+                if metadata["source_id"] not in (FLORIDA_SOURCE, IOWA_SOURCE):
+                    same = same_results(conn, metadata, current)
+                    if same:
+                        return same
             require_forward_release(conn, current, metadata)
         schema = "p_" + metadata["state"].lower() + "_" + attempt_id.hex
         artifacts = root / "data/publications" / str(attempt_id)

@@ -398,7 +398,7 @@ class FiveStateTests(unittest.TestCase):
             path.write_bytes(body)
             return FetchResponse(200, {}, url, len(body), hashlib.sha256(body).hexdigest())
 
-        with patch("election_pipeline.bundles.fetch_file", side_effect=fetch):
+        with patch("election_pipeline.collectors.common.fetch_file", side_effect=fetch):
             result = bundles.fetch_bundle(src, self.settings, self.root / "bundle.zip")
         self.assertTrue(calls[1][0].endswith("930-PM-General-Election-Results-.xlsx"))
         self.assertEqual(calls[1][1], self.settings.max_download_bytes - len(members["index.html"]))
@@ -406,7 +406,7 @@ class FiveStateTests(unittest.TestCase):
         with zipfile.ZipFile(self.root / "bundle.zip") as z:
             self.assertEqual(z.read("index.html"), members["index.html"])
             self.assertEqual(z.read("results.xlsx"), members["results.xlsx"])
-        with patch("election_pipeline.bundles.fetch_file", side_effect=fetch):
+        with patch("election_pipeline.collectors.common.fetch_file", side_effect=fetch):
             calls.clear()
             with self.assertRaises(FetchFailure):
                 bundles.fetch_bundle(

@@ -1,0 +1,377 @@
+{
+ "state": "CA",
+ "provenance": "Candidate names as published by the results API (it gives no IDs). Reviewed from the official captures recorded in tests/fixtures/nine_states/provenance.json (November 6, 2026 UTC).",
+ "races": {
+  "CA-GOV": {
+   "candidates": [
+    "Xavier Becerra",
+    "Steve Hilton"
+   ],
+   "counties": []
+  },
+  "CA-01": {
+   "candidates": [
+    "Mike McGuire",
+    "James Gallagher"
+   ],
+   "counties": []
+  },
+  "CA-02": {
+   "candidates": [
+    "Jared Huffman",
+    "Robin Littau"
+   ],
+   "counties": []
+  },
+  "CA-03": {
+   "candidates": [
+    "Ami Bera",
+    "Robb Tucker"
+   ],
+   "counties": []
+  },
+  "CA-04": {
+   "candidates": [
+    "Eric Jones",
+    "Mike Thompson"
+   ],
+   "counties": []
+  },
+  "CA-05": {
+   "candidates": [
+    "Michael Masuda",
+    "Tom McClintock"
+   ],
+   "counties": []
+  },
+  "CA-06": {
+   "candidates": [
+    "Richard Pan",
+    "Kevin Kiley"
+   ],
+   "counties": []
+  },
+  "CA-07": {
+   "candidates": [
+    "Doris Matsui",
+    "Mai Vang"
+   ],
+   "counties": []
+  },
+  "CA-08": {
+   "candidates": [
+    "John Garamendi",
+    "Rudy Recile"
+   ],
+   "counties": []
+  },
+  "CA-09": {
+   "candidates": [
+    "Josh Harder",
+    "John McBride"
+   ],
+   "counties": []
+  },
+  "CA-10": {
+   "candidates": [
+    "Mark DeSaulnier",
+    "Jeff Frese"
+   ],
+   "counties": []
+  },
+  "CA-11": {
+   "candidates": [
+    "Connie Chan",
+    "Scott Wiener"
+   ],
+   "counties": []
+  },
+  "CA-12": {
+   "candidates": [
+    "Jamie Joyce",
+    "Lateefah Simon"
+   ],
+   "counties": []
+  },
+  "CA-13": {
+   "candidates": [
+    "Adam Gray",
+    "Kevin Lincoln"
+   ],
+   "counties": []
+  },
+  "CA-14": {
+   "candidates": [
+    "Melissa Hernandez",
+    "Aisha Wahab"
+   ],
+   "counties": []
+  },
+  "CA-15": {
+   "candidates": [
+    "Kevin Mullin",
+    "Charles Hoelter"
+   ],
+   "counties": []
+  },
+  "CA-16": {
+   "candidates": [
+    "Sam Liccardo",
+    "Peter Sundin Soulé"
+   ],
+   "counties": []
+  },
+  "CA-17": {
+   "candidates": [
+    "Ro Khanna",
+    "Ritesh Tandon"
+   ],
+   "counties": []
+  },
+  "CA-18": {
+   "candidates": [
+    "Zoe Lofgren",
+    "Shane Lewis"
+   ],
+   "counties": []
+  },
+  "CA-19": {
+   "candidates": [
+    "Jimmy Panetta",
+    "Peter Coe Verbica"
+   ],
+   "counties": []
+  },
+  "CA-20": {
+   "candidates": [
+    "Sandra Van Scotter",
+    "Vince Fong"
+   ],
+   "counties": []
+  },
+  "CA-21": {
+   "candidates": [
+    "Jim Costa",
+    "Kyle Kirkland"
+   ],
+   "counties": []
+  },
+  "CA-22": {
+   "candidates": [
+    "Randy Villegas",
+    "David G. Valadao"
+   ],
+   "counties": []
+  },
+  "CA-23": {
+   "candidates": [
+    "Tessa Lynn Hodge",
+    "Jay Obernolte"
+   ],
+   "counties": []
+  },
+  "CA-24": {
+   "candidates": [
+    "Salud Carbajal",
+    "Bob Smith"
+   ],
+   "counties": []
+  },
+  "CA-25": {
+   "candidates": [
+    "Raul Ruiz",
+    "Joe Males"
+   ],
+   "counties": []
+  },
+  "CA-26": {
+   "candidates": [
+    "Jacqui Irwin",
+    "Sam Gallucci"
+   ],
+   "counties": []
+  },
+  "CA-27": {
+   "candidates": [
+    "George Whitesides",
+    "Jason Gibbs"
+   ],
+   "counties": []
+  },
+  "CA-28": {
+   "candidates": [
+    "Judy Chu",
+    "April A. Verlato"
+   ],
+   "counties": []
+  },
+  "CA-29": {
+   "candidates": [
+    "Angélica María Dueñas",
+    "Luz Maria Rivas"
+   ],
+   "counties": []
+  },
+  "CA-30": {
+   "candidates": [
+    "Laura Friedman",
+    "Scott Alan Meyers"
+   ],
+   "counties": []
+  },
+  "CA-31": {
+   "candidates": [
+    "Gil Cisneros",
+    "Eric Ching"
+   ],
+   "counties": []
+  },
+  "CA-32": {
+   "candidates": [
+    "Brad Sherman",
+    "Larry Thompson"
+   ],
+   "counties": []
+  },
+  "CA-33": {
+   "candidates": [
+    "Pete Aguilar",
+    "Stephanie M. Vargas"
+   ],
+   "counties": []
+  },
+  "CA-34": {
+   "candidates": [
+    "Jimmy Gomez",
+    "Angela Gonzales-Torres"
+   ],
+   "counties": []
+  },
+  "CA-35": {
+   "candidates": [
+    "Norma J. Torres",
+    "Mike Cargile"
+   ],
+   "counties": []
+  },
+  "CA-36": {
+   "candidates": [
+    "Ted W. Lieu",
+    "Houston Brignano"
+   ],
+   "counties": []
+  },
+  "CA-37": {
+   "candidates": [
+    "Sydney Kamlager-Dove",
+    "Samantha Mota"
+   ],
+   "counties": []
+  },
+  "CA-38": {
+   "candidates": [
+    "Hilda Solis",
+    "Pedro Antonio Casas"
+   ],
+   "counties": []
+  },
+  "CA-39": {
+   "candidates": [
+    "Mark Takano",
+    "Steve Manos"
+   ],
+   "counties": []
+  },
+  "CA-40": {
+   "candidates": [
+    "Ken Calvert",
+    "Young Kim"
+   ],
+   "counties": []
+  },
+  "CA-41": {
+   "candidates": [
+    "Linda Sánchez",
+    "Mitch Clemmons"
+   ],
+   "counties": []
+  },
+  "CA-42": {
+   "candidates": [
+    "Robert Garcia",
+    "Brian Burley"
+   ],
+   "counties": []
+  },
+  "CA-43": {
+   "candidates": [
+    "Maxine Waters",
+    "Cristian Morales"
+   ],
+   "counties": []
+  },
+  "CA-44": {
+   "candidates": [
+    "Nanette Diaz Barragan",
+    "Genevieve Angel"
+   ],
+   "counties": []
+  },
+  "CA-45": {
+   "candidates": [
+    "Derek Tran",
+    "Chuong V. Vo"
+   ],
+   "counties": []
+  },
+  "CA-46": {
+   "candidates": [
+    "Lou Correa",
+    "David Pan"
+   ],
+   "counties": []
+  },
+  "CA-47": {
+   "candidates": [
+    "Dave Min",
+    "Jenny Rae Le Roux"
+   ],
+   "counties": []
+  },
+  "CA-48": {
+   "candidates": [
+    "Marni von Wilpert",
+    "Jim Desmond"
+   ],
+   "counties": []
+  },
+  "CA-49": {
+   "candidates": [
+    "Mike Levin",
+    "Armen Kurdian"
+   ],
+   "counties": []
+  },
+  "CA-50": {
+   "candidates": [
+    "Scott Peters",
+    "Steve Cohen"
+   ],
+   "counties": []
+  },
+  "CA-51": {
+   "candidates": [
+    "Sara Jacobs",
+    "Ricardo Cabrera"
+   ],
+   "counties": []
+  },
+  "CA-52": {
+   "candidates": [
+    "Juan Vargas",
+    "Jeff Belle"
+   ],
+   "counties": []
+  }
+ }
+}

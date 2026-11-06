@@ -16,6 +16,7 @@ from pathlib import Path
 from unittest.mock import patch
 from urllib.error import URLError
 
+from election_pipeline import pipeline
 from election_pipeline.checks import InvalidArchive, validate_archive
 from election_pipeline.cli import main
 from election_pipeline.pipeline import collect_source, retry_after_seconds
@@ -81,6 +82,11 @@ class CollectionTests(unittest.TestCase):
         self.body = synthetic_zip()
         Handler.responses = []
         Handler.requests = []
+        # Most tests exercise one run after another; the persistent backoff between failed
+        # runs has its own tests below.
+        immediate = patch("election_pipeline.pipeline.BACKOFF_BASE_SECONDS", 0)
+        immediate.start()
+        self.addCleanup(immediate.stop)
 
     def collect(self, **kwargs) -> dict:
         return collect_source(self.source, self.settings, self.root, **kwargs)
@@ -92,7 +98,45 @@ class CollectionTests(unittest.TestCase):
         return [json.loads(path.read_text()) for path in self.root.glob("metadata/**/*.json")]
 
     def state(self) -> dict:
+        """Cache state; failure bookkeeping (and the identity it is stored under) is
+        checked separately, so {} still means no cache or validator was saved."""
+        state = ArchiveStore(self.root, self.source).read_state()
+        state = {k: v for k, v in state.items() if k not in pipeline.FAILURE_KEYS}
+        return {} if state.keys() <= {"schema_version", "source_signature", "url"} else state
+
+    def raw_state(self) -> dict:
         return ArchiveStore(self.root, self.source).read_state()
+
+    def test_failed_runs_back_off_without_requests_until_due(self) -> None:
+        with patch("election_pipeline.pipeline.BACKOFF_BASE_SECONDS", 300):
+            Handler.responses = [{"status": 404}]
+            self.assertEqual(self.collect()["outcome"], "http_error")
+            state = self.raw_state()
+            self.assertEqual(state["consecutive_failures"], 1)
+            self.assertIsNone(state["blocked_since"])
+            waiting = self.collect()
+            self.assertEqual(waiting["outcome"], "backing_off")
+            self.assertEqual(len(Handler.requests), 1)  # no request while backing off
+            self.assertEqual(len(self.records()), 1)  # and nothing recorded per tick
+            # An operator's forced download still goes out, and success clears the count.
+            Handler.responses = [self.good()]
+            self.assertEqual(self.collect(force_download=True)["outcome"], "downloaded")
+            self.assertFalse(set(pipeline.FAILURE_KEYS) & self.raw_state().keys())
+
+    @patch("election_pipeline.pipeline.BACKOFF_BASE_SECONDS", 300)
+    def test_backoff_grows_and_access_refusals_wait_longer(self) -> None:
+        self.assertEqual(
+            [pipeline.failure_backoff(n, False) for n in (1, 2, 3, 4, 9)],
+            [300, 900, 2700, 3600, 3600],
+        )
+        self.assertEqual(pipeline.failure_backoff(9, True), 6 * 3600)
+        for _ in range(2):
+            Handler.responses = [{"status": 403}]
+            self.assertEqual(self.collect(force_download=True)["outcome"], "http_error")
+        state = self.raw_state()
+        self.assertEqual(state["consecutive_failures"], 2)
+        self.assertIsNotNone(state["blocked_since"])
+        self.assertEqual(state["last_failure"], "HTTP 403")
 
     def archives(self) -> list[Path]:
         return list(self.root.glob("raw/**/*.zip"))
@@ -197,6 +241,21 @@ class CollectionTests(unittest.TestCase):
         self.assertEqual(len({record["fetch_id"] for record in records}), 2)
         self.assertEqual(len({record["run_id"] for record in records}), 1)
 
+    def test_redirects_are_checked_before_they_are_followed(self) -> None:
+        # A plain-HTTP target off loopback is refused before any request is made to it.
+        Handler.responses = [{"status": 302, "headers": {"Location": "http://example.com/x.zip"}}]
+        result = self.collect()
+        self.assertEqual(result["outcome"], "network_error")
+        self.assertIn("Refused redirect", result["error"])
+        self.assertEqual(len(Handler.requests), 1)
+        # An allowed target is followed as before.
+        Handler.responses = [
+            {"status": 302, "headers": {"Location": self.url + "?moved"}},
+            self.good(),
+        ]
+        self.assertEqual(self.collect(force_download=True)["outcome"], "downloaded")
+        self.assertEqual(Handler.requests[-1]["path"], "/results.zip?moved")
+
     def test_terminal_404_is_not_retried(self) -> None:
         Handler.responses = [{"status": 404}]
         self.assertEqual(self.collect()["outcome"], "http_error")
@@ -210,7 +269,7 @@ class CollectionTests(unittest.TestCase):
         self.assertEqual(len(Handler.requests), 3)
 
     def test_network_exception_retries_without_advancing_state(self) -> None:
-        with patch("election_pipeline.collect.urlopen", side_effect=URLError("simulated timeout")):
+        with patch("election_pipeline.collect.open_url", side_effect=URLError("simulated timeout")):
             self.assertEqual(self.collect()["outcome"], "network_error")
         self.assertEqual(len(self.records()), 3)
         self.assertEqual(self.state(), {})

@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import re
+import time
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from importlib.resources import files
@@ -373,16 +374,28 @@ def dashboard_settings(env_file):
 
 
 class PublishedResults:
+    # Publications change at most every few minutes; a poll within this many seconds
+    # reuses the last payload instead of opening another database connection.
+    TTL_SECONDS = 10
+
     def __init__(self, settings, geography, source_id, state="NC", races=None):
         self.state = state_adapter(state)
         self.settings, self.geography, self.source_id = settings, geography, source_id
         self.races = races if races is not None else self.state.races
         self.cache, self.lock = {}, Lock()
         self.feed_cache = []
+        self.recent = None  # (monotonic time, payload)
 
     def __call__(self):
+        with self.lock:
+            if self.recent and time.monotonic() - self.recent[0] < self.TTL_SECONDS:
+                return self.recent[1]
+            payload = self.read()
+            self.recent = (time.monotonic(), payload)
+            return payload
+
+    def read(self):
         with (
-            self.lock,
             psycopg.connect(
                 **self.settings,
                 autocommit=True,
@@ -459,7 +472,16 @@ class PublishedResults:
             return payload
 
 
-def national_payload(providers, demo=False):
+def summary(state):
+    """Keep county feed status for monitoring; load county vote rows on demand."""
+    races = {
+        race: {k: v for k, v in contest.items() if k != "counties"}
+        for race, contest in (state.get("races") or {}).items()
+    }
+    return {**state, "races": races}
+
+
+def national_payload(providers, demo=False, detail=False):
     calendar = json.loads(
         files("election_pipeline")
         .joinpath("resources/elections_2026.json")
@@ -469,7 +491,8 @@ def national_payload(providers, demo=False):
     for code, provider in providers.items():
         adapter = state_adapter(code)
         try:
-            states[code] = {**provider(), "availability": "available", "name": adapter.name}
+            payload = provider() if detail else summary(provider())
+            states[code] = {**payload, "availability": "available", "name": adapter.name}
         except Exception:
             logging.getLogger(__name__).warning("Published %s snapshot unavailable", code)
             states[code] = {
@@ -562,6 +585,10 @@ def create_app(
     @app.middleware("http")
     async def headers(request, call_next):
         response = await call_next(request)
+        if request.url.path.endswith((".json", ".js", ".css", ".html")) or request.url.path == "/":
+            # Revalidate static files by ETag, so a deployed map or script change is seen
+            # without hand-edited cache-busting query strings.
+            response.headers.setdefault("Cache-Control", "no-cache")
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "same-origin"
         response.headers["Content-Security-Policy"] = (
@@ -595,6 +622,7 @@ def create_app(
 
     @app.get("/api/national")
     def national(request: Request):
+        # County detail is served per state by /api/states/{code}.
         return api_response(request, lambda: national_payload(approved_providers(), demo))
 
     @app.get("/api/states/{code}")

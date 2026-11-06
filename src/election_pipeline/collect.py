@@ -9,7 +9,13 @@ import time
 from dataclasses import dataclass
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.request import HTTPCookieProcessor, HTTPSHandler, Request, build_opener, urlopen
+from urllib.request import (
+    HTTPCookieProcessor,
+    HTTPRedirectHandler,
+    HTTPSHandler,
+    Request,
+    build_opener,
+)
 
 from election_pipeline.settings import CollectorSettings, Source, validate_url
 from election_pipeline.tls import context_for_url
@@ -30,6 +36,30 @@ class FetchFailure(RuntimeError):
         self.status = status
         self.headers = headers or {}
         self.bytes_received = bytes_received
+
+
+class CheckedRedirect(HTTPRedirectHandler):
+    """Check every redirect target before it is requested, not only the final URL."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        try:
+            validate_url(newurl)
+        except ValueError as error:
+            raise FetchFailure(
+                f"Refused redirect to a disallowed URL: {error}", retryable=False, status=code
+            ) from error
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def open_url(request, *, timeout, context=None, cookies=None):
+    """Open with verified TLS (the host's context when it needs one) and checked redirects."""
+    handlers = [
+        CheckedRedirect(),
+        HTTPSHandler(context=context) if context is not None else HTTPSHandler(),
+    ]
+    if cookies is not None:
+        handlers.append(HTTPCookieProcessor(cookies))
+    return build_opener(*handlers).open(request, timeout=timeout)
 
 
 @dataclass(frozen=True)
@@ -73,16 +103,11 @@ def fetch_file(
     except (ValueError, OSError) as error:
         raise FetchFailure(f"TLS configuration failed: {error}", retryable=False) from error
     try:
-        if cookies is None:
-            options = {"context": context} if context is not None else {}
-            response = urlopen(request, timeout=settings.timeout_seconds, **options)
-        else:
-            # HTTPSHandler() without a context still uses verified default TLS.
-            opener = build_opener(
-                HTTPCookieProcessor(cookies),
-                HTTPSHandler(context=context) if context is not None else HTTPSHandler(),
-            )
-            response = opener.open(request, timeout=settings.timeout_seconds)
+        # HTTPSHandler() without a context still uses verified default TLS.
+        options = {"context": context} if context is not None else {}
+        if cookies is not None:
+            options["cookies"] = cookies
+        response = open_url(request, timeout=settings.timeout_seconds, **options)
     except HTTPError as error:
         # urllib represents 304 as HTTPError; it is a normal conditional-GET result.
         response = error

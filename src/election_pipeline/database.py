@@ -218,10 +218,26 @@ def register_snapshot(conn, store, sha):
 
 
 def import_fetches(conn, store):
+    """Import fetch records not yet finished in the database.
+
+    A record's file name is its fetch ID, and a finished row is never updated again (see
+    the upsert below), so files already imported as finished are skipped unread. Each
+    load then costs one directory listing instead of rereading every attempt ever made.
+    """
     count = 0
     folder = store.root / "metadata" / store.source.source_id
+    finished = {
+        row["fetch_id"].hex
+        for row in conn.execute(
+            "SELECT fetch_id FROM ops.fetch_attempts "
+            "WHERE source_id=%s AND finished_at IS NOT NULL",
+            (store.source.source_id,),
+        )
+    }
 
     for path in sorted(folder.glob("*/*.json")):
+        if path.stem in finished:
+            continue
         record = json.loads(path.read_text(encoding="utf-8"))
 
         if not isinstance(record, dict) or record.get("schema_version") != 1:

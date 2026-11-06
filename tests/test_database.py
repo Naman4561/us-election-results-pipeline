@@ -345,6 +345,9 @@ class DatabaseTests(unittest.TestCase):
             (metadata / (identifier + ".json")).write_text(json.dumps(record))
 
         self.load(directory)
+        # Finished records are skipped by name on later loads, so they are not reread.
+        for path in metadata.glob("*.json"):
+            path.write_text("not json")
         self.load(directory)
 
         self.assertEqual(len(self.query("SELECT * FROM ops.fetch_attempts")), 2)

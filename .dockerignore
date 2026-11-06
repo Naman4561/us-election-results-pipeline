@@ -19,3 +19,6 @@ dbt/.user.yml
 *.pem
 secrets
 node_modules
+
+*.patch
+*.mbox

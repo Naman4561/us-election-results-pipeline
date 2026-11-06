@@ -1,0 +1,118 @@
+{
+ "state": "GA",
+ "provenance": "Reviewed from the official responses in tests/fixtures/five_states (see its README.md and provenance.json).",
+ "races": {
+  "GA-SEN": {
+   "candidates": [
+    "01000000-3a82-a359-482e-08df23e5ff36",
+    "01000000-3a82-a359-4a50-08df23e5ff36"
+   ],
+   "counties": []
+  },
+  "GA-GOV": {
+   "candidates": [
+    "01000000-3a82-a359-0468-08df23e5ff46",
+    "01000000-3a82-a359-047d-08df23e5ff46"
+   ],
+   "counties": []
+  },
+  "GA-01": {
+   "candidates": [
+    "01000000-3a82-a359-9ccc-08df23e5ffce",
+    "01000000-3a82-a359-9cec-08df23e5ffce"
+   ],
+   "counties": []
+  },
+  "GA-02": {
+   "candidates": [
+    "01000000-3a82-a359-628a-08df23e60062",
+    "01000000-3a82-a359-62da-08df23e60062"
+   ],
+   "counties": []
+  },
+  "GA-03": {
+   "candidates": [
+    "01000000-3a82-a359-d193-08df23e60305",
+    "01000000-3a82-a359-d1a9-08df23e60305"
+   ],
+   "counties": []
+  },
+  "GA-04": {
+   "candidates": [
+    "01000000-3a82-a359-d68e-08df23e681eb",
+    "01000000-3a82-a359-d696-08df23e681eb"
+   ],
+   "counties": []
+  },
+  "GA-05": {
+   "candidates": [
+    "01000000-3a82-a359-9a45-08df23e6579b",
+    "01000000-3a82-a359-9a56-08df23e6579b"
+   ],
+   "counties": []
+  },
+  "GA-06": {
+   "candidates": [
+    "01000000-3a82-a359-82e6-08df23e6637a",
+    "01000000-3a82-a359-82ee-08df23e6637a"
+   ],
+   "counties": []
+  },
+  "GA-07": {
+   "candidates": [
+    "01000000-3a82-a359-6c30-08df23e60217",
+    "01000000-3a82-a359-6c50-08df23e60217"
+   ],
+   "counties": []
+  },
+  "GA-08": {
+   "candidates": [
+    "01000000-3a82-a359-92f5-08df23e604e7",
+    "01000000-3a82-a359-9308-08df23e604e7"
+   ],
+   "counties": []
+  },
+  "GA-09": {
+   "candidates": [
+    "01000000-3a82-a359-2e18-08df23e600df",
+    "01000000-3a82-a359-2e34-08df23e600df"
+   ],
+   "counties": []
+  },
+  "GA-10": {
+   "candidates": [
+    "01000000-3a82-a359-4c80-08df23e600a6",
+    "01000000-3a82-a359-4c9a-08df23e600a6"
+   ],
+   "counties": []
+  },
+  "GA-11": {
+   "candidates": [
+    "01000000-3a82-a359-422e-08df23e60017",
+    "01000000-3a82-a359-425a-08df23e60017"
+   ],
+   "counties": []
+  },
+  "GA-12": {
+   "candidates": [
+    "01000000-3a82-a359-b739-08df23e5ff66",
+    "01000000-3a82-a359-b754-08df23e5ff66"
+   ],
+   "counties": []
+  },
+  "GA-13": {
+   "candidates": [
+    "01000000-3a82-a359-6a5a-08df23e6047a",
+    "01000000-3a82-a359-6a6b-08df23e6047a"
+   ],
+   "counties": []
+  },
+  "GA-14": {
+   "candidates": [
+    "01000000-3a82-a359-99a5-08df23e60ffc",
+    "01000000-3a82-a359-99bb-08df23e60ffc"
+   ],
+   "counties": []
+  }
+ }
+}

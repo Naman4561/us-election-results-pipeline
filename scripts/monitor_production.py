@@ -132,6 +132,14 @@ def assess(prod, config, now):
             state = read_json(data / "state" / f"{name}.json")
             if age_seconds(state["last_checked_at"], now) > poll_limit:
                 issues[f"poll/{name}"] = "No recent successful official-source check"
+            # One transient failure is normal; repeated failures or a refusal are not.
+            if (state.get("consecutive_failures") or 0) >= 3 or state.get("blocked_since"):
+                issues[f"poll/{name}"] = (
+                    f"Collection failing: {state['consecutive_failures']} consecutive runs"
+                    + (" refused by the site" if state.get("blocked_since") else "")
+                    + f"; last: {str(state.get('last_failure'))[:120]}"
+                    + f"; next try after {state.get('failure_backoff_until')}"
+                )
         except (OSError, ValueError, TypeError, KeyError):
             issues[f"poll/{name}"] = "Collector state is missing or invalid"
 

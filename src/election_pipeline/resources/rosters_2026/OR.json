@@ -1,0 +1,203 @@
+{
+ "state": "OR",
+ "provenance": "Candidate IDs and counties from the official CSV exports. Reviewed from the official captures recorded in tests/fixtures/nine_states/provenance.json (November 6, 2026 UTC).",
+ "races": {
+  "OR-01": {
+   "candidates": [
+    "9901",
+    "300024797",
+    "300060170"
+   ],
+   "counties": [
+    "Clatsop",
+    "Columbia",
+    "Multnomah",
+    "Tillamook",
+    "Washington"
+   ]
+  },
+  "OR-02": {
+   "candidates": [
+    "9901",
+    "300060172",
+    "300060173"
+   ],
+   "counties": [
+    "Baker",
+    "Clackamas",
+    "Crook",
+    "Deschutes",
+    "Douglas",
+    "Gilliam",
+    "Grant",
+    "Harney",
+    "Jackson",
+    "Jefferson",
+    "Josephine",
+    "Klamath",
+    "Lake",
+    "Malheur",
+    "Marion",
+    "Morrow",
+    "Sherman",
+    "Umatilla",
+    "Union",
+    "Wallowa",
+    "Wasco",
+    "Wheeler"
+   ]
+  },
+  "OR-03": {
+   "candidates": [
+    "9901",
+    "300060178",
+    "300060177"
+   ],
+   "counties": [
+    "Clackamas",
+    "Hood River",
+    "Multnomah"
+   ]
+  },
+  "OR-04": {
+   "candidates": [
+    "9901",
+    "300060180",
+    "300060181",
+    "300060179"
+   ],
+   "counties": [
+    "Benton",
+    "Coos",
+    "Curry",
+    "Douglas",
+    "Lane",
+    "Lincoln",
+    "Linn"
+   ]
+  },
+  "OR-05": {
+   "candidates": [
+    "9901",
+    "300046872",
+    "300060183",
+    "300060182"
+   ],
+   "counties": [
+    "Clackamas",
+    "Deschutes",
+    "Jefferson",
+    "Linn",
+    "Marion",
+    "Multnomah"
+   ]
+  },
+  "OR-06": {
+   "candidates": [
+    "9901",
+    "100084021",
+    "300060184"
+   ],
+   "counties": [
+    "Clackamas",
+    "Marion",
+    "Polk",
+    "Washington",
+    "Yamhill"
+   ]
+  },
+  "OR-GOV": {
+   "candidates": [
+    "9901",
+    "100084063",
+    "300060194",
+    "300060193"
+   ],
+   "counties": [
+    "Baker",
+    "Benton",
+    "Clackamas",
+    "Clatsop",
+    "Columbia",
+    "Coos",
+    "Crook",
+    "Curry",
+    "Deschutes",
+    "Douglas",
+    "Gilliam",
+    "Grant",
+    "Harney",
+    "Hood River",
+    "Jackson",
+    "Jefferson",
+    "Josephine",
+    "Klamath",
+    "Lake",
+    "Lane",
+    "Lincoln",
+    "Linn",
+    "Malheur",
+    "Marion",
+    "Morrow",
+    "Multnomah",
+    "Polk",
+    "Sherman",
+    "Tillamook",
+    "Umatilla",
+    "Union",
+    "Wallowa",
+    "Wasco",
+    "Washington",
+    "Wheeler",
+    "Yamhill"
+   ]
+  },
+  "OR-SEN": {
+   "candidates": [
+    "9901",
+    "300060093",
+    "300060584",
+    "300060095",
+    "300060094"
+   ],
+   "counties": [
+    "Baker",
+    "Benton",
+    "Clackamas",
+    "Clatsop",
+    "Columbia",
+    "Coos",
+    "Crook",
+    "Curry",
+    "Deschutes",
+    "Douglas",
+    "Gilliam",
+    "Grant",
+    "Harney",
+    "Hood River",
+    "Jackson",
+    "Jefferson",
+    "Josephine",
+    "Klamath",
+    "Lake",
+    "Lane",
+    "Lincoln",
+    "Linn",
+    "Malheur",
+    "Marion",
+    "Morrow",
+    "Multnomah",
+    "Polk",
+    "Sherman",
+    "Tillamook",
+    "Umatilla",
+    "Union",
+    "Wallowa",
+    "Wasco",
+    "Washington",
+    "Wheeler",
+    "Yamhill"
+   ]
+  }
+ }
+}

@@ -11,7 +11,7 @@ test("national/state map navigation and coverage statuses", async (t) => {
       process.env.PYTHON || "python",
       [
         "-c",
-        "from fastapi.testclient import TestClient; from election_pipeline.dashboard.server import create_app; print(TestClient(create_app(demo=True)).get('/api/national').text)",
+        "import json; from fastapi.testclient import TestClient; from election_pipeline.dashboard.server import create_app; c = TestClient(create_app(demo=True)); n = c.get('/api/national').json(); print(json.dumps({'national': n, 'states': {k: c.get('/api/states/' + k).json() for k in n['states']}}))",
       ],
       { encoding: "utf8", maxBuffer: 10 * 1024 * 1024 },
     ),
@@ -26,9 +26,12 @@ test("national/state map navigation and coverage statuses", async (t) => {
   w.AbortSignal = AbortSignal;
   w.fetch = async (url) => {
     calls++;
-    const body = url.startsWith("/api/")
-      ? payload
-      : JSON.parse(fs.readFileSync(base + url.split("?")[0], "utf8"));
+    const body =
+      url === "/api/national"
+        ? payload.national
+        : url.startsWith("/api/states/")
+          ? payload.states[decodeURIComponent(url.slice(12))]
+          : JSON.parse(fs.readFileSync(base + url.split("?")[0], "utf8"));
     return {
       ok: true,
       status: 200,
@@ -95,7 +98,8 @@ test("national/state map navigation and coverage statuses", async (t) => {
   assert(
     d.querySelector("#result-content").textContent.includes("requires review"),
   );
-  assert.equal(calls, msCalls + 1, "Mississippi county clicks use cached data");
+  // One refresh polls the national summary and the open state; county clicks are cached.
+  assert.equal(calls, msCalls + 2, "Mississippi county clicks use cached data");
   payload.states.MS.county_feeds.HINDS.issue = "manual_snapshot";
   payload.states.MS.county_feeds.HINDS.acquisition = "manual";
   payload.states.MS.county_feeds.HINDS.source_note =
@@ -272,7 +276,7 @@ test("national/state map navigation and coverage statuses", async (t) => {
     click("#national");
   }
   click('[data-office="senate"]');
-  const stats = payload.states.NC.races["NC-SEN"].stats.total_votes;
+  const stats = payload.national.states.NC.races["NC-SEN"].stats.total_votes;
   for (const leader of ["DEM", "REP", "OTHER", "UNKNOWN"]) {
     Object.assign(stats, { total: 100, status: "leading", leader });
     click("#refresh");
@@ -287,15 +291,20 @@ test("national/state map navigation and coverage statuses", async (t) => {
   click("#refresh");
   await settle();
   assert.equal(status("NC"), "tie");
-  payload.states.NC.availability = "unavailable";
+  payload.national.states.NC.availability = "unavailable";
   click("#refresh");
   await settle();
   assert.equal(status("NC"), "unavailable");
-  payload.mode = "published";
-  for (const s of Object.values(payload.states))
+  payload.national.mode = "published";
+  for (const s of [
+    ...Object.values(payload.national.states),
+    ...Object.values(payload.states),
+  ])
     if (s.publication) s.publication.status = "unofficial";
-  payload.states.OH.acquisition = { method: "manual" };
-  payload.states.OH.publication.source_modified_at = "2026-11-04T02:42:36Z";
+  for (const s of [payload.national.states.OH, payload.states.OH]) {
+    s.acquisition = { method: "manual" };
+    s.publication.source_modified_at = "2026-11-04T02:42:36Z";
+  }
   click("#refresh");
   await settle();
   assert(

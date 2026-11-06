@@ -11,6 +11,7 @@ import uuid
 from pathlib import Path
 
 from election_pipeline.deployment.catalog import IMAGE
+from election_pipeline.pipeline import collector_code_hash
 
 
 def command(args, *, timeout=30, env=None, input=None):
@@ -48,12 +49,10 @@ def verify_release(path, image):
 
 
 def package_hash(path):
-    digest = hashlib.sha256()
     package = Path(path) / "src/election_pipeline"
-    for file in sorted(package.rglob("*.py")):
-        digest.update(file.relative_to(package).as_posix().encode() + b"\0")
-        digest.update(file.read_bytes() + b"\0")
-    return digest.hexdigest()
+    # Releases before the roster move fingerprinted Python files only.
+    include_resources = (package / "resources/rosters_2026").is_dir()
+    return collector_code_hash(package, include_resources=include_resources)
 
 
 def release_hash(path):

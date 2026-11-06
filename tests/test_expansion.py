@@ -189,7 +189,7 @@ class ExpansionTests(unittest.TestCase):
             path.write_bytes(body)
             return FetchResponse(200, {}, url, len(body), hashlib.sha256(body).hexdigest())
 
-        with patch.object(bundles, "fetch_file", side_effect=fetch) as request:
+        with patch("election_pipeline.collectors.common.fetch_file", side_effect=fetch) as request:
             path = self.root / "media.zip"
             bundles.fetch_bundle(source, self.settings, path)
             self.assertEqual(request.call_count, 5)
@@ -274,7 +274,7 @@ class ExpansionTests(unittest.TestCase):
             path.write_bytes(body)
             return FetchResponse(200, {}, url, len(body), hashlib.sha256(body).hexdigest())
 
-        with patch.object(bundles, "fetch_file", side_effect=fetch):
+        with patch("election_pipeline.collectors.common.fetch_file", side_effect=fetch):
             a, b = self.root / "a.zip", self.root / "b.zip"
             self.assertEqual(
                 bundles.fetch_bundle(source, self.settings, a).sha256,

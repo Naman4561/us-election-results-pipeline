@@ -23,22 +23,16 @@ bundle and that bundle is under ``REFRESH_SECONDS`` old, the previous bundle is 
 unchanged. Otherwise every page and export is fetched again.
 """
 
-import hashlib
 import re
-import shutil
-import tempfile
-import time
-import zipfile
-from dataclasses import replace
 from http.cookiejar import CookieJar
 from pathlib import Path
 from urllib.parse import urlencode, urljoin, urlsplit
 
-from election_pipeline.collect import FetchFailure, FetchResponse, fetch_file
+from election_pipeline.collect import FetchFailure
+from election_pipeline.collectors.common import REFRESH_SECONDS, Bundle, reusable  # noqa: F401
 from election_pipeline.parsers.html import Tree
 from election_pipeline.states import state_adapter
 
-REFRESH_SECONDS = 3600
 WORKBOOK = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 TARGET = re.compile(r"ctl00\$MainContent\$[A-Za-z0-9_$]{1,120}")
 DOWNLOADS = {".xlsx": (WORKBOOK,), ".csv": ("application/text", "text/csv", "application/csv")}
@@ -82,85 +76,23 @@ def postback(page, page_url, target, choices=None):
     return action, urlencode(fields).encode("ascii")
 
 
-def reusable(previous, changes):
-    if previous is None or not Path(previous).exists():
-        return False
-    if time.time() - Path(previous).stat().st_mtime > REFRESH_SECONDS:
-        return False
-    try:
-        with zipfile.ZipFile(previous) as archive:
-            return all(archive.read(name) == body for name, body in changes.items())
-    except (KeyError, OSError, zipfile.BadZipFile):
-        return False
-
-
 def fetch_bundle(source, settings, destination, *, previous=None, store=None, force_download=False):
     parser = state_adapter(source.state).parser
     urls = dict((*source.files, (source.primary_filename, source.url)))
     if set(parser.CHANGE_MEMBERS) - urls.keys():
         raise FetchFailure("Change members must be configured source files", retryable=False)
-    jar, components, received = CookieJar(), [], 0
-    started = time.monotonic()
-    with tempfile.TemporaryDirectory(prefix=".bundle-", dir=destination.parent) as directory:
-        paths = {}
-
-        def get(name, url, form=None):
-            nonlocal received
-            remaining = settings.max_download_seconds - (time.monotonic() - started)
-            if remaining <= 0:
-                raise FetchFailure("Bundle exceeded its elapsed-time budget")
-            if received >= settings.max_download_bytes:
-                raise FetchFailure("Bundle exceeds its combined download budget", retryable=False)
-            limits = replace(
-                settings,
-                max_download_seconds=remaining,
-                timeout_seconds=min(settings.timeout_seconds, remaining),
-                max_download_bytes=settings.max_download_bytes - received,
-            )
-            path = Path(directory) / name
-            result = fetch_file(source, limits, path, {}, url=url, form=form, cookies=jar)
-            if result.status != 200:
-                return result
-            received += result.bytes_received
-            kinds = DOWNLOADS.get(Path(name).suffix, (WORKBOOK,))
-            if form is not None and not result.headers.get("content-type", "").startswith(kinds):
-                raise FetchFailure(f"Official export for {name} returned an unexpected file type")
-            paths[name] = path
-            components.append(
-                {
-                    "name": name,
-                    "url": url,
-                    "method": "GET" if form is None else "POST",
-                    "final_url": result.final_url,
-                    "sha256": result.sha256,
-                    "bytes": result.bytes_received,
-                    "headers": result.headers,
-                }
-            )
-            return None
-
+    with Bundle(source, settings, destination, cookies=CookieJar(), record_method=True) as bundle:
         for name in parser.CHANGE_MEMBERS:
-            if stopped := get(name, urls[name]):
+            if stopped := bundle.get(name, urls[name]):
                 return stopped
-        changes = {name: paths[name].read_bytes() for name in parser.CHANGE_MEMBERS}
-        if not force_download and reusable(previous, changes):
-            shutil.copyfile(previous, destination)
-            with destination.open("rb") as handle:
-                digest = hashlib.file_digest(handle, "sha256").hexdigest()
-            components.append({"name": "*", "reused_archive_sha256": digest})
-            return FetchResponse(
-                200,
-                {"content-type": "application/zip"},
-                source.url,
-                received,
-                digest,
-                tuple(components),
-            )
+        changes = {name: bundle.read(name) for name in parser.CHANGE_MEMBERS}
+        if reused := bundle.reuse(previous, changes, force=force_download):
+            return reused
         for name, url in urls.items():
-            if name not in paths and (stopped := get(name, url)):
+            if name not in bundle.paths and (stopped := bundle.get(name, url)):
                 return stopped
         try:
-            plan = parser.exports(paths, source)
+            plan = parser.exports(bundle.paths, source)
         except (ValueError, UnicodeError) as error:
             raise FetchFailure(str(error), retryable=False) from error
         if {entry[0] for entry in plan} != set(source.supplemental_members):
@@ -169,22 +101,14 @@ def fetch_bundle(source, settings, destination, *, previous=None, store=None, fo
             # Like a person clicking several export buttons, each post reuses the page's state.
             try:
                 action, form = postback(
-                    paths[page_member].read_text(encoding="utf-8", errors="replace"),
+                    bundle.paths[page_member].read_text(encoding="utf-8", errors="replace"),
                     urls[page_member],
                     target,
                     *choices,
                 )
             except ValueError as error:
                 raise FetchFailure(str(error), retryable=False) from error
-            if stopped := get(member, action, form):
+            kinds = DOWNLOADS.get(Path(member).suffix, (WORKBOOK,))
+            if stopped := bundle.get(member, action, form=form, kinds=kinds):
                 return stopped
-        with zipfile.ZipFile(destination, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-            for name, path in sorted(paths.items()):
-                info = zipfile.ZipInfo(name, date_time=(1980, 1, 1, 0, 0, 0))
-                info.compress_type = zipfile.ZIP_DEFLATED
-                archive.writestr(info, path.read_bytes())
-    with destination.open("rb") as handle:
-        digest = hashlib.file_digest(handle, "sha256").hexdigest()
-    return FetchResponse(
-        200, {"content-type": "application/zip"}, source.url, received, digest, tuple(components)
-    )
+        return bundle.finish()
