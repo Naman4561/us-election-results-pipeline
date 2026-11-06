@@ -52,8 +52,8 @@ def project_hash(root):
     return digest.hexdigest()
 
 
-def florida_file_modified_at(conn, snapshot_id, source_url):
-    """Use the results file's recorded header, including for previously loaded bundles."""
+def florida_file_modified_range(conn, snapshot_id, source_url):
+    """Collect the bounds of valid timestamps observed for identical file bytes."""
     headers = conn.execute(
         """
         SELECT metadata #>> '{components,0,headers,last-modified}' AS modified,
@@ -68,15 +68,18 @@ def florida_file_modified_at(conn, snapshot_id, source_url):
         """,
         (FLORIDA_SOURCE, snapshot_id, source_url),
     ).fetchall()
-    if len(headers) != 1:
+    if not headers:
         return None
-    try:
-        modified = parsedate_to_datetime(headers[0]["modified"])
-    except (ValueError, TypeError, OverflowError):
-        return None
-    if modified.tzinfo is None or modified > headers[0]["first_seen"]:
-        return None
-    return modified
+    timestamps = []
+    for header in headers:
+        try:
+            modified = parsedate_to_datetime(header["modified"])
+        except (ValueError, TypeError, OverflowError):
+            return None
+        if modified.tzinfo is None or modified > header["first_seen"]:
+            return None
+        timestamps.append(modified)
+    return min(timestamps), max(timestamps)
 
 
 def release_metadata(conn, release_id):
@@ -103,9 +106,9 @@ def release_metadata(conn, release_id):
 
     state_adapter(row["state"]).contract(row["dataset"])
     if row["source_id"] == FLORIDA_SOURCE:
-        row["source_modified_at"] = florida_file_modified_at(
-            conn, row["snapshot_id"], row["source_url"]
-        )
+        modified_range = florida_file_modified_range(conn, row["snapshot_id"], row["source_url"])
+        row["source_modified_range"] = modified_range
+        row["source_modified_at"] = modified_range[1] if modified_range else None
 
     return row
 
@@ -276,15 +279,16 @@ def require_forward_release(conn, current, metadata):
         metadata["source_id"] == FLORIDA_SOURCE
         and current["snapshot_id"] != metadata["snapshot_id"]
     ):
-        incoming_time = metadata["source_modified_at"]
-        if incoming_time:
-            current_time = current["source_modified_at"] or florida_file_modified_at(
+        incoming_range = metadata["source_modified_range"]
+        if incoming_range:
+            current_range = florida_file_modified_range(
                 conn, current["snapshot_id"], metadata["source_url"]
             )
-            if current_time and incoming_time != current_time:
-                if incoming_time < current_time:
+            if current_range:
+                if incoming_range[1] < current_range[0]:
                     raise ValueError("An earlier Florida source file requires an explicit restore")
-                return
+                if incoming_range[0] > current_range[1]:
+                    return
         if metadata["snapshot_id"] < current["snapshot_id"]:
             raise ValueError("An earlier release requires an explicit restore")
     if current["release_id"] > metadata["release_id"]:
