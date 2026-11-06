@@ -116,6 +116,44 @@ class PublicationArtifactTests(unittest.TestCase):
         )
         build.assert_not_called()
 
+    def test_equivalent_iowa_archive_can_reuse_the_current_publication(self):
+        conn = MagicMock()
+        conn.__enter__.return_value = conn
+        publication_id = uuid.uuid4()
+        metadata = {"source_id": publication.IOWA_SOURCE, "state": "IA", "release_id": 7479}
+        current = {
+            "publication_id": publication_id,
+            "release_id": 7640,
+            "transform_sha256": "code-hash",
+            "status": "test",
+        }
+        with (
+            patch.object(publication, "connect", return_value=conn),
+            patch.object(publication, "publication_lock"),
+            patch.object(publication, "release_metadata", return_value=metadata),
+            patch.object(publication, "current_publication", return_value=current),
+            patch.object(publication, "project_hash", return_value="code-hash"),
+            patch.object(publication, "equivalent_iowa_release", return_value=True) as equivalent,
+            patch.object(publication, "build_candidate") as build,
+        ):
+            root = Path(__file__).resolve().parents[1]
+            result = publish(root, {}, 7479, "test", skip_current=True)
+            self.assertEqual(
+                result,
+                {
+                    "outcome": "already_current",
+                    "publication_id": str(publication_id),
+                    "release_id": 7640,
+                },
+            )
+            with self.assertRaisesRegex(ValueError, "earlier release"):
+                publish(root, {}, 7479, "unofficial", skip_current=True)
+            equivalent.assert_called_once_with(conn, current, metadata)
+            equivalent.return_value = False
+            with self.assertRaisesRegex(ValueError, "earlier release"):
+                publish(root, {}, 7479, "test", skip_current=True)
+        build.assert_not_called()
+
     def test_florida_orders_distinct_snapshots_by_separated_file_time_ranges(self):
         earlier = datetime(2026, 11, 4, 15, 0, 3, tzinfo=timezone.utc)
         later_start = datetime(2026, 11, 4, 21, 48, 3, tzinfo=timezone.utc)
@@ -175,7 +213,13 @@ class PublicationArtifactTests(unittest.TestCase):
         later = datetime(2026, 11, 5, 15, 48, tzinfo=timezone.utc)
         conn = MagicMock()
         conn.__enter__.return_value = conn
-        current = {"snapshot_id": 1, "release_id": 12, "source_modified_at": later}
+        current = {
+            "snapshot_id": 1,
+            "release_id": 12,
+            "source_modified_at": later,
+            "transform_sha256": "code-hash",
+            "status": "test",
+        }
         incoming = {
             "source_id": publication.FLORIDA_SOURCE,
             "state": "FL",

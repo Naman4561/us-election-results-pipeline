@@ -20,6 +20,7 @@ from election_pipeline.states import publication_lock, state_adapter
 
 GROUPS = "request_type party_registration sex race ethnicity ballot_count"
 FLORIDA_SOURCE = "fl_2026_general"
+IOWA_SOURCE = "ia_2026_general"
 
 
 def project_hash(root):
@@ -295,6 +296,55 @@ def require_forward_release(conn, current, metadata):
         raise ValueError("An earlier release requires an explicit restore")
 
 
+def equivalent_iowa_release(conn, current, metadata):
+    """Clarity can return distinct bundles of the same Iowa results version."""
+    if metadata["source_id"] != IOWA_SOURCE or metadata["snapshot_id"] == current["snapshot_id"]:
+        return False
+    return conn.execute(
+        """
+        WITH markers AS (
+            SELECT snapshot_id, metadata #>> '{components,0,sha256}' AS marker_sha
+            FROM ops.fetch_attempts
+            WHERE source_id = %(source_id)s
+              AND snapshot_id IN (%(incoming_snapshot)s, %(published_snapshot)s)
+              AND http_status = 200 AND outcome IN ('downloaded', 'unchanged')
+              AND metadata #>> '{components,0,name}' = 'current_ver.txt'
+              AND metadata #>> '{components,0,url}' = %(source_url)s
+              AND metadata #>> '{components,0,sha256}' ~ '^[a-f0-9]{64}$'
+        ), incoming AS (
+            SELECT to_jsonb(r) - 'release_id' - 'source_line' AS result
+            FROM ia.results r WHERE release_id = %(incoming_release)s
+        ), published AS (
+            SELECT to_jsonb(r) - 'release_id' - 'source_line' AS result
+            FROM ia.results r WHERE release_id = %(published_release)s
+        )
+        SELECT
+            (SELECT count(DISTINCT snapshot_id) = 2 AND count(DISTINCT marker_sha) = 1
+             FROM markers)
+            AND EXISTS (
+                SELECT 1 FROM ops.processing_releases
+                WHERE release_id = %(published_release)s
+                  AND parser_report->>'source_update_text' = %(update_text)s
+            )
+            AND EXISTS (SELECT 1 FROM incoming)
+            AND NOT EXISTS (
+                (SELECT result FROM incoming EXCEPT ALL SELECT result FROM published)
+                UNION ALL
+                (SELECT result FROM published EXCEPT ALL SELECT result FROM incoming)
+            ) AS equivalent
+        """,
+        {
+            "source_id": IOWA_SOURCE,
+            "source_url": metadata["source_url"],
+            "incoming_snapshot": metadata["snapshot_id"],
+            "published_snapshot": current["snapshot_id"],
+            "incoming_release": metadata["release_id"],
+            "published_release": current["release_id"],
+            "update_text": metadata["parser_report"].get("source_update_text"),
+        },
+    ).fetchone()["equivalent"]
+
+
 def promote(conn, metadata, attempt_id, schema, code_hash, status):
     current = current_publication(conn, metadata["source_id"])
     require_forward_release(conn, current, metadata)
@@ -501,18 +551,21 @@ def prepare(root, db, release_id, status, *, skip_current=False):
         code_hash = project_hash(root)
         if skip_current:
             current = current_publication(conn, metadata["source_id"])
-            require_forward_release(conn, current, metadata)
             if (
                 current
-                and current["release_id"] == release_id
                 and current["transform_sha256"] == code_hash
                 and current["status"] == status
+                and (
+                    current["release_id"] == release_id
+                    or equivalent_iowa_release(conn, current, metadata)
+                )
             ):
                 return {
                     "outcome": "already_current",
                     "publication_id": str(current["publication_id"]),
-                    "release_id": release_id,
+                    "release_id": current["release_id"],
                 }
+            require_forward_release(conn, current, metadata)
         schema = "p_" + metadata["state"].lower() + "_" + attempt_id.hex
         artifacts = root / "data/publications" / str(attempt_id)
         conn.execute(
