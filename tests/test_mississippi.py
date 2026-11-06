@@ -430,6 +430,7 @@ class MississippiTests(unittest.TestCase):
         conn.execute.side_effect = responses
         geo = json.loads((STATIC / "ms-map.json").read_text())
         provider = PublishedResults({}, geo, self.source.source_id, state="MS")
+        provider.TTL_SECONDS = 0  # exercise the per-publication cache, not the short reuse
         with patch("election_pipeline.dashboard.server.psycopg.connect", return_value=conn):
             first, second = provider(), provider()
         self.assertEqual(first["races"], second["races"])
