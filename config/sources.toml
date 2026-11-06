@@ -8,7 +8,7 @@ max_download_bytes = 52428800
 max_uncompressed_bytes = 268435456
 max_zip_members = 20
 max_csv_rows = 2000000
-user_agent = "US-Election-Results-Pipeline/0.1"
+user_agent = "US-Election-Results-Pipeline/0.1 (+https://github.com/Naman4561/us-election-results-pipeline)"
 
 [sources.nc_2026_general]
 state = "NC"

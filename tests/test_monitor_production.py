@@ -216,6 +216,23 @@ class MonitorTests(unittest.TestCase):
         self.assertIn("poll/nc_test", self.assess())
         self.assertNotIn("pipeline/nc_test", self.assess())
 
+    def test_repeated_failures_and_refusals_are_explained(self):
+        failing = {
+            "last_checked_at": self.recent,
+            "consecutive_failures": 1,
+            "last_failure": "HTTP 503",
+            "failure_backoff_until": self.recent,
+        }
+        atomic_json(self.root / "data/state/nc_test.json", failing)
+        self.assertNotIn("poll/nc_test", self.assess())  # one transient failure is normal
+        atomic_json(self.root / "data/state/nc_test.json", {**failing, "consecutive_failures": 3})
+        self.assertIn("3 consecutive runs", self.assess()["poll/nc_test"])
+        atomic_json(
+            self.root / "data/state/nc_test.json",
+            {**failing, "last_failure": "HTTP 403", "blocked_since": self.recent},
+        )
+        self.assertIn("refused by the site", self.assess()["poll/nc_test"])
+
     def test_slow_source_poll_interval_does_not_relax_run_monitoring(self):
         self.sources["nc_test"] = replace(self.sources["nc_test"], min_interval_seconds=86400)
         atomic_json(
