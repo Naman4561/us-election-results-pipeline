@@ -875,6 +875,20 @@
         "precincts_total": 46,
         "report_generated_local": "2026-11-04T14:33:00",
         "review_method": "Source PDF image read and reported Senate values transcribed; independent agreement is still an operator acceptance check."
+      },
+      "69ad7819895b2e9db74baef9b4eb502e54b07e98d170ed795ef2e8032667bdd2": {
+        "counts": {
+          "Scott Colom": 22712,
+          "Cindy Hyde-Smith": 22364,
+          "Ty Pinkins": 690
+        },
+        "write_in_votes": 65,
+        "write_in_label": "Write-In Totals",
+        "reported_candidate_vote_total": 45831,
+        "precincts_reporting": 46,
+        "precincts_total": 46,
+        "report_generated_local": "2026-11-05T10:37:00",
+        "review_method": "Official countywide PDF visually reviewed. Page 1 gives the report time and Senate totals, including write-ins. Absentee votes are included; affidavit scope is unspecified."
       }
     },
     "WARREN": {
@@ -927,7 +941,8 @@
     }
   },
   "compatible_policy_sha256": [
-    "ffa2d1119af363b9584ff9480c06758dd122a0c85d157b29ac7c5df15ab0db5e"
+    "ffa2d1119af363b9584ff9480c06758dd122a0c85d157b29ac7c5df15ab0db5e",
+    "7107622d0b781a8ac8091f1ff61dbbeebc167bff0c7308b2001f86ba646aa7e5"
   ],
   "previous_source_id": "ms_2026_general"
 }

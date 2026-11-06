@@ -88,6 +88,20 @@ class CountyScalingTests(unittest.TestCase):
         self.f.setUp()
         self.addCleanup(self.f.doCleanups)
 
+    def test_additive_scan_review_can_reparse_an_approved_cached_bundle(self):
+        f = self.f
+        original, _ = f.collect()
+        approved = f.policy["compatible_policy_sha256"][-1]
+        cached = f.rewrite_bundle(
+            original, lambda members, manifest: manifest.update(policy_sha256=approved)
+        )
+        self.assertIn("MADISON", ms.read_bundle(cached, f.source)[2])
+        unknown = f.rewrite_bundle(
+            original, lambda members, manifest: manifest.update(policy_sha256="0" * 64)
+        )
+        with self.assertRaisesRegex(ValueError, "unapproved policy"):
+            ms.read_bundle(unknown, f.source)
+
     def test_82_counties_83_members_reconcile_without_claiming_live_complete_coverage(self):
         f = self.f
         original, _ = f.collect()

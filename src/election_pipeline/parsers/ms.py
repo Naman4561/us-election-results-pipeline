@@ -14,7 +14,7 @@ from importlib.resources import files
 from election_pipeline.parsers import totals
 from election_pipeline.parsers.html import Tree
 
-POLICY_SHA256 = "7107622d0b781a8ac8091f1ff61dbbeebc167bff0c7308b2001f86ba646aa7e5"
+POLICY_SHA256 = "61b564006562819358a771f27842a0d5474d585be96e4821904a132669b97c7a"
 NUMBER = r"(?:0|[1-9][0-9]*|[1-9][0-9]{0,2}(?:,[0-9]{3})+)"
 FEED_FIELDS = (
     "source_line",
@@ -471,11 +471,9 @@ def checked_manifest(archive, source, contract, previous=False):
     ):
         raise ValueError("County bundle exceeds archive bounds")
     d = json.loads(archive.read(source.primary_filename))
-    allowed = (
-        {POLICY_SHA256, *contract.get("compatible_policy_sha256", [])}
-        if previous
-        else {POLICY_SHA256}
-    )
+    # Additive scan reviews can be deployed while a valid bundle is still in cache.
+    # A full parse still requires the current source ID, manifest version and members.
+    allowed = {POLICY_SHA256, *contract.get("compatible_policy_sha256", [])}
     source_ids = (
         {source.source_id, contract.get("previous_source_id")} if previous else {source.source_id}
     )
