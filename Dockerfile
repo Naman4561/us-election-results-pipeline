@@ -1,4 +1,5 @@
-FROM python:3.12-slim-bookworm
+# Pinned by digest for reproducible builds; Dependabot proposes updates.
+FROM python:3.12-slim-bookworm@sha256:935c3c5b12357a7e10caa9c1e6ca5692344d97cf229832ef584be2cec9fc03df
 
 ARG VCS_REF=unversioned
 LABEL org.opencontainers.image.revision=$VCS_REF
@@ -13,12 +14,12 @@ WORKDIR /app
 RUN groupadd --gid 10001 election \
     && useradd --uid 10001 --gid 10001 --create-home election
 
-COPY pyproject.toml README.md requirements-dev.txt ./
+COPY pyproject.toml README.md requirements-dev.txt constraints.txt ./
 COPY src ./src
 
 # Publication fingerprints expect source files underneath /app.
 RUN --mount=type=cache,target=/root/.cache/pip \
-    PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=8 python -m pip install \
+    PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=8 python -m pip install -c constraints.txt \
     -e '.[postgres,transform,dashboard,deployment]' \
     -r requirements-dev.txt
 

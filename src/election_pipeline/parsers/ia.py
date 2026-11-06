@@ -145,7 +145,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             raise ValueError(f"{identity}: detail and summary candidates differ")
         candidates = [f"{key}-{n}" for n in range(1, len(expected) + 1)]
         seen = set()
-        for county, groups, _ in counties:
+        for county, _, _ in counties:
             if county in seen:
                 raise ValueError(f"{identity}: duplicate county {county}")
             seen.add(county)
