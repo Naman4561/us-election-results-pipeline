@@ -32,6 +32,9 @@ class State:
     # The state hides small county counts for voter privacy (printed as "*"). Its county
     # rows may then add up to less than an official total, never more.
     county_privacy_masking: bool = False
+    # Parser module under election_pipeline.parsers; defaults to the schema name. Oregon's
+    # schema "or" is a Python keyword, so its parser module has a different name.
+    parser_module: str = ""
 
     @property
     def schema(self):
@@ -76,7 +79,7 @@ class State:
 
     @property
     def parser(self):
-        return import_module(f"election_pipeline.parsers.{self.schema}")
+        return import_module(f"election_pipeline.parsers.{self.parser_module or self.schema}")
 
     def contract(self, dataset):
         return self.parser.load_contract(dataset)
@@ -287,6 +290,7 @@ STATES = {
         governor=True,
         source_page="https://results.oregonvotes.gov/",
         collection_backend="enr_export",
+        parser_module="oregon",
     ),
     # California elects no senator in 2026. Its results API is collected statewide only.
     "CA": State(

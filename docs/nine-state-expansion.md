@@ -120,7 +120,8 @@ detail is not collected (no precinct-to-county guessing). Governor tickets are s
 - PostgreSQL reserves `or`, so Oregon's migration quotes the schema (`"or"`), and test
   helpers that probe migrations quote schema names. Every runtime path already used
   quoted identifiers; `pg_dump --schema=or` and the dbt models were tested.
-- `parsers/or.py` is imported by name (`import_module`), as every state parser is.
+- Oregon's parser module is `parsers/oregon.py` (`State.parser_module`), since `or` is a
+  Python keyword; its database schema stays `or`.
 - Virginia (Fairfax County / Fairfax city) and Maryland (Baltimore County / Baltimore
   City) have counties and cities with the same base name, so their maps are keyed by the
   Census full name (`scripts/fetch_boundaries.py: FULL_NAME_STATES`). Maryland's

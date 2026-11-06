@@ -36,6 +36,7 @@ from election_pipeline.database import (
 )
 from election_pipeline.deployment import migrations
 from election_pipeline.parsers import clarity, ia, md, totals
+from election_pipeline.parsers import oregon as OREGON
 from election_pipeline.parsers.scope_2026 import ROSTERS
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
@@ -58,7 +59,6 @@ HOSTS = {
     "MD": "elections.maryland.gov",
     "HI": "elections.hawaii.gov",
 }
-OREGON = importlib.import_module("election_pipeline.parsers.or")  # "or" is a keyword
 
 
 def members(code):
