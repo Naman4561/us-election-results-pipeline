@@ -1,0 +1,2880 @@
+diff --git a/docs/mississippi-collection.md b/docs/mississippi-collection.md
+index 3d86343..2fa306b 100644
+--- a/docs/mississippi-collection.md
++++ b/docs/mississippi-collection.md
+@@ -65,7 +65,9 @@ Find a current official countywide Senate report through the inventory's county
+ site or circuit clerk directory. An older election, precinct-only PDF, media total
+ or unofficial transcription is not an acceptable replacement. Preserve the original
+ bytes. Obtain the original through ordinary authorized access; the importer does
+-not bypass challenges or fetch URLs.
++not bypass challenges or fetch URLs. Automatic counties whose configured URL blocks the
++production host follow the same steps with extra checks; see "A configured URL the host
++cannot fetch" below.
+ 
+ Create a review template locally, after collecting the source at least once:
+ 
+@@ -111,6 +113,61 @@ observation time, until another reviewed import. They are not confirmed by polli
+ other counties. Monitoring alerts after six hours. Automatic stale/unavailable
+ sources still alert separately; uncollected counties are not operational failures.
+ 
++## Onboarding a county to an automatic source
++
++A county moves from the reviewed-file slot to a pinned automatic URL only in a new release.
++
++1. **Capture the original.** Save the exact original bytes and SHA-256 from ordinary
++   authorized access, with the official page that links it.
++2. **Add a fixture and expected counts.** Add the original to a fixture archive with
++   provenance. Check the expected counts against the report itself.
++3. **Edit the policy.** In `ms_2026_counties.json`, set `url`, `format`, `acquisition` and
++   the ballot scopes. Keep the county's existing `member` name, even when the report is a PDF
++   in a `.report` slot.
++4. **Update the fingerprint.** Move the old `POLICY_SHA256` into
++   `compatible_policy_sha256`, then set the new value. This lets earlier bundles still seed
++   fallback.
++5. **Update the source configuration.** Add the URL to the source's `files` and remove the
++   member from `supplemental_members`.
++
++Registered sources are pinned to their image and configuration, so the change needs a new
++registration. A state may hold only one owner and one explicit replacement. Check
++`deploy.py status` before choosing a source ID or `previous_source_id`.
++
++Reviewed scans keep the existing SHA-bound `reviewed_scans` rule. OCR output is never admitted
++directly.
++
++**Manual snapshots during onboarding.** If the county already has a reviewed import, that
++snapshot remains the county's fallback until a validated automatic response replaces it. A
++failed, deferred or challenge response leaves it labelled **manual snapshot**, with its
++review, original URL and observation time. The failure is recorded as `automatic_issue`, and
++no conditional validators are sent to the new URL. Monitoring alerts as soon as a manual
++snapshot has a later failed automatic attempt; it does not wait the six-hour manual threshold.
++A successful automatic response clears the review and the manual label.
++
++**A configured URL the host cannot fetch.** Some county sites block the production host
++outright (Hancock's CivicPlus site returns a Cloudflare "you have been blocked" page). The
++pipeline never tries to get around a block: no browser impersonation, alternate addresses,
++proxies or challenge solving. Ask the site owner to allow the pipeline's user agent; the block
++page gives a Ray ID to quote. Until then, a person who can open the configured URL normally
++may save the file and import it with `import-county`, as above. For an automatic county the
++importer adds three checks:
++
++- `source_url` must be exactly the county's configured URL (the template fills it in);
++- the release's own parser for that county must read the file; and
++- the parser's counts, write-ins, precincts and report time must equal the review.
++
++The import is refused while that county's automatic collection is `current`. The county is
++then a **manual snapshot** exactly as in onboarding: each blocked poll is recorded as
++`automatic_issue`, monitoring raises one "manual snapshot retained" alert, and the first
++validated automatic response replaces the snapshot. A newer report needs another import.
++
++**Changing an existing county URL is not supported.** A changed URL does not reuse the old
++URL's snapshot: the county becomes unavailable until the new URL validates. The deployment
++catalog also refuses a replacement whose feed URLs differ from the registered source
++(`expands_coverage` requires the old `(member, url)` pairs to be kept). Re-pinning a moved
++upload needs a separate, explicit design.
++
+ ## Database and presentation
+ 
+ The existing additive `010_ms.sql` migration is unchanged. Six dbt models validate
+diff --git a/docs/mississippi-county-sources.md b/docs/mississippi-county-sources.md
+index dc33b3d..bce2b04 100644
+--- a/docs/mississippi-county-sources.md
++++ b/docs/mississippi-county-sources.md
+@@ -140,6 +140,42 @@ Source discovery is complete for this first pass, but implementation and admissi
+ - https://www.mssupervisors.org/mississippi-counties
+ - https://www.sos.ms.gov/news/official-statement-election-update
+ 
++## Follow-up passes, 2026-11-05
++
++**No new official county source was verified. Coverage remains 13 configured counties and
++69 unresolved counties.** Each unresolved county has `followup_passes` records in the JSON
++inventory. The record lists the pages checked and the outcome.
++
++- **16:22Z, restricted session.** Only a search engine was available. The SOS results page
++  listed only the March 10, 2026 primaries; certified November results are expected around
++  December 3. Statewide report-text searches found only counties already configured
++  (DeSoto, Warren).
++- **16:48Z, unrestricted network.** Each known county, circuit clerk and election commission
++  page was requested once, plus one level of election links. WordPress and CivicPlus listings
++  were checked for items published after November 2. No challenge, block or TLS error was
++  bypassed.
++
++| Outcome | Counties | Evidence and next action |
++|---|---|---|
++| Requires human review (2) | Lee, Benton | **Lee:** the official site returned 503 or reset the connection. A Daily Journal story relays Senate counts from unofficial circuit clerk results; that is not admissible, so request the original. **Benton:** the official results page renders client-side (Wix) with no 2026 report in its HTML; check it in a browser. |
++| Wrong election (4) | Bolivar, Jackson, Pearl River, Washington | Results pages hold only older elections. **Pearl River:** the county-linked ArcGIS app was retitled "General Election 2026", but its data sources are a 2023 primary map, a deleted service, and a precinct layer last edited 2023-11-08. |
++| Blocked (20) | Adams, Calhoun, Chickasaw, Claiborne, Clarke, Copiah, Harrison, Holmes, Jefferson Davis, Leflore, Marion, Newton, Pontotoc, Smith, Stone, Tippah, Tishomingo, Walthall, Webster, Wilkinson | No official page was retrievable. Causes were HTTP 403 (Harrison, every page), HTTP 503, connection resets, DNS failures, or TLS errors (for example, Tippah's certificate does not match its host). Retry from another network or ask the circuit clerk. |
++| Not found (38) | Alcorn, Amite, Attala, Carroll, Clay, Coahoma, Covington, Forrest, Franklin, George, Greene, Humphreys, Jasper, Jefferson, Jones, Kemper, Lawrence, Leake, Lincoln, Lowndes, Marshall, Montgomery, Noxubee, Oktibbeha, Panola, Perry, Prentiss, Quitman, Scott, Sharkey, Simpson, Tate, Tunica, Union, Wayne, Winston, Yalobusha, Yazoo | Reachable official pages had no November 2026 Senate report. Lincoln's "Election Central" link (`dustinbairfield.com`) now serves gambling spam: it is not an authority, and the county may want to know. Franklin's only lead returns 404. |
++| No known site (5) | Choctaw, Grenada, Issaquena, Itawamba, Tallahatchie | Only the SOS directory contact is known. |
++
++**Configured but blocked: Hancock.** Hancock's configured PDF was captured at 02:14Z on
++November 5 (SHA-256 `95c3086e…`, Colom 4,538 / Hyde-Smith 11,441 / Pinkins 753, 26 of 26
++precincts). By about 22:00Z the same URL returned HTTP 403 with a Cloudflare "Sorry, you
++have been blocked" page, both from the development workspace and from the production host.
++Production has never collected it. The block is not bypassed. Ask the county or CivicPlus to
++allow the pipeline, or import the file as a manual snapshot (see *A configured URL the host
++cannot fetch* in [collection and intake](mississippi-collection.md)).
++
++Absence is a point-in-time observation: counties often post reports days after the election,
++or only on social media. Adding a county still requires its original official report captured
++with exact bytes and a SHA-256. See *Onboarding a county* in
++[collection and intake](mississippi-collection.md).
++
+ ## Expansion checkpoint
+ 
+ Lafayette, Lamar and Sunflower were added to the configured reports. See [collection and intake](mississippi-collection.md) for exact source limitations and the reviewed-file process for the remaining 69 counties. Historical probe outcomes above retain their original timestamps; absence of a report in that pass does not prove that none exists. The machine-readable `intake` field is the current implementation status for each county.
+diff --git a/docs/source-research/ms-2026-county-sources.json b/docs/source-research/ms-2026-county-sources.json
+index 599a64f..b2699f1 100644
+--- a/docs/source-research/ms-2026-county-sources.json
++++ b/docs/source-research/ms-2026-county-sources.json
+@@ -62,7 +62,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: HTTP 503, connection reset.",
++          "pages_checked": [
++            "http://www.adamscountyms.net",
++            "https://www.adamscountyms.net"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Alcorn",
+@@ -113,7 +134,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "http://www.alcorncounty.org/",
++            "http://www.alcorncounty.org/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Amite",
+@@ -159,7 +201,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.amitecounty.ms/",
++            "https://www.amitecounty.ms/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Attala",
+@@ -205,7 +268,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.attalacounty.net/",
++            "https://www.attalacounty.net/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Benton",
+@@ -285,7 +369,31 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "requires_human_review",
++          "notes": "The official 'Election Results' page is client-rendered (Wix); the server HTML contains no 2026 report. Check it in a browser.",
++          "pages_checked": [
++            "https://www.bentoncountyms.gov/tools-and-tips",
++            "https://www.bentoncountyms.gov/",
++            "https://www.bentoncountyms.gov/",
++            "https://www.bentoncountyms.gov/cloud-desktop",
++            "https://www.bentoncountyms.gov/tools-and-tips"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Bolivar",
+@@ -324,7 +432,30 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "wrong_election",
++          "notes": "Circuit clerk results page lists 2024 reports only.",
++          "pages_checked": [
++            "https://bolivar-circuit-clerk.ms/election-results/",
++            "https://www.co.bolivar.ms.us/",
++            "https://bolivar-circuit-clerk.ms/elections/",
++            "https://bolivar-circuit-clerk.ms/election-results/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Calhoun",
+@@ -362,7 +493,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: DNS/connect failure.",
++          "pages_checked": [
++            "http://www.calhouncoms.com/",
++            "https://www.calhouncoms.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Carroll",
+@@ -403,7 +555,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.carrollcountyms.org/",
++            "https://www.carrollcountyms.org"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Chickasaw",
+@@ -441,7 +614,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: HTTP 503, connection reset.",
++          "pages_checked": [
++            "http://www.chickasawcoms.com/",
++            "https://www.chickasawcoms.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Choctaw",
+@@ -469,7 +663,25 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "no_known_site",
++          "notes": "No county or circuit clerk website is known (SOS directory contact only).",
++          "pages_checked": [],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Claiborne",
+@@ -511,7 +723,27 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: HTTP 503.",
++          "pages_checked": [
++            "https://www.ccmsgov.us/board-of-supervisors/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Clarke",
+@@ -553,7 +785,27 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: TLS verification failure.",
++          "pages_checked": [
++            "https://clarkecountyms.gov/board-of-supervisors/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Clay",
+@@ -629,7 +881,29 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report; other pages failed (HTTP 404).",
++          "pages_checked": [
++            "https://www.claycountyms.com/election-results/",
++            "https://www.claycountyms.com/",
++            "https://www.claycountyms.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Coahoma",
+@@ -693,7 +967,31 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://coahomacounty.net/",
++            "https://coahomacounty.net/",
++            "https://coahomacounty.net/circuit-clerk/",
++            "https://coahomacounty.net/circuit-court/election-information/",
++            "https://coahomacounty.net/circuit-clerk/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Copiah",
+@@ -743,7 +1041,27 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: HTTP 503.",
++          "pages_checked": [
++            "https://www.copiahcountyms.gov/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Covington",
+@@ -813,7 +1131,31 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.covingtoncountyms.gov/",
++            "https://www.covingtoncountyms.gov/government/circuit-clerk",
++            "https://www.covingtoncountyms.gov/election-commission",
++            "https://www.covingtoncountyms.gov/election-commission",
++            "https://www.covingtoncountyms.gov/government/circuit-clerk"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "DeSoto",
+@@ -992,7 +1334,29 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": true,
++          "notes": "Targeted search returned only county directory pages and older news; no 2026 report.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report; other pages failed (timeout); one page showed a bot challenge, not bypassed.",
++          "pages_checked": [
++            "https://forrestcountyms.us/",
++            "https://forrestcountyms.us/forrest-county-voter-registration/",
++            "https://forrestcountyms.us/forrest-county-voter-registration/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Franklin",
+@@ -1029,7 +1393,27 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "The only known website lead (a Weebly page) returns HTTP 404; no current official site found.",
++          "pages_checked": [
++            "https://franklincoms.weebly.com/county-government.html"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "George",
+@@ -1111,7 +1495,32 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "http://www.georgecountyms.com/",
++            "https://www.georgecountyms.com/",
++            "https://www.georgecountyms.com/circuit_clerk.html",
++            "https://www.georgecountyms.com/election_commission.html",
++            "https://www.georgecountyms.com/election_commission.html",
++            "https://www.georgecountyms.com/circuit_clerk.html"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Greene",
+@@ -1181,7 +1590,32 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report; one page showed a bot challenge, not bypassed.",
++          "pages_checked": [
++            "https://www.greenecountyms.gov/",
++            "https://www.greenecountyms.gov/",
++            "https://www.greenecountyms.gov/about-5-1",
++            "https://www.greenecountyms.gov/about-5-8",
++            "http://www.greenecountycircuitclerk.com/",
++            "https://www.greenecountyms.gov/about-5-8"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Grenada",
+@@ -1209,7 +1643,25 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "no_known_site",
++          "notes": "No county or circuit clerk website is known (SOS directory contact only).",
++          "pages_checked": [],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Hancock",
+@@ -1477,7 +1929,31 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": true,
++          "notes": "Targeted searches (county site, circuit clerk) returned only news judicial totals (WXXV, WLOX); no official countywide report.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "Every county page returned HTTP 403 to this client.",
++          "pages_checked": [
++            "https://harrisoncountyms.gov/government/election_commission/index.php",
++            "http://co.harrison.ms.us/",
++            "https://harrisoncountyms.gov/",
++            "https://harrisoncountyms.gov/government/circuit_clerk/index.php",
++            "https://harrisoncountyms.gov/government/circuit_clerk/elections_and_voting.php"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Hinds",
+@@ -1601,7 +2077,27 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: TLS verification failure.",
++          "pages_checked": [
++            "https://holmescountyms.org/board-supervisors"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Humphreys",
+@@ -1642,7 +2138,27 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report; one page showed a bot challenge, not bypassed.",
++          "pages_checked": [
++            "https://www.humphreyscountyms.com/supervisors/index.php"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Issaquena",
+@@ -1670,7 +2186,25 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "no_known_site",
++          "notes": "No county or circuit clerk website is known (SOS directory contact only).",
++          "pages_checked": [],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Itawamba",
+@@ -1698,7 +2232,25 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "no_known_site",
++          "notes": "No county or circuit clerk website is known (SOS directory contact only).",
++          "pages_checked": [],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Jackson",
+@@ -1783,7 +2335,29 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": true,
++          "notes": "Targeted search found no official report; news reports affidavit counting was still under way on Nov. 4.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "wrong_election",
++          "notes": "County results archive's newest entries are primaries; no November 2026 entry.",
++          "pages_checked": [
++            "https://co.jackson.ms.us/Archive.aspx?AMID=42",
++            "https://www.co.jackson.ms.us/",
++            "https://co.jackson.ms.us/Archive.aspx?AMID=42"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Jasper",
+@@ -1844,7 +2418,30 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://co.jasper.ms.us/",
++            "https://co.jasper.ms.us/",
++            "https://co.jasper.ms.us/circuit-clerk/",
++            "https://co.jasper.ms.us/circuit-clerk/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Jefferson",
+@@ -1917,7 +2514,32 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.jeffersoncountyms.com/",
++            "https://www.jeffersoncountyms.com/",
++            "https://www.jeffersoncountyms.com/circuit-clerk/",
++            "https://www.jeffersoncountyms.com/election-commission/",
++            "https://www.jeffersoncountyms.com/election-commission/",
++            "https://www.jeffersoncountyms.com/circuit-clerk/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Jefferson Davis",
+@@ -1954,7 +2576,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: DNS/connect failure.",
++          "pages_checked": [
++            "http://www.jeffersondaviscountyms.com/",
++            "https://www.jeffersondaviscountyms.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Jones",
+@@ -1993,7 +2636,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": true,
++          "notes": "Targeted search returned no official 2026 report.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.jonescounty.com/",
++            "https://www.jonescounty.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Kemper",
+@@ -2070,7 +2734,31 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://kempercountyms.gov/",
++            "https://kempercountyms.gov/circuit-clerk/",
++            "https://kempercountyms.gov/election-commission/",
++            "https://kempercountyms.gov/election-commission/",
++            "https://kempercountyms.gov/circuit-clerk/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Lafayette",
+@@ -2363,7 +3051,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.DropCatch.com/domain/lawrencecountyms.com",
++            "https://www.DropCatch.com/domain/lawrencecountyms.com"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Leake",
+@@ -2443,7 +3152,30 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report; one page showed a bot challenge, not bypassed.",
++          "pages_checked": [
++            "https://leakecountyms.org/election-results/",
++            "https://leakecountyms.org/",
++            "https://leakecountyms.org/election-results/",
++            "https://leakecountyms.org/election-commission/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Lee",
+@@ -2481,7 +3213,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "requires_human_review",
++          "searched_individually": true,
++          "notes": "Daily Journal story (syndicated via Yahoo News) attributes Senate counts to unofficial results provided by the Lee County Circuit Clerk's Office. That is a news relay, not an official capture; request the original report from the circuit clerk. Not admissible as an ingestion source.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "requires_human_review",
++          "notes": "Official site returned HTTP 503/connection reset. A Daily Journal story attributes Senate counts to unofficial circuit clerk results; request the original from the circuit clerk.",
++          "pages_checked": [
++            "http://leecoms.com/",
++            "https://leecoms.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Leflore",
+@@ -2523,7 +3276,27 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: TLS verification failure.",
++          "pages_checked": [
++            "https://www.leflorecounty.ms/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Lincoln",
+@@ -2597,7 +3370,33 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "County pages reachable without a 2026 report. Its 'Election Central' link (dustinbairfield.com) now serves unrelated gambling spam: not an authority; worth reporting to the county.",
++          "pages_checked": [
++            "https://www.golincolnms.com/",
++            "https://www.golincolnms.com",
++            "https://www.golincolnms.com/circuit-clerk",
++            "https://www.golincolnms.com/election-commission",
++            "https://www.golincolnms.com/circuit-clerk",
++            "https://www.golincolnms.com/election-commission",
++            "http://www.dustinbairfield.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Lowndes",
+@@ -2656,7 +3455,29 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": true,
++          "notes": "Targeted search returned only older Commercial Dispatch results articles; no 2026 report.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.lowndescountyms.com/",
++            "https://lowndescountyms.com/",
++            "https://www.lowndescountyms.com/m/directory/department?did=18"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Madison",
+@@ -2791,7 +3612,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: TLS verification failure.",
++          "pages_checked": [
++            "http://www.marioncountyms.com/",
++            "https://www.marioncountyms.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Marshall",
+@@ -2847,7 +3689,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.marshall-county.com/",
++            "https://www.marshall-county.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Monroe",
+@@ -3037,7 +3900,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.montgomerycountyms.com/",
++            "https://www.montgomerycountyms.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Neshoba",
+@@ -3209,7 +4093,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: HTTP 503.",
++          "pages_checked": [
++            "http://www.newtoncountyms.net/",
++            "https://www.newtoncountyms.net/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Noxubee",
+@@ -3250,7 +4155,27 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report. The only known site is a community-alliance page, not county government.",
++          "pages_checked": [
++            "https://noxubeealliance.com/quality-of-life-noxubee-mississipp/noxubee-county-government/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Oktibbeha",
+@@ -3287,7 +4212,29 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": true,
++          "notes": "Targeted search returned only older runoff coverage.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report; other pages failed (TLS verification failure).",
++          "pages_checked": [
++            "https://www.oktibbeha.ms.gov/",
++            "https://www.oktibbehacountyms.org/",
++            "https://www.oktibbeha.ms.gov/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Panola",
+@@ -3324,7 +4271,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report; other pages failed (connection reset).",
++          "pages_checked": [
++            "http://panolams.com/",
++            "https://panolams.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Pearl River",
+@@ -3468,7 +4436,33 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": true,
++          "notes": "Targeted search returned only older Picayune Item articles; the prior ArcGIS lead remains unverified.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "wrong_election",
++          "notes": "The county-linked ArcGIS app is retitled 'Election Results - General Election 2026', but its sources are a 2023 primary web map, a deleted election_results service and a precinct layer last edited 2023-11-08. No 2026 Senate data.",
++          "pages_checked": [
++            "https://www.pearlrivercounty.net/AlertCenter.aspx?AID=Live-election-results-will-be-available--27",
++            "https://www.pearlrivercounty.net/",
++            "https://www.pearlrivercounty.net/",
++            "https://www.pearlrivercounty.net/AlertCenter.aspx",
++            "https://www.pearlrivercounty.net/m/newsflash/home/detail/42",
++            "https://pearlrivercounty.net/200/Elections",
++            "https://www.pearlrivercounty.net/AlertCenter.aspx"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Perry",
+@@ -3509,7 +4503,27 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report; one page showed a bot challenge, not bypassed.",
++          "pages_checked": [
++            "https://members.theadp.com/list/member/perry-county-board-of-supervisors-new-augusta-744"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Pike",
+@@ -3701,7 +4715,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: HTTP 503, connection reset.",
++          "pages_checked": [
++            "http://pontotoccoms.com/",
++            "https://pontotoccoms.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Prentiss",
+@@ -3761,7 +4796,31 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.prentisscounty.org/",
++            "https://www.prentisscounty.org/",
++            "https://www.prentisscounty.org/circuit-clerk",
++            "https://www.prentisscounty.org/circuit-clerk",
++            "https://www.prentisscounty.org/election-commission"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Quitman",
+@@ -3803,7 +4862,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://quitmancountyms.org/",
++            "https://quitmancountyms.org/government/election-comission/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Rankin",
+@@ -4064,7 +5144,32 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report; one page showed a bot challenge, not bypassed.",
++          "pages_checked": [
++            "https://scottcountyms.gov/",
++            "https://scottcountyms.gov/",
++            "https://scottcountyms.gov/government/circuit-clerk/",
++            "https://scottcountyms.gov/services/register-to-vote-and-elections/",
++            "https://scottcountyms.gov/services/register-to-vote-and-elections/",
++            "https://scottcountyms.gov/government/election-commission/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Sharkey",
+@@ -4110,7 +5215,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.sharkeycounty.net/",
++            "https://www.sharkeycounty.net/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Simpson",
+@@ -4160,7 +5286,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report; other pages failed (TLS verification failure).",
++          "pages_checked": [
++            "http://simpsoncountyms.com/",
++            "https://simpsoncountyms.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Smith",
+@@ -4214,7 +5361,27 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: HTTP 503.",
++          "pages_checked": [
++            "https://www.smithcountyms.gov/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Stone",
+@@ -4256,7 +5423,27 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: HTTP 503.",
++          "pages_checked": [
++            "https://www.stonecountyms.gov/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Sunflower",
+@@ -4328,7 +5515,25 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "no_known_site",
++          "notes": "No county or circuit clerk website is known (SOS directory contact only).",
++          "pages_checked": [],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Tate",
+@@ -4408,7 +5613,30 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://tatecountyms.gov/",
++            "https://tatecountyms.gov/",
++            "https://tatecountyms.gov/circuit-clerk/",
++            "https://tatecountyms.gov/circuit-clerk/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Tippah",
+@@ -4439,7 +5667,27 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "blocked",
++          "searched_individually": true,
++          "notes": "A directory aggregator lists the official results page http://www.co.tippah.ms.us/election-results; this session's fetch policy refused it (prior pass: HTTP 502/503). Still a lead, not a verified source.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "Official results page's TLS certificate does not match www.co.tippah.ms.us; not bypassed.",
++          "pages_checked": [
++            "https://www.co.tippah.ms.us/election-results/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Tishomingo",
+@@ -4481,7 +5729,27 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: HTTP 503.",
++          "pages_checked": [
++            "https://www.co.tishomingo.ms.us/board-of-supervisors/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Tunica",
+@@ -4522,7 +5790,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report; one page showed a bot challenge, not bypassed.",
++          "pages_checked": [
++            "https://www.tunicacountymississippi.com/",
++            "https://www.tunicacountymississippi.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Union",
+@@ -4563,7 +5852,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.unioncoms.com/",
++            "https://www.unioncoms.com/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Walthall",
+@@ -4600,7 +5910,27 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: TLS verification failure.",
++          "pages_checked": [
++            "https://www.co.walthall.ms.us/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Warren",
+@@ -4784,7 +6114,32 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "wrong_election",
++          "notes": "Election commission page links a 2023 recapitulation only.",
++          "pages_checked": [
++            "https://www.washingtoncounty.ms/",
++            "https://www.washingtoncounty.ms/",
++            "https://www.washingtoncounty.ms/circuit-clerk",
++            "https://www.washingtoncounty.ms/election-commission",
++            "https://www.washingtoncounty.ms/election-commission",
++            "https://www.washingtoncounty.ms/circuit-clerk"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Wayne",
+@@ -4838,7 +6193,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.waynecounty.ms/",
++            "https://www.waynecounty.ms/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Webster",
+@@ -4884,7 +6260,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: HTTP 503, TLS verification failure.",
++          "pages_checked": [
++            "http://www.webstercountyms.org/node/11",
++            "https://www.webstercountyms.org/node/11"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Wilkinson",
+@@ -4934,7 +6331,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "blocked",
++          "notes": "No known official page was retrievable: HTTP 503.",
++          "pages_checked": [
++            "http://www.wilkinson.co.ms.gov/",
++            "https://www.wilkinson.co.ms.gov/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Winston",
+@@ -4971,7 +6389,30 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report; other pages failed (connection reset); one page showed a bot challenge, not bypassed.",
++          "pages_checked": [
++            "https://www.winstoncountyms.org/",
++            "https://www.winstonms.com/",
++            "https://www.winstoncountyms.org/election-commisioners.html",
++            "https://www.winstoncountyms.org/circuit-clerk.html"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Yalobusha",
+@@ -5013,7 +6454,28 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.yalobushaonline.org/",
++            "https://www.yalobushaonline.org/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     },
+     {
+       "county": "Yazoo",
+@@ -5087,7 +6549,32 @@
+         "status": "awaiting_official_report",
+         "report_url": null,
+         "format": "reviewed_file"
+-      }
++      },
++      "followup_passes": [
++        {
++          "checked_at_utc": "2026-11-05T16:22:07Z",
++          "outcome": "not_found",
++          "searched_individually": false,
++          "notes": "No county-specific search in this pass; covered only by the statewide phrase searches.",
++          "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing.",
++          "official_source_verified": false
++        },
++        {
++          "checked_at_utc": "2026-11-05T16:48:13Z",
++          "outcome": "not_found",
++          "notes": "Reachable official pages had no November 2026 Senate report.",
++          "pages_checked": [
++            "https://www.yazoocounty.net/",
++            "https://www.yazoocounty.net/",
++            "https://www.yazoocounty.net/circuit-clerk/",
++            "https://www.yazoocounty.net/election-commission/",
++            "https://www.yazoocounty.net/election-commission/",
++            "https://www.yazoocounty.net/circuit-clerk/"
++          ],
++          "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++          "official_source_verified": false
++        }
++      ]
+     }
+   ],
+   "capture_archive": {
+@@ -5098,5 +6585,29 @@
+     "note": "Original public county source captures for offline parser development; fixed snapshots, not current live statewide results."
+   },
+   "intake_slots": 82,
+-  "implementation_note": "13 configured official URLs; 69 reviewed-file intake slots await original official county reports. Intake availability does not establish current vote coverage. Existing probe records retain their original check times."
++  "implementation_note": "13 configured official URLs; 69 reviewed-file intake slots await original official county reports. Intake availability does not establish current vote coverage. Existing probe records retain their original check times.",
++  "followup_passes": [
++    {
++      "checked_at_utc": "2026-11-05T16:22:07Z",
++      "counties_checked": 69,
++      "new_verified_sources": 0,
++      "statewide_source": "None. The SOS election-results page listed only the March 10, 2026 primaries; certified November results are expected around December 3.",
++      "method": "Statewide phrase searches for Electionware/Hart report text with the 2026 Senate candidates returned only already-configured counties (DeSoto, Warren).",
++      "access_limitation": "Direct county-site probes were not possible from this session: the workspace egress proxy refused county/SOS hosts and the fetch tool accepted only URLs returned as search results. Absence here is not evidence that the county published nothing."
++    },
++    {
++      "checked_at_utc": "2026-11-05T16:48:13Z",
++      "counties_checked": 69,
++      "new_verified_sources": 0,
++      "outcomes": {
++        "blocked": 20,
++        "not_found": 38,
++        "requires_human_review": 2,
++        "wrong_election": 4,
++        "no_known_site": 5
++      },
++      "method": "Direct HTTPS requests from an unrestricted network: one request per known county/circuit clerk/election-commission page, one level of election links, WordPress REST listings and CivicPlus alert/archive listings for items after 2026-11-02, and the Pearl River ArcGIS item/service metadata. No challenge, block or TLS error was bypassed.",
++      "supersedes_access_limitation_of": "2026-11-05T16:22:07Z"
++    }
++  ]
+ }
+diff --git a/scripts/monitor_production.py b/scripts/monitor_production.py
+index 51064d9..37721af 100644
+--- a/scripts/monitor_production.py
++++ b/scripts/monitor_production.py
+@@ -185,7 +185,16 @@ def assess(prod, config, now):
+                     issues[f"dashboard/{code}"] = "State dashboard has no approved publication"
+                 for county, record in state.get("county_feeds", {}).items():
+                     if record.get("issue") == "manual_snapshot":
+-                        if age_seconds(record.get("last_success_at"), now) > 21600:
++                        # An imported snapshot is attempted when observed. A later attempt
++                        # means a configured automatic source failed to replace it.
++                        attempted = record.get("last_attempt_at")
++                        if attempted and age_seconds(attempted, now) < age_seconds(
++                            record.get("last_success_at"), now
++                        ):
++                            issues[f"county/{code}/{county}"] = (
++                                "Configured county source failed; manual snapshot retained"
++                            )
++                        elif age_seconds(record.get("last_success_at"), now) > 21600:
+                             issues[f"county/{code}/{county}"] = (
+                                 "Manual county snapshot is over six hours old"
+                             )
+diff --git a/src/election_pipeline/collectors/county_files.py b/src/election_pipeline/collectors/county_files.py
+index 942df86..9551b04 100644
+--- a/src/election_pipeline/collectors/county_files.py
++++ b/src/election_pipeline/collectors/county_files.py
+@@ -110,7 +110,8 @@ def fetch_bundle(
+             cached = old.get(key)
+             prior = cached[1] if cached else scheduling.get(key, {})
+             conditions = {}
+-            if cached and not force_download:
++            # Validators belong to one URL; a manual snapshot has none for the new URL.
++            if cached and not force_download and prior.get("url") == county["url"]:
+                 headers = prior.get("headers", {})
+                 if headers.get("etag"):
+                     conditions["If-None-Match"] = headers["etag"]
+@@ -190,15 +191,20 @@ def fetch_bundle(
+                         quarantine_path = store.relative(store.quarantine(path, rejected_sha))
+                 finished = utc_now()
+                 raw = cached[3] if cached else b""
++                # Fallback keeps the identity of the bytes it carries. A reviewed import
++                # of a newly automatic county keeps its URL, review and manual label.
++                manual = bool(cached and prior.get("review"))
+                 record = {
+                     "status": "stale" if cached else "unavailable",
+-                    "url": county["url"],
++                    "url": prior.get("url", county["url"]) if cached else county["url"],
+                     "raw_sha256": hashlib.sha256(raw).hexdigest() if cached else None,
+                     "last_attempt_at": finished,
+                     "last_success_at": prior.get("last_success_at") if cached else None,
+-                    "issue": issue,
++                    "issue": "ManualSnapshot" if manual else issue,
+                     "headers": prior.get("headers", {}) if cached else {},
+                 }
++                if manual:
++                    record.update(review=prior["review"], automatic_issue=issue)
+             if issue and issue.startswith("CollectionDeferred:"):
+                 record["retry_priority_at"] = (
+                     prior.get("retry_priority_at") or prior.get("last_attempt_at") or "1970"
+diff --git a/src/election_pipeline/county_import.py b/src/election_pipeline/county_import.py
+index 70ff4f7..346c439 100644
+--- a/src/election_pipeline/county_import.py
++++ b/src/election_pipeline/county_import.py
+@@ -17,15 +17,43 @@ from election_pipeline.storage import ArchiveStore, file_hash, utc_now
+ def selected(source, county_key):
+     contract = ms.validate_source(source)
+     county = next((c for c in contract["counties"] if c["key"] == county_key), None)
+-    if not county or county.get("url"):
+-        raise ValueError(
+-            "Select a reviewed-file county; automatic-source changes require a release"
+-        )
++    if not county:
++        raise ValueError("Select a county from the reviewed Mississippi contract")
+     return contract, county
+ 
+ 
++AUTOMATIC_FIELDS = (
++    "counts",
++    "write_in_votes",
++    "precincts_reporting",
++    "precincts_total",
++    "report_generated_at",
++)
++
++
++def automatic_original(raw, county, contract, parsed, review):
++    """An automatic county imports only its own configured file, read by its own parser.
++
++    This is for a configured official URL the production host cannot fetch (for example a
++    firewall block). The human supplies bytes; the release's parser, not the review alone,
++    decides the counts, and the reviewer must have transcribed the same values.
++    """
++    if review["source_url"] != county["url"]:
++        raise ValueError("An automatic county import must be the county's configured URL")
++    machine = ms.read_county(raw, county, contract)
++
++    def same(key):
++        if key == "report_generated_at" and machine[key] and parsed[key]:
++            return ms.stamp(machine[key]) == ms.stamp(parsed[key])
++        return machine[key] == parsed[key]
++
++    different = [key for key in AUTOMATIC_FIELDS if not same(key)]
++    if different:
++        raise ValueError("Review disagrees with the county parser: " + ", ".join(different))
++
++
+ def write_template(source, county_key, file, output):
+-    contract, _ = selected(source, county_key)
++    contract, county = selected(source, county_key)
+     if Path(file).stat().st_size > 8_000_000:
+         raise ValueError("Report exceeds file limit")
+     review = dict(
+@@ -34,7 +62,7 @@ def write_template(source, county_key, file, output):
+         election_date=source.election_date,
+         contest_id=contract["contest_id"],
+         raw_sha256=file_hash(Path(file)),
+-        source_url=None,
++        source_url=county.get("url"),
+         official_page_url=None,
+         observed_at=None,
+         reviewed_by=None,
+@@ -64,6 +92,8 @@ def import_county(source, settings, data_dir, county_key, file, review_file):
+     raw = Path(file).read_bytes()
+     review = json.loads(Path(review_file).read_text(encoding="utf-8-sig"))
+     parsed = reviewed_file(raw, county, contract, review)
++    if county.get("url"):
++        automatic_original(raw, county, contract, parsed, review)
+     observed = ms.stamp(review["observed_at"])
+     if observed > datetime.now(timezone.utc) + timedelta(minutes=5) or observed < ms.stamp(
+         "2026-11-03T00:00:00-06:00"
+@@ -79,6 +109,8 @@ def import_county(source, settings, data_dir, county_key, file, review_file):
+         if not accepted:
+             raise ValueError("No validated prior county bundle")
+         prior = accepted.get(county_key)
++        if county.get("url") and prior and prior[1]["status"] == "current":
++            raise ValueError("Automatic collection is current; a manual import is not needed")
+         if prior:
+             if prior[1]["raw_sha256"] == review["raw_sha256"]:
+                 semantic = (
+diff --git a/src/election_pipeline/parsers/ms.py b/src/election_pipeline/parsers/ms.py
+index 67deec4..594ade5 100644
+--- a/src/election_pipeline/parsers/ms.py
++++ b/src/election_pipeline/parsers/ms.py
+@@ -440,13 +440,15 @@ def read_county(raw, county, contract=None):
+ 
+ 
+ def read_snapshot(raw, county, contract, record):
+-    if county.get("url"):
+-        if record.get("url") != county["url"] or record.get("review"):
++    review = record.get("review")
++    # A reviewed import stays a manual snapshot even after its county is onboarded to
++    # an automatic URL; only a validated automatic response may replace it.
++    if county.get("url") and not review:
++        if record.get("url") != county["url"]:
+             raise ValueError("Automatic county source identity changed")
+         return read_county(raw, county, contract)
+     from election_pipeline.parsers.county_reports import reviewed_file
+ 
+-    review = record.get("review")
+     parsed = reviewed_file(raw, county, contract, review)
+     if (
+         record.get("url") != review["source_url"]
+@@ -556,7 +558,9 @@ def read_bundle(archive_path, source):
+             else:
+                 if stamp(r.get("last_attempt_at")) > checked:
+                     raise ValueError("Attempt follows manifest")
+-                if county.get("url") and r.get("url") != county["url"]:
++                # A manual fallback keeps its reviewed original's URL (validated by
++                # read_snapshot); every other record must name the configured URL.
++                if status != "stale" and county.get("url") and r.get("url") != county["url"]:
+                     raise ValueError("County source identity mismatch")
+                 if (status == "current") != (r.get("issue") is None):
+                     raise ValueError("County status disagrees with its issue")
+@@ -647,7 +651,9 @@ def parse(archive_path, source, settings, output, stats, reference=None):
+             }
+         )
+         if county.get("url") and record["status"] != "current":
+-            issues[county["key"]] = record.get("issue") or record["status"]
++            issues[county["key"]] = (
++                record.get("automatic_issue") or record.get("issue") or record["status"]
++            )
+         for name, value in parsed.get("counts", {}).items():
+             aggregate[name] += value
+             rows.append(
+diff --git a/tests/test_monitor_production.py b/tests/test_monitor_production.py
+index 53850bc..76b35e0 100644
+--- a/tests/test_monitor_production.py
++++ b/tests/test_monitor_production.py
+@@ -145,6 +145,16 @@ class MonitorTests(unittest.TestCase):
+         issues = self.assess(dashboard=payload)
+         self.assertEqual(set(issues), {"county/MS/JACKSON"})
+         self.assertIn("Manual county snapshot", issues["county/MS/JACKSON"])
++        # A recent import of an onboarded county whose automatic check failed afterwards.
++        record.update(
++            last_success_at=(self.now - timedelta(hours=1)).isoformat(),
++            last_attempt_at=self.recent,
++        )
++        issues = self.assess(dashboard=payload)
++        self.assertEqual(set(issues), {"county/MS/JACKSON"})
++        self.assertIn("Configured county source failed", issues["county/MS/JACKSON"])
++        record["last_attempt_at"] = record["last_success_at"]
++        self.assertEqual(self.assess(dashboard=payload), {})
+ 
+     def test_catalog_adds_enabled_states_and_ignores_registered_pending_states(self):
+         from election_pipeline.deployment import catalog
+diff --git a/tests/test_ms_blocked_county.py b/tests/test_ms_blocked_county.py
+new file mode 100644
+index 0000000..4c69677
+--- /dev/null
++++ b/tests/test_ms_blocked_county.py
+@@ -0,0 +1,142 @@
++"""A configured county URL the host cannot fetch can be imported as a manual snapshot.
++
++Hancock is the real case: its official PDF is behind a firewall that blocks the production
++host. The pipeline never tries to get past the block; a person supplies the official file,
++the county's own parser must read it, and the reviewer's transcription must match.
++"""
++
++import hashlib
++import json
++import unittest
++from unittest.mock import patch
++
++import test_mississippi as fixtures
++
++from election_pipeline.collectors import county_files
++from election_pipeline.county_import import import_county, write_template
++from election_pipeline.parsers import ms
++from election_pipeline.pipeline import collect_source
++
++BLOCKED = {"HANCOCK": 403}
++
++
++class BlockedAutomaticCountyTests(unittest.TestCase):
++    def setUp(self):
++        self.f = fixtures.MississippiTests()
++        self.f.setUp()
++        self.addCleanup(self.f.doCleanups)
++        self.county = self.f.counties["HANCOCK"]
++        self.raw = self.f.raw["HANCOCK"]
++
++    def review(self, **changes):
++        value = dict(
++            state="MS",
++            county="HANCOCK",
++            election_date="2026-11-03",
++            contest_id="MS-SEN",
++            raw_sha256=hashlib.sha256(self.raw).hexdigest(),
++            source_url=self.county["url"],
++            official_page_url="https://www.hancockcounty.ms.gov/DocumentCenter/Index/164",
++            observed_at="2026-11-04T06:00:00+00:00",
++            reviewed_by="TEST FIXTURE: values from tests/test_mississippi.py EXPECTED",
++            countywide_report_confirmed=True,
++            report_generated_at="2026-11-03T21:31:00-06:00",
++            report_date="2026-11-03",
++            report_time_note=None,
++            counts=dict(zip(self.f.policy["candidates"], fixtures.EXPECTED["HANCOCK"])),
++            write_in_votes=28,
++            write_in_label="Write-In Totals",
++            reported_candidate_vote_total=16760,
++            precincts_reporting=26,
++            precincts_total=26,
++            absentee_scope="unspecified",
++            affidavit_scope="unspecified",
++        )
++        value.update(changes)
++        return value
++
++    def collect(self, failures):
++        with patch.object(
++            county_files, "fetch_file", side_effect=self.f.fetcher(failures=failures)
++        ):
++            return collect_source(self.f.source, self.f.settings, self.f.root, force_download=True)
++
++    def importing(self, review, raw=None):
++        original, review_path = self.f.root / "hancock.pdf", self.f.root / "hancock.json"
++        original.write_bytes(self.raw if raw is None else raw)
++        review_path.write_text(json.dumps(review), encoding="utf-8")
++        with patch.object(county_files, "fetch_file", side_effect=AssertionError("import HTTP")):
++            return import_county(
++                self.f.source, self.f.settings, self.f.root, "HANCOCK", original, review_path
++            )
++
++    def latest(self):
++        return ms.read_bundle(self.f.store.cached_archive(self.f.store.read_state()), self.f.source)
++
++    def test_blocked_county_imports_and_stays_manual_until_the_url_works(self):
++        self.collect(BLOCKED)
++        _, manifest, accepted = self.latest()
++        self.assertEqual(manifest["counties"]["HANCOCK"]["status"], "unavailable")
++        self.assertNotIn("HANCOCK", accepted)
++
++        review = self.review()
++        self.assertEqual(self.importing(review)["outcome"], "manual_imported")
++        _, manifest, accepted = self.latest()
++        record = manifest["counties"]["HANCOCK"]
++        self.assertEqual((record["status"], record["issue"]), ("stale", "ManualSnapshot"))
++        self.assertEqual(accepted["HANCOCK"][2]["counts"], review["counts"])
++
++        # Still blocked: the snapshot is kept, labelled manual, and the block is recorded.
++        self.collect(BLOCKED)
++        _, manifest, accepted = self.latest()
++        record = manifest["counties"]["HANCOCK"]
++        self.assertEqual(record["issue"], "ManualSnapshot")
++        self.assertIn("HTTP 403", record["automatic_issue"])
++        self.assertEqual(record["last_success_at"], review["observed_at"])
++        self.assertIn("HANCOCK", accepted)
++
++        # Once the URL answers, real automatic bytes replace the review.
++        self.collect({})
++        _, manifest, _ = self.latest()
++        record = manifest["counties"]["HANCOCK"]
++        self.assertEqual((record["status"], record["issue"]), ("current", None))
++        self.assertNotIn("review", record)
++
++        with self.assertRaisesRegex(ValueError, "Automatic collection is current"):
++            self.importing(self.review(observed_at="2026-11-04T07:00:00+00:00"))
++
++    def test_review_must_match_the_county_parser(self):
++        self.collect(BLOCKED)
++        names = self.f.policy["candidates"]
++        swapped = dict(zip(names, (11441, 4538, 753)))  # reconciles, but wrong candidates
++        with self.assertRaisesRegex(ValueError, "disagrees with the county parser: counts"):
++            self.importing(self.review(counts=swapped))
++        with self.assertRaisesRegex(ValueError, "precincts_reporting"):
++            self.importing(self.review(precincts_reporting=25))
++        with self.assertRaisesRegex(ValueError, "report_generated_at"):
++            self.importing(self.review(report_generated_at="2026-11-03T20:31:00-06:00"))
++
++    def test_only_the_configured_url_and_the_countys_own_report_are_accepted(self):
++        self.collect(BLOCKED)
++        with self.assertRaisesRegex(ValueError, "configured URL"):
++            self.importing(
++                self.review(source_url="https://www.hancockcounty.ms.gov/DocumentCenter/View/1/x")
++            )
++        hinds = self.f.raw["HINDS"]
++        with self.assertRaises(ValueError):
++            self.importing(self.review(raw_sha256=hashlib.sha256(hinds).hexdigest()), raw=hinds)
++        _, manifest, accepted = self.latest()
++        self.assertNotIn("HANCOCK", accepted)
++        self.assertEqual(manifest["counties"]["HANCOCK"]["status"], "unavailable")
++
++    def test_template_names_the_configured_url_and_leaves_counts_for_the_reviewer(self):
++        original, template = self.f.root / "hancock.pdf", self.f.root / "hancock-review.json"
++        original.write_bytes(self.raw)
++        write_template(self.f.source, "HANCOCK", original, template)
++        value = json.loads(template.read_text(encoding="utf-8"))
++        self.assertEqual(value["source_url"], self.county["url"])
++        self.assertTrue(all(v is None for v in value["counts"].values()))
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tests/test_ms_source_transitions.py b/tests/test_ms_source_transitions.py
+new file mode 100644
+index 0000000..a6e42f2
+--- /dev/null
++++ b/tests/test_ms_source_transitions.py
+@@ -0,0 +1,254 @@
++"""Configuration changes must not silently discard a county's accepted counts.
++
++Onboarding a reviewed-file county to an automatic URL changes the source contract.
++These tests use a patched policy (never the shipped one), so the transition is exercised
++without inventing a real county source.
++"""
++
++import copy
++import json
++import unittest
++from dataclasses import replace
++from unittest.mock import patch
++
++import test_mississippi as fixtures
++from test_county_scaling import synthetic_review
++
++from election_pipeline.collectors import county_files
++from election_pipeline.county_import import import_county
++from election_pipeline.deployment import catalog
++from election_pipeline.parsers import ms
++from election_pipeline.pipeline import collect_source
++
++NEW_JACKSON = "https://example.com/official/jackson-automatic.pdf"
++MOVED_HINDS = "https://example.com/official/hinds-moved.pdf"
++
++
++class SourceTransitionTests(unittest.TestCase):
++    def setUp(self):
++        self.f = fixtures.MississippiTests()
++        self.f.setUp()
++        self.addCleanup(self.f.doCleanups)
++
++    def contract(self, change):
++        value = copy.deepcopy(self.f.policy)
++        counties = {c["key"]: c for c in value["counties"]}
++        change(counties)
++        return value
++
++    def source_for(self, contract):
++        files = tuple(sorted((c["member"], c["url"]) for c in contract["counties"] if c.get("url")))
++        manual = tuple(c["member"] for c in contract["counties"] if not c.get("url"))
++        return replace(self.f.source, files=files, supplemental_members=manual)
++
++    def collect_with(self, contract, previous, failures):
++        source = self.source_for(contract)
++        destination = self.f.store.temporary_download()
++        with (
++            patch.object(ms, "policy", return_value=contract),
++            patch.object(county_files, "fetch_file", side_effect=self.fetcher(contract, failures)),
++        ):
++            county_files.fetch_bundle(
++                source, self.f.settings, destination, previous=previous, store=self.f.store
++            )
++            return source, destination, ms.read_bundle(destination, source)
++
++    def fetcher(self, contract, failures):
++        # The test fetcher only knows the shipped URLs; transition URLs must fail closed.
++        shipped = self.f.fetcher(failures=failures)
++        known = {c["url"] for c in self.f.policy["counties"] if c.get("url")}
++
++        def fetch(source, limits, path, conditions, *, url):
++            if url not in known:
++                self.assertEqual(conditions, {}, "Validators from another URL were reused")
++                return county_files.FetchResponse(404, {}, url)
++            return shipped(source, limits, path, conditions, url=url)
++
++        return fetch
++
++    def imported_jackson(self):
++        f = self.f
++        with patch.object(county_files, "fetch_file", side_effect=f.fetcher()):
++            collect_source(f.source, f.settings, f.root, force_download=True)
++        raw, review = synthetic_review(f, "JACKSON")
++        original, review_path = f.root / "jackson.pdf", f.root / "jackson.json"
++        original.write_bytes(raw)
++        review_path.write_text(json.dumps(review), encoding="utf-8")
++        with patch.object(county_files, "fetch_file", side_effect=AssertionError("import HTTP")):
++            import_county(f.source, f.settings, f.root, "JACKSON", original, review_path)
++        return f.store.cached_archive(f.store.read_state()), review
++
++    def test_manual_snapshot_survives_onboarding_until_the_automatic_source_succeeds(self):
++        previous, review = self.imported_jackson()
++        contract = self.contract(
++            lambda c: c["JACKSON"].update(
++                url=NEW_JACKSON, acquisition="automatic", format="pdf_text_electionware"
++            )
++        )
++        _, _, (_, manifest, accepted) = self.collect_with(contract, previous, failures={})
++        record = manifest["counties"]["JACKSON"]
++        self.assertIn("JACKSON", set(accepted), "Accepted manual counts were discarded")
++        self.assertEqual(accepted["JACKSON"][2]["counts"], review["counts"])
++        # Provenance stays with the reviewed original, not the new automatic URL.
++        self.assertEqual(record["status"], "stale")
++        self.assertEqual(record["issue"], "ManualSnapshot")
++        self.assertEqual(record["url"], review["source_url"])
++        self.assertEqual(record["last_success_at"], review["observed_at"])
++        self.assertEqual(record["review"], review)
++        self.assertIn("HTTP 404", record["automatic_issue"])
++        self.assertEqual(manifest["counties"]["HINDS"]["status"], "current")
++
++    def test_manual_fallback_is_reported_as_a_source_issue_not_a_healthy_feed(self):
++        previous, _ = self.imported_jackson()
++        contract = self.contract(
++            lambda c: c["JACKSON"].update(
++                url=NEW_JACKSON, acquisition="automatic", format="pdf_text_electionware"
++            )
++        )
++        source, path, _ = self.collect_with(contract, previous, failures={})
++        output = self.f.root / "parsed"
++        output.mkdir()
++        stats = {}
++        with patch.object(ms, "policy", return_value=contract):
++            ms.parse(path, source, self.f.settings, output, stats)
++        self.assertIn("HTTP 404", stats["county_feed_issues"]["JACKSON"])
++        self.assertIn("Some configured county sources are stale or unavailable.", stats["warnings"])
++        with (output / "county_feeds.csv").open(encoding="utf-8", newline="") as handle:
++            feeds = {r["county"]: r for r in fixtures.csv.DictReader(handle)}
++        self.assertEqual(feeds["JACKSON"]["issue"], "manual_snapshot")
++        self.assertEqual(feeds["JACKSON"]["collection_status"], "stale")
++
++    def test_changed_automatic_url_does_not_reuse_the_old_url_snapshot(self):
++        # Re-pinning is out of scope: the catalog also refuses changed feed URLs.
++        f = self.f
++        first, _ = f.collect()
++        moved = self.contract(lambda c: c["HINDS"].update(url=MOVED_HINDS))
++        _, _, (_, manifest, accepted) = self.collect_with(moved, first, failures={})
++        self.assertNotIn("HINDS", set(accepted))
++        self.assertEqual(manifest["counties"]["HINDS"]["status"], "unavailable")
++
++    def test_manual_record_cannot_masquerade_as_a_current_automatic_check(self):
++        previous, _ = self.imported_jackson()
++        contract = self.contract(
++            lambda c: c["JACKSON"].update(
++                url=NEW_JACKSON, acquisition="automatic", format="pdf_text_electionware"
++            )
++        )
++        source, path, _ = self.collect_with(contract, previous, failures={})
++
++        def promote(members, manifest):
++            manifest["source_id"] = source.source_id
++            record = manifest["counties"]["JACKSON"]
++            record.update(
++                status="current",
++                issue=None,
++                url=NEW_JACKSON,
++                last_success_at=record["last_attempt_at"],
++            )
++
++        forged = self.f.rewrite_bundle(path, promote)
++        with (
++            patch.object(ms, "policy", return_value=contract),
++            self.assertRaisesRegex(ValueError, "manual snapshot"),
++        ):
++            ms.read_bundle(forged, source)
++
++    def test_successful_automatic_check_replaces_a_manual_snapshot_with_real_bytes(self):
++        """Hinds stands in for an onboarded county: reviewed import, then its shipped URL."""
++        f = self.f
++        hinds = f.counties["HINDS"]
++        manual_policy = self.contract(
++            lambda c: (
++                c["HINDS"].pop("url"),
++                c["HINDS"].update(acquisition="reviewed_file", format="reviewed_file"),
++            )
++        )
++        manual_source = self.source_for(manual_policy)
++        store = type(f.store)(f.root, manual_source)
++        with (
++            patch.object(ms, "policy", return_value=manual_policy),
++            patch.object(county_files, "fetch_file", side_effect=self.fetcher(manual_policy, {})),
++        ):
++            collect_source(manual_source, f.settings, f.root, force_download=True)
++        original = f.root / "hinds.pdf"
++        original.write_bytes(f.raw["HINDS"])
++        review = dict(
++            state="MS",
++            county="HINDS",
++            election_date="2026-11-03",
++            contest_id="MS-SEN",
++            raw_sha256=fixtures.hashlib.sha256(f.raw["HINDS"]).hexdigest(),
++            source_url=hinds["url"],
++            official_page_url="https://www.co.hinds.ms.us/pgs/results/ElectionNightResults.asp",
++            observed_at="2026-11-04T06:00:00+00:00",
++            reviewed_by="TEST FIXTURE: values from tests/test_mississippi.py EXPECTED",
++            countywide_report_confirmed=True,
++            report_generated_at="2026-11-03T23:00:00-06:00",
++            report_date="2026-11-03",
++            report_time_note=None,
++            counts=dict(zip(f.policy["candidates"], fixtures.EXPECTED["HINDS"])),
++            write_in_votes=None,
++            write_in_label=None,
++            reported_candidate_vote_total=None,
++            precincts_reporting=108,
++            precincts_total=108,
++            absentee_scope="unspecified",
++            affidavit_scope="unspecified",
++        )
++        review_path = f.root / "hinds.json"
++        review_path.write_text(json.dumps(review), encoding="utf-8")
++        with patch.object(ms, "policy", return_value=manual_policy):
++            import_county(manual_source, f.settings, f.root, "HINDS", original, review_path)
++        previous = store.cached_archive(store.read_state())
++
++        # Onboarded: the shipped policy gives Hinds its automatic URL. First a failure...
++        failed = f.store.temporary_download()
++        outage = f.fetcher(failures={"HINDS": 503})
++        with patch.object(county_files, "fetch_file", side_effect=outage):
++            county_files.fetch_bundle(f.source, f.settings, failed, previous=previous)
++        _, manifest, accepted = ms.read_bundle(failed, f.source)
++        self.assertEqual(manifest["counties"]["HINDS"]["issue"], "ManualSnapshot")
++        self.assertEqual(accepted["HINDS"][2]["counts"], review["counts"])
++        # ...then a validated automatic response replaces the manual label and review.
++        fixed = f.store.temporary_download()
++        with patch.object(county_files, "fetch_file", side_effect=f.fetcher()):
++            county_files.fetch_bundle(f.source, f.settings, fixed, previous=failed)
++        _, manifest, accepted = ms.read_bundle(fixed, f.source)
++        record = manifest["counties"]["HINDS"]
++        self.assertEqual(
++            (record["status"], record["url"], record["issue"]), ("current", hinds["url"], None)
++        )
++        self.assertNotIn("review", record)
++        self.assertEqual(tuple(accepted["HINDS"][2]["counts"].values()), fixtures.EXPECTED["HINDS"])
++
++    def test_catalog_admits_onboarding_but_refuses_a_changed_feed_url(self):
++        f = self.f
++
++        def entry(contract):
++            value = catalog.entry(
++                self.source_for(contract),
++                f.settings,
++                image_id="sha256:" + "a" * 64,
++                revision="b" * 40,
++                release_path=f.root,
++                worker="expansion",
++                status="unofficial",
++            )
++            value["races"] = ["MS-SEN"]
++            return value
++
++        current = entry(f.policy)
++        onboarded = entry(
++            self.contract(
++                lambda c: c["JACKSON"].update(
++                    url=NEW_JACKSON, acquisition="automatic", format="pdf_text_electionware"
++                )
++            )
++        )
++        moved = entry(self.contract(lambda c: c["HINDS"].update(url=MOVED_HINDS)))
++        self.assertTrue(catalog.expands_coverage(current, onboarded))
++        self.assertFalse(catalog.expands_coverage(current, moved))
++
++
++if __name__ == "__main__":
++    unittest.main()
