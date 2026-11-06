@@ -291,7 +291,8 @@ def repin(path, release, image, name, prod, config):
     stored = json.loads(json.dumps({k: candidate[k] for k in ("source", "settings")}))
     if (
         stored["source"] != before["source"]
-        or stored["settings"] != before["settings"]
+        or catalog.contract_settings(stored["settings"])
+        != catalog.contract_settings(before["settings"])
         or list(meta["races"]) != before["races"]
     ):
         raise ValueError("Re-pinning cannot change the source contract, settings or races")
@@ -318,6 +319,7 @@ def repin(path, release, image, name, prod, config):
             {**{k: current.get(k) for k in PIN_KEYS}, "replaced_at": utc_now()}
         )
         current.update({k: candidate[k] for k in PIN_KEYS}, repin_candidate_id=candidate_id)
+        current["settings"] = stored["settings"]  # may differ only in identification
 
     catalog.update(path, change)
     return {

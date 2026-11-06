@@ -602,7 +602,7 @@ class RepinTests(unittest.TestCase):
         for key, value in changes.items():
             if key in ("url", "source_id"):
                 meta["source"][key] = value
-            elif key == "timeout_seconds":
+            elif key in ("timeout_seconds", "user_agent"):
                 meta["settings"][key] = value
             else:
                 meta[key] = value
@@ -693,6 +693,18 @@ class RepinTests(unittest.TestCase):
                 self.repin(meta=self.metadata(**changes))
         self.assertEqual(self.prepared, [])
         self.assertEqual(self.entry(), self.before)
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_a_new_user_agent_alone_may_be_repinned_and_is_recorded(self):
+        agent = "US-Election-Results-Pipeline/0.1 (+https://example.com/project)"
+        result = self.repin(meta=self.metadata(user_agent=agent))
+        self.assertEqual(result["outcome"], "repinned")
+        after = self.entry()
+        self.assertEqual(after["settings"]["user_agent"], agent)
+        self.assertEqual(
+            {k: v for k, v in after["settings"].items() if k != "user_agent"},
+            {k: v for k, v in self.before["settings"].items() if k != "user_agent"},
+        )
 
     def test_failed_validation_keeps_the_old_pin(self):
         failure = {"source_id": "ga_2026_general", "outcome": "failed", "error": "reset"}
