@@ -6,6 +6,7 @@ import tempfile
 import unittest
 import uuid
 from dataclasses import replace
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -80,6 +81,9 @@ class PublicationArtifactTests(unittest.TestCase):
         conn.execute.return_value.fetchone.return_value = {
             "ok": True,
             "publication_id": identifier,
+            "release_id": 12,
+            "transform_sha256": "code-hash",
+            "status": "test",
         }
 
         with (
@@ -87,7 +91,7 @@ class PublicationArtifactTests(unittest.TestCase):
             patch.object(
                 publication,
                 "release_metadata",
-                return_value={"source_id": "nc", "state": "NC"},
+                return_value={"source_id": "nc", "state": "NC", "release_id": 12},
             ),
             patch.object(
                 publication,
@@ -108,9 +112,86 @@ class PublicationArtifactTests(unittest.TestCase):
         self.assertEqual(result["publication_id"], str(identifier))
         self.assertEqual(
             conn.execute.call_args.args[1],
-            ("nc", 12, "code-hash", "test"),
+            ("nc",),
         )
         build.assert_not_called()
+
+    def test_florida_orders_distinct_snapshots_by_official_file_time(self):
+        earlier = datetime(2026, 11, 4, 15, tzinfo=timezone.utc)
+        later = datetime(2026, 11, 5, 15, 48, tzinfo=timezone.utc)
+        conn = MagicMock()
+        conn.execute.return_value.fetchall.return_value = [
+            {"modified": "Wed, 04 Nov 2026 15:00:00 GMT", "first_seen": later}
+        ]
+        current = {"snapshot_id": 959576, "release_id": 5419, "source_modified_at": None}
+        incoming = {
+            "source_id": publication.FLORIDA_SOURCE,
+            "snapshot_id": 931656,
+            "release_id": 5317,
+            "source_modified_at": later,
+            "source_url": "https://example.org/results.txt",
+        }
+        publication.require_forward_release(conn, current, incoming)
+        self.assertEqual(
+            conn.execute.call_args.args[1],
+            (publication.FLORIDA_SOURCE, 959576, incoming["source_url"]),
+        )
+
+        with self.assertRaisesRegex(ValueError, "earlier Florida source file"):
+            publication.require_forward_release(
+                conn,
+                {"snapshot_id": 931656, "release_id": 5317, "source_modified_at": later},
+                {
+                    **incoming,
+                    "snapshot_id": 959576,
+                    "release_id": 5500,
+                    "source_modified_at": earlier,
+                },
+            )
+
+        with self.assertRaisesRegex(ValueError, "earlier release"):
+            publication.require_forward_release(
+                conn, current, {**incoming, "source_modified_at": None, "release_id": 5500}
+            )
+
+    def test_florida_rejects_older_file_before_building_candidate(self):
+        earlier = datetime(2026, 11, 4, 15, tzinfo=timezone.utc)
+        later = datetime(2026, 11, 5, 15, 48, tzinfo=timezone.utc)
+        conn = MagicMock()
+        conn.__enter__.return_value = conn
+        current = {"snapshot_id": 1, "release_id": 12, "source_modified_at": later}
+        incoming = {
+            "source_id": publication.FLORIDA_SOURCE,
+            "state": "FL",
+            "snapshot_id": 2,
+            "release_id": 13,
+            "source_modified_at": earlier,
+        }
+        with (
+            patch.object(publication, "connect", return_value=conn),
+            patch.object(publication, "release_metadata", return_value=incoming),
+            patch.object(publication, "current_publication", return_value=current),
+            patch.object(publication, "project_hash", return_value="code-hash"),
+            patch.object(publication, "build_candidate") as build,
+        ):
+            with self.assertRaisesRegex(ValueError, "earlier Florida source file"):
+                publish(Path(__file__).resolve().parents[1], {}, 13, "test", skip_current=True)
+        build.assert_not_called()
+
+    def test_florida_file_time_requires_a_consistent_past_header(self):
+        conn = MagicMock()
+        cursor = conn.execute.return_value
+        observed = datetime(2026, 11, 6, tzinfo=timezone.utc)
+        valid = {"modified": "Thu, 05 Nov 2026 15:48:03 GMT", "first_seen": observed}
+        for rows in (
+            [],
+            [{**valid, "modified": "invalid"}],
+            [{**valid, "modified": "Fri, 06 Nov 2026 01:00:00 GMT"}],
+            [valid, {**valid, "modified": "Wed, 04 Nov 2026 15:00:03 GMT"}],
+        ):
+            with self.subTest(rows=rows):
+                cursor.fetchall.return_value = rows
+                self.assertIsNone(publication.florida_file_modified_at(conn, 42, "source"))
 
 
 @unittest.skipUnless(

@@ -8,6 +8,7 @@ import os
 import subprocess
 import sys
 import uuid
+from email.utils import parsedate_to_datetime
 from importlib.metadata import version
 from pathlib import Path
 
@@ -18,6 +19,7 @@ from election_pipeline.database import connect
 from election_pipeline.states import publication_lock, state_adapter
 
 GROUPS = "request_type party_registration sex race ethnicity ballot_count"
+FLORIDA_SOURCE = "fl_2026_general"
 
 
 def project_hash(root):
@@ -50,6 +52,33 @@ def project_hash(root):
     return digest.hexdigest()
 
 
+def florida_file_modified_at(conn, snapshot_id, source_url):
+    """Use the results file's recorded header, including for previously loaded bundles."""
+    headers = conn.execute(
+        """
+        SELECT metadata #>> '{components,0,headers,last-modified}' AS modified,
+               min(finished_at) AS first_seen
+        FROM ops.fetch_attempts
+        WHERE source_id = %s AND snapshot_id = %s AND http_status = 200
+          AND outcome IN ('downloaded', 'unchanged') AND finished_at IS NOT NULL
+          AND metadata #>> '{components,0,name}' = 'results.txt'
+          AND metadata #>> '{components,0,url}' = %s
+          AND metadata #>> '{components,0,headers,last-modified}' IS NOT NULL
+        GROUP BY 1
+        """,
+        (FLORIDA_SOURCE, snapshot_id, source_url),
+    ).fetchall()
+    if len(headers) != 1:
+        return None
+    try:
+        modified = parsedate_to_datetime(headers[0]["modified"])
+    except (ValueError, TypeError, OverflowError):
+        return None
+    if modified.tzinfo is None or modified > headers[0]["first_seen"]:
+        return None
+    return modified
+
+
 def release_metadata(conn, release_id):
     row = conn.execute(
         """
@@ -73,6 +102,10 @@ def release_metadata(conn, release_id):
         raise ValueError("Choose a completed ingestion release")
 
     state_adapter(row["state"]).contract(row["dataset"])
+    if row["source_id"] == FLORIDA_SOURCE:
+        row["source_modified_at"] = florida_file_modified_at(
+            conn, row["snapshot_id"], row["source_url"]
+        )
 
     return row
 
@@ -223,19 +256,44 @@ def activate(conn, publication_id, source_id):
     )
 
 
-def promote(conn, metadata, attempt_id, schema, code_hash, status):
-    current = conn.execute(
+def current_publication(conn, source_id):
+    return conn.execute(
         """
-        SELECT p.publication_id, p.release_id
+        SELECT p.publication_id, p.release_id, p.snapshot_id, p.source_modified_at,
+               p.transform_sha256, p.status
         FROM serving.current_publications c
         JOIN serving.publications p USING (publication_id)
         WHERE c.source_id = %s
         """,
-        (metadata["source_id"],),
+        (source_id,),
     ).fetchone()
 
-    if current and current["release_id"] > metadata["release_id"]:
+
+def require_forward_release(conn, current, metadata):
+    if current is None:
+        return
+    if (
+        metadata["source_id"] == FLORIDA_SOURCE
+        and current["snapshot_id"] != metadata["snapshot_id"]
+    ):
+        incoming_time = metadata["source_modified_at"]
+        if incoming_time:
+            current_time = current["source_modified_at"] or florida_file_modified_at(
+                conn, current["snapshot_id"], metadata["source_url"]
+            )
+            if current_time and incoming_time != current_time:
+                if incoming_time < current_time:
+                    raise ValueError("An earlier Florida source file requires an explicit restore")
+                return
+        if metadata["snapshot_id"] < current["snapshot_id"]:
+            raise ValueError("An earlier release requires an explicit restore")
+    if current["release_id"] > metadata["release_id"]:
         raise ValueError("An earlier release requires an explicit restore")
+
+
+def promote(conn, metadata, attempt_id, schema, code_hash, status):
+    current = current_publication(conn, metadata["source_id"])
+    require_forward_release(conn, current, metadata)
 
     relation = sql.Identifier(schema + "_staging", "stg_" + metadata["state"].lower() + "_releases")
     candidate = conn.execute(
@@ -438,14 +496,14 @@ def prepare(root, db, release_id, status, *, skip_current=False):
         publication_lock(conn, metadata["state"])
         code_hash = project_hash(root)
         if skip_current:
-            current = conn.execute(
-                "SELECT p.publication_id FROM serving.current_publications c "
-                "JOIN serving.publications p USING (publication_id) "
-                "WHERE c.source_id=%s AND p.release_id=%s "
-                "AND p.transform_sha256=%s AND p.status=%s",
-                (metadata["source_id"], release_id, code_hash, status),
-            ).fetchone()
-            if current:
+            current = current_publication(conn, metadata["source_id"])
+            require_forward_release(conn, current, metadata)
+            if (
+                current
+                and current["release_id"] == release_id
+                and current["transform_sha256"] == code_hash
+                and current["status"] == status
+            ):
                 return {
                     "outcome": "already_current",
                     "publication_id": str(current["publication_id"]),
