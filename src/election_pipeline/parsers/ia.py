@@ -89,6 +89,8 @@ def blocks(report):
         title = match[1]
         if title in found or match[2] != "1":
             raise ValueError(f"{title}: duplicate or multi-seat Iowa contest")
+        if index + 2 >= len(lines):
+            raise ValueError(f"{title}: Iowa contest heading has no table")
         names = cells(lines[index + 1])
         header = cells(lines[index + 2])
         if header != ["County", "Registered Voters"] + ["Election Day", "Absentee", "Total"] * len(

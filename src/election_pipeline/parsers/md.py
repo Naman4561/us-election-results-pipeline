@@ -6,7 +6,9 @@ candidate and a Totals row. Maryland elects no U.S. senator in 2026.
 
 Checks: the page is the 2026 general election page for that contest ("Vote for 1"); the
 candidate header is complete; county rows add up exactly to the Totals row, which gives
-the statewide (or districtwide) counts. Tables may be split into several side-by-side
+the statewide (or districtwide) counts. Each page carries its own "Last refreshed" time;
+if a collection straddles a refresh, every contest is kept as of its own page and all
+times are recorded. Tables may be split into several side-by-side
 parts "based on the number of candidates"; each part must list the same jurisdictions.
 
 Maryland's summary pages also split votes into Early Voting, Election Day, Mail-In and
@@ -66,6 +68,13 @@ def candidate(cell):
     return parts[0], parts[1]
 
 
+def total_cell(cell, race):
+    match = re.fullmatch(r"([0-9,]+) \([0-9.]+%\)", cell)
+    if not match:
+        raise ValueError(f"{race}: unexpected Maryland Totals cell {cell!r}")
+    return formatted_count(match[1])
+
+
 def page(raw, race):
     body = Tree(raw.decode("utf-8", errors="strict")).root
     words = " ".join(body.text.split())
@@ -93,10 +102,7 @@ def page(raw, race):
             if len(cells) != len(part) + 1:
                 raise ValueError(f"{race}: malformed Maryland table row")
             if cells[0] == "Totals":
-                totals += [
-                    formatted_count(re.fullmatch(r"([0-9,]+) \([0-9.]+%\)", c)[1])
-                    for c in cells[1:]
-                ]
+                totals += [total_cell(c, race) for c in cells[1:]]
                 continue
             if cells[0] in rows:
                 raise ValueError(f"{race}: duplicate Maryland jurisdiction")
@@ -124,11 +130,11 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     if source.format != "bundle" or source.election_date != "2026-11-03" or source.state != "MD":
         raise ValueError("Unsupported Maryland source/election")
     wanted = state_adapter("MD").selected_races(source)
-    rows, times = [], set()
+    rows, times = [], {}
     with zipfile.ZipFile(archive_path) as archive:
         pages = {race: page(archive.read(MEMBERS[race]), race) for race in wanted}
     for race, (names, counties, totals, done, total, refreshed) in pages.items():
-        times.add(refreshed)
+        times[race] = refreshed
         places = {county(name): values for name, values in counties.items()}
         if len(places) != len(counties):
             raise ValueError(f"{race}: Maryland jurisdictions collide")
@@ -139,11 +145,12 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             for place, values in places.items():
                 rows.append(row(race, race, name, name, party, values[index], county=place))
         verify_scope("MD", race, [n for n, _ in names], sorted(places))
-    if len(times) != 1:
-        raise ValueError("Maryland pages were refreshed at different times")
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
+    # Each page is checked on its own; a collection that straddles a refresh keeps each
+    # contest as of its own page, and records every contest's time.
     stats.update(
-        source_update_text=times.pop(),
+        source_update_text="; ".join(sorted(set(times.values()))),
+        source_update_times=times,
         contest_total_reconciliation="passed",
         vote_methods="reported_not_stored",
     )
