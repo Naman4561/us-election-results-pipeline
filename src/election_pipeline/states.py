@@ -299,6 +299,7 @@ STATES = {
         governor=True,
         county_results=False,
         source_page="https://electionresults.sos.ca.gov/",
+        collection_backend="gated_files",
     ),
     # Maryland elects no senator in 2026.
     "MD": State(
@@ -310,6 +311,7 @@ STATES = {
         senate=False,
         governor=True,
         source_page="https://elections.maryland.gov/elections/2026/general_results/",
+        collection_backend="gated_files",
     ),
     # Hawaii elects no senator in 2026; its county detail is only published as PDFs.
     "HI": State(

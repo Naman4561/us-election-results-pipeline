@@ -379,9 +379,7 @@ class NineStateTests(unittest.TestCase):
                 calls = []
                 source, fetch, data = self.ev_server(code, calls)
                 destination = self.root / f"{code}.zip"
-                with patch(
-                    "election_pipeline.collectors.enhanced_voting.fetch_file", side_effect=fetch
-                ):
+                with patch("election_pipeline.collectors.common.fetch_file", side_effect=fetch):
                     bundles.fetch_bundle(source, self.settings, destination)
                     with zipfile.ZipFile(destination) as archive:
                         self.assertEqual({n: archive.read(n) for n in archive.namelist()}, data)
@@ -393,7 +391,7 @@ class NineStateTests(unittest.TestCase):
                     self.assertEqual(calls, [source.url])  # unchanged: previous bundle reused
         calls = []
         source, fetch, _ = self.ev_server("ID", calls, changes=True)
-        with patch("election_pipeline.collectors.enhanced_voting.fetch_file", side_effect=fetch):
+        with patch("election_pipeline.collectors.common.fetch_file", side_effect=fetch):
             with self.assertRaisesRegex(FetchFailure, "changed during collection"):
                 bundles.fetch_bundle(source, self.settings, self.root / "x.zip")
         for bad in ("../data", "01000000-70f4-ca87-27ba-08df23e9954c?x=1", "abc"):
@@ -510,7 +508,7 @@ class NineStateTests(unittest.TestCase):
             )
 
         destination = self.root / "co.zip"
-        with patch("election_pipeline.collectors.clarity.fetch_file", side_effect=fetch):
+        with patch("election_pipeline.collectors.common.fetch_file", side_effect=fetch):
             bundles.fetch_bundle(source, self.settings, destination)
             with zipfile.ZipFile(destination) as archive:
                 self.assertEqual({n: archive.read(n) for n in archive.namelist()}, data)
@@ -527,6 +525,38 @@ class NineStateTests(unittest.TestCase):
                 clarity_collector.version_base(source.url, bad)
         with self.assertRaises(ValueError):
             clarity_collector.version_base("https://evil.example/CO/1/current_ver.txt", b"5")
+
+    def test_gated_collector_skips_other_files_while_the_primary_is_unchanged(self):
+        source = self.sources["ca_2026_general"]
+        data = members("CA")
+        urls = {url: name for name, url in (*source.files, (source.primary_filename, source.url))}
+        calls = []
+
+        def fetch(src, settings, path, headers, *, url=None, form=None, cookies=None):
+            calls.append(url)
+            body = data[urls[url]]
+            path.write_bytes(body)
+            return FetchResponse(
+                200,
+                {"content-type": "application/json"},
+                url,
+                len(body),
+                hashlib.sha256(body).hexdigest(),
+            )
+
+        destination = self.root / "ca.zip"
+        with patch("election_pipeline.collectors.common.fetch_file", side_effect=fetch):
+            bundles.fetch_bundle(source, self.settings, destination)
+            self.assertEqual(len(calls), 53)
+            with zipfile.ZipFile(destination) as archive:
+                self.assertEqual({n: archive.read(n) for n in archive.namelist()}, data)
+            calls.clear()
+            bundles.fetch_bundle(source, self.settings, self.root / "b.zip", previous=destination)
+            self.assertEqual(calls, [source.url])
+            data["governor.json"] = data["governor.json"].replace(b"p.m.", b"a.m.", 1)
+            calls.clear()
+            bundles.fetch_bundle(source, self.settings, self.root / "c.zip", previous=destination)
+            self.assertEqual(len(calls), 53)
 
     # Oregon --------------------------------------------------------------------------------
 
@@ -601,6 +631,34 @@ class NineStateTests(unittest.TestCase):
             lambda d: d.update({"house-02.html": d["house-03.html"]}),
             "belongs to another district",
         )
+        with self.assertRaisesRegex(ValueError, "unexpected Maryland Totals cell 'NR'"):
+            md.total_cell("NR", "MD-01")
+
+        def straddled(data):  # one page from a later refresh than the others
+            data["house-01.html"] = re.sub(
+                rb"Last refreshed: [^<]+",
+                b"Last refreshed: 11/05/2026 11:56:33 PM",
+                data["house-01.html"],
+            )
+
+        report = self.parse("MD", straddled)
+        self.assertEqual(report["outcome"], "parsed", report)
+        self.assertEqual(report["source_update_times"]["MD-01"], "11/05/2026 11:56:33 PM")
+        self.assertIn("; ", report["source_update_text"])
+
+    def test_unexpected_parser_errors_are_reported_as_validation_failures(self):
+        def truncated(data):
+            raw = clarity.detail_member(data["detail.zip"], self.settings, "txt")
+            cut = raw.index(b"United States Senator")
+            raw = raw[: raw.index(b"\n", cut) + 1]  # the heading is the last line
+            buffer = io.BytesIO()
+            with zipfile.ZipFile(buffer, "w") as archive:
+                archive.writestr("detail.txt", raw)
+            data["detail.zip"] = buffer.getvalue()
+
+        self.failed("IA", truncated, "heading has no table")
+        with patch("election_pipeline.parsers.hi.candidate", side_effect=IndexError("list index")):
+            self.failed("HI", None, "Unexpected IndexError while parsing")
 
     def test_hi_methods_and_tickets(self):
         report = self.parse("HI")

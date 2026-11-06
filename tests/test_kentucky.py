@@ -195,7 +195,7 @@ class KentuckyTests(unittest.TestCase):
             path.write_bytes(url.encode())
             return FetchResponse(200, {}, url, len(url), hashlib.sha256(url.encode()).hexdigest())
 
-        with patch.object(bundles, "fetch_file", side_effect=fetch):
+        with patch("election_pipeline.collectors.common.fetch_file", side_effect=fetch):
             one = bundles.fetch_bundle(self.source, self.settings, self.root / "one.zip")
             two = bundles.fetch_bundle(self.source, self.settings, self.root / "two.zip")
         self.assertEqual(one.sha256, two.sha256)
