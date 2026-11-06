@@ -45,7 +45,7 @@ class AlaskaTLSTests(unittest.TestCase):
             source = Source("ak_probe", "AK", "2026-11-03", URL)
             with (
                 patch("election_pipeline.tls.ISSUERS_SHA256", "0" * 64),
-                patch("election_pipeline.collect.urlopen") as request,
+                patch("election_pipeline.collect.open_url") as request,
                 self.assertRaisesRegex(FetchFailure, "integrity") as failure,
             ):
                 fetch_file(source, CollectorSettings(), Path(temporary) / "download", {})
@@ -57,7 +57,7 @@ class AlaskaTLSTests(unittest.TestCase):
             source = Source("ak_probe", "AK", "2026-11-03", URL)
             for url, custom in ((URL, True), ("https://example.com/index.html", False)):
                 with patch(
-                    "election_pipeline.collect.urlopen",
+                    "election_pipeline.collect.open_url",
                     side_effect=HTTPError(url, 404, "Missing", {}, None),
                 ) as request:
                     result = fetch_file(

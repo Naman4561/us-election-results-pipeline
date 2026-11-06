@@ -241,6 +241,21 @@ class CollectionTests(unittest.TestCase):
         self.assertEqual(len({record["fetch_id"] for record in records}), 2)
         self.assertEqual(len({record["run_id"] for record in records}), 1)
 
+    def test_redirects_are_checked_before_they_are_followed(self) -> None:
+        # A plain-HTTP target off loopback is refused before any request is made to it.
+        Handler.responses = [{"status": 302, "headers": {"Location": "http://example.com/x.zip"}}]
+        result = self.collect()
+        self.assertEqual(result["outcome"], "network_error")
+        self.assertIn("Refused redirect", result["error"])
+        self.assertEqual(len(Handler.requests), 1)
+        # An allowed target is followed as before.
+        Handler.responses = [
+            {"status": 302, "headers": {"Location": self.url + "?moved"}},
+            self.good(),
+        ]
+        self.assertEqual(self.collect(force_download=True)["outcome"], "downloaded")
+        self.assertEqual(Handler.requests[-1]["path"], "/results.zip?moved")
+
     def test_terminal_404_is_not_retried(self) -> None:
         Handler.responses = [{"status": 404}]
         self.assertEqual(self.collect()["outcome"], "http_error")
@@ -254,7 +269,7 @@ class CollectionTests(unittest.TestCase):
         self.assertEqual(len(Handler.requests), 3)
 
     def test_network_exception_retries_without_advancing_state(self) -> None:
-        with patch("election_pipeline.collect.urlopen", side_effect=URLError("simulated timeout")):
+        with patch("election_pipeline.collect.open_url", side_effect=URLError("simulated timeout")):
             self.assertEqual(self.collect()["outcome"], "network_error")
         self.assertEqual(len(self.records()), 3)
         self.assertEqual(self.state(), {})
