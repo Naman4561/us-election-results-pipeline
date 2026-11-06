@@ -200,18 +200,15 @@ def _collect_locked(
         )
 
         if datetime.now(timezone.utc) < next_check:
-            record = {
-                **base,
-                "fetch_id": uuid.uuid4().hex,
-                "started_at": utc_now(),
-                "finished_at": utc_now(),
-                "attempt": 0,
+            # No request is made, so no fetch record is written: one per scheduler tick
+            # would grow without bound and say nothing the state file does not.
+            return {
+                "source_id": source.source_id,
+                "run_id": run_id,
                 "outcome": "not_due",
-                "http_status": None,
+                "attempt": 0,
                 "next_check_at": next_check.isoformat(),
             }
-
-            return _summary(record, store.write_attempt(record))
     use_conditions = cached is not None and not force_download and source.format != "bundle"
     for attempt in range(1, settings.max_attempts + 1):
         conditions = {}
