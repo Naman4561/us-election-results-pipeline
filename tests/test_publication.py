@@ -1,10 +1,13 @@
 """Artifact checks offline; publication checks in an opt-in *_test database."""
 
+import csv
+import io
 import json
 import os
 import tempfile
 import unittest
 import uuid
+import zipfile
 from dataclasses import replace
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -173,6 +176,37 @@ class PublicationDatabaseTests(unittest.TestCase):
                 "publication_id"
             ]
         )
+
+    def test_identical_results_from_a_new_snapshot_are_not_republished(self):
+        first_release = self.load(self.f.rows)
+        first = publish(self.root, self.db, first_release, "test", skip_current=True)
+
+        # Same rows, different raw bytes (as when a file embeds its download time).
+        output = io.StringIO(newline="")
+        writer = csv.writer(output, delimiter="\t")
+        writer.writerow(fixtures.RESULT_HEADER)
+        writer.writerows(self.f.rows)
+        path = self.f.root / "input.zip"
+        with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr("results.txt", output.getvalue())
+        self.f.install(path)
+        directory = Path(self.f.parse()["output_dir"])
+        second_release = load_parsed(
+            self.f.source, self.f.settings, self.f.root, directory, self.db
+        )["release_id"]
+        self.assertNotEqual(first_release, second_release)
+
+        repeat = publish(self.root, self.db, second_release, "test", skip_current=True)
+        self.assertEqual(repeat["outcome"], "already_current")
+        self.assertEqual(repeat["publication_id"], first["publication_id"])
+        self.assertEqual(repeat["identical_to_release"], first_release)
+        self.assertEqual(self.query("SELECT count(*) AS n FROM serving.publications")[0]["n"], 1)
+
+        # A real change publishes normally.
+        rows = [row.copy() for row in self.f.rows]
+        rows[0][9], rows[0][13] = "1", "9"
+        changed = publish(self.root, self.db, self.load(rows), "test", skip_current=True)
+        self.assertNotEqual(changed["publication_id"], first["publication_id"])
 
     def test_publication_failure_idempotency_corrections_and_restore(self):
         first_release = self.load(self.f.rows)

@@ -427,6 +427,39 @@ def candidate_fingerprints(conn, schema, *, lock=False):
     return result
 
 
+def same_results(conn, metadata, code_hash, status):
+    """The live publication, if this release parsed to byte-identical outputs.
+
+    Some official files embed their download time, so every collection is a new raw
+    snapshot even when no vote changed. Publishing it again would rebuild identical
+    tables, so the scheduled runner keeps the live publication instead. The new raw
+    snapshot and its release stay recorded; only the redundant publication is skipped.
+    """
+    live = conn.execute(
+        "SELECT p.publication_id, p.release_id, r.parser_report "
+        "FROM serving.current_publications c "
+        "JOIN serving.publications p USING (publication_id) "
+        "JOIN ops.processing_releases r ON r.release_id = p.release_id "
+        "WHERE c.source_id=%s AND p.transform_sha256=%s AND p.status=%s",
+        (metadata["source_id"], code_hash, status),
+    ).fetchone()
+    report = metadata.get("parser_report") or {}
+    if not live or not report.get("output_sha256"):
+        return None
+    previous = live["parser_report"] or {}
+    if any(
+        previous.get(key) != report.get(key)
+        for key in ("output_sha256", "output_rows", "contests", "minimum_candidates")
+    ):
+        return None
+    return {
+        "outcome": "already_current",
+        "publication_id": str(live["publication_id"]),
+        "release_id": metadata["release_id"],
+        "identical_to_release": live["release_id"],
+    }
+
+
 def prepare(root, db, release_id, status, *, skip_current=False):
     """Transform and validate one release; retain an immutable checked checkpoint."""
     if status not in ("test", "unofficial"):
@@ -451,6 +484,9 @@ def prepare(root, db, release_id, status, *, skip_current=False):
                     "publication_id": str(current["publication_id"]),
                     "release_id": release_id,
                 }
+            same = same_results(conn, metadata, code_hash, status)
+            if same:
+                return same
         schema = "p_" + metadata["state"].lower() + "_" + attempt_id.hex
         artifacts = root / "data/publications" / str(attempt_id)
         conn.execute(
