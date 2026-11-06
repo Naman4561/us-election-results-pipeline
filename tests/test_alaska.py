@@ -313,7 +313,7 @@ class AlaskaDatabaseTests(unittest.TestCase):
                     "002_publication.sql": "serving.publications",
                     "003_state_schemas.sql": "ky.results",
                     "004_mn_ne_tx.sql": "tx.results",
-                }.get(file.name, file.stem[4:] + ".results")
+                }.get(file.name, f'"{file.stem[4:]}".results')  # "or" is reserved
                 if conn.execute("SELECT to_regclass(%s) AS t", (relation,)).fetchone()["t"] is None:
                     conn.execute(file.read_text())
             conn.execute("TRUNCATE ops.sources CASCADE")

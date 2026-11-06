@@ -10,7 +10,12 @@ is a fetch failure and the last publication stays live.
 The state's parser module declares:
 
 - ``CHANGE_MEMBERS``: statewide CSV members that change whenever any result changes;
-- ``exports(paths, source)``: ``(member, page_member, event_target)`` for each workbook.
+- ``exports(paths, source)``: ``(member, page_member, event_target)`` for each export,
+  optionally with a fourth item: the page's own radio choices to submit with it (for
+  example Oregon's "CSV" format option). A choice must be a radio button that exists on
+  that page with exactly that value.
+
+An export named ``*.xlsx`` must come back as a workbook and ``*.csv`` as a CSV download.
 
 Each workbook embeds its download time, so identical results would otherwise create a
 new snapshot every poll. When every change member is byte-identical to the previous
@@ -36,9 +41,10 @@ from election_pipeline.states import state_adapter
 REFRESH_SECONDS = 3600
 WORKBOOK = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 TARGET = re.compile(r"ctl00\$MainContent\$[A-Za-z0-9_$]{1,120}")
+DOWNLOADS = {".xlsx": (WORKBOOK,), ".csv": ("application/text", "text/csv", "application/csv")}
 
 
-def postback(page, page_url, target):
+def postback(page, page_url, target, choices=None):
     """Return (action URL, encoded form) for one export button on an official page."""
     if not TARGET.fullmatch(target):
         raise ValueError("Unexpected export control name")
@@ -61,6 +67,17 @@ def postback(page, page_url, target):
         fields[name] = node.attrs.get("value") or ""
     if not {"__VIEWSTATE", "__EVENTVALIDATION"} <= fields.keys():
         raise ValueError("Results page lacks its export form state")
+    for name, value in (choices or {}).items():
+        radios = [
+            n
+            for n in forms[0].find("input")
+            if n.attrs.get("type", "").lower() == "radio"
+            and n.attrs.get("name") == name
+            and n.attrs.get("value") == value
+        ]
+        if len(radios) != 1 or name in fields:
+            raise ValueError("Export option is not one of the page's own choices")
+        fields[name] = value
     fields.update(__EVENTTARGET=target, __EVENTARGUMENT="")
     return action, urlencode(fields).encode("ascii")
 
@@ -105,8 +122,9 @@ def fetch_bundle(source, settings, destination, *, previous=None, store=None, fo
             if result.status != 200:
                 return result
             received += result.bytes_received
-            if form is not None and not result.headers.get("content-type", "").startswith(WORKBOOK):
-                raise FetchFailure(f"Official export for {name} did not return a workbook")
+            kinds = DOWNLOADS.get(Path(name).suffix, (WORKBOOK,))
+            if form is not None and not result.headers.get("content-type", "").startswith(kinds):
+                raise FetchFailure(f"Official export for {name} returned an unexpected file type")
             paths[name] = path
             components.append(
                 {
@@ -145,15 +163,16 @@ def fetch_bundle(source, settings, destination, *, previous=None, store=None, fo
             plan = parser.exports(paths, source)
         except (ValueError, UnicodeError) as error:
             raise FetchFailure(str(error), retryable=False) from error
-        if {member for member, _, _ in plan} != set(source.supplemental_members):
+        if {entry[0] for entry in plan} != set(source.supplemental_members):
             raise FetchFailure("Export plan differs from the configured members", retryable=False)
-        for member, page_member, target in plan:
+        for member, page_member, target, *choices in plan:
             # Like a person clicking several export buttons, each post reuses the page's state.
             try:
                 action, form = postback(
                     paths[page_member].read_text(encoding="utf-8", errors="replace"),
                     urls[page_member],
                     target,
+                    *choices,
                 )
             except ValueError as error:
                 raise FetchFailure(str(error), retryable=False) from error

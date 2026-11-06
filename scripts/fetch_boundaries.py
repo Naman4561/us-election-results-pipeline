@@ -12,6 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = ROOT / "src/election_pipeline/dashboard/static"
 BASE = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/"
+FULL_NAME_STATES = {"VA", "MD"}
 STATES = set(
     (
         "AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT "
@@ -197,13 +198,16 @@ def main():
             "State_County",
             1,
             f"STATE = '{fips}'",
-            "STATE,GEOID,BASENAME",
+            "STATE,GEOID,BASENAME,NAME",
             projection={"AK": 3338, "HI": 3759}.get(code, 5070),
             offset=200,
         )
         if code == "HI":
             counties = [hawaiian_main_islands(f) for f in counties]
         draw = layout([feature], (20, 20, 1160, 640))
+        # Virginia's independent cities and Baltimore City share base names with counties
+        # (Fairfax County / Fairfax city), so those states key counties by full name.
+        label = "NAME" if code in FULL_NAME_STATES else "BASENAME"
         local_districts = [f for f in districts if f["attributes"]["STATE"] == fips]
         save(
             code.lower() + "-map.json",
@@ -215,8 +219,8 @@ def main():
                 "sources": {"counties": county_source, "districts": sources["districts"]},
                 "counties": [
                     {
-                        "id": county_key(f["attributes"]["BASENAME"]),
-                        "name": f["attributes"]["BASENAME"],
+                        "id": county_key(f["attributes"][label]),
+                        "name": f["attributes"][label],
                         "fips": f["attributes"]["GEOID"],
                         **draw(f),
                     }

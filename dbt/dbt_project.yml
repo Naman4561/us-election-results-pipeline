@@ -149,6 +149,151 @@ vars:
   - FL-26
   - FL-27
   - FL-28
+  va_results_source: va_2026_general
+  va_races:
+  - VA-SEN
+  - VA-01
+  - VA-02
+  - VA-03
+  - VA-04
+  - VA-05
+  - VA-06
+  - VA-07
+  - VA-08
+  - VA-09
+  - VA-10
+  - VA-11
+  va_methods:
+  - early_voting
+  - election_day
+  - absentee_by_mail
+  - provisional
+  - post_election
+  id_results_source: id_2026_general
+  id_races:
+  - ID-SEN
+  - ID-GOV
+  - ID-01
+  - ID-02
+  wa_results_source: wa_2026_general
+  wa_races:
+  - WA-01
+  - WA-02
+  - WA-03
+  - WA-04
+  - WA-05
+  - WA-06
+  - WA-07
+  - WA-08
+  - WA-09
+  - WA-10
+  co_results_source: co_2026_general
+  co_races:
+  - CO-SEN
+  - CO-GOV
+  - CO-01
+  - CO-02
+  - CO-03
+  - CO-04
+  - CO-05
+  - CO-06
+  - CO-07
+  - CO-08
+  ia_results_source: ia_2026_general
+  ia_races:
+  - IA-SEN
+  - IA-GOV
+  - IA-01
+  - IA-02
+  - IA-03
+  - IA-04
+  ia_methods:
+  - election_day
+  - absentee_combined
+  or_results_source: or_2026_general
+  or_races:
+  - OR-SEN
+  - OR-GOV
+  - OR-01
+  - OR-02
+  - OR-03
+  - OR-04
+  - OR-05
+  - OR-06
+  ca_results_source: ca_2026_general
+  ca_races:
+  - CA-GOV
+  - CA-01
+  - CA-02
+  - CA-03
+  - CA-04
+  - CA-05
+  - CA-06
+  - CA-07
+  - CA-08
+  - CA-09
+  - CA-10
+  - CA-11
+  - CA-12
+  - CA-13
+  - CA-14
+  - CA-15
+  - CA-16
+  - CA-17
+  - CA-18
+  - CA-19
+  - CA-20
+  - CA-21
+  - CA-22
+  - CA-23
+  - CA-24
+  - CA-25
+  - CA-26
+  - CA-27
+  - CA-28
+  - CA-29
+  - CA-30
+  - CA-31
+  - CA-32
+  - CA-33
+  - CA-34
+  - CA-35
+  - CA-36
+  - CA-37
+  - CA-38
+  - CA-39
+  - CA-40
+  - CA-41
+  - CA-42
+  - CA-43
+  - CA-44
+  - CA-45
+  - CA-46
+  - CA-47
+  - CA-48
+  - CA-49
+  - CA-50
+  - CA-51
+  - CA-52
+  md_results_source: md_2026_general
+  md_races:
+  - MD-GOV
+  - MD-01
+  - MD-02
+  - MD-03
+  - MD-04
+  - MD-05
+  - MD-06
+  - MD-07
+  - MD-08
+  hi_results_source: hi_2026_general
+  hi_races:
+  - HI-GOV
+  - HI-01
+  - HI-02
+  hi_methods:
+  - mail
+  - in_person
 models:
   election_analytics:
     +materialized: '{{ var(''publication_materialization'', ''view'') }}'
@@ -196,6 +341,33 @@ models:
       fl:
         +tags:
         - state_fl
+      va:
+        +tags:
+        - state_va
+      id:
+        +tags:
+        - state_id
+      wa:
+        +tags:
+        - state_wa
+      co:
+        +tags:
+        - state_co
+      ia:
+        +tags:
+        - state_ia
+      or:
+        +tags:
+        - state_or
+      ca:
+        +tags:
+        - state_ca
+      md:
+        +tags:
+        - state_md
+      hi:
+        +tags:
+        - state_hi
     marts:
       +schema: marts
       ak:
@@ -240,3 +412,30 @@ models:
       fl:
         +tags:
         - state_fl
+      va:
+        +tags:
+        - state_va
+      id:
+        +tags:
+        - state_id
+      wa:
+        +tags:
+        - state_wa
+      co:
+        +tags:
+        - state_co
+      ia:
+        +tags:
+        - state_ia
+      or:
+        +tags:
+        - state_or
+      ca:
+        +tags:
+        - state_ca
+      md:
+        +tags:
+        - state_md
+      hi:
+        +tags:
+        - state_hi

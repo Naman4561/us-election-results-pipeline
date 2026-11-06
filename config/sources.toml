@@ -286,3 +286,164 @@ format = "bundle"
 primary_filename = "results.txt"
 min_interval_seconds = 300
 expected_members = ["results.txt"]
+
+[sources.va_2026_general]
+state = "VA"
+election_date = "2026-11-03"
+url = "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/data"
+format = "bundle"
+primary_filename = "data.json"
+min_interval_seconds = 300
+expected_members = ["data.json", "item-va-sen.json", "item-va-01.json", "item-va-02.json", "item-va-03.json", "item-va-04.json", "item-va-05.json", "item-va-06.json", "item-va-07.json", "item-va-08.json", "item-va-09.json", "item-va-10.json", "item-va-11.json"]
+supplemental_members = ["item-va-sen.json", "item-va-01.json", "item-va-02.json", "item-va-03.json", "item-va-04.json", "item-va-05.json", "item-va-06.json", "item-va-07.json", "item-va-08.json", "item-va-09.json", "item-va-10.json", "item-va-11.json"]
+
+[sources.id_2026_general]
+state = "ID"
+election_date = "2026-11-03"
+url = "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/data"
+format = "bundle"
+primary_filename = "data.json"
+min_interval_seconds = 300
+expected_members = ["data.json", "item-id-sen.json", "item-id-gov.json", "item-id-01.json", "item-id-02.json"]
+supplemental_members = ["item-id-sen.json", "item-id-gov.json", "item-id-01.json", "item-id-02.json"]
+
+[sources.wa_2026_general]
+state = "WA"
+election_date = "2026-11-03"
+url = "https://results.votewa.gov/results/public/api/elections/washington/20261103/data"
+format = "bundle"
+primary_filename = "data.json"
+min_interval_seconds = 300
+expected_members = ["data.json", "item-wa-01.json", "item-wa-02.json", "item-wa-03.json", "item-wa-04.json", "item-wa-05.json", "item-wa-06.json", "item-wa-07.json", "item-wa-08.json", "item-wa-09.json", "item-wa-10.json"]
+supplemental_members = ["item-wa-01.json", "item-wa-02.json", "item-wa-03.json", "item-wa-04.json", "item-wa-05.json", "item-wa-06.json", "item-wa-07.json", "item-wa-08.json", "item-wa-09.json", "item-wa-10.json"]
+
+[sources.co_2026_general]
+state = "CO"
+election_date = "2026-11-03"
+url = "https://results.enr.clarityelections.com/CO/127407/current_ver.txt"
+format = "bundle"
+primary_filename = "current_ver.txt"
+min_interval_seconds = 300
+expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
+supplemental_members = ["detail.zip", "settings.json", "summary.json"]
+
+[sources.ia_2026_general]
+state = "IA"
+election_date = "2026-11-03"
+url = "https://results.enr.clarityelections.com/IA/127077/current_ver.txt"
+format = "bundle"
+primary_filename = "current_ver.txt"
+min_interval_seconds = 300
+expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
+supplemental_members = ["detail.zip", "settings.json", "summary.json"]
+
+# Oregon's export pages change on every request, so each collection repeats all 38 exports;
+# a 15-minute interval keeps that load modest.
+[sources.or_2026_general]
+state = "OR"
+election_date = "2026-11-03"
+url = "https://results.oregonvotes.gov/ResultsExport.aspx"
+format = "bundle"
+primary_filename = "export.html"
+min_interval_seconds = 900
+expected_members = ["export.html", "statewide.csv", "governor.csv", "county-baker.csv", "county-benton.csv", "county-clackamas.csv", "county-clatsop.csv", "county-columbia.csv", "county-coos.csv", "county-crook.csv", "county-curry.csv", "county-deschutes.csv", "county-douglas.csv", "county-gilliam.csv", "county-grant.csv", "county-harney.csv", "county-hood-river.csv", "county-jackson.csv", "county-jefferson.csv", "county-josephine.csv", "county-klamath.csv", "county-lake.csv", "county-lane.csv", "county-lincoln.csv", "county-linn.csv", "county-malheur.csv", "county-marion.csv", "county-morrow.csv", "county-multnomah.csv", "county-polk.csv", "county-sherman.csv", "county-tillamook.csv", "county-umatilla.csv", "county-union.csv", "county-wallowa.csv", "county-wasco.csv", "county-washington.csv", "county-wheeler.csv", "county-yamhill.csv"]
+supplemental_members = ["statewide.csv", "governor.csv", "county-baker.csv", "county-benton.csv", "county-clackamas.csv", "county-clatsop.csv", "county-columbia.csv", "county-coos.csv", "county-crook.csv", "county-curry.csv", "county-deschutes.csv", "county-douglas.csv", "county-gilliam.csv", "county-grant.csv", "county-harney.csv", "county-hood-river.csv", "county-jackson.csv", "county-jefferson.csv", "county-josephine.csv", "county-klamath.csv", "county-lake.csv", "county-lane.csv", "county-lincoln.csv", "county-linn.csv", "county-malheur.csv", "county-marion.csv", "county-morrow.csv", "county-multnomah.csv", "county-polk.csv", "county-sherman.csv", "county-tillamook.csv", "county-umatilla.csv", "county-union.csv", "county-wallowa.csv", "county-wasco.csv", "county-washington.csv", "county-wheeler.csv", "county-yamhill.csv"]
+
+[sources.or_2026_general.collector_overrides]
+max_zip_members = 64
+
+# California's results API serves one JSON document per contest (no county detail here).
+[sources.ca_2026_general]
+state = "CA"
+election_date = "2026-11-03"
+url = "https://api.sos.ca.gov/returns/governor"
+format = "bundle"
+primary_filename = "governor.json"
+min_interval_seconds = 900
+expected_members = ["governor.json", "us-rep-01.json", "us-rep-02.json", "us-rep-03.json", "us-rep-04.json", "us-rep-05.json", "us-rep-06.json", "us-rep-07.json", "us-rep-08.json", "us-rep-09.json", "us-rep-10.json", "us-rep-11.json", "us-rep-12.json", "us-rep-13.json", "us-rep-14.json", "us-rep-15.json", "us-rep-16.json", "us-rep-17.json", "us-rep-18.json", "us-rep-19.json", "us-rep-20.json", "us-rep-21.json", "us-rep-22.json", "us-rep-23.json", "us-rep-24.json", "us-rep-25.json", "us-rep-26.json", "us-rep-27.json", "us-rep-28.json", "us-rep-29.json", "us-rep-30.json", "us-rep-31.json", "us-rep-32.json", "us-rep-33.json", "us-rep-34.json", "us-rep-35.json", "us-rep-36.json", "us-rep-37.json", "us-rep-38.json", "us-rep-39.json", "us-rep-40.json", "us-rep-41.json", "us-rep-42.json", "us-rep-43.json", "us-rep-44.json", "us-rep-45.json", "us-rep-46.json", "us-rep-47.json", "us-rep-48.json", "us-rep-49.json", "us-rep-50.json", "us-rep-51.json", "us-rep-52.json"]
+
+[sources.ca_2026_general.files]
+"us-rep-01.json" = "https://api.sos.ca.gov/returns/us-rep/district/1"
+"us-rep-02.json" = "https://api.sos.ca.gov/returns/us-rep/district/2"
+"us-rep-03.json" = "https://api.sos.ca.gov/returns/us-rep/district/3"
+"us-rep-04.json" = "https://api.sos.ca.gov/returns/us-rep/district/4"
+"us-rep-05.json" = "https://api.sos.ca.gov/returns/us-rep/district/5"
+"us-rep-06.json" = "https://api.sos.ca.gov/returns/us-rep/district/6"
+"us-rep-07.json" = "https://api.sos.ca.gov/returns/us-rep/district/7"
+"us-rep-08.json" = "https://api.sos.ca.gov/returns/us-rep/district/8"
+"us-rep-09.json" = "https://api.sos.ca.gov/returns/us-rep/district/9"
+"us-rep-10.json" = "https://api.sos.ca.gov/returns/us-rep/district/10"
+"us-rep-11.json" = "https://api.sos.ca.gov/returns/us-rep/district/11"
+"us-rep-12.json" = "https://api.sos.ca.gov/returns/us-rep/district/12"
+"us-rep-13.json" = "https://api.sos.ca.gov/returns/us-rep/district/13"
+"us-rep-14.json" = "https://api.sos.ca.gov/returns/us-rep/district/14"
+"us-rep-15.json" = "https://api.sos.ca.gov/returns/us-rep/district/15"
+"us-rep-16.json" = "https://api.sos.ca.gov/returns/us-rep/district/16"
+"us-rep-17.json" = "https://api.sos.ca.gov/returns/us-rep/district/17"
+"us-rep-18.json" = "https://api.sos.ca.gov/returns/us-rep/district/18"
+"us-rep-19.json" = "https://api.sos.ca.gov/returns/us-rep/district/19"
+"us-rep-20.json" = "https://api.sos.ca.gov/returns/us-rep/district/20"
+"us-rep-21.json" = "https://api.sos.ca.gov/returns/us-rep/district/21"
+"us-rep-22.json" = "https://api.sos.ca.gov/returns/us-rep/district/22"
+"us-rep-23.json" = "https://api.sos.ca.gov/returns/us-rep/district/23"
+"us-rep-24.json" = "https://api.sos.ca.gov/returns/us-rep/district/24"
+"us-rep-25.json" = "https://api.sos.ca.gov/returns/us-rep/district/25"
+"us-rep-26.json" = "https://api.sos.ca.gov/returns/us-rep/district/26"
+"us-rep-27.json" = "https://api.sos.ca.gov/returns/us-rep/district/27"
+"us-rep-28.json" = "https://api.sos.ca.gov/returns/us-rep/district/28"
+"us-rep-29.json" = "https://api.sos.ca.gov/returns/us-rep/district/29"
+"us-rep-30.json" = "https://api.sos.ca.gov/returns/us-rep/district/30"
+"us-rep-31.json" = "https://api.sos.ca.gov/returns/us-rep/district/31"
+"us-rep-32.json" = "https://api.sos.ca.gov/returns/us-rep/district/32"
+"us-rep-33.json" = "https://api.sos.ca.gov/returns/us-rep/district/33"
+"us-rep-34.json" = "https://api.sos.ca.gov/returns/us-rep/district/34"
+"us-rep-35.json" = "https://api.sos.ca.gov/returns/us-rep/district/35"
+"us-rep-36.json" = "https://api.sos.ca.gov/returns/us-rep/district/36"
+"us-rep-37.json" = "https://api.sos.ca.gov/returns/us-rep/district/37"
+"us-rep-38.json" = "https://api.sos.ca.gov/returns/us-rep/district/38"
+"us-rep-39.json" = "https://api.sos.ca.gov/returns/us-rep/district/39"
+"us-rep-40.json" = "https://api.sos.ca.gov/returns/us-rep/district/40"
+"us-rep-41.json" = "https://api.sos.ca.gov/returns/us-rep/district/41"
+"us-rep-42.json" = "https://api.sos.ca.gov/returns/us-rep/district/42"
+"us-rep-43.json" = "https://api.sos.ca.gov/returns/us-rep/district/43"
+"us-rep-44.json" = "https://api.sos.ca.gov/returns/us-rep/district/44"
+"us-rep-45.json" = "https://api.sos.ca.gov/returns/us-rep/district/45"
+"us-rep-46.json" = "https://api.sos.ca.gov/returns/us-rep/district/46"
+"us-rep-47.json" = "https://api.sos.ca.gov/returns/us-rep/district/47"
+"us-rep-48.json" = "https://api.sos.ca.gov/returns/us-rep/district/48"
+"us-rep-49.json" = "https://api.sos.ca.gov/returns/us-rep/district/49"
+"us-rep-50.json" = "https://api.sos.ca.gov/returns/us-rep/district/50"
+"us-rep-51.json" = "https://api.sos.ca.gov/returns/us-rep/district/51"
+"us-rep-52.json" = "https://api.sos.ca.gov/returns/us-rep/district/52"
+
+[sources.ca_2026_general.collector_overrides]
+max_zip_members = 64
+
+# Maryland's official "County Break Down" pages for governor and each House district.
+[sources.md_2026_general]
+state = "MD"
+election_date = "2026-11-03"
+url = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_1_1.html"
+format = "bundle"
+primary_filename = "governor.html"
+min_interval_seconds = 300
+expected_members = ["governor.html", "house-01.html", "house-02.html", "house-03.html", "house-04.html", "house-05.html", "house-06.html", "house-07.html", "house-08.html"]
+
+[sources.md_2026_general.files]
+"house-01.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_1_District%201.html"
+"house-02.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_2_District%202.html"
+"house-03.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_3_District%203.html"
+"house-04.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_4_District%204.html"
+"house-05.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_5_District%205.html"
+"house-06.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_6_District%206.html"
+"house-07.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_7_District%207.html"
+"house-08.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_8_District%208.html"
+
+[sources.hi_2026_general]
+state = "HI"
+election_date = "2026-11-03"
+url = "https://elections.hawaii.gov/wp-content/results/2026%20General/summary.txt"
+format = "bundle"
+primary_filename = "summary.txt"
+min_interval_seconds = 300
+expected_members = ["summary.txt"]

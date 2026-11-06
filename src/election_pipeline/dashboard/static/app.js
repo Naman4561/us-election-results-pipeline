@@ -12,6 +12,9 @@ const methodNames = {
   absentee_by_mail: "Absentee by mail",
   provisional: "Provisional",
   absentee_combined: "Absentee (combined)",
+  post_election: "Post-election (late mail)",
+  mail: "Mail ballots",
+  in_person: "In person",
 };
 const colors = {
   DEM: "#2775c7",
@@ -632,7 +635,9 @@ function renderStatePanel() {
     target.append(
       element(
         "p",
-        "Race totals only. County results and vote-method breakdowns are unavailable in this adapter.",
+        (state.methods || []).length > 1
+          ? "Race totals only. County results are unavailable in this adapter."
+          : "Race totals only. County results and vote-method breakdowns are unavailable in this adapter.",
         "empty",
       ),
     );

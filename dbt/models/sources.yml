@@ -67,3 +67,39 @@ sources:
   schema: fl
   tables:
   - name: results
+- name: va
+  schema: va
+  tables:
+  - name: results
+- name: id
+  schema: id
+  tables:
+  - name: results
+- name: wa
+  schema: wa
+  tables:
+  - name: results
+- name: co
+  schema: co
+  tables:
+  - name: results
+- name: ia
+  schema: ia
+  tables:
+  - name: results
+- name: or
+  schema: or
+  tables:
+  - name: results
+- name: ca
+  schema: ca
+  tables:
+  - name: results
+- name: md
+  schema: md
+  tables:
+  - name: results
+- name: hi
+  schema: hi
+  tables:
+  - name: results

@@ -19,9 +19,15 @@ join {{ ref('stg_' ~ state ~ '_releases') }} m using (release_id)
 where m.dataset='election_results'
 {% endmacro %}
 
+{#- A state may also store vote methods (var <state>_methods); each adds to total_votes. -#}
+{% macro method_columns(state) -%}
+{%- for method in var(state ~ '_methods', []) %}, {{ method }}{% endfor -%}
+{%- endmacro %}
+
 {% macro total_only_contests(state) %}
 with totals as (
-    select release_id, source_id, election_date, state, contest_id, choice, choice_party, total_votes
+    select release_id, source_id, election_date, state, contest_id, choice, choice_party,
+           total_votes{{ method_columns(state) }}
     from {{ ref('stg_' ~ state ~ '_results') }} where unit_type='state'
 ), denominators as (
     select *, sum(total_votes) over (partition by release_id, contest_id) as contest_votes
@@ -31,8 +37,18 @@ select *, total_votes::numeric / nullif(contest_votes, 0) as vote_share from den
 {% endmacro %}
 
 {% macro total_only_counties(state) %}
-select release_id, source_id, election_date, state, county, contest_id, choice, choice_party, total_votes
+select release_id, source_id, election_date, state, county, contest_id, choice, choice_party,
+       total_votes{{ method_columns(state) }}
 from {{ ref('stg_' ~ state ~ '_results') }} where unit_type='county'
+{% endmacro %}
+
+{% macro total_only_vote_methods(state) %}
+{% set methods = var(state ~ '_methods') %}
+select release_id, unit_type, county, contest_id, choice
+from {{ ref('stg_' ~ state ~ '_results') }}
+where total_votes < 0
+{% for method in methods %}   or {{ method }} is null or {{ method }} < 0
+{% endfor %}   or {% for method in methods %}{{ method }}{% if not loop.last %} + {% endif %}{% endfor %} <> total_votes
 {% endmacro %}
 
 {% macro total_only_release_completeness(state) %}
@@ -68,9 +84,11 @@ having count(*) < 2 or count(total_votes) <> count(*) or min(total_votes)<0
 {% macro total_only_county_reconciliation(state) %}
 with counties as (
     select release_id, contest_id, choice, coalesce(choice_party,'') as party, sum(total_votes) as votes
+{%- for method in var(state ~ '_methods', []) %}, sum({{ method }}) as {{ method }}{% endfor %}
     from {{ ref(state ~ '_county_candidate_results') }} group by 1,2,3,4
 ), official as (
     select release_id, contest_id, choice, coalesce(choice_party,'') as party, total_votes as votes
+{%- for method in var(state ~ '_methods', []) %}, {{ method }}{% endfor %}
     from {{ ref(state ~ '_contest_candidate_results') }}
 )
 select coalesce(c.release_id,s.release_id) as release_id,
@@ -78,4 +96,6 @@ select coalesce(c.release_id,s.release_id) as release_id,
        coalesce(c.choice,s.choice) as choice
 from counties c full outer join official s using (release_id,contest_id,choice,party)
 where c.votes is distinct from s.votes
+{%- for method in var(state ~ '_methods', []) %}
+   or c.{{ method }} is distinct from s.{{ method }}{% endfor %}
 {% endmacro %}

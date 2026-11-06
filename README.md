@@ -9,5 +9,7 @@ Adding states without restarting the accepted collectors: [docs/isolated-deploym
 
 South Dakota, New Mexico and Florida (Senate, governor and House, with county results): [docs/sd-nm-fl-expansion.md](docs/sd-nm-fl-expansion.md).
 
+Virginia, Idaho, Washington, Colorado, Iowa, Oregon, California, Maryland and Hawaii (with vote methods where published; Montana deferred): [docs/nine-state-expansion.md](docs/nine-state-expansion.md).
+
 Georgia, South Carolina, Kansas and Ohio adapters, validation and isolated rollout;
 Maine official-source work remains pending: [docs/five-state-expansion.md](docs/five-state-expansion.md).

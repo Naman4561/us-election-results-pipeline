@@ -1,0 +1,1249 @@
+{
+ "CA": {
+  "archive_sha256": "6cd5cfd08f861b323b567066c49d05ed0d07384fcb6c8b960fcdae0d47e939ff",
+  "captured_at": "2026-11-06T05:10:51+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 495,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/1",
+    "name": "us-rep-01.json",
+    "sha256": "db463d8e006069ef3ecebd9f40adf16dcfbfa8e8b75824b9af8c0347c3bd8715",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/1"
+   },
+   {
+    "bytes": 494,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/2",
+    "name": "us-rep-02.json",
+    "sha256": "bf90e3057b943f65cebcdbce2f428b5a84e39c69bd220257fc36252d4152bed2",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/2"
+   },
+   {
+    "bytes": 487,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/3",
+    "name": "us-rep-03.json",
+    "sha256": "2989c92aca85ef4d7417ae54284a45b0dc3ce62fbcdd4ff4a30de1a72a25aac7",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/3"
+   },
+   {
+    "bytes": 491,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/4",
+    "name": "us-rep-04.json",
+    "sha256": "e550a4324def7c9abc5451825f9adb242d6a99065dcec475a31374233517dfd5",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/4"
+   },
+   {
+    "bytes": 497,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/5",
+    "name": "us-rep-05.json",
+    "sha256": "3133d03ef4d5f264f7fa4711aca512eaec0510c86db80842a754dabcfde3e0ae",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/5"
+   },
+   {
+    "bytes": 490,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/6",
+    "name": "us-rep-06.json",
+    "sha256": "df43f9eefb10ea93d6fd3940af21505c438f9b606da15b4a7e6e5db2b83a62b3",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/6"
+   },
+   {
+    "bytes": 488,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/7",
+    "name": "us-rep-07.json",
+    "sha256": "c7ddeb9c04387ecb73fea6e11f443fc48bba59aff876057b11023074958b276a",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/7"
+   },
+   {
+    "bytes": 494,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/8",
+    "name": "us-rep-08.json",
+    "sha256": "c75cfb99a6da7ea3474f3c4183a58e8b579a32a6d9d0cb38f4d6d41cadc4e69e",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/8"
+   },
+   {
+    "bytes": 491,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/9",
+    "name": "us-rep-09.json",
+    "sha256": "318ca48c90f7643522e563137b13342f47a8f42a05267e5a6f613eba38feed45",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/9"
+   },
+   {
+    "bytes": 495,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/10",
+    "name": "us-rep-10.json",
+    "sha256": "b6d117b57e166b2369a7db4fa7d1bced95022b45b33e483ffaa71df77abea4d1",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/10"
+   },
+   {
+    "bytes": 493,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/11",
+    "name": "us-rep-11.json",
+    "sha256": "d915dba276e33295557b72f37f2d9ab9607634ddf2000c4bafbc03f5d59a7aeb",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/11"
+   },
+   {
+    "bytes": 495,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/12",
+    "name": "us-rep-12.json",
+    "sha256": "d313aba74f8769ac4e89e58f8c0cefd385141c954d170c9ac099818d0f2e53c6",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/12"
+   },
+   {
+    "bytes": 491,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/13",
+    "name": "us-rep-13.json",
+    "sha256": "292cfc80154e75c51b1608c8048c285372cc3745ec1cb623fd364d6e5bdb1eca",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/13"
+   },
+   {
+    "bytes": 497,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/14",
+    "name": "us-rep-14.json",
+    "sha256": "412df4cdefddf35be9d6c2576dbfd2afdd5d75f6228808dc88cc0bbd0fc85365",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/14"
+   },
+   {
+    "bytes": 497,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/15",
+    "name": "us-rep-15.json",
+    "sha256": "50a63555bc798138da5cdccd70119f41bdd49e563da5e9566988c74c44fb7f0a",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/15"
+   },
+   {
+    "bytes": 501,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/16",
+    "name": "us-rep-16.json",
+    "sha256": "fce1f9c5d199c6c98ed5d1d6c3fb357b3e4700fa6a00f4db3fc18eaa6f7ea646",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/16"
+   },
+   {
+    "bytes": 491,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/17",
+    "name": "us-rep-17.json",
+    "sha256": "a27aa30d2c3bd7c3c65bcbea897fad7221fc54f059f1f23724e3a72f48d228e0",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/17"
+   },
+   {
+    "bytes": 491,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/18",
+    "name": "us-rep-18.json",
+    "sha256": "7a2aafb42d9651b408b1df04a70b0456d91928fb90b986490ff702ac679f66ec",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/18"
+   },
+   {
+    "bytes": 500,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/19",
+    "name": "us-rep-19.json",
+    "sha256": "0a787454a5bb863b1cc796bb570eefb1cc5da686146a75a6d6697754ffe43d45",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/19"
+   },
+   {
+    "bytes": 498,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/20",
+    "name": "us-rep-20.json",
+    "sha256": "6b5f2addec3771557b151695659fe012ed1c57da49e497042c68bcfb986519f0",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/20"
+   },
+   {
+    "bytes": 491,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/21",
+    "name": "us-rep-21.json",
+    "sha256": "b2e45b066e5ac0d22462425878179d89cf00b86b755b78d474768eaee9425a7b",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/21"
+   },
+   {
+    "bytes": 499,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/22",
+    "name": "us-rep-22.json",
+    "sha256": "8a7c3d148093599766152f17e14c23b2210628f004259263a49c2c42b44a4787",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/22"
+   },
+   {
+    "bytes": 502,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/23",
+    "name": "us-rep-23.json",
+    "sha256": "5ee57e10ebff36895e61df0ead245607578ed1d323270704aa9af75ca6ec7b45",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/23"
+   },
+   {
+    "bytes": 493,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/24",
+    "name": "us-rep-24.json",
+    "sha256": "3871cac9c130d5d9785966aac50f4cc216ec53a58c80b79be0696af0843ed44a",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/24"
+   },
+   {
+    "bytes": 487,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/25",
+    "name": "us-rep-25.json",
+    "sha256": "f9d2098541e41ede33d1c48481d33aeabc1eac20c0caf8468a8f7b4aa25d6079",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/25"
+   },
+   {
+    "bytes": 498,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/26",
+    "name": "us-rep-26.json",
+    "sha256": "c17d241fc8f5a9aac8a3ad5f166d3374c7c5a3ceae3abb38632f4dad67a22136",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/26"
+   },
+   {
+    "bytes": 498,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/27",
+    "name": "us-rep-27.json",
+    "sha256": "d069d9bd940862dd8944d1011de31d600466cfee348e1d685981d78123251ae3",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/27"
+   },
+   {
+    "bytes": 494,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/28",
+    "name": "us-rep-28.json",
+    "sha256": "37fd18168435401f9c0bcad45b24d04bad8b21b5bf3b391876abb784e437fa92",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/28"
+   },
+   {
+    "bytes": 508,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/29",
+    "name": "us-rep-29.json",
+    "sha256": "03a8669caca2e79b0d826f878b182e139b88b2ffb85f9e06e7320a8fecf2b38c",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/29"
+   },
+   {
+    "bytes": 501,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/30",
+    "name": "us-rep-30.json",
+    "sha256": "b6fc199ada4d670a920090cdda3daff68666f976decde3279ad8dfdabf36dd53",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/30"
+   },
+   {
+    "bytes": 492,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/31",
+    "name": "us-rep-31.json",
+    "sha256": "e09b79d1fd5049433c76a0a559eed6798b6fc5c2c0367daf4bff4b1979c9d1ba",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/31"
+   },
+   {
+    "bytes": 496,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/32",
+    "name": "us-rep-32.json",
+    "sha256": "243d8aa97a97abeaddd35dc855bc1cbd6bd6127040d15b0de520ef22122f8204",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/32"
+   },
+   {
+    "bytes": 500,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/33",
+    "name": "us-rep-33.json",
+    "sha256": "b2091e68f34c199fad68d9e0d0d79e1479216fcf6245766e58620f9ea4a76547",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/33"
+   },
+   {
+    "bytes": 502,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/34",
+    "name": "us-rep-34.json",
+    "sha256": "ec9d6cbeaf187f77476cdf0f4a1ff7af533a86f95c8d1ec711086f97ee0181aa",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/34"
+   },
+   {
+    "bytes": 496,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/35",
+    "name": "us-rep-35.json",
+    "sha256": "d22909bd51e79e58ca8cb908bfb11dd20a29d1183999a23a5a4a54b42ae194bb",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/35"
+   },
+   {
+    "bytes": 497,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/36",
+    "name": "us-rep-36.json",
+    "sha256": "309912265022c247d49c105f4d6baa53ad9acc15680c0bb2fed2c1df1829fa7f",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/36"
+   },
+   {
+    "bytes": 502,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/37",
+    "name": "us-rep-37.json",
+    "sha256": "6128c6496ba3ab8e958b3f435d7693311b9fb34d917772ec572800d027455d63",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/37"
+   },
+   {
+    "bytes": 500,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/38",
+    "name": "us-rep-38.json",
+    "sha256": "dd50e3682d922c33acf21736f83b299e523941acea11f888271a24528b089fba",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/38"
+   },
+   {
+    "bytes": 491,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/39",
+    "name": "us-rep-39.json",
+    "sha256": "6a972c2b6eed3e1412041c3d06e36ee9d417d92f6e013084f531671a64d4b49b",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/39"
+   },
+   {
+    "bytes": 489,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/40",
+    "name": "us-rep-40.json",
+    "sha256": "02376ca3633bac3f75c14e6fea862f68ea74300b7e1eb4b7a84b0cc3ce6a65bd",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/40"
+   },
+   {
+    "bytes": 498,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/41",
+    "name": "us-rep-41.json",
+    "sha256": "b007b6f44fef82d6f905625c0f61f5b4464dcd7b6b4fa3e690022f4a2c7494fe",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/41"
+   },
+   {
+    "bytes": 495,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/42",
+    "name": "us-rep-42.json",
+    "sha256": "9110228bb7ac6c10722159a443f31293b5df8e9439f27529de931cd78bd8750d",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/42"
+   },
+   {
+    "bytes": 499,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/43",
+    "name": "us-rep-43.json",
+    "sha256": "fc0f41c05245d43eda17a50109d895e30362e468b97a18ac48d6d1d852592a5e",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/43"
+   },
+   {
+    "bytes": 506,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/44",
+    "name": "us-rep-44.json",
+    "sha256": "13ea6c8bb3cb6cec5531094b2a5f8b160713cd93721daccfe953dbf886797310",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/44"
+   },
+   {
+    "bytes": 492,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/45",
+    "name": "us-rep-45.json",
+    "sha256": "f2802dbaa06f28003ac025da1330da4a17cddd0d5377f8c5fa9dfa8eabd3122e",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/45"
+   },
+   {
+    "bytes": 488,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/46",
+    "name": "us-rep-46.json",
+    "sha256": "d9163f54c69619183605335f3f286c8217c3f1f1b5f5af0609c7b07003abfc95",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/46"
+   },
+   {
+    "bytes": 495,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/47",
+    "name": "us-rep-47.json",
+    "sha256": "ee9ff525700d12db262a4f468d6f0946ef3c919f026120d9447b74e509e29e6a",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/47"
+   },
+   {
+    "bytes": 498,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/48",
+    "name": "us-rep-48.json",
+    "sha256": "c14bd077391ee5fa2780b9a2b94f35dab78bab9bbccf9b9d2280617fda4c39a1",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/48"
+   },
+   {
+    "bytes": 493,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/49",
+    "name": "us-rep-49.json",
+    "sha256": "a9fd4a4cc923c2269cc524385cb27fb256534af565e05842fe96a43e8ce199d9",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/49"
+   },
+   {
+    "bytes": 493,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/50",
+    "name": "us-rep-50.json",
+    "sha256": "475a2d89752cc7aaf921c28738142af866e7ec667e49c90ff8a99609ad574d1c",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/50"
+   },
+   {
+    "bytes": 496,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/51",
+    "name": "us-rep-51.json",
+    "sha256": "fa132f713bf426d1c114e36043a97334047ced2d97468324a6b608600ac555ee",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/51"
+   },
+   {
+    "bytes": 490,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/us-rep/district/52",
+    "name": "us-rep-52.json",
+    "sha256": "f0102ad6f5b75be91f10122b66c243c5ab7d5975a94628aefbf460a08cea3183",
+    "url": "https://api.sos.ca.gov/returns/us-rep/district/52"
+   },
+   {
+    "bytes": 471,
+    "content_type": "application/json; charset=UTF-8",
+    "final_url": "https://api.sos.ca.gov/returns/governor",
+    "name": "governor.json",
+    "sha256": "947d43725bf0d51c813b6b673eb75ecab0f7d7f6fa804f076c74f4af0f87fb1c",
+    "url": "https://api.sos.ca.gov/returns/governor"
+   }
+  ],
+  "source_id": "ca_2026_general"
+ },
+ "CO": {
+  "archive_sha256": "fba2339ceb287b304df3b0f18e000e373d3e676ab092f0b2419551f4a5d34dcc",
+  "captured_at": "2026-11-06T05:10:21+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 6,
+    "content_type": "text/plain; charset=utf-8",
+    "final_url": "https://results.enr.clarityelections.com/CO/127407/current_ver.txt",
+    "name": "current_ver.txt",
+    "sha256": "6c615835f0882a5152fea2137bcacf0aed7799feb16739c1b0c2c041725968f5",
+    "url": "https://results.enr.clarityelections.com/CO/127407/current_ver.txt"
+   },
+   {
+    "bytes": 245842,
+    "content_type": "application/json",
+    "final_url": "https://results.enr.clarityelections.com/CO/127407/385830/json/en/summary.json",
+    "name": "summary.json",
+    "sha256": "0cc29cebd8aa78c2291837567ec56125f51a26ca54223673176844cab63aabbb",
+    "url": "https://results.enr.clarityelections.com/CO/127407/385830/json/en/summary.json"
+   },
+   {
+    "bytes": 12845,
+    "content_type": "application/json",
+    "final_url": "https://results.enr.clarityelections.com/CO/127407/385830/json/en/electionsettings.json",
+    "name": "settings.json",
+    "sha256": "fc3b5d4fa1d9e199a8580483940907042334fa11a4e5bcde18bb007d9cfdc9e7",
+    "url": "https://results.enr.clarityelections.com/CO/127407/385830/json/en/electionsettings.json"
+   },
+   {
+    "bytes": 60799,
+    "content_type": "application/zip",
+    "final_url": "https://results.enr.clarityelections.com/CO/127407/385830/reports/detailxml.zip",
+    "name": "detail.zip",
+    "sha256": "fc47abb7c6db31f303f6db74ad2cae5bc5459393cac3920f915726cdce95c236",
+    "url": "https://results.enr.clarityelections.com/CO/127407/385830/reports/detailxml.zip"
+   }
+  ],
+  "source_id": "co_2026_general"
+ },
+ "HI": {
+  "archive_sha256": "91a14ad65aba7c6bf0ad789d2e79959ba7b7df8524696e709b1ef2c82c0bd193",
+  "captured_at": "2026-11-06T05:11:31+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 22026,
+    "content_type": "text/plain; charset=UTF-8",
+    "final_url": "https://elections.hawaii.gov/wp-content/results/2026%20General/summary.txt",
+    "name": "summary.txt",
+    "sha256": "e3cdfcd52551119d1c63a62ed59412e5b2c0311c3e47ae14efcb5046ed3bcd28",
+    "url": "https://elections.hawaii.gov/wp-content/results/2026%20General/summary.txt"
+   }
+  ],
+  "source_id": "hi_2026_general"
+ },
+ "IA": {
+  "archive_sha256": "02da4c89fa870b5b9efbb6a22ff5d891398e30e7a633134c1e1f7421f1cda513",
+  "captured_at": "2026-11-06T05:10:23+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 6,
+    "content_type": "text/plain; charset=utf-8",
+    "final_url": "https://results.enr.clarityelections.com/IA/127077/current_ver.txt",
+    "name": "current_ver.txt",
+    "sha256": "7eff28a7d56c0edb5e37c24b09fa0ee010e4cc70af2fd29ac54da36f8a616cdf",
+    "url": "https://results.enr.clarityelections.com/IA/127077/current_ver.txt"
+   },
+   {
+    "bytes": 235190,
+    "content_type": "application/json",
+    "final_url": "https://results.enr.clarityelections.com/IA/127077/385624/json/en/summary.json",
+    "name": "summary.json",
+    "sha256": "cc6254e740744989bb89da3d7f7cb566b96fc4142f9c57f7ff9993c21962e4aa",
+    "url": "https://results.enr.clarityelections.com/IA/127077/385624/json/en/summary.json"
+   },
+   {
+    "bytes": 34230,
+    "content_type": "application/json",
+    "final_url": "https://results.enr.clarityelections.com/IA/127077/385624/json/en/electionsettings.json",
+    "name": "settings.json",
+    "sha256": "a7a3a589e1d91ebb5d5d8a67fc06cead2b9a91ac33081cd485fe491c6db028bb",
+    "url": "https://results.enr.clarityelections.com/IA/127077/385624/json/en/electionsettings.json"
+   },
+   {
+    "bytes": 84564,
+    "content_type": "application/zip",
+    "final_url": "https://results.enr.clarityelections.com/IA/127077/385624/reports/detailtxt.zip",
+    "name": "detail.zip",
+    "sha256": "84385a403ee38b7433046698313a669f71a993b60416b6ff5962aa22ed4a2e4c",
+    "url": "https://results.enr.clarityelections.com/IA/127077/385624/reports/detailtxt.zip"
+   }
+  ],
+  "source_id": "ia_2026_general"
+ },
+ "ID": {
+  "archive_sha256": "85ec1669195f3b5ee275264ed99360112831b66f0f218b834e4b4c5500de09b2",
+  "captured_at": "2026-11-06T05:10:17+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 522796,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/data",
+    "name": "data.json",
+    "sha256": "93a555d55dc6816cafd93dc983911946e5b76dec75e9eeb1c9582a281d26f507",
+    "url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/data"
+   },
+   {
+    "bytes": 126185,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-70f4-ca87-27ba-08df23e9954c",
+    "name": "item-id-sen.json",
+    "sha256": "5e79948a5b3d2877993cb54485dd19935fdbef4b5d9f86205062768c21bbcc32",
+    "url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-70f4-ca87-27ba-08df23e9954c"
+   },
+   {
+    "bytes": 55990,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-9b8a-13bb-e31b-08df23ec9989",
+    "name": "item-id-01.json",
+    "sha256": "18054a8dd946dd91a6f49465b1427653dfa7935611ddeb29cc80d3416ba2dca6",
+    "url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-9b8a-13bb-e31b-08df23ec9989"
+   },
+   {
+    "bytes": 88391,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-9b8a-13bb-7a7e-08df23ecc8f3",
+    "name": "item-id-02.json",
+    "sha256": "d3f8e2830f62e7b8bc58401364c34722c7bfecc2976941afae6506ad9f70b99d",
+    "url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-9b8a-13bb-7a7e-08df23ecc8f3"
+   },
+   {
+    "bytes": 166327,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-70f4-ca87-1a95-08df23ecef0e",
+    "name": "item-id-gov.json",
+    "sha256": "f63687ccc6c6f4b418cf499f8e54d7044b24767c44294c1f28fd2cb7a82037a9",
+    "url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-70f4-ca87-1a95-08df23ecef0e"
+   },
+   {
+    "bytes": 522796,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/data",
+    "name": ".recheck.json",
+    "sha256": "93a555d55dc6816cafd93dc983911946e5b76dec75e9eeb1c9582a281d26f507",
+    "url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/data"
+   }
+  ],
+  "source_id": "id_2026_general"
+ },
+ "MD": {
+  "archive_sha256": "54c9d1a056c43561deb1a6421065d180630adda328c66e167333848638b2bf09",
+  "captured_at": "2026-11-06T05:11:29+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 18921,
+    "content_type": "text/html",
+    "final_url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_1_District%201.html",
+    "name": "house-01.html",
+    "sha256": "447746b72c8706ea0a0d574a531b1da597f1474c7bcb9118c8258bb4b9b49f03",
+    "url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_1_District%201.html"
+   },
+   {
+    "bytes": 17526,
+    "content_type": "text/html",
+    "final_url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_2_District%202.html",
+    "name": "house-02.html",
+    "sha256": "ef4e167a6239e108a291b7a16d8948aa2fe95bb93e07a0d9b476eda29d487ff1",
+    "url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_2_District%202.html"
+   },
+   {
+    "bytes": 17711,
+    "content_type": "text/html",
+    "final_url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_3_District%203.html",
+    "name": "house-03.html",
+    "sha256": "06082bd056fdaa729e8d015a5830338b6704dfa006d650ce1af9404593bf333b",
+    "url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_3_District%203.html"
+   },
+   {
+    "bytes": 17551,
+    "content_type": "text/html",
+    "final_url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_4_District%204.html",
+    "name": "house-04.html",
+    "sha256": "a0287c5ce7095d70a76d1ca57c10a66c9726448bc2ea2666da247b8f1b032e07",
+    "url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_4_District%204.html"
+   },
+   {
+    "bytes": 18042,
+    "content_type": "text/html",
+    "final_url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_5_District%205.html",
+    "name": "house-05.html",
+    "sha256": "d9c19012834d6efe0d9a2634dbfa9c5771993c3efc7f7871ecda3e5f34d85be2",
+    "url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_5_District%205.html"
+   },
+   {
+    "bytes": 18024,
+    "content_type": "text/html",
+    "final_url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_6_District%206.html",
+    "name": "house-06.html",
+    "sha256": "3f540d4b076b1962de6e5f5069889460b39e5d2c4e73e303005b8072053a5041",
+    "url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_6_District%206.html"
+   },
+   {
+    "bytes": 17392,
+    "content_type": "text/html",
+    "final_url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_7_District%207.html",
+    "name": "house-07.html",
+    "sha256": "677a1c06038765e7cb9d64d14b23f5074175d426160fe4a6b5d71575bf422d35",
+    "url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_7_District%207.html"
+   },
+   {
+    "bytes": 17536,
+    "content_type": "text/html",
+    "final_url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_8_District%208.html",
+    "name": "house-08.html",
+    "sha256": "873505704a266dd017c75dd5e1a8713ca385e43456a20b291094499ae040ec52",
+    "url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_8_District%208.html"
+   },
+   {
+    "bytes": 21902,
+    "content_type": "text/html",
+    "final_url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_1_1.html",
+    "name": "governor.html",
+    "sha256": "3684fd0280949191880d72bed756b5d150e3bc4f8ad77211d75c873587f3eadd",
+    "url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_1_1.html"
+   }
+  ],
+  "source_id": "md_2026_general"
+ },
+ "OR": {
+  "archive_sha256": "b093a6b7538ec910ecd7e2bc12a4aafe2906bcb785f8588b050a5b616bc89727",
+  "captured_at": "2026-11-06T05:10:24+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 42597,
+    "content_type": "text/html; charset=utf-8",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "GET",
+    "name": "export.html",
+    "sha256": "c42ee1cdcab2c5efa0c198c5935320972f0d30b8dddd0012d9430f218193de1f",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 4682,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "statewide.csv",
+    "sha256": "fb500ea0d2b2eba015d5844091f5a9f25a864ac2470117a8a181c12930b44865",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 824,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "governor.csv",
+    "sha256": "4f59b60d9dca9e5319a6da731fbd5f57c5ec395f89292ddadfd252a6e16337a1",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 13756,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-baker.csv",
+    "sha256": "862a1ad67b391a7db9503127f380e7c5360192e963a68cf2d57fa104bf4a089c",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 17679,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-benton.csv",
+    "sha256": "befaca60f8f622233e2ccf2a37bf68ec5c6ea16b4ca6493f3276ada7f36a3acb",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 50466,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-clackamas.csv",
+    "sha256": "2cb194559750a9f58f5326f3ed1db8aab0dd52a968188b592ac6f9d4f4bd38ae",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 15441,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-clatsop.csv",
+    "sha256": "1cc2281ee3039fbbfb107145dd9c926b601394bb8941fc828e4a3d09061adbfd",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 23072,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-columbia.csv",
+    "sha256": "af69eab8cc327c38f259e3431d80a394dcd40b23799d90ae224c21ecb6ab11f7",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 16444,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-coos.csv",
+    "sha256": "96d41c8a280b5833ddef5d10cbe192b2edde20daf798346af9ef2d7e04c7746b",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 5541,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-crook.csv",
+    "sha256": "cf2556b89fca99771b07dc7ea6c649e6b3c7ed24314923241a1c3def781669ba",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 8221,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-curry.csv",
+    "sha256": "6479dea08c4edaccc0119083ab6b32582f0fb4a94bfcf6756e075cc93a23429b",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 16647,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-deschutes.csv",
+    "sha256": "30a63a231661c67a883abc10737a408d3e19138b200e0747b3eb10b918782410",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 26574,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-douglas.csv",
+    "sha256": "1ddafcd3ff186318537c8f19f06ac6db17ad528a1640c1b2635a4886bd69c171",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 8200,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-gilliam.csv",
+    "sha256": "0f2ec60af6bce7c848e7c48f2e37b3d6fd1af3bdd68f72f292d345c21e6b672d",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 11691,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-grant.csv",
+    "sha256": "927f1609cf33404b09bcce2b76b6a74ca5003cb73421857b69a8271d756e2e51",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 6377,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-harney.csv",
+    "sha256": "36aa3fb05d3f009bd3cfb72136a0813e862acdb7803b81ba5b394f5d7e661f35",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 7361,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-hood-river.csv",
+    "sha256": "ce81c8c0ef1a3ddf6ebccb9154f0713d7a0dc92550e485539f2e76a160cb0276",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 25442,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-jackson.csv",
+    "sha256": "8074aa5ba6c69214c584a66d129689d2532ffa1fa939b39cd305dd393d50edb3",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 11094,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-jefferson.csv",
+    "sha256": "b62f64fbb8571070701c919680b70f5d43c615f075ba0633284117e0b6a58d80",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 12396,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-josephine.csv",
+    "sha256": "09db99f3a31a20a1a45dae23d60834a9d19f4924e33a04d4ed934137550aac65",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 12002,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-klamath.csv",
+    "sha256": "143e47104ac811878045a96bab3026a188fe8ef746e1ce5e6e3895db8175da5a",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 7817,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-lake.csv",
+    "sha256": "1c7706fbafd56ed3925a07a568adca62bd16b9d59e8a38c560edf602bfcbadb9",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 33913,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-lane.csv",
+    "sha256": "72fed013cb6d159cec9e43a1caf6075d98729fa371ce9a2b9c3a8046b15eafc0",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 19562,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-lincoln.csv",
+    "sha256": "344fe7a9fa997d00b4b1be50a2dbea882542ec99c3dda67caafbb8c166f95766",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 26849,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-linn.csv",
+    "sha256": "a1f240884970f1f06057f0469418586c2edabce8bfac905eab9ae9bd1e8c0e92",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 12279,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-malheur.csv",
+    "sha256": "0bcf6d32a1504ef640b76fa585eb37f1a21a3343ec8cea6ec4c67156d2d20c61",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 40596,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-marion.csv",
+    "sha256": "58dafb06e3751bb957a7b4cd8f3ad106b95a1cdfda51d6ed0ac986015592f780",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 11194,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-morrow.csv",
+    "sha256": "79fba574fdcf7ff55cd2ad8f20b7b47e24e80837a07d926e2dbf96bc081c4aad",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 48397,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-multnomah.csv",
+    "sha256": "f306aa4516d7583361c5e287e4d6518b268ef222a9edde71675dfc47d42c2e28",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 15646,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-polk.csv",
+    "sha256": "0c185cf865c1ee765b78232c09344f516394c57286905ceb993c89cf2974c807",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 10674,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-sherman.csv",
+    "sha256": "53df1d56a3ce8f514983eeeaee0f7cd7a89ed8e523be96b3342c08e212459ae4",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 14266,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-tillamook.csv",
+    "sha256": "dd2a02737b1fe3e7b2fba4d357c882b2e1c00fd3b6e5688b8029cbc06a341f55",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 17777,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-umatilla.csv",
+    "sha256": "02839768fd5d6b88efd8043896f869a30cba119c1808dff2942771b142b79fec",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 17907,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-union.csv",
+    "sha256": "45f05a9e8792e035922dca2743daf2adc0d3b69dd62a4b3baffd91a4afe31492",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 9319,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-wallowa.csv",
+    "sha256": "cf28081632d8e17d673ed766f5a27a4430b6ea7c62c232da9b845cea34d1e37d",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 14981,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-wasco.csv",
+    "sha256": "ed88ba37086ad7a46cb24015e341fabfe6138f4867cc8aa291a89fc2b9cd7e77",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 42470,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-washington.csv",
+    "sha256": "8fb75b70464442dd32726f3b3ac5318a93bdc5bb459f1bd01a59251cee0f9c37",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 7876,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-wheeler.csv",
+    "sha256": "425462b574304d1ec8531c3aedb7cfc1874588ea57452eb07d213f8b38b07745",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   },
+   {
+    "bytes": 22511,
+    "content_type": "application/text",
+    "final_url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+    "method": "POST",
+    "name": "county-yamhill.csv",
+    "sha256": "0557bf684055eed2f0993d5e877f87295fddc26fabce9e117376786913fa6413",
+    "url": "https://results.oregonvotes.gov/ResultsExport.aspx"
+   }
+  ],
+  "source_id": "or_2026_general"
+ },
+ "VA": {
+  "archive_sha256": "1e858c4fae24ecc4d911d31b6ecdd3b3a380831f199507534e5fc5768a609feb",
+  "captured_at": "2026-11-06T05:10:11+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 1976281,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/data",
+    "name": "data.json",
+    "sha256": "12f401c00e745c9803f1e4b6a015f9f8e2605568d7e552d2af2b6a236f32b668",
+    "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/data"
+   },
+   {
+    "bytes": 941667,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-d69c-08df1fee529a",
+    "name": "item-va-sen.json",
+    "sha256": "2e5dc043dbc78ff479f56ca73ad36b344c8a5047fa5e0799219d2c50a0444eb7",
+    "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-d69c-08df1fee529a"
+   },
+   {
+    "bytes": 134607,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-abd6-08df1fee5328",
+    "name": "item-va-01.json",
+    "sha256": "436c8136bce23c89366152cf49eaad5fe8ae48e3c8b0ffc88528c72c6848e3f2",
+    "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-abd6-08df1fee5328"
+   },
+   {
+    "bytes": 99163,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-fd71-08df1fee52e7",
+    "name": "item-va-02.json",
+    "sha256": "7b800a4630ae133c7b64a05c076a9728add7c836a4a6d08d605b84f570b228df",
+    "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-fd71-08df1fee52e7"
+   },
+   {
+    "bytes": 66326,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-a8a1-08df1fee5325",
+    "name": "item-va-03.json",
+    "sha256": "88906af7c09a695d54c9f58cc3a2ad12fa3e217ecf83488a0e7149588864e604",
+    "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-a8a1-08df1fee5325"
+   },
+   {
+    "bytes": 146385,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-0c7d-08df1fee52ee",
+    "name": "item-va-04.json",
+    "sha256": "a86ca85bf9ec979fcb57026e9af1f8fb51442ec5f54e35d80d0681ed630ac569",
+    "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-0c7d-08df1fee52ee"
+   },
+   {
+    "bytes": 226317,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-608c-08df1fee52fa",
+    "name": "item-va-05.json",
+    "sha256": "a41bc4187a4705168adb0494a590b83b63276aa1c83116d20066f56282feea06",
+    "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-608c-08df1fee52fa"
+   },
+   {
+    "bytes": 168032,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-fb41-08df1fee5319",
+    "name": "item-va-06.json",
+    "sha256": "307547c0e9cbca39b20af6bf2426ad3a11c924ac2e0de9c6bfc2b7d85a915a9a",
+    "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-fb41-08df1fee5319"
+   },
+   {
+    "bytes": 180377,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-3092-08df1fee52f4",
+    "name": "item-va-07.json",
+    "sha256": "feb8afff27d5401f634c0bf374f8a92c9d94eb63a8c49e2c24761e8eca9d683b",
+    "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-3092-08df1fee52f4"
+   },
+   {
+    "bytes": 55077,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-317a-08df1fee52e5",
+    "name": "item-va-08.json",
+    "sha256": "044d5e010fc9fc2160e0b9a664758799bdcc449f080cf9aa3468ab47876e12d5",
+    "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-317a-08df1fee52e5"
+   },
+   {
+    "bytes": 203686,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-e187-08df1fee5306",
+    "name": "item-va-09.json",
+    "sha256": "6e15918cb357923959a78fd3e207f869828ae5e63b6ca7510ea83e6a5d84f155",
+    "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-e187-08df1fee5306"
+   },
+   {
+    "bytes": 72386,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-7d2f-08df1fee5314",
+    "name": "item-va-10.json",
+    "sha256": "f1a812b3fee4f69e11be164970caca6decbeb2fa92d341c9dfd2b0570c3cdd1a",
+    "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-7d2f-08df1fee5314"
+   },
+   {
+    "bytes": 26840,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-c993-08df1fee52e3",
+    "name": "item-va-11.json",
+    "sha256": "604c6cc97e04781b429f67c06105b45d3b1ecc190599e11c6ca2cb04c3a669f8",
+    "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/ballot-items/01000000-f030-c43d-c993-08df1fee52e3"
+   },
+   {
+    "bytes": 1976281,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/data",
+    "name": ".recheck.json",
+    "sha256": "12f401c00e745c9803f1e4b6a015f9f8e2605568d7e552d2af2b6a236f32b668",
+    "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/data"
+   }
+  ],
+  "source_id": "va_2026_general"
+ },
+ "WA": {
+  "archive_sha256": "d9ec1573bb335d9f11b845c4330ea723742b74c4470ccf60ee6e60a5a315d322",
+  "captured_at": "2026-11-06T05:10:19+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 558692,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/data",
+    "name": "data.json",
+    "sha256": "00590e15711080e01a11c552d3e3e374776c32d1bf6ea4595517e82e562e37a5",
+    "url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/data"
+   },
+   {
+    "bytes": 6301,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-bcf8-08df15c0a829",
+    "name": "item-wa-01.json",
+    "sha256": "9448ff0288ce0f05d9bfacaf031e19d5c937a66bf46d6241e4b42b4ca20e969e",
+    "url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-bcf8-08df15c0a829"
+   },
+   {
+    "bytes": 13241,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-306c-08df15c0a82a",
+    "name": "item-wa-02.json",
+    "sha256": "2e95b8a8eebe81233408c94d5525bfbf8c22f450ee3fa66e0f459e7363ef678f",
+    "url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-306c-08df15c0a82a"
+   },
+   {
+    "bytes": 17959,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-4779-08df15c0a82a",
+    "name": "item-wa-03.json",
+    "sha256": "f4d12acea76b7eada2e05ae057aa85507d5937c5e6219ce5500f9c96b32f7640",
+    "url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-4779-08df15c0a82a"
+   },
+   {
+    "bytes": 20317,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-5bf3-08df15c0a82a",
+    "name": "item-wa-04.json",
+    "sha256": "aa6563a2912e6cd11aafe1f8ae6265bc3e125b84fc8cae9ea674a1f6ea6337ee",
+    "url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-5bf3-08df15c0a82a"
+   },
+   {
+    "bytes": 29898,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-6f41-08df15c0a82a",
+    "name": "item-wa-05.json",
+    "sha256": "8d5dda902e753e9d5c0c0224c36e6a3d9c8485ad6545b78bd6bbfd480c40d3be",
+    "url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-6f41-08df15c0a82a"
+   },
+   {
+    "bytes": 15965,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-84fb-08df15c0a82a",
+    "name": "item-wa-06.json",
+    "sha256": "ea46fc57c649335101ecc8244ace4763bd7dc0ca7bf231147a305f1c4da58d33",
+    "url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-84fb-08df15c0a82a"
+   },
+   {
+    "bytes": 4052,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-97f2-08df15c0a82a",
+    "name": "item-wa-07.json",
+    "sha256": "406b48e0ea122d8d202c02513688fe75f37fb3cde5f1936f34e062afe6b0185a",
+    "url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-97f2-08df15c0a82a"
+   },
+   {
+    "bytes": 15634,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-ab7f-08df15c0a82a",
+    "name": "item-wa-08.json",
+    "sha256": "29a2e91a4c74594e557f3fd9bb7b655e4850b76c770e2b3f99520f32f1aed886",
+    "url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-ab7f-08df15c0a82a"
+   },
+   {
+    "bytes": 4042,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-bd9b-08df15c0a82a",
+    "name": "item-wa-09.json",
+    "sha256": "ed5fcc0b5d1c108ca73595760abf52a77b2c4e456ec27c09cf9fd126d5ae1635",
+    "url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-bd9b-08df15c0a82a"
+   },
+   {
+    "bytes": 6496,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-d064-08df15c0a82a",
+    "name": "item-wa-10.json",
+    "sha256": "417bb295ceaec6bd5814186f0307c332e9af8b772d13660525ef9b1079a18d33",
+    "url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/ballot-items/54c40000-9064-bbec-d064-08df15c0a82a"
+   },
+   {
+    "bytes": 558692,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/data",
+    "name": ".recheck.json",
+    "sha256": "00590e15711080e01a11c552d3e3e374776c32d1bf6ea4595517e82e562e37a5",
+    "url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/data"
+   }
+  ],
+  "source_id": "wa_2026_general"
+ }
+}
