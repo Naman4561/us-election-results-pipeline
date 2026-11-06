@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Election Data Sandbox</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">▦</span>
+      <div><span class="eyebrow">US ELECTION RESULTS PIPELINE</span><h1>Election Data Sandbox</h1></div>
+    </div>
+    <span class="local"><span></span> Local workspace</span>
+  </header>
+  <div class="workspace">
+    <aside class="catalog" aria-label="Dataset catalog">
+      <div class="section-heading">
+        <h2>Dataset catalog</h2>
+        <button id="refresh" type="button" title="Refresh imported datasets">Refresh</button>
+      </div>
+      <p class="muted catalog-count" id="catalog-count" role="status">Loading catalog…</p>
+      <label>Search datasets<input type="search" id="search" placeholder="Title, tag, publisher…"></label>
+      <div class="facets">
+        <label>Data type<select id="kind"><option value="">All types</option></select></label>
+        <label>Status<select id="status"><option value="">All statuses</option></select></label>
+      </div>
+      <div class="facets">
+        <label>Jurisdiction<select id="jurisdiction"><option value="">All areas</option></select></label>
+        <label>Period start year<select id="year"><option value="">All years</option></select></label>
+      </div>
+      <ul id="dataset-list" class="dataset-list" aria-label="Available datasets"></ul>
+    </aside>
+    <main>
+      <p id="error" class="error" role="alert" hidden></p>
+      <section id="empty" class="card empty">
+        <span class="eyebrow">RESEARCH WORKSPACE</span>
+        <h2>Explore a dataset</h2>
+        <p>Select a dataset and a version from the catalog to inspect its rows, provenance, and statistics.</p>
+        <p>Import a CSV or TSV with a dataset manifest, then refresh the catalog.</p>
+        <code>python -m election_pipeline.research import --help</code>
+      </section>
+      <div id="selected" hidden>
+        <section class="dataset-header">
+          <div class="badges" id="badges"></div>
+          <h2 id="title"></h2>
+          <p class="grain" id="grain"></p>
+          <label class="version-label">Dataset version<select id="version"></select></label>
+        </section>
+        <details class="card provenance" id="provenance">
+          <summary>Source and original files</summary>
+          <dl id="metadata"></dl>
+          <p id="notes" class="muted"></p>
+          <ul id="files" class="file-list"></ul>
+        </details>
+        <section id="archive-only" class="card empty" hidden>
+          <h3>Original files available</h3>
+          <p>Open the source details to download them. Import a CSV or TSV with the same dataset ID to explore a tabular version.</p>
+        </section>
+        <div id="explorer" hidden>
+          <section class="card controls" aria-label="Row filters">
+            <div class="section-heading">
+              <h3>Filters</h3>
+              <button type="button" id="add-filter">+ Add filter</button>
+            </div>
+            <p id="filter-help" class="muted">Filters apply together to the table and statistics.</p>
+            <form id="filters">
+              <div id="filter-list"></div>
+              <div id="filter-actions" class="actions" hidden>
+                <button type="submit" class="primary">Apply filters</button>
+                <button type="button" id="clear-filters">Clear filters</button>
+              </div>
+            </form>
+          </section>
+          <section class="card" aria-label="Filtered statistics">
+            <div class="stats-heading">
+              <div>
+                <h3>Statistics</h3>
+                <p class="muted" id="stats-hint">Computed across matching rows.</p>
+              </div>
+              <label>Summarize column<select id="statistic"></select></label>
+            </div>
+            <div class="metrics" id="metrics"></div>
+            <ul id="frequencies" class="frequencies" aria-label="Most common values" hidden></ul>
+          </section>
+          <section class="card rows" aria-labelledby="rows-heading">
+            <div class="rows-toolbar">
+              <div>
+                <h3 id="rows-heading">Data rows</h3>
+                <p id="row-summary" class="muted" role="status"></p>
+              </div>
+              <div class="sort-controls">
+                <label>Sort by<select id="sort"></select></label>
+                <label>Direction<select id="direction">
+                  <option value="asc">Ascending</option><option value="desc">Descending</option>
+                </select></label>
+              </div>
+            </div>
+            <div class="table-scroll" tabindex="0" aria-label="Scrollable data rows">
+              <table><thead id="headers"></thead><tbody id="rows"></tbody></table>
+            </div>
+            <div class="pagination">
+              <label>Rows per page<select id="page-size">
+                <option>25</option><option>50</option><option>100</option>
+              </select></label>
+              <div class="page-buttons">
+                <button type="button" id="prev">Previous</button>
+                <span id="page-number">Page 1</span>
+                <button type="button" id="next">Next</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+</body>
+</html>

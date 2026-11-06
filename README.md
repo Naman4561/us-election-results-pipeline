@@ -11,3 +11,6 @@ North Carolina analysis page (results by race, vote methods, count history, earl
 
 Georgia, South Carolina, Kansas and Ohio adapters, validation and isolated rollout;
 Maine official-source work remains pending: [docs/five-state-expansion.md](docs/five-state-expansion.md).
+
+Local dataset catalog and analysis sandbox for research files and parser snapshots:
+[docs/research-sandbox.md](docs/research-sandbox.md).
