@@ -3,6 +3,7 @@
 import hashlib
 import importlib.util
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
@@ -35,15 +36,20 @@ class RosterTests(unittest.TestCase):
     def test_roster_data_is_part_of_the_parser_code_hash(self):
         before = pipeline.collector_code_hash()
         self.assertEqual(package_hash(ROOT), before)
-        path = FOLDER / "HI.json"
-        original = path.read_bytes()
-        try:
-            path.write_bytes(original + b" ")
-            self.assertNotEqual(pipeline.collector_code_hash(), before)
-            self.assertEqual(package_hash(ROOT), pipeline.collector_code_hash())
-        finally:
-            path.write_bytes(original)
-        self.assertEqual(pipeline.collector_code_hash(), before)
+        # Change a copy: the installed package is read-only in the release image.
+        with tempfile.TemporaryDirectory() as temporary:
+            release = Path(temporary)
+            package = release / "src/election_pipeline"
+            shutil.copytree(
+                ROOT / "src/election_pipeline",
+                package,
+                ignore=shutil.ignore_patterns("__pycache__"),
+            )
+            self.assertEqual(pipeline.collector_code_hash(package), before)
+            path = package / "resources/rosters_2026/HI.json"
+            path.write_bytes(path.read_bytes() + b" ")
+            self.assertNotEqual(pipeline.collector_code_hash(package), before)
+            self.assertEqual(package_hash(release), pipeline.collector_code_hash(package))
 
     def test_legacy_release_keeps_its_python_only_fingerprint(self):
         with tempfile.TemporaryDirectory() as temporary:
