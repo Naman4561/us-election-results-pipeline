@@ -106,7 +106,7 @@ def run_source(
                     )
                     outcome = fetched["outcome"]
 
-                    if outcome in ("not_due", "deferred"):
+                    if outcome in ("not_due", "deferred", "backing_off"):
                         state = store.read_state()
 
                         if (

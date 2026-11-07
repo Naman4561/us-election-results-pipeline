@@ -17,13 +17,34 @@ from election_pipeline.settings import CollectorSettings, Source
 from election_pipeline.storage import ArchiveStore, CollectionLocked, utc_now
 
 RETRYABLE_STATUSES = {408, 425, 429, 500, 502, 503, 504}
+# Access refusals: the site (or its firewall) is declining this client.
+BLOCKED_STATUSES = {401, 403, 451}
+BACKOFF_BASE_SECONDS = 300
+BACKOFF_MAX_SECONDS = 3600
+BLOCKED_BACKOFF_MAX_SECONDS = 6 * 3600
+FAILURE_KEYS = ("consecutive_failures", "failure_backoff_until", "blocked_since", "last_failure")
 
 
-def collector_code_hash() -> str:
-    """Identify the actual shipped Python sources even before a Git repository exists."""
+def failure_backoff(failures: int, blocked: bool) -> float:
+    """Seconds to wait after the nth consecutive failed collection run.
+
+    5, 15, 45 minutes, then hourly; a site refusing access backs off to six hours, so a
+    firewall or challenge is not retried every scheduler tick, yet recovery needs no
+    operator once the site allows the client again.
+    """
+    cap = BLOCKED_BACKOFF_MAX_SECONDS if blocked else BACKOFF_MAX_SECONDS
+    return float(min(cap, BACKOFF_BASE_SECONDS * 3 ** min(failures - 1, 10)))
+
+
+def collector_code_hash(package_dir: Path | None = None, *, include_resources: bool = True) -> str:
+    """Identify the shipped Python sources and reviewed parser data, without needing Git."""
     digest = hashlib.sha256()
-    package_dir = Path(__file__).parent
-    for path in sorted(package_dir.rglob("*.py")):
+    package_dir = package_dir if package_dir is not None else Path(__file__).parent
+    sources = list(package_dir.rglob("*.py"))
+    # Reviewed data the parsers check against (rosters, county lists) counts as code.
+    if include_resources:
+        sources.extend((package_dir / "resources").rglob("*.json"))
+    for path in sorted(sources):
         name = path.relative_to(package_dir).as_posix()
         digest.update(name.encode() + b"\0" + path.read_bytes() + b"\0")
     return digest.hexdigest()
@@ -59,11 +80,34 @@ def _summary(record: dict, metadata: Path | None = None) -> dict:
         "verification_level",
         "dataset",
         "next_check_at",
+        "consecutive_failures",
     )
     result = {key: record[key] for key in keys if key in record}
     if metadata is not None:
         result["metadata_path"] = str(metadata)
     return result
+
+
+def _record_failure(store: ArchiveStore, state: dict, record: dict) -> dict:
+    """Persist one more consecutive failed run and when the next request may happen."""
+    failures = int(state.get("consecutive_failures") or 0) + 1
+    blocked = record.get("http_status") in BLOCKED_STATUSES
+    now = datetime.now(timezone.utc)
+    until = (now + timedelta(seconds=failure_backoff(failures, blocked))).isoformat(
+        timespec="seconds"
+    )
+    store.write_state(
+        {
+            **state,
+            "consecutive_failures": failures,
+            "failure_backoff_until": until,
+            "blocked_since": (state.get("blocked_since") or now.isoformat(timespec="seconds"))
+            if blocked
+            else None,
+            "last_failure": record.get("error") or record.get("outcome"),
+        }
+    )
+    return {"consecutive_failures": failures, "retry_not_before": until}
 
 
 def collect_source(
@@ -130,6 +174,24 @@ def _collect_locked(
         }
         return _summary(record, store.write_attempt(record))
 
+    backoff_until = state.get("failure_backoff_until")
+    if (
+        backoff_until
+        and not force_download
+        and datetime.fromisoformat(backoff_until) > datetime.now(timezone.utc)
+    ):
+        # Nothing is requested, so nothing is recorded per tick; the state file and the
+        # last failed attempt already explain the wait.
+        return {
+            "source_id": source.source_id,
+            "run_id": run_id,
+            "outcome": "backing_off",
+            "attempt": 0,
+            "retry_not_before": backoff_until,
+            "consecutive_failures": state.get("consecutive_failures"),
+            "error": state.get("last_failure"),
+        }
+
     cached = store.cached_archive(state)
     if (
         source.min_interval_seconds
@@ -142,18 +204,15 @@ def _collect_locked(
         )
 
         if datetime.now(timezone.utc) < next_check:
-            record = {
-                **base,
-                "fetch_id": uuid.uuid4().hex,
-                "started_at": utc_now(),
-                "finished_at": utc_now(),
-                "attempt": 0,
+            # No request is made, so no fetch record is written: one per scheduler tick
+            # would grow without bound and say nothing the state file does not.
+            return {
+                "source_id": source.source_id,
+                "run_id": run_id,
                 "outcome": "not_due",
-                "http_status": None,
+                "attempt": 0,
                 "next_check_at": next_check.isoformat(),
             }
-
-            return _summary(record, store.write_attempt(record))
     use_conditions = cached is not None and not force_download and source.format != "bundle"
     for attempt in range(1, settings.max_attempts + 1):
         conditions = {}
@@ -320,6 +379,8 @@ def _collect_locked(
         store.write_attempt(record)
         if new_state is not None:
             new_state.pop("retry_not_before", None)
+            for key in FAILURE_KEYS:
+                new_state.pop(key, None)
             store.write_state(new_state)
             return _summary(record, metadata_path)
         if retryable and attempt < settings.max_attempts:
@@ -334,5 +395,7 @@ def _collect_locked(
             if record["outcome"] == "unexpected_304":
                 cached = None
             continue
+        if record["outcome"] != "deferred":
+            record.update(_record_failure(store, state, record))
         return _summary(record, metadata_path)
     raise AssertionError("A bounded collection loop must return a result")

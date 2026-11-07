@@ -1,0 +1,155 @@
+{
+ "state": "NM",
+ "provenance": "Reviewed from the official captures recorded in tests/fixtures/new_states/provenance.json (November 6, 2026 UTC).",
+ "races": {
+  "NM-01": {
+   "candidates": [
+    "19609",
+    "19610"
+   ],
+   "counties": [
+    "BERNALILLO",
+    "CHAVES",
+    "DE BACA",
+    "GUADALUPE",
+    "LINCOLN",
+    "OTERO",
+    "SANDOVAL",
+    "SANTA FE",
+    "TORRANCE",
+    "VALENCIA"
+   ]
+  },
+  "NM-02": {
+   "candidates": [
+    "19611",
+    "19612"
+   ],
+   "counties": [
+    "BERNALILLO",
+    "CATRON",
+    "CHAVES",
+    "CIBOLA",
+    "DONA ANA",
+    "EDDY",
+    "GRANT",
+    "HIDALGO",
+    "LEA",
+    "LUNA",
+    "MCKINLEY",
+    "OTERO",
+    "SIERRA",
+    "SOCORRO",
+    "VALENCIA"
+   ]
+  },
+  "NM-03": {
+   "candidates": [
+    "19613",
+    "19614"
+   ],
+   "counties": [
+    "CHAVES",
+    "COLFAX",
+    "CURRY",
+    "EDDY",
+    "HARDING",
+    "LEA",
+    "LOS ALAMOS",
+    "MCKINLEY",
+    "MORA",
+    "QUAY",
+    "RIO ARRIBA",
+    "ROOSEVELT",
+    "SAN JUAN",
+    "SAN MIGUEL",
+    "SANDOVAL",
+    "SANTA FE",
+    "TAOS",
+    "UNION"
+   ]
+  },
+  "NM-GOV": {
+   "candidates": [
+    "20140",
+    "20141"
+   ],
+   "counties": [
+    "BERNALILLO",
+    "CATRON",
+    "CHAVES",
+    "CIBOLA",
+    "COLFAX",
+    "CURRY",
+    "DE BACA",
+    "DONA ANA",
+    "EDDY",
+    "GRANT",
+    "GUADALUPE",
+    "HARDING",
+    "HIDALGO",
+    "LEA",
+    "LINCOLN",
+    "LOS ALAMOS",
+    "LUNA",
+    "MCKINLEY",
+    "MORA",
+    "OTERO",
+    "QUAY",
+    "RIO ARRIBA",
+    "ROOSEVELT",
+    "SAN JUAN",
+    "SAN MIGUEL",
+    "SANDOVAL",
+    "SANTA FE",
+    "SIERRA",
+    "SOCORRO",
+    "TAOS",
+    "TORRANCE",
+    "UNION",
+    "VALENCIA"
+   ]
+  },
+  "NM-SEN": {
+   "candidates": [
+    "19607",
+    "19608"
+   ],
+   "counties": [
+    "BERNALILLO",
+    "CATRON",
+    "CHAVES",
+    "CIBOLA",
+    "COLFAX",
+    "CURRY",
+    "DE BACA",
+    "DONA ANA",
+    "EDDY",
+    "GRANT",
+    "GUADALUPE",
+    "HARDING",
+    "HIDALGO",
+    "LEA",
+    "LINCOLN",
+    "LOS ALAMOS",
+    "LUNA",
+    "MCKINLEY",
+    "MORA",
+    "OTERO",
+    "QUAY",
+    "RIO ARRIBA",
+    "ROOSEVELT",
+    "SAN JUAN",
+    "SAN MIGUEL",
+    "SANDOVAL",
+    "SANTA FE",
+    "SIERRA",
+    "SOCORRO",
+    "TAOS",
+    "TORRANCE",
+    "UNION",
+    "VALENCIA"
+   ]
+  }
+ }
+}

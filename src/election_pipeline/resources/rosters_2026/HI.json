@@ -1,0 +1,29 @@
+{
+ "state": "HI",
+ "provenance": "Summary-file candidate IDs. Reviewed from the official captures recorded in tests/fixtures/nine_states/provenance.json (November 6, 2026 UTC).",
+ "races": {
+  "HI-01": {
+   "candidates": [
+    "4",
+    "3",
+    "1",
+    "2"
+   ],
+   "counties": []
+  },
+  "HI-02": {
+   "candidates": [
+    "1",
+    "2"
+   ],
+   "counties": []
+  },
+  "HI-GOV": {
+   "candidates": [
+    "2",
+    "1"
+   ],
+   "counties": []
+  }
+ }
+}

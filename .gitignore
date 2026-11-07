@@ -18,3 +18,7 @@ dbt/.user.yml
 *.pem
 !/src/election_pipeline/resources/alaska-issuers.pem
 node_modules/
+
+# Patches are exchanged outside the repository.
+/*.patch
+/*.mbox

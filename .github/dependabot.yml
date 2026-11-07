@@ -1,0 +1,16 @@
+# Proposes updates for the pinned build base image and CI actions. Python pins live in
+# constraints.txt; regenerate it with the command at its top.
+version: 2
+updates:
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly

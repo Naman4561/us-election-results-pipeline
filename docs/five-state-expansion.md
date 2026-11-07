@@ -41,7 +41,7 @@ https://www3.maine.gov/sos/news/general-election-two-months-away-secretary-state
 - New total-only dbt models use shared SQL macros with thin per-state models,
   tags, fixtures and completeness tests. A candidate build selects only its own
   state and uses a separate temporary schema.
-- Candidate and eligible-county rosters are pinned in `parsers/scope_2026.py`.
+- Candidate and eligible-county rosters are pinned in `resources/rosters_2026/`.
   They are Python data intentionally included in the existing parser code hash.
   This catches dropped candidates/counties even when arithmetic would still
   reconcile, including removal of a zero-vote county. Legitimate roster/format

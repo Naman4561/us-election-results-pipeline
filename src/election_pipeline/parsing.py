@@ -104,11 +104,22 @@ def reference_check(path, source, totals, limit):
     }
 
 
+HANDLED = (OSError, ValueError, KeyError, TypeError, csv.Error, zipfile.BadZipFile)
+
+
 def _parse(archive, source, settings, output, stats, reference):
     from election_pipeline.states import parser_for
 
     validate_payload(archive, source, settings)
-    return parser_for(source)(archive, source, settings, output, stats, reference)
+    parser = parser_for(source)
+    try:
+        return parser(archive, source, settings, output, stats, reference)
+    except HANDLED:
+        raise
+    except Exception as error:
+        # An unexpected document shape (a missing line, element or attribute) is a failed
+        # validation of that snapshot, reported like any other, not a crashed run.
+        raise ValueError(f"Unexpected {type(error).__name__} while parsing: {error}") from error
 
 
 def parse_source(
@@ -197,7 +208,7 @@ def parse_source(
 
         return {**report, "output_dir": str(target)}
 
-    except (OSError, ValueError, KeyError, TypeError, csv.Error, zipfile.BadZipFile) as error:
+    except HANDLED as error:
         report.update(
             outcome="validation_failed",
             error=str(error),

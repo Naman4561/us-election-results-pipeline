@@ -51,6 +51,7 @@ const view = {
   method: "total_votes",
 };
 let data,
+  details = {},
   geometry = {},
   currentFeatures = [],
   etag,
@@ -116,8 +117,10 @@ function statusFor(code, race, county = null) {
     return { status: "unavailable" };
   const contest = state.races[race];
   if (county && state.county_detail === false) return { status: "unavailable" };
+  // County detail arrives with the state's own snapshot; until then nothing is shown.
+  if (county && !contest?.counties) return { status: "unavailable" };
   // The state hid a small count here for voter privacy; the county is left blank.
-  if (county && contest?.county_privacy_masked && !contest.counties[county])
+  if (county && contest?.county_privacy_masked && !contest.counties?.[county])
     return { status: "unavailable", masked: true };
   const feed = county ? state.county_feeds?.[county] : null;
   if (feed?.collection_status === "not_collected")
@@ -125,7 +128,7 @@ function statusFor(code, race, county = null) {
   if (feed?.collection_status === "unavailable")
     return { status: "unavailable" };
   const stats = county
-    ? contest?.counties[county]?.stats[view.method]
+    ? contest?.counties?.[county]?.stats[view.method]
     : contest?.stats[view.scope === "US" ? "total_votes" : view.method];
   if (
     !county &&
@@ -145,9 +148,7 @@ function statusFor(code, race, county = null) {
 async function loadGeometry(code) {
   if (geometry[code]) return true;
   try {
-    const response = await fetch(
-      "/" + code.toLowerCase() + "-map.json?v=expansion2",
-    );
+    const response = await fetch("/" + code.toLowerCase() + "-map.json");
     if (!response.ok) throw Error("Map unavailable");
     geometry[code] = await response.json();
     return true;
@@ -156,8 +157,35 @@ async function loadGeometry(code) {
     return false;
   }
 }
+// The national snapshot omits county detail; a state's full snapshot is loaded when it is
+// viewed, with its own ETag so unchanged polls are 304s.
+async function loadState(code) {
+  const cached = details[code];
+  const response = await fetch("/api/states/" + encodeURIComponent(code), {
+    cache: "no-store",
+    headers: cached?.etag ? { "If-None-Match": cached.etag } : {},
+    signal: AbortSignal.timeout(10000),
+  });
+  if (response.status !== 304) {
+    if (!response.ok) throw Error("State unavailable");
+    const state = await response.json();
+    if (!state.races) throw Error("Invalid state snapshot");
+    details[code] = { etag: response.headers.get("etag"), state };
+  }
+  if (details[code] && data.states[code]?.availability === "available")
+    data.states[code] = { ...data.states[code], ...details[code].state };
+}
+async function loadDetail(code) {
+  try {
+    await loadState(code);
+  } catch (error) {
+    $("notice").textContent =
+      "County detail is unavailable right now. Retrying automatically.";
+  }
+}
 async function selectState(code, race = null) {
   if (!data.coverage[code] || !(await loadGeometry(code))) return;
+  await loadDetail(code);
   view.scope = code;
   view.race = race;
   view.county = null;
@@ -403,7 +431,7 @@ function renderStatePanel() {
     view.office === "house"
       ? race || offices[view.office]
       : offices[view.office];
-  const county = contest?.counties[view.county];
+  const county = contest?.counties?.[view.county];
   const feed = state.county_feeds?.[view.county];
   const partial = state.county_collection;
   if (!view.county && partial)
@@ -833,6 +861,7 @@ async function refresh() {
       data = fresh;
       etag = response.headers.get("etag");
     }
+    if (view.scope !== "US") await loadState(view.scope);
     stale = false;
     render();
   } catch (error) {
@@ -850,7 +879,7 @@ async function refresh() {
 }
 async function start() {
   try {
-    const response = await fetch("/us-map.json?v=expansion2");
+    const response = await fetch("/us-map.json");
     if (!response.ok) throw Error("Map unavailable");
     geometry.US = await response.json();
     await refresh();
@@ -866,6 +895,7 @@ async function start() {
         }),
     );
     readLocation();
+    if (view.scope !== "US") await loadDetail(view.scope);
     if (view.scope === "US" || (await loadGeometry(view.scope))) render();
   } catch (error) {
     $("notice").textContent = "Unable to load the dashboard. Refresh to retry.";
@@ -926,6 +956,7 @@ for (const [id, change] of [
 async function restoreLocation() {
   readLocation();
   zoom = 1;
+  if (view.scope !== "US") await loadDetail(view.scope);
   if (view.scope === "US" || (await loadGeometry(view.scope))) render();
 }
 window.addEventListener("popstate", restoreLocation);

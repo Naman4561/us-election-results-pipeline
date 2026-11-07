@@ -29,7 +29,7 @@ election-collect = "election_pipeline.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-"election_pipeline" = ["resources/*.json", "resources/*.pem"]
+"election_pipeline" = ["resources/*.json", "resources/*.pem", "resources/rosters_2026/*.json"]
 "election_pipeline.dashboard" = [
     "static/*.html",
     "static/*.css",
