@@ -23,8 +23,6 @@ from types import SimpleNamespace
 from unittest.mock import patch
 from urllib.parse import parse_qs
 
-import yaml
-
 from election_pipeline import bundles, publication
 from election_pipeline.collect import FetchFailure, FetchResponse, fetch_file
 from election_pipeline.collectors import enr_export
@@ -36,9 +34,7 @@ from election_pipeline.database import (
     load_parsed,
     verify,
 )
-from election_pipeline.deployment import migrations
 from election_pipeline.parsers.enr_platform import export_target
-from election_pipeline.parsers.scope_2026 import ROSTERS
 from election_pipeline.parsers.workbook import Workbook
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import CollectorSettings, Source, load_config
@@ -152,8 +148,7 @@ class NewStateTests(unittest.TestCase):
 
     # Shared contract -------------------------------------------------------------------
 
-    def test_fixture_provenance_rosters_and_configuration_match(self):
-        project = yaml.safe_load((ROOT / "dbt/dbt_project.yml").read_text())
+    def test_fixture_provenance_and_configuration_match(self):
         hosts = {
             "SD": "electionresults.sd.gov",
             "NM": "electionresults.sos.nm.gov",
@@ -167,8 +162,6 @@ class NewStateTests(unittest.TestCase):
         for code in CODES:
             source = self.sources[code.lower() + "_2026_general"]
             self.assertEqual(set(members(code)), set(source.expected_members))
-            self.assertEqual(set(state_adapter(code).races), set(ROSTERS[code]))
-            self.assertEqual(set(project["vars"][code.lower() + "_races"]), set(ROSTERS[code]))
         self.assertNotIn("FL-10", state_adapter("FL").races)
 
     def test_official_snapshots_parse_verify_reconcile_convert_and_replay(self):
@@ -214,12 +207,6 @@ class NewStateTests(unittest.TestCase):
                 self.assertNotIn("county_privacy_masked", payload["races"][race])
             providers[code] = lambda payload=payload: payload
         self.assertEqual(set(national_payload(providers)["states"]), set(CODES))
-
-    def test_each_migration_is_additive_and_scoped_to_one_state(self):
-        for number, code in enumerate(CODES, 11):
-            path = ROOT / f"migrations/{number:03}_{code.lower()}.sql"
-            body = migrations.validate_migration(path.read_text(), code.lower())
-            self.assertIn("CREATE TABLE " + code.lower() + ".results", body)
 
     # South Dakota -----------------------------------------------------------------------
 

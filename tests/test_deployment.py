@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import tempfile
+import threading
 import unittest
 import uuid
 from contextlib import redirect_stdout
@@ -199,6 +200,37 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(
             json.loads((self.root / "expansion-latest.json").read_text())["outcome"], "failed"
         )
+
+    def test_parallel_expansion_jobs_run_at_the_same_time(self):
+        self.value["sources"]["ga_2026_general"]["enabled"] = True
+        other = copy.deepcopy(self.value["sources"]["ga_2026_general"])
+        other["source"].update(source_id="pa_2026_general", state="PA")
+        self.value["sources"]["pa_2026_general"] = other
+        catalog.write(self.path, self.value)
+        # Neither job can finish until both have started, so a sequential run would stall.
+        started = threading.Barrier(2, timeout=10)
+
+        def run(entry, prod, config):
+            started.wait()
+            return {"source_id": entry["source"]["source_id"], "outcome": "succeeded"}
+
+        with patch.object(control, "run_one", side_effect=run):
+            with redirect_stdout(io.StringIO()):
+                config = {**self.config, "EXPANSION_PARALLEL": "2"}
+                self.assertEqual(control.run_enabled(self.path, self.prod, config), 0)
+        latest = json.loads((self.root / "expansion-latest.json").read_text())
+        self.assertEqual(
+            sorted(r["source_id"] for r in latest["results"]),
+            ["ga_2026_general", "pa_2026_general"],
+        )
+
+    def test_parallel_expansion_jobs_require_a_bounded_count(self):
+        for value in ("0", "5", "two"):
+            with patch.object(control, "run_one") as run, self.assertRaises(ValueError):
+                control.run_enabled(
+                    self.path, self.prod, {**self.config, "EXPANSION_PARALLEL": value}
+                )
+            run.assert_not_called()
 
     def test_only_new_schema_additive_sql_passes(self):
         body = migrations.validate_migration(ddl(), "ga")

@@ -17,14 +17,16 @@ from dotenv import dotenv_values
 
 from election_pipeline.deployment import catalog, containers, control, dashboard
 from election_pipeline.settings import CollectorSettings
+from election_pipeline.states import STATES as REGISTERED
 from election_pipeline.storage import ArchiveStore, atomic_json, utc_now
 
-STATES = {"TX", "MN", "NC", "NE"}
+# States with a full-coverage source contract; see State.coverage_seats.
+STATES = {code for code, state in REGISTERED.items() if state.coverage_seats}
 
 
 def names(states):
     if not states or len(states) != len(set(states)) or not set(states) <= STATES:
-        raise ValueError("Choose distinct supported states: TX MN NC NE")
+        raise ValueError("Choose distinct supported states: " + " ".join(sorted(STATES)))
     return [code.lower() + "_2026_general_all" for code in states]
 
 

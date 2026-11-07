@@ -172,6 +172,7 @@ def make_payload(
     payload = {
         "state": state,
         "methods": methods,
+        "method_note": adapter.method_note,
         "county_detail": adapter.county_results,
         "vote_basis": adapter.vote_basis,
         "source_page": adapter.source_page,
@@ -193,7 +194,8 @@ def with_county_feeds(payload, geography, rows, now=None):
     now = now or datetime.now(timezone.utc)
     names = {f["id"]: f for f in geography["counties"]}
     notes = {
-        c["key"]: c.get("source_note") for c in state_adapter("MS").parser.policy()["counties"]
+        c["key"]: c.get("source_note")
+        for c in state_adapter(payload["state"]).parser.policy()["counties"]
     }
     records = {}
     accepted = set()
@@ -249,6 +251,15 @@ def with_county_feeds(payload, geography, rows, now=None):
     }
 
 
+def demo_methods(total, methods):
+    """Split a synthetic total across a state's vote methods; the last takes the rest."""
+    split = {m: total // d for m, d in zip(methods[:-1], (3, 2, 7, 50))}
+    split.update({m: 0 for m in methods[:-1] if m not in split})
+    if methods:
+        split[methods[-1]] = total - sum(split.values())
+    return split
+
+
 def demo_payload(geography, state="NC"):
     """Synthetic fixtures, explicitly labelled; never a database fallback."""
     races_config, methods = state_adapter(state).available_races, state_adapter(state).methods
@@ -276,23 +287,16 @@ def demo_payload(geography, state="NC"):
                 shares,
             ):
                 total = int(base * share)
-                election_day, early, mail = total // 3, total // 2, total // 7
                 rows.append(
                     {
                         "county": feature["name"],
                         "contest_id": race,
                         "choice": choice,
                         "choice_party": party,
-                        "election_day": election_day,
-                        "early_voting": early,
-                        "absentee_by_mail": mail,
-                        "provisional": total - election_day - early - mail,
+                        **demo_methods(total, methods[1:]),
                         "total_votes": total,
                     }
                 )
-    if state == "KY":
-        for row in rows:
-            row["absentee_combined"] = row["total_votes"] - row["election_day"]
     feeds = None
     if state_adapter(state).county_feed_status:
         configured = {
@@ -503,6 +507,7 @@ def national_payload(providers, demo=False, detail=False):
                 "vote_basis": adapter.vote_basis,
                 "source_page": adapter.source_page,
                 "methods": adapter.methods,
+                "method_note": adapter.method_note,
                 "publication": None,
                 "races": {},
             }

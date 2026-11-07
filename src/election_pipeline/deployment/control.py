@@ -9,6 +9,7 @@ import re
 import tempfile
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -699,13 +700,21 @@ def rollback(path, config):
     return {"outcome": "rolled_back", "dashboard": previous["name"]}
 
 
+def parallel_jobs(config):
+    value = config.get("EXPANSION_PARALLEL", "1")
+    if not re.fullmatch(r"[1-4]", value):
+        raise ValueError("Set EXPANSION_PARALLEL to 1-4 jobs after checking host headroom")
+    return int(value)
+
+
 def run_enabled(path, prod, config):
-    """One bounded sequential worker; never run or reconfigure baseline sources."""
+    """One bounded worker, sequential unless EXPANSION_PARALLEL allows more jobs at once;
+    never run or reconfigure baseline sources."""
     value = catalog.read(path)
     catalog.verify_baseline(value, prod)
     containers.limits(config)
+    workers = parallel_jobs(config)
     deadline = time.monotonic() + int(config.get("CYCLE_SECONDS", "270"))
-    results = []
     entries = [
         (name, e)
         for name, e in value["sources"].items()
@@ -717,16 +726,13 @@ def run_enabled(path, prod, config):
         path = Path(prod["DATA_DIR"]) / "runs" / pair[0] / "latest.json"
         return path.stat().st_mtime if path.exists() else 0
 
-    for name, entry in sorted(entries, key=last_run):
+    def job(name, entry):
         if time.monotonic() >= deadline:
-            results.append(
-                {"source_id": name, "outcome": "deferred", "error": "Cycle budget reached"}
-            )
-            continue
+            return {"source_id": name, "outcome": "deferred", "error": "Cycle budget reached"}
         try:
             current = catalog.read(path)["sources"][name]
             if not current["enabled"]:
-                continue
+                return None
             job_config = {
                 **config,
                 "JOB_TIMEOUT": str(
@@ -743,9 +749,13 @@ def run_enabled(path, prod, config):
         for key, secret in prod.items():
             if "PASSWORD" in key and secret:
                 encoded = encoded.replace(secret, "[redacted]")
-        result = json.loads(encoded)
-        results.append(result)
-        print(json.dumps(result), flush=True)
+        print(encoded, flush=True)
+        return json.loads(encoded)
+
+    # Each job has its own container limits, so N parallel jobs use N times the budget.
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        jobs = [pool.submit(job, name, entry) for name, entry in sorted(entries, key=last_run)]
+        results = [r for r in (j.result() for j in jobs) if r is not None]
     atomic_json(
         Path(config["CONTROL_STATE_DIR"]) / "expansion-latest.json",
         {

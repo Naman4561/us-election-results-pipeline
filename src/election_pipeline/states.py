@@ -35,6 +35,15 @@ class State:
     # Parser module under election_pipeline.parsers; defaults to the schema name. Oregon's
     # schema "or" is a Python keyword, so its parser module has a different name.
     parser_module: str = ""
+    # dbt models and migration are hand-written rather than generated from this entry by
+    # scripts/new_state.py with the shared total_only macros.
+    custom_models: bool = False
+    # A full-coverage source (deployment/coverage.py) may select the Senate, any of these
+    # House seats and, unless the state elects none, the governor. 0: no such source.
+    coverage_seats: int = 0
+    coverage_governor: bool = True
+    # Shown under a race when the state's vote-method breakdown needs explaining.
+    method_note: str = ""
 
     @property
     def schema(self):
@@ -56,15 +65,14 @@ class State:
     @property
     def available_races(self):
         """All supported offices; an explicit source contract selects its coverage."""
-        seats = {"NC": 14, "MN": 8, "NE": 3, "TX": 38}.get(self.code)
-        if seats is None:
+        if not self.coverage_seats:
             return self.races
         return {
             **{f"{self.code}-SEN": "U.S. Senate"},
-            **({f"{self.code}-GOV": "Governor"} if self.code != "NC" else {}),
+            **({f"{self.code}-GOV": "Governor"} if self.coverage_governor else {}),
             **{
                 f"{self.code}-{n:02}": f"U.S. House · {self.code}-{n:02}"
-                for n in range(1, seats + 1)
+                for n in range(1, self.coverage_seats + 1)
             },
         }
 
@@ -96,6 +104,7 @@ STATES = {
         vote_basis="covered_counties_named_candidates",
         collection_backend="county_files",
         county_feed_status=True,
+        custom_models=True,
     ),
     "AK": State(
         "AK",
@@ -115,6 +124,9 @@ STATES = {
         (1, 3, 4, 11),
         ("total_votes", "election_day", "early_voting", "absentee_by_mail", "provisional"),
         source_page="https://er.ncsbe.gov/",
+        custom_models=True,
+        coverage_seats=14,
+        coverage_governor=False,
     ),
     "KY": State(
         "KY",
@@ -123,6 +135,11 @@ STATES = {
         tuple(range(1, 7)),
         ("total_votes", "election_day", "absentee_combined"),
         source_page="https://vrsws.sos.ky.gov/liveresults/",
+        method_note=(
+            "Kentucky combines absentee votes. Separate early, mail and provisional counts "
+            "are unavailable. Precinct reporting status is not a percentage of votes counted."
+        ),
+        custom_models=True,
     ),
     "MN": State(
         "MN",
@@ -131,6 +148,8 @@ STATES = {
         (1,),
         ("total_votes",),
         source_page="https://electionresults.sos.mn.gov/",
+        custom_models=True,
+        coverage_seats=8,
     ),
     "NE": State(
         "NE",
@@ -141,6 +160,8 @@ STATES = {
         governor=True,
         county_results=False,
         source_page="https://electionresults.nebraska.gov/",
+        custom_models=True,
+        coverage_seats=3,
     ),
     "TX": State(
         "TX",
@@ -151,6 +172,8 @@ STATES = {
         governor=True,
         county_results=False,
         source_page="https://goelect.txelections.civixapps.com/ivis-enr-ui/races",
+        custom_models=True,
+        coverage_seats=38,
     ),
     "GA": State(
         "GA",
