@@ -103,7 +103,7 @@ class RetentionTests(unittest.TestCase):
                     {
                         "outcome": "passed" if passed else "failed",
                         "temporary_database_removed": True,
-                        "backup_dir": str(work / "bundle"),
+                        "backup_dir": str((work / "bundle").resolve()),
                     }
                 )
             )
