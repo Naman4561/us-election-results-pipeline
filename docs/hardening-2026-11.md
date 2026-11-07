@@ -34,8 +34,11 @@ pass.
   then pin those exact digests in a separate, reviewed change.
 - **Tests and dev tools in the image.** `scripts/stage_coverage_release.sh` runs the full
   test suite inside the built image as a release gate, so they are needed there.
-- **Worker capacity.** Whether one sequential worker keeps up needs production run
-  durations; see below.
+- **Worker capacity.** One sequential worker keeps up in steady state: on 7 November
+  all 18 expansion sources fit the 270 second cycle, most as `not_due` or
+  `already_current`. A catch-up after 16 hours of stopped timers overran it (two
+  timeouts, five deferred). `EXPANSION_PARALLEL` (1-4, default 1) allows more jobs at
+  once if deferrals recur; see `docs/isolated-deployments.md`.
 - **Stricter lint rules.** The `flake8-bugbear` loop-variable findings are all test
   closures called within the same iteration; enabling the rules would add churn only.
 
