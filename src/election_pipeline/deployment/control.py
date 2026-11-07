@@ -154,7 +154,7 @@ def install_controls(config, unit_root=Path("/etc/systemd/system")):
         if unit == "election-backup.service":
             text += (
                 f"ExecStartPost=\nExecStartPost={root}/.venv/bin/python "
-                f"{root}/scripts/prune_backups.py --keep 3 --apply\n"
+                f"{root}/scripts/prune_backups.py --keep 1 --apply\n"
             )
         (directory / "deployment.conf").write_text(text, encoding="utf-8")
     for unit in ("election-expansion.service", "election-expansion.timer"):
