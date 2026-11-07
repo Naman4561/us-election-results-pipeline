@@ -255,7 +255,8 @@ class MonitorTests(unittest.TestCase):
             self.root / "backups/latest-backup.json",
             {
                 "outcome": "uploaded",
-                "finished_at": (self.now - timedelta(hours=3)).isoformat(),
+                # Backups run every six hours; past seven the report is overdue.
+                "finished_at": (self.now - timedelta(hours=8)).isoformat(),
             },
         )
         issues = self.assess(
@@ -266,6 +267,26 @@ class MonitorTests(unittest.TestCase):
         self.assertTrue(
             {"backup", "dashboard", "timer/election-backup.timer", "disk//"} <= set(issues)
         )
+
+    def test_backup_between_scheduled_runs_is_healthy(self):
+        atomic_json(
+            self.root / "backups/latest-backup.json",
+            {"outcome": "uploaded", "finished_at": (self.now - timedelta(hours=6)).isoformat()},
+        )
+        self.assertNotIn("backup", self.assess())
+
+    def test_failed_s3_retention_is_reported_beside_an_uploaded_backup(self):
+        atomic_json(
+            self.root / "backups/latest-backup.json",
+            {
+                "outcome": "uploaded",
+                "finished_at": self.recent,
+                "s3_retention": {"outcome": "failed", "error": "AccessDenied"},
+            },
+        )
+        issues = self.assess()
+        self.assertIn("backup/s3-retention", issues)
+        self.assertNotIn("backup", issues)
 
     def test_alert_deduplication_reminder_and_recovery(self):
         issue = {"backup": "Latest run did not complete successfully"}

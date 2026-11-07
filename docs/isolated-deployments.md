@@ -99,7 +99,7 @@ backup and monitor use the versioned controls on their next invocation. It does
 not edit `production.env`, retag an image, rerun bootstrap, stop a timer, recreate
 PostgreSQL or restart the existing collectors.
 
-Confirm the new monitor reports `healthy` and the next hourly backup is uploaded.
+Confirm the new monitor reports `healthy` and the next backup is uploaded.
 If the backup is already running, let it finish; registration refuses to proceed
 while a legacy backup invocation might still be in flight.
 
@@ -275,5 +275,5 @@ into the frozen production checkout during reporting.
 Backups cover all registered schemas and sources, even before public activation.
 They retain raw evidence, source definitions, each pinned collector release, the
 deployment catalog and active/previous dashboard coverage. They do not export
-container images on every hourly run: retain or rebuild the registered releases'
+container images on every run: retain or rebuild the registered releases'
 images separately, and keep the existing private credentials recovery procedure.

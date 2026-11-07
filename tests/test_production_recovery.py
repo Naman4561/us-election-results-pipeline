@@ -8,6 +8,7 @@ import tempfile
 import unittest
 import zipfile
 from contextlib import redirect_stdout
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -282,6 +283,91 @@ class ProductionRecoveryTests(unittest.TestCase):
             json.loads(marker.read_text()),
             self.receipt,
         )
+
+
+class RemoteRetentionTests(unittest.TestCase):
+    """Backups outside the newest five are tagged for the 3-day lifecycle rule."""
+
+    CONFIG = {
+        "AWS_PROFILE": "election-backup",
+        "AWS_DEFAULT_REGION": "us-east-2",
+        "BACKUP_BUCKET": "private-bucket",
+        "BACKUP_PREFIX": "election-pipeline",
+    }
+    NOW = datetime(2026, 11, 8, 12, tzinfo=timezone.utc)
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.state = Path(temporary.name) / "s3-retention.json"
+
+    def listing(self, completed, abandoned=()):
+        """Backups uploaded hours_ago; abandoned ones lack a completion record."""
+        contents = []
+        for number, hours_ago in [*completed, *abandoned]:
+            backup_id = f"backup_{number:032x}"
+            stamp = (self.NOW - timedelta(hours=hours_ago)).isoformat().replace("+00:00", "Z")
+            names = ["bundle.zip"] + (["complete.json"] if (number, hours_ago) in completed else [])
+            for name in names:
+                key = f"election-pipeline/rolling/{backup_id}/{name}"
+                contents.append({"Key": key, "LastModified": stamp})
+        contents.append(
+            {
+                "Key": "election-pipeline/rolling/not-a-backup/x",
+                "LastModified": "2026-11-01T00:00:00Z",
+            }
+        )
+        return {"Contents": contents}
+
+    def run_retention(self, listing, current):
+        tagged = []
+
+        def s3api(config, operation, *arguments):
+            if operation == "list-objects-v2":
+                return listing
+            tagged.append(arguments[arguments.index("--key") + 1])
+            self.assertIn("TagSet=[{Key=retention,Value=expire}]", arguments)
+            return {}
+
+        with patch.object(job, "aws_s3api", side_effect=s3api):
+            result = job.mark_expired_backups(
+                self.CONFIG, self.state, f"backup_{current:032x}", now=self.NOW
+            )
+        return result, tagged
+
+    def test_newest_five_are_kept_and_older_backups_are_tagged(self):
+        # Eight complete backups six hours apart; number 8 was just uploaded.
+        completed = [(n, (8 - n) * 6) for n in range(1, 9)]
+        result, tagged = self.run_retention(self.listing(completed), 8)
+        self.assertEqual(result["kept"], [f"backup_{n:032x}" for n in (8, 7, 6, 5, 4)])
+        self.assertEqual(result["newly_marked"], [f"backup_{n:032x}" for n in (1, 2, 3)])
+        self.assertEqual(len(tagged), 6)  # bundle.zip and complete.json of each
+        self.assertFalse(any(f"backup_{n:032x}" in key for n in (4, 5, 6, 7, 8) for key in tagged))
+
+    def test_marked_backups_are_not_tagged_again(self):
+        completed = [(n, (8 - n) * 6) for n in range(1, 9)]
+        self.run_retention(self.listing(completed), 8)
+        completed.append((9, 0))
+        result, tagged = self.run_retention(self.listing(completed), 9)
+        self.assertEqual(result["newly_marked"], [f"backup_{4:032x}"])
+        self.assertEqual(len(tagged), 2)
+
+    def test_fewer_than_five_backups_tags_nothing(self):
+        result, tagged = self.run_retention(self.listing([(1, 12), (2, 6), (3, 0)]), 3)
+        self.assertEqual(tagged, [])
+        self.assertEqual(len(result["kept"]), 3)
+
+    def test_abandoned_uploads_are_tagged_only_after_a_day(self):
+        listing = self.listing([(1, 0)], abandoned=[(2, 30), (3, 2)])
+        result, tagged = self.run_retention(listing, 1)
+        self.assertEqual(result["newly_marked"], [f"backup_{2:032x}"])
+        self.assertEqual(tagged, [f"election-pipeline/rolling/backup_{2:032x}/bundle.zip"])
+
+    def test_missing_current_upload_stops_before_tagging(self):
+        completed = [(n, (8 - n) * 6) for n in range(1, 9)]
+        with self.assertRaises(ValueError):
+            self.run_retention(self.listing(completed), 99)
+        self.assertFalse(self.state.exists())
 
 
 if __name__ == "__main__":

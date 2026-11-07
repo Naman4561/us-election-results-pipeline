@@ -146,11 +146,17 @@ def assess(prod, config, now):
     problem = report_problem(
         Path(config.get("BACKUP_DIR", "/srv/election-pipeline/backups")) / "latest-backup.json",
         {"uploaded"},
-        int(config.get("MAX_BACKUP_AGE_SECONDS", "7200")),
+        int(config.get("MAX_BACKUP_AGE_SECONDS", "25200")),
         now,
     )
     if problem:
         issues["backup"] = problem
+    else:
+        retention = read_json(
+            Path(config.get("BACKUP_DIR", "/srv/election-pipeline/backups")) / "latest-backup.json"
+        ).get("s3_retention")
+        if retention and retention.get("outcome") != "applied":
+            issues["backup/s3-retention"] = "Older S3 backups were not marked for expiry"
 
     for timer in ("election-pipeline.timer", "election-backup.timer"):
         if not systemd("is-active", timer):

@@ -3,6 +3,8 @@ Collection, validation, transformation, visualization, and analysis of official 
 
 Nov 2
 
+Backups (every six hours to S3, three days and the newest five retained): [docs/backups.md](docs/backups.md).
+
 Adding a state (registry entry, parser, then generated dbt models and migration): [docs/adding-a-state.md](docs/adding-a-state.md).
 
 Multi-state architecture, Kentucky source contract, validation and rollout: [docs/multistate-expansion.md](docs/multistate-expansion.md).

@@ -11,6 +11,7 @@ import tempfile
 import time
 import zipfile
 from contextlib import nullcontext
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from dotenv import dotenv_values
@@ -98,6 +99,91 @@ def upload_bundle(config, bundle, archive, receipt):
     # Uploaded last: a partial upload has no completion record.
     aws_copy(config, receipt_path, location + "complete.json")
     atomic_json(bundle / "uploaded.json", receipt)
+
+
+def aws_s3api(config, *arguments):
+    result = subprocess.run(
+        [
+            "/usr/local/bin/aws",
+            "--profile",
+            config["AWS_PROFILE"],
+            "--region",
+            config["AWS_DEFAULT_REGION"],
+            "s3api",
+            *arguments,
+            "--output",
+            "json",
+        ],
+        capture_output=True,
+        text=True,
+        timeout=300,
+        check=False,
+    )
+    if result.returncode:
+        raise RuntimeError("S3 request failed: " + result.stderr[-2000:])
+    return json.loads(result.stdout) if result.stdout.strip() else {}
+
+
+def mark_expired_backups(config, state_path, current_id, now=None):
+    """Tag remote backups outside the newest few as ``retention=expire``.
+
+    The bucket's lifecycle rule deletes tagged objects once they are older than its
+    expiry (3 days), so a backup survives while it is recent or among the newest
+    ``BACKUP_S3_KEEP_LATEST``. Nothing is tagged unless a backup was just uploaded, so if
+    backups stop the newest ones are kept indefinitely. The backup user needs
+    ``s3:PutObjectTagging`` only; it cannot delete.
+    """
+    keep_latest = int(config.get("BACKUP_S3_KEEP_LATEST", "5"))
+    if keep_latest < 1:
+        raise ValueError("Keep at least one remote backup")
+    now = now or datetime.now(timezone.utc)
+    bucket, prefix = config["BACKUP_BUCKET"], f"{config['BACKUP_PREFIX']}/rolling/"
+    listing = aws_s3api(config, "list-objects-v2", "--bucket", bucket, "--prefix", prefix)
+
+    objects, completed = {}, {}
+    for item in listing.get("Contents", []):
+        backup_id, _, name = item["Key"][len(prefix) :].partition("/")
+        if not re.fullmatch(ID_PATTERN, backup_id):
+            continue
+        modified = datetime.fromisoformat(item["LastModified"].replace("Z", "+00:00"))
+        objects.setdefault(backup_id, []).append((item["Key"], modified))
+        if name == "complete.json":
+            completed[backup_id] = modified
+
+    newest = sorted(completed, key=completed.get, reverse=True)[:keep_latest]
+    if current_id not in newest:
+        raise ValueError("The uploaded backup is missing from the remote listing")
+    # An upload without a completion record is abandoned once it is a day old.
+    stale = {
+        backup_id
+        for backup_id, items in objects.items()
+        if backup_id not in completed and now - max(m for _, m in items) > timedelta(days=1)
+    }
+    expired = (set(completed) - set(newest)) | stale
+
+    state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
+    marked = set(state.get("marked", []))
+    for backup_id in sorted(expired - marked):
+        for key, _ in objects[backup_id]:
+            aws_s3api(
+                config,
+                "put-object-tagging",
+                "--bucket",
+                bucket,
+                "--key",
+                key,
+                "--tagging",
+                "TagSet=[{Key=retention,Value=expire}]",
+            )
+        marked.add(backup_id)
+        # Saved per backup so an interrupted run does not repeat finished work.
+        atomic_json(state_path, {"marked": sorted(marked & set(objects))})
+    atomic_json(state_path, {"marked": sorted(marked & set(objects))})
+    return {
+        "outcome": "applied",
+        "kept": newest,
+        "newly_marked": sorted(expired - set(state.get("marked", []))),
+    }
 
 
 def unpack_bundle(archive, destination, receipt):
@@ -221,6 +307,13 @@ def main():
                 "backup_id": bundle.name,
                 "archive_bytes": receipt["bytes"],
             }
+            # The backup is safe in S3 either way; the monitor reports a retention failure.
+            try:
+                result["s3_retention"] = mark_expired_backups(
+                    config, args.destination / "s3-retention.json", bundle.name
+                )
+            except Exception as error:
+                result["s3_retention"] = {"outcome": "failed", "error": str(error)[-500:]}
 
         else:
             work = Path(tempfile.mkdtemp(prefix="restore-", dir=args.destination))

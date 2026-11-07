@@ -1,8 +1,8 @@
 [Unit]
-Description=Upload an election backup every hour
+Description=Upload an election backup every six hours
 
 [Timer]
-OnCalendar=*-*-* *:02:00
+OnCalendar=*-*-* 00/6:02:00
 Persistent=true
 AccuracySec=1s
 
