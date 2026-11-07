@@ -47,6 +47,16 @@ def expands_coverage(old, new):
     )
 
 
+# Collector settings that identify the client rather than define the source contract.
+# A re-pin may change them; the image's configuration supplies the value at run time.
+IDENTIFICATION_SETTINGS = ("user_agent",)
+
+
+def contract_settings(settings):
+    """Settings a re-pin must keep unchanged (all but the client identification)."""
+    return {k: v for k, v in dict(settings).items() if k not in IDENTIFICATION_SETTINGS}
+
+
 def validate(value):
     if value.get("version") != 1 or type(value.get("generation")) is not int:
         raise ValueError("Unsupported deployment catalog")

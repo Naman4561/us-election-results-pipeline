@@ -651,14 +651,8 @@ function renderStatePanel() {
     box.append(head, bar);
     target.append(box);
   }
-  if (code === "KY")
-    target.append(
-      element(
-        "p",
-        "Kentucky combines absentee votes. Separate early, mail and provisional counts are unavailable. Precinct reporting status is not a percentage of votes counted.",
-        "empty",
-      ),
-    );
+  if (state.method_note)
+    target.append(element("p", state.method_note, "empty"));
   if (state.county_detail === false)
     target.append(
       element(

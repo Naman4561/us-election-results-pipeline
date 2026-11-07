@@ -10,7 +10,7 @@ from pathlib import Path
 ID_PATTERN = r"backup_[0-9a-f]{32}"
 
 
-def prune_backups(destination, keep=3, apply=False):
+def prune_backups(destination, keep=1, apply=False):
     if keep < 1:
         raise ValueError("Keep at least one uploaded backup")
 
@@ -67,7 +67,7 @@ def main():
         type=Path,
         default=Path("/srv/election-pipeline/backups"),
     )
-    parser.add_argument("--keep", type=int, default=3)
+    parser.add_argument("--keep", type=int, default=1)
     parser.add_argument("--apply", action="store_true")
     args = parser.parse_args()
 

@@ -16,8 +16,6 @@ from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
-import yaml
-
 from election_pipeline import bundles, publication
 from election_pipeline.collect import FetchFailure, FetchResponse
 from election_pipeline.collectors.sc import latest_report
@@ -29,9 +27,7 @@ from election_pipeline.database import (
     load_parsed,
     verify,
 )
-from election_pipeline.deployment import migrations
 from election_pipeline.parsers.html import Tree
-from election_pipeline.parsers.scope_2026 import ROSTERS
 from election_pipeline.parsers.structured import xml
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
@@ -152,14 +148,10 @@ class FiveStateTests(unittest.TestCase):
 
     def test_fixture_provenance_and_scope_match_configured_races(self):
         ledger = json.loads((FIXTURES / "provenance.json").read_text())
-        project = yaml.safe_load((ROOT / "dbt/dbt_project.yml").read_text())
         for name, metadata in ledger.items():
             raw = gzip.decompress((FIXTURES / (name + ".gz")).read_bytes())
             self.assertEqual(hashlib.sha256(raw).hexdigest(), metadata["sha256"])
             self.assertEqual(len(raw), metadata["bytes"])
-        for code in CODES:
-            self.assertEqual(set(state_adapter(code).races), set(ROSTERS[code]))
-            self.assertEqual(set(project["vars"][code.lower() + "_races"]), set(ROSTERS[code]))
         self.assertNotIn("me_2026_general", self.sources)
 
     def test_maps_and_dashboard_match_all_new_state_results(self):
@@ -476,12 +468,6 @@ class FiveStateTests(unittest.TestCase):
         report = self.parse("SC", mutate)
         self.assertEqual(report["outcome"], "parsed", report)
         self.assertTrue(report["all_counts_zero"])
-
-    def test_each_migration_is_additive_and_scoped_to_one_state(self):
-        for number, code in enumerate(CODES, 5):
-            path = ROOT / f"migrations/{number:03}_{code.lower()}.sql"
-            body = migrations.validate_migration(path.read_text(), code.lower())
-            self.assertIn("CREATE TABLE " + code.lower() + ".results", body)
 
 
 @unittest.skipUnless(

@@ -516,6 +516,14 @@ class CoverageDeploymentTests(unittest.TestCase):
                 self.repin(mutate)
             self.assertEqual(self.path.read_bytes(), before)
 
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_private_repin_accepts_and_records_a_new_user_agent(self):
+        self.add()
+        agent = "US-Election-Results-Pipeline/0.1 (+https://example.com/project)"
+        self.repin(lambda meta: meta["settings"].update(user_agent=agent))
+        entry = catalog.read(self.path)["sources"][self.name]
+        self.assertEqual(entry["settings"]["user_agent"], agent)
+
     def test_repin_rejects_changed_applied_migrations(self):
         self.add()
         before = self.path.read_bytes()

@@ -10,6 +10,7 @@ import subprocess
 import time
 import uuid
 from contextlib import ExitStack, suppress
+from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -17,14 +18,16 @@ from dotenv import dotenv_values
 
 from election_pipeline.deployment import catalog, containers, control, dashboard
 from election_pipeline.settings import CollectorSettings
+from election_pipeline.states import STATES as REGISTERED
 from election_pipeline.storage import ArchiveStore, atomic_json, utc_now
 
-STATES = {"TX", "MN", "NC", "NE"}
+# States with a full-coverage source contract; see State.coverage_seats.
+STATES = {code for code, state in REGISTERED.items() if state.coverage_seats}
 
 
 def names(states):
     if not states or len(states) != len(set(states)) or not set(states) <= STATES:
-        raise ValueError("Choose distinct supported states: TX MN NC NE")
+        raise ValueError("Choose distinct supported states: " + " ".join(sorted(STATES)))
     return [code.lower() + "_2026_general_all" for code in states]
 
 
@@ -107,7 +110,8 @@ def repin_private(path, release, identity, revision, name, prod):
         raise ValueError("Image Python sources differ from the release checkout")
     if (
         catalog.source_from_json(meta["source"]) != catalog.source_from_json(before["source"])
-        or CollectorSettings(**meta["settings"]) != CollectorSettings(**before["settings"])
+        or catalog.contract_settings(asdict(CollectorSettings(**meta["settings"])))
+        != catalog.contract_settings(asdict(CollectorSettings(**before["settings"])))
         or meta["races"] != before["races"]
     ):
         raise ValueError("A private re-pin cannot change source, settings or race coverage")
@@ -144,6 +148,7 @@ def repin_private(path, release, identity, revision, name, prod):
             revision=revision,
             release_path=str(Path(release).resolve()),
             release_sha256=fingerprint,
+            settings=asdict(CollectorSettings(**meta["settings"])),
         )
         # Keep historical DB publications; require fresh validation for this image.
         for key in ("candidate_id", "publication_id", "published_at"):

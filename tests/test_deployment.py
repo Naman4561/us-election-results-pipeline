@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import tempfile
+import threading
 import unittest
 import uuid
 from contextlib import redirect_stdout
@@ -199,6 +200,37 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(
             json.loads((self.root / "expansion-latest.json").read_text())["outcome"], "failed"
         )
+
+    def test_parallel_expansion_jobs_run_at_the_same_time(self):
+        self.value["sources"]["ga_2026_general"]["enabled"] = True
+        other = copy.deepcopy(self.value["sources"]["ga_2026_general"])
+        other["source"].update(source_id="pa_2026_general", state="PA")
+        self.value["sources"]["pa_2026_general"] = other
+        catalog.write(self.path, self.value)
+        # Neither job can finish until both have started, so a sequential run would stall.
+        started = threading.Barrier(2, timeout=10)
+
+        def run(entry, prod, config):
+            started.wait()
+            return {"source_id": entry["source"]["source_id"], "outcome": "succeeded"}
+
+        with patch.object(control, "run_one", side_effect=run):
+            with redirect_stdout(io.StringIO()):
+                config = {**self.config, "EXPANSION_PARALLEL": "2"}
+                self.assertEqual(control.run_enabled(self.path, self.prod, config), 0)
+        latest = json.loads((self.root / "expansion-latest.json").read_text())
+        self.assertEqual(
+            sorted(r["source_id"] for r in latest["results"]),
+            ["ga_2026_general", "pa_2026_general"],
+        )
+
+    def test_parallel_expansion_jobs_require_a_bounded_count(self):
+        for value in ("0", "5", "two"):
+            with patch.object(control, "run_one") as run, self.assertRaises(ValueError):
+                control.run_enabled(
+                    self.path, self.prod, {**self.config, "EXPANSION_PARALLEL": value}
+                )
+            run.assert_not_called()
 
     def test_only_new_schema_additive_sql_passes(self):
         body = migrations.validate_migration(ddl(), "ga")
@@ -570,7 +602,7 @@ class RepinTests(unittest.TestCase):
         for key, value in changes.items():
             if key in ("url", "source_id"):
                 meta["source"][key] = value
-            elif key == "timeout_seconds":
+            elif key in ("timeout_seconds", "user_agent"):
                 meta["settings"][key] = value
             else:
                 meta[key] = value
@@ -661,6 +693,18 @@ class RepinTests(unittest.TestCase):
                 self.repin(meta=self.metadata(**changes))
         self.assertEqual(self.prepared, [])
         self.assertEqual(self.entry(), self.before)
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_a_new_user_agent_alone_may_be_repinned_and_is_recorded(self):
+        agent = "US-Election-Results-Pipeline/0.1 (+https://example.com/project)"
+        result = self.repin(meta=self.metadata(user_agent=agent))
+        self.assertEqual(result["outcome"], "repinned")
+        after = self.entry()
+        self.assertEqual(after["settings"]["user_agent"], agent)
+        self.assertEqual(
+            {k: v for k, v in after["settings"].items() if k != "user_agent"},
+            {k: v for k, v in self.before["settings"].items() if k != "user_agent"},
+        )
 
     def test_failed_validation_keeps_the_old_pin(self):
         failure = {"source_id": "ga_2026_general", "outcome": "failed", "error": "reset"}

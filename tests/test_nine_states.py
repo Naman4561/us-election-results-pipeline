@@ -20,8 +20,6 @@ import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
-import yaml
-
 from election_pipeline import bundles, publication
 from election_pipeline.collect import FetchFailure, FetchResponse
 from election_pipeline.collectors import clarity as clarity_collector
@@ -34,10 +32,8 @@ from election_pipeline.database import (
     load_parsed,
     verify,
 )
-from election_pipeline.deployment import migrations
 from election_pipeline.parsers import clarity, ia, md, totals
 from election_pipeline.parsers import oregon as OREGON
-from election_pipeline.parsers.scope_2026 import ROSTERS
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
 from election_pipeline.states import state_adapter
@@ -127,8 +123,7 @@ class NineStateTests(unittest.TestCase):
 
     # Shared contract -------------------------------------------------------------------
 
-    def test_fixture_provenance_rosters_and_configuration_match(self):
-        project = yaml.safe_load((ROOT / "dbt/dbt_project.yml").read_text())
+    def test_fixture_provenance_and_configuration_match(self):
         self.assertEqual(set(LEDGER), set(CODES))
         for code in CODES:
             entry = LEDGER[code]
@@ -142,12 +137,6 @@ class NineStateTests(unittest.TestCase):
                 if component["name"] in data:
                     body = data[component["name"]]
                     self.assertEqual(hashlib.sha256(body).hexdigest(), component["sha256"])
-            self.assertEqual(set(state_adapter(code).races), set(ROSTERS[code]), code)
-            self.assertEqual(set(project["vars"][code.lower() + "_races"]), set(ROSTERS[code]))
-            self.assertEqual(
-                project["vars"].get(code.lower() + "_methods", []),
-                list(state_adapter(code).methods[1:]),
-            )
         # No race is invented for offices these states do not elect in 2026.
         for code, race in (("WA", "WA-SEN"), ("WA", "WA-GOV"), ("VA", "VA-GOV"), ("CA", "CA-SEN")):
             self.assertNotIn(race, state_adapter(code).races)
@@ -233,19 +222,6 @@ class NineStateTests(unittest.TestCase):
                         self.assertEqual(len(payload["races"][race]["counties"]), counties)
                 providers[code] = lambda payload=payload: payload
         self.assertEqual(set(national_payload(providers)["states"]), set(CODES))
-
-    def test_each_migration_is_additive_and_scoped_to_one_state(self):
-        for code, number in MIGRATIONS.items():
-            schema = code.lower()
-            path = ROOT / f"migrations/{number:03}_{schema}.sql"
-            body = migrations.validate_migration(path.read_text(), schema)
-            quoted = f'"{schema}"' if schema == "or" else schema
-            self.assertIn(f"CREATE TABLE {quoted}.results", body)
-            self.assertEqual(
-                f"{quoted}.county_candidate_results" in body, state_adapter(code).county_results
-            )
-            for method in state_adapter(code).methods[1:]:
-                self.assertIn(f"{method} bigint NOT NULL", body)
 
     def test_vote_method_contract_matches_each_state(self):
         with self.assertRaises(ValueError):

@@ -58,7 +58,7 @@ class PruneDataTests(unittest.TestCase):
 
     def test_dry_run_plans_only_recreatable_old_files(self):
         result = self.run_prune(apply=False)
-        planned = set(result["removed"])
+        planned = {Path(path).as_posix() for path in result["removed"]}
         self.assertEqual(
             planned,
             {

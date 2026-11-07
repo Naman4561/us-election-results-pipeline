@@ -1,5 +1,5 @@
 [Unit]
-Description=Upload an election backup and retain three uploaded local bundles
+Description=Upload an election backup and retain one uploaded local bundle
 Requires=docker.service
 After=docker.service network-online.target
 Wants=network-online.target
@@ -14,7 +14,7 @@ WorkingDirectory=/opt/election-pipeline
 UMask=0077
 Nice=10
 ExecStart=/opt/election-pipeline/.venv/bin/python scripts/production_recovery.py backup
-ExecStartPost=/opt/election-pipeline/.venv/bin/python scripts/prune_backups.py --keep 3 --apply
+ExecStartPost=/opt/election-pipeline/.venv/bin/python scripts/prune_backups.py --keep 1 --apply
 Restart=on-failure
 RestartSec=30s
 TimeoutStartSec=40min

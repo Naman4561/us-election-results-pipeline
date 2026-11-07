@@ -212,11 +212,18 @@ sudo systemctl start election-expansion.service
 sudo journalctl -u election-expansion.service -n 30 --no-pager -o cat
 ```
 
-New states run sequentially within a 270 second cycle, with per-job timeouts and
-container CPU/RAM limits. A failing state does not prevent another admitted state
-from running. States exceeding the cycle budget are reported as deferred, and
-monitoring checks each enabled source's freshness separately. Revisit capacity
-before adding enough states to exhaust that budget.
+New states run within a 270 second cycle, with per-job timeouts and container
+CPU/RAM limits. A failing state does not prevent another admitted state from
+running. States exceeding the cycle budget are reported as deferred, and
+monitoring checks each enabled source's freshness separately.
+
+Jobs run one at a time unless `EXPANSION_PARALLEL` (1-4, default 1) in the
+deployment env allows more. Each parallel job gets the full `EXPANSION_CPUS` and
+`EXPANSION_MEMORY`, so two jobs need twice that headroom beside the baseline
+collector and PostgreSQL. Raise it when `expansion-latest.json` starts reporting
+deferred states, after measuring free memory during a live cycle. Publications
+for different states already overlap safely: each takes its own advisory lock and
+dbt selects only that state's tagged models.
 
 ## Move an active source to a fixed image
 
@@ -230,13 +237,14 @@ sudo "$CR/.venv/bin/python" "$CR/scripts/deploy.py" repin \
 ```
 
 - **What it accepts:** registered expansion sources only. The new image must report
-  the identical source contract, collector settings and races, and the release must
-  contain every applied migration unchanged.
+  the identical source contract, collector settings and races (only the identifying
+  `user_agent` may differ), and the release must contain every applied migration
+  unchanged.
 - **Validation:** the new image runs a prepare-only cycle: collect, parse, load and
   validate a candidate. Nothing is published. The pin changes only if that cycle
   returns `validated`, the catalog entry is unchanged, and no backup is running.
 - **What changes:** only `image_id`, `revision`, `release_path` and
-  `release_sha256`. The source ID, archives, flags and publications stay the same.
+  `release_sha256` (and the recorded `user_agent`, if the image's differs). The source ID, archives, flags and publications stay the same.
   Earlier pins are kept in `previous_images`.
 - **Rollback:** the same command with the previous release and image. Keep the
   previous release directory and image until the new pin has published.

@@ -44,7 +44,9 @@ class RetentionTests(unittest.TestCase):
     def test_dry_run_changes_nothing(self):
         result = module.prune_backups(self.root)
         self.assertEqual(result["outcome"], "planned")
-        self.assertEqual(len(result["would_remove"]), 2)
+        # By default only the newest uploaded bundle stays on disk; all are in S3.
+        self.assertEqual(result["kept"], [self.bundles[-1].name])
+        self.assertEqual(len(result["would_remove"]), 4)
         self.assertTrue(all(bundle.exists() for bundle in self.bundles))
 
     def test_apply_preserves_newest_and_unmarked_data(self):
@@ -103,7 +105,7 @@ class RetentionTests(unittest.TestCase):
                     {
                         "outcome": "passed" if passed else "failed",
                         "temporary_database_removed": True,
-                        "backup_dir": str(work / "bundle"),
+                        "backup_dir": str((work / "bundle").resolve()),
                     }
                 )
             )
