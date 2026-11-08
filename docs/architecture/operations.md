@@ -78,9 +78,12 @@ flowchart LR
     DEC -- "all clear after issues" --> REC["SNS recovery"]
     checks --> HB["CloudWatch heartbeat<br/>only after alerts are delivered"]
     checks --> FILE["latest-check.json"]
+    checks --> REM["Overdue manual snapshots<br/>REMINDER message, every 6 h<br/>not an alert, not unhealthy"]
 ```
 
-Repeated alerts are deduplicated with a periodic reminder; a `--dry-run` prints the
+Overdue manual snapshots (`manual/*`, manual MS counties) are operator tasks, so they go
+out as separate `REMINDER` messages and never mark the deployment unhealthy. Repeated
+alerts are deduplicated with a periodic reminder; a `--dry-run` prints the
 assessment without sending or saving anything.
 
 ## Development loop

@@ -143,8 +143,10 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual(self.assess(dashboard=payload), {})
         record["last_success_at"] = (self.now - timedelta(hours=7)).isoformat()
         issues = self.assess(dashboard=payload)
-        self.assertEqual(set(issues), {"county/MS/JACKSON"})
-        self.assertIn("Manual county snapshot", issues["county/MS/JACKSON"])
+        self.assertEqual(set(issues), {"reminder/county/MS/JACKSON"})
+        alerts, reminders = monitor.split(issues)
+        self.assertEqual(alerts, {})
+        self.assertIn("Manual county snapshot", reminders["county/MS/JACKSON"])
 
     def test_catalog_adds_enabled_states_and_ignores_registered_pending_states(self):
         from election_pipeline.deployment import catalog
@@ -312,6 +314,43 @@ class MonitorTests(unittest.TestCase):
             self.assertFalse(sent)
         self.assertEqual(publish.call_count, 3)
         self.assertTrue(publish.call_args.args[1].startswith("RECOVERED"))
+
+    def test_manual_reminders_are_sent_apart_from_alerts_and_repeat_every_six_hours(self):
+        reminders = {"manual/oh_2026_general": "Manual snapshot is overdue for an operator update"}
+        with patch.object(monitor, "publish") as publish:
+            state, sent = monitor.notify_reminders(self.config, reminders, {}, self.now)
+            self.assertTrue(sent)
+            self.assertTrue(publish.call_args.args[1].startswith("REMINDER"))
+            later = self.now + timedelta(hours=1)
+            state, sent = monitor.notify_reminders(self.config, reminders, state, later)
+            self.assertFalse(sent)
+            more = {
+                **reminders,
+                "county/MS/JACKSON": "Manual county snapshot is over six hours old",
+            }
+            state, sent = monitor.notify_reminders(self.config, more, state, later)
+            self.assertTrue(sent)  # a new reminder is sent at once
+            state, sent = monitor.notify_reminders(
+                self.config, more, state, later + timedelta(hours=5)
+            )
+            self.assertFalse(sent)
+            state, sent = monitor.notify_reminders(
+                self.config, more, state, later + timedelta(hours=6)
+            )
+            self.assertTrue(sent)
+            cleared, sent = monitor.notify_reminders(
+                self.config, {}, state, later + timedelta(hours=7)
+            )
+            self.assertFalse(sent)  # no "recovered" message for operator tasks
+            self.assertEqual(cleared, {})
+        self.assertEqual(publish.call_count, 3)
+        self.assertEqual(
+            monitor.split({"reminder/manual/x": "late", "backup": "bad"}),
+            (
+                {"backup": "bad"},
+                {"manual/x": "late"},
+            ),
+        )
 
     def invoke(self, flag=None, publishing_error=None):
         prod_file = self.root / "production.env"

@@ -1,4 +1,9 @@
-"""Check production reports, publish SNS alerts and a CloudWatch heartbeat."""
+"""Check production reports, publish SNS alerts and a CloudWatch heartbeat.
+
+An overdue manual snapshot is an operator task, not a production or collection fault:
+it is reported as a reminder (key prefix ``reminder/``), sent as its own ``REMINDER``
+message and left out of the health outcome, alerts and recoveries.
+"""
 
 import argparse
 import json
@@ -17,6 +22,7 @@ from election_pipeline.storage import atomic_json
 ROOT = Path(__file__).resolve().parents[1]
 STATE_DIR = Path("/var/lib/election-pipeline-monitor")
 GOOD_RUNS = {"succeeded", "already_current", "not_due", "awaiting_publication"}
+REMINDER = "reminder/"
 
 
 def read_json(path):
@@ -107,7 +113,9 @@ def assess(prod, config, now):
                 if age_seconds(receipt["downloaded_at"], now) > entry.get(
                     "manual_max_age_seconds", 21600
                 ):
-                    issues[f"manual/{name}"] = "Manual snapshot is overdue for an operator update"
+                    issues[f"{REMINDER}manual/{name}"] = (
+                        "Manual snapshot is overdue for an operator update"
+                    )
                 if receipt["publication_id"] != entry["publication_id"]:
                     issues[f"manual/{name}"] = (
                         "Manual receipt does not match the approved publication"
@@ -200,7 +208,7 @@ def assess(prod, config, now):
                 for county, record in state.get("county_feeds", {}).items():
                     if record.get("issue") == "manual_snapshot":
                         if age_seconds(record.get("last_success_at"), now) > 21600:
-                            issues[f"county/{code}/{county}"] = (
+                            issues[f"{REMINDER}county/{code}/{county}"] = (
                                 "Manual county snapshot is over six hours old"
                             )
                         continue
@@ -304,6 +312,39 @@ def notify_changes(config, issues, previous, now):
     return {"issues": issues, "last_sent": now.isoformat()}, True
 
 
+def split(found):
+    """(alerts, reminders): reminders lose their prefix."""
+    alerts = {key: value for key, value in found.items() if not key.startswith(REMINDER)}
+    reminders = {
+        key[len(REMINDER) :]: value for key, value in found.items() if key.startswith(REMINDER)
+    }
+    return alerts, reminders
+
+
+def notify_reminders(config, reminders, previous, now):
+    """Send operator reminders when one is new, then every MANUAL_REMINDER_SECONDS while
+    any stay open. Clearing a reminder sends nothing."""
+    last_sent = previous.get("last_sent")
+    new = set(reminders) - set(previous.get("reminders", {}))
+    due = not last_sent or age_seconds(last_sent, now) >= int(
+        config.get("MANUAL_REMINDER_SECONDS", "21600")
+    )
+    if not reminders:
+        return {}, False
+    if not new and not due:
+        return {**previous, "reminders": reminders}, False
+    body = json.dumps(
+        {
+            "deployment": config["DEPLOYMENT"],
+            "checked_at": now.isoformat(),
+            "reminders": reminders,
+        },
+        indent=2,
+    )
+    publish(config, f"REMINDER: {config['DEPLOYMENT']} manual updates", body)
+    return {"reminders": reminders, "last_sent": now.isoformat()}, True
+
+
 def heartbeat(config):
     metric = [
         {
@@ -365,10 +406,11 @@ def main():
             result = {"outcome": "test_sent"}
         else:
             now = datetime.now(timezone.utc)
-            issues = assess(prod, config, now)
+            issues, reminders = split(assess(prod, config, now))
             result = {
                 "outcome": "unhealthy" if issues else "healthy",
                 "issues": issues,
+                "reminders": reminders,
                 "checked_at": now.isoformat(),
             }
 
@@ -378,6 +420,11 @@ def main():
                 previous = read_json(path) if path.exists() else {}
                 updated, notified = notify_changes(config, issues, previous, now)
                 atomic_json(path, updated)
+                path = STATE_DIR / "reminders.json"
+                previous = read_json(path) if path.exists() else {}
+                updated, reminded = notify_reminders(config, reminders, previous, now)
+                atomic_json(path, updated)
+                result["reminded"] = reminded
                 heartbeat(config)
                 result["notified"] = notified
                 atomic_json(STATE_DIR / "latest-check.json", result)

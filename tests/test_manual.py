@@ -441,7 +441,7 @@ class ManualDeploymentTests(unittest.TestCase):
             entry["manual_snapshot"]["downloaded_at"] = (now - timedelta(hours=7)).isoformat()
             self.save()
             issues = monitor.assess(self.prod, self.config, now)
-        self.assertIn("manual/oh_2026_general", issues)
+        self.assertIn("reminder/manual/oh_2026_general", issues)
         self.assertNotIn("poll/oh_2026_general", issues)
 
 
