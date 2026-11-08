@@ -22,6 +22,7 @@ GROUPS = "request_type party_registration sex race ethnicity ballot_count"
 FLORIDA_SOURCE = "fl_2026_general"
 IOWA_SOURCE = "ia_2026_general"
 SAME_OUTPUT_KEYS = ("output_sha256", "output_rows", "contests", "minimum_candidates")
+DBT_CACHES = ("partial_parse.msgpack", "graph.gpickle")
 
 
 def project_hash(root):
@@ -244,7 +245,11 @@ def build_candidate(root, db, metadata, schema, artifacts):
     if completed.returncode:
         raise ValueError(f"dbt build failed; inspect {artifacts}")
 
-    return checked_results(artifacts, metadata["state"])
+    results = checked_results(artifacts, metadata["state"])
+    # dbt's parse caches (about 1 MB per attempt) are never reread: builds use --no-partial-parse.
+    for cache in DBT_CACHES:
+        (artifacts / cache).unlink(missing_ok=True)
+    return results
 
 
 def activate(conn, publication_id, source_id):

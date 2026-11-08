@@ -355,6 +355,8 @@ class CoverageParserTests(unittest.TestCase):
             patch.object(publication, "checked_results"),
         ):
             run.return_value.returncode = 0
+            for cache in ("partial_parse.msgpack", "graph.gpickle", "manifest.json"):
+                (self.root / cache).write_bytes(b"dbt")
             publication.build_candidate(
                 ROOT,
                 {
@@ -373,6 +375,11 @@ class CoverageParserTests(unittest.TestCase):
         self.assertEqual(len(variables["tx_races"]), 40)
         self.assertTrue(variables["allow_uncontested"])
         self.assertEqual(variables["tx_results_source"], metadata["source_id"])
+        # Parse caches go; the audited manifest stays.
+        self.assertEqual(
+            [p.name for p in self.root.iterdir() if p.name.endswith((".msgpack", ".gpickle"))], []
+        )
+        self.assertTrue((self.root / "manifest.json").exists())
 
 
 class CoverageDeploymentTests(unittest.TestCase):

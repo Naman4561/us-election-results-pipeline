@@ -101,6 +101,32 @@ def upload_bundle(config, bundle, archive, receipt):
     atomic_json(bundle / "uploaded.json", receipt)
 
 
+KEPT_AFTER_UPLOAD = {"bundle.zip", "manifest.json", "upload.json", "uploaded.json"}
+
+
+def trim_uploaded_bundle(bundle):
+    """Remove the unpacked copy once its archive is in S3, keeping ``bundle.zip``.
+
+    The archive with its receipt restores through ``unpack_bundle``; the unpacked tree only
+    duplicated it (about 12 GB on election week). Returns the bytes freed.
+    """
+    receipt = json.loads((bundle / "uploaded.json").read_text(encoding="utf-8"))
+    archive = bundle / "bundle.zip"
+    if receipt.get("backup_id") != bundle.name or archive.stat().st_size != receipt["bytes"]:
+        raise ValueError("The uploaded receipt does not match the local archive")
+    freed = 0
+    for entry in bundle.iterdir():
+        if entry.name in KEPT_AFTER_UPLOAD:
+            continue
+        if entry.is_dir() and not entry.is_symlink():
+            freed += sum(f.stat().st_size for f in entry.rglob("*") if f.is_file())
+            shutil.rmtree(entry)
+        else:
+            freed += entry.lstat().st_size
+            entry.unlink()
+    return freed
+
+
 def aws_s3api(config, *arguments):
     result = subprocess.run(
         [
@@ -300,13 +326,22 @@ def main():
                 )
             bundle = Path(result["backup_dir"])
             result["backup_id"] = bundle.name
-            archive, receipt = pack_bundle(bundle, prod["IMAGE_TAG"])
-            upload_bundle(config, bundle, archive, receipt)
+            try:
+                archive, receipt = pack_bundle(bundle, prod["IMAGE_TAG"])
+                upload_bundle(config, bundle, archive, receipt)
+            except Exception:
+                # Nothing complete reached S3; the next run starts a fresh bundle.
+                shutil.rmtree(bundle, ignore_errors=True)
+                raise
             result = {
                 "outcome": "uploaded",
                 "backup_id": bundle.name,
                 "archive_bytes": receipt["bytes"],
             }
+            try:
+                result["local_bytes_freed"] = trim_uploaded_bundle(bundle)
+            except Exception as error:
+                result["local_trim"] = {"outcome": "failed", "error": str(error)[-500:]}
             # The backup is safe in S3 either way; the monitor reports a retention failure.
             try:
                 result["s3_retention"] = mark_expired_backups(

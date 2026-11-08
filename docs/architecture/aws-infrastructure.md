@@ -104,9 +104,10 @@ sequenceDiagram
     B->>B: Lock every source (skip if a job is running)
     B->>PG: Repeatable-read snapshot + dump
     B->>D: Copy data dirs, verify every raw file hash
-    B->>D: bundle.zip (~2.9 GB)
+    B->>D: bundle.zip (~4 GB)
     B->>S3: bundle.zip, then complete.json
-    B->>D: uploaded.json, prune to newest 1
+    B->>D: uploaded.json, delete the unpacked copy (keep bundle.zip)
+    B->>D: prune to newest 1
     B->>S3: Tag backups outside newest 5 retention=expire
     LC->>S3: Delete tagged objects older than 3 days
 ```

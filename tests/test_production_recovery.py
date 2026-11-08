@@ -284,6 +284,29 @@ class ProductionRecoveryTests(unittest.TestCase):
             self.receipt,
         )
 
+    def test_uploaded_bundle_keeps_only_its_restorable_archive(self):
+        with self.assertRaises(FileNotFoundError):
+            job.trim_uploaded_bundle(self.bundle)
+        self.assertTrue((self.bundle / "database.dump").exists())
+
+        (self.bundle / "data/raw").mkdir(parents=True)
+        (self.bundle / "data/raw/feed.zip").write_bytes(b"x" * 10)
+        config = {"BACKUP_BUCKET": "private-bucket", "BACKUP_PREFIX": "election-pipeline"}
+        with patch.object(job, "aws_copy", return_value=None):
+            job.upload_bundle(config, self.bundle, self.archive, self.receipt)
+
+        self.assertGreaterEqual(job.trim_uploaded_bundle(self.bundle), 10)
+        self.assertEqual(
+            {entry.name for entry in self.bundle.iterdir()},
+            {"bundle.zip", "manifest.json", "upload.json", "uploaded.json"},
+        )
+        destination = self.root / "download"
+        job.unpack_bundle(self.bundle / "bundle.zip", destination, self.receipt)
+        self.assertEqual(
+            (destination / "database.dump").read_bytes(),
+            b"synthetic database archive\x00\xff",
+        )
+
 
 class RemoteRetentionTests(unittest.TestCase):
     """Backups outside the newest five are tagged for the 3-day lifecycle rule."""
