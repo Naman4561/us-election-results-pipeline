@@ -159,6 +159,44 @@ class PublicationArtifactTests(unittest.TestCase):
         build.assert_not_called()
         same.assert_not_called()
 
+    def test_earlier_release_with_the_live_outputs_and_update_time_is_not_a_rollback(self):
+        live = {
+            "output_sha256": {"results.csv": "a" * 64},
+            "output_rows": 180,
+            "contests": ["WA-01"],
+            "minimum_candidates": 2,
+            "source_update_text": "2026-11-08T01:04:18.1236473Z",
+        }
+        conn = MagicMock()
+        conn.execute.return_value.fetchone.return_value = {"parser_report": live}
+        current = {"snapshot_id": 2203555, "release_id": 10047}
+        incoming = {
+            "source_id": "wa_2026_general",
+            "snapshot_id": 2133791,
+            "release_id": 9807,
+            "parser_report": dict(live),
+        }
+        publication.require_forward_release(conn, current, incoming)
+        self.assertEqual(conn.execute.call_args.args[1], (10047,))
+        for key, value in (
+            ("source_update_text", "2026-11-08T00:04:18Z"),
+            ("output_sha256", {"results.csv": "b" * 64}),
+            ("output_rows", 179),
+            ("source_update_text", None),
+        ):
+            with (
+                self.subTest(key=key),
+                self.assertRaisesRegex(ValueError, "earlier release"),
+            ):
+                publication.require_forward_release(
+                    conn, current, {**incoming, "parser_report": {**live, key: value}}
+                )
+        # Iowa and Florida keep their own, stricter equivalence rules.
+        with self.assertRaisesRegex(ValueError, "earlier release"):
+            publication.require_forward_release(
+                conn, current, {**incoming, "source_id": publication.IOWA_SOURCE}
+            )
+
     def test_florida_orders_distinct_snapshots_by_separated_file_time_ranges(self):
         earlier = datetime(2026, 11, 4, 15, 0, 3, tzinfo=timezone.utc)
         later_start = datetime(2026, 11, 4, 21, 48, 3, tzinfo=timezone.utc)

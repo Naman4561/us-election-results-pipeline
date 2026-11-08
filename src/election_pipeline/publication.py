@@ -21,6 +21,7 @@ from election_pipeline.states import publication_lock, state_adapter
 GROUPS = "request_type party_registration sex race ethnicity ballot_count"
 FLORIDA_SOURCE = "fl_2026_general"
 IOWA_SOURCE = "ia_2026_general"
+SAME_OUTPUT_KEYS = ("output_sha256", "output_rows", "contests", "minimum_candidates")
 
 
 def project_hash(root):
@@ -293,7 +294,37 @@ def require_forward_release(conn, current, metadata):
         if metadata["snapshot_id"] < current["snapshot_id"]:
             raise ValueError("An earlier release requires an explicit restore")
     if current["release_id"] > metadata["release_id"]:
+        if metadata["source_id"] not in (FLORIDA_SOURCE, IOWA_SOURCE) and same_parsed_release(
+            conn, metadata, current
+        ):
+            return
         raise ValueError("An earlier release requires an explicit restore")
+
+
+def parser_report(conn, release_id):
+    return (
+        conn.execute(
+            "SELECT parser_report FROM ops.processing_releases WHERE release_id=%s",
+            (release_id,),
+        ).fetchone()["parser_report"]
+        or {}
+    )
+
+
+def same_parsed_release(conn, metadata, current):
+    """Whether an earlier-numbered release is the live one's data, not older data.
+
+    Some sites serve byte-different copies of one results version (Washington, Nov 8:
+    two archives, one update time, identical parsed outputs). Seeing them alternate is
+    no rollback; once a code change makes a rebuild due, either copy may be rebuilt.
+    """
+    report = metadata.get("parser_report") or {}
+    if not report.get("output_sha256") or not report.get("source_update_text"):
+        return False
+    previous = parser_report(conn, current["release_id"])
+    return all(
+        previous.get(key) == report.get(key) for key in (*SAME_OUTPUT_KEYS, "source_update_text")
+    )
 
 
 def equivalent_iowa_release(conn, current, metadata):
@@ -550,17 +581,8 @@ def same_results(conn, metadata, current):
     report = metadata.get("parser_report") or {}
     if not report.get("output_sha256"):
         return None
-    previous = (
-        conn.execute(
-            "SELECT parser_report FROM ops.processing_releases WHERE release_id=%s",
-            (current["release_id"],),
-        ).fetchone()["parser_report"]
-        or {}
-    )
-    if any(
-        previous.get(key) != report.get(key)
-        for key in ("output_sha256", "output_rows", "contests", "minimum_candidates")
-    ):
+    previous = parser_report(conn, current["release_id"])
+    if any(previous.get(key) != report.get(key) for key in SAME_OUTPUT_KEYS):
         return None
     return {
         "outcome": "already_current",
