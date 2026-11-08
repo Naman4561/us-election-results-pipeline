@@ -304,6 +304,16 @@ STATES = {
         source_page="https://results.enr.clarityelections.com/IA/127077/",
         collection_backend="clarity",
     ),
+    # West Virginia elects no governor in 2026.
+    "WV": State(
+        "WV",
+        "West Virginia",
+        "wv_2026_general",
+        (1, 2),
+        ("total_votes",),
+        source_page="https://results.enr.clarityelections.com/WV/127496/",
+        collection_backend="clarity",
+    ),
     "OR": State(
         "OR",
         "Oregon",

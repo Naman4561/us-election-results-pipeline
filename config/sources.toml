@@ -337,6 +337,16 @@ min_interval_seconds = 300
 expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
 supplemental_members = ["detail.zip", "settings.json", "summary.json"]
 
+[sources.wv_2026_general]
+state = "WV"
+election_date = "2026-11-03"
+url = "https://results.enr.clarityelections.com/WV/127496/current_ver.txt"
+format = "bundle"
+primary_filename = "current_ver.txt"
+min_interval_seconds = 300
+expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
+supplemental_members = ["detail.zip", "settings.json", "summary.json"]
+
 # Oregon's export pages change on every request, so each collection repeats all 38 exports;
 # a 15-minute interval keeps that load modest.
 [sources.or_2026_general]

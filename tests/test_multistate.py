@@ -72,7 +72,7 @@ class MultiStateTests(unittest.TestCase):
             set(payload["states"]),
             {
                 *("NC", "KY", "MN", "NE", "TX", "GA", "SC", "KS", "OH", "AK", "MS", "SD", "NM"),
-                *("FL", "VA", "ID", "WA", "CO", "IA", "OR", "CA", "MD", "HI"),
+                *("FL", "VA", "ID", "WA", "CO", "IA", "OR", "CA", "MD", "HI", "WV"),
             },
         )
         self.assertEqual(len(payload["coverage"]["KY"]), 7)

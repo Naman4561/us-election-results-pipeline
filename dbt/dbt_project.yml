@@ -294,6 +294,11 @@ vars:
   hi_methods:
   - mail
   - in_person
+  wv_results_source: wv_2026_general
+  wv_races:
+  - WV-SEN
+  - WV-01
+  - WV-02
 models:
   election_analytics:
     +materialized: '{{ var(''publication_materialization'', ''view'') }}'
@@ -368,6 +373,9 @@ models:
       hi:
         +tags:
         - state_hi
+      wv:
+        +tags:
+        - state_wv
     marts:
       +schema: marts
       ak:
@@ -439,3 +447,6 @@ models:
       hi:
         +tags:
         - state_hi
+      wv:
+        +tags:
+        - state_wv

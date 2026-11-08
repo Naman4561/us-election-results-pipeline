@@ -103,3 +103,7 @@ sources:
   schema: hi
   tables:
   - name: results
+- name: wv
+  schema: wv
+  tables:
+  - name: results

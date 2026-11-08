@@ -1,0 +1,42 @@
+{
+ "WV": {
+  "archive_sha256": "62354660792d2055a6c9047adaf702e1a439de5f5d900294ea9bfac1c5c14d9a",
+  "captured_at": "2026-11-08T00:32:30+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 6,
+    "content_type": "text/plain; charset=utf-8",
+    "final_url": "https://results.enr.clarityelections.com/WV/127496/current_ver.txt",
+    "name": "current_ver.txt",
+    "sha256": "1e68d23aef94d734dec3b437c17f70b9fdeb1d0547ee3192bdcc37a44268e7d0",
+    "url": "https://results.enr.clarityelections.com/WV/127496/current_ver.txt"
+   },
+   {
+    "bytes": 100755,
+    "content_type": "application/json",
+    "final_url": "https://results.enr.clarityelections.com/WV/127496/385637/json/en/summary.json",
+    "name": "summary.json",
+    "sha256": "2caaac780f9514a17302f7b1e9bfb6fa437b3245a69e4d852c47db5dfc8a56d6",
+    "url": "https://results.enr.clarityelections.com/WV/127496/385637/json/en/summary.json"
+   },
+   {
+    "bytes": 29550,
+    "content_type": "application/json",
+    "final_url": "https://results.enr.clarityelections.com/WV/127496/385637/json/en/electionsettings.json",
+    "name": "settings.json",
+    "sha256": "987c2825e768102fe0b60387fd5af1224f26d78cdca071bf6d54ab22b11446a5",
+    "url": "https://results.enr.clarityelections.com/WV/127496/385637/json/en/electionsettings.json"
+   },
+   {
+    "bytes": 16751,
+    "content_type": "application/zip",
+    "final_url": "https://results.enr.clarityelections.com/WV/127496/385637/reports/detailxml.zip",
+    "name": "detail.zip",
+    "sha256": "ac72839c297dfe4643014a1870ce80accfe98d4ec21eb2adbd6f8d56d10a57cb",
+    "url": "https://results.enr.clarityelections.com/WV/127496/385637/reports/detailxml.zip"
+   }
+  ],
+  "source_id": "wv_2026_general"
+ }
+}
