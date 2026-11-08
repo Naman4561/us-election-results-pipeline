@@ -441,9 +441,11 @@ def read_county(raw, county, contract=None):
 
 def read_snapshot(raw, county, contract, record):
     if county.get("url"):
-        if record.get("url") != county["url"] or record.get("review"):
+        if record.get("url") != county["url"]:
             raise ValueError("Automatic county source identity changed")
-        return read_county(raw, county, contract)
+        if not record.get("review"):
+            return read_county(raw, county, contract)
+        # A reviewed copy of the configured report, imported while the feed is refused.
     from election_pipeline.parsers.county_reports import reviewed_file
 
     review = record.get("review")

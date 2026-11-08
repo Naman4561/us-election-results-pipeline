@@ -199,6 +199,9 @@ def fetch_bundle(
                     "issue": issue,
                     "headers": prior.get("headers", {}) if cached else {},
                 }
+            if issue and cached and prior.get("review"):
+                # A failed poll keeps the reviewed manual snapshot as it was imported.
+                record = {**prior, "last_attempt_at": finished, "poll_issue": issue}
             if issue and issue.startswith("CollectionDeferred:"):
                 record["retry_priority_at"] = (
                     prior.get("retry_priority_at") or prior.get("last_attempt_at") or "1970"

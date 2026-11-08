@@ -161,6 +161,71 @@ class CountyScalingTests(unittest.TestCase):
         final = ms.read_bundle(f.store.cached_archive(f.store.read_state()), f.source)[1]
         self.assertEqual(final["counties"]["JACKSON"], after["counties"]["JACKSON"])
 
+    def test_refused_automatic_county_takes_a_reviewed_copy_until_its_feed_answers(self):
+        f = self.f
+        blocked = {"HANCOCK": 403}
+        with patch.object(county_files, "fetch_file", side_effect=f.fetcher(failures=blocked)):
+            collect_source(f.source, f.settings, f.root, force_download=True)
+        state = f.store.read_state()
+        _, before, accepted = ms.read_bundle(f.store.cached_archive(state), f.source)
+        self.assertEqual(before["counties"]["HANCOCK"]["status"], "unavailable")
+        self.assertNotIn("HANCOCK", accepted)
+
+        county = f.counties["HANCOCK"]
+        raw = f.raw["HANCOCK"]
+        original, template = f.root / "hancock.pdf", f.root / "hancock.json"
+        original.write_bytes(raw)
+        write_template(f.source, "HANCOCK", original, template)
+        review = json.loads(template.read_text())
+        self.assertEqual(review["source_url"], county["url"])
+        review.update(
+            official_page_url="https://www.hancockcounty.ms.gov/DocumentCenter/Index/164",
+            observed_at="2026-11-08T19:30:00+00:00",
+            reviewed_by="TEST REVIEWER",
+            countywide_report_confirmed=True,
+            report_generated_at="2026-11-03T21:31:00-06:00",
+            report_date="2026-11-03",
+            counts={"Scott Colom": 4538, "Cindy Hyde-Smith": 11441, "Ty Pinkins": 753},
+            write_in_votes=28,
+            write_in_label="Write-In Totals",
+            precincts_reporting=26,
+            precincts_total=26,
+        )
+        wrong = {**review, "source_url": "https://example.com/hancock.pdf"}
+        (f.root / "wrong.json").write_text(json.dumps(wrong), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "configured URL"):
+            import_county(f.source, f.settings, f.root, "HANCOCK", original, f.root / "wrong.json")
+        template.write_text(json.dumps(review), encoding="utf-8")
+        with patch.object(county_files, "fetch_file", side_effect=AssertionError("import HTTP")):
+            result = import_county(f.source, f.settings, f.root, "HANCOCK", original, template)
+        self.assertEqual(result["outcome"], "manual_imported", result)
+
+        # The site still refuses the server: the reviewed copy and its labels stay.
+        with patch.object(county_files, "fetch_file", side_effect=f.fetcher(failures=blocked)):
+            collect_source(f.source, f.settings, f.root, force_download=True)
+        _, manifest, accepted = ms.read_bundle(
+            f.store.cached_archive(f.store.read_state()), f.source
+        )
+        record = manifest["counties"]["HANCOCK"]
+        self.assertEqual((record["status"], record["issue"]), ("stale", "ManualSnapshot"))
+        self.assertEqual(record["last_success_at"], review["observed_at"])
+        self.assertIn("403", record["poll_issue"])
+        self.assertEqual(accepted["HANCOCK"][2]["counts"], review["counts"])
+        report = f.parse(f.store.cached_archive(f.store.read_state()))
+        feed = next(r for r in f.read(report, "county_feeds.csv") if r["county"] == "HANCOCK")
+        self.assertEqual(feed["issue"], "manual_snapshot")
+
+        # Once the site answers, the automatic response replaces the manual snapshot.
+        with patch.object(county_files, "fetch_file", side_effect=f.fetcher()):
+            collect_source(f.source, f.settings, f.root, force_download=True)
+        _, manifest, accepted = ms.read_bundle(
+            f.store.cached_archive(f.store.read_state()), f.source
+        )
+        self.assertEqual(manifest["counties"]["HANCOCK"]["status"], "current")
+        self.assertNotIn("review", manifest["counties"]["HANCOCK"])
+        with self.assertRaisesRegex(ValueError, "already has accepted results"):
+            import_county(f.source, f.settings, f.root, "HANCOCK", original, template)
+
     def test_missing_review_values_wrong_original_and_impossible_totals_are_rejected(self):
         f = self.f
         raw, good = synthetic_review(f, "JACKSON")

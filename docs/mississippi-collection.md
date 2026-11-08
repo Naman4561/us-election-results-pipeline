@@ -15,6 +15,12 @@ no vote rows, and the dashboard retains the partial-coverage warning.
 | Reviewed, exact-hash PDF | Lauderdale, Madison, Warren, Lafayette, Lamar | Poll the original URL; changed bytes require a new reviewed transcription |
 | Reviewed file intake | Other 69 counties | Obtain an original official countywide report, review it, then explicitly import |
 
+An automatic county whose site refuses the server (Hancock's Cloudflare front end
+returns 403 to the AWS host) can take a reviewed copy of the report at its configured
+URL through the same `import-county` command, but only while its feed has no accepted
+response. Polling continues; failed polls keep the manual snapshot (and record
+`poll_issue`), and the first accepted automatic response replaces it.
+
 The first ten captures remain in `tests/fixtures/mississippi/reports.zip`.
 The three additions and their original-byte fingerprints are in `expansion.zip`.
 The canonical policy is `src/election_pipeline/resources/ms_2026_counties.json`.

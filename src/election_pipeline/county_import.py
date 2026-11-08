@@ -15,17 +15,19 @@ from election_pipeline.storage import ArchiveStore, file_hash, utc_now
 
 
 def selected(source, county_key):
+    """A reviewed-file county, or an automatic one whose feed has never been accepted (for
+    example, a county site that refuses the server). Its reviewed copy must be the report
+    at its configured URL, and polling continues: an accepted automatic response replaces
+    the manual snapshot."""
     contract = ms.validate_source(source)
     county = next((c for c in contract["counties"] if c["key"] == county_key), None)
-    if not county or county.get("url"):
-        raise ValueError(
-            "Select a reviewed-file county; automatic-source changes require a release"
-        )
+    if not county:
+        raise ValueError("Select a configured Mississippi county")
     return contract, county
 
 
 def write_template(source, county_key, file, output):
-    contract, _ = selected(source, county_key)
+    contract, county = selected(source, county_key)
     if Path(file).stat().st_size > 8_000_000:
         raise ValueError("Report exceeds file limit")
     review = dict(
@@ -34,7 +36,7 @@ def write_template(source, county_key, file, output):
         election_date=source.election_date,
         contest_id=contract["contest_id"],
         raw_sha256=file_hash(Path(file)),
-        source_url=None,
+        source_url=county.get("url"),
         official_page_url=None,
         observed_at=None,
         reviewed_by=None,
@@ -79,6 +81,11 @@ def import_county(source, settings, data_dir, county_key, file, review_file):
         if not accepted:
             raise ValueError("No validated prior county bundle")
         prior = accepted.get(county_key)
+        if county.get("url"):
+            if review["source_url"] != county["url"]:
+                raise ValueError("An automatic county's review must name its configured URL")
+            if prior and not prior[1].get("review"):
+                raise ValueError("The automatic county feed already has accepted results")
         if prior:
             if prior[1]["raw_sha256"] == review["raw_sha256"]:
                 semantic = (
