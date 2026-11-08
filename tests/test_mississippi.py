@@ -32,7 +32,7 @@ from election_pipeline.parsers import ms
 from election_pipeline.parsing import parse_source
 from election_pipeline.pipeline import collect_source
 from election_pipeline.settings import load_config
-from election_pipeline.storage import ArchiveStore
+from election_pipeline.storage import ArchiveStore, member_path
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/fixtures/mississippi/reports.zip"
@@ -127,6 +127,13 @@ class MississippiTests(unittest.TestCase):
         with zipfile.ZipFile(path) as archive:
             members = {n: archive.read(n) for n in archive.namelist()}
         manifest = json.loads(members[self.source.primary_filename])
+        if manifest["version"] == 3:
+            # Inline the stored county reports so the mutated copy stands alone (version 2).
+            for county in self.policy["counties"]:
+                sha = manifest["counties"][county["key"]].get("raw_sha256")
+                if sha and not members[county["member"]]:
+                    members[county["member"]] = member_path(self.store.raw_dir, sha).read_bytes()
+            manifest["version"] = 2
         change(members, manifest)
         members[self.source.primary_filename] = json.dumps(manifest).encode()
         target = self.root / "mutated.zip"

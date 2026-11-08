@@ -84,6 +84,16 @@ def fetch_bundle(
         }
         for c in contract["counties"]
     }
+    # Version 3 keeps each accepted county report once under members/<sha256>.bin and
+    # leaves its bundle member empty; without a store (offline tests) members stay inline.
+    external = store is not None
+
+    def keep(raw):
+        if external and raw:
+            store.store_member(raw)
+            return b""
+        return raw
+
     with tempfile.TemporaryDirectory(prefix=".bundle-", dir=destination.parent) as directory:
         directory = Path(directory)
 
@@ -93,7 +103,7 @@ def fetch_bundle(
             cached = old.get(key)
             if cached and (offline or not county.get("url")):
                 records[key] = dict(cached[1])
-                path.write_bytes(cached[3])
+                path.write_bytes(keep(cached[3]))
             else:
                 path.write_bytes(b"")
                 if offline and county.get("url"):
@@ -209,7 +219,7 @@ def fetch_bundle(
             record["rejected_sha256"] = rejected_sha
             record["quarantine_path"] = quarantine_path
             accepted_path = directory / county["member"]
-            accepted_path.write_bytes(raw)
+            accepted_path.write_bytes(keep(raw))
             component = {
                 "name": county["member"],
                 "county": key,
@@ -240,7 +250,7 @@ def fetch_bundle(
                 retryable=False,
             )
         manifest = {
-            "version": 2,
+            "version": 3 if external else 2,
             "state": source.state,
             "election_date": source.election_date,
             "source_id": source.source_id,

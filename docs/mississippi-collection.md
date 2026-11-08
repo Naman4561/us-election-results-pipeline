@@ -56,14 +56,17 @@ Each replayable raw ZIP has 83 members: a manifest and one member slot per count
 Unknown slots are empty and have no accepted hash. Manual originals, their review,
 source URLs, observation time and reviewer are retained with the same bundle.
 
-The initial 13-source bundle is approximately 6.7 MB compressed. Because manifest
-check times change, unchanged reports still produce new bundles: about **1.9 GB
-per day at five-minute polling**, before parsed data, database snapshots and
-backups. Original PDFs are embedded in each bundle; this release does not deduplicate
-members across bundles. With 82 reports the size can grow substantially. The
-128 MiB uncompressed archive ceiling is an admission limit, not a capacity forecast.
-Monitor disk use and use an intentional poll/retention schedule. No existing
-production data is deleted by this change.
+Manifest check times change on every poll, so each poll is a new bundle (that is how
+county freshness reaches each publication). From manifest version 3 the county
+reports themselves are not embedded: each distinct report is kept once at
+`members/<raw_sha256>.bin` beside the source's archives, and its slot in the ZIP is
+empty. The parser reads the stored report, checks it against the manifest hash and
+refuses a missing or altered one. Every distinct version of a report is retained;
+a report polled unchanged all day is stored once, and a poll's bundle is a few KB.
+Version 1-2 bundles (embedded reports, about 7 MB each) still parse unchanged and
+are never rewritten, because database snapshots and backups verify their hashes.
+An image older than this change refuses version 3 bundles rather than misreading
+them, so after a rollback the first poll fetches every county again.
 
 ## Reviewed county intake
 

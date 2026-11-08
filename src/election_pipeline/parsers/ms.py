@@ -10,9 +10,11 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 from html.parser import HTMLParser
 from importlib.resources import files
+from pathlib import Path
 
 from election_pipeline.parsers import totals
 from election_pipeline.parsers.html import Tree
+from election_pipeline.storage import member_path
 
 POLICY_SHA256 = "61b564006562819358a771f27842a0d5474d585be96e4821904a132669b97c7a"
 NUMBER = r"(?:0|[1-9][0-9]*|[1-9][0-9]{0,2}(?:,[0-9]{3})+)"
@@ -481,7 +483,7 @@ def checked_manifest(archive, source, contract, previous=False):
     )
     if (
         not isinstance(d, dict)
-        or d.get("version") not in ((1, 2) if previous else (2,))
+        or d.get("version") not in ((1, 2, 3) if previous else (2, 3))
         or not isinstance(d.get("counties"), dict)
         or (d.get("state"), d.get("election_date")) != (source.state, source.election_date)
         or d.get("source_id") not in source_ids
@@ -492,10 +494,23 @@ def checked_manifest(archive, source, contract, previous=False):
     return d
 
 
-def accepted_county(archive, county, contract, record, checked):
+def county_bytes(archive, county, record, external):
+    """A county report: inline (versions 1-2) or kept once beside the archive (version 3)."""
+    raw = archive.read(county["member"])
+    if not external:
+        return raw
+    if raw:
+        raise ValueError("A version 3 bundle keeps county reports outside the archive")
+    path = member_path(Path(archive.filename).parent, record.get("raw_sha256"))
+    if path.is_symlink() or not path.is_file() or path.stat().st_size > 8_000_000:
+        raise ValueError("County report is missing from the member store")
+    return path.read_bytes()
+
+
+def accepted_county(archive, county, contract, record, checked, external=False):
     if not isinstance(record, dict) or not isinstance(record.get("headers"), dict):
         raise ValueError("Invalid county record")
-    raw = archive.read(county["member"])
+    raw = county_bytes(archive, county, record, external)
     if hashlib.sha256(raw).hexdigest() != record.get("raw_sha256"):
         raise ValueError("County member fingerprint mismatch")
     attempted, succeeded = (
@@ -527,7 +542,9 @@ def previous_counties(archive_path, source):
             if not isinstance(r, dict) or r.get("status") not in {"current", "stale"}:
                 continue
             try:
-                accepted[county["key"]] = accepted_county(archive, county, contract, r, checked)
+                accepted[county["key"]] = accepted_county(
+                    archive, county, contract, r, checked, manifest["version"] == 3
+                )
             except (ValueError, OSError, KeyError, TypeError, zipfile.BadZipFile):
                 continue
     return accepted
@@ -561,7 +578,9 @@ def read_bundle(archive_path, source):
                 if (status == "current") != (r.get("issue") is None):
                     raise ValueError("County status disagrees with its issue")
             if status in {"current", "stale"}:
-                accepted[county["key"]] = accepted_county(archive, county, contract, r, checked)
+                accepted[county["key"]] = accepted_county(
+                    archive, county, contract, r, checked, manifest["version"] == 3
+                )
             elif archive.read(county["member"]) or r.get("raw_sha256") or r.get("last_success_at"):
                 raise ValueError("Unknown county must not contain a count snapshot")
     if not accepted:

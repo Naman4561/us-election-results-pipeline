@@ -88,6 +88,46 @@ class CountyScalingTests(unittest.TestCase):
         self.f.setUp()
         self.addCleanup(self.f.doCleanups)
 
+    def test_unchanged_county_reports_are_stored_once_and_new_versions_are_kept(self):
+        f = self.f
+        members = f.store.raw_dir / "members"
+        first, _ = f.collect()
+        stored = {p.name for p in members.iterdir()}
+        _, manifest, accepted = ms.read_bundle(first, f.source)
+        self.assertEqual(manifest["version"], 3)
+        self.assertEqual(stored, {r[1]["raw_sha256"] + ".bin" for r in accepted.values()})
+        with zipfile.ZipFile(first) as archive:
+            self.assertTrue(all(archive.read(r[0]["member"]) == b"" for r in accepted.values()))
+
+        # Unchanged polls add a small manifest-only bundle and no county bytes.
+        second, _ = f.collect(previous=first)
+        self.assertNotEqual(first, second)
+        self.assertEqual({p.name for p in members.iterdir()}, stored)
+        self.assertLess(second.stat().st_size, 100_000)
+        self.assertEqual(ms.read_bundle(second, f.source)[2].keys(), accepted.keys())
+
+        # A changed report is a new version: both the old and new bytes are retained.
+        changed, real = f.raw["PIKE"] + b" ", ms.read_county
+
+        def read(raw, county, contract):
+            return real(f.raw["PIKE"] if raw == changed else raw, county, contract)
+
+        with patch.object(ms, "read_county", side_effect=read):
+            third, _ = f.collect(previous=second, bodies={"PIKE": changed})
+        current = {p.name for p in members.iterdir()}
+        self.assertEqual(current - stored, {hashlib.sha256(changed).hexdigest() + ".bin"})
+        self.assertLessEqual(stored, current)
+        self.assertEqual(ms.read_bundle(first, f.source)[2]["PIKE"][3], f.raw["PIKE"])
+
+        # A missing or altered stored report is refused, never read as empty.
+        pike = members / (hashlib.sha256(changed).hexdigest() + ".bin")
+        pike.write_bytes(b"tampered")
+        with self.assertRaisesRegex(ValueError, "fingerprint"):
+            ms.read_bundle(third, f.source)
+        pike.unlink()
+        with self.assertRaisesRegex(ValueError, "member store"):
+            ms.read_bundle(third, f.source)
+
     def test_additive_scan_review_can_reparse_an_approved_cached_bundle(self):
         f = self.f
         original, _ = f.collect()

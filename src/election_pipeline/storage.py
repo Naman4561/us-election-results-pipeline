@@ -28,6 +28,13 @@ def file_hash(path: Path) -> str:
     return digest.hexdigest()
 
 
+def member_path(raw_dir: Path, digest: str) -> Path:
+    """Where a content-addressed bundle member lives beside its source's archives."""
+    if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+        raise ValueError("Invalid bundle member SHA-256")
+    return Path(raw_dir) / "members" / f"{digest}.bin"
+
+
 def atomic_json(path: Path, value: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary = tempfile.mkstemp(prefix=".json-", suffix=".tmp", dir=path.parent)
@@ -153,6 +160,30 @@ class ArchiveStore:
             return target, False
         os.replace(temporary, target)
         return target, True
+
+    def store_member(self, raw: bytes) -> str:
+        """Keep one copy of a bundle member under ``members/<sha256>.bin``; return its digest.
+
+        County bundles reference members by digest, so a report polled unchanged a hundred
+        times a day is stored once while every distinct version is retained.
+        """
+        digest = hashlib.sha256(raw).hexdigest()
+        target = member_path(self.raw_dir, digest)
+        if target.exists():
+            if target.is_symlink() or file_hash(target) != digest:
+                raise OSError(f"Existing bundle member failed its content hash: {target}")
+            return digest
+        target.parent.mkdir(parents=True, exist_ok=True)
+        descriptor, name = tempfile.mkstemp(prefix=".member-", suffix=".part", dir=target.parent)
+        try:
+            with os.fdopen(descriptor, "wb") as handle:
+                handle.write(raw)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(name, target)
+        finally:
+            Path(name).unlink(missing_ok=True)
+        return digest
 
     def quarantine(self, temporary: Path, digest: str) -> Path:
         target = self.root / "quarantine" / self.source.source_id / f"{digest}.bin"
