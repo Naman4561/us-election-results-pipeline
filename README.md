@@ -3,6 +3,8 @@ Collection, validation, transformation, visualization, and analysis of official 
 
 Nov 2
 
+Architecture and data flow diagrams (collection, modelling, AWS, operations): [docs/architecture/](docs/architecture/README.md).
+
 Backups (every six hours to S3, three days and the newest five retained): [docs/backups.md](docs/backups.md).
 
 Adding a state (registry entry, parser, then generated dbt models and migration): [docs/adding-a-state.md](docs/adding-a-state.md).
