@@ -16,7 +16,7 @@ from election_pipeline.parsers import totals
 from election_pipeline.parsers.html import Tree
 from election_pipeline.storage import member_path
 
-POLICY_SHA256 = "61b564006562819358a771f27842a0d5474d585be96e4821904a132669b97c7a"
+POLICY_SHA256 = "d6609e6d1b03503b6a461a4d217d31f79f20c9a1604b0b6d38fc180f056bc56b"
 NUMBER = r"(?:0|[1-9][0-9]*|[1-9][0-9]{0,2}(?:,[0-9]{3})+)"
 FEED_FIELDS = (
     "source_line",
@@ -75,7 +75,6 @@ def validate_source(source):
         or source.dataset != "election_results"
         or source.format != "bundle"
         or source.primary_filename != "county-status.json"
-        or source.contests != ("MS-SEN",)
         or dict(source.files) != feeds
         or set(source.supplemental_members)
         != {c["member"] for c in contract["counties"] if not c.get("url")}
@@ -462,7 +461,7 @@ def read_snapshot(raw, county, contract, record):
     return parsed
 
 
-def checked_manifest(archive, source, contract, previous=False):
+def checked_manifest(archive, source, contract):
     entries = archive.infolist()
     if (
         len(entries) > 100
@@ -475,18 +474,14 @@ def checked_manifest(archive, source, contract, previous=False):
     ):
         raise ValueError("County bundle exceeds archive bounds")
     d = json.loads(archive.read(source.primary_filename))
-    # Additive scan reviews can be deployed while a valid bundle is still in cache.
-    # A full parse still requires the current source ID, manifest version and members.
-    allowed = {POLICY_SHA256, *contract.get("compatible_policy_sha256", [])}
-    source_ids = (
-        {source.source_id, contract.get("previous_source_id")} if previous else {source.source_id}
-    )
+    # Archives written under an earlier reviewed policy stay replayable.
+    allowed = {POLICY_SHA256, *contract["compatible_policy_sha256"]}
     if (
         not isinstance(d, dict)
-        or d.get("version") not in ((1, 2, 3) if previous else (2, 3))
+        or d.get("version") not in (2, 3)
         or not isinstance(d.get("counties"), dict)
         or (d.get("state"), d.get("election_date")) != (source.state, source.election_date)
-        or d.get("source_id") not in source_ids
+        or d.get("source_id") != source.source_id
         or d.get("policy_sha256") not in allowed
     ):
         raise ValueError("Wrong county bundle identity or unapproved policy")
@@ -495,7 +490,7 @@ def checked_manifest(archive, source, contract, previous=False):
 
 
 def county_bytes(archive, county, record, external):
-    """A county report: inline (versions 1-2) or kept once beside the archive (version 3)."""
+    """A county report: inline (version 2) or kept once beside the archive (version 3)."""
     raw = archive.read(county["member"])
     if not external:
         return raw
@@ -535,7 +530,7 @@ def previous_counties(archive_path, source):
     contract = validate_source(source)
     accepted = {}
     with zipfile.ZipFile(archive_path) as archive:
-        manifest = checked_manifest(archive, source, contract, previous=True)
+        manifest = checked_manifest(archive, source, contract)
         checked = stamp(manifest["checked_at"])
         for county in contract["counties"]:
             r = manifest["counties"].get(county["key"], {})

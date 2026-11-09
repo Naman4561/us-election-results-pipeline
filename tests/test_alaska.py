@@ -227,7 +227,7 @@ class AlaskaTests(unittest.TestCase):
 
         _, sources = load_config(ROOT / "config/sources.toml")
         entries = {}
-        for name, worker in (("nc_2026_general", "baseline"), ("ak_2026_general", "expansion")):
+        for name, worker in (("nc_2026_general_all", "baseline"), ("ak_2026_general", "expansion")):
             entry = catalog.entry(
                 sources[name],
                 self.settings,
@@ -249,7 +249,7 @@ class AlaskaTests(unittest.TestCase):
             "baseline": {
                 "image_id": "sha256:" + "a" * 64,
                 "revision": "b" * 40,
-                "source_ids": ["nc_2026_general"],
+                "source_ids": ["nc_2026_general_all"],
             },
             "sources": entries,
             "dashboard": {"name": "live", "url": "http://127.0.0.1:8000", "states": ["NC"]},

@@ -89,7 +89,7 @@ def ballot_items(raw, source, site):
 
     data = unique_json(raw)
     election(data, site, source)
-    wanted = state_adapter(site.state).selected_races(source)
+    wanted = state_adapter(site.state).races
     return [(member(race), text(b["id"])) for race, b in selected(data, site, wanted).items()]
 
 
@@ -133,7 +133,7 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
 
     if source.format != "bundle" or source.election_date != "2026-11-03":
         raise ValueError(f"Unsupported {site.name} source/election")
-    wanted = state_adapter(site.state).selected_races(source)
+    wanted = state_adapter(site.state).races
     with zipfile.ZipFile(archive_path) as archive:
         data = unique_json(archive.read(source.primary_filename))
         record = election(data, site, source)

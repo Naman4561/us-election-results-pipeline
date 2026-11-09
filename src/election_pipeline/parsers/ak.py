@@ -90,7 +90,7 @@ def validate_page(raw):
 def parse(archive_path, source, settings, output, stats, reference=None):
     validate_source(source)
     profile = scope()
-    wanted = state_adapter("AK").selected_races(source)
+    wanted = state_adapter("AK").races
     if set(wanted) != set(profile["races"]):
         raise ValueError("Alaska requires all three reviewed statewide contests")
     by_id = {value["source_id"]: key for key, value in profile["races"].items()}

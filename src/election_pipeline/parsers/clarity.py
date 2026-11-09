@@ -138,7 +138,7 @@ def parse_detail_xml(
     from election_pipeline.states import state_adapter
 
     code = source.state
-    wanted = state_adapter(code).selected_races(source)
+    wanted = state_adapter(code).races
     with zipfile.ZipFile(archive_path) as archive:
         updated = settings_check(archive.read("settings.json"), code, settings)
         official = summary(archive.read("summary.json"), race, settings)

@@ -62,7 +62,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
 
     if source.format != "bundle" or source.election_date != "2026-11-03" or source.state != "FL":
         raise ValueError("Unsupported Florida source/election")
-    wanted = state_adapter("FL").selected_races(source)
+    wanted = state_adapter("FL").races
     with zipfile.ZipFile(archive_path) as archive:
         text = archive.read(source.primary_filename).decode("utf-8-sig")
     reader = csv.reader(io.StringIO(text, newline=""), delimiter="\t", strict=True)

@@ -65,7 +65,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
 
     if source.format != "bundle" or source.election_date != "2026-11-03" or source.state != "SD":
         raise ValueError("Unsupported South Dakota source/election")
-    wanted = state_adapter("SD").selected_races(source)
+    wanted = state_adapter("SD").races
     with zipfile.ZipFile(archive_path) as archive:
         page = archive.read("export.html").decode("utf-8", errors="replace")
         updated = statewide_update(page, "South Dakota", "General Election November 3, 2026")

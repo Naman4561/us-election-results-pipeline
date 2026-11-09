@@ -81,7 +81,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
 
     if source.format != "bundle" or source.election_date != "2026-11-03" or source.state != "HI":
         raise ValueError("Unsupported Hawaii source/election")
-    wanted = state_adapter("HI").selected_races(source)
+    wanted = state_adapter("HI").races
     with zipfile.ZipFile(archive_path) as archive:
         raw = archive.read(source.primary_filename).decode("utf-8-sig")
     if "\x00" in raw:

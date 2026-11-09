@@ -38,10 +38,6 @@ class State:
     # dbt models and migration are hand-written rather than generated from this entry by
     # scripts/new_state.py with the shared total_only macros.
     custom_models: bool = False
-    # A full-coverage source (deployment/coverage.py) may select the Senate, any of these
-    # House seats and, unless the state elects none, the governor. 0: no such source.
-    coverage_seats: int = 0
-    coverage_governor: bool = True
     # Shown under a race when the state's vote-method breakdown needs explaining.
     method_note: str = ""
 
@@ -63,29 +59,6 @@ class State:
         }
 
     @property
-    def available_races(self):
-        """All supported offices; an explicit source contract selects its coverage."""
-        if not self.coverage_seats:
-            return self.races
-        return {
-            **{f"{self.code}-SEN": "U.S. Senate"},
-            **({f"{self.code}-GOV": "Governor"} if self.coverage_governor else {}),
-            **{
-                f"{self.code}-{n:02}": f"U.S. House · {self.code}-{n:02}"
-                for n in range(1, self.coverage_seats + 1)
-            },
-        }
-
-    def selected_races(self, source):
-        if source.state != self.code:
-            raise ValueError("Race contract belongs to another state")
-        if not source.contests:
-            return self.races
-        if not set(source.contests) <= self.available_races.keys():
-            raise ValueError("Source selects an unsupported contest")
-        return {identity: self.available_races[identity] for identity in source.contests}
-
-    @property
     def parser(self):
         return import_module(f"election_pipeline.parsers.{self.parser_module or self.schema}")
 
@@ -97,7 +70,7 @@ STATES = {
     "MS": State(
         "MS",
         "Mississippi",
-        "ms_2026_general",
+        "ms_2026_general_all",
         (),
         ("total_votes",),
         source_page="https://www.sos.ms.gov/MSCountyElectionInfo/",
@@ -120,13 +93,11 @@ STATES = {
     "NC": State(
         "NC",
         "North Carolina",
-        "nc_2026_general",
-        (1, 3, 4, 11),
+        "nc_2026_general_all",
+        tuple(range(1, 15)),
         ("total_votes", "election_day", "early_voting", "absentee_by_mail", "provisional"),
         source_page="https://er.ncsbe.gov/",
         custom_models=True,
-        coverage_seats=14,
-        coverage_governor=False,
     ),
     "KY": State(
         "KY",
@@ -144,36 +115,34 @@ STATES = {
     "MN": State(
         "MN",
         "Minnesota",
-        "mn_2026_general",
-        (1,),
+        "mn_2026_general_all",
+        tuple(range(1, 9)),
         ("total_votes",),
+        governor=True,
         source_page="https://electionresults.sos.mn.gov/",
         custom_models=True,
-        coverage_seats=8,
     ),
     "NE": State(
         "NE",
         "Nebraska",
-        "ne_2026_general",
-        (),
+        "ne_2026_general_all",
+        (1, 2, 3),
         ("total_votes",),
         governor=True,
         county_results=False,
         source_page="https://electionresults.nebraska.gov/",
         custom_models=True,
-        coverage_seats=3,
     ),
     "TX": State(
         "TX",
         "Texas",
-        "tx_2026_general",
-        (15, 23, 28, 34, 35),
+        "tx_2026_general_all",
+        tuple(range(1, 39)),
         ("total_votes",),
         governor=True,
         county_results=False,
         source_page="https://goelect.txelections.civixapps.com/ivis-enr-ui/races",
         custom_models=True,
-        coverage_seats=38,
     ),
     "GA": State(
         "GA",

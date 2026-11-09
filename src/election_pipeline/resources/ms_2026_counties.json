@@ -941,8 +941,7 @@
     }
   },
   "compatible_policy_sha256": [
-    "ffa2d1119af363b9584ff9480c06758dd122a0c85d157b29ac7c5df15ab0db5e",
-    "7107622d0b781a8ac8091f1ff61dbbeebc167bff0c7308b2001f86ba646aa7e5"
-  ],
-  "previous_source_id": "ms_2026_general"
+    "7107622d0b781a8ac8091f1ff61dbbeebc167bff0c7308b2001f86ba646aa7e5",
+    "61b564006562819358a771f27842a0d5474d585be96e4821904a132669b97c7a"
+  ]
 }

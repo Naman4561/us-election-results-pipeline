@@ -100,7 +100,7 @@ def finish(rows, source, settings, output, stats, *, reference=None, reconcile=F
     adapter = state_adapter(source.state)
     if ("total_votes", *methods) != adapter.methods:
         raise ValueError("Stored vote methods differ from the state's published contract")
-    wanted = adapter.selected_races(source)
+    wanted = adapter.races
     keys, names, state, county, coverage = set(), set(), {}, {}, defaultdict(set)
     if not rows or len(rows) > settings.max_csv_rows:
         raise ValueError("Missing/excessive selected results")
@@ -132,8 +132,8 @@ def finish(rows, source, settings, output, stats, *, reference=None, reconcile=F
         raise ValueError("Selected contest coverage is incomplete")
     for contest in wanted:
         votes = [v[-1] for k, v in state.items() if k[0] == contest]
-        minimum = 1 if source.contests else 2
-        if len(votes) < minimum or (
+        # Every seat is covered, so an uncontested race legitimately has one candidate.
+        if not votes or (
             any(v is None for v in votes) and any(v is not None for v in votes)
         ):
             raise ValueError("Incomplete candidate counts; mixed blank and numeric results")
@@ -173,7 +173,6 @@ def finish(rows, source, settings, output, stats, *, reference=None, reconcile=F
         all_counts_zero=known and not any(v[-1] for v in state.values()),
         contest_count=len(wanted),
         contests=sorted(wanted),
-        minimum_candidates=1 if source.contests else 2,
         county_counts={k: len(v) for k, v in coverage.items()},
         reference_comparison=reference_check(reference, source, official, settings.max_csv_rows)
         if reference is not None

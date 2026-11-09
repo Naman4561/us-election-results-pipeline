@@ -128,7 +128,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
 
     if source.format != "bundle" or source.election_date != "2026-11-03" or source.state != "IA":
         raise ValueError("Unsupported Iowa source/election")
-    wanted = state_adapter("IA").selected_races(source)
+    wanted = state_adapter("IA").races
     with zipfile.ZipFile(archive_path) as archive:
         updated = clarity.settings_check(archive.read("settings.json"), "IA", settings)
         official = clarity.summary(archive.read("summary.json"), race, settings)

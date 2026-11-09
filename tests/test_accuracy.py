@@ -25,7 +25,7 @@ class AccuracyTests(unittest.TestCase):
             "state": "NC",
             "election_date": "2026-11-03",
             "release_id": 8,
-            "source_id": "nc_2026_general",
+            "source_id": "nc_2026_general_all",
             "raw_sha256": "a" * 64,
         }
 

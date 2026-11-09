@@ -195,13 +195,11 @@ def build_candidate(root, db, metadata, schema, artifacts):
         if (
             not races
             or len(races) != len(set(races))
-            or not set(races) <= state.available_races.keys()
+            or not set(races) <= state.races.keys()
         ):
             raise ValueError("Ingestion release has an invalid contest contract")
         variables[state.schema + "_races"] = races
-        variables["allow_uncontested"] = (
-            metadata.get("parser_report", {}).get("minimum_candidates") == 1
-        )
+        variables["allow_uncontested"] = True
 
     environment = {
         **os.environ,

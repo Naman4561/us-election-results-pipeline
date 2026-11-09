@@ -24,7 +24,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     if source.format != "bundle" or source.election_date != "2026-11-03":
         raise ValueError("Unsupported Nebraska source/election")
     rows, races = [], {}
-    wanted = state_adapter("NE").selected_races(source)
+    wanted = state_adapter("NE").races
     with zipfile.ZipFile(archive_path) as archive:
         index = archive.read("election.html").decode("utf-8-sig")
         if "General Election November 3, 2026" not in re.sub(r"<[^>]*>", "", index):

@@ -145,7 +145,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
 
     if source.format != "bundle" or source.election_date != "2026-11-03" or source.state != "OR":
         raise ValueError("Unsupported Oregon source/election")
-    wanted = state_adapter("OR").selected_races(source)
+    wanted = state_adapter("OR").races
     with zipfile.ZipFile(archive_path) as archive:
         updated = update_text(archive.read("export.html").decode("utf-8", errors="replace"))
         official = {}

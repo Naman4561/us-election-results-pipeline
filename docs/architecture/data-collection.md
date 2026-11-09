@@ -30,7 +30,7 @@ flowchart TB
 ```
 
 Some states need one-off handling: South Carolina resolves dated workbooks from its
-fallback page (`collectors/sc.py`), Texas reads the Civix API (`parsers/tx_civix.py`),
+fallback page (`collectors/sc.py`), Texas reads the Civix API (`parsers/tx.py`),
 and Alaska pins its issuer certificates (`resources/alaska-issuers.pem`).
 
 ## One collection run

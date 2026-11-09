@@ -10,13 +10,6 @@ max_zip_members = 20
 max_csv_rows = 2000000
 user_agent = "US-Election-Results-Pipeline/0.1"
 
-[sources.nc_2026_general]
-state = "NC"
-election_date = "2026-11-03"
-url = "https://s3.amazonaws.com/dl.ncsbe.gov/ENRS/2026_11_03/results_pct_20261103.zip"
-format = "zip"
-expected_members = ["results_pct_20261103.txt"]
-
 [sources.ak_2026_general]
 state = "AK"
 election_date = "2026-11-03"
@@ -59,42 +52,6 @@ expected_members = ["results.xml", "election.xml", "parties.xml", "units.xml", "
 "units.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/GeopoliticalUnits"
 "contests.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/Contests"
 "candidates.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/Candidates"
-
-[sources.mn_2026_general]
-state = "MN"
-election_date = "2026-11-03"
-url = "https://electionresultsfiles.sos.mn.gov/20261103/ussenatecty.txt"
-format = "bundle"
-primary_filename = "senate-county.txt"
-min_interval_seconds = 300
-expected_members = ["senate-county.txt", "senate.txt", "house-county.txt", "house.txt", "counties.txt"]
-
-[sources.mn_2026_general.files]
-"senate.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/ussenate.txt"
-"house-county.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/USHouseCty.txt"
-"house.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/USHouse.txt"
-"counties.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/Cntytbl.txt"
-
-[sources.ne_2026_general]
-state = "NE"
-election_date = "2026-11-03"
-url = "https://electionresults.nebraska.gov/resultsCSV.aspx?map=CTY&text=All&type=SW"
-format = "bundle"
-primary_filename = "results.csv"
-min_interval_seconds = 300
-expected_members = ["results.csv", "election.html"]
-
-[sources.ne_2026_general.files]
-"election.html" = "https://electionresults.nebraska.gov/ResultsMedia.aspx"
-
-[sources.tx_2026_general]
-state = "TX"
-election_date = "2026-11-03"
-url = "https://goelect.txelections.civixapps.com/api-ivis-system/api/s3/enr/election/53815"
-format = "bundle"
-primary_filename = "results.json"
-min_interval_seconds = 300
-expected_members = ["results.json"]
 
 [sources.ga_2026_general]
 state = "GA"
@@ -145,7 +102,6 @@ format = "bundle"
 primary_filename = "results.json"
 expected_members = ["results.json"]
 min_interval_seconds = 300
-contests = ["TX-SEN", "TX-GOV", "TX-01", "TX-02", "TX-03", "TX-04", "TX-05", "TX-06", "TX-07", "TX-08", "TX-09", "TX-10", "TX-11", "TX-12", "TX-13", "TX-14", "TX-15", "TX-16", "TX-17", "TX-18", "TX-19", "TX-20", "TX-21", "TX-22", "TX-23", "TX-24", "TX-25", "TX-26", "TX-27", "TX-28", "TX-29", "TX-30", "TX-31", "TX-32", "TX-33", "TX-34", "TX-35", "TX-36", "TX-37", "TX-38"]
 
 [sources.mn_2026_general_all]
 state = "MN"
@@ -155,7 +111,6 @@ format = "bundle"
 primary_filename = "senate-county.txt"
 expected_members = ["senate-county.txt", "senate.txt", "house-county.txt", "house.txt", "counties.txt", "governor.txt", "governor-precinct.txt"]
 min_interval_seconds = 300
-contests = ["MN-SEN", "MN-GOV", "MN-01", "MN-02", "MN-03", "MN-04", "MN-05", "MN-06", "MN-07", "MN-08"]
 
 [sources.mn_2026_general_all.files]
 "senate.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/ussenate.txt"
@@ -172,7 +127,6 @@ url = "https://s3.amazonaws.com/dl.ncsbe.gov/ENRS/2026_11_03/results_pct_2026110
 format = "zip"
 expected_members = ["results_pct_20261103.txt"]
 min_interval_seconds = 300
-contests = ["NC-SEN", "NC-01", "NC-02", "NC-03", "NC-04", "NC-05", "NC-06", "NC-07", "NC-08", "NC-09", "NC-10", "NC-11", "NC-12", "NC-13", "NC-14"]
 
 [sources.ne_2026_general_all]
 state = "NE"
@@ -182,42 +136,9 @@ format = "bundle"
 primary_filename = "results.csv"
 expected_members = ["results.csv", "election.html"]
 min_interval_seconds = 300
-contests = ["NE-SEN", "NE-GOV", "NE-01", "NE-02", "NE-03"]
 
 [sources.ne_2026_general_all.files]
 "election.html" = "https://electionresults.nebraska.gov/ResultsMedia.aspx"
-
-
-[sources.ms_2026_general]
-state = "MS"
-election_date = "2026-11-03"
-url = "https://www.sos.ms.gov/MSCountyElectionInfo/"
-format = "bundle"
-primary_filename = "county-status.json"
-contests = ["MS-SEN"]
-min_interval_seconds = 300
-expected_members = ["county-status.json", "adams.report", "alcorn.report", "amite.report", "attala.report", "benton.report", "bolivar.report", "calhoun.report", "carroll.report", "chickasaw.report", "choctaw.report", "claiborne.report", "clarke.report", "clay.report", "coahoma.report", "copiah.report", "covington.report", "desoto.pdf", "forrest.report", "franklin.report", "george.report", "greene.report", "grenada.report", "hancock.pdf", "harrison.report", "hinds.pdf", "holmes.report", "humphreys.report", "issaquena.report", "itawamba.report", "jackson.report", "jasper.report", "jefferson.report", "jeffersondavis.report", "jones.report", "kemper.report", "lafayette.pdf", "lamar.pdf", "lauderdale.pdf", "lawrence.report", "leake.report", "lee.report", "leflore.report", "lincoln.report", "lowndes.report", "madison.pdf", "marion.report", "marshall.report", "monroe.pdf", "montgomery.report", "neshoba.html", "newton.report", "noxubee.report", "oktibbeha.report", "panola.report", "pearlriver.report", "perry.report", "pike.pdf", "pontotoc.report", "prentiss.report", "quitman.report", "rankin.html", "scott.report", "sharkey.report", "simpson.report", "smith.report", "stone.report", "sunflower.html", "tallahatchie.report", "tate.report", "tippah.report", "tishomingo.report", "tunica.report", "union.report", "walthall.report", "warren.pdf", "washington.report", "wayne.report", "webster.report", "wilkinson.report", "winston.report", "yalobusha.report", "yazoo.report"]
-supplemental_members = ["adams.report", "alcorn.report", "amite.report", "attala.report", "benton.report", "bolivar.report", "calhoun.report", "carroll.report", "chickasaw.report", "choctaw.report", "claiborne.report", "clarke.report", "clay.report", "coahoma.report", "copiah.report", "covington.report", "forrest.report", "franklin.report", "george.report", "greene.report", "grenada.report", "harrison.report", "holmes.report", "humphreys.report", "issaquena.report", "itawamba.report", "jackson.report", "jasper.report", "jefferson.report", "jeffersondavis.report", "jones.report", "kemper.report", "lawrence.report", "leake.report", "lee.report", "leflore.report", "lincoln.report", "lowndes.report", "marion.report", "marshall.report", "montgomery.report", "newton.report", "noxubee.report", "oktibbeha.report", "panola.report", "pearlriver.report", "perry.report", "pontotoc.report", "prentiss.report", "quitman.report", "scott.report", "sharkey.report", "simpson.report", "smith.report", "stone.report", "tallahatchie.report", "tate.report", "tippah.report", "tishomingo.report", "tunica.report", "union.report", "walthall.report", "washington.report", "wayne.report", "webster.report", "wilkinson.report", "winston.report", "yalobusha.report", "yazoo.report"]
-
-[sources.ms_2026_general.collector_overrides]
-max_zip_members = 100
-max_download_bytes = 134217728
-max_uncompressed_bytes = 134217728
-
-[sources.ms_2026_general.files]
-"desoto.pdf" = "https://www.desotocountyms.gov/DocumentCenter/View/11878/Results-Summary"
-"hancock.pdf" = "https://www.hancockcounty.ms.gov/DocumentCenter/View/1224/Unofficial-Results"
-"hinds.pdf" = "https://www.co.hinds.ms.us/pgs/results/Unofficial%20Summary%20Report.pdf"
-"lafayette.pdf" = "https://lafayettems.com/wp-content/uploads/2026/11/2026-GENERAL-ELECTION-UNOFFICIAL-RESULTS-AFFIDAVITS-NOT-COUNTED.pdf"
-"lamar.pdf" = "https://lamarcountyms.gov/ms/wp-content/uploads/2026/11/Election_Summary_Results3.pdf"
-"lauderdale.pdf" = "https://www.lauderdalecounty.org/wp-content/uploads/2026/11/2026-election-with-absentee.pdf"
-"madison.pdf" = "https://www.madison-co.com/elections/election_results.pdf"
-"monroe.pdf" = "https://www.monroems.com/circuitclerk/results/CUMMULATIVE_RESULTS_ALL_PRECINCTS.pdf"
-"neshoba.html" = "https://neshobacounty.net/news/general-election-results-from-november-3-2026/"
-"pike.pdf" = "https://www.pikecountyelectionresults.org/2026_general/DW.pdf"
-"rankin.html" = "https://www2.rankincounty.org/results/index.html"
-"sunflower.html" = "https://www.sunflowercircuitclerk.com/hart/ALL_PRECINCTS.html"
-"warren.pdf" = "https://warrencountyms.gov/wp-content/uploads/2026/11/General-Unofficial-November-3-Election-Results.pdf"
 
 [sources.ms_2026_general_all]
 state = "MS"
@@ -225,7 +146,6 @@ election_date = "2026-11-03"
 url = "https://www.sos.ms.gov/MSCountyElectionInfo/"
 format = "bundle"
 primary_filename = "county-status.json"
-contests = ["MS-SEN"]
 min_interval_seconds = 300
 expected_members = ["county-status.json", "adams.report", "alcorn.report", "amite.report", "attala.report", "benton.report", "bolivar.report", "calhoun.report", "carroll.report", "chickasaw.report", "choctaw.report", "claiborne.report", "clarke.report", "clay.report", "coahoma.report", "copiah.report", "covington.report", "desoto.pdf", "forrest.report", "franklin.report", "george.report", "greene.report", "grenada.report", "hancock.pdf", "harrison.report", "hinds.pdf", "holmes.report", "humphreys.report", "issaquena.report", "itawamba.report", "jackson.report", "jasper.report", "jefferson.report", "jeffersondavis.report", "jones.report", "kemper.report", "lafayette.pdf", "lamar.pdf", "lauderdale.pdf", "lawrence.report", "leake.report", "lee.report", "leflore.report", "lincoln.report", "lowndes.report", "madison.pdf", "marion.report", "marshall.report", "monroe.pdf", "montgomery.report", "neshoba.html", "newton.report", "noxubee.report", "oktibbeha.report", "panola.report", "pearlriver.report", "perry.report", "pike.pdf", "pontotoc.report", "prentiss.report", "quitman.report", "rankin.html", "scott.report", "sharkey.report", "simpson.report", "smith.report", "stone.report", "sunflower.html", "tallahatchie.report", "tate.report", "tippah.report", "tishomingo.report", "tunica.report", "union.report", "walthall.report", "warren.pdf", "washington.report", "wayne.report", "webster.report", "wilkinson.report", "winston.report", "yalobusha.report", "yazoo.report"]
 supplemental_members = ["adams.report", "alcorn.report", "amite.report", "attala.report", "benton.report", "bolivar.report", "calhoun.report", "carroll.report", "chickasaw.report", "choctaw.report", "claiborne.report", "clarke.report", "clay.report", "coahoma.report", "copiah.report", "covington.report", "forrest.report", "franklin.report", "george.report", "greene.report", "grenada.report", "harrison.report", "holmes.report", "humphreys.report", "issaquena.report", "itawamba.report", "jackson.report", "jasper.report", "jefferson.report", "jeffersondavis.report", "jones.report", "kemper.report", "lawrence.report", "leake.report", "lee.report", "leflore.report", "lincoln.report", "lowndes.report", "marion.report", "marshall.report", "montgomery.report", "newton.report", "noxubee.report", "oktibbeha.report", "panola.report", "pearlriver.report", "perry.report", "pontotoc.report", "prentiss.report", "quitman.report", "scott.report", "sharkey.report", "simpson.report", "smith.report", "stone.report", "tallahatchie.report", "tate.report", "tippah.report", "tishomingo.report", "tunica.report", "union.report", "walthall.report", "washington.report", "wayne.report", "webster.report", "wilkinson.report", "winston.report", "yalobusha.report", "yazoo.report"]

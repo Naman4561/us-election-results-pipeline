@@ -93,12 +93,12 @@ def unique(seen, key, line):
 def result_rows(path: Path, source: Source, limit: int, stats: dict):
     from election_pipeline.states import state_adapter
 
-    selected = state_adapter("NC").selected_races(source)
     coverage = {
         "US SENATE": "NC-SEN",
         **{f"US HOUSE OF REPRESENTATIVES DISTRICT {n:02d}": f"NC-{n:02d}" for n in range(1, 15)},
     }
-    coverage = {name: identity for name, identity in coverage.items() if identity in selected}
+    if set(coverage.values()) != state_adapter("NC").races.keys():
+        raise ValueError("NC contest names differ from the registered races")
     if len(source.expected_members) != 1:
         raise ValueError("NC results require exactly one configured ZIP member")
 

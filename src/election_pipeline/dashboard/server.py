@@ -112,7 +112,7 @@ def make_payload(
 ):
     adapter = state_adapter(state)
     races_config, methods = races if races is not None else adapter.races, adapter.methods
-    if not races_config or not races_config.keys() <= adapter.available_races.keys():
+    if not races_config or not races_config.keys() <= adapter.races.keys():
         raise ValueError("Dashboard coverage is outside the supported state contests")
     names = {f["id"]: f["name"] for f in geography["counties"]}
     by_race, by_county, totals = (
@@ -262,7 +262,7 @@ def demo_methods(total, methods):
 
 def demo_payload(geography, state="NC"):
     """Synthetic fixtures, explicitly labelled; never a database fallback."""
-    races_config, methods = state_adapter(state).available_races, state_adapter(state).methods
+    races_config, methods = state_adapter(state).races, state_adapter(state).methods
     rows = []
     for feature in geography["counties"] or (
         [geography["outline"]] if not state_adapter(state).county_results else []
@@ -565,7 +565,7 @@ def create_app(
             if entry["public"] and isinstance(original, PublishedResults):
                 identity = (code, entry["source"]["source_id"], tuple(entry["races"]))
                 if identity not in configured_providers:
-                    supported = state_adapter(code).available_races
+                    supported = state_adapter(code).races
                     if not set(entry["races"]) <= supported.keys():
                         raise ValueError("Catalog selects unsupported dashboard contests")
                     configured_providers[identity] = PublishedResults(

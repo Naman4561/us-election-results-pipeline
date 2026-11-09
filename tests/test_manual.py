@@ -201,7 +201,7 @@ class ManualDeploymentTests(unittest.TestCase):
         self.prod = {
             "DATA_DIR": str(self.root / "data"),
             "IMAGE_TAG": self.revision,
-            "PIPELINE_SOURCES": "nc_2026_general,ky_2026_general",
+            "PIPELINE_SOURCES": "nc_2026_general_all,ky_2026_general",
         }
         self.config = {
             "CONTROL_STATE_DIR": str(self.root),
@@ -402,7 +402,7 @@ class ManualDeploymentTests(unittest.TestCase):
             control.rollback(self.path, self.config)
         after = switch.call_args.args[2]
         self.assertFalse(after["sources"][self.source.source_id]["public"])
-        self.assertTrue(after["sources"]["nc_2026_general"]["public"])
+        self.assertTrue(after["sources"]["nc_2026_general_all"]["public"])
 
     def test_manual_freshness_does_not_require_http_poll_but_overdue_import_alerts(self):
         now = datetime.now(timezone.utc)

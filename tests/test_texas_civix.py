@@ -95,7 +95,7 @@ class TexasCivixTests(unittest.TestCase):
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         self.settings, sources = load_config(ROOT / "config/sources.toml")
-        self.source = sources["tx_2026_general"]
+        self.source = sources["tx_2026_general_all"]
 
     def parse(self, mutate=None, raw=None):
         data = fixture()
@@ -244,7 +244,7 @@ class SourceTransferTests(unittest.TestCase):
         self.root = Path(self.temporary.name)
         self.path = self.root / "catalog.json"
         settings, sources = load_config(ROOT / "config/sources.toml")
-        self.source, self.settings = sources["tx_2026_general"], settings
+        self.source, self.settings = sources["tx_2026_general_all"], settings
         self.name = self.source.source_id
         old_source = replace(
             self.source,
@@ -277,10 +277,10 @@ class SourceTransferTests(unittest.TestCase):
             "baseline": {
                 "image_id": self.old_image,
                 "revision": self.revision,
-                "source_ids": ["nc_2026_general", self.name],
+                "source_ids": ["nc_2026_general_all", self.name],
             },
             "sources": {
-                "nc_2026_general": entry(sources["nc_2026_general"]),
+                "nc_2026_general_all": entry(sources["nc_2026_general_all"]),
                 self.name: entry(old_source),
             },
         }
@@ -288,7 +288,7 @@ class SourceTransferTests(unittest.TestCase):
         self.prod_file = self.root / "production.env"
         self.original = (
             f"IMAGE_TAG={self.revision}\nPIPELINE_STATUS=unofficial\n"
-            f"PIPELINE_SOURCES=nc_2026_general,{self.name}\n"
+            f"PIPELINE_SOURCES=nc_2026_general_all,{self.name}\n"
             f"DATA_DIR={self.root}/data\nPOSTGRES_PASSWORD=keep-secret\n"
         )
         self.prod_file.write_text(self.original, encoding="utf-8")
@@ -349,14 +349,14 @@ class SourceTransferTests(unittest.TestCase):
         value = catalog.read(self.path)
         self.assertEqual(result["outcome"], "transferred")
         self.assertEqual(
-            value["sources"]["nc_2026_general"],
-            json.loads(json.dumps(self.value["sources"]["nc_2026_general"])),
+            value["sources"]["nc_2026_general_all"],
+            json.loads(json.dumps(self.value["sources"]["nc_2026_general_all"])),
         )
         self.assertEqual(value["baseline"]["image_id"], self.old_image)
         prod = dict(dotenv_values(self.prod_file))
         self.assertEqual(prod["IMAGE_TAG"], self.revision)
         self.assertEqual(prod["POSTGRES_PASSWORD"], "keep-secret")
-        self.assertEqual(prod["PIPELINE_SOURCES"], "nc_2026_general")
+        self.assertEqual(prod["PIPELINE_SOURCES"], "nc_2026_general_all")
         self.assertEqual(value["sources"][self.name]["worker"], "expansion")
         self.assertTrue(value["sources"][self.name]["public"])
         self.assertTrue(value["sources"][self.name]["enabled"])

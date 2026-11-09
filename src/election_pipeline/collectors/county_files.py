@@ -40,16 +40,6 @@ def fetch_bundle(
     adapter = state_adapter(source.state)
     parser = adapter.parser
     contract = parser.validate_source(source)
-    if previous is None and store is not None:
-        predecessor = contract.get("previous_source_id")
-        if predecessor and predecessor != source.source_id:
-            from election_pipeline.storage import ArchiveStore
-
-            legacy = ArchiveStore(store.root, replace(source, source_id=predecessor))
-            try:
-                previous = legacy.cached_archive(legacy.read_state())
-            except (ValueError, OSError):
-                previous = None
     old = {}
     scheduling = {}
     if previous is not None:

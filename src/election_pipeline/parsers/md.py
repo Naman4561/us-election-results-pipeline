@@ -129,7 +129,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
 
     if source.format != "bundle" or source.election_date != "2026-11-03" or source.state != "MD":
         raise ValueError("Unsupported Maryland source/election")
-    wanted = state_adapter("MD").selected_races(source)
+    wanted = state_adapter("MD").races
     rows, times = [], {}
     with zipfile.ZipFile(archive_path) as archive:
         pages = {race: page(archive.read(MEMBERS[race]), race) for race in wanted}

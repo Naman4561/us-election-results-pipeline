@@ -429,7 +429,7 @@ class ConfigurationAndCheckTests(unittest.TestCase):
     def test_real_configuration_loads(self) -> None:
         root = Path(__file__).resolve().parents[1]
         settings, sources = load_config(root / "config" / "sources.toml")
-        self.assertEqual(sources["nc_2026_general"].expected_members, ("results_pct_20261103.txt",))
+        self.assertEqual(sources["nc_2026_general_all"].expected_members, ("results_pct_20261103.txt",))
         self.assertEqual(settings.max_attempts, 3)
 
     def test_config_rejects_unknown_fields(self) -> None:
@@ -486,7 +486,7 @@ class ConfigurationAndCheckTests(unittest.TestCase):
         with patch("sys.stdout", new_callable=io.StringIO) as output:
             self.assertEqual(main(["list-sources", "--config", config]), 0)
             listed = [json.loads(line)["source_id"] for line in output.getvalue().splitlines()]
-            self.assertIn("nc_2026_general", listed)
+            self.assertIn("nc_2026_general_all", listed)
         with patch("sys.stderr", new_callable=io.StringIO) as output:
             self.assertEqual(main(["collect", "--source", "unknown", "--config", config]), 2)
             self.assertEqual(json.loads(output.getvalue())["outcome"], "configuration_error")

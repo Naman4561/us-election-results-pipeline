@@ -30,7 +30,7 @@ def validate_source(source):
         or source.election_date != "2026-11-03"
         or source.primary_filename != "senate-county.txt"
         or source.url != MEDIA_BASE + "ussenatecty.txt"
-        or dict(source.files) != {**MEDIA_FILES, **(GOVERNOR_FILES if source.contests else {})}
+        or dict(source.files) != {**MEDIA_FILES, **GOVERNOR_FILES}
     ):
         raise ValueError("Minnesota requires the verified 2026 election-dated media-file URLs")
 
@@ -50,19 +50,9 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     from election_pipeline.states import state_adapter
 
     validate_source(source)
-    wanted = state_adapter("MN").selected_races(source)
+    wanted = state_adapter("MN").races
     rows, expected, actual = [], {}, defaultdict(lambda: [0, 0])
     with zipfile.ZipFile(archive_path) as archive:
-        # New bundles contain only the official data files. Keep legacy index validation
-        # when replaying an older bundle; never reinterpret a CAPTCHA as election evidence.
-        if "election.html" in archive.namelist():
-            index = archive.read("election.html").decode("utf-8-sig")
-            if "radware captcha page" in index.lower():
-                raise ValueError(
-                    "Minnesota legacy index contains a CAPTCHA; collect a fresh media bundle"
-                )
-            if "Tuesday, November 3, 2026" not in index:
-                raise ValueError("Minnesota index belongs to another election")
         counties = {}
         for identity, name, precincts in flat(archive, "counties.txt", 3, settings.max_csv_rows):
             if identity in counties or not name:

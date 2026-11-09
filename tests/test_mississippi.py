@@ -59,7 +59,7 @@ class MississippiTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
         self.settings, sources = load_config(ROOT / "config/sources.toml")
-        self.source = sources["ms_2026_general"]
+        self.source = sources["ms_2026_general_all"]
         self.policy = ms.policy()
         self.counties = {c["key"]: c for c in self.policy["counties"]}
         with zipfile.ZipFile(FIXTURE) as archive:

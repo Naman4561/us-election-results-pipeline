@@ -81,7 +81,7 @@ def page_for(race):
 def exports(paths, source):
     from election_pipeline.states import state_adapter
 
-    wanted = state_adapter("NM").selected_races(source)
+    wanted = state_adapter("NM").races
     found = races({m: paths[m].read_bytes() for m in CHANGE_MEMBERS}, wanted)
     plan = []
     for race in sorted(found):
@@ -128,7 +128,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
 
     if source.format != "bundle" or source.election_date != "2026-11-03" or source.state != "NM":
         raise ValueError("Unsupported New Mexico source/election")
-    wanted = state_adapter("NM").selected_races(source)
+    wanted = state_adapter("NM").races
     with zipfile.ZipFile(archive_path) as archive:
         updates = {
             statewide_update(

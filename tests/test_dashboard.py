@@ -120,13 +120,13 @@ class DashboardTests(unittest.TestCase):
         responses[4].fetchall.return_value = [{**row, "contest_id": identity} for identity in RACES]
         conn.execute.side_effect = responses
         with patch("election_pipeline.dashboard.server.psycopg.connect", return_value=conn):
-            result = PublishedResults({}, self.geo, "nc_2026_general")()
+            result = PublishedResults({}, self.geo, "nc_2026_general_all")()
         self.assertEqual(result["publication"]["publication_id"], "old")
         for call in conn.execute.call_args_list[-2:]:
             self.assertEqual(call.args[1], ("old",))
 
     def test_reader_reuses_a_recent_payload_without_reconnecting(self):
-        reader = PublishedResults({}, self.geo, "nc_2026_general")
+        reader = PublishedResults({}, self.geo, "nc_2026_general_all")
         with patch.object(reader, "read", return_value={"races": {}}) as read:
             first, second = reader(), reader()
             self.assertIs(first, second)
