@@ -143,7 +143,17 @@ def _collect_locked(
         else None
     )
     if state.get("source_signature") != signature:
-        state = {"source_signature": signature, "url": source.url}
+        # A new release or source setting. For the same URL the last archived snapshot and
+        # the failure record still hold, so a site that is down keeps its fallback; only
+        # the HTTP validators belong to the old request.
+        kept = state if state.get("url") == source.url else {}
+        state = {
+            **{k: v for k, v in kept.items() if k not in ("etag", "last_modified")},
+            "source_signature": signature,
+            "url": source.url,
+        }
+        if kept:
+            store.write_state(state)
     store.remove_abandoned_downloads()
     base = {
         "schema_version": 1,

@@ -80,19 +80,19 @@ class DashboardTests(unittest.TestCase):
         second = copy.deepcopy(first)
         second["publication"]["publication_id"] = "second"
         current = [first]
-        with TestClient(create_app(provider=lambda: current[0])) as client:
-            one = client.get("/api/snapshot")
+        with TestClient(create_app(state_providers={"NC": lambda: current[0]})) as client:
+            one = client.get("/api/states/NC")
             self.assertEqual(one.status_code, 200)
             tag = one.headers["etag"]
             self.assertEqual(
-                client.get("/api/snapshot", headers={"If-None-Match": tag}).status_code, 304
+                client.get("/api/states/NC", headers={"If-None-Match": tag}).status_code, 304
             )
             current[0] = second
-            two = client.get("/api/snapshot", headers={"If-None-Match": tag})
+            two = client.get("/api/states/NC", headers={"If-None-Match": tag})
             self.assertEqual(two.status_code, 200)
             self.assertEqual(two.json()["publication"]["publication_id"], "second")
             current[0] = first
-            restored = client.get("/api/snapshot", headers={"If-None-Match": two.headers["etag"]})
+            restored = client.get("/api/states/NC", headers={"If-None-Match": two.headers["etag"]})
             self.assertEqual(restored.json()["publication"]["publication_id"], "demo-v1")
             self.assertEqual(client.get("/").status_code, 200)
             self.assertEqual(client.get("/app.js").status_code, 200)
@@ -101,8 +101,8 @@ class DashboardTests(unittest.TestCase):
         def fail():
             raise ValueError("private-password-must-not-leak")
 
-        with TestClient(create_app(provider=fail)) as client:
-            response = client.get("/api/snapshot")
+        with TestClient(create_app(state_providers={"NC": fail})) as client:
+            response = client.get("/api/states/NC")
             self.assertEqual(response.status_code, 503)
             self.assertNotIn("private-password", response.text)
             self.assertNotIn("demo", response.text)

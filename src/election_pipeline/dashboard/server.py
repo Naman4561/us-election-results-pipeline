@@ -538,7 +538,6 @@ def national_payload(providers, demo=False, detail=False):
 
 
 def create_app(
-    provider=None,
     demo=False,
     env_file=Path(".env.dashboard"),
     state_providers=None,
@@ -546,7 +545,7 @@ def create_app(
 ):
     catalog_file = catalog_file or os.environ.get("DASHBOARD_CATALOG")
     if state_providers is None:
-        settings = None if provider is not None or demo else dashboard_settings(env_file)
+        settings = None if demo else dashboard_settings(env_file)
         state_providers = {}
         for code, state in STATES.items():
             geography = json.loads(
@@ -557,9 +556,6 @@ def create_app(
                 if demo
                 else PublishedResults(settings, geography, state.source_id, code)
             )
-    if provider is not None:
-        state_providers = {**state_providers, "NC": provider}
-    provider = state_providers["NC"]
 
     def approved_providers():
         """The catalog's public states; a manually imported one is labelled as such."""
@@ -618,10 +614,6 @@ def create_app(
         if request.headers.get("if-none-match") == etag:
             return Response(status_code=304, headers=headers)
         return Response(content, media_type="application/json", headers=headers)
-
-    @app.get("/api/snapshot")
-    def snapshot(request: Request):
-        return api_response(request, lambda: approved_providers()["NC"]())
 
     @app.get("/api/national")
     def national(request: Request):

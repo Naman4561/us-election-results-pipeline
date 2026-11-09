@@ -302,6 +302,21 @@ class CollectionTests(unittest.TestCase):
         self.collect()
         self.assertNotIn("If-None-Match", Handler.requests[1]["headers"])
 
+    def test_new_signature_keeps_the_snapshot_and_failures_but_not_validators(self) -> None:
+        Handler.responses = [self.good(ETag='"v1"'), {"status": 503}]
+        first = self.collect()
+        # A release that signs the source differently, while the site is down.
+        self.settings = replace(self.settings, max_csv_rows=self.settings.max_csv_rows - 1)
+        self.assertEqual(self.collect(force_download=True)["outcome"], "http_error")
+        self.assertNotIn("If-None-Match", Handler.requests[1]["headers"])
+        state = self.raw_state()
+        self.assertEqual(state["source_signature"], self.source.signature(self.settings))
+        self.assertEqual(state["sha256"], first["sha256"])
+        self.assertIn("last_checked_at", state)
+        self.assertEqual(state["consecutive_failures"], 1)
+        self.assertNotIn("etag", state)
+        self.assertIsNotNone(ArchiveStore(self.root, self.source).cached_archive(state))
+
     def test_missing_cached_file_forces_a_full_download(self) -> None:
         Handler.responses = [self.good(ETag='"v1"'), self.good(ETag='"v1"')]
         self.collect()
