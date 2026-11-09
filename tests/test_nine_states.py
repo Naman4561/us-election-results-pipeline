@@ -403,6 +403,16 @@ class NineStateTests(unittest.TestCase):
         )
         with self.assertRaises(ValueError):
             clarity.settings_check(raw, "CO", self.settings)
+        # Clarity began writing "no parent" as the text "null"; a county's page is refused.
+        record = json.loads(clarity.document(raw, self.settings))
+        for parent, valid in (("null", True), ("IA", False), ("", False)):
+            with self.subTest(parent=parent):
+                changed = json.dumps({**record, "parententityname": parent}).encode()
+                if valid:
+                    clarity.settings_check(changed, "IA", self.settings)
+                else:
+                    with self.assertRaises(ValueError):
+                        clarity.settings_check(changed, "IA", self.settings)
 
     def test_ia_blank_cells_only_where_total_is_zero(self):
         self.assertEqual(ia.group("", "", "0"), (0, 0, 0))

@@ -34,7 +34,9 @@ def document(raw, settings):
 def settings_check(raw, state, settings):
     """The site's own state code and update time, which must fall in the election window."""
     record = unique_json(document(raw, settings))
-    if record.get("entityname") != state or record.get("parententityname") is not None:
+    # A county's page names its state as parent. A state's own page has none, written as
+    # JSON null, or since Nov 9, 2026 as the text "null".
+    if record.get("entityname") != state or record.get("parententityname") not in (None, "null"):
         raise ValueError(f"Clarity settings belong to another site than {state}")
     updated = text(record.get("websiteupdatedat"), "update time")
     match = re.fullmatch(r"(.+) [ECM][SD]T", updated)
