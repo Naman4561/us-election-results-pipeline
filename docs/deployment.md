@@ -31,8 +31,10 @@ deploy status
    ```
 
 2. **Release** it. Migrations are applied (they are additive), then every enabled HTTP
-   source runs once under the new image in check-only mode: collect, parse, load and
-   the full dbt build, with the candidate discarded and nothing published. Only when
+   source runs once under the new image in check-only mode: its latest archived
+   snapshot is parsed, loaded and put through the full dbt build, with the candidate
+   discarded and nothing published. No request goes to the state and collector state is
+   untouched, so a state's site being down does not block a release. Only when
    every source validates does `current` move to the release; the worker uses it from
    its next cycle. A source that fails leaves the old release current.
 
@@ -103,7 +105,8 @@ sudo "$R/.venv/bin/python" "$R/scripts/cutover.py" --release "$R" --image "elect
 
 The first run prints the plan. `--apply` refuses without an uploaded backup from the
 last hour, then stops both collectors and waits for running jobs and applies migration
-024. It runs every enabled HTTP source once, check-only, in the new image; if any fails,
+024. It checks every enabled HTTP source's latest snapshot in the new image (as a
+release does); if any fails,
 the collectors restart, nothing else has changed, and the pinned images keep running.
 Otherwise it copies every per-state row into the shared tables (each table's counts and vote sums
 verified before commit), writes the new catalog and settings, points `current` at the

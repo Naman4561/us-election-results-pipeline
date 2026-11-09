@@ -171,7 +171,9 @@ def point_current(config, release_path):
 def check_sources(image, value, prod, config):
     """Run every enabled HTTP source once, check-only, in ``image``; return those that failed.
 
-    Each run collects, parses, loads and builds dbt, then discards its candidate.
+    Each run parses the source's latest archived snapshot, loads it and builds dbt, then
+    discards its candidate. Nothing is requested from the state, so a site that is down
+    does not block a release, and the live collector state is left alone.
     """
 
     def check(name):

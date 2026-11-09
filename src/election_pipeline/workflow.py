@@ -33,8 +33,9 @@ def run_source(
     """Retry committed stages idempotently. Replay does not publish by default.
 
     ``prepare_only`` keeps a validated candidate for a later promotion. ``check_only``
-    validates and discards one (a new release proving it can publish each source); it
-    leaves the source's latest run, which monitoring reads, as it was.
+    validates and discards one (a new release proving it can publish each source). It
+    replays the source's latest archived snapshot, so it makes no request and leaves the
+    collector state and latest run, which collection and monitoring read, as they were.
     """
     if status not in ("test", "unofficial"):
         raise ValueError("Choose test or unofficial explicitly")
@@ -105,6 +106,12 @@ def run_source(
 
             try:
                 digest = replay_sha256
+
+                if check_only and not digest:
+                    state = store.read_state()
+                    if not store.cached_archive(state):
+                        raise ValueError("No archived snapshot to check")
+                    digest = state["sha256"]
 
                 if not digest:
                     fetched = stage(

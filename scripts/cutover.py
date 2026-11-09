@@ -9,7 +9,7 @@ Run from the staged release's own venv, as root, after an uploaded backup. With 
 The first prints the plan; ``--apply`` performs it.
 
 Steps, in order: stop both collectors and wait for running jobs; apply migration 024;
-run every enabled HTTP source once, check-only, in the new image (if any fails, the
+check every enabled HTTP source's latest snapshot in the new image (if any fails, the
 collectors restart and nothing else changes); copy every per-state row into the shared
 tables (each schema verified, see election_pipeline.consolidate); write the version 2
 catalog and deployment settings;

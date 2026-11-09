@@ -211,6 +211,34 @@ class WorkflowTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "cannot publish"):
             self.run_source(prepare_only=True, replay_sha256=self.sha, publish_replay=True)
 
+    def test_check_only_replays_the_archived_snapshot_and_leaves_collector_state(self):
+        store = ArchiveStore(self.f.root, self.f.source)
+        # A new release may sign the source differently; a check must not reset its state.
+        store.write_state({**store.read_state(), "sha256": self.sha, "source_signature": "old"})
+        before = store.state_path.read_bytes()
+        with (
+            patch.object(
+                publication,
+                "prepare",
+                return_value={"outcome": "validated", "candidate_id": "c", "release_id": 7},
+            ),
+            patch.object(publication, "discard", return_value={"outcome": "discarded"}) as discard,
+        ):
+            result = self.run_source(check_only=True)
+        self.assertEqual(result["outcome"], "validated")
+        self.assertEqual(result["raw_sha256"], self.sha)
+        self.collect.assert_not_called()
+        discard.assert_called_once()
+        self.publish.assert_not_called()
+        self.assertEqual(store.state_path.read_bytes(), before)
+        self.assertFalse((self.f.root / "runs" / self.f.source.source_id / "latest.json").exists())
+
+        store.write_state({"source_signature": "old"})
+        result = self.run_source(check_only=True)
+        self.assertEqual(result["outcome"], "failed")
+        self.assertIn("No archived snapshot", result["error"])
+        self.collect.assert_not_called()
+
     def test_full_run_lock_rejects_overlap_without_overwriting_latest_report(self):
         first = self.run_source()
         latest = Path(first["report_path"]).parent / "latest.json"
