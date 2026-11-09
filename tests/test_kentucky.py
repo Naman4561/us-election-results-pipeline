@@ -10,10 +10,11 @@ from pathlib import Path
 from unittest.mock import patch
 from xml.etree.ElementTree import Element, SubElement, tostring
 
+from loading import copies
+
 from election_pipeline import bundles
 from election_pipeline.collect import FetchResponse
-from election_pipeline.database import converted_rows, verify
-from election_pipeline.parsers import ky
+from election_pipeline.database import verify
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import CollectorSettings, load_config
 from election_pipeline.storage import ArchiveStore
@@ -145,12 +146,13 @@ class KentuckyTests(unittest.TestCase):
         self.assertEqual(len(rows), 14)
         self.assertEqual({r["total_votes"] for r in rows}, {"240", "480"})
         self.assertNotIn("early_voting", rows[0])
-        verify(self.source, self.settings, self.store, directory)
-        converted = list(
-            converted_rows(directory / "reporting_units.csv", ky.REPORT_FIELDS, self.source, 4, 121)
-        )
-        self.assertEqual(converted[0][0], 4)
-        self.assertEqual(converted[0][4], "")  # State-level county remains empty text.
+        loaded = copies(self.source, self.settings, self.store, directory, 4)
+        units = loaded[("landing", "reporting_units")]
+        self.assertEqual(len(units), 121)
+        self.assertEqual(units[0][:3], (4, 2, "KY"))
+        self.assertEqual(units[0][5], "")  # State-level county remains empty text.
+        methods = loaded[("landing", "result_methods")]
+        self.assertEqual(len(methods), 2 * report["output_rows"])
 
     def test_state_county_disagreement_blocks_publication(self):
         self.results[0]["TotalVotes"] += 1

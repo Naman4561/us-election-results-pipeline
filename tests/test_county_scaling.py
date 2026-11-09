@@ -1,12 +1,10 @@
 """Synthetic scale/recovery checks; synthetic counts never enter production."""
 
-import copy
 import hashlib
 import io
 import json
 import unittest
 import zipfile
-from dataclasses import replace
 from unittest.mock import MagicMock, patch
 
 import test_mississippi as fixtures
@@ -16,11 +14,10 @@ from election_pipeline.checks import validate_payload
 from election_pipeline.collectors import county_files
 from election_pipeline.county_import import import_county, write_template
 from election_pipeline.database import import_fetches
-from election_pipeline.deployment import catalog, containers
+from election_pipeline.deployment import containers
 from election_pipeline.parsers import ms
 from election_pipeline.parsers.county_reports import reviewed_file
 from election_pipeline.pipeline import collect_source
-from election_pipeline.storage import ArchiveStore
 
 
 def synthetic_review(fixture, key):
@@ -161,7 +158,7 @@ class CountyScalingTests(unittest.TestCase):
         saved, _ = f.store.commit_download(target, fetched.sha256)
         report = f.parse(saved)
         self.assertEqual(report["outcome"], "parsed", report)
-        self.assertEqual((report["counties_with_counts"], report["output_rows"]), (82, 249))
+        self.assertEqual((report["counties_with_counts"], report["output_rows"]), (82, 246))
         payload, _ = f.payload(report)
         self.assertEqual(payload["county_collection"]["manual"], 69)
         self.assertFalse(payload["county_collection"]["complete"])
@@ -306,46 +303,6 @@ class CountyScalingTests(unittest.TestCase):
         self.assertIn("PIKE", accepted)
         self.assertEqual(manifest["counties"]["PIKE"]["status"], "stale")
 
-    def test_legacy_bundle_seeds_shadow_owner_without_writing_the_old_state(self):
-        f = self.f
-        first, _ = f.collect()
-        added = {"LAFAYETTE", "LAMAR", "SUNFLOWER"}
-
-        def legacy(members, manifest):
-            manifest.update(version=1, policy_sha256=f.policy["compatible_policy_sha256"][0])
-            for county in f.policy["counties"]:
-                if county["key"] in added or not county.get("url"):
-                    members.pop(county["member"])
-                if county["key"] in added:
-                    manifest["counties"][county["key"]] = dict(
-                        status="not_collected",
-                        url=None,
-                        raw_sha256=None,
-                        last_attempt_at=None,
-                        last_success_at=None,
-                        issue=None,
-                        headers={},
-                    )
-
-        old = f.rewrite_bundle(first, legacy)
-        sha = hashlib.sha256(old.read_bytes()).hexdigest()
-        destination = f.store.temporary_download()
-        destination.write_bytes(old.read_bytes())
-        f.store.commit_download(destination, sha)
-        f.store.write_state({"sha256": sha, "source_signature": "legacy"})
-        old_state = f.store.state_path.read_bytes()
-        shadow = replace(f.source, source_id="ms_2026_general_all")
-        store = ArchiveStore(f.root, shadow)
-        target = store.temporary_download()
-        with patch.object(
-            county_files, "fetch_file", side_effect=f.fetcher(failures={"HINDS": 403})
-        ):
-            county_files.fetch_bundle(shadow, f.settings, target, store=store)
-        _, manifest, accepted = ms.read_bundle(target, shadow)
-        self.assertEqual(len(accepted), 13)
-        self.assertEqual(manifest["counties"]["HINDS"]["status"], "stale")
-        self.assertEqual(f.store.state_path.read_bytes(), old_state)
-
     def test_deadline_defers_work_and_next_cycle_services_deferred_counties_first(self):
         f = self.f
         clock, visits = [0.0], []
@@ -370,106 +327,14 @@ class CountyScalingTests(unittest.TestCase):
         self.assertGreaterEqual(len(set(visits)), 2)
         self.assertEqual(len(ms.read_bundle(second, f.source)[2]), len(set(visits)))
 
-    def test_explicit_same_race_replacement_preserves_existing_owners_and_feed_urls(self):
-        f = self.f
-        image, revision = "sha256:" + "a" * 64, "b" * 40
-        new = catalog.entry(
-            replace(f.source, source_id="ms_2026_general_all"),
-            f.settings,
-            image_id=image,
-            revision=revision,
-            release_path=f.root,
-            worker="expansion",
-            status="unofficial",
-        )
-        old_source = replace(
-            f.source,
-            files=tuple(
-                p
-                for p in f.source.files
-                if p[0]
-                not in {f.counties[k]["member"] for k in ("LAFAYETTE", "LAMAR", "SUNFLOWER")}
-            ),
-            expected_members=tuple(
-                [f.source.primary_filename]
-                + [
-                    p[0]
-                    for p in f.source.files
-                    if p[0]
-                    not in {f.counties[k]["member"] for k in ("LAFAYETTE", "LAMAR", "SUNFLOWER")}
-                ]
-            ),
-            supplemental_members=(),
-            collector_overrides=(),
-        )
-        old = catalog.entry(
-            old_source,
-            f.settings,
-            image_id=image,
-            revision=revision,
-            release_path=f.root,
-            worker="expansion",
-            status="unofficial",
-        )
-        old["races"] = new["races"] = ["MS-SEN"]
-        self.assertTrue(catalog.expands_coverage(old, new))
-        changed = copy.deepcopy(new)
-        changed["source"]["files"] = [
-            (name, url + "?other=1") for name, url in new["source"]["files"]
-        ]
-        self.assertFalse(catalog.expands_coverage(old, changed))
-        value = dict(
-            version=1,
-            generation=0,
-            baseline=dict(image_id=image, revision=revision, source_ids=[]),
-            sources={
-                old_source.source_id: {**old, "enabled": True, "public": True},
-                new["source"]["source_id"]: {**new, "replaces": old_source.source_id},
-            },
-        )
-        catalog.validate(value)
-        for code in ("NC", "KY"):
-            baseline_source = replace(
-                old_source,
-                source_id=code.lower() + "_2026_general",
-                state=code,
-                format="zip",
-                files=(),
-                expected_members=(),
-                contests=(),
-            )
-            baseline = catalog.entry(
-                baseline_source,
-                f.settings,
-                image_id=image,
-                revision=revision,
-                release_path=f.root,
-                worker="baseline",
-                status="unofficial",
-            )
-            baseline["races"] = [code + "-SEN"]
-            value["sources"][baseline_source.source_id] = baseline
-            value["baseline"]["source_ids"].append(baseline_source.source_id)
-        switched = catalog.prospective(value, [new["source"]["source_id"]])
-        self.assertFalse(switched["sources"][old_source.source_id]["enabled"])
-        self.assertTrue(switched["sources"][new["source"]["source_id"]]["public"])
-        for code in ("nc", "ky"):
-            name = code + "_2026_general"
-            self.assertEqual(
-                switched["sources"][name], json.loads(json.dumps(value["sources"][name]))
-            )
-        with self.assertRaisesRegex(ValueError, "multiple public"):
-            value["sources"][new["source"]["source_id"]].update(enabled=True, public=True)
-            catalog.validate(value)
-
-    def test_production_county_import_uses_pinned_image_offline_without_database_secrets(self):
+    def test_production_county_import_uses_the_release_image_offline_without_secrets(self):
         f = self.f
         original, review = f.root / "original.pdf", f.root / "review.json"
         original.write_bytes(b"test")
         review.write_text("{}")
         identity = "sha256:" + "a" * 64
-        entry = dict(image_id=identity, source=dict(source_id="ms_2026_general_all"))
-        config = dict(EXPANSION_CPUS="0.5", EXPANSION_MEMORY="768m")
+        source = "ms_2026_general_all"
+        config = dict(JOB_CPUS="0.5", JOB_MEMORY="768m")
         with (
             patch.object(
                 containers, "command", return_value='{"outcome":"manual_imported"}'
@@ -477,7 +342,7 @@ class CountyScalingTests(unittest.TestCase):
             patch.object(containers.subprocess, "run") as cleanup,
         ):
             containers.import_county(
-                entry, dict(DATA_DIR=str(f.root)), config, "JACKSON", original, review
+                identity, source, dict(DATA_DIR=str(f.root)), config, "JACKSON", original, review
             )
         args = run.call_args.args[0]
         self.assertEqual(args[args.index("--network") + 1], "none")
@@ -488,7 +353,13 @@ class CountyScalingTests(unittest.TestCase):
         self.assertEqual(cleanup.call_args.args[0][-1], args[args.index("--name") + 1])
         with self.assertRaises(ValueError):
             containers.import_county(
-                entry, dict(DATA_DIR=str(f.root / "other")), config, "JACKSON", original, review
+                identity,
+                source,
+                dict(DATA_DIR=str(f.root / "other")),
+                config,
+                "JACKSON",
+                original,
+                review,
             )
 
 

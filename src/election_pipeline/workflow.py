@@ -28,15 +28,21 @@ def run_source(
     publish_replay=False,
     reference=None,
     prepare_only=False,
+    check_only=False,
 ):
-    """Retry committed stages idempotently. Replay does not publish by default."""
+    """Retry committed stages idempotently. Replay does not publish by default.
+
+    ``prepare_only`` keeps a validated candidate for a later promotion. ``check_only``
+    validates and discards one (a new release proving it can publish each source); it
+    leaves the source's latest run, which monitoring reads, as it was.
+    """
     if status not in ("test", "unofficial"):
         raise ValueError("Choose test or unofficial explicitly")
 
     if publish_replay and not replay_sha256:
         raise ValueError("--publish-replay requires --replay-sha256")
-    if prepare_only and publish_replay:
-        raise ValueError("--prepare-only cannot publish a replay")
+    if (prepare_only or check_only) and publish_replay:
+        raise ValueError("Preparing or checking cannot publish a replay")
 
     store = ArchiveStore(Path(data_dir), source)
 
@@ -55,7 +61,7 @@ def run_source(
     }
 
     directory = store.root / "runs" / source.source_id
-    path = directory / f"{report['run_id']}.json"
+    path = (directory / "checks" if check_only else directory) / f"{report['run_id']}.json"
     report["report_path"] = str(path)
 
     started = time.monotonic()
@@ -63,7 +69,8 @@ def run_source(
 
     def save():
         atomic_json(path, report)
-        atomic_json(directory / "latest.json", report)
+        if not check_only:
+            atomic_json(directory / "latest.json", report)
 
     def stage(name, function):
         item = {
@@ -177,14 +184,16 @@ def run_source(
 
                 report["release_id"] = loaded["release_id"]
 
-                if prepare_only:
-                    from election_pipeline.publication import prepare
+                if prepare_only or check_only:
+                    from election_pipeline.publication import discard, prepare
 
                     candidate = stage(
                         "validate_candidate",
                         lambda: prepare(Path(root), db, loaded["release_id"], status),
                     )
                     report["candidate_id"] = candidate["candidate_id"]
+                    if check_only:
+                        stage("discard_candidate", lambda: discard(db, candidate["candidate_id"]))
                     report["outcome"] = "validated"
                     return report
 

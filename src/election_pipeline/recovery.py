@@ -216,8 +216,6 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=(),
         from election_pipeline.deployment import catalog as registry
 
         registry.validate(catalog)
-        sources = registry.sources(catalog)
-        database_schemas = registry.schemas(catalog)
 
     identity = "backup_" + uuid.uuid4().hex
 
@@ -277,21 +275,20 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=(),
 
         if catalog is not None:
             atomic_json(temporary / "deployment-catalog.json", catalog)
-            # Preserve all pinned collector releases, not just the maintenance checkout.
+            # Preserve the current release and the rollback one.
             releases = {}
-            for entry in catalog["sources"].values():
-                revision, release = entry["revision"], Path(entry["release_path"])
-                if revision in releases:
+            for entry in (catalog["release"], catalog.get("previous_release")):
+                if not entry or entry["revision"] in releases:
                     continue
+                revision, release = entry["revision"], Path(entry["release_path"])
                 actual = subprocess.check_output(
                     ["git", "-C", str(release), "rev-parse", "HEAD"], text=True
                 ).strip()
-                if actual != revision:
-                    raise ValueError("Registered release checkout changed")
-                from election_pipeline.deployment.containers import release_hash
-
-                if release_hash(release) != entry["release_sha256"]:
-                    raise ValueError("Registered release files changed")
+                dirty = subprocess.check_output(
+                    ["git", "-C", str(release), "status", "--porcelain"], text=True
+                ).strip()
+                if actual != revision or dirty:
+                    raise ValueError("Release checkout changed")
                 releases[revision] = str(release)
                 target = temporary / "releases" / revision
                 for directory in (

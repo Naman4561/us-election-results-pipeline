@@ -1,4 +1,4 @@
-"""Check a second dashboard, then gracefully reload the existing Caddy process."""
+"""Start a candidate dashboard, check it, then point the existing Caddy process at it."""
 
 from __future__ import annotations
 
@@ -13,6 +13,13 @@ from election_pipeline.deployment import catalog, containers
 from election_pipeline.storage import atomic_json, utc_now
 
 
+def expected_races(value):
+    """{state: races} that a dashboard for this catalog must serve."""
+    from election_pipeline.states import STATES
+
+    return {code: list(STATES[code].races) for code in catalog.public_states(value)}
+
+
 def check(url, expected):
     with urllib.request.urlopen(url.rstrip("/") + "/api/national", timeout=10) as response:
         payload = json.load(response)
@@ -24,7 +31,7 @@ def check(url, expected):
         if (
             state.get("availability") != "available"
             or not publication.get("publication_id")
-            or set(state.get("races", {})) != set(entry["races"])
+            or set(state.get("races", {})) != set(entry)
         ):
             raise ValueError(f"Candidate dashboard is missing published results for {code}")
         if publication.get("status") not in ("test", "unofficial"):
@@ -32,27 +39,18 @@ def check(url, expected):
     return payload
 
 
-def start(value, names, prod, config, directory, *, port, image):
+def start(value, names, prod, config, directory, *, port, release):
+    """Start a private dashboard from ``release`` serving the catalog with ``names`` public."""
     if not 8001 <= port <= 8099:
         raise ValueError("Candidate port must be localhost 8001–8099")
-    image_id, revision = containers.inspect_image(image)
-    prospective = catalog.prospective(value, names)
+    image_id, revision = release["image_id"], release["revision"]
+    prospective = catalog.published(value, names)
     codes = catalog.public_states(prospective)
-    # The candidate image must describe exactly the registered adapter contracts.
-    for entry in prospective["sources"].values():
-        if entry["public"]:
-            meta = containers.metadata(image_id, entry["source"]["source_id"])
-            if (
-                catalog.source_from_json(meta["source"])
-                != catalog.source_from_json(entry["source"])
-                or meta["races"] != entry["races"]
-            ):
-                raise ValueError("Dashboard image changed an existing adapter's coverage/source")
     directory = Path(directory)
     directory.mkdir(parents=True, mode=0o755)
     os.chmod(directory, 0o755)
     catalog.write(directory / "catalog.json", prospective)
-    name = "election-expansion-dashboard-" + directory.name.rsplit("-", 1)[-1]
+    name = "election-dashboard-" + directory.name.rsplit("-", 1)[-1]
     env = {
         **containers.database_env(prod, reader=True),
         "DASHBOARD_CATALOG": "/coverage/catalog.json",
@@ -121,7 +119,7 @@ def reload(caddy, content):
 
 
 def handoff(path, caddy, target, journal, *, before=None, catalog_file=None):
-    if not re.fullmatch(r"(?:dashboard|election-expansion-dashboard-[0-9a-f]{32}):8000", target):
+    if not re.fullmatch(r"election-dashboard-[0-9a-f]{32}:8000", target):
         raise ValueError("Invalid dashboard upstream")
     old = Path(path).read_text(encoding="utf-8")
     found = re.findall(r"reverse_proxy\s+(\S+)", old)
@@ -169,6 +167,6 @@ def stop_unused(name, value):
     protected = {
         d.get("name") for d in (value.get("dashboard", {}), value.get("previous_dashboard", {}))
     }
-    if not re.fullmatch(r"election-expansion-dashboard-[0-9a-f]{32}", name) or name in protected:
+    if not re.fullmatch(r"election-dashboard-[0-9a-f]{32}", name) or name in protected:
         raise ValueError("Active and previous dashboard containers are protected")
     subprocess.run(["docker", "rm", "-f", name], capture_output=True, check=True, timeout=20)

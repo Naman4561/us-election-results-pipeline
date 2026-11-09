@@ -12,9 +12,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 import test_parsing as fixtures
+from loading import migrated
 from test_collection import Handler
 
 from election_pipeline import database, publication, workflow
+from election_pipeline.states import state_adapter
 from election_pipeline.storage import ArchiveStore, file_hash
 
 
@@ -270,21 +272,8 @@ class IntegratedWorkflowTests(unittest.TestCase):
         }
         root = Path(__file__).resolve().parents[1]
 
+        db = migrated()
         with database.connect(db) as conn:
-            for relation, filename in [
-                ("ops.sources", "001_initial.sql"),
-                ("serving.publications", "002_publication.sql"),
-                ("ky.results", "003_state_schemas.sql"),
-                ("tx.results", "004_mn_ne_tx.sql"),
-            ]:
-                exists = conn.execute(
-                    "SELECT to_regclass(%s) AS t",
-                    (relation,),
-                ).fetchone()["t"]
-
-                if exists is None:
-                    conn.execute((root / "migrations" / filename).read_text())
-
             conn.execute("TRUNCATE ops.sources CASCADE")
 
         f = fixtures.ParsingTests()
@@ -386,51 +375,36 @@ class IntegratedWorkflowTests(unittest.TestCase):
             first["publication_id"],
         )
 
-        from election_pipeline.dashboard.server import (
-            STATIC,
-            make_payload,
-        )
+        from election_pipeline.dashboard.server import STATIC, make_payload, published_rows
 
         with database.connect(db) as conn:
             params = (corrected["publication_id"],)
 
-            county = conn.execute(
-                """
-                SELECT *
-                FROM serving.nc_county_candidate_results
-                WHERE publication_id = %s
-                """,
-                params,
-            ).fetchall()
-
-            contest = conn.execute(
-                """
-                SELECT *
-                FROM serving.nc_contest_candidate_results
-                WHERE publication_id = %s
-                """,
-                params,
-            ).fetchall()
+            methods = state_adapter("NC").methods[1:]
+            county = published_rows(conn, params[0], "county_results", ("county",), methods)
+            contest = published_rows(conn, params[0], "contest_results", (), methods)
 
             totals = conn.execute(
                 """
                 SELECT publication_id, sum(total_votes) AS n
-                FROM serving.nc_contest_candidate_results
+                FROM serving.contest_results
                 GROUP BY publication_id
                 """
             ).fetchall()
 
             self.assertEqual(
                 {str(row["publication_id"]): row["n"] for row in totals},
+                # Two precincts of 10 votes in each race; the correction removes one vote.
                 {
-                    first["publication_id"]: 100,
-                    corrected["publication_id"]: 99,
+                    first["publication_id"]: 20 * len(state_adapter("NC").races),
+                    corrected["publication_id"]: 20 * len(state_adapter("NC").races) - 1,
                 },
             )
 
-            count = conn.execute("SELECT count(*) AS n FROM landing.nc_results").fetchone()["n"]
+            count = conn.execute("SELECT count(*) AS n FROM landing.results").fetchone()["n"]
 
-            self.assertEqual(count, 20)
+            # Both releases keep every precinct row: two per race.
+            self.assertEqual(count, 2 * 2 * len(state_adapter("NC").races))
 
         payload = make_payload(
             json.loads((STATIC / "nc-map.json").read_text()),

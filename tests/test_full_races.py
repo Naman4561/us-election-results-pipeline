@@ -477,5 +477,6 @@ class FullRaceDatabaseTests(unittest.TestCase):
                         ).fetchone()["ok"]
                     )
 
+
 if __name__ == "__main__":
     unittest.main()

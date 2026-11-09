@@ -10,7 +10,6 @@ import subprocess
 import tempfile
 import time
 import zipfile
-from contextlib import nullcontext
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -52,10 +51,10 @@ def aws_copy(config, source, destination):
         raise RuntimeError("S3 transfer failed: " + result.stderr[-2000:])
 
 
-def pack_bundle(bundle, deployed_tag):
+def pack_bundle(bundle, revision):
     manifest = verify_bundle(bundle)
     manifest["deployment"] = {
-        "image_tag": deployed_tag,
+        "release_revision": revision,
         "maintenance_commit": subprocess.check_output(
             ["git", "rev-parse", "HEAD"],
             cwd=ROOT,
@@ -312,8 +311,10 @@ def main():
         if args.action == "backup":
             from election_pipeline.deployment import catalog as registry
 
-            with registry.locked(args.catalog_file) if args.catalog_file else nullcontext():
-                catalog = registry.read(args.catalog_file) if args.catalog_file else None
+            if not args.catalog_file:
+                raise ValueError("A backup records the deployment: pass --catalog-file")
+            with registry.locked(args.catalog_file):
+                catalog = registry.read(args.catalog_file)
                 result = backup(
                     ROOT,
                     data,
@@ -327,7 +328,7 @@ def main():
             bundle = Path(result["backup_dir"])
             result["backup_id"] = bundle.name
             try:
-                archive, receipt = pack_bundle(bundle, prod["IMAGE_TAG"])
+                archive, receipt = pack_bundle(bundle, catalog["release"]["revision"])
                 upload_bundle(config, bundle, archive, receipt)
             except Exception:
                 # Nothing complete reached S3; the next run starts a fresh bundle.

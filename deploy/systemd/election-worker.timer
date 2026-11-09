@@ -1,11 +1,11 @@
 [Unit]
-Description=Poll admitted expansion states every five minutes
+Description=Poll every enabled election results source every five minutes
 
 [Timer]
 OnCalendar=*:0/5:30
 Persistent=true
 RandomizedDelaySec=5
-Unit=election-expansion.service
+Unit=election-worker.service
 
 [Install]
 WantedBy=timers.target

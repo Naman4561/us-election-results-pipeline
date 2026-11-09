@@ -1,15 +1,13 @@
-"""Manage isolated expansion releases without restarting existing collectors."""
+"""Operate the production deployment: the worker cycle, releases, sources and dashboard."""
 
 import argparse
 import json
 import os
-import uuid
 from pathlib import Path
 
 from dotenv import dotenv_values
 
-from election_pipeline.deployment import catalog, control, coverage, dashboard
-from election_pipeline.storage import atomic_json
+from election_pipeline.deployment import catalog, control, dashboard
 
 
 def main():
@@ -18,178 +16,90 @@ def main():
         "--config", type=Path, default=Path("/etc/election-pipeline/deployment.env")
     )
     sub = parser.add_subparsers(dest="action", required=True)
-    sub.add_parser("init")
-    sub.add_parser("install-controls")
+    sub.add_parser("run", help="One worker cycle over every enabled HTTP source")
     sub.add_parser("status")
-    sub.add_parser("run")
-    sub.add_parser("rollback-dashboard")
-    sub.add_parser("recover-handoff")
-    sub.add_parser("recover-coverage-retirement")
-    disable = sub.add_parser(
-        "disable-baseline", help="Remove a baseline state's public coverage and schedule"
-    )
-    disable.add_argument("--source", required=True)
-    admitted = sub.add_parser("activate-sources")
-    admitted.add_argument("--source", action="append", required=True)
-    county = sub.add_parser("import-county")
-    county.add_argument("--source", required=True)
+    staged = sub.add_parser("release", help="Make a staged release current")
+    staged.add_argument("--release", type=Path, required=True)
+    staged.add_argument("--image", required=True)
+    sub.add_parser("rollback-release")
+    for name in ("prepare", "promote", "disable"):
+        sub.add_parser(name).add_argument("--source", required=True)
+    county = sub.add_parser("import-county", help="Import a reviewed Mississippi county report")
     county.add_argument("--county", required=True)
     county.add_argument("--file", type=Path, required=True)
     county.add_argument("--review-json", type=Path, required=True)
-    expand = sub.add_parser("coverage")
-    expand.add_argument("phase", choices=("prepare", "activate", "retire"))
-    expand.add_argument("--states", nargs="+", required=True, choices=sorted(coverage.STATES))
-    expand.add_argument("--release", type=Path)
-    expand.add_argument("--image")
-    repin = sub.add_parser("repin", help="Move a registered expansion source to a new image")
-    repin.add_argument("--release", type=Path, required=True)
-    repin.add_argument("--image", required=True)
-    repin.add_argument("--source", required=True)
-    register = sub.add_parser("register")
-    register.add_argument("--release", type=Path, required=True)
-    register.add_argument("--image", required=True)
-    register.add_argument("--source", required=True)
-    register.add_argument("--status", choices=("test", "unofficial"), required=True)
-    register.add_argument(
-        "--replaces", help="Existing source whose race coverage is being expanded"
-    )
-    transfer = sub.add_parser("transfer-source")
-    transfer.add_argument("--release", type=Path, required=True)
-    transfer.add_argument("--image", required=True)
-    transfer.add_argument("--source", required=True)
-    transfer.add_argument("--status", choices=("test", "unofficial"), required=True)
-    transfer.add_argument("--evidence-file", type=Path, required=True)
-    transfer.add_argument("--validation-report", type=Path, required=True)
-    for name in ("migrate", "prepare", "promote"):
-        command = sub.add_parser(name)
-        command.add_argument("--source", required=True)
-        if name == "migrate":
-            command.add_argument("--file", type=Path, required=True)
-    start = sub.add_parser("start-dashboard")
-    start.add_argument("--source", action="append", default=[])
-    start.add_argument("--image", required=True)
-    start.add_argument("--port", type=int, default=8001)
+    start = sub.add_parser("start-dashboard", help="A private candidate from the release")
+    start.add_argument("--source", action="append", default=[], help="Also make public")
     activate = sub.add_parser("activate")
-    activate.add_argument("--candidate", type=uuid.UUID, required=True)
+    activate.add_argument("--candidate", required=True)
     activate.add_argument("--restore-report", type=Path)
-    discard = sub.add_parser("discard-dashboard")
-    discard.add_argument("--name", required=True)
+    sub.add_parser("rollback-dashboard")
+    sub.add_parser("recover-handoff")
+    sub.add_parser("discard-dashboard").add_argument("--name", required=True)
     args = parser.parse_args()
     config = dict(dotenv_values(args.config, interpolate=False))
-    prod = dict(
-        dotenv_values(
-            config.get("PRODUCTION_ENV", "/etc/election-pipeline/production.env"), interpolate=False
-        )
-    )
+    prod = dict(dotenv_values(config["PRODUCTION_ENV"], interpolate=False))
     path = Path(config["CATALOG_FILE"])
     state = Path(config["CONTROL_STATE_DIR"])
     state.mkdir(parents=True, exist_ok=True, mode=0o755)
     os.umask(0o077)
     try:
         action = args.action
-        if action == "init":
-            result = control.initialize(path, config["BASELINE_ROOT"], prod)
-        elif action == "install-controls":
-            result = control.install_controls(config)
-        elif action == "status":
+        if action == "run":
+            # systemd prevents overlapping cycles; this lock also covers manual invocations.
+            with catalog.locked(state / "worker.json", exclusive=True, nonblocking=True):
+                return control.run_enabled(path, prod, config)
+        if action == "status":
             value = catalog.read(path)
             result = {
                 "generation": value["generation"],
+                "release": value["release"]["revision"],
+                "dashboard": value["dashboard"]["name"],
                 "sources": {
-                    n: {k: e[k] for k in ("worker", "enabled", "public", "revision")}
+                    n: {k: e[k] for k in ("acquisition", "enabled", "public", "status")}
                     for n, e in value["sources"].items()
                 },
             }
-        elif action == "register":
-            result = control.register(
-                path,
-                args.release,
-                args.image,
-                args.source,
-                args.status,
-                prod,
-                config,
-                replaces=args.replaces,
-            )
-        elif action == "repin":
-            result = control.repin(path, args.release, args.image, args.source, prod, config)
-        elif action == "import-county":
-            result = control.import_county(
-                path, args.source, args.county, args.file, args.review_json, prod, config
-            )
-        elif action == "activate-sources":
-            result = coverage.activate_sources(path, args.source, prod, config)
-        elif action == "coverage":
-            if args.phase == "prepare":
-                if not args.release or not args.image:
-                    raise ValueError("Coverage preparation requires --release and --image")
-                result = coverage.prepare(path, args.states, args.release, args.image, prod, config)
-            else:
-                result = getattr(coverage, args.phase)(path, args.states, prod, config)
-        elif action == "recover-coverage-retirement":
-            result = coverage.recover_retirement(path, config)
-        elif action == "disable-baseline":
-            result = coverage.disable_baseline(path, args.source, prod, config)
-        elif action == "transfer-source":
-            result = control.transfer_source(
-                path,
-                args.release,
-                args.image,
-                args.source,
-                args.status,
-                args.evidence_file,
-                args.validation_report,
-                config,
-            )
-        elif action == "migrate":
-            result = control.migrate_source(path, args.source, args.file, prod)
+        elif action == "release":
+            result = control.release(path, args.release, args.image, prod, config)
+        elif action == "rollback-release":
+            result = control.rollback_release(path, config)
         elif action in ("prepare", "promote"):
             result = getattr(control, action)(path, args.source, prod, config)
-        elif action == "start-dashboard":
-            identity = uuid.uuid4().hex
-            result = dashboard.start(
-                catalog.read(path),
-                args.source,
-                prod,
-                config,
-                state / ("dashboard-" + identity),
-                port=args.port,
-                image=args.image,
+        elif action == "disable":
+            result = control.disable(path, args.source)
+        elif action == "import-county":
+            result = control.import_county(
+                path, args.county, args.file, args.review_json, prod, config
             )
-            result["id"] = identity
-            atomic_json(state / ("candidate-" + identity + ".json"), result)
+        elif action == "start-dashboard":
+            result = control.start_dashboard(path, args.source, prod, config)
         elif action == "activate":
             candidate = json.loads(
-                (state / ("candidate-" + args.candidate.hex + ".json")).read_text(encoding="utf-8")
+                (state / f"candidate-{args.candidate}.json").read_text(encoding="utf-8")
             )
             report = (
                 json.loads(args.restore_report.read_text(encoding="utf-8"))
                 if args.restore_report
                 else {}
             )
-            result = control.activate(path, candidate, report, prod, config)
+            result = control.activate(path, candidate, report, config)
         elif action == "rollback-dashboard":
-            result = control.rollback(path, config)
+            result = control.rollback_dashboard(path, config)
         elif action == "recover-handoff":
             with catalog.locked(path, exclusive=True):
                 dashboard.recover(state / "handoff.json")
             result = {"outcome": "recovered"}
-        elif action == "discard-dashboard":
+        else:
             dashboard.stop_unused(args.name, catalog.read(path))
             result = {"outcome": "discarded"}
-        else:
-            # systemd already prevents overlapping activations of this unit. Also protect
-            # manual invocations with a separate lock so backups can still read the catalog.
-            with catalog.locked(state / "worker.json", exclusive=True, nonblocking=True):
-                return control.run_enabled(path, prod, config)
         print(json.dumps(result, indent=2), flush=True)
         return 0
     except Exception as error:
-        text = str(error)
-        for key, secret in prod.items():
-            if "PASSWORD" in key and secret:
-                text = text.replace(secret, "[redacted]")
-        print(json.dumps({"outcome": "failed", "error": text}), flush=True)
+        print(
+            json.dumps({"outcome": "failed", "error": control.redacted(str(error), prod)}),
+            flush=True,
+        )
         return 1
 
 

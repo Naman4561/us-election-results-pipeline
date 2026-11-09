@@ -1,4 +1,7 @@
-"""Run only newly owned containers; never recreate the production Compose project."""
+"""Containers this deployment owns: jobs, imports and dashboards from the release image.
+
+The Compose project (PostgreSQL and Caddy) is never recreated from here.
+"""
 
 from __future__ import annotations
 
@@ -49,10 +52,7 @@ def verify_release(path, image):
 
 
 def package_hash(path):
-    package = Path(path) / "src/election_pipeline"
-    # Releases before the roster move fingerprinted Python files only.
-    include_resources = (package / "resources/rosters_2026").is_dir()
-    return collector_code_hash(package, include_resources=include_resources)
+    return collector_code_hash(Path(path) / "src/election_pipeline")
 
 
 def release_hash(path):
@@ -69,19 +69,19 @@ def release_hash(path):
 
 
 def limits(config):
-    cpus, memory = config.get("EXPANSION_CPUS", ""), config.get("EXPANSION_MEMORY", "")
+    cpus, memory = config.get("JOB_CPUS", ""), config.get("JOB_MEMORY", "")
     if not re.fullmatch(r"(?:[0-9]+(?:\.[0-9]+)?)", cpus) or not 0 < float(cpus) <= 8:
-        raise ValueError("Set EXPANSION_CPUS to a measured CPU budget between 0 and 8")
+        raise ValueError("Set JOB_CPUS to a measured CPU budget between 0 and 8")
     if not re.fullmatch(r"[1-9][0-9]*[mg]", memory, re.I):
-        raise ValueError("Set EXPANSION_MEMORY after checking host headroom, e.g. 768m")
+        raise ValueError("Set JOB_MEMORY after checking host headroom, e.g. 768m")
     return ["--cpus", cpus, "--memory", memory, "--memory-swap", memory, "--pids-limit", "256"]
 
 
 def base_args(name, image, config, *, network=True):
-    if not name.startswith("election-expansion-") or not IMAGE.fullmatch(image):
-        raise ValueError(
-            "Only uniquely named expansion containers and immutable images are allowed"
-        )
+    if not re.fullmatch(r"election-(?:job|import|dashboard)-[0-9a-f]{32}", name) or not (
+        IMAGE.fullmatch(image)
+    ):
+        raise ValueError("Only uniquely named owned containers and immutable images are allowed")
     return [
         "docker",
         "run",
@@ -118,16 +118,16 @@ def database_env(prod, *, reader=False):
     }
 
 
-def run_job(entry, prod, config, arguments, *, timeout=240):
-    name = "election-expansion-job-" + uuid.uuid4().hex
+def run_job(image, prod, config, arguments, *, timeout=240):
+    name = "election-job-" + uuid.uuid4().hex
     env = {**database_env(prod), "HOME": "/tmp"}
     args = [
-        *base_args(name, entry["image_id"], config),
+        *base_args(name, image, config),
         "--rm",
         "--mount",
         f"type=bind,src={prod['DATA_DIR']},dst=/app/data",
         *[part for key in env for part in ("--env", key)],
-        entry["image_id"],
+        image,
         "python",
         *arguments,
     ]
@@ -135,14 +135,14 @@ def run_job(entry, prod, config, arguments, *, timeout=240):
         return command(args, timeout=timeout, env={**os.environ, **env})
     except subprocess.TimeoutExpired as error:
         raise RuntimeError(
-            f"Expansion job exceeded its timeout; forced removal requested for {name}"
+            f"Job exceeded its timeout; forced removal requested for {name}"
         ) from error
     finally:
         # Killing a Docker client does not kill its container. Touch only this owned UUID.
         subprocess.run(["docker", "rm", "-f", name], capture_output=True, timeout=20, check=False)
 
 
-def import_county(entry, prod, config, county, report, review):
+def import_county(image, source_id, prod, config, county, report, review):
     """An offline import needs the data mount, but no database credentials or network."""
     root = Path(prod["DATA_DIR"]).resolve()
     paths = []
@@ -151,19 +151,19 @@ def import_county(entry, prod, config, county, report, review):
         if not path.is_file():
             raise ValueError("County input must be a file within DATA_DIR")
         paths.append("/app/data/" + path.relative_to(root).as_posix())
-    name = "election-expansion-import-" + uuid.uuid4().hex
+    name = "election-import-" + uuid.uuid4().hex
     args = [
-        *base_args(name, entry["image_id"], config, network=False),
+        *base_args(name, image, config, network=False),
         "--rm",
         "--mount",
         f"type=bind,src={root},dst=/app/data",
-        entry["image_id"],
+        image,
         "python",
         "-m",
         "election_pipeline",
         "import-county",
         "--source",
-        entry["source"]["source_id"],
+        source_id,
         "--county",
         county,
         "--data-dir",
@@ -177,27 +177,3 @@ def import_county(entry, prod, config, county, report, review):
         return command(args, timeout=120)
     finally:
         subprocess.run(["docker", "rm", "-f", name], capture_output=True, timeout=20, check=False)
-
-
-def metadata(image, source_id):
-    return json.loads(
-        command(
-            [
-                "docker",
-                "run",
-                "--rm",
-                "--network",
-                "none",
-                "--read-only",
-                "--cap-drop",
-                "ALL",
-                "--security-opt",
-                "no-new-privileges",
-                image,
-                "python",
-                "scripts/release_metadata.py",
-                "--source",
-                source_id,
-            ]
-        )
-    )

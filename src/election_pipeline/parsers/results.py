@@ -194,7 +194,7 @@ def finish(rows, source, settings, output, stats, *, reference=None, reconcile=F
         else {"status": "not_provided"},
         warnings=warnings,
         election_status="not determined by parser",
-        **({"vote_methods": list(methods)} if methods else {}),
+        vote_methods=list(methods),
         **({"reporting_unit_rows": len(units)} if units else {}),
     )
 

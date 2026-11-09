@@ -8,10 +8,11 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
+from loading import migrated
 
 from election_pipeline import publication
 from election_pipeline.dashboard.server import STATIC, create_app, demo_payload, national_payload
-from election_pipeline.database import connect, connection_settings, load_parsed
+from election_pipeline.database import connect, load_parsed
 from election_pipeline.states import publication_lock, state_adapter
 
 
@@ -26,7 +27,7 @@ class MultiStateTests(unittest.TestCase):
         self.assertIn("lock_shared", calls[2].args[0])
         self.assertNotEqual(calls[1].args[1], calls[3].args[1])
 
-    def test_dbt_processes_have_state_selectors_and_private_artifact_paths(self):
+    def test_dbt_processes_get_their_states_contract_and_private_artifact_paths(self):
         root = Path(__file__).resolve().parents[1]
         db = {
             "host": "127.0.0.1",
@@ -51,14 +52,19 @@ class MultiStateTests(unittest.TestCase):
                         "release_id": 1,
                         "election_date": "2026-11-03",
                         "source_id": code.lower(),
+                        "parser_report": {"contests": sorted(state_adapter(code).races)},
                     },
                     "p_" + code.lower(),
                     root / "data/publications" / code,
                 )
-            calls = run.call_args_list
-            self.assertIn("tag:state_nc", calls[0].args[0])
-            self.assertIn("tag:state_ky", calls[1].args[0])
-            self.assertNotEqual(calls[0].args[0], calls[1].args[0])
+            calls = [call.args[0] for call in run.call_args_list]
+            variables = [json.loads(call[call.index("--vars") + 1]) for call in calls]
+            self.assertEqual([v["state"] for v in variables], ["NC", "KY"])
+            self.assertEqual(variables[0]["methods"], list(state_adapter("NC").methods[1:]))
+            self.assertNotEqual(
+                calls[0][calls[0].index("--target-path") + 1],
+                calls[1][calls[1].index("--target-path") + 1],
+            )
         self.assertEqual(dict(os.environ), before)
 
     def test_national_api_and_party_categories(self):
@@ -125,20 +131,8 @@ class MultiStateTests(unittest.TestCase):
 class MultiStateDatabaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        name = os.environ["ELECTION_TEST_DATABASE"]
-        if not name.endswith("_test"):
-            raise ValueError("Disposable *_test database required")
         cls.root = Path(__file__).resolve().parents[1]
-        cls.db = {**connection_settings(), "dbname": name}
-        with connect(cls.db) as conn:
-            for relation, filename in [
-                ("ops.sources", "001_initial.sql"),
-                ("serving.publications", "002_publication.sql"),
-                ("ky.results", "003_state_schemas.sql"),
-                ("tx.results", "004_mn_ne_tx.sql"),
-            ]:
-                if conn.execute("SELECT to_regclass(%s) AS t", (relation,)).fetchone()["t"] is None:
-                    conn.execute((cls.root / "migrations" / filename).read_text())
+        cls.db = migrated()
 
     def test_real_state_lock_concurrency_and_exclusive_backup(self):
         with connect(self.db) as nc, connect(self.db) as ky, connect(self.db) as other:
@@ -186,17 +180,12 @@ class MultiStateDatabaseTests(unittest.TestCase):
                 2,
             )
             conn.execute("SET ROLE election_dashboard")
-            for code in ("NC", "KY"):
-                schema = state_adapter(code).schema
-                self.assertFalse(
-                    conn.execute(
-                        "SELECT has_table_privilege(current_user,%s,'SELECT') AS ok",
-                        (schema + ".results",),
-                    ).fetchone()["ok"]
-                )
-                self.assertTrue(
-                    conn.execute(
-                        "SELECT has_table_privilege(current_user,%s,'SELECT') AS ok",
-                        (schema + ".county_candidate_results",),
-                    ).fetchone()["ok"]
-                )
+            self.assertFalse(
+                conn.execute(
+                    "SELECT has_schema_privilege(current_user, 'landing', 'USAGE') AS ok"
+                ).fetchone()["ok"]
+            )
+            counties = conn.execute(
+                "SELECT state, count(*) AS n FROM serving.county_results GROUP BY state"
+            ).fetchall()
+            self.assertEqual({row["state"] for row in counties}, {"NC", "KY"})

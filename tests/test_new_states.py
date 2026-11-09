@@ -23,7 +23,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 from urllib.parse import parse_qs
 
-from loading import copies
+from loading import copies, migrated
 
 from election_pipeline import bundles, publication
 from election_pipeline.collect import FetchFailure, FetchResponse, fetch_file
@@ -31,7 +31,6 @@ from election_pipeline.collectors import enr_export
 from election_pipeline.dashboard.server import STATIC, make_payload, national_payload
 from election_pipeline.database import (
     connect,
-    connection_settings,
     load_parsed,
 )
 from election_pipeline.parsers.enr_platform import export_target
@@ -214,7 +213,7 @@ class NewStateTests(unittest.TestCase):
     def test_sd_county_rows_and_quote_variants_reconcile_to_the_statewide_csv(self):
         report = self.parse("SD")
         self.assertEqual(report["county_reconciliation"], "passed")
-        self.assertEqual(report["vote_methods"], "not_published")
+        self.assertEqual(report["vote_methods"], [])
         rows = self.read(report, "county_results.csv")
         names = {r["choice"] for r in rows if r["contest_id"] == "SD-AL"}
         # The CSV writes 'Nikki' and the workbook "Nikki"; both are the same candidate.
@@ -272,7 +271,7 @@ class NewStateTests(unittest.TestCase):
         report = self.parse("NM")
         self.assertEqual(report["county_reconciliation"], "passed_except_privacy_masked_counties")
         self.assertEqual(report["privacy_masked_counties"], {"NM-02": ["CHAVES"]})
-        self.assertEqual(set(report["vote_methods"].values()), {"not_reported"})
+        self.assertEqual(set(report["vote_method_status"].values()), {"not_reported"})
         rows = self.read(report, "county_results.csv")
         district = [r for r in rows if r["contest_id"] == "NM-02"]
         self.assertNotIn("CHAVES", {r["county"] for r in district})
@@ -367,7 +366,7 @@ class NewStateTests(unittest.TestCase):
 
         report = self.parse("NM", methods(0))
         self.assertEqual(report["outcome"], "parsed", report)
-        self.assertEqual(report["vote_methods"]["NM-SEN"], "reported_not_stored")
+        self.assertEqual(report["vote_method_status"]["NM-SEN"], "reported_not_stored")
         self.failed("NM", methods(1))
 
     def test_nm_export_controls_are_found_by_race_id(self):
@@ -603,21 +602,7 @@ class EnrCollectorTests(unittest.TestCase):
 )
 class NewStateDatabaseTests(unittest.TestCase):
     def test_three_states_load_validate_publish_and_enforce_reader_permissions(self):
-        name = os.environ["ELECTION_TEST_DATABASE"]
-        if not name.endswith("_test"):
-            raise ValueError("Disposable *_test database required")
-        db = {**connection_settings(), "dbname": name}
-        with connect(db) as conn:
-            for path in sorted((ROOT / "migrations").glob("*.sql")):
-                schema = {
-                    "001_initial.sql": "ops.sources",
-                    "002_publication.sql": "serving.publications",
-                    "003_state_schemas.sql": "ky.results",
-                    "004_mn_ne_tx.sql": "tx.results",
-                }.get(path.name, f'"{path.stem[4:]}".results')  # "or" is reserved
-                if conn.execute("SELECT to_regclass(%s) AS t", (schema,)).fetchone()["t"] is None:
-                    conn.execute(path.read_text())
-            conn.execute("TRUNCATE ops.sources CASCADE")
+        db = migrated()
         for code in CODES:
             f = NewStateTests()
             f.setUp()
@@ -633,17 +618,21 @@ class NewStateDatabaseTests(unittest.TestCase):
             )
             with connect(db) as conn:
                 conn.execute("SET ROLE election_dashboard")
-                for table, allowed in (("contest_candidate_results", True), ("results", False)):
-                    self.assertEqual(
-                        conn.execute(
-                            "SELECT has_table_privilege(current_user,%s,'SELECT') AS ok",
-                            (f"{code.lower()}.{table}",),
-                        ).fetchone()["ok"],
-                        allowed,
-                    )
+                # The dashboard reads published results, never parsed rows.
+                self.assertTrue(
+                    conn.execute(
+                        "SELECT has_table_privilege(current_user, 'serving.contest_results',"
+                        " 'SELECT') AS ok"
+                    ).fetchone()["ok"]
+                )
+                self.assertFalse(
+                    conn.execute(
+                        "SELECT has_schema_privilege(current_user, 'landing', 'USAGE') AS ok"
+                    ).fetchone()["ok"]
+                )
                 conn.execute("RESET ROLE")
                 county = conn.execute(
-                    f"SELECT count(*) AS n FROM {code.lower()}.county_candidate_results "
+                    "SELECT count(*) AS n FROM serving.county_results "
                     "WHERE publication_id=(SELECT publication_id FROM serving.current_publications "
                     "WHERE source_id=%s)",
                     (f.source.source_id,),

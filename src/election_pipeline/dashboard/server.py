@@ -29,10 +29,6 @@ from election_pipeline.states import STATES, state_adapter
 
 STATIC = Path(__file__).with_name("static")
 METHODS = ("total_votes", "election_day", "early_voting", "absentee_by_mail", "provisional")
-RACES = {
-    "NC-SEN": "U.S. Senate",
-    **{f"NC-{n:02}": f"U.S. House · NC-{n:02}" for n in (1, 3, 4, 11)},
-}
 
 
 def county_key(name):
@@ -142,10 +138,7 @@ def make_payload(
         set(totals) != set(races_config)
         or (adapter.county_results and set(by_race) != set(races_config))
     ):
-        raise ValueError(
-            "A published snapshot must contain all five tracked NC contests "
-            "or all configured state contests"
-        )
+        raise ValueError("A published snapshot must contain every race of its state")
     races = {}
     for identity, name in races_config.items():
         stats = {m: summarize(totals[identity], m) for m in methods}
@@ -409,10 +402,10 @@ class PublishedResults:
     # reuses the last payload instead of opening another database connection.
     TTL_SECONDS = 10
 
-    def __init__(self, settings, geography, source_id, state="NC", races=None):
+    def __init__(self, settings, geography, source_id, state="NC"):
         self.state = state_adapter(state)
         self.settings, self.geography, self.source_id = settings, geography, source_id
-        self.races = races if races is not None else self.state.races
+        self.races = self.state.races
         self.cache, self.lock = {}, Lock()
         self.feed_cache = []
         self.recent = None  # (monotonic time, payload)
@@ -563,9 +556,9 @@ def create_app(
     if provider is not None:
         state_providers = {**state_providers, "NC": provider}
     provider = state_providers["NC"]
-    configured_providers = {}
 
     def approved_providers():
+        """The catalog's public states; a manually imported one is labelled as such."""
         if not catalog_file:
             return state_providers
         from election_pipeline.deployment import catalog as registry
@@ -575,24 +568,9 @@ def create_app(
         if not codes <= state_providers.keys():
             raise ValueError("This dashboard image cannot serve all approved states")
         approved = {code: state_providers[code] for code in sorted(codes)}
-        for entry in deployment["sources"].values():
-            code = entry["source"]["state"]
-            original = state_providers.get(code)
-            if entry["public"] and isinstance(original, PublishedResults):
-                identity = (code, entry["source"]["source_id"], tuple(entry["races"]))
-                if identity not in configured_providers:
-                    supported = state_adapter(code).races
-                    if not set(entry["races"]) <= supported.keys():
-                        raise ValueError("Catalog selects unsupported dashboard contests")
-                    configured_providers[identity] = PublishedResults(
-                        original.settings,
-                        original.geography,
-                        identity[1],
-                        code,
-                        {race: supported[race] for race in entry["races"]},
-                    )
-                approved[code] = configured_providers[identity]
-            if entry["public"] and entry["worker"] == "manual":
+        for name, entry in deployment["sources"].items():
+            code = registry.configured()[name].state
+            if entry["public"] and entry["acquisition"] == "manual" and code in approved:
 
                 def manual_provider(provider=approved[code]):
                     return {**provider(), "acquisition": {"method": "manual"}}

@@ -1,6 +1,5 @@
 """Reviewed roster data files and the roster review script."""
 
-import hashlib
 import importlib.util
 import json
 import shutil
@@ -50,16 +49,6 @@ class RosterTests(unittest.TestCase):
             path.write_bytes(path.read_bytes() + b" ")
             self.assertNotEqual(pipeline.collector_code_hash(package), before)
             self.assertEqual(package_hash(release), pipeline.collector_code_hash(package))
-
-    def test_legacy_release_keeps_its_python_only_fingerprint(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            package = root / "src/election_pipeline"
-            (package / "resources").mkdir(parents=True)
-            (package / "worker.py").write_bytes(b"pass\n")
-            (package / "resources/legacy.json").write_bytes(b"{}")
-            expected = hashlib.sha256(b"worker.py\0pass\n\0").hexdigest()
-            self.assertEqual(package_hash(root), expected)
 
     def test_recording_observes_without_checking_and_does_not_leak(self):
         with recording() as observed:

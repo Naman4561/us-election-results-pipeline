@@ -50,6 +50,20 @@ def atomic_json(path: Path, value: dict) -> None:
         temporary_path.unlink(missing_ok=True)
 
 
+def replace_private(path: Path, text: str) -> None:
+    """Atomically replace a configuration file; the new file is readable by its owner only."""
+    path = Path(path)
+    descriptor, temporary = tempfile.mkstemp(prefix=".private-", suffix=".tmp", dir=path.parent)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8", newline="\n") as handle:
+            handle.write(text)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        Path(temporary).unlink(missing_ok=True)
+
+
 class CollectionLocked(RuntimeError):
     """Another process currently owns this source's collection lock."""
 

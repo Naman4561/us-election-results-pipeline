@@ -16,10 +16,8 @@ from pathlib import Path
 
 from dotenv import dotenv_values
 
-from election_pipeline.settings import load_config
 from election_pipeline.storage import atomic_json
 
-ROOT = Path(__file__).resolve().parents[1]
 STATE_DIR = Path("/var/lib/election-pipeline-monitor")
 GOOD_RUNS = {"succeeded", "already_current", "not_due", "awaiting_publication"}
 REMINDER = "reminder/"
@@ -69,45 +67,39 @@ def dashboard_payload(url):
 
 
 def assess(prod, config, now):
-    data = Path(prod["DATA_DIR"])
-    _, configured = load_config(ROOT / "config/sources.toml")
-    names = [name.strip() for name in prod["PIPELINE_SOURCES"].split(",") if name.strip()]
-    catalog = None
-    if config.get("DEPLOYMENT_CATALOG"):
-        from election_pipeline.deployment import catalog as registry
+    from election_pipeline.deployment import catalog as registry
+    from election_pipeline.deployment.containers import inspect_image
 
-        catalog = registry.read(config["DEPLOYMENT_CATALOG"])
-        registry.verify_baseline(catalog, prod)
-        configured = registry.sources(catalog)
-        names = [name for name, entry in catalog["sources"].items() if entry["enabled"]]
-    if not names or len(names) != len(set(names)) or any(name not in configured for name in names):
-        raise ValueError("Invalid PIPELINE_SOURCES configuration")
+    data = Path(prod["DATA_DIR"])
+    catalog = registry.read(config["CATALOG_FILE"])
+    configured = registry.configured()
+    names = sorted(name for name, entry in catalog["sources"].items() if entry["enabled"])
 
     issues = {}
-    if catalog:
-        from election_pipeline.deployment.containers import inspect_image
-
+    release = catalog["release"]
+    try:
+        if inspect_image(release["image_id"])[1] != release["revision"]:
+            issues["deployment/release"] = "The release image has a different revision"
+    except Exception:
+        issues["deployment/release"] = "The release image is missing"
+    current = config.get("CURRENT_RELEASE")
+    if current and Path(current).resolve() != Path(release["release_path"]).resolve():
+        issues["deployment/current"] = "The current symlink is not the catalog's release"
+    journal = Path(config["CATALOG_FILE"]).parent / "handoff.json"
+    if journal.exists():
         try:
-            identity, _ = inspect_image("election-pipeline:" + prod["IMAGE_TAG"])
-            if identity != catalog["baseline"]["image_id"]:
-                issues["deployment/baseline"] = "The existing collector image tag was replaced"
-        except Exception:
-            issues["deployment/baseline"] = "Cannot verify the existing collector image"
-        journal = Path(config["DEPLOYMENT_CATALOG"]).parent / "handoff.json"
-        if journal.exists():
-            try:
-                handoff = read_json(journal)
-                if (
-                    handoff.get("outcome") == "pending"
-                    and age_seconds(handoff["started_at"], now) > 120
-                ):
-                    issues["deployment/handoff"] = "Dashboard handoff requires recovery"
-            except (ValueError, OSError, TypeError, KeyError):
-                issues["deployment/handoff"] = "Dashboard handoff journal is invalid"
+            handoff = read_json(journal)
+            if (
+                handoff.get("outcome") == "pending"
+                and age_seconds(handoff["started_at"], now) > 120
+            ):
+                issues["deployment/handoff"] = "Dashboard handoff requires recovery"
+        except (ValueError, OSError, TypeError, KeyError):
+            issues["deployment/handoff"] = "Dashboard handoff journal is invalid"
     for name in names:
         source = configured[name]
-        if catalog and catalog["sources"][name]["worker"] == "manual":
-            entry = catalog["sources"][name]
+        entry = catalog["sources"][name]
+        if entry["acquisition"] == "manual":
             try:
                 receipt = entry["manual_snapshot"]
                 if entry.get("manual_final") is not True and age_seconds(
@@ -166,71 +158,41 @@ def assess(prod, config, now):
         if retention and retention.get("outcome") != "applied":
             issues["backup/s3-retention"] = "Older S3 backups were not marked for expiry"
 
-    for timer in ("election-pipeline.timer", "election-backup.timer"):
-        if not systemd("is-active", timer):
-            issues[f"timer/{timer}"] = "Timer is not active"
-
-    for service in ("election-pipeline.service", "election-backup.service"):
-        if systemd("is-failed", service):
-            issues[f"service/{service}"] = "Service is in a failed state"
-
-    if catalog and any(
-        e["enabled"] and e["worker"] == "expansion" for e in catalog["sources"].values()
-    ):
-        if not systemd("is-active", "election-expansion.timer"):
-            issues["timer/election-expansion.timer"] = "Expansion timer is not active"
-        if systemd("is-failed", "election-expansion.service"):
-            issues["service/election-expansion.service"] = "Expansion worker failed"
+    for unit in ("election-worker", "election-backup"):
+        if not systemd("is-active", unit + ".timer"):
+            issues[f"timer/{unit}.timer"] = "Timer is not active"
+        if systemd("is-failed", unit + ".service"):
+            issues[f"service/{unit}.service"] = "Service is in a failed state"
 
     try:
-        url = config.get("DASHBOARD_URL", "http://127.0.0.1:8000/api/snapshot")
-        if catalog:
-            url = config.get("DASHBOARD_URL", "http://127.0.0.1/api/national").replace(
-                "/api/snapshot", "/api/national"
-            )
-        payload = dashboard_payload(url)
-        if "states" in payload:
-            if catalog and set(payload["states"]) != registry.public_states(catalog):
-                issues["dashboard/coverage"] = "Public dashboard coverage differs from approval"
-            if payload.get("mode") != "published":
-                issues["dashboard"] = "Dashboard is not serving published returns"
-            for name in names:
-                if catalog and not catalog["sources"][name]["public"]:
-                    continue
-                code = configured[name].state
-                state = payload["states"].get(code, {})
-                if state.get("availability") != "available" or not state.get("races"):
-                    issues[f"dashboard/{code}"] = "State dashboard results are unavailable"
-                elif config.get("REQUIRE_PUBLICATION", "true").lower() == "true" and not state.get(
-                    "publication"
-                ):
-                    issues[f"dashboard/{code}"] = "State dashboard has no approved publication"
-                for county, record in state.get("county_feeds", {}).items():
-                    if record.get("issue") == "manual_snapshot":
-                        if age_seconds(record.get("last_success_at"), now) > 21600:
-                            issues[f"{REMINDER}county/{code}/{county}"] = (
-                                "Manual county snapshot is over six hours old"
-                            )
-                        continue
-                    if record.get("collection_status") in {"stale", "unavailable"}:
-                        issues[f"county/{code}/{county}"] = (
-                            "County source requires scan review"
-                            if record.get("issue") == "review_required"
-                            else "County source check is overdue or failed; "
-                            "last accepted votes retained"
+        payload = dashboard_payload(config.get("DASHBOARD_URL", "http://127.0.0.1/api/national"))
+        if set(payload.get("states", {})) != registry.public_states(catalog):
+            issues["dashboard/coverage"] = "Public dashboard coverage differs from approval"
+        if payload.get("mode") != "published":
+            issues["dashboard"] = "Dashboard is not serving published returns"
+        for name in names:
+            if not catalog["sources"][name]["public"]:
+                continue
+            code = configured[name].state
+            state = payload["states"].get(code, {})
+            if state.get("availability") != "available" or not state.get("races"):
+                issues[f"dashboard/{code}"] = "State dashboard results are unavailable"
+            elif not state.get("publication"):
+                issues[f"dashboard/{code}"] = "State dashboard has no approved publication"
+            for county, record in state.get("county_feeds", {}).items():
+                if record.get("issue") == "manual_snapshot":
+                    if age_seconds(record.get("last_success_at"), now) > 21600:
+                        issues[f"{REMINDER}county/{code}/{county}"] = (
+                            "Manual county snapshot is over six hours old"
                         )
-        elif catalog:
-            issues["dashboard"] = "Deployment monitoring requires the national dashboard API"
-        elif (
-            payload.get("mode") != "published"
-            or not isinstance(payload.get("races"), dict)
-            or not payload["races"]
-        ):
-            issues["dashboard"] = "Dashboard returned an unexpected payload"
-        elif config.get("REQUIRE_PUBLICATION", "true").lower() == "true" and not payload.get(
-            "publication"
-        ):
-            issues["dashboard"] = "Dashboard has no approved publication"
+                    continue
+                if record.get("collection_status") in {"stale", "unavailable"}:
+                    issues[f"county/{code}/{county}"] = (
+                        "County source requires scan review"
+                        if record.get("issue") == "review_required"
+                        else "County source check is overdue or failed; "
+                        "last accepted votes retained"
+                    )
     except Exception:
         issues["dashboard"] = "Dashboard API is unavailable or invalid"
 
@@ -377,7 +339,11 @@ def main():
         type=Path,
         default=Path("/etc/election-pipeline/monitor.env"),
     )
-    parser.add_argument("--catalog-file", type=Path)
+    parser.add_argument(
+        "--deployment-env-file",
+        type=Path,
+        default=Path("/etc/election-pipeline/deployment.env"),
+    )
     modes = parser.add_mutually_exclusive_group()
     modes.add_argument("--dry-run", action="store_true")
     modes.add_argument("--test-alert", action="store_true")
@@ -385,9 +351,11 @@ def main():
 
     os.umask(0o077)
     prod = dict(dotenv_values(args.env_file, interpolate=False))
-    config = dict(dotenv_values(args.monitor_env_file, interpolate=False))
-    if args.catalog_file:
-        config["DEPLOYMENT_CATALOG"] = str(args.catalog_file)
+    # CATALOG_FILE and CURRENT_RELEASE come from the deployment; alert settings from monitor.env.
+    config = {
+        **dotenv_values(args.deployment_env_file, interpolate=False),
+        **dotenv_values(args.monitor_env_file, interpolate=False),
+    }
     config.setdefault("DEPLOYMENT", "election-production")
     secrets = [value for key, value in prod.items() if "PASSWORD" in key and value]
     if config.get("SNS_TOPIC_ARN"):

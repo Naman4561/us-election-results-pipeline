@@ -712,6 +712,24 @@ def publish_prepared(root, db, candidate_id):
         return {**result, "attempt_id": str(candidate_id), "release_id": metadata["release_id"]}
 
 
+def discard(db, candidate_id):
+    """Drop a validated, unpublished candidate; its attempt is recorded as skipped."""
+    with connect(db) as conn, conn.transaction():
+        attempt = conn.execute(
+            "SELECT * FROM ops.publication_attempts WHERE attempt_id=%s FOR UPDATE",
+            (candidate_id,),
+        ).fetchone()
+        if not attempt or attempt["outcome"] != "running" or not attempt["validated_at"]:
+            raise ValueError("Only a validated, unpublished candidate can be discarded")
+        cleanup_candidate(conn, attempt["candidate_schema"])
+        conn.execute(
+            "UPDATE ops.publication_attempts SET outcome='skipped', finished_at=clock_timestamp()"
+            " WHERE attempt_id=%s",
+            (candidate_id,),
+        )
+    return {"outcome": "discarded", "candidate_id": str(candidate_id)}
+
+
 def publish(root, db, release_id, status, *, skip_current=False):
     result = prepare(root, db, release_id, status, skip_current=skip_current)
     if result["outcome"] == "already_current":

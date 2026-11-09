@@ -20,12 +20,15 @@ def migration_body(text):
     return match.group(1)
 
 
-def migrate(conn, root=ROOT, writer=None):
+def migrate(conn, root=ROOT, writer=None, through=None):
     """Apply pending migrations as ``writer`` (the owning role); return their names.
 
     An applied migration whose file changed is refused: add a new migration instead.
+    ``through`` stops after that migration (consolidation tests start before 024).
     """
     paths = sorted((Path(root) / "migrations").glob("*.sql"))
+    if through:
+        paths = [p for p in paths if p.name <= through]
     if not paths:
         raise ValueError("No migration files found")
     ledger = conn.execute("SELECT to_regclass('ops.schema_migrations') AS t").fetchone()["t"]

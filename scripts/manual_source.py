@@ -17,8 +17,6 @@ def main():
     sub = parser.add_subparsers(dest="action", required=True)
     setup = sub.add_parser("configure")
     setup.add_argument("--source", required=True)
-    setup.add_argument("--release", type=Path, required=True)
-    setup.add_argument("--image", required=True)
     setup.add_argument("--max-age-hours", type=int, default=6)
     setup.add_argument("--final", action="store_true", help="The source no longer updates")
     local = sub.add_parser("import")
@@ -36,14 +34,7 @@ def main():
         path = Path(config["CATALOG_FILE"])
         if args.action == "configure":
             result = configure(
-                path,
-                args.release,
-                args.image,
-                args.source,
-                prod,
-                config,
-                max_age_seconds=args.max_age_hours * 3600,
-                final=args.final,
+                path, args.source, max_age_seconds=args.max_age_hours * 3600, final=args.final
             )
         else:
             kwargs = (

@@ -147,7 +147,7 @@ class TwoStateTests(unittest.TestCase):
 
     def test_wv_published_figures(self):
         report = self.parse("WV")
-        self.assertEqual(report["vote_methods"], "not_published")
+        self.assertEqual(report["vote_methods"], [])
         senate = {
             r["choice"]: r["total_votes"]
             for r in self.read(report, "contest_results.csv")

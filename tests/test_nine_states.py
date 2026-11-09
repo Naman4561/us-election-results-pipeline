@@ -20,7 +20,7 @@ import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
-from loading import copies
+from loading import copies, migrated
 
 from election_pipeline import bundles, publication
 from election_pipeline.collect import FetchFailure, FetchResponse
@@ -29,10 +29,9 @@ from election_pipeline.collectors import enhanced_voting, enr_export
 from election_pipeline.dashboard.server import STATIC, make_payload, national_payload
 from election_pipeline.database import (
     connect,
-    connection_settings,
     load_parsed,
 )
-from election_pipeline.parsers import clarity, ia, md, totals
+from election_pipeline.parsers import clarity, ia, md
 from election_pipeline.parsers import oregon as OREGON
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
@@ -220,10 +219,6 @@ class NineStateTests(unittest.TestCase):
         self.assertEqual(set(national_payload(providers)["states"]), set(CODES))
 
     def test_vote_method_contract_matches_each_state(self):
-        with self.assertRaises(ValueError):
-            totals.with_methods(("total_votes",))
-        with self.assertRaises(ValueError):
-            totals.with_methods(("mail", "mail"))
         report = self.parse("VA")
         rows = self.read(report, "results.csv")
         for row in rows:
@@ -234,10 +229,7 @@ class NineStateTests(unittest.TestCase):
             r for r in self.read(report, "contest_results.csv") if r["contest_id"] == "VA-SEN"
         ]
         self.assertGreater(sum(r["early_voting"] for r in senate), 0)
-        self.assertEqual(report["vote_methods"], "stored")
-        # A parser that stores different methods than its state publishes is refused.
-        with patch("election_pipeline.parsers.ia.METHODS", ("absentee_combined", "election_day")):
-            self.failed("IA", None, "Stored vote methods differ")
+        self.assertEqual(report["vote_methods"], list(state_adapter("VA").methods[1:]))
 
     # Enhanced Voting (Virginia, Idaho, Washington) -----------------------------------------
 
@@ -447,7 +439,7 @@ class NineStateTests(unittest.TestCase):
 
         self.failed("IA", candidate_total)
         report = self.parse("IA")
-        self.assertEqual(report["vote_methods"], "stored")
+        self.assertEqual(report["vote_methods"], ["election_day", "absentee_combined"])
         county = [r for r in self.read(report, "county_results.csv") if r["contest_id"] == "IA-SEN"]
         self.assertEqual(
             sum(r["election_day"] + r["absentee_combined"] for r in county),
@@ -653,21 +645,7 @@ class NineStateTests(unittest.TestCase):
 )
 class NineStateDatabaseTests(unittest.TestCase):
     def test_nine_states_load_validate_publish_and_enforce_reader_permissions(self):
-        name = os.environ["ELECTION_TEST_DATABASE"]
-        if not name.endswith("_test"):
-            raise ValueError("Disposable *_test database required")
-        db = {**connection_settings(), "dbname": name}
-        with connect(db) as conn:
-            for path in sorted((ROOT / "migrations").glob("*.sql")):
-                schema = {
-                    "001_initial.sql": "ops.sources",
-                    "002_publication.sql": "serving.publications",
-                    "003_state_schemas.sql": "ky.results",
-                    "004_mn_ne_tx.sql": "tx.results",
-                }.get(path.name, f'"{path.stem[4:]}".results')
-                if conn.execute("SELECT to_regclass(%s) AS t", (schema,)).fetchone()["t"] is None:
-                    conn.execute(path.read_text())
-            conn.execute("TRUNCATE ops.sources CASCADE")
+        db = migrated()
         for code in CODES:
             with self.subTest(code=code):
                 f = NineStateTests()
@@ -682,35 +660,26 @@ class NineStateDatabaseTests(unittest.TestCase):
                     publication.publish_prepared(ROOT, db, candidate["candidate_id"])["outcome"],
                     "published",
                 )
-                schema = f'"{code.lower()}"'
                 with connect(db) as conn:
                     conn.execute("SET ROLE election_dashboard")
-                    for table, allowed in (("contest_candidate_results", True), ("results", False)):
-                        self.assertEqual(
-                            conn.execute(
-                                "SELECT has_table_privilege(current_user,%s,'SELECT') AS ok",
-                                (f"{schema}.{table}",),
-                            ).fetchone()["ok"],
-                            allowed,
-                        )
-                    conn.execute("RESET ROLE")
                     current = (
                         "WHERE publication_id=(SELECT publication_id FROM "
                         "serving.current_publications WHERE source_id=%s)"
                     )
-                    methods = state_adapter(code).methods
                     contest = conn.execute(
-                        f"SELECT count(*) AS n, sum(total_votes) AS total, "
-                        f"sum({' + '.join(methods[1:]) or 'total_votes'}) AS methods "
-                        f"FROM {schema}.contest_candidate_results {current}",
-                        (f.source.source_id,),
+                        "SELECT count(*) AS n, sum(total_votes) AS total, "
+                        "(SELECT coalesce(sum(votes), 0) FROM serving.contest_method_results "
+                        + current
+                        + ") AS methods FROM serving.contest_results "
+                        + current,
+                        (f.source.source_id, f.source.source_id),
                     ).fetchone()
                     self.assertGreater(contest["n"], 0)
-                    self.assertEqual(contest["total"], contest["methods"])
+                    if state_adapter(code).methods[1:]:
+                        self.assertEqual(contest["total"], contest["methods"])
                     if state_adapter(code).county_results:
                         county = conn.execute(
-                            f"SELECT count(*) AS n FROM {schema}.county_candidate_results "
-                            + current,
+                            "SELECT count(*) AS n FROM serving.county_results " + current,
                             (f.source.source_id,),
                         ).fetchone()["n"]
                         self.assertGreater(county, 0)

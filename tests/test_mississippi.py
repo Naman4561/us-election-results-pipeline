@@ -11,6 +11,8 @@ from datetime import timedelta
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+from loading import copies, migrated
+
 from election_pipeline import accuracy, publication
 from election_pipeline.collect import FetchFailure, FetchResponse
 from election_pipeline.collectors import county_files
@@ -22,12 +24,8 @@ from election_pipeline.dashboard.server import (
 )
 from election_pipeline.database import (
     connect,
-    connection_settings,
-    converted_rows,
     load_parsed,
-    verify,
 )
-from election_pipeline.deployment import migrations
 from election_pipeline.parsers import ms
 from election_pipeline.parsing import parse_source
 from election_pipeline.pipeline import collect_source
@@ -200,10 +198,11 @@ class MississippiTests(unittest.TestCase):
         self.assertEqual(report["outcome"], "parsed", report)
         self.assertEqual(
             (report["output_rows"], report["county_feed_rows"], report["counties_with_counts"]),
-            (42, 82, 13),
+            (39, 82, 13),
         )
         self.assertFalse(report["coverage_complete"])
-        self.assertEqual(report["county_reconciliation"], "passed")
+        # Mississippi publishes no statewide totals; they are summed from accepted counties.
+        self.assertEqual(report["county_reconciliation"], "not_available")
         contests = {
             r["choice"]: int(r["total_votes"]) for r in self.read(report, "contest_results.csv")
         }
@@ -216,16 +215,11 @@ class MississippiTests(unittest.TestCase):
         self.assertEqual(feeds["JACKSON"]["write_in_votes"], "")
         self.assertEqual(feeds["MONROE"]["absentee_scope"], "excluded")
         self.assertEqual(feeds["NESHOBA"]["precincts_total"], "")
-        verify(self.source, self.settings, self.store, Path(report["output_dir"]))
-        contract = ms.load_contract("election_results")
-        values = list(
-            converted_rows(
-                Path(report["output_dir"]) / "county_feeds.csv", ms.FEED_FIELDS, self.source, 99, 82
-            )
-        )
+        loaded = copies(self.source, self.settings, self.store, report["output_dir"], 99)
+        values = loaded[("ms", "county_feeds")]
         self.assertEqual(len(values), 82)
         self.assertEqual(values[0][:2], (99, 2))
-        self.assertEqual(len(contract.auxiliary), 1)
+        self.assertEqual(len(loaded[("landing", "results")]), 39)
         with patch.object(
             county_files, "fetch_file", side_effect=AssertionError("Replay made HTTP")
         ):
@@ -370,17 +364,15 @@ class MississippiTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             with_county_feeds(payload, json.loads((STATIC / "ms-map.json").read_text()), feeds[:-1])
 
-    def test_additive_migration_reader_grants_and_publication_targets(self):
-        text = (ROOT / "migrations/010_ms.sql").read_text()
-        migrations.validate_migration(text, "ms")
-        with self.assertRaises(ValueError):
-            migrations.validate_migration(
-                text.replace("ms.county_feed_status TO", "ms.county_feeds TO"), "ms"
-            )
+    def test_publication_targets_and_map(self):
         targets = publication.targets({"state": "MS", "dataset": "election_results"})
         self.assertEqual(
             {t[2] for t in targets},
-            {"county_candidate_results", "contest_candidate_results", "county_feed_status"},
+            {
+                ("serving", "county_results"),
+                ("serving", "contest_results"),
+                ("ms", "county_feed_status"),
+            },
         )
         geo = json.loads((STATIC / "ms-map.json").read_text())
         self.assertEqual((len(geo["counties"]), len(geo["districts"])), (82, 4))
@@ -452,20 +444,8 @@ class MississippiTests(unittest.TestCase):
 )
 class MississippiDatabaseTests(unittest.TestCase):
     def test_load_publish_reader_provenance_and_failed_validation_keep_live_publication(self):
-        name = os.environ["ELECTION_TEST_DATABASE"]
-        if not name.endswith("_test"):
-            raise ValueError("Disposable *_test database required")
-        db = {**connection_settings(), "dbname": name}
+        db = migrated()
         with connect(db) as conn:
-            for file in sorted((ROOT / "migrations").glob("*.sql")):
-                relation = {
-                    "001_initial.sql": "ops.sources",
-                    "002_publication.sql": "serving.publications",
-                    "003_state_schemas.sql": "ky.results",
-                    "004_mn_ne_tx.sql": "tx.results",
-                }.get(file.name, f'"{file.stem[4:]}".results')  # "or" is reserved
-                if conn.execute("SELECT to_regclass(%s) AS t", (relation,)).fetchone()["t"] is None:
-                    conn.execute(file.read_text())
             conn.execute("TRUNCATE ops.sources CASCADE")
         fixture = MississippiTests()
         fixture.setUp()
@@ -484,9 +464,9 @@ class MississippiDatabaseTests(unittest.TestCase):
                 conn.execute("SELECT count(*) AS n FROM ms.county_feed_status").fetchone()["n"], 82
             )
             self.assertEqual(
-                conn.execute("SELECT count(*) AS n FROM ms.county_candidate_results").fetchone()[
-                    "n"
-                ],
+                conn.execute(
+                    "SELECT count(*) AS n FROM serving.county_results WHERE state='MS'"
+                ).fetchone()["n"],
                 39,
             )
             conn.execute("SET ROLE election_dashboard")
@@ -503,10 +483,10 @@ class MississippiDatabaseTests(unittest.TestCase):
                 ).fetchone()["ok"]
             )
             conn.execute("RESET ROLE")
+            # A county losing a candidate's count no longer matches its accepted report.
             conn.execute(
-                "UPDATE ms.results SET total_votes=total_votes+1 "
-                "WHERE release_id=%s AND unit_type='county' "
-                "AND county='HINDS' AND choice='Scott Colom'",
+                "DELETE FROM landing.results WHERE release_id=%s AND county='HINDS' "
+                "AND choice='Scott Colom'",
                 (loaded["release_id"],),
             )
         with self.assertRaisesRegex(ValueError, "dbt build failed"):
@@ -542,7 +522,7 @@ class MississippiDatabaseTests(unittest.TestCase):
         with connect(db) as conn:
             self.assertEqual(
                 conn.execute(
-                    "SELECT count(*) AS n FROM ms.county_candidate_results WHERE publication_id=%s",
+                    "SELECT count(*) AS n FROM serving.county_results WHERE publication_id=%s",
                     (published["publication_id"],),
                 ).fetchone()["n"],
                 246,

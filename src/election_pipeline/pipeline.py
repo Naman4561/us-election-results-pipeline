@@ -36,14 +36,12 @@ def failure_backoff(failures: int, blocked: bool) -> float:
     return float(min(cap, BACKOFF_BASE_SECONDS * 3 ** min(failures - 1, 10)))
 
 
-def collector_code_hash(package_dir: Path | None = None, *, include_resources: bool = True) -> str:
+def collector_code_hash(package_dir: Path | None = None) -> str:
     """Identify the shipped Python sources and reviewed parser data, without needing Git."""
     digest = hashlib.sha256()
     package_dir = package_dir if package_dir is not None else Path(__file__).parent
-    sources = list(package_dir.rglob("*.py"))
     # Reviewed data the parsers check against (rosters, county lists) counts as code.
-    if include_resources:
-        sources.extend((package_dir / "resources").rglob("*.json"))
+    sources = [*package_dir.rglob("*.py"), *(package_dir / "resources").rglob("*.json")]
     for path in sorted(sources):
         name = path.relative_to(package_dir).as_posix()
         digest.update(name.encode() + b"\0" + path.read_bytes() + b"\0")

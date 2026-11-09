@@ -9,7 +9,6 @@ try:
     from fastapi.testclient import TestClient
 
     from election_pipeline.dashboard.server import (
-        RACES,
         STATIC,
         PublishedResults,
         create_app,
@@ -21,6 +20,11 @@ try:
     )
 except ImportError:
     TestClient = None
+
+from election_pipeline.states import state_adapter
+
+RACES = state_adapter("NC").races
+METHODS = state_adapter("NC").methods[1:]
 
 
 @unittest.skipUnless(TestClient, "Install postgres, dashboard extras and httpx")
@@ -68,7 +72,7 @@ class DashboardTests(unittest.TestCase):
             make_payload(
                 self.geo, {}, complete, [{**complete[0], "total_votes": 11}, *complete[1:]]
             )
-        with self.assertRaisesRegex(ValueError, "five tracked"):
+        with self.assertRaisesRegex(ValueError, "every race"):
             make_payload(self.geo, {}, complete[:-1], complete[:-1])
 
     def test_http_etag_changes_with_publication_and_restore(self):
@@ -109,20 +113,37 @@ class DashboardTests(unittest.TestCase):
         conn.transaction.return_value.__enter__.return_value = None
         metadata = {"publication_id": "old", "release_id": 1, "status": "test"}
         row = self.row()
-        responses = [MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()]
+        # Role check, current publication, then rows and method rows for counties and contests.
+        responses = [MagicMock() for _ in range(7)]
         responses[1].fetchone.return_value = {
             "rolsuper": False,
             "rolcreatedb": False,
             "rolcreaterole": False,
         }
         responses[2].fetchone.return_value = metadata
-        responses[3].fetchall.return_value = [{**row, "contest_id": identity} for identity in RACES]
-        responses[4].fetchall.return_value = [{**row, "contest_id": identity} for identity in RACES]
+        totals = {k: v for k, v in row.items() if k not in METHODS}
+        for index, place in ((3, {"county": row["county"]}), (5, {})):
+            responses[index].fetchall.return_value = [
+                {**totals, **place, "contest_id": identity} for identity in RACES
+            ]
+            responses[index + 1].__iter__.return_value = iter(
+                [
+                    {
+                        **place,
+                        "contest_id": identity,
+                        "choice": row["choice"],
+                        "method": m,
+                        "votes": row[m],
+                    }
+                    for identity in RACES
+                    for m in METHODS
+                ]
+            )
         conn.execute.side_effect = responses
         with patch("election_pipeline.dashboard.server.psycopg.connect", return_value=conn):
             result = PublishedResults({}, self.geo, "nc_2026_general_all")()
         self.assertEqual(result["publication"]["publication_id"], "old")
-        for call in conn.execute.call_args_list[-2:]:
+        for call in conn.execute.call_args_list[-4:]:
             self.assertEqual(call.args[1], ("old",))
 
     def test_reader_reuses_a_recent_payload_without_reconnecting(self):

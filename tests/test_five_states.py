@@ -16,7 +16,7 @@ from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
-from loading import copies
+from loading import copies, migrated
 
 from election_pipeline import bundles, publication
 from election_pipeline.collect import FetchFailure, FetchResponse
@@ -24,7 +24,6 @@ from election_pipeline.collectors.sc import latest_report
 from election_pipeline.dashboard.server import STATIC, make_payload, national_payload
 from election_pipeline.database import (
     connect,
-    connection_settings,
     load_parsed,
 )
 from election_pipeline.parsers.html import Tree
@@ -472,21 +471,7 @@ class FiveStateTests(unittest.TestCase):
 )
 class FiveStateDatabaseTests(unittest.TestCase):
     def test_four_states_load_validate_publish_replay_and_enforce_reader_permissions(self):
-        name = os.environ["ELECTION_TEST_DATABASE"]
-        if not name.endswith("_test"):
-            raise ValueError("Disposable *_test database required")
-        db = {**connection_settings(), "dbname": name}
-        with connect(db) as conn:
-            for path in sorted((ROOT / "migrations").glob("*.sql")):
-                schema = {
-                    "001_initial.sql": "ops.sources",
-                    "002_publication.sql": "serving.publications",
-                    "003_state_schemas.sql": "ky.results",
-                    "004_mn_ne_tx.sql": "tx.results",
-                }.get(path.name, f'"{path.stem[4:]}".results')  # "or" is reserved
-                if conn.execute("SELECT to_regclass(%s) AS t", (schema,)).fetchone()["t"] is None:
-                    conn.execute(path.read_text())
-            conn.execute("TRUNCATE ops.sources CASCADE")
+        db = migrated()
         for code in CODES:
             f = FiveStateTests()
             f.setUp()
@@ -508,15 +493,15 @@ class FiveStateDatabaseTests(unittest.TestCase):
             )
             with connect(db) as conn:
                 conn.execute("SET ROLE election_dashboard")
+                # The dashboard reads published results, never parsed rows.
                 self.assertTrue(
                     conn.execute(
-                        "SELECT has_table_privilege(current_user,%s,'SELECT') AS ok",
-                        (code.lower() + ".contest_candidate_results",),
+                        "SELECT has_table_privilege(current_user, 'serving.contest_results',"
+                        " 'SELECT') AS ok"
                     ).fetchone()["ok"]
                 )
                 self.assertFalse(
                     conn.execute(
-                        "SELECT has_table_privilege(current_user,%s,'SELECT') AS ok",
-                        (code.lower() + ".results",),
+                        "SELECT has_schema_privilege(current_user, 'landing', 'USAGE') AS ok"
                     ).fetchone()["ok"]
                 )

@@ -30,13 +30,17 @@ class PublicationArtifactTests(unittest.TestCase):
                     "model.a": {
                         "resource_type": "model",
                         "config": {"materialized": "table"},
+                        "tags": ["results"],
                     },
                     "test.a": {
                         "resource_type": "test",
                         "name": "release_completeness",
+                        "depends_on": {"nodes": ["model.a"]},
                     },
+                    # Mississippi's models are not built for other states.
+                    "model.ms": {"resource_type": "model", "tags": ["ms"]},
                 },
-                "unit_tests": {"unit_test.a": {}},
+                "unit_tests": {"unit_test.a": {"depends_on": {"nodes": ["model.a"]}}},
             }
             (path / "manifest.json").write_text(json.dumps(manifest))
 
@@ -71,10 +75,10 @@ class PublicationArtifactTests(unittest.TestCase):
                         )
                     )
                     if accepted:
-                        checked_results(path)
+                        checked_results(path, ["results"])
                     else:
                         with self.assertRaises(ValueError):
-                            checked_results(path)
+                            checked_results(path, ["results"])
 
     def test_runner_fast_path_requires_the_same_release_transform_and_status(self):
         conn = MagicMock()

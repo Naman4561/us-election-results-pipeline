@@ -1,4 +1,25 @@
-"""A credential-free registry shared by backups, monitoring and the dashboard."""
+"""The credential-free deployment state shared by the worker, backups, monitor and dashboard.
+
+One release (an immutable Git checkout and the image built from it) runs every source.
+Each source records only how it is deployed; its definition and races come from the
+release's own ``config/sources.toml`` and ``election_pipeline.states``::
+
+    {
+      "version": 2,
+      "generation": 7,
+      "release": {"revision": ..., "image_id": ..., "release_path": ...},
+      "previous_release": {...} | null,
+      "dashboard": {"name": ..., "url": ..., "states": [...], ...},
+      "previous_dashboard": {...},          # optional, the one-step rollback
+      "sources": {
+        "<source_id>": {
+          "enabled": true, "public": true, "status": "unofficial",
+          "acquisition": "http" | "manual",
+          ...                                 # publication and manual-snapshot receipts
+        }
+      }
+    }
+"""
 
 from __future__ import annotations
 
@@ -7,112 +28,60 @@ import os
 import re
 import tempfile
 from contextlib import contextmanager
-from dataclasses import asdict
 from pathlib import Path
 
-from election_pipeline.settings import CollectorSettings, Source
+from election_pipeline.settings import load_config
+from election_pipeline.states import STATES
 
 IMAGE = re.compile(r"sha256:[0-9a-f]{64}")
 REVISION = re.compile(r"[0-9a-f]{40}")
+CONFIG = Path(__file__).resolve().parents[3] / "config/sources.toml"
 
 
-def source_from_json(value):
-    raw = dict(value)
-    for key in ("expected_members", "expected_columns", "contests", "supplemental_members"):
-        raw[key] = tuple(raw.get(key, ()))
-    raw["files"] = tuple(tuple(pair) for pair in raw.get("files", ()))
-    raw["collector_overrides"] = tuple(tuple(pair) for pair in raw.get("collector_overrides", ()))
-    return Source(**raw)
+def configured():
+    return load_config(CONFIG)[1]
 
 
-def expands_coverage(old, new):
-    """Explicit county replacements preserve prior feeds while expanding admission."""
-    if set(old["races"]) < set(new["races"]):
-        return True
-    from election_pipeline.states import STATES
-
-    previous, candidate = source_from_json(old["source"]), source_from_json(new["source"])
-    adapter = STATES.get(candidate.state)
-    return bool(
-        adapter
-        and adapter.collection_backend == "county_files"
-        and old["races"] == new["races"]
-        and previous.state == candidate.state
-        and previous.election_date == candidate.election_date
-        and previous.dataset == candidate.dataset == "election_results"
-        and previous.format == candidate.format == "bundle"
-        and set(previous.files) <= set(candidate.files)
-        and set(previous.expected_members) <= set(candidate.expected_members)
-        and candidate.supplemental_members
-    )
-
-
-# Collector settings that identify the client rather than define the source contract.
-# A re-pin may change them; the image's configuration supplies the value at run time.
-IDENTIFICATION_SETTINGS = ("user_agent",)
-
-
-def contract_settings(settings):
-    """Settings a re-pin must keep unchanged (all but the client identification)."""
-    return {k: v for k, v in dict(settings).items() if k not in IDENTIFICATION_SETTINGS}
+def validate_release(release):
+    if (
+        not IMAGE.fullmatch(release.get("image_id", ""))
+        or not REVISION.fullmatch(release.get("revision", ""))
+        or not Path(release.get("release_path", "")).is_absolute()
+    ):
+        raise ValueError("A release needs an immutable image ID, Git revision and absolute path")
 
 
 def validate(value):
-    if value.get("version") != 1 or type(value.get("generation")) is not int:
+    if value.get("version") != 2 or type(value.get("generation")) is not int:
         raise ValueError("Unsupported deployment catalog")
-    baseline = value["baseline"]
-    if not IMAGE.fullmatch(baseline["image_id"]) or not REVISION.fullmatch(baseline["revision"]):
-        raise ValueError("Baseline requires an immutable image ID and Git revision")
-    sources, owners = value["sources"], {}
-    for name, entry in sources.items():
-        source = source_from_json(entry["source"])
-        CollectorSettings(**entry["settings"])
-        if name != source.source_id or entry["worker"] not in ("baseline", "expansion", "manual"):
-            raise ValueError("Invalid source identity or worker")
+    validate_release(value["release"])
+    if value.get("previous_release") is not None:
+        validate_release(value["previous_release"])
+    sources = configured()
+    for name, entry in value["sources"].items():
+        if name not in sources:
+            raise ValueError(f"Catalog names an unconfigured source: {name}")
         for flag in ("enabled", "public"):
             if type(entry[flag]) is not bool:
                 raise ValueError("Deployment flags must be boolean")
         if entry["public"] and not entry["enabled"]:
             raise ValueError("Public sources must be enabled")
-        if source.dataset == "election_results":
-            if source.contests and list(source.contests) != entry.get("races"):
-                raise ValueError("Catalog races differ from the source's explicit contest contract")
-            if entry["worker"] == "manual":
-                age = entry.get("manual_max_age_seconds", 21600)
-                if type(age) is not int or not 900 <= age <= 604800:
-                    raise ValueError("Invalid manual snapshot freshness limit")
-                if type(entry.get("manual_final", False)) is not bool:
-                    raise ValueError("Manual final flag must be boolean")
-            owners.setdefault(source.state, []).append((name, entry))
-        elif entry["enabled"] or entry["public"]:
-            raise ValueError("Ancillary sources run manually")
-        if not IMAGE.fullmatch(entry["image_id"]) or not REVISION.fullmatch(entry["revision"]):
-            raise ValueError("Sources require immutable image IDs and Git revisions")
-        if not Path(entry["release_path"]).is_absolute():
-            raise ValueError("Release paths must be absolute")
         if entry["status"] not in ("test", "unofficial"):
             raise ValueError("Publication status must be explicit")
-    for entries in owners.values():
-        if len(entries) == 1:
-            if entries[0][1].get("replaces"):
-                raise ValueError("Replacement target is missing")
-            continue
-        replacements = [(name, entry) for name, entry in entries if entry.get("replaces")]
-        if len(entries) != 2 or len(replacements) != 1:
-            raise ValueError("A state can have only one results owner and one explicit replacement")
-        name, replacement = replacements[0]
-        old_name, old = next(pair for pair in entries if pair[0] != name)
-        if (
-            replacement["replaces"] != old_name
-            or replacement["worker"] != "expansion"
-            or replacement["source"]["election_date"] != old["source"]["election_date"]
-            or not expands_coverage(old, replacement)
-            or sum(entry["public"] for _, entry in entries) > 1
-        ):
-            raise ValueError("Invalid coverage replacement or multiple public results owners")
-    expected = sorted(name for name, e in sources.items() if e["worker"] == "baseline")
-    if expected != sorted(baseline["source_ids"]):
-        raise ValueError("Baseline source selection changed")
+        if entry["acquisition"] not in ("http", "manual"):
+            raise ValueError("Acquisition must be http or manual")
+        source = sources[name]
+        if source.dataset != "election_results":
+            if entry["enabled"]:
+                raise ValueError("Ancillary datasets are collected manually")
+        elif name != STATES[source.state].source_id:
+            raise ValueError(f"{name} is not its state's results source")
+        if entry["acquisition"] == "manual":
+            age = entry.get("manual_max_age_seconds", 21600)
+            if type(age) is not int or not 900 <= age <= 604800:
+                raise ValueError("Invalid manual snapshot freshness limit")
+            if type(entry.get("manual_final", False)) is not bool:
+                raise ValueError("Manual final flag must be boolean")
     return value
 
 
@@ -163,56 +132,18 @@ def update(path, change):
         return value
 
 
-def entry(source, settings, *, image_id, revision, release_path, worker, status):
+def public_states(value):
+    sources = configured()
     return {
-        "source": asdict(source),
-        "settings": asdict(settings),
-        "image_id": image_id,
-        "revision": revision,
-        "release_path": str(Path(release_path).resolve()),
-        "worker": worker,
-        "status": status,
-        "enabled": worker == "baseline",
-        "public": worker == "baseline",
+        sources[name].state
+        for name, entry in value["sources"].items()
+        if entry["public"] and sources[name].dataset == "election_results"
     }
 
 
-def sources(value):
-    return {name: source_from_json(e["source"]) for name, e in value["sources"].items()}
-
-
-def public_states(value):
-    return {e["source"]["state"] for e in value["sources"].values() if e["public"]}
-
-
-def prospective(value, names):
-    """Select replacement snapshots without changing a running legacy collector."""
+def published(value, names):
+    """The catalog with ``names`` made public, as a dashboard candidate will serve it."""
     result = json.loads(json.dumps(value))
     for name in names:
-        entry = result["sources"][name]
-        if (
-            entry["worker"] not in ("expansion", "manual")
-            or entry["source"]["dataset"] != "election_results"
-        ):
-            raise ValueError("Only managed result sources may be activated")
-        if old_name := entry.get("replaces"):
-            old = result["sources"][old_name]
-            old["public"] = False
-            if old["worker"] != "baseline":
-                old["enabled"] = False
-        entry.update(public=True, enabled=True)
+        result["sources"][name].update(enabled=True, public=True)
     return validate(result)
-
-
-def schemas(value):
-    return sorted(
-        {"ops", "landing", "serving", *(s.state.lower() for s in sources(value).values())}
-    )
-
-
-def verify_baseline(value, prod):
-    names = sorted(name.strip() for name in prod["PIPELINE_SOURCES"].split(",") if name.strip())
-    if names != sorted(value["baseline"]["source_ids"]):
-        raise ValueError("The existing worker's PIPELINE_SOURCES changed")
-    if prod["IMAGE_TAG"] != value["baseline"]["revision"]:
-        raise ValueError("The existing worker's IMAGE_TAG changed")

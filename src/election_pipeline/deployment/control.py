@@ -1,25 +1,28 @@
-"""Host-side release control. Existing collector units and tags stay untouched."""
+"""Host-side control of the one release that runs every state.
+
+A release is staged (scripts/stage_release.sh: checkout, image, tests) and then made
+current with ``release``: migrations apply, every enabled HTTP source must validate a
+publication candidate under the new image, and only then do the catalog and the
+``current`` symlink (which the systemd units run from) move. The public dashboard moves
+separately, after a candidate dashboard from the release passes its checks.
+"""
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import re
-import tempfile
+import socket
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
-from dotenv import dotenv_values
-
 from election_pipeline.database import connect
-from election_pipeline.deployment import catalog, containers, dashboard, migrations
-from election_pipeline.settings import CollectorSettings, load_config
-from election_pipeline.states import state_adapter
-from election_pipeline.storage import ArchiveStore, atomic_json, file_hash, utc_now
+from election_pipeline.deployment import catalog, containers, dashboard
+from election_pipeline.migrations import migrate
+from election_pipeline.storage import atomic_json, utc_now
 
 GOOD = {"succeeded", "already_current", "not_due", "awaiting_publication"}
 
@@ -35,49 +38,103 @@ def db_settings(prod, *, writer=False):
     }
 
 
-def expansion(value, name):
-    entry = value["sources"][name]
-    if entry["worker"] != "expansion":
-        raise ValueError("This action is restricted to new expansion sources")
-    return entry
+def redacted(text, prod):
+    for key, secret in prod.items():
+        if "PASSWORD" in key and secret:
+            text = text.replace(secret, "[redacted]")
+    return text
 
 
-def import_county(path, name, county, report, review, prod, config):
-    with catalog.locked(path):
-        entry = expansion(catalog.read(path), name)
-        source = catalog.source_from_json(entry["source"])
-        from election_pipeline.county_import import selected
-
-        if source.state != "MS" or not entry["enabled"] or not entry["public"]:
-            raise ValueError("Select the active public Mississippi expansion source")
-        selected(source, county)
-        return json.loads(containers.import_county(entry, prod, config, county, report, review))
+def require_no_backup():
+    active = containers.command(
+        ["systemctl", "show", "--value", "-p", "ActiveState", "election-backup.service"]
+    )
+    if active in ("active", "activating", "deactivating", "reloading"):
+        raise ValueError("A backup is running; retry after it finishes")
 
 
-def controls_ready(config):
-    root = config["CONTROL_ROOT"]
-    for unit, script in (
-        ("election-backup.service", "production_recovery.py"),
-        ("election-monitor.service", "monitor_production.py"),
-    ):
-        loaded = containers.command(["systemctl", "show", "--value", "-p", "ExecStart", unit])
-        if (
-            str(Path(root) / "scripts" / script) not in loaded
-            or config["CATALOG_FILE"] not in loaded
-        ):
-            raise ValueError("Install versioned backup/monitor controls before registering states")
+# Jobs ---------------------------------------------------------------------------------
 
 
-def initialize(path, root, prod):
-    root = Path(root).resolve()
-    image_id, revision = containers.inspect_image("election-pipeline:" + prod["IMAGE_TAG"])
-    if (
-        revision != prod["IMAGE_TAG"]
-        or containers.command(["git", "-C", str(root), "rev-parse", "HEAD"]) != revision
-    ):
-        raise ValueError("Baseline checkout, image and IMAGE_TAG must agree")
-    if containers.command(["git", "-C", str(root), "status", "--porcelain"]):
-        raise ValueError("Record a clean baseline before installing deployment controls")
+def run_one(image, name, status, prod, config, *, mode=None):
+    """Run one source in the release image; ``mode`` is prepare-only or check-only."""
+    args = ["scripts/run_source.py", "--source", name, "--status", status]
+    if mode:
+        args.append("--" + mode)
+    output = containers.run_job(
+        image, prod, config, args, timeout=int(config.get("JOB_TIMEOUT", "240"))
+    )
+    # run_dbt directs logs to stderr; tolerate separate JSON/log lines from dependencies.
+    result = [json.loads(line) for line in output.splitlines() if line.startswith("{")][-1]
+    if result.get("source_id") != name:
+        raise ValueError("Worker returned the wrong source identity")
+    return result
+
+
+def parallel_jobs(config):
+    value = config.get("JOB_PARALLEL", "1")
+    if not re.fullmatch(r"[1-4]", value):
+        raise ValueError("Set JOB_PARALLEL to 1-4 jobs after checking host headroom")
+    return int(value)
+
+
+def collected(value):
+    return sorted(
+        name
+        for name, entry in value["sources"].items()
+        if entry["enabled"] and entry["acquisition"] == "http"
+    )
+
+
+def run_enabled(path, prod, config):
+    """One bounded cycle over every enabled HTTP source, least recently run first."""
+    value = catalog.read(path)
+    containers.limits(config)
+    deadline = time.monotonic() + int(config.get("CYCLE_SECONDS", "270"))
+
+    def last_run(name):
+        latest = Path(prod["DATA_DIR"]) / "runs" / name / "latest.json"
+        return latest.stat().st_mtime if latest.exists() else 0
+
+    def job(name):
+        if time.monotonic() >= deadline:
+            return {"source_id": name, "outcome": "deferred", "error": "Cycle budget reached"}
+        try:
+            current = catalog.read(path)
+            entry = current["sources"][name]
+            if not entry["enabled"]:
+                return None
+            remaining = max(1, int(deadline - time.monotonic()))
+            budget = {
+                **config,
+                "JOB_TIMEOUT": str(min(int(config.get("JOB_TIMEOUT", "240")), remaining)),
+            }
+            result = run_one(current["release"]["image_id"], name, entry["status"], prod, budget)
+        except Exception as error:
+            result = {"source_id": name, "outcome": "failed", "error": str(error)}
+        encoded = redacted(json.dumps(result), prod)
+        print(encoded, flush=True)
+        return json.loads(encoded)
+
+    # Each job has its own container limits, so N parallel jobs use N times the budget.
+    with ThreadPoolExecutor(max_workers=parallel_jobs(config)) as pool:
+        results = [
+            r for r in pool.map(job, sorted(collected(value), key=last_run)) if r is not None
+        ]
+    ok = all(r["outcome"] in GOOD for r in results)
+    atomic_json(
+        Path(config["CONTROL_STATE_DIR"]) / "worker-latest.json",
+        {"finished_at": utc_now(), "results": results, "outcome": "succeeded" if ok else "failed"},
+    )
+    return 0 if ok else 1
+
+
+# Releases -----------------------------------------------------------------------------
+
+
+def describe(release_path, image):
+    """The release record for a staged checkout and the image built from it."""
+    identity, revision = containers.verify_release(release_path, image)
     code_hash = containers.command(
         [
             "docker",
@@ -86,453 +143,130 @@ def initialize(path, root, prod):
             "--network",
             "none",
             "--read-only",
-            image_id,
+            identity,
             "python",
             "-c",
             "from election_pipeline.pipeline import collector_code_hash; "
             "print(collector_code_hash())",
         ]
     )
-    if code_hash != containers.package_hash(root):
-        raise ValueError("Baseline image and checkout Python sources differ")
-    release_hash = containers.release_hash(root)
-    settings, sources = load_config(root / "config/sources.toml")
-    names = [name.strip() for name in prod["PIPELINE_SOURCES"].split(",") if name.strip()]
-    if not names or len(names) != len(set(names)) or not set(names) <= sources.keys():
-        raise ValueError("Invalid baseline source list")
-    value = {
-        "version": 1,
-        "generation": 0,
-        "baseline": {"image_id": image_id, "revision": revision, "source_ids": names},
-        "sources": {},
-        "dashboard": {
-            "name": "dashboard",
-            "url": "http://127.0.0.1:8000",
-            "states": sorted(sources[n].state for n in names),
-        },
-    }
-    for name, source in sources.items():
-        if source.contests and name not in names:
-            continue
-        value["sources"][name] = catalog.entry(
-            source,
-            settings,
-            image_id=image_id,
-            revision=revision,
-            release_path=root,
-            worker="baseline" if name in names else "manual",
-            status=prod.get("PIPELINE_STATUS", "test"),
-        )
-        value["sources"][name]["races"] = list(state_adapter(source.state).races)
-        value["sources"][name]["release_sha256"] = release_hash
-    with catalog.locked(path, exclusive=True):
-        if Path(path).exists():
-            raise ValueError("Catalog already exists; refusing to replace it")
-        catalog.write(path, value)
-    return {"outcome": "initialized", "baseline_sources": names, "image_id": image_id}
-
-
-def install_controls(config, unit_root=Path("/etc/systemd/system")):
-    root, path = Path(config["CONTROL_ROOT"]), config["CATALOG_FILE"]
-    for item in (str(root), path):
-        if not re.fullmatch(r"/[A-Za-z0-9_./-]+", item):
-            raise ValueError("Use simple absolute release/catalog paths for systemd")
-    if not (root / ".venv/bin/python").is_file():
-        raise ValueError(
-            "Create the control release's venv and install its deployment extras first"
-        )
-    for unit, action in (
-        ("election-backup.service", "production_recovery.py backup"),
-        ("election-monitor.service", "monitor_production.py"),
-    ):
-        directory = unit_root / (unit + ".d")
-        directory.mkdir(parents=True, exist_ok=True)
-        text = (
-            f"[Service]\nWorkingDirectory={root}\nExecStart=\n"
-            f"ExecStart={root}/.venv/bin/python {root}/scripts/{action} --catalog-file {path}\n"
-        )
-        if unit == "election-backup.service":
-            text += (
-                f"ExecStartPost=\nExecStartPost={root}/.venv/bin/python "
-                f"{root}/scripts/prune_backups.py --keep 1 --apply\n"
-            )
-        (directory / "deployment.conf").write_text(text, encoding="utf-8")
-    for unit in ("election-expansion.service", "election-expansion.timer"):
-        template = (root / "deploy/systemd" / unit).read_text(encoding="utf-8")
-        (unit_root / unit).write_text(
-            template.replace("@CONTROL_ROOT@", str(root)), encoding="utf-8"
-        )
-    containers.command(["systemctl", "daemon-reload"])
-    # No stop/restart/start of any existing unit. The next invocation uses the new code.
-    return {"outcome": "installed", "note": "Existing running jobs were left untouched"}
-
-
-def require_applied_migrations(release, prod):
-    with connect(db_settings(prod, writer=True)) as conn:
-        for migration in conn.execute("SELECT name, sha256 FROM ops.schema_migrations").fetchall():
-            file = Path(release) / "migrations" / migration["name"]
-            if (
-                not file.is_file()
-                or hashlib.sha256(file.read_bytes()).hexdigest() != migration["sha256"]
-            ):
-                raise ValueError("Candidate release changed or omitted an applied migration")
-
-
-def require_no_backup():
-    # A legacy backup already in flight may not hold the new catalog lock.
-    active = containers.command(
-        ["systemctl", "show", "--value", "-p", "ActiveState", "election-backup.service"]
-    )
-    if active in ("active", "activating", "deactivating", "reloading"):
-        raise ValueError("A backup is running; retry after it finishes")
-
-
-def register(path, release, image, name, status, prod, config, *, replaces=None):
-    controls_ready(config)
-    identity, revision = containers.verify_release(release, image)
-    metadata = containers.metadata(identity, name)
-    if metadata["code_sha256"] != containers.package_hash(release):
-        raise ValueError("Image Python sources differ from its release checkout")
-    source = catalog.source_from_json(metadata["source"])
-    settings = CollectorSettings(**metadata["settings"])
-    require_applied_migrations(release, prod)
-    entry = catalog.entry(
-        source,
-        settings,
-        image_id=identity,
-        revision=revision,
-        release_path=release,
-        worker="expansion",
-        status=status,
-    )
-    entry["races"] = metadata["races"]
-    entry["release_sha256"] = containers.release_hash(release)
-    if replaces:
-        entry["replaces"] = replaces
-
-    def change(value):
-        catalog.verify_baseline(value, prod)
-        if name in value["sources"]:
-            raise ValueError("Source/state is already owned; existing states cannot be replaced")
-        existing = [
-            (n, e)
-            for n, e in value["sources"].items()
-            if e["source"]["state"] == source.state and e["source"]["dataset"] == "election_results"
-        ]
-        if replaces:
-            if len(existing) != 1 or existing[0][0] != replaces:
-                raise ValueError("Replacement must name the state's one existing results source")
-            old = catalog.source_from_json(existing[0][1]["source"])
-            if (
-                any(
-                    getattr(old, k) != getattr(source, k)
-                    for k in ("state", "election_date", "dataset", "format")
-                )
-                or not source.contests
-                or not catalog.expands_coverage(existing[0][1], entry)
-                or status != existing[0][1]["status"]
-            ):
-                raise ValueError("Replacement must preserve election/status and admitted coverage")
-        elif existing:
-            raise ValueError("Source/state is already owned; use an explicit coverage replacement")
-        require_no_backup()
-        lock_dir = Path(prod["DATA_DIR"]) / "locks"
-        lock_dir.mkdir(parents=True, exist_ok=True)
-        created = []
-        try:
-            for suffix in (".lock", ".pipeline.lock"):
-                lock = lock_dir / (name + suffix)
-                # Refuse to adopt old source state or change another owner's permissions.
-                descriptor = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
-                created.append(lock)
-                try:
-                    os.fchown(descriptor, 10001, 10001)
-                finally:
-                    os.close(descriptor)
-        except Exception:
-            for lock in created:
-                lock.unlink()
-            raise
-        value["sources"][name] = entry
-
-    catalog.update(path, change)
-    return {"outcome": "registered", "source_id": name, "enabled": False, "public": False}
-
-
-PIN_KEYS = ("image_id", "revision", "release_path", "release_sha256")
-
-
-def repin(path, release, image, name, prod, config):
-    """Move one registered expansion source to a newly verified image.
-
-    Only the image pin changes. The source contract, settings, races, status, flags,
-    source ID, archives and publications stay as they are, so rolling back is the
-    same command with the previous release and image.
-    """
-    controls_ready(config)
-    containers.limits(config)
-    identity, revision = containers.verify_release(release, image)
-    meta = containers.metadata(identity, name)
-    if meta["code_sha256"] != containers.package_hash(release):
-        raise ValueError("Image Python sources differ from its release checkout")
-    require_applied_migrations(release, prod)
-    before = expansion(catalog.read(path), name)
-    candidate = catalog.entry(
-        catalog.source_from_json(meta["source"]),
-        CollectorSettings(**meta["settings"]),
-        image_id=identity,
-        revision=revision,
-        release_path=release,
-        worker="expansion",
-        status=before["status"],
-    )
-    candidate["release_sha256"] = containers.release_hash(release)
-    # Compare as stored: the catalog keeps JSON, where tuples become lists.
-    stored = json.loads(json.dumps({k: candidate[k] for k in ("source", "settings")}))
-    if (
-        stored["source"] != before["source"]
-        or catalog.contract_settings(stored["settings"])
-        != catalog.contract_settings(before["settings"])
-        or list(meta["races"]) != before["races"]
-    ):
-        raise ValueError("Re-pinning cannot change the source contract, settings or races")
-    if identity == before["image_id"]:
-        return {"outcome": "already_pinned", "source_id": name, "image_id": identity}
-    # The new image must collect, parse, load and validate a candidate before it is
-    # pinned. Nothing is published; the recurring worker publishes as usual afterwards.
-    prepared = run_one(
-        {**before, **{k: candidate[k] for k in PIN_KEYS}}, prod, config, prepare=True
-    )
-    if prepared["outcome"] != "validated":
-        raise ValueError(
-            "The new image did not produce a validated candidate: "
-            + str(prepared.get("error") or prepared["outcome"])
-        )
-    candidate_id = str(uuid.UUID(prepared["candidate_id"]))
-
-    def change(value):
-        current = expansion(value, name)
-        if any(current.get(k) != before.get(k) for k in (*PIN_KEYS, "source", "races", "status")):
-            raise ValueError("Source deployment changed during re-pin validation; retry")
-        require_no_backup()
-        current.setdefault("previous_images", []).append(
-            {**{k: current.get(k) for k in PIN_KEYS}, "replaced_at": utc_now()}
-        )
-        current.update({k: candidate[k] for k in PIN_KEYS}, repin_candidate_id=candidate_id)
-        current["settings"] = stored["settings"]  # may differ only in identification
-
-    catalog.update(path, change)
+    if code_hash != containers.package_hash(release_path):
+        raise ValueError("Image Python sources differ from the release checkout")
     return {
-        "outcome": "repinned",
-        "source_id": name,
-        "image_id": identity,
         "revision": revision,
-        "previous_revision": before["revision"],
-        "previous_release": before["release_path"],
-        "validated_candidate_id": candidate_id,
-        "note": "The recurring worker uses the new image from its next cycle",
-    }
-
-
-def private_text(path, text):
-    """Replace one private configuration file without exposing its contents in argv."""
-    path = Path(path)
-    descriptor, temporary = tempfile.mkstemp(dir=path.parent, prefix=".source-handoff-")
-    try:
-        with os.fdopen(descriptor, "w", encoding="utf-8", newline="") as handle:
-            handle.write(text)
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(temporary, path)
-    finally:
-        Path(temporary).unlink(missing_ok=True)
-
-
-def transfer_source(path, release, image, name, status, evidence, report_file, config):
-    """Move one existing source to the independent worker; leave other images pinned."""
-    controls_ready(config)
-    containers.limits(config)
-    identity, revision = containers.verify_release(release, image)
-    meta = containers.metadata(identity, name)
-    if meta["code_sha256"] != containers.package_hash(release):
-        raise ValueError("Image sources differ from the release checkout")
-    source = catalog.source_from_json(meta["source"])
-    settings = CollectorSettings(**meta["settings"])
-    report = json.loads(Path(report_file).read_text(encoding="utf-8"))
-    checked_at = datetime.fromisoformat(report["checked_at"])
-    if not 0 <= (datetime.now(timezone.utc) - checked_at).total_seconds() <= 1800:
-        raise ValueError("Run the saved-response parser check within 30 minutes of transfer")
-    if any(
-        (
-            report.get("outcome") != "parsed",
-            report.get("source_id") != name,
-            report.get("source_signature") != source.signature(settings),
-            report.get("collector_code_sha256") != meta["code_sha256"],
-            report.get("raw_sha256") != file_hash(Path(evidence)),
-            report.get("internal_reconciliation") != "passed",
-            report.get("contest_total_reconciliation") != "passed",
-            report.get("contest_count") != len(meta["races"]),
-            report.get("all_counts_zero") is not False,
-        )
-    ):
-        raise ValueError("Transfer requires a matching successful nonzero saved-response check")
-    new = catalog.entry(
-        source,
-        settings,
-        image_id=identity,
-        revision=revision,
-        release_path=release,
-        worker="expansion",
-        status=status,
-    )
-    new.update(races=meta["races"], release_sha256=containers.release_hash(release))
-    prod_file = Path(config.get("PRODUCTION_ENV", "/etc/election-pipeline/production.env"))
-    journal = Path(config["CONTROL_STATE_DIR"]) / "source-handoff.json"
-    with catalog.locked(path, exclusive=True, nonblocking=True):
-        before = catalog.read(path)
-        old = before["sources"][name]
-        if old["worker"] != "baseline":
-            raise ValueError("Only a currently baseline-owned source may be transferred")
-        old_source = catalog.source_from_json(old["source"])
-        if (
-            name != source.source_id
-            or any(
-                getattr(source, key) != getattr(old_source, key)
-                for key in ("state", "election_date", "dataset")
-            )
-            or source.dataset != "election_results"
-            or meta["races"] != old["races"]
-        ):
-            raise ValueError("Transfer cannot change source identity or watched race coverage")
-        original = prod_file.read_bytes().decode("utf-8")
-        prod = dict(dotenv_values(prod_file, interpolate=False))
-        catalog.verify_baseline(before, prod)
-        remaining = [
-            item.strip()
-            for item in prod["PIPELINE_SOURCES"].split(",")
-            if item.strip() and item.strip() != name
-        ]
-        if not remaining:
-            raise ValueError("Retiring the last baseline source needs a separate worker retirement")
-        changed, matches = re.subn(
-            r"(?m)^PIPELINE_SOURCES[ \t]*=[^\r\n]*",
-            "PIPELINE_SOURCES=" + ",".join(remaining),
-            original,
-        )
-        if matches != 1:
-            raise ValueError("Expected exactly one PIPELINE_SOURCES assignment")
-        if (
-            journal.exists()
-            and json.loads(journal.read_text(encoding="utf-8"))["outcome"] == "pending"
-        ):
-            raise ValueError("A previous source handoff needs inspection before another transfer")
-
-        def require_idle():
-            state = containers.command(
-                ["systemctl", "show", "--value", "-p", "ActiveState", "election-pipeline.service"]
-            )
-            if state not in ("inactive", "failed"):
-                raise ValueError("The baseline cycle is running; retry transfer after it finishes")
-
-        require_idle()
-        with (
-            ArchiveStore(Path(prod["DATA_DIR"]), old_source).lock(stage="pipeline"),
-            ArchiveStore(Path(prod["DATA_DIR"]), old_source).lock(),
-        ):
-            evidence_dir = Path(prod["DATA_DIR"]) / "accuracy/adapter_checks" / name
-            evidence_dir.mkdir(parents=True, exist_ok=True)
-            saved = evidence_dir / (report["raw_sha256"] + ".json")
-            saved.write_bytes(Path(evidence).read_bytes())
-            atomic_json(evidence_dir / (report["raw_sha256"] + ".check.json"), report)
-            after = json.loads(json.dumps(before))
-            new.update(enabled=old["enabled"], public=old["public"], previous_release=old)
-            after["sources"][name] = new
-            after["baseline"]["source_ids"] = remaining
-            after["generation"] += 1
-            catalog.validate(after)
-            backup = prod_file.with_name(prod_file.name + ".before-source-" + uuid.uuid4().hex)
-            private_text(backup, original)
-            record = {
-                "outcome": "pending",
-                "source_id": name,
-                "started_at": utc_now(),
-                "production_env_backup": str(backup),
-                "catalog_before": before,
-                "catalog_after": after,
-            }
-            atomic_json(journal, record)
-            if prod_file.read_bytes().decode("utf-8") != original:
-                atomic_json(journal, {**record, "outcome": "cancelled"})
-                raise ValueError("Production configuration changed during transfer; retry")
-            try:
-                private_text(prod_file, changed)
-                require_idle()
-                catalog.write(path, after)
-                atomic_json(journal, {**record, "outcome": "applied"})
-            except Exception:
-                catalog.write(path, before)
-                private_text(prod_file, original)
-                atomic_json(journal, {**record, "outcome": "rolled_back"})
-                raise
-    return {
-        "outcome": "transferred",
-        "source_id": name,
-        "worker": "expansion",
-        "remaining_baseline_sources": remaining,
         "image_id": identity,
-        "note": "The independent worker performs its normal validation before publication",
+        "release_path": str(Path(release_path).resolve()),
     }
 
 
-def run_one(entry, prod, config, *, prepare=False):
-    args = [
-        "scripts/run_expansion_source.py",
-        "--source",
-        entry["source"]["source_id"],
-        "--status",
-        entry["status"],
-    ]
-    if prepare:
-        args.append("--prepare-only")
-    output = containers.run_job(
-        entry, prod, config, args, timeout=int(config.get("JOB_TIMEOUT", "240"))
-    )
-    # run_dbt directs logs to stderr; tolerate separate JSON/log lines from dependencies.
-    rows = [json.loads(line) for line in output.splitlines() if line.startswith("{")]
-    result = rows[-1]
-    if result.get("source_id") != entry["source"]["source_id"]:
-        raise ValueError("Worker returned the wrong source identity")
-    return result
+def point_current(config, release_path):
+    """Atomically repoint the ``current`` symlink the systemd units run from."""
+    link = Path(config["CURRENT_RELEASE"])
+    temporary = link.with_name(".current-" + uuid.uuid4().hex)
+    os.symlink(release_path, temporary)
+    os.replace(temporary, link)
+
+
+def release(path, release_path, image, prod, config):
+    """Make a staged release current once it validates every enabled HTTP source."""
+    staged = describe(release_path, image)
+    value = catalog.read(path)
+    if staged["revision"] == value["release"]["revision"]:
+        return {"outcome": "already_current", "revision": staged["revision"]}
+    with connect(db_settings(prod, writer=True)) as conn:
+        applied = migrate(conn, root=staged["release_path"])
+    names = collected(value)
+
+    def check(name):
+        try:
+            result = run_one(
+                staged["image_id"],
+                name,
+                value["sources"][name]["status"],
+                prod,
+                config,
+                mode="check-only",
+            )
+        except Exception as error:
+            result = {"source_id": name, "outcome": "failed", "error": str(error)}
+        return name, result
+
+    with ThreadPoolExecutor(max_workers=parallel_jobs(config)) as pool:
+        checks = dict(pool.map(check, names))
+    failed = {
+        n: r.get("error") or r["outcome"] for n, r in checks.items() if r["outcome"] != "validated"
+    }
+    if failed:
+        raise ValueError(redacted("The release did not validate: " + json.dumps(failed), prod))
+
+    def change(current):
+        if current["release"] != value["release"]:
+            raise ValueError("The release changed during validation; retry")
+        require_no_backup()
+        current["previous_release"] = current["release"]
+        current["release"] = staged
+
+    catalog.update(path, change)
+    point_current(config, staged["release_path"])
+    return {
+        "outcome": "released",
+        "revision": staged["revision"],
+        "previous_revision": value["release"]["revision"],
+        "migrations_applied": applied,
+        "sources_validated": names,
+        "note": "Workers use the release from their next cycle; move the dashboard next",
+    }
+
+
+def rollback_release(path, config):
+    """Return workers to the previous release. Migrations are additive and stay applied."""
+
+    def change(value):
+        if value.get("previous_release") is None:
+            raise ValueError("No previous release is recorded")
+        require_no_backup()
+        value["release"], value["previous_release"] = value["previous_release"], value["release"]
+
+    value = catalog.update(path, change)
+    point_current(config, value["release"]["release_path"])
+    return {"outcome": "rolled_back", "revision": value["release"]["revision"]}
+
+
+# New sources --------------------------------------------------------------------------
 
 
 def prepare(path, name, prod, config):
+    """Validate a not-yet-enabled source's first publication candidate."""
     value = catalog.read(path)
-    entry = expansion(value, name)
-    if entry["enabled"]:
-        raise ValueError("Use the recurring worker for an already enabled source")
-    result = run_one(entry, prod, config, prepare=True)
+    entry = value["sources"][name]
+    if entry["enabled"] or entry["acquisition"] != "http":
+        raise ValueError("Prepare a disabled HTTP source; enabled sources publish on their own")
+    result = run_one(
+        value["release"]["image_id"], name, entry["status"], prod, config, mode="prepare-only"
+    )
     if result["outcome"] != "validated":
-        raise ValueError("The new source did not produce a validated candidate")
+        raise ValueError("The source did not produce a validated candidate")
 
-    def change(value):
-        current = expansion(value, name)
-        if current["image_id"] != entry["image_id"] or current["enabled"]:
+    def change(current):
+        if current["sources"][name]["enabled"]:
             raise ValueError("Source deployment changed during preparation")
-        current["candidate_id"] = str(uuid.UUID(result["candidate_id"]))
+        current["sources"][name]["candidate_id"] = str(uuid.UUID(result["candidate_id"]))
 
     catalog.update(path, change)
     return result
 
 
-def promote(path, name, prod, config, *, allow_manual=False):
+def promote(path, name, prod, config):
+    """Publish a source's prepared candidate (still private until dashboard activation)."""
     value = catalog.read(path)
     entry = value["sources"][name]
-    if entry["worker"] == "manual" and allow_manual:
-        if entry.get("manual_candidate", {}).get("candidate_id") != entry.get("candidate_id"):
-            raise ValueError("Manual acquisition receipt does not match the prepared candidate")
-    else:
-        entry = expansion(value, name)
-    candidate = entry["candidate_id"]
+    if entry["acquisition"] == "manual" and entry.get("manual_candidate", {}).get(
+        "candidate_id"
+    ) != entry.get("candidate_id"):
+        raise ValueError("Manual acquisition receipt does not match the prepared candidate")
+    candidate = entry.get("candidate_id")
+    if not candidate:
+        raise ValueError("Prepare the source first")
     with connect(db_settings(prod, writer=True)) as conn:
         row = conn.execute(
             "SELECT s.source_id FROM ops.publication_attempts a "
@@ -544,40 +278,117 @@ def promote(path, name, prod, config, *, allow_manual=False):
             raise ValueError("Candidate belongs to another source")
     result = json.loads(
         containers.run_job(
-            entry, prod, config, ["scripts/publish.py", "promote", "--candidate-id", candidate]
+            value["release"]["image_id"],
+            prod,
+            config,
+            ["scripts/publish.py", "promote", "--candidate-id", candidate],
         )
     )
     if result.get("outcome") not in ("published", "skipped", "already_current"):
         raise ValueError("Publication promotion failed")
 
-    def change(value):
-        current = value["sources"][name]
-        if current.get("candidate_id") != candidate:
+    def change(current):
+        source = current["sources"][name]
+        if source.get("candidate_id") != candidate:
             raise ValueError("Candidate changed while being promoted")
-        current["published_at"] = utc_now()
-        current["publication_id"] = result["publication_id"]
-        if entry["worker"] == "manual":
-            current["manual_snapshot"] = {
-                **current["manual_candidate"],
+        source.update(published_at=utc_now(), publication_id=result["publication_id"])
+        if source["acquisition"] == "manual":
+            source["manual_snapshot"] = {
+                **source.pop("manual_candidate"),
                 "publication_id": result["publication_id"],
             }
+        source.pop("candidate_id")
 
     catalog.update(path, change)
-    latest = Path(prod["DATA_DIR"]) / "runs" / name / "latest.json"
-    run = json.loads(latest.read_text(encoding="utf-8"))
-    if run.get("candidate_id") == candidate and run.get("outcome") == "validated":
-        run.update(
-            outcome="succeeded", publication_id=result["publication_id"], finished_at=utc_now()
-        )
-        run["stages"].append(
-            {"stage": "manual_promotion", "outcome": "published", "result": result}
-        )
-        atomic_json(latest, run)
-        atomic_json(Path(prod["DATA_DIR"]) / "runs" / name / (run["run_id"] + ".json"), run)
     return result
 
 
-def recovery_gate(entry, report, now):
+def disable(path, name):
+    """Stop collecting a private source. Public sources leave through a dashboard switch."""
+
+    def change(value):
+        entry = value["sources"][name]
+        if entry["public"]:
+            raise ValueError("Activate a dashboard without this state before disabling it")
+        entry["enabled"] = False
+
+    catalog.update(path, change)
+    return {"outcome": "disabled", "source_id": name}
+
+
+def import_county(path, county, report, review, prod, config):
+    from election_pipeline.county_import import selected
+    from election_pipeline.states import STATES
+
+    name = STATES["MS"].source_id
+    with catalog.locked(path):
+        value = catalog.read(path)
+        entry = value["sources"][name]
+        if not entry["enabled"] or not entry["public"]:
+            raise ValueError("Mississippi must be enabled and public")
+        selected(catalog.configured()[name], county)
+        return json.loads(
+            containers.import_county(
+                value["release"]["image_id"], name, prod, config, county, report, review
+            )
+        )
+
+
+# Dashboard ----------------------------------------------------------------------------
+
+
+def free_port():
+    # Account for Docker bindings even on hosts with the userland proxy disabled.
+    published = containers.command(["docker", "ps", "--format", "{{.Ports}}"])
+    reserved = {int(port) for port in re.findall(r":([0-9]+)->", published)}
+    for port in range(8001, 8100):
+        if port in reserved:
+            continue
+        try:
+            with socket.socket() as handle:
+                handle.bind(("127.0.0.1", port))
+        except OSError:
+            continue
+        return port
+    raise ValueError("No free localhost dashboard port in 8001–8099")
+
+
+def wait_for(url, expected, seconds=30):
+    deadline = time.monotonic() + seconds
+    while True:
+        try:
+            return dashboard.check(url, expected)
+        except OSError:
+            if time.monotonic() >= deadline:
+                raise ValueError("Candidate dashboard did not become ready") from None
+            time.sleep(1)
+
+
+def start_dashboard(path, names, prod, config):
+    """A private dashboard from the current release with ``names`` also made public."""
+    value = catalog.read(path)
+    for name in names:
+        if value["sources"][name]["public"] or not value["sources"][name].get("publication_id"):
+            raise ValueError(f"{name}: publish its first snapshot (prepare, promote) first")
+    identity = uuid.uuid4().hex
+    state = Path(config["CONTROL_STATE_DIR"])
+    candidate = dashboard.start(
+        value,
+        names,
+        prod,
+        config,
+        state / ("dashboard-" + identity),
+        port=free_port(),
+        release=value["release"],
+    )
+    candidate["id"] = identity
+    wait_for(candidate["url"], dashboard.expected_races(catalog.published(value, names)))
+    atomic_json(state / ("candidate-" + identity + ".json"), candidate)
+    return candidate
+
+
+def recovery_gate(value, names, report, now):
+    """A restore check after the new states' publications, which it verified."""
     if report.get("outcome") != "passed" or not all(
         report.get(key)
         for key in (
@@ -588,19 +399,16 @@ def recovery_gate(entry, report, now):
     ):
         raise ValueError("A successful isolated restore and permission check is required")
     finished = datetime.fromisoformat(report["finished_at"])
-    published = datetime.fromisoformat(entry["published_at"])
-    if finished < published or not 0 <= (now - finished).total_seconds() <= 1800:
-        raise ValueError("Restore check must be recent and after the new state's publication")
-    name = entry["source"]["source_id"]
-    if report.get("current_publications", {}).get(name) != entry["publication_id"]:
-        raise ValueError("Restore check did not verify this state's published snapshot")
-    table = entry["source"]["state"].lower() + ".contest_candidate_results"
-    if report.get("database_inventory", {}).get(table, {}).get("rows", 0) <= 0:
-        raise ValueError("Restored new-state published results are missing")
-
-
-def expected_states(value):
-    return {e["source"]["state"]: e for e in value["sources"].values() if e["public"]}
+    if not 0 <= (now - finished).total_seconds() <= 1800:
+        raise ValueError("Restore check must be from the last 30 minutes")
+    for name in names:
+        entry = value["sources"][name]
+        if finished < datetime.fromisoformat(entry["published_at"]):
+            raise ValueError("Restore check must follow the new state's publication")
+        if report.get("current_publications", {}).get(name) != entry["publication_id"]:
+            raise ValueError("Restore check did not verify this state's published snapshot")
+    if report.get("database_inventory", {}).get("serving.contest_results", {}).get("rows", 0) <= 0:
+        raise ValueError("Restored published results are missing")
 
 
 def switch_dashboard(path, before, after, target, config):
@@ -617,7 +425,9 @@ def switch_dashboard(path, before, after, target, config):
     )
     record = json.loads(journal.read_text(encoding="utf-8"))
     try:
-        dashboard.check(config.get("ORIGIN_URL", "http://127.0.0.1"), expected_states(after))
+        dashboard.check(
+            config.get("ORIGIN_URL", "http://127.0.0.1"), dashboard.expected_races(after)
+        )
         catalog.write(path, after)
         atomic_json(journal, {**record, "outcome": "applied"})
     except Exception:
@@ -630,39 +440,30 @@ def switch_dashboard(path, before, after, target, config):
     return old
 
 
-def activate(path, candidate, report, prod, config):
-    controls_ready(config)
+def activate(path, candidate, report, config):
+    """Point the public site at a checked candidate dashboard; new states become public."""
     containers.limits(config)
     with catalog.locked(path, exclusive=True):
         value = catalog.read(path)
-        catalog.verify_baseline(value, prod)
         if value["generation"] != candidate["catalog_generation"]:
             raise ValueError("Catalog changed; create and check a fresh dashboard candidate")
-        if candidate["name"] != "election-expansion-dashboard-" + candidate["id"]:
+        if candidate["name"] != "election-dashboard-" + candidate["id"]:
             raise ValueError("Invalid candidate identity")
-        prospective = catalog.prospective(value, candidate["sources"])
-        for name in candidate["sources"]:
-            entry = prospective["sources"][name]
+        names = candidate["sources"]
+        if names:
+            recovery_gate(value, names, report, datetime.now(timezone.utc))
+        prospective = catalog.published(value, names)
+        payload = dashboard.check(candidate["url"], dashboard.expected_races(prospective))
+        for name in names:
+            code = catalog.configured()[name].state
             if (
-                entry["worker"] not in ("expansion", "manual")
-                or entry["source"]["dataset"] != "election_results"
+                str(payload["states"][code]["publication"]["publication_id"])
+                != (prospective["sources"][name]["publication_id"])
             ):
-                raise ValueError("Only managed result sources may be activated")
-            recovery_gate(entry, report, datetime.now(timezone.utc))
-        payload = dashboard.check(candidate["url"], expected_states(prospective))
-        for name in candidate["sources"]:
-            entry = prospective["sources"][name]
-            if (
-                str(payload["states"][entry["source"]["state"]]["publication"]["publication_id"])
-                != entry["publication_id"]
-            ):
-                raise ValueError(
-                    "The privately checked publication changed; validate and back up again"
-                )
-        old = Path(config["CADDYFILE"]).read_text(encoding="utf-8")
+                raise ValueError("The checked publication changed; validate and back up again")
         prospective["previous_dashboard"] = {
             **value["dashboard"],
-            "caddyfile": old,
+            "caddyfile": Path(config["CADDYFILE"]).read_text(encoding="utf-8"),
             "source_flags": {
                 name: {key: entry[key] for key in ("enabled", "public")}
                 for name, entry in value["sources"].items()
@@ -671,114 +472,24 @@ def activate(path, candidate, report, prod, config):
         prospective["dashboard"] = candidate
         prospective["generation"] += 1
         switch_dashboard(path, value, prospective, candidate["name"], config)
-    return {"outcome": "activated", "sources": candidate["sources"], "dashboard": candidate["name"]}
+    return {"outcome": "activated", "sources": names, "dashboard": candidate["name"]}
 
 
-def rollback(path, config):
+def rollback_dashboard(path, config):
     with catalog.locked(path, exclusive=True):
         before = catalog.read(path)
         value = json.loads(json.dumps(before))
         previous = value.get("previous_dashboard")
         if previous is None:
             raise ValueError("No previous dashboard is eligible for rollback")
-        for name, entry in value["sources"].items():
-            if name in previous.get("source_flags", {}):
-                entry.update(previous["source_flags"][name])
-            if entry["source"]["state"] not in previous["states"] and entry["worker"] in (
-                "expansion",
-                "manual",
-            ):
-                entry.update(public=False, enabled=False)
-        desired = {
-            code: entry
-            for code, entry in expected_states(value).items()
-            if code in previous["states"]
+        for name, flags in previous["source_flags"].items():
+            if name in value["sources"]:
+                value["sources"][name].update(flags)
+        dashboard.check(previous["url"], dashboard.expected_races(value))
+        value["dashboard"] = {
+            k: v for k, v in previous.items() if k not in ("caddyfile", "source_flags")
         }
-        dashboard.check(previous["url"], desired)
-        value["dashboard"] = {k: v for k, v in previous.items() if k != "caddyfile"}
         value.pop("previous_dashboard")
         value["generation"] += 1
         switch_dashboard(path, before, value, previous["name"], config)
     return {"outcome": "rolled_back", "dashboard": previous["name"]}
-
-
-def parallel_jobs(config):
-    value = config.get("EXPANSION_PARALLEL", "1")
-    if not re.fullmatch(r"[1-4]", value):
-        raise ValueError("Set EXPANSION_PARALLEL to 1-4 jobs after checking host headroom")
-    return int(value)
-
-
-def run_enabled(path, prod, config):
-    """One bounded worker, sequential unless EXPANSION_PARALLEL allows more jobs at once;
-    never run or reconfigure baseline sources."""
-    value = catalog.read(path)
-    catalog.verify_baseline(value, prod)
-    containers.limits(config)
-    workers = parallel_jobs(config)
-    deadline = time.monotonic() + int(config.get("CYCLE_SECONDS", "270"))
-    entries = [
-        (name, e)
-        for name, e in value["sources"].items()
-        if e["worker"] == "expansion" and e["enabled"]
-    ]
-
-    # Start with the least recently attempted source to avoid starving later states.
-    def last_run(pair):
-        path = Path(prod["DATA_DIR"]) / "runs" / pair[0] / "latest.json"
-        return path.stat().st_mtime if path.exists() else 0
-
-    def job(name, entry):
-        if time.monotonic() >= deadline:
-            return {"source_id": name, "outcome": "deferred", "error": "Cycle budget reached"}
-        try:
-            current = catalog.read(path)["sources"][name]
-            if not current["enabled"]:
-                return None
-            job_config = {
-                **config,
-                "JOB_TIMEOUT": str(
-                    min(
-                        int(config.get("JOB_TIMEOUT", "240")),
-                        max(1, int(deadline - time.monotonic())),
-                    )
-                ),
-            }
-            result = run_one(entry, prod, job_config)
-        except Exception as error:
-            result = {"source_id": name, "outcome": "failed", "error": str(error)}
-        encoded = json.dumps(result)
-        for key, secret in prod.items():
-            if "PASSWORD" in key and secret:
-                encoded = encoded.replace(secret, "[redacted]")
-        print(encoded, flush=True)
-        return json.loads(encoded)
-
-    # Each job has its own container limits, so N parallel jobs use N times the budget.
-    with ThreadPoolExecutor(max_workers=workers) as pool:
-        jobs = [pool.submit(job, name, entry) for name, entry in sorted(entries, key=last_run)]
-        results = [r for r in (j.result() for j in jobs) if r is not None]
-    atomic_json(
-        Path(config["CONTROL_STATE_DIR"]) / "expansion-latest.json",
-        {
-            "finished_at": utc_now(),
-            "results": results,
-            "outcome": "succeeded" if all(r["outcome"] in GOOD for r in results) else "failed",
-        },
-    )
-    return 0 if all(r["outcome"] in GOOD for r in results) else 1
-
-
-def migrate_source(path, name, file, prod):
-    with catalog.locked(path, exclusive=True):
-        entry = expansion(catalog.read(path), name)
-        file = Path(file).resolve()
-        if file.parent != Path(entry["release_path"]) / "migrations":
-            raise ValueError("Migration must be tracked in the registered release")
-        containers.command(
-            ["git", "-C", entry["release_path"], "ls-files", "--error-unmatch", str(file)]
-        )
-        if containers.command(["git", "-C", entry["release_path"], "status", "--porcelain"]):
-            raise ValueError("Registered release checkout is no longer clean")
-        with connect(db_settings(prod, writer=True)) as conn:
-            return migrations.apply(conn, file, entry["source"]["state"].lower())

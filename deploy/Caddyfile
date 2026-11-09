@@ -1,3 +1,5 @@
+# The first `deploy.py activate` replaces the placeholder upstream below; every later
+# dashboard switch rewrites all three upstreams together.
 {$SITE_DOMAIN} {
     encode zstd gzip
 
@@ -9,19 +11,19 @@
 
         handle /api/* {
             header >Cache-Control "no-store"
-            reverse_proxy dashboard:8000
+            reverse_proxy election-dashboard-not-activated:8000
         }
 
         handle @assets {
             header Cache-Control "public, max-age=300" {
                 match status 2xx
             }
-            reverse_proxy dashboard:8000
+            reverse_proxy election-dashboard-not-activated:8000
         }
 
         handle {
             header >Cache-Control "no-cache"
-            reverse_proxy dashboard:8000
+            reverse_proxy election-dashboard-not-activated:8000
         }
     }
 

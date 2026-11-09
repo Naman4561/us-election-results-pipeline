@@ -143,11 +143,11 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         if len(senate) != 120:
             raise ValueError("Kentucky county/race coverage is incomplete")
 
-        units, seen = [], set()
+        reporting, seen = [], set()
         for element in sections["ReportData"]:
             raw = values(element)
             identity = raw["ReportingUnitId"]
-            if identity in seen or len(units) >= settings.max_csv_rows:
+            if identity in seen or len(reporting) >= settings.max_csv_rows:
                 raise ValueError("Duplicate/excessive Kentucky reporting units")
             seen.add(identity)
             kind, name, precinct = geography(identity)
@@ -165,7 +165,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             ]
             if numbers[1] > numbers[0]:
                 raise ValueError("Reporting precinct count exceeds participating count")
-            units.append(
+            reporting.append(
                 dict(
                     unit_type=kind,
                     county=name,
@@ -180,7 +180,9 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             )
         if {key[0] for key in result_keys} - seen:
             raise ValueError("Candidate rows lack reporting-unit metadata")
-    finish(rows, source, settings, output, stats, reference=reference, reconcile=True, units=units)
+    finish(
+        rows, source, settings, output, stats, reference=reference, reconcile=True, units=reporting
+    )
     stats["warnings"].append(
         "Absentee is combined; early/mail/provisional breakdowns are unavailable."
     )
