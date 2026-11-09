@@ -198,8 +198,24 @@ def check_sources(image, value, prod, config, moved=()):
     return {
         n: r.get("error") or r["outcome"]
         for n, r in checks.items()
-        if r["outcome"] != "validated" and not (n in moved and r.get("error") == NO_SNAPSHOT)
+        if r["outcome"] != "validated" and not (n in moved and no_snapshot(r.get("error")))
     }
+
+
+def no_snapshot(error):
+    """Whether a failed check said only that the source has no snapshot to check.
+
+    A job that fails exits nonzero, so its JSON report, the last JSON line it prints,
+    reaches us inside the runner's "Command failed" message rather than as the result.
+    """
+    for line in reversed((error or "").splitlines()):
+        start = line.find('{"')
+        if start >= 0:
+            try:
+                return json.loads(line[start:]).get("error") == NO_SNAPSHOT
+            except ValueError:
+                return False
+    return error == NO_SNAPSHOT
 
 
 def release(path, release_path, image, prod, config, moved=()):

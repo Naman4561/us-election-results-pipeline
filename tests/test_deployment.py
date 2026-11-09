@@ -254,16 +254,20 @@ class DeploymentTests(unittest.TestCase):
 
     def test_only_a_named_moved_source_may_lack_a_snapshot_to_check(self):
         def check(error):
-            return lambda image, name, *a, **k: (
-                {"source_id": name, "outcome": "failed", "error": error}
-                if name == KY
-                else {"source_id": name, "outcome": "validated"}
-            )
+            def run(image, name, *a, **k):
+                if name != KY:
+                    return {"source_id": name, "outcome": "validated"}
+                # As in production: the failed job exits nonzero, and the runner raises
+                # with the job's report after its log lines.
+                report = json.dumps({"source_id": name, "outcome": "failed", "error": error})
+                raise RuntimeError('Command failed (docker, exit 1): {"log": "dbt"}\n' + report)
+
+            return run
 
         with patch.object(control, "run_one", side_effect=check(NO_SNAPSHOT)):
-            self.assertEqual(
-                control.check_sources(NEW_IMAGE, self.value, self.prod, self.config),
-                {KY: NO_SNAPSHOT},
+            self.assertIn(
+                NO_SNAPSHOT,
+                control.check_sources(NEW_IMAGE, self.value, self.prod, self.config)[KY],
             )
             self.assertEqual(
                 control.check_sources(NEW_IMAGE, self.value, self.prod, self.config, [KY]), {}
@@ -272,10 +276,12 @@ class DeploymentTests(unittest.TestCase):
                 control.check_sources(NEW_IMAGE, self.value, self.prod, self.config, [GA])
         # Any other failure of a moved source still stops the release.
         with patch.object(control, "run_one", side_effect=check("Parsing failed")):
-            self.assertEqual(
-                control.check_sources(NEW_IMAGE, self.value, self.prod, self.config, [KY]),
-                {KY: "Parsing failed"},
+            self.assertIn(
+                "Parsing failed",
+                control.check_sources(NEW_IMAGE, self.value, self.prod, self.config, [KY])[KY],
             )
+        self.assertFalse(control.no_snapshot('Command failed: {"error": "No archived'))
+        self.assertFalse(control.no_snapshot(None))
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock and symlinks")
     def test_rollback_swaps_back_to_the_previous_release(self):
