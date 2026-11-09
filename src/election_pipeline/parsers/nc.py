@@ -11,18 +11,13 @@ from pathlib import Path
 from election_pipeline.parsers.common import integer, records
 from election_pipeline.settings import Source
 
-COVERAGE = {
+# The official file's contest names for every NC race this pipeline covers.
+CONTESTS = {
     "US SENATE": "NC-SEN",
-    **{f"US HOUSE OF REPRESENTATIVES DISTRICT {n:02d}": f"NC-{n:02d}" for n in (1, 3, 4, 11)},
+    **{f"US HOUSE OF REPRESENTATIVES DISTRICT {n:02d}": f"NC-{n:02d}" for n in range(1, 15)},
 }
-
-VOTES = (
-    "election_day",
-    "early_voting",
-    "absentee_by_mail",
-    "provisional",
-    "total_votes",
-)
+# The official file's vote-method columns, in order; they add up to Total Votes.
+METHODS = ("election_day", "early_voting", "absentee_by_mail", "provisional")
 
 RESULT_HEADER = (
     "County",
@@ -52,23 +47,6 @@ DEMO_HEADER = (
     "0",
 )
 
-RESULT_FIELDS = (
-    "election_date",
-    "state",
-    "county",
-    "precinct",
-    "contest_id",
-    "contest_name",
-    "source_contest_group_id",
-    "contest_type",
-    "choice",
-    "choice_party",
-    "vote_for",
-    "real_precinct",
-    *VOTES,
-    "source_line",
-)
-
 DEMO_FIELDS = (
     "election_date",
     "state",
@@ -80,6 +58,15 @@ DEMO_FIELDS = (
     "ethnicity",
     "ballot_count",
     "source_line",
+)
+DEMO_STATE = (
+    "election_date",
+    "state",
+    "request_type",
+    "party_registration",
+    "sex",
+    "race",
+    "ethnicity",
 )
 
 
@@ -93,11 +80,7 @@ def unique(seen, key, line):
 def result_rows(path: Path, source: Source, limit: int, stats: dict):
     from election_pipeline.states import state_adapter
 
-    coverage = {
-        "US SENATE": "NC-SEN",
-        **{f"US HOUSE OF REPRESENTATIVES DISTRICT {n:02d}": f"NC-{n:02d}" for n in range(1, 15)},
-    }
-    if set(coverage.values()) != state_adapter("NC").races.keys():
+    if set(CONTESTS.values()) != state_adapter("NC").races.keys():
         raise ValueError("NC contest names differ from the registered races")
     if len(source.expected_members) != 1:
         raise ValueError("NC results require exactly one configured ZIP member")
@@ -149,7 +132,7 @@ def result_rows(path: Path, source: Source, limit: int, stats: dict):
                 )
 
                 counties.add(county)
-                contest = coverage.get(row["Contest Name"])
+                contest = CONTESTS.get(row["Contest Name"])
 
                 if contest is None:
                     continue
@@ -177,28 +160,27 @@ def result_rows(path: Path, source: Source, limit: int, stats: dict):
                 stats["administrative_rows_retained"] += row["Real Precinct"] == "N"
 
                 yield dict(
-                    zip(
-                        RESULT_FIELDS,
-                        (
-                            election,
-                            source.state,
-                            county,
-                            row["Precinct"],
-                            contest,
-                            row["Contest Name"],
-                            row["Contest Group ID"],
-                            row["Contest Type"],
-                            row["Choice"],
-                            party,
-                            vote_for,
-                            row["Real Precinct"],
-                            *votes,
-                            line,
-                        ),
-                    )
+                    unit_type="precinct",
+                    county=county,
+                    precinct=row["Precinct"],
+                    contest_id=contest,
+                    source_contest_id=row["Contest Group ID"],
+                    source_candidate_id=row["Choice"],
+                    choice=row["Choice"],
+                    choice_party=party,
+                    total_votes=votes[4],
+                    precincts_reporting=None,
+                    precincts_total=None,
+                    **dict(zip(METHODS, votes[:4])),
+                    attributes={
+                        "contest_name": row["Contest Name"],
+                        "contest_type": row["Contest Type"],
+                        # "N" marks administrative rows: absentee, one-stop, provisional.
+                        "real_precinct": row["Real Precinct"] == "Y",
+                    },
                 )
 
-    missing = set(coverage.values()) - contests
+    missing = set(CONTESTS.values()) - contests
 
     if missing:
         raise ValueError(f"Missing tracked contests: {sorted(missing)}")
@@ -245,152 +227,69 @@ def demographic_rows(path: Path, source: Source, limit: int, stats: dict):
 
 
 def parse(archive, source, settings, output, stats, reference):
-    from election_pipeline.parsing import (
-        DEMO_STATE,
-        RESULT_CONTEST,
-        RESULT_COUNTY,
-        accumulate,
-        reference_check,
-        write_groups,
-    )
+    from election_pipeline.parsers.results import finish, write_groups
 
-    results = source.dataset == "election_results" and source.format == "zip"
-    demographics = source.dataset == "absentee_early_demographics" and source.format == "csv"
-
-    if source.state != "NC" or not (results or demographics):
-        raise ValueError("No parser registered for this state/dataset/format")
-
-    if reference is not None and not results:
-        raise ValueError("Candidate-vote reference comparisons apply only to election results")
-
-    fields = RESULT_FIELDS if results else DEMO_FIELDS
-    measures = VOTES if results else ("ballot_count",)
-    iterator = result_rows if results else demographic_rows
-    county, statewide = {}, {}
-    raw_totals = [0] * len(measures)
-
-    name = "precinct_results.csv" if results else "county_demographics.csv"
-
-    with (output / name).open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields)
-        writer.writeheader()
-
-        for row in iterator(archive, source, settings.max_csv_rows, stats):
-            writer.writerow(row)
-
-            for index, measure in enumerate(measures):
-                raw_totals[index] += row[measure]
-
-            if results:
-                accumulate(county, row, RESULT_COUNTY, measures)
-            else:
-                accumulate(statewide, row, DEMO_STATE, measures)
-
-    if results:
-        for key, values in county.items():
-            row = dict(zip((*RESULT_COUNTY, *measures), (*key, *values)))
-            accumulate(statewide, row, RESULT_CONTEST, measures)
-
-        write_groups(output / "county_results.csv", county, RESULT_COUNTY, measures)
-        write_groups(output / "contest_results.csv", statewide, RESULT_CONTEST, measures)
-    else:
-        write_groups(output / "state_demographics.csv", statewide, DEMO_STATE, measures)
-
-    # Internal transformation checks, not independent official validation.
-    for groups in (county, statewide) if results else (statewide,):
-        aggregated = [
-            sum(values[index] for values in groups.values()) for index in range(len(measures))
-        ]
-
-        if aggregated != raw_totals:
-            raise ValueError("Aggregation did not preserve input counts")
-
-    stats["internal_reconciliation"] = "passed"
-    stats["all_counts_zero"] = not any(raw_totals)
-
-    stats["reference_comparison"] = (
-        reference_check(reference, source, statewide, settings.max_csv_rows)
-        if reference is not None
-        else {"status": "not_provided" if results else "not_applicable"}
-    )
-
-    stats["warnings"] = []
-
-    if stats["all_counts_zero"]:
-        stats["warnings"].append("All counts are zero; this does not establish live reporting.")
-
-    if results:
+    if source.state != "NC":
+        raise ValueError("No parser registered for this state")
+    if source.dataset == "election_results" and source.format == "zip":
+        rows = list(result_rows(archive, source, settings.max_csv_rows, stats))
+        finish(rows, source, settings, output, stats, reference=reference)
         if stats["nul_party_values_normalized"]:
             stats["warnings"].append(
                 f"Normalized {stats['nul_party_values_normalized']} NUL-only party values "
                 "to missing."
             )
         stats["warnings"].append("Candidate votes are not unique ballots or demographic turnout.")
-
-    stats["election_status"] = "not determined by parser"
-
-
-def load_contract(dataset):
-    from election_pipeline.states import LoadContract
-
-    if dataset == "election_results":
-        return LoadContract(
-            "results",
-            "precinct_results.csv",
-            RESULT_FIELDS,
-            ("precinct_results.csv", "county_results.csv", "contest_results.csv"),
-            "zip",
-        )
-    if dataset == "absentee_early_demographics":
-        return LoadContract(
-            "absentee_demographics",
-            "county_demographics.csv",
-            DEMO_FIELDS,
-            ("county_demographics.csv", "state_demographics.csv"),
-            "csv",
-        )
-    raise ValueError("Unsupported NC dataset")
-
-
-def database_row(row, source, release):
-    from election_pipeline.database import number
-
-    prefix = (
-        release,
-        number(row["source_line"]),
-        row["county"],
+        return
+    if source.dataset != "absentee_early_demographics" or source.format != "csv":
+        raise ValueError("No parser registered for this NC dataset/format")
+    if reference is not None:
+        raise ValueError("Candidate-vote reference comparisons apply only to election results")
+    statewide, total = {}, 0
+    with (output / "county_demographics.csv").open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=DEMO_FIELDS)
+        writer.writeheader()
+        for row in demographic_rows(archive, source, settings.max_csv_rows, stats):
+            writer.writerow(row)
+            total += row["ballot_count"]
+            key = tuple(row[name] for name in DEMO_STATE)
+            statewide[key] = statewide.get(key, 0) + row["ballot_count"]
+    write_groups(
+        output / "state_demographics.csv",
+        {k: [v] for k, v in statewide.items()},
+        DEMO_STATE,
+        ("ballot_count",),
+    )
+    if sum(statewide.values()) != total:
+        raise ValueError("Aggregation did not preserve input counts")
+    stats.update(
+        internal_reconciliation="passed",
+        all_counts_zero=not total,
+        reference_comparison={"status": "not_applicable"},
+        warnings=["All counts are zero; this does not establish live reporting."]
+        if not total
+        else [],
+        election_status="not determined by parser",
     )
 
-    if source.dataset == "election_results":
-        if row["real_precinct"] not in {"Y", "N"}:
-            raise ValueError("Invalid real-precinct flag")
 
-        return (
-            *prefix,
-            row["precinct"],
-            row["contest_id"],
-            row["contest_name"],
-            row["source_contest_group_id"],
-            row["contest_type"],
-            row["choice"],
-            row["choice_party"] or None,
-            number(row["vote_for"]),
-            row["real_precinct"] == "Y",
-            *(number(row[name]) for name in VOTES),
+# The absentee/early-voting demographics dataset keeps its own NC tables.
+DEMOGRAPHIC_TYPES = {
+    "source_line": "int",
+    "county": "text",
+    "request_type": "text",
+    "party_registration": "optional",
+    "sex": "optional",
+    "race": "optional",
+    "ethnicity": "optional",
+    "ballot_count": "int",
+}
+DATASETS = {
+    "absentee_early_demographics": {
+        "county_demographics.csv": (
+            ("nc", "absentee_demographics"),
+            DEMOGRAPHIC_TYPES,
+            "output_rows",
         )
-
-    else:
-        return (
-            *prefix,
-            row["request_type"],
-            *(
-                row[name] or None
-                for name in (
-                    "party_registration",
-                    "sex",
-                    "race",
-                    "ethnicity",
-                )
-            ),
-            number(row["ballot_count"]),
-        )
+    }
+}

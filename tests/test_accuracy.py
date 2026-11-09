@@ -9,7 +9,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from election_pipeline import accuracy
-from election_pipeline.parsers.nc import COVERAGE
+from election_pipeline.parsers.nc import CONTESTS
 
 
 class AccuracyTests(unittest.TestCase):
@@ -36,7 +36,7 @@ class AccuracyTests(unittest.TestCase):
                 "choice_party": "DEM",
                 "total_votes": 20,
             }
-            for race in COVERAGE.values()
+            for race in CONTESTS.values()
         ]
 
         self.conn = MagicMock()

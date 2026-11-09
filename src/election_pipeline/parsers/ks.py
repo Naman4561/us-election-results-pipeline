@@ -5,9 +5,9 @@ import zipfile
 from datetime import datetime, timedelta, timezone
 
 from election_pipeline.parsers.html import Tree
+from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import formatted_count, party, row
-from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
 from election_pipeline.states import state_adapter
 
 # The Secretary of State prints Central time. The reporting window starts after DST

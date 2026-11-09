@@ -13,7 +13,6 @@ and counted after Election Day). All five are stored. Virginia has no governor's
 import re
 
 from election_pipeline.parsers import enhanced_voting as ev
-from election_pipeline.parsers.totals import with_methods
 
 METHODS = {
     "Early Voting": "early_voting",
@@ -22,7 +21,6 @@ METHODS = {
     "Provisional": "provisional",
     "Post-Election": "post_election",
 }
-FIELDS, load_contract, database_row = with_methods(tuple(METHODS.values()))
 
 
 def ordinal(number):

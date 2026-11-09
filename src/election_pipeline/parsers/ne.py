@@ -6,7 +6,7 @@ import re
 import zipfile
 
 from election_pipeline.parsers.common import integer
-from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
+from election_pipeline.parsers.results import finish
 
 HEADER = (
     "RaceID,RaceName,PartyCode,AreaType,AreaNum,OfficeSeqNo,BallotOrder,CandidateID,"

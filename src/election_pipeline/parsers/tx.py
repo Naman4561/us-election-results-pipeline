@@ -7,7 +7,7 @@ import zipfile
 from datetime import datetime
 from urllib.parse import urlsplit
 
-from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
+from election_pipeline.parsers.results import finish
 
 
 def unique_object(pairs):

@@ -1,9 +1,5 @@
 version: 2
 sources:
-- name: ak
-  schema: ak
-  tables:
-  - name: results
 - name: ops
   schema: ops
   tables:
@@ -11,99 +7,15 @@ sources:
   - name: snapshots
   - name: processing_releases
 - name: landing
-  schema: nc
-  tables:
-  - name: nc_results
-    identifier: results
-  - name: nc_absentee_demographics
-    identifier: absentee_demographics
-- name: ky
-  schema: ky
+  schema: landing
   tables:
   - name: results
-  - name: reporting_units
-- name: mn
-  schema: mn
-  tables:
-  - name: results
-- name: ne
-  schema: ne
-  tables:
-  - name: results
-- name: tx
-  schema: tx
-  tables:
-  - name: results
-- name: ga
-  schema: ga
-  tables:
-  - name: results
-- name: sc
-  schema: sc
-  tables:
-  - name: results
-- name: ks
-  schema: ks
-  tables:
-  - name: results
-- name: oh
-  schema: oh
-  tables:
-  - name: results
+  - name: result_methods
 - name: ms
   schema: ms
   tables:
-  - name: results
   - name: county_feeds
-- name: sd
-  schema: sd
+- name: nc
+  schema: nc
   tables:
-  - name: results
-- name: nm
-  schema: nm
-  tables:
-  - name: results
-- name: fl
-  schema: fl
-  tables:
-  - name: results
-- name: va
-  schema: va
-  tables:
-  - name: results
-- name: id
-  schema: id
-  tables:
-  - name: results
-- name: wa
-  schema: wa
-  tables:
-  - name: results
-- name: co
-  schema: co
-  tables:
-  - name: results
-- name: ia
-  schema: ia
-  tables:
-  - name: results
-- name: or
-  schema: or
-  tables:
-  - name: results
-- name: ca
-  schema: ca
-  tables:
-  - name: results
-- name: md
-  schema: md
-  tables:
-  - name: results
-- name: hi
-  schema: hi
-  tables:
-  - name: results
-- name: wv
-  schema: wv
-  tables:
-  - name: results
+  - name: absentee_demographics

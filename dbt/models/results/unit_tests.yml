@@ -1,0 +1,72 @@
+version: 2
+unit_tests:
+- name: county_totals_prefer_county_rows_and_sum_precincts_otherwise
+  model: stg_county_rows
+  given:
+  - input: ref('stg_results')
+    rows:
+    # XX-01 is published per county and per precinct: only the county row counts.
+    - {release_id: 1, source_line: 2, unit_type: county, county: A, precinct: '', contest_id: XX-01, choice: P, total_votes: 5}
+    - {release_id: 1, source_line: 3, unit_type: precinct, county: A, precinct: '1', contest_id: XX-01, choice: P, total_votes: 4}
+    # XX-02 is published per precinct only.
+    - {release_id: 1, source_line: 4, unit_type: precinct, county: A, precinct: '1', contest_id: XX-02, choice: P, total_votes: 2}
+    - {release_id: 1, source_line: 5, unit_type: state, county: '', precinct: '', contest_id: XX-02, choice: P, total_votes: 2}
+  expect:
+    rows:
+    - {source_line: 2}
+    - {source_line: 4}
+
+- name: county_totals_add_precincts_and_keep_unknown_counts_unknown
+  model: county_results
+  given:
+  - input: ref('stg_county_rows')
+    rows:
+    - {release_id: 1, state: XX, county: A, contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 2}
+    - {release_id: 1, state: XX, county: A, contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 3}
+    - {release_id: 1, state: XX, county: B, contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 1}
+    - {release_id: 1, state: XX, county: B, contest_id: XX-01, choice: P, choice_party: DEM, total_votes: null}
+    - {release_id: 2, state: XX, county: A, contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 7}
+  expect:
+    rows:
+    - {release_id: 1, county: A, total_votes: 5}
+    - {release_id: 1, county: B, total_votes: null}
+    - {release_id: 2, county: A, total_votes: 7}
+
+- name: contest_totals_use_official_rows_or_else_the_county_sum
+  model: contest_results
+  given:
+  - input: ref('stg_results')
+    rows:
+    - {release_id: 1, unit_type: state, state: XX, contest_id: XX-SEN, choice: P, choice_party: DEM, total_votes: 6}
+    - {release_id: 1, unit_type: state, state: XX, contest_id: XX-SEN, choice: Q, choice_party: REP, total_votes: 2}
+    - {release_id: 1, unit_type: county, state: XX, contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 3}
+  - input: ref('county_results')
+    rows:
+    # Ignored for XX-SEN, which the state publishes.
+    - {release_id: 1, state: XX, county: A, contest_id: XX-SEN, choice: P, choice_party: DEM, total_votes: 1}
+    - {release_id: 1, state: XX, county: A, contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 3}
+    - {release_id: 1, state: XX, county: B, contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 1}
+  expect:
+    rows:
+    - {contest_id: XX-SEN, choice: P, total_votes: 6, contest_votes: 8}
+    - {contest_id: XX-SEN, choice: Q, total_votes: 2, contest_votes: 8}
+    - {contest_id: XX-01, choice: P, total_votes: 4, contest_votes: 4}
+
+- name: contest_methods_use_official_rows_or_else_the_county_sum
+  model: contest_method_results
+  given:
+  - input: ref('stg_results')
+    rows:
+    - {release_id: 1, source_line: 2, unit_type: state, contest_id: XX-SEN, choice: P}
+  - input: ref('stg_result_methods')
+    rows:
+    - {release_id: 1, source_line: 2, method: mail, votes: 4}
+  - input: ref('county_method_results')
+    rows:
+    - {release_id: 1, county: A, contest_id: XX-SEN, choice: P, method: mail, votes: 1}
+    - {release_id: 1, county: A, contest_id: XX-01, choice: P, method: mail, votes: 2}
+    - {release_id: 1, county: B, contest_id: XX-01, choice: P, method: mail, votes: 3}
+  expect:
+    rows:
+    - {contest_id: XX-SEN, choice: P, method: mail, votes: 4}
+    - {contest_id: XX-01, choice: P, method: mail, votes: 5}

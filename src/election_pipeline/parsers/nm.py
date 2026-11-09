@@ -21,9 +21,9 @@ from election_pipeline.parsers.enr_platform import (
     sheet_rows,
     statewide_update,
 )
+from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import row
-from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
 from election_pipeline.parsers.workbook import Workbook
 
 HEADER = (
@@ -217,5 +217,5 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             "passed_except_privacy_masked_counties" if hidden_counties else "passed"
         ),
         privacy_masked_counties=hidden_counties,
-        vote_methods=method_status,
+        vote_method_status=method_status,
     )

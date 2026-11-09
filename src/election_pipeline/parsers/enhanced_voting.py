@@ -19,9 +19,9 @@ import re
 import zipfile
 from dataclasses import dataclass, field
 
+from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, party, row, text, unique_json
-from election_pipeline.parsers.totals import finish
 
 
 @dataclass(frozen=True)
@@ -211,14 +211,12 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
         stats,
         reference=reference,
         reconcile=True,
-        methods=tuple(dict.fromkeys(site.methods.values())),
     )
     stats.update(
         source_version=text(record["publishVersionId"]),
         source_update_text=text(record["asOf"]),
         official_results=record.get("isOfficialResults") is True,
         contest_total_reconciliation="passed",
-        vote_methods="stored" if site.methods else "not_published",
     )
 
 

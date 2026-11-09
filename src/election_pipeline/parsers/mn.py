@@ -7,7 +7,7 @@ import zipfile
 from collections import defaultdict
 
 from election_pipeline.parsers.common import integer
-from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
+from election_pipeline.parsers.results import finish
 
 MEDIA_BASE = "https://electionresultsfiles.sos.mn.gov/20261103/"
 MEDIA_FILES = {

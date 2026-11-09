@@ -23,8 +23,6 @@ from election_pipeline.pipeline import collector_code_hash
 from election_pipeline.states import state_adapter
 from election_pipeline.storage import ArchiveStore, atomic_json, file_hash, utc_now
 
-LOAD_CONTRACT_VERSION = 1
-
 
 def connection_settings(env_file=Path(".env")):
     values = dotenv_values(env_file, interpolate=False)
@@ -87,25 +85,64 @@ def timestamp(value):
     return result
 
 
+# Shared landing tables (migration 024). Releases loaded into per-state tables before
+# consolidation keep version 1.
+LOAD_CONTRACT_VERSION = 2
+RESULT_TYPES = {
+    "source_line": "int",
+    "total_votes": "int",
+    "precincts_reporting": "int",
+    "precincts_total": "int",
+    "choice_party": "optional",
+    "attributes": "json",
+}
+UNIT_TYPES = {
+    "source_line": "int",
+    "reporting_status": "optional",
+    "precincts_participating": "int",
+    "precincts_reporting": "int",
+    "ballots_cast": "int",
+    "registered_voters": "int",
+}
+
+
+def load_plan(source, report):
+    """(file, relation, column types, expected rows) for everything a release loads."""
+    adapter = state_adapter(source.state)
+    if source.dataset not in adapter.datasets:
+        raise ValueError("Unsupported dataset for this state")
+    if source.dataset != "election_results":
+        files = dict(adapter.parser.DATASETS[source.dataset])
+    else:
+        files = {"results.csv": (("landing", "results"), RESULT_TYPES, "output_rows")}
+        if "reporting_unit_rows" in report:
+            files["reporting_units.csv"] = (
+                ("landing", "reporting_units"),
+                UNIT_TYPES,
+                "reporting_unit_rows",
+            )
+        files.update(getattr(adapter.parser, "AUXILIARY", {}))
+    plan = []
+    for name, (relation, types, count_key) in files.items():
+        expected = report.get(count_key)
+        if type(expected) is not int or expected <= 0:
+            raise ValueError(f"Invalid row count for {name}")
+        plan.append((name, relation, types, expected))
+    return plan
+
+
 def verify(source, settings, store, directory):
     report = json.loads((directory / "report.json").read_text(encoding="utf-8"))
 
     if not isinstance(report, dict):
         raise ValueError("Parser report must be a JSON object")
 
-    adapter = state_adapter(source.state)
-    contract = adapter.contract(source.dataset)
-    if source.format != contract.format:
-        raise ValueError("Unsupported source format for this dataset")
-    table = adapter.schema + "_" + contract.table
-    filename, fields, files = contract.filename, contract.fields, contract.files
-
     expected = {
         "source_id": source.source_id,
         "dataset": source.dataset,
         "election_date": source.election_date,
         "source_url": source.url,
-        "parser_contract_version": 1,
+        "parser_contract_version": 2,
         "outcome": "parsed",
         "internal_reconciliation": "passed",
     }
@@ -118,20 +155,16 @@ def verify(source, settings, store, directory):
     if not isinstance(comparison, dict):
         raise ValueError("Missing reference-comparison status")
 
-    status = comparison.get("status")
     allowed = (
         {"matched", "not_provided"} if source.dataset == "election_results" else {"not_applicable"}
     )
 
-    if status not in allowed:
+    if comparison.get("status") not in allowed:
         raise ValueError("Parser reference comparison is invalid or mismatched")
 
     identity = report["identity"]
 
-    if not isinstance(identity, dict):
-        raise ValueError("Parser identity must be a JSON object")
-
-    if set(identity) != {
+    if not isinstance(identity, dict) or set(identity) != {
         "raw_sha256",
         "source_signature",
         "code_sha256",
@@ -152,26 +185,21 @@ def verify(source, settings, store, directory):
         raise ValueError("Raw archive path or SHA-256 mismatch")
 
     hashes = report["output_sha256"]
+    plan = load_plan(source, report)
 
-    if not isinstance(hashes, dict):
-        raise ValueError("Output hashes must be a JSON object")
-
-    if set(hashes) != set(files):
+    if not isinstance(hashes, dict) or not {name for name, *_ in plan} <= set(hashes):
         raise ValueError("Unexpected parser output file set")
 
     for name, expected_hash in hashes.items():
         if file_hash(directory / name) != digest(expected_hash):
             raise ValueError(f"Parsed output SHA-256 mismatch: {name}")
 
-    if (
-        type(report["output_rows"]) is not int
-        or not 0 < report["output_rows"] <= settings.max_csv_rows
-    ):
+    if any(rows > settings.max_csv_rows for *_, rows in plan):
         raise ValueError("Invalid expected row count")
 
     fingerprint = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
 
-    return report, raw, fingerprint, table, filename, fields
+    return report, raw, fingerprint, plan
 
 
 def register_source(conn, source):
@@ -309,12 +337,24 @@ def import_fetches(conn, store):
     return count
 
 
-def converted_rows(path, fields, source, release, expected_rows):
+def value(text, kind):
+    """One CSV cell as a database value; only "text" columns keep an empty string."""
+    if kind == "text":
+        return text
+    if not text:
+        return None
+    if kind == "int":
+        return number(text)
+    if kind == "time":
+        return timestamp(text)
+    if kind == "json":
+        return Jsonb(json.loads(text))
+    return text
+
+
+def csv_rows(path, source, expected_rows):
     with path.open(encoding="utf-8", newline="") as handle:
         reader = csv.DictReader(handle, strict=True)
-
-        if reader.fieldnames != list(fields):
-            raise ValueError("Unexpected detailed CSV header")
 
         for position, row in enumerate(reader, 1):
             if position > expected_rows:
@@ -333,7 +373,81 @@ def converted_rows(path, fields, source, release, expected_rows):
             if row["state"] != source.state or row["election_date"] != source.election_date:
                 raise ValueError("Detailed CSV election/state mismatch")
 
-            yield state_adapter(source.state).parser.database_row(row, source, release)
+            yield row
+
+
+def copy_rows(conn, relation, columns, rows):
+    statement = sql.SQL("COPY {} ({}) FROM STDIN").format(
+        sql.Identifier(*relation), sql.SQL(",").join(map(sql.Identifier, columns))
+    )
+    with conn.cursor().copy(statement) as copy:
+        for row in rows:
+            copy.write_row(row)
+
+
+def converted(source, directory, release, plan, methods):
+    """(relation, columns, rows) for each COPY of a release, in load order.
+
+    Vote-method columns of the results become rows of landing.result_methods.
+    """
+    for name, relation, types, expected in plan:
+        path = directory / name
+        with path.open(encoding="utf-8", newline="") as handle:
+            header = next(csv.reader(handle))
+        results = relation == ("landing", "results")
+        if results and header[len(header) - len(methods) :] != list(methods):
+            raise ValueError("Results do not carry the state's vote methods")
+        # Shared tables keep each row's state; state-specific tables imply it.
+        dropped = {"election_date", *(methods if results else ())}
+        if relation[0] != "landing":
+            dropped.add("state")
+        columns = [c for c in header if c not in dropped]
+        yield (
+            relation,
+            ["release_id", *columns],
+            (
+                (release, *(value(row[c], types.get(c, "text")) for c in columns))
+                for row in csv_rows(path, source, expected)
+            ),
+        )
+        if results and methods:
+            yield (
+                ("landing", "result_methods"),
+                ["release_id", "source_line", "method", "votes"],
+                (
+                    (release, number(row["source_line"]), method, number(row[method]))
+                    for row in csv_rows(path, source, expected)
+                    for method in methods
+                ),
+            )
+
+
+def load_release(conn, source, directory, release, plan, methods):
+    for relation, columns, rows in converted(source, directory, release, plan, methods):
+        copy_rows(conn, relation, columns, rows)
+
+
+def release_counts(conn, release, plan, methods):
+    """Rows per planned relation, then vote-method rows (when the state stores methods)."""
+    relations = [relation for _, relation, _, _ in plan]
+    if methods:
+        relations.append(("landing", "result_methods"))
+    return [
+        conn.execute(
+            sql.SQL("SELECT count(*) AS n FROM {} WHERE release_id=%s").format(
+                sql.Identifier(*relation)
+            ),
+            (release,),
+        ).fetchone()["n"]
+        for relation in relations
+    ]
+
+
+def expected_counts(plan, methods):
+    counts = [rows for *_, rows in plan]
+    if methods:
+        counts.append(plan[0][3] * len(methods))
+    return counts
 
 
 def load_parsed(source, settings, data_dir, parsed_dir, db):
@@ -366,8 +480,9 @@ def load_parsed(source, settings, data_dir, parsed_dir, db):
 
         report_hash = file_hash(directory / "report.json")
 
-        report, raw, fingerprint, table, filename, fields = verify(
-            source, settings, store, directory
+        report, raw, fingerprint, plan = verify(source, settings, store, directory)
+        methods = (
+            state_adapter(source.state).methods[1:] if source.dataset == "election_results" else ()
         )
 
         with conn.transaction():
@@ -433,46 +548,19 @@ def load_parsed(source, settings, data_dir, parsed_dir, db):
                 (release,),
             ).fetchone()
 
-            adapter = state_adapter(source.state)
-            contract = adapter.contract(source.dataset)
             skipped = record["loaded_at"] is not None
-            rows_to_load = [(contract.table, filename, fields, report["output_rows"])]
-            for relation, artifact, columns, count_key in contract.auxiliary:
-                expected_count = report.get(count_key)
-                if (
-                    type(expected_count) is not int
-                    or not 0 < expected_count <= settings.max_csv_rows
-                ):
-                    raise ValueError("Invalid auxiliary row count")
-                rows_to_load.append((relation, artifact, columns, expected_count))
-            for relation, artifact, columns, expected_count in rows_to_load:
-                target = sql.Identifier(adapter.schema, relation)
-                count_sql = sql.SQL("SELECT count(*) AS n FROM {} WHERE release_id=%s").format(
-                    target
-                )
-                count = conn.execute(count_sql, (release,)).fetchone()["n"]
-                if skipped:
-                    if count != expected_count:
-                        raise ValueError(
-                            "Previously loaded release has an unexpected database row count"
-                        )
-                else:
-                    if count:
-                        raise ValueError("Unfinished release already contains rows")
-                    copied = ["release_id", "source_line"] + [
-                        k for k in columns if k not in {"source_line", "state", "election_date"}
-                    ]
-                    copy_sql = sql.SQL("COPY {} ({}) FROM STDIN").format(
-                        target, sql.SQL(",").join(map(sql.Identifier, copied))
+            expected = expected_counts(plan, methods)
+            if skipped:
+                if release_counts(conn, release, plan, methods) != expected:
+                    raise ValueError(
+                        "Previously loaded release has an unexpected database row count"
                     )
-                    with conn.cursor().copy(copy_sql) as copy:
-                        for row in converted_rows(
-                            directory / artifact, columns, source, release, expected_count
-                        ):
-                            copy.write_row(row)
-                    count = conn.execute(count_sql, (release,)).fetchone()["n"]
-                    if count != expected_count:
-                        raise ValueError("Loaded row count does not match parser report")
+            else:
+                if any(release_counts(conn, release, plan, methods)):
+                    raise ValueError("Unfinished release already contains rows")
+                load_release(conn, source, directory, release, plan, methods)
+                if release_counts(conn, release, plan, methods) != expected:
+                    raise ValueError("Loaded row count does not match parser report")
             count = report["output_rows"]
             if not skipped:
                 conn.execute(

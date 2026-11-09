@@ -16,7 +16,6 @@ from psycopg import sql
 
 from election_pipeline.database import connect
 from election_pipeline.settings import load_config
-from election_pipeline.states import STATES
 from election_pipeline.storage import (
     ArchiveStore,
     atomic_json,
@@ -24,7 +23,13 @@ from election_pipeline.storage import (
     utc_now,
 )
 
-SCHEMAS = ("ops", "landing", "serving", *(s.schema for s in STATES.values()))
+# Per-state result schemas from before migration 024. Their rows were copied into the
+# shared tables at cutover; they stay, unused, as that copy's original and are backed up.
+CONSOLIDATED_SCHEMAS = (
+    "ak", "ca", "co", "fl", "ga", "hi", "ia", "id", "ks", "ky", "md", "mn",
+    "ne", "nm", "oh", "or", "sc", "sd", "tx", "va", "wa", "wv",
+)  # fmt: skip
+SCHEMAS = ("ops", "landing", "serving", "ms", "nc", *CONSOLIDATED_SCHEMAS)
 
 DATA_DIRECTORIES = (
     "raw",
@@ -76,7 +81,7 @@ def inventory(conn, schemas=SCHEMAS):
 
     found = {row["table_schema"] for row in tables}
 
-    if not {"ops", "serving"}.issubset(found) or not ({"landing", "nc", "ky"} & found):
+    if not {"ops", "landing", "serving"}.issubset(found):
         raise ValueError("Apply the ingestion and publication migrations first")
 
     result = {}

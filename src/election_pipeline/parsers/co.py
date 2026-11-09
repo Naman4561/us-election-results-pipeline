@@ -12,7 +12,6 @@ stored as the detail report prints them.
 import re
 
 from election_pipeline.parsers import clarity
-from election_pipeline.parsers.totals import database_row, load_contract  # noqa: F401
 
 VERSION_FILES = {
     "summary.json": "json/en/summary.json",

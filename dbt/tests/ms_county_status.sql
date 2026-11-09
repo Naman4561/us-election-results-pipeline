@@ -1,7 +1,7 @@
-{{ config(tags=['state_ms']) }}
+{{ config(tags=['ms']) }}
 with results as (
     select release_id, county, count(*) as candidates
-    from {{ ref('ms_county_candidate_results') }} group by release_id, county
+    from {{ ref('county_results') }} group by release_id, county
 )
 select f.release_id, f.county
 from {{ ref('ms_county_feed_status') }} f

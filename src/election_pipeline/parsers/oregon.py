@@ -23,9 +23,9 @@ import zipfile
 
 from election_pipeline.parsers.enr_platform import export_target, page_text
 from election_pipeline.parsers.html import Tree
+from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import row
-from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
 
 HEADER = (
     "ContestID,ContestName,NominatingParty,PartyCode,AreaType,AreaNum,OfficeSeqNo,BallotOrder,"
@@ -180,5 +180,4 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats.update(
         source_update_text=updated,
         contest_total_reconciliation="passed",
-        vote_methods="not_published",
     )

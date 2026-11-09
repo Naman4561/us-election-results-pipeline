@@ -23,9 +23,9 @@ import re
 import zipfile
 
 from election_pipeline.parsers.html import Node, Tree
+from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import formatted_count, row, text
-from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
 
 MEMBERS = {"MD-GOV": "governor.html", **{f"MD-0{n}": f"house-0{n}.html" for n in range(1, 9)}}
 HEADINGS = {
@@ -152,5 +152,5 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         source_update_text="; ".join(sorted(set(times.values()))),
         source_update_times=times,
         contest_total_reconciliation="passed",
-        vote_methods="reported_not_stored",
+        vote_method_status="reported_not_stored",
     )

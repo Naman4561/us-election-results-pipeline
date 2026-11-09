@@ -18,10 +18,9 @@ from psycopg.types.json import Jsonb
 from election_pipeline.database import connect
 from election_pipeline.states import publication_lock, state_adapter
 
-GROUPS = "request_type party_registration sex race ethnicity ballot_count"
 FLORIDA_SOURCE = "fl_2026_general"
 IOWA_SOURCE = "ia_2026_general"
-SAME_OUTPUT_KEYS = ("output_sha256", "output_rows", "contests", "minimum_candidates")
+SAME_OUTPUT_KEYS = ("output_sha256", "output_rows", "contests")
 DBT_CACHES = ("partial_parse.msgpack", "graph.gpickle")
 
 
@@ -107,7 +106,8 @@ def release_metadata(conn, release_id):
     if not row or row["loaded_at"] is None or row["loaded_rows"] != row["expected_rows"]:
         raise ValueError("Choose a completed ingestion release")
 
-    state_adapter(row["state"]).contract(row["dataset"])
+    if row["dataset"] not in state_adapter(row["state"]).datasets:
+        raise ValueError("Unsupported dataset for this state")
     if row["source_id"] == FLORIDA_SOURCE:
         modified_range = florida_file_modified_range(conn, row["snapshot_id"], row["source_url"])
         row["source_modified_range"] = modified_range
@@ -116,7 +116,8 @@ def release_metadata(conn, release_id):
     return row
 
 
-def checked_results(path, state=None):
+def checked_results(path, tags):
+    """The dbt run results, if every selected model, test and unit test passed."""
     manifest = json.loads((path / "manifest.json").read_text(encoding="utf-8"))
     results = json.loads((path / "run_results.json").read_text(encoding="utf-8"))
 
@@ -124,51 +125,39 @@ def checked_results(path, state=None):
     if not invocation or invocation != manifest["metadata"]["invocation_id"]:
         raise ValueError("dbt artifacts do not belong to one invocation")
 
-    nodes = manifest["nodes"]
-    units = manifest.get("unit_tests", {})
-    if state:
-        tag = "state_" + state.lower()
-        models = {
-            k
-            for k, n in nodes.items()
-            if n["resource_type"] == "model" and tag in n.get("tags", [])
-        }
-        selected = {
-            k: n
-            for k, n in nodes.items()
-            if k in models
-            or (
-                n["resource_type"] == "test"
-                and (
-                    tag in n.get("tags", [])
-                    or bool(set(n.get("depends_on", {}).get("nodes", [])) & models)
-                )
-            )
-        }
-        units = {
-            k: n
-            for k, n in units.items()
-            if tag in n.get("tags", [])
-            or bool(set(n.get("depends_on", {}).get("nodes", [])) & models)
-        }
-    else:
-        selected = nodes
+    def selected(node):
+        return bool(set(tags) & set(node.get("tags", [])))
+
+    models = {
+        k for k, n in manifest["nodes"].items() if n["resource_type"] == "model" and selected(n)
+    }
+
+    def covered(node):
+        # dbt runs with --indirect-selection cautious: a test runs only when every model it
+        # reads was built in this run.
+        parents = {p for p in node.get("depends_on", {}).get("nodes", []) if p.startswith("model.")}
+        return bool(parents) and parents <= models
+
+    nodes = {
+        k: n
+        for k, n in manifest["nodes"].items()
+        if k in models or (n["resource_type"] == "test" and covered(n))
+    }
+    units = {k: n for k, n in manifest.get("unit_tests", {}).items() if covered(n)}
     if any(
         n["resource_type"] == "model" and n["config"]["materialized"] != "table"
-        for n in selected.values()
+        for n in nodes.values()
     ):
         raise ValueError("Publication candidates must be materialized as tables")
-    required = "release_completeness"
-    if not units or not any(
-        n["resource_type"] == "test" and n.get("name", "").endswith(required)
-        for n in selected.values()
+    if not models or not any(
+        n["resource_type"] == "test" and n.get("name", "").endswith("release_completeness")
+        for n in nodes.values()
     ):
         raise ValueError("Required publication checks are missing from the project")
-    expected = {k for k, n in selected.items() if n["resource_type"] in ("model", "test")}
-    expected.update(units)
+    expected = set(nodes) | set(units)
     actual = {r["unique_id"]: r for r in results["results"]}
 
-    if not expected or set(actual) != expected or len(actual) != len(results["results"]):
+    if set(actual) != expected or len(actual) != len(results["results"]):
         raise ValueError("The complete dbt build did not run")
 
     if any(r["status"] not in ("success", "pass") for r in actual.values()):
@@ -177,29 +166,40 @@ def checked_results(path, state=None):
     return results
 
 
-def build_candidate(root, db, metadata, schema, artifacts):
-    source_variable = (
-        metadata["state"].lower() + "_results_source"
-        if metadata["dataset"] == "election_results"
-        else metadata["state"].lower() + "_demographics_source"
-    )
+def build_tags(metadata):
+    if metadata["dataset"] != "election_results":
+        return ["demographics"]
+    return ["results"] + (["ms"] if state_adapter(metadata["state"]).county_feed_status else [])
+
+
+def build_variables(metadata):
+    """The dbt vars for one release: its state's races, methods and county checks."""
     variables = {
         "publication_materialization": "table",
         "publication_release_id": metadata["release_id"],
         "election_date": str(metadata["election_date"]),
-        source_variable: metadata["source_id"],
+        "state": metadata["state"],
     }
     if metadata["dataset"] == "election_results":
         state = state_adapter(metadata["state"])
-        races = metadata.get("parser_report", {}).get("contests", list(state.races))
-        if (
-            not races
-            or len(races) != len(set(races))
-            or not set(races) <= state.races.keys()
-        ):
+        if metadata.get("parser_report", {}).get("contests") != sorted(state.races):
             raise ValueError("Ingestion release has an invalid contest contract")
-        variables[state.schema + "_races"] = races
-        variables["allow_uncontested"] = True
+        variables.update(
+            races=sorted(state.races),
+            methods=list(state.methods[1:]),
+            county_reconciliation=(
+                "none"
+                if not state.county_results
+                else "masked"
+                if state.county_privacy_masking
+                else "exact"
+            ),
+        )
+    return variables
+
+
+def build_candidate(root, db, metadata, schema, artifacts):
+    variables, tags = build_variables(metadata), build_tags(metadata)
 
     environment = {
         **os.environ,
@@ -223,7 +223,9 @@ def build_candidate(root, db, metadata, schema, artifacts):
             "--schema",
             schema,
             "--select",
-            "tag:state_" + metadata["state"].lower(),
+            *("tag:" + tag for tag in tags),
+            "--indirect-selection",
+            "cautious",
             "--vars",
             json.dumps(variables),
             "--target-path",
@@ -243,7 +245,7 @@ def build_candidate(root, db, metadata, schema, artifacts):
     if completed.returncode:
         raise ValueError(f"dbt build failed; inspect {artifacts}")
 
-    results = checked_results(artifacts, metadata["state"])
+    results = checked_results(artifacts, tags)
     # dbt's parse caches (about 1 MB per attempt) are never reread: builds use --no-partial-parse.
     for cache in DBT_CACHES:
         (artifacts / cache).unlink(missing_ok=True)
@@ -347,10 +349,10 @@ def equivalent_iowa_release(conn, current, metadata):
               AND metadata #>> '{components,0,sha256}' ~ '^[a-f0-9]{64}$'
         ), incoming AS (
             SELECT to_jsonb(r) - 'release_id' - 'source_line' AS result
-            FROM ia.results r WHERE release_id = %(incoming_release)s
+            FROM landing.results r WHERE release_id = %(incoming_release)s
         ), published AS (
             SELECT to_jsonb(r) - 'release_id' - 'source_line' AS result
-            FROM ia.results r WHERE release_id = %(published_release)s
+            FROM landing.results r WHERE release_id = %(published_release)s
         )
         SELECT
             (SELECT count(DISTINCT snapshot_id) = 2 AND count(DISTINCT marker_sha) = 1
@@ -383,7 +385,10 @@ def promote(conn, metadata, attempt_id, schema, code_hash, status):
     current = current_publication(conn, metadata["source_id"])
     require_forward_release(conn, current, metadata)
 
-    relation = sql.Identifier(schema + "_staging", "stg_" + metadata["state"].lower() + "_releases")
+    releases = (
+        "stg_releases" if metadata["dataset"] == "election_results" else "stg_demographic_releases"
+    )
+    relation = sql.Identifier(schema + "_staging", releases)
     candidate = conn.execute(
         sql.SQL("SELECT release_id, source_id FROM {}").format(relation)
     ).fetchall()
@@ -442,7 +447,7 @@ def promote(conn, metadata, attempt_id, schema, code_hash, status):
                     INSERT INTO {} (publication_id, {})
                     SELECT %s, {} FROM {} WHERE release_id = %s
                 """).format(
-                    sql.Identifier(metadata["state"].lower(), target),
+                    sql.Identifier(*target),
                     identifiers,
                     identifiers,
                     sql.Identifier(schema + "_" + layer, model),
@@ -475,62 +480,72 @@ def promote(conn, metadata, attempt_id, schema, code_hash, status):
 
 
 def targets(metadata):
+    """(candidate layer, model, serving relation, columns) frozen by a publication."""
+    if metadata["dataset"] != "election_results":
+        groups = "request_type party_registration sex race ethnicity ballot_count"
+        return [
+            (
+                "staging",
+                "stg_nc_absentee_demographics",
+                ("nc", "county_absentee_demographics"),
+                "county " + groups,
+            ),
+            (
+                "marts",
+                "nc_state_absentee_demographics",
+                ("nc", "state_absentee_demographics"),
+                groups,
+            ),
+        ]
     adapter = state_adapter(metadata["state"])
-    if metadata["dataset"] == "election_results":
-        votes = " ".join(adapter.methods)
-        county_target = (
-            [
-                (
-                    "marts",
-                    adapter.schema + "_county_candidate_results",
-                    "county_candidate_results",
-                    "county contest_id choice choice_party " + votes,
-                ),
-            ]
-            if adapter.county_results
-            else []
-        )
-        feed_target = (
-            [
-                (
-                    "marts",
-                    adapter.schema + "_county_feed_status",
-                    "county_feed_status",
-                    "county county_fips collection_status source_url raw_sha256 last_attempt_at "
-                    "last_success_at report_generated_at report_date "
-                    "precincts_reporting precincts_total "
-                    "absentee_scope affidavit_scope write_in_votes write_in_label issue",
-                )
-            ]
-            if adapter.county_feed_status
-            else []
-        )
-        return (
-            county_target
-            + feed_target
-            + [
-                (
-                    "marts",
-                    adapter.schema + "_contest_candidate_results",
-                    "contest_candidate_results",
-                    "contest_id choice choice_party " + votes + " contest_votes vote_share",
-                ),
-            ]
-        )
-    return [
-        (
-            "staging",
-            "stg_" + adapter.schema + "_absentee_demographics",
-            "county_absentee_demographics",
-            "county " + GROUPS,
-        ),
+    copied = [
         (
             "marts",
-            adapter.schema + "_state_absentee_demographics",
-            "state_absentee_demographics",
-            GROUPS,
-        ),
+            "contest_results",
+            ("serving", "contest_results"),
+            "state contest_id choice choice_party total_votes contest_votes vote_share",
+        )
     ]
+    if adapter.methods[1:]:
+        copied.append(
+            (
+                "marts",
+                "contest_method_results",
+                ("serving", "contest_method_results"),
+                "contest_id choice method votes",
+            )
+        )
+    if adapter.county_results:
+        copied.append(
+            (
+                "marts",
+                "county_results",
+                ("serving", "county_results"),
+                "state county contest_id choice choice_party total_votes",
+            )
+        )
+        if adapter.methods[1:]:
+            copied.append(
+                (
+                    "marts",
+                    "county_method_results",
+                    ("serving", "county_method_results"),
+                    "county contest_id choice method votes",
+                )
+            )
+    if adapter.county_feed_status:
+        copied.append(
+            (
+                "marts",
+                "ms_county_feed_status",
+                ("ms", "county_feed_status"),
+                "county county_fips collection_status source_url raw_sha256 last_attempt_at "
+                "last_success_at report_generated_at report_date "
+                "precincts_reporting precincts_total "
+                "absentee_scope affidavit_scope write_in_votes write_in_label issue",
+            )
+        )
+    return copied
 
 
 def cleanup_candidate(conn, schema):

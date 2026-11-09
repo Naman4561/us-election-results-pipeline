@@ -1,0 +1,1 @@
+{{ releases('election_results') }}

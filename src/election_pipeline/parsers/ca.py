@@ -14,9 +14,9 @@ exactly. Each document's "precincts reporting" line is stored with its statewide
 import re
 import zipfile
 
+from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import formatted_count, row, text, unique_json
-from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
 
 PARTIES = {"Dem": "DEM", "Rep": "REP", "Lib": "LIB", "Grn": "GRN"}
 REPORTING = re.compile(
@@ -97,5 +97,4 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats.update(
         source_update_text="; ".join(sorted(times)),
         contest_total_reconciliation="not_available",
-        vote_methods="not_published",
     )

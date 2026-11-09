@@ -20,6 +20,8 @@ import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
+from loading import copies
+
 from election_pipeline import bundles, publication
 from election_pipeline.collect import FetchFailure, FetchResponse
 from election_pipeline.collectors import clarity as clarity_collector
@@ -28,9 +30,7 @@ from election_pipeline.dashboard.server import STATIC, make_payload, national_pa
 from election_pipeline.database import (
     connect,
     connection_settings,
-    converted_rows,
     load_parsed,
-    verify,
 )
 from election_pipeline.parsers import clarity, ia, md, totals
 from election_pipeline.parsers import oregon as OREGON
@@ -169,15 +169,11 @@ class NineStateTests(unittest.TestCase):
                 for race, number in counties.items():
                     self.assertEqual(report["county_counts"][race], number)
                 directory = Path(report["output_dir"])
-                verify(self.source, self.settings, self.store, directory)
-                contract = state_adapter(code).contract("election_results")
-                converted = list(
-                    converted_rows(
-                        directory / contract.filename, contract.fields, self.source, 88, records
-                    )
-                )
+                converted = copies(self.source, self.settings, self.store, directory, 88)[
+                    ("landing", "results")
+                ]
+                self.assertEqual(len(converted), records)
                 self.assertEqual(converted[0][:2], (88, 2))
-                self.assertEqual(len(converted[0]), len(contract.fields) - 1)
                 replay = parse_source(
                     self.source, self.settings, self.root, sha256=report["identity"]["raw_sha256"]
                 )

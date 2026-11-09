@@ -9,8 +9,6 @@ from pathlib import Path
 from types import SimpleNamespace
 from urllib.parse import urlsplit
 
-from psycopg import sql
-
 from election_pipeline.database import connect
 from election_pipeline.parsing import reference_check
 from election_pipeline.states import state_adapter
@@ -63,10 +61,8 @@ def compare_publication(
         adapter = state_adapter(metadata["state"])
         if adapter.county_feed_status:
             coverage = conn.execute(
-                sql.SQL(
-                    "SELECT count(*) AS n FROM {} WHERE publication_id=%s "
-                    "AND collection_status='current'"
-                ).format(sql.Identifier(adapter.schema, "county_feed_status")),
+                "SELECT count(*) AS n FROM ms.county_feed_status WHERE publication_id=%s "
+                "AND collection_status='current'",
                 (publication_id,),
             ).fetchone()
             if coverage["n"] != 82:
@@ -75,15 +71,13 @@ def compare_publication(
                     "compare each accepted county against its official report instead"
                 )
         rows = conn.execute(
-            sql.SQL(
-                "SELECT contest_id, choice, choice_party, total_votes FROM {} "
-                "WHERE publication_id=%s"
-            ).format(sql.Identifier(adapter.schema, "contest_candidate_results")),
+            "SELECT contest_id, choice, choice_party, total_votes FROM serving.contest_results "
+            "WHERE publication_id=%s",
             (publication_id,),
         ).fetchall()
 
     if {row["contest_id"] for row in rows} != set(adapter.races):
-        raise ValueError("Publication does not contain the complete state watchlist")
+        raise ValueError("Publication does not contain every race of its state")
     if any(row["total_votes"] is None for row in rows):
         raise ValueError("Unknown vote counts cannot be verified against a numerical reference")
 

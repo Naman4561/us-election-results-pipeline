@@ -23,6 +23,8 @@ from types import SimpleNamespace
 from unittest.mock import patch
 from urllib.parse import parse_qs
 
+from loading import copies
+
 from election_pipeline import bundles, publication
 from election_pipeline.collect import FetchFailure, FetchResponse, fetch_file
 from election_pipeline.collectors import enr_export
@@ -30,9 +32,7 @@ from election_pipeline.dashboard.server import STATIC, make_payload, national_pa
 from election_pipeline.database import (
     connect,
     connection_settings,
-    converted_rows,
     load_parsed,
-    verify,
 )
 from election_pipeline.parsers.enr_platform import export_target
 from election_pipeline.parsers.workbook import Workbook
@@ -179,13 +179,10 @@ class NewStateTests(unittest.TestCase):
                 for race, number in counties.items():
                     self.assertEqual(report["county_counts"][race], number)
                 directory = Path(report["output_dir"])
-                verify(self.source, self.settings, self.store, directory)
-                contract = state_adapter(code).contract("election_results")
-                converted = list(
-                    converted_rows(
-                        directory / contract.filename, contract.fields, self.source, 88, records
-                    )
-                )
+                converted = copies(self.source, self.settings, self.store, directory, 88)[
+                    ("landing", "results")
+                ]
+                self.assertEqual(len(converted), records)
                 self.assertEqual(converted[0][:2], (88, 2))
                 replay = parse_source(
                     self.source, self.settings, self.root, sha256=report["identity"]["raw_sha256"]

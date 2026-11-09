@@ -18,9 +18,9 @@ from election_pipeline.parsers.enr_platform import (
     read_csv,
     statewide_update,
 )
+from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import row
-from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
 from election_pipeline.parsers.workbook import Workbook
 
 HEADER = (
@@ -124,5 +124,4 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats.update(
         source_update_text=updated,
         contest_total_reconciliation="passed",
-        vote_methods="not_published",
     )

@@ -11,7 +11,7 @@ from dataclasses import replace
 from pathlib import Path
 
 from election_pipeline.cli import main
-from election_pipeline.parsers.nc import COVERAGE, RESULT_HEADER
+from election_pipeline.parsers.nc import CONTESTS, RESULT_HEADER
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import CollectorSettings, Source
 from election_pipeline.storage import ArchiveStore, file_hash
@@ -50,7 +50,7 @@ class ParsingTests(unittest.TestCase):
                 "10",
                 real,
             ]
-            for contest in COVERAGE
+            for contest in CONTESTS
             for precinct, real in (("001", "Y"), ("ABSENTEE", "N"))
         ]
 
@@ -90,14 +90,15 @@ class ParsingTests(unittest.TestCase):
         self.assertEqual(result["outcome"], "parsed")
         self.assertEqual(result["internal_reconciliation"], "passed")
         self.assertEqual(result["reference_comparison"]["status"], "not_provided")
-        self.assertEqual(result["administrative_rows_retained"], 5)
+        self.assertEqual(result["administrative_rows_retained"], len(CONTESTS))
 
-        rows = self.read_output(result, "precinct_results.csv")
-        self.assertEqual(rows[0]["precinct"], "001")
+        rows = self.read_output(result, "results.csv")
+        self.assertEqual((rows[0]["unit_type"], rows[0]["precinct"]), ("precinct", "001"))
+        self.assertIs(json.loads(rows[1]["attributes"])["real_precinct"], False)
 
         for name in ("county_results.csv", "contest_results.csv"):
             totals = self.read_output(result, name)
-            self.assertEqual(len(totals), 5)
+            self.assertEqual(len(totals), len(CONTESTS))
             self.assertEqual({row["total_votes"] for row in totals}, {"20"})
             self.assertEqual({row["early_voting"] for row in totals}, {"6"})
 
@@ -124,7 +125,7 @@ class ParsingTests(unittest.TestCase):
         self.assertEqual(list(self.root.glob("parsed/*/*/report.json")), [])
 
     def test_nul_only_party_is_missing_and_raw_bytes_and_votes_are_preserved(self):
-        from election_pipeline.database import converted_rows
+        from election_pipeline.database import RESULT_TYPES, csv_rows, value
 
         rows = [row.copy() for row in self.rows]
         rows[0][6:8] = ["Write-In (Miscellaneous)", "\x00"]
@@ -138,21 +139,15 @@ class ParsingTests(unittest.TestCase):
         with zipfile.ZipFile(archive) as zipped:
             self.assertIn(b"\x00", zipped.read("results.txt"))
         directory = Path(result["output_dir"])
-        for name in ("precinct_results.csv", "county_results.csv", "contest_results.csv"):
+        for name in ("results.csv", "county_results.csv", "contest_results.csv"):
             self.assertNotIn(b"\x00", (directory / name).read_bytes())
-        parsed = self.read_output(result, "precinct_results.csv")
+        parsed = self.read_output(result, "results.csv")
         self.assertEqual(parsed[0]["choice"], "Write-In (Miscellaneous)")
         self.assertEqual(parsed[0]["choice_party"], "")
         self.assertEqual(parsed[0]["total_votes"], "10")
-        from election_pipeline.parsers.nc import RESULT_FIELDS
-
-        converted = list(
-            converted_rows(
-                directory / "precinct_results.csv", RESULT_FIELDS, self.source, 7, len(rows)
-            )
-        )
-        self.assertIsNone(converted[0][9])
-        self.assertEqual(converted[0][-1], 10)
+        first = next(csv_rows(directory / "results.csv", self.source, len(rows)))
+        self.assertIsNone(value(first["choice_party"], RESULT_TYPES["choice_party"]))
+        self.assertEqual(value(first["total_votes"], RESULT_TYPES["total_votes"]), 10)
 
     def test_embedded_party_nul_and_nuls_in_retained_identifiers_are_rejected(self):
         for column, value in (
@@ -171,7 +166,7 @@ class ParsingTests(unittest.TestCase):
 
     def test_nul_choice_in_an_untracked_local_race_is_not_retained(self):
         ignored = self.rows[0].copy()
-        ignored[5:8] = ["LOCAL OFFICE OUTSIDE COVERAGE", "\x00", "\x00"]
+        ignored[5:8] = ["LOCAL OFFICE OUTSIDE CONTESTS", "\x00", "\x00"]
         self.archive([*self.rows, ignored])
         result = self.parse()
         self.assertEqual(result["outcome"], "parsed", result)
@@ -220,7 +215,7 @@ class ParsingTests(unittest.TestCase):
                 writer = csv.writer(handle)
                 writer.writerow(("election_date", "contest_id", "choice", "total_votes"))
 
-                contests = list(COVERAGE.values())[:-1] if omit else COVERAGE.values()
+                contests = list(CONTESTS.values())[:-1] if omit else CONTESTS.values()
 
                 for contest in contests:
                     writer.writerow(("2026-11-03", contest, "Candidate A", value))
@@ -328,7 +323,7 @@ class ParsingTests(unittest.TestCase):
             writer = csv.writer(handle)
             writer.writerow(("election_date", "contest_id", "choice", "total_votes"))
 
-            for contest in COVERAGE.values():
+            for contest in CONTESTS.values():
                 writer.writerow(("2026-11-03", contest, "Candidate A", "19"))
 
         with redirect_stdout(io.StringIO()) as captured:

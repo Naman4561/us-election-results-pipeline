@@ -1,17 +1,7 @@
-"""State adapters and the stable result contract shared by jobs and the dashboard."""
+"""Every covered state: its races, vote methods and parser, shared by jobs and the dashboard."""
 
 from dataclasses import dataclass
 from importlib import import_module
-
-
-@dataclass(frozen=True)
-class LoadContract:
-    table: str
-    filename: str
-    fields: tuple[str, ...]
-    files: tuple[str, ...]
-    format: str
-    auxiliary: tuple = ()
 
 
 @dataclass(frozen=True)
@@ -32,17 +22,15 @@ class State:
     # The state hides small county counts for voter privacy (printed as "*"). Its county
     # rows may then add up to less than an official total, never more.
     county_privacy_masking: bool = False
-    # Parser module under election_pipeline.parsers; defaults to the schema name. Oregon's
-    # schema "or" is a Python keyword, so its parser module has a different name.
+    # Parser module under election_pipeline.parsers; defaults to the slug. Oregon's
+    # slug "or" is a Python keyword, so its parser module has a different name.
     parser_module: str = ""
-    # dbt models and migration are hand-written rather than generated from this entry by
-    # scripts/new_state.py with the shared total_only macros.
-    custom_models: bool = False
     # Shown under a race when the state's vote-method breakdown needs explaining.
     method_note: str = ""
 
     @property
-    def schema(self):
+    def slug(self):
+        """Lowercase code naming the state's parser module and map file."""
         return self.code.lower()
 
     @property
@@ -60,10 +48,12 @@ class State:
 
     @property
     def parser(self):
-        return import_module(f"election_pipeline.parsers.{self.parser_module or self.schema}")
+        return import_module(f"election_pipeline.parsers.{self.parser_module or self.slug}")
 
-    def contract(self, dataset):
-        return self.parser.load_contract(dataset)
+    @property
+    def datasets(self):
+        """Election results, plus any ancillary dataset the parser stores itself."""
+        return ("election_results", *getattr(self.parser, "DATASETS", {}))
 
 
 STATES = {
@@ -77,7 +67,6 @@ STATES = {
         vote_basis="covered_counties_named_candidates",
         collection_backend="county_files",
         county_feed_status=True,
-        custom_models=True,
     ),
     "AK": State(
         "AK",
@@ -97,7 +86,6 @@ STATES = {
         tuple(range(1, 15)),
         ("total_votes", "election_day", "early_voting", "absentee_by_mail", "provisional"),
         source_page="https://er.ncsbe.gov/",
-        custom_models=True,
     ),
     "KY": State(
         "KY",
@@ -110,7 +98,6 @@ STATES = {
             "Kentucky combines absentee votes. Separate early, mail and provisional counts "
             "are unavailable. Precinct reporting status is not a percentage of votes counted."
         ),
-        custom_models=True,
     ),
     "MN": State(
         "MN",
@@ -120,7 +107,6 @@ STATES = {
         ("total_votes",),
         governor=True,
         source_page="https://electionresults.sos.mn.gov/",
-        custom_models=True,
     ),
     "NE": State(
         "NE",
@@ -131,7 +117,6 @@ STATES = {
         governor=True,
         county_results=False,
         source_page="https://electionresults.nebraska.gov/",
-        custom_models=True,
     ),
     "TX": State(
         "TX",
@@ -142,7 +127,6 @@ STATES = {
         governor=True,
         county_results=False,
         source_page="https://goelect.txelections.civixapps.com/ivis-enr-ui/races",
-        custom_models=True,
     ),
     "GA": State(
         "GA",

@@ -429,7 +429,9 @@ class ConfigurationAndCheckTests(unittest.TestCase):
     def test_real_configuration_loads(self) -> None:
         root = Path(__file__).resolve().parents[1]
         settings, sources = load_config(root / "config" / "sources.toml")
-        self.assertEqual(sources["nc_2026_general_all"].expected_members, ("results_pct_20261103.txt",))
+        self.assertEqual(
+            sources["nc_2026_general_all"].expected_members, ("results_pct_20261103.txt",)
+        )
         self.assertEqual(settings.max_attempts, 3)
 
     def test_config_rejects_unknown_fields(self) -> None:

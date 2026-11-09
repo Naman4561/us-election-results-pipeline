@@ -6,14 +6,13 @@ import io
 import json
 import re
 import zipfile
-from collections import Counter
 from datetime import datetime, timedelta, timezone
 from html.parser import HTMLParser
 from importlib.resources import files
 from pathlib import Path
 
-from election_pipeline.parsers import totals
 from election_pipeline.parsers.html import Tree
+from election_pipeline.parsers.results import finish
 from election_pipeline.storage import member_path
 
 POLICY_SHA256 = "d6609e6d1b03503b6a461a4d217d31f79f20c9a1604b0b6d38fc180f056bc56b"
@@ -585,43 +584,32 @@ def read_bundle(archive_path, source):
     return contract, manifest, accepted
 
 
-def load_contract(dataset):
-    from election_pipeline.states import LoadContract
-
-    base = totals.load_contract(dataset)
-    return LoadContract(
-        base.table,
-        base.filename,
-        base.fields,
-        (*base.files, "county_feeds.csv"),
-        base.format,
-        (("county_feeds", "county_feeds.csv", FEED_FIELDS, "county_feed_rows"),),
+# Per-county collection health, loaded into ms.county_feeds beside the shared results.
+AUXILIARY = {
+    "county_feeds.csv": (
+        ("ms", "county_feeds"),
+        {
+            **{name: "optional" for name in FEED_FIELDS},
+            "county": "text",
+            "collection_status": "text",
+            "source_line": "int",
+            "precincts_reporting": "int",
+            "precincts_total": "int",
+            "write_in_votes": "int",
+            "last_attempt_at": "time",
+            "last_success_at": "time",
+            "report_generated_at": "time",
+        },
+        "county_feed_rows",
     )
-
-
-def database_row(row, source, release):
-    from election_pipeline.database import number, timestamp
-
-    if "collection_status" not in row:
-        return totals.database_row(row, source, release)
-    numeric = {"source_line", "precincts_reporting", "precincts_total", "write_in_votes"}
-    times = {"last_attempt_at", "last_success_at", "report_generated_at"}
-    return (release,) + tuple(
-        number(row[k])
-        if row[k] and k in numeric
-        else timestamp(row[k])
-        if row[k] and k in times
-        else row[k] or None
-        for k in FEED_FIELDS
-        if k not in {"state", "election_date"}
-    )
+}
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
     contract, manifest, accepted = read_bundle(archive_path, source)
     if not accepted:
         raise ValueError("No accepted county Senate counts are available")
-    rows, aggregate, health, issues = [], Counter(), [], {}
+    rows, health, issues = [], [], {}
     for county in contract["counties"]:
         record = manifest["counties"][county["key"]]
         parsed = accepted[county["key"]][2] if county["key"] in accepted else {}
@@ -663,7 +651,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         if county.get("url") and record["status"] != "current":
             issues[county["key"]] = record.get("issue") or record["status"]
         for name, value in parsed.get("counts", {}).items():
-            aggregate[name] += value
             rows.append(
                 {
                     "unit_type": "county",
@@ -678,22 +665,8 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                     "precincts_total": parsed["precincts_total"],
                 }
             )
-    for name, value in aggregate.items():
-        rows.append(
-            {
-                "unit_type": "state",
-                "county": "",
-                "contest_id": "MS-SEN",
-                "source_contest_id": "MS-SEN",
-                "source_candidate_id": name,
-                "choice": name,
-                "choice_party": contract["candidates"][name],
-                "total_votes": value,
-                "precincts_reporting": None,
-                "precincts_total": None,
-            }
-        )
-    totals.finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
+    # Statewide totals are the sum of accepted counties; the state publishes none.
+    finish(rows, source, settings, output, stats, reference=reference)
     stats["reference_comparison"]["scope"] = (
         "Three named Senate candidates across accepted county snapshots only; "
         "not a complete statewide comparison and not a write-in comparison."

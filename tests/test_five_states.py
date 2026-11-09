@@ -16,6 +16,8 @@ from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
+from loading import copies
+
 from election_pipeline import bundles, publication
 from election_pipeline.collect import FetchFailure, FetchResponse
 from election_pipeline.collectors.sc import latest_report
@@ -23,9 +25,7 @@ from election_pipeline.dashboard.server import STATIC, make_payload, national_pa
 from election_pipeline.database import (
     connect,
     connection_settings,
-    converted_rows,
     load_parsed,
-    verify,
 )
 from election_pipeline.parsers.html import Tree
 from election_pipeline.parsers.structured import xml
@@ -133,13 +133,10 @@ class FiveStateTests(unittest.TestCase):
                     report["county_reconciliation"], "not_available" if code == "GA" else "passed"
                 )
                 directory = Path(report["output_dir"])
-                verify(self.source, self.settings, self.store, directory)
-                contract = state_adapter(code).contract("election_results")
-                converted = list(
-                    converted_rows(
-                        directory / contract.filename, contract.fields, self.source, 88, records
-                    )
-                )
+                converted = copies(self.source, self.settings, self.store, directory, 88)[
+                    ("landing", "results")
+                ]
+                self.assertEqual(len(converted), records)
                 self.assertEqual(converted[0][:2], (88, 2))
                 replay = parse_source(
                     self.source, self.settings, self.root, sha256=report["identity"]["raw_sha256"]

@@ -3,9 +3,9 @@
 import re
 import zipfile
 
+from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, party, row, text, unique_json
-from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
 
 
 def english(values):

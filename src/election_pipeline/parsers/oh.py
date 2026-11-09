@@ -4,9 +4,9 @@ import re
 import zipfile
 
 from election_pipeline.parsers.common import integer
+from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import party, row, text, xml
-from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
 from election_pipeline.states import state_adapter
 
 

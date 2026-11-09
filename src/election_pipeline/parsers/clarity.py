@@ -14,9 +14,9 @@ import re
 import zipfile
 from datetime import datetime
 
+from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row, text, unique_json, xml
-from election_pipeline.parsers.totals import finish
 
 
 def document(raw, settings):
@@ -207,5 +207,4 @@ def parse_detail_xml(
         source_update_text=updated,
         source_timestamp=text(root.findtext("Timestamp"), "timestamp"),
         contest_total_reconciliation="passed",
-        vote_methods="not_published",
     )

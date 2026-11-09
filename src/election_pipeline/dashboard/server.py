@@ -377,6 +377,33 @@ def dashboard_settings(env_file):
     }
 
 
+def published_rows(conn, publication_id, table, place, methods):
+    """A publication's candidate rows, each with its vote-method counts as columns."""
+    rows = conn.execute(
+        sql.SQL("SELECT * FROM {} WHERE publication_id=%s").format(
+            sql.Identifier("serving", table)
+        ),
+        (publication_id,),
+    ).fetchall()
+    if not methods:
+        return rows
+    keys = (*place, "contest_id", "choice")
+    counts = {}
+    for record in conn.execute(
+        sql.SQL("SELECT * FROM {} WHERE publication_id=%s").format(
+            sql.Identifier("serving", table.replace("_results", "_method_results"))
+        ),
+        (publication_id,),
+    ):
+        counts.setdefault(tuple(record[k] for k in keys), {})[record["method"]] = record["votes"]
+    for row in rows:
+        found = counts.get(tuple(row[k] for k in keys), {})
+        if set(found) != set(methods):
+            raise ValueError("Published vote methods are incomplete")
+        row.update(found)
+    return rows
+
+
 class PublishedResults:
     # Publications change at most every few minutes; a poll within this many seconds
     # reuses the last payload instead of opening another database connection.
@@ -433,27 +460,16 @@ class PublishedResults:
                 )
             identity = str(metadata["publication_id"])
             if identity not in self.cache:
+                methods = self.state.methods[1:]
                 counties = (
-                    conn.execute(
-                        sql.SQL("SELECT * FROM {} WHERE publication_id=%s").format(
-                            sql.Identifier(self.state.schema, "county_candidate_results")
-                        ),
-                        (identity,),
-                    ).fetchall()
+                    published_rows(conn, identity, "county_results", ("county",), methods)
                     if self.state.county_results
                     else []
                 )
-                contests = conn.execute(
-                    sql.SQL("SELECT * FROM {} WHERE publication_id=%s").format(
-                        sql.Identifier(self.state.schema, "contest_candidate_results")
-                    ),
-                    (identity,),
-                ).fetchall()
+                contests = published_rows(conn, identity, "contest_results", (), methods)
                 feeds = (
                     conn.execute(
-                        sql.SQL("SELECT * FROM {} WHERE publication_id=%s").format(
-                            sql.Identifier(self.state.schema, "county_feed_status")
-                        ),
+                        "SELECT * FROM ms.county_feed_status WHERE publication_id=%s",
                         (identity,),
                     ).fetchall()
                     if self.state.county_feed_status
@@ -537,7 +553,7 @@ def create_app(
         state_providers = {}
         for code, state in STATES.items():
             geography = json.loads(
-                (STATIC / (state.schema + "-map.json")).read_text(encoding="utf-8")
+                (STATIC / (state.slug + "-map.json")).read_text(encoding="utf-8")
             )
             state_providers[code] = (
                 (lambda g=geography, c=code: demo_payload(g, c))

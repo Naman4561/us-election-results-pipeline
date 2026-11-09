@@ -11,7 +11,6 @@ Write-in votes are reported as one "Write-in" line and kept as a candidate, as p
 import re
 
 from election_pipeline.parsers import enhanced_voting as ev
-from election_pipeline.parsers.totals import database_row, load_contract  # noqa: F401
 
 
 def race(name):

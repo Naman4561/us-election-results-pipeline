@@ -1,0 +1,22 @@
+version: 2
+models:
+- name: county_results
+  data_tests:
+  - unique_combination:
+      arguments:
+        columns: [release_id, county, contest_id, choice]
+- name: contest_results
+  data_tests:
+  - unique_combination:
+      arguments:
+        columns: [release_id, contest_id, choice]
+- name: county_method_results
+  data_tests:
+  - unique_combination:
+      arguments:
+        columns: [release_id, county, contest_id, choice, method]
+- name: contest_method_results
+  data_tests:
+  - unique_combination:
+      arguments:
+        columns: [release_id, contest_id, choice, method]

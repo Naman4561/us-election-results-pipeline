@@ -19,9 +19,9 @@ import io
 import re
 import zipfile
 
+from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import row, text
-from election_pipeline.parsers.totals import finish, with_methods
 
 HEADER = [
     "#Contest ID",
@@ -52,7 +52,6 @@ TITLES = {
     "U.S. Representative, Dist II": "HI-02",
 }
 METHODS = ("mail", "in_person")
-FIELDS, load_contract, database_row = with_methods(METHODS)
 PARTIES = {"D": "DEM", "R": "REP", "G": "GRN", "L": "LIB"}
 
 
@@ -130,5 +129,5 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         verify_scope(
             "HI", race, [r["source_candidate_id"] for r in rows if r["contest_id"] == race]
         )
-    finish(rows, source, settings, output, stats, reference=reference, methods=METHODS)
-    stats.update(contest_total_reconciliation="not_available", vote_methods="stored")
+    finish(rows, source, settings, output, stats, reference=reference)
+    stats.update(contest_total_reconciliation="not_available")

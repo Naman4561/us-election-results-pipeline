@@ -1,25 +1,13 @@
 """Initialize production roles and checksum-tracked migrations."""
 
-import hashlib
 import os
 import re
 import sys
-from pathlib import Path
 
 from psycopg import sql
 
 from election_pipeline.database import connect, connection_settings
-
-
-def migration_body(text):
-    match = re.fullmatch(
-        r"(?:\s|--[^\n]*(?:\n|$))*BEGIN;\s*(.*?)\s*COMMIT;\s*",
-        text,
-        flags=re.IGNORECASE | re.DOTALL,
-    )
-    if not match:
-        raise ValueError("Migration must have outer BEGIN/COMMIT statements")
-    return match.group(1)
+from election_pipeline.migrations import migrate
 
 
 def ensure_login(conn, name, password):
@@ -39,50 +27,6 @@ def ensure_login(conn, name, password):
             "NOREPLICATION NOBYPASSRLS PASSWORD {}"
         ).format(verb, sql.Identifier(name), sql.Literal(password))
     )
-
-
-def migrate(conn, root, writer):
-    paths = sorted((root / "migrations").glob("*.sql"))
-    ledger = conn.execute("SELECT to_regclass('ops.schema_migrations') AS t").fetchone()["t"]
-
-    if not ledger and conn.execute("SELECT to_regclass('ops.sources') AS t").fetchone()["t"]:
-        raise ValueError(
-            "Existing schemas have no production migration ledger; review before adoption"
-        )
-    if not paths:
-        raise ValueError("No migration files found")
-
-    for path in paths:
-        fingerprint = hashlib.sha256(path.read_bytes()).hexdigest()
-        applied = (
-            conn.execute(
-                "SELECT sha256 FROM ops.schema_migrations WHERE name=%s",
-                (path.name,),
-            ).fetchone()
-            if ledger
-            else None
-        )
-        if applied:
-            if applied["sha256"] != fingerprint:
-                raise ValueError(f"Applied migration changed: {path.name}; add a new migration")
-            continue
-
-        with conn.transaction():
-            conn.execute(sql.SQL("SET LOCAL ROLE {}").format(sql.Identifier(writer)))
-            conn.execute(migration_body(path.read_text(encoding="utf-8")))
-            if not ledger:
-                conn.execute("""
-                    CREATE TABLE ops.schema_migrations (
-                        name text PRIMARY KEY,
-                        sha256 text NOT NULL,
-                        applied_at timestamptz NOT NULL DEFAULT clock_timestamp()
-                    )
-                """)
-            conn.execute(
-                "INSERT INTO ops.schema_migrations(name, sha256) VALUES (%s, %s)",
-                (path.name, fingerprint),
-            )
-        ledger = True
 
 
 def main():
@@ -124,7 +68,7 @@ def main():
             )
             conn.execute("REVOKE CREATE ON SCHEMA public FROM PUBLIC")
 
-            migrate(conn, Path(__file__).resolve().parents[1], writer)
+            migrate(conn, writer=writer)
 
             conn.execute(
                 sql.SQL(

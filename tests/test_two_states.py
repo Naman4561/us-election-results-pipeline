@@ -16,10 +16,11 @@ import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
+from loading import copies
+
 from election_pipeline import bundles
 from election_pipeline.collect import FetchResponse
 from election_pipeline.dashboard.server import STATIC, make_payload
-from election_pipeline.database import converted_rows, verify
 from election_pipeline.parsers import clarity, wv
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
@@ -113,13 +114,10 @@ class TwoStateTests(unittest.TestCase):
                 self.assertEqual(report["county_reconciliation"], "passed")
                 self.assertEqual(report["county_counts"], counties)
                 directory = Path(report["output_dir"])
-                verify(self.source, self.settings, self.store, directory)
-                contract = state_adapter(code).contract("election_results")
-                converted = list(
-                    converted_rows(
-                        directory / contract.filename, contract.fields, self.source, 88, records
-                    )
-                )
+                converted = copies(self.source, self.settings, self.store, directory, 88)[
+                    ("landing", "results")
+                ]
+                self.assertEqual(len(converted), records)
                 self.assertEqual(converted[0][:2], (88, 2))
                 replay = parse_source(
                     self.source, self.settings, self.root, sha256=report["identity"]["raw_sha256"]

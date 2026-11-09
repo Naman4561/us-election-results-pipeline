@@ -23,9 +23,9 @@ import re
 import zipfile
 
 from election_pipeline.parsers import clarity
+from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import row, text
-from election_pipeline.parsers.totals import finish, with_methods
 
 VERSION_FILES = {
     "summary.json": "json/en/summary.json",
@@ -33,7 +33,6 @@ VERSION_FILES = {
     "detail.zip": "reports/detailtxt.zip",
 }
 METHODS = ("election_day", "absentee_combined")
-FIELDS, load_contract, database_row = with_methods(METHODS)
 TITLES = {
     "United States Senator": "IA-SEN",
     "Governor and Lt. Governor": "IA-GOV",
@@ -170,11 +169,8 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                     }
                 )
         verify_scope("IA", identity, candidates, sorted(seen))
-    finish(
-        rows, source, settings, output, stats, reference=reference, reconcile=True, methods=METHODS
-    )
+    finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=updated,
         contest_total_reconciliation="passed",
-        vote_methods="stored",
     )

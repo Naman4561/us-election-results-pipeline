@@ -12,8 +12,8 @@ from urllib.parse import urljoin
 
 from election_pipeline.parsers.common import integer
 from election_pipeline.parsers.html import Tree
+from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.structured import row
-from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
 from election_pipeline.states import state_adapter
 
 CSV_URL = "https://www.elections.alaska.gov/enr/26GENR/results/GA_ENR_Precinct_State_of_Alaska.csv"

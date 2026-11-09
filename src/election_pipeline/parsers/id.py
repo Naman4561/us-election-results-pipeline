@@ -7,7 +7,6 @@ feed. County names drop their " County" suffix to match the Census county map.
 import re
 
 from election_pipeline.parsers import enhanced_voting as ev
-from election_pipeline.parsers.totals import database_row, load_contract  # noqa: F401
 
 
 def race(name):

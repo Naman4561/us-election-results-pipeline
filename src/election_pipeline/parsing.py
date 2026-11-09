@@ -17,57 +17,13 @@ from election_pipeline.pipeline import collector_code_hash
 from election_pipeline.settings import CollectorSettings, Source
 from election_pipeline.storage import ArchiveStore, atomic_json, file_hash, utc_now
 
-RESULT_COUNTY = (
-    "election_date",
-    "state",
-    "county",
-    "contest_id",
-    "choice",
-    "choice_party",
-)
-
-RESULT_CONTEST = (
-    "election_date",
-    "state",
-    "contest_id",
-    "choice",
-    "choice_party",
-)
-
-DEMO_STATE = (
-    "election_date",
-    "state",
-    "request_type",
-    "party_registration",
-    "sex",
-    "race",
-    "ethnicity",
-)
-
-
-def accumulate(groups, row, dimensions, measures):
-    key = tuple(row[name] for name in dimensions)
-    totals = groups.setdefault(key, [0] * len(measures))
-
-    for index, measure in enumerate(measures):
-        totals[index] += row[measure]
-
-
-def write_groups(path, groups, dimensions, measures):
-    with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.writer(handle)
-        writer.writerow((*dimensions, *measures))
-
-        for key, totals in sorted(groups.items()):
-            writer.writerow((*key, *totals))
-
 
 def reference_check(path, source, totals, limit):
     """Compare complete contest/choice totals; origin and timing need human verification."""
     expected = {}
 
     for key, values in totals.items():
-        pair = (key[2], key[3])  # RESULT_CONTEST: contest_id, choice
+        pair = (key[2], key[3])  # contest_results.csv key: ..., contest_id, choice
         expected[pair] = expected.get(pair, 0) + values[-1]
 
     actual = {}
@@ -181,7 +137,7 @@ def parse_source(
             dataset=source.dataset,
             source_url=source.url,
             raw_archive=store.relative(archive),
-            parser_contract_version=1,
+            parser_contract_version=2,
         )
 
         with tempfile.TemporaryDirectory(prefix=".parse-", dir=parent) as temporary:

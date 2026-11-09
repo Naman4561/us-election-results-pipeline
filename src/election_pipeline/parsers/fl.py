@@ -19,9 +19,9 @@ import zipfile
 from collections import defaultdict
 
 from election_pipeline.parsers.common import integer
+from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import row
-from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
 
 HEADER = (
     "ElectionDate\tPartyCode\tPartyName\tRaceCode\tRaceName\tCountyCode\tCountyName\tJuris1num\t"
@@ -146,5 +146,4 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     finish(rows, source, settings, output, stats, reference=reference)
     stats.update(
         statewide_totals="sum_of_official_county_rows",
-        vote_methods="not_published",
     )
