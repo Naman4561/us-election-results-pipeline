@@ -1,50 +1,42 @@
 # Adding a state
 
-A state that stores statewide (and optionally county) candidate totals uses the shared
-`total_only` dbt macros. Its dbt models, data tests, unit test, dbt variables and schema
-migration are generated from its registry entry; only the parts that depend on the
-official source are written by hand.
+Every state shares the same tables, dbt models and data tests, parameterized by its
+registry entry, so adding one needs no migration or SQL. What is written by hand is what
+depends on the official source: where it is, how to read it, and who is on the ballot.
 
 ## Steps
 
-1. **Register it** in `src/election_pipeline/states.py`: name, source ID, House seats,
-   vote methods, and the flags that apply (`senate`, `governor`, `county_results`,
-   `county_privacy_masking`, `collection_backend`, `method_note`). A schema that is a
-   Python keyword (`in`, `or`) needs `parser_module`.
-2. **Describe the source** in `config/sources.toml` under `sources.<source_id>`.
-3. **Write the parser** `src/election_pipeline/parsers/<code>.py`, reusing a platform
-   parser (`clarity`, `enhanced_voting`, `enr_platform`, `totals`) where the state uses one.
-4. **Record the roster** in `src/election_pipeline/resources/rosters_2026/<CODE>.json`;
-   `scripts/review_rosters.py` prints what a captured snapshot implies.
-5. **Generate the rest:**
-
-   ```powershell
-   python scripts/new_state.py XX
-   ```
-
-   This writes `dbt/models/staging/xx/`, `dbt/models/marts/xx/`, `dbt/models/xx.yml`,
-   `dbt/models/xx_unit_tests.yml`, `dbt/tests/xx_*.sql`, the next numbered
-   `migrations/NNN_xx.sql`, and the state's entries in `dbt/dbt_project.yml` and
-   `dbt/models/sources.yml`. Rerun it after changing the registry entry; it never
-   rewrites a migration that already exists.
-6. **Draw the map:** `python scripts/fetch_boundaries.py --states XX`.
-7. **Add fixtures and tests** for what is specific to the state's source: captured
-   official files with provenance, parser rejections, county reconciliation.
+1. **Register it** in `src/election_pipeline/states.py`: name, source ID, House seats
+   (`(0,)` for at-large), vote methods, and the flags that apply (`senate`, `governor`,
+   `county_results`, `county_privacy_masking`, `collection_backend`, `method_note`).
+   A code that is a Python keyword (`in`, `or`) needs `parser_module`.
+2. **Describe the source** in `config/sources.toml` under `sources.<source_id>`: URL,
+   format, expected bundle members, and `min_interval_seconds = 840` (every 15 minutes).
+3. **Write the parser** `src/election_pipeline/parsers/<code>.py`. Its `parse` reads the
+   official format, reusing a platform reader where the state uses one (`clarity`,
+   `enhanced_voting`, `enr_platform`, `workbook`, `structured`, `html`), and hands the rows
+   to `parsers.results.finish`, which checks races, candidates and methods and derives
+   the totals the source does not print. Pass `reconcile=True` when the source prints
+   statewide and county rows that must agree exactly.
+4. **Record the roster** in `src/election_pipeline/resources/rosters_2026/<CODE>.json`:
+   the candidates of every race. `scripts/review_rosters.py` prints what a captured
+   snapshot implies; a person reviews it before it is committed.
+5. **Draw the map:** `python scripts/fetch_boundaries.py --states XX` writes
+   `dashboard/static/xx-map.json`.
+6. **Add fixtures and tests** for what is specific to the source: captured official
+   files with provenance, its rejections (a missing county, a changed candidate, methods
+   that do not add up) and its county reconciliation.
+7. **Deploy** it private first, then make it public:
+   [adding a state in production](deployment.md#adding-a-state-in-production).
 
 ## What checks it
 
-`tests/test_registry.py` runs over every registered state, so a new state is covered
-without copying cohort tests. It fails when:
+`tests/test_registry.py` runs over every registered state, so a new one is covered
+without copying tests. It fails when a state lacks a source, parser, map or matching
+roster, when a configured source belongs to no state, or when the races do not match the
+offices the entry declares.
 
-- a generated file differs from what the registry implies (`python scripts/new_state.py --check`
-  lists them);
-- a state lacks a source contract, parser, map or matching roster;
-- a migration is not additive and scoped to its own schema, or its county table and
-  method columns disagree with the registry.
-
-## Exceptions
-
-- NC, KY, MN, NE, TX and MS keep hand-written dbt models (`custom_models=True`).
-- The CA and HI migrations were applied before the generator existed and are pinned by
-  hash. Both allow county rows in `results` although neither stores any; a new
-  statewide-only state gets the stricter `unit_type IN ('state')`.
+At run time the parser stops with `validation_failed` on an unexpected race, candidate
+or county, or on methods that do not add up, and dbt's data tests stop publication on an
+incomplete release, inconsistent candidate counts or county rows that do not reconcile
+(`exact`, `masked` for privacy-masked states, or `none` without county results).

@@ -23,15 +23,11 @@ The machine-readable inventory is [ms-2026-county-sources.json](source-research/
 
 The [captured reports archive](../tests/fixtures/mississippi/reports.zip) preserves the ten original county captures plus Rankin’s alternate PDF and a provenance manifest. SHA-256 values are recorded in the JSON inventory. These fixed captures support offline parser development; they are not a live statewide dataset.
 
-## Collection design
+## Collection
 
-Start with the Senate; the same original reports may later supply House results. Use one adapter per report format, with county-specific identity and expected-choice contracts. Five reports have Electionware text, two are scanned Electionware PDFs, one is a scanned VotingWorks report, one has Hart-style cumulative HTML, and one is county news HTML. These are format groups, not an assertion that one untested regex handles all reports.
-
-Fetch each county independently with bounded concurrency and per-host pacing. Archive original bytes and record request time, report time, URL, ETag/Last-Modified when available, and SHA-256. Only reparse changed content. A failed download must retain the last good county snapshot with its original timestamp and an explicit stale status. Validate content even on HTTP 200: county, general election date, Senate title, candidate set, duplicate keys, and nonnegative integer counts.
-
-For text PDFs, reconcile parsed candidate totals with the printed total where supplied. For scanned PDFs, OCR is an extraction aid: require visual review before admission and on changed layouts or unresolved arithmetic. Preserve unadjudicated write-ins as such. Do not fill absent write-in counts with zero. Do not add a county summary to its precinct reports or sum duplicated precinct files.
-
-The eventual state assembly must select one accepted snapshot per county, preserve every county's source timestamp, and publish coverage metadata. With partial collection, label totals as coming from the covered counties, show the missing counties as unknown, and never present 10 counties as a complete statewide result. Reporting all precincts does not establish that all absentee or affidavit ballots have been counted. Do not infer certification or call a winner.
+How the configured counties are collected, validated and imported by review is in
+[Mississippi collection](mississippi-collection.md). This page is the research inventory
+behind it.
 
 ## Remaining source gaps
 
@@ -40,10 +36,6 @@ High-priority follow-up: Harrison, Jackson, Lee, Forrest, Lowndes, Lafayette, Jo
 Pearl River has a current county alert linking an ArcGIS application, but the referenced configuration names older primary/local races and its election results service did not supply a verified Senate dataset. Tippah has an indexed official results page, but returned 502/503 here. Those are leads, not accepted feeds. Bolivar/Jackson/Leake/Lafayette point to older elections or old social-media announcements. Several directory referral URLs are outdated, temporary placeholders, or nongovernment directory listings.
 
 The SOS county directory supplies a circuit-clerk contact route for unresolved counties. Request an official November 3, 2026 cumulative Senate report or CSV, generation time, included and outstanding ballot categories, and the URL or delivery method for later revisions. No requests have been sent. Do not substitute news totals for missing official county captures.
-
-## Admission and production gates
-
-Source discovery is complete for this first pass, but implementation and admission are pending. Build fixture-backed parsers, verify production-host access, check each county against its original report, test corrections and stale-source recovery, and test explicit partial coverage before public activation. Existing production workers and publications remain outside this research change.
 
 ## All-county register
 
@@ -140,6 +132,6 @@ Source discovery is complete for this first pass, but implementation and admissi
 - https://www.mssupervisors.org/mississippi-counties
 - https://www.sos.ms.gov/news/official-statement-election-update
 
-## Expansion checkpoint
+## Later additions
 
 Lafayette, Lamar and Sunflower were added to the configured reports. See [collection and intake](mississippi-collection.md) for exact source limitations and the reviewed-file process for the remaining 69 counties. Historical probe outcomes above retain their original timestamps; absence of a report in that pass does not prove that none exists. The machine-readable `intake` field is the current implementation status for each county.

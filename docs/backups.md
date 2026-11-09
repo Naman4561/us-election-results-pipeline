@@ -3,7 +3,7 @@
 `election-backup.timer` runs a full backup every six hours (00:02, 06:02, 12:02 and
 18:02 UTC). Each bundle is self-contained: every raw snapshot ever collected, fetch
 metadata, collector state, a PostgreSQL dump of the whole history, the deployment
-catalog and each pinned release's code. The newest bundle therefore holds every
+catalog and the code of the current and previous releases. The newest bundle therefore holds every
 snapshot an older one does; older bundles only add earlier states of the system.
 
 ## Running alongside collection

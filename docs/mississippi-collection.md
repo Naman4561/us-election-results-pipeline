@@ -1,11 +1,11 @@
-# Mississippi county collection and expansion
+# Mississippi county collection
 
-This release can ingest all 82 Mississippi counties for the 2026 U.S. Senate race.
+The pipeline can ingest all 82 Mississippi counties for the 2026 U.S. Senate race.
 **13 official county sources are configured; 69 still need an official report.**
 A reviewed-file intake path is not a claim of live coverage. Missing counties have
 no vote rows, and the dashboard retains the partial-coverage warning.
 
-## Current admission
+## County sources
 
 | Route | Counties | Update rule |
 | --- | --- | --- |
@@ -94,14 +94,12 @@ The template intentionally cannot be imported without review.
 ```
 
 These example paths are local. For production, copy the original and completed
-review into the existing production data directory's `county-intake` folder. Give
-the two files read permission for UID 10001. The following host-side command uses
-the registered immutable image and existing data mount, with networking disabled
-and no database credentials passed to the import container:
+review into the production data directory's `county-intake` folder, readable by UID
+10001. The import runs in the current release image with the data mount, networking
+disabled and no database credentials:
 
 ```bash
-controlRoot="$(sudo sed -n 's/^CONTROL_ROOT=//p' /etc/election-pipeline/deployment.env)"
-sudo "$controlRoot/.venv/bin/python" "$controlRoot/scripts/deploy.py" import-county --source ms_2026_general_all --county JACKSON --file /srv/election-pipeline/data/county-intake/jackson.pdf --review-json /srv/election-pipeline/data/county-intake/jackson-review.json
+sudo "$R/.venv/bin/python" "$R/scripts/deploy.py" import-county --county JACKSON --file /srv/election-pipeline/data/county-intake/jackson.pdf --review-json /srv/election-pipeline/data/county-intake/jackson-review.json
 ```
 
 The two paths must resolve inside the configured `DATA_DIR`. Adjust the example
@@ -117,15 +115,16 @@ alone never updates the public database.
 
 Manual counties remain labelled **manual snapshot**, with their original
 observation time, until another reviewed import. They are not confirmed by polling
-other counties. Monitoring alerts after six hours. Automatic stale/unavailable
-sources still alert separately; uncollected counties are not operational failures.
+other counties. After six hours the monitor sends a reminder (not an alert).
+Automatic stale or unavailable sources alert separately; uncollected counties are not operational failures.
 
 ## Database and presentation
 
-The existing additive `010_ms.sql` migration is unchanged. Six dbt models validate
-county coverage, candidate identity, counts, reconciliation, percentages and
-provenance. Vote rows and county status freeze under the same publication ID.
-The dashboard role can read published relations only.
+Mississippi's vote rows go into the shared results tables like every state's. Its
+county collection status has tables of its own (`ms` schema): dbt's `tag:ms` models and
+test check the status register against the published bundle, and vote rows and county
+status freeze under the same publication ID. The dashboard role can read the published
+status only.
 
 Aggregates and percentages cover the three named candidates in accepted counties,
 not all statewide ballots. Write-ins remain separate, including Warren's original
@@ -133,28 +132,13 @@ not all statewide ballots. Write-ins remain separate, including Warren's origina
 is excluded from party-lead totals while coverage is partial or manual. Clicking
 counties uses the already loaded API payload.
 
-## Tests and rollout
+## Tests
 
-Run the native PostgreSQL acceptance test before admission. It verifies the real
-13-source bundle, reader permissions, preservation after failed validation, and a
-separate 82-county synthetic capacity bundle. Synthetic counts never go to production.
+The PostgreSQL acceptance test verifies the real 13-source bundle, reader permissions,
+preservation after failed validation, and a separate 82-county synthetic capacity
+bundle. Synthetic counts never go to production.
 
 ```powershell
-.\.venv\Scripts\python -m pip install -e '.[postgres,transform,dashboard,deployment]' -r requirements-dev.txt
 .\.venv\Scripts\python -m unittest discover -s tests -v
 .\.venv\Scripts\python scripts/check_pipeline.py --pattern test_mississippi.py
 ```
-
-Commit/push, then stage the pushed branch with `scripts/stage_coverage_release.sh`.
-Run the new `scripts/rollout_mississippi.sh` from that staged CONTROL_ROOT with sudo.
-It registers `ms_2026_general_all`, explicitly replacing `ms_2026_general` if present,
-applies the idempotent migration, prepares and privately promotes the snapshot,
-then uses the existing backup, isolated restore, candidate API check and atomic
-route/catalog activation. It leaves other states on their existing images and
-stops on a failed gate. Do not add this source to the baseline source list.
-
-After activation, inspect `/api/states/MS`, `/api/national`, the next scheduled
-expansion run and disk monitoring. Expect an 82-entry county registry, 13 accepted
-counties if all configured reports remain reachable and unchanged, 69 unknown
-counties, and `county_collection.complete=false`. No activation has been performed
-by preparing this patch.
