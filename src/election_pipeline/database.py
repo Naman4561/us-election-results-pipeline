@@ -414,12 +414,18 @@ def converted(source, directory, release, plan, methods):
             yield (
                 ("landing", "result_methods"),
                 ["release_id", "source_line", "method", "votes"],
-                (
-                    (release, number(row["source_line"]), method, number(row[method]))
-                    for row in csv_rows(path, source, expected)
-                    for method in methods
-                ),
+                method_rows(csv_rows(path, source, expected), release, methods),
             )
+
+
+def method_rows(rows, release, methods):
+    """landing.result_methods rows; a row's methods must add up exactly to its total."""
+    for row in rows:
+        votes = {method: number(row[method]) for method in methods}
+        if sum(votes.values()) != number(row["total_votes"]):
+            raise ValueError("Vote methods do not add up to the row's total")
+        for method, count in votes.items():
+            yield release, number(row["source_line"]), method, count
 
 
 def load_release(conn, source, directory, release, plan, methods):

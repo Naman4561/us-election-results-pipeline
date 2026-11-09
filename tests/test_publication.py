@@ -14,9 +14,11 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import test_parsing as fixtures
+from loading import migrated
 
 from election_pipeline import publication
-from election_pipeline.database import connect, connection_settings, load_parsed
+from election_pipeline.database import connect, load_parsed
+from election_pipeline.parsers.nc import CONTESTS
 from election_pipeline.publication import checked_results, publish, restore
 
 
@@ -311,23 +313,8 @@ class PublicationArtifactTests(unittest.TestCase):
 class PublicationDatabaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        name = os.environ["ELECTION_TEST_DATABASE"]
-        if not name.endswith("_test"):
-            raise ValueError("Publication tests require a disposable *_test database")
-
         cls.root = Path(__file__).resolve().parents[1]
-        cls.db = {**connection_settings(), "dbname": name}
-
-        with connect(cls.db) as conn:
-            for relation, filename in [
-                ("ops.sources", "001_initial.sql"),
-                ("serving.publications", "002_publication.sql"),
-                ("ky.results", "003_state_schemas.sql"),
-                ("tx.results", "004_mn_ne_tx.sql"),
-            ]:
-                exists = conn.execute("SELECT to_regclass(%s) AS t", (relation,)).fetchone()["t"]
-                if exists is None:
-                    conn.execute((cls.root / "migrations" / filename).read_text())
+        cls.db = migrated()
 
     def setUp(self):
         self.f = fixtures.ParsingTests()
@@ -415,13 +402,12 @@ class PublicationDatabaseTests(unittest.TestCase):
         second_release = self.load(rows)
 
         with connect(self.db) as conn:
-            conn.execute(
-                """
-                DELETE FROM landing.nc_results
-                WHERE release_id=%s AND source_line=2
-                """,
-                (second_release,),
-            )
+            # Take one precinct row (and its vote methods) out of the loaded release.
+            for table in ("result_methods", "results"):
+                conn.execute(
+                    f"DELETE FROM landing.{table} WHERE release_id=%s AND source_line=2",
+                    (second_release,),
+                )
 
         with self.assertRaisesRegex(ValueError, "dbt build failed"):
             publish(self.root, self.db, second_release, "test")
@@ -435,15 +421,16 @@ class PublicationDatabaseTests(unittest.TestCase):
         # Repair the deliberately damaged fixture in the disposable database.
         with connect(self.db) as conn:
             conn.execute(
-                """
-                INSERT INTO landing.nc_results
-                SELECT %s, source_line, county, precinct, contest_id,
-                       contest_name, source_contest_group_id, contest_type,
-                       choice, choice_party, vote_for, real_precinct,
-                       1, early_voting, absentee_by_mail, provisional, 9
-                FROM landing.nc_results
-                WHERE release_id=%s AND source_line=2
-                """,
+                "INSERT INTO landing.results SELECT %s, source_line, state, unit_type, county,"
+                " precinct, contest_id, source_contest_id, source_candidate_id, choice,"
+                " choice_party, 9, precincts_reporting, precincts_total, attributes"
+                " FROM landing.results WHERE release_id=%s AND source_line=2",
+                (second_release, first_release),
+            )
+            conn.execute(
+                "INSERT INTO landing.result_methods SELECT %s, source_line, method,"
+                " CASE method WHEN 'election_day' THEN 1 ELSE votes END"
+                " FROM landing.result_methods WHERE release_id=%s AND source_line=2",
                 (second_release, first_release),
             )
 
@@ -452,12 +439,13 @@ class PublicationDatabaseTests(unittest.TestCase):
 
         totals = self.query("""
             SELECT publication_id, sum(total_votes) AS n
-            FROM serving.nc_contest_candidate_results
+            FROM serving.contest_results
             GROUP BY publication_id
         """)
         self.assertEqual(
             {str(r["publication_id"]): r["n"] for r in totals},
-            {first_id: 100, second["publication_id"]: 99},
+            # Two precincts of 10 votes in each NC race; the correction removes one vote.
+            {first_id: 20 * len(CONTESTS), second["publication_id"]: 20 * len(CONTESTS) - 1},
         )
 
         original = publication.promote
@@ -479,10 +467,11 @@ class PublicationDatabaseTests(unittest.TestCase):
             self.query(
                 """
                 SELECT count(*) AS n
-                FROM serving.nc_contest_candidate_results
+                FROM serving.contest_results
                 """
             )[0]["n"],
-            10,
+            # One candidate per race in each of the two publications.
+            2 * len(CONTESTS),
         )
 
         restore(self.db, uuid.UUID(first_id))

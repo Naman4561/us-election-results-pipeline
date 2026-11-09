@@ -10,24 +10,20 @@ import tempfile
 import unittest
 import zipfile
 from dataclasses import replace
-from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
+
+from loading import copies, migrated
 
 from election_pipeline import publication
 from election_pipeline.dashboard.server import STATIC, make_payload, party_group
 from election_pipeline.database import (
     connect,
-    connection_settings,
-    converted_rows,
     load_parsed,
-    verify,
 )
-from election_pipeline.deployment import catalog, coverage, migrations
 from election_pipeline.parsers import ak
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
-from election_pipeline.states import state_adapter
 from election_pipeline.storage import ArchiveStore
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -86,16 +82,9 @@ class AlaskaTests(unittest.TestCase):
         self.assertEqual(report["ballot_totals"]["AK-SEN"], 215335)
         self.assertEqual(report["vote_method_totals"]["AK-SEN"]["total"], 213180)
         self.assertEqual(report["vote_method_reconciliation"], "passed")
-        verify(self.source, self.settings, self.store, Path(report["output_dir"]))
-        converted = list(
-            converted_rows(
-                Path(report["output_dir"]) / "results.csv",
-                ak.load_contract("election_results").fields,
-                self.source,
-                77,
-                12,
-            )
-        )
+        converted = copies(self.source, self.settings, self.store, report["output_dir"], 77)[
+            ("landing", "results")
+        ]
         self.assertEqual(len(converted), 12)
         self.assertIn(None, next(r for r in converted if "Sullivan, Daniel J. Jr." in r))
         replay = parse_source(
@@ -200,101 +189,6 @@ class AlaskaTests(unittest.TestCase):
             self.assertRaisesRegex(ValueError, "integrity"),
         ):
             ak.scope()
-        body = migrations.validate_migration((ROOT / "migrations/009_ak.sql").read_text(), "ak")
-        self.assertIn("CREATE TABLE ak.results", body)
-
-    def test_activation_rejects_unregistered_unprepared_and_baseline_sources_before_backup(self):
-        path = self.root / "catalog.json"
-        for selected, entries in (
-            ([], {}),
-            (["ak_2026_general"], {}),
-            (["ak_2026_general"], {"ak_2026_general": {"worker": "baseline"}}),
-            (
-                ["ak_2026_general"],
-                {"ak_2026_general": {"worker": "expansion", "enabled": False, "public": False}},
-            ),
-        ):
-            with (
-                patch.object(catalog, "read", return_value={"sources": entries}),
-                patch("election_pipeline.deployment.containers.command") as command,
-            ):
-                with self.assertRaises(ValueError):
-                    coverage.activate_sources(path, selected, {}, {})
-                command.assert_not_called()
-
-    def test_new_state_activation_keeps_existing_coverage_and_uses_restore_gate(self):
-        from election_pipeline.deployment import containers, control
-
-        _, sources = load_config(ROOT / "config/sources.toml")
-        entries = {}
-        for name, worker in (("nc_2026_general_all", "baseline"), ("ak_2026_general", "expansion")):
-            entry = catalog.entry(
-                sources[name],
-                self.settings,
-                image_id="sha256:" + "a" * 64,
-                revision="b" * 40,
-                release_path=self.root,
-                worker=worker,
-                status="unofficial",
-            )
-            entry["races"] = list(state_adapter(sources[name].state).races)
-            entries[name] = entry
-        now = datetime.now(timezone.utc)
-        entries["ak_2026_general"].update(
-            publication_id="new-publication", published_at=(now - timedelta(minutes=1)).isoformat()
-        )
-        value = {
-            "version": 1,
-            "generation": 0,
-            "baseline": {
-                "image_id": "sha256:" + "a" * 64,
-                "revision": "b" * 40,
-                "source_ids": ["nc_2026_general_all"],
-            },
-            "sources": entries,
-            "dashboard": {"name": "live", "url": "http://127.0.0.1:8000", "states": ["NC"]},
-        }
-        path = self.root / "catalog.json"
-        catalog.write(path, value)
-        before = path.read_bytes()
-        (self.root / "latest-backup.json").write_text(
-            json.dumps({"outcome": "uploaded", "backup_id": "backup_" + "c" * 32})
-        )
-        restored = {
-            "outcome": "passed",
-            "temporary_database_removed": True,
-            "writer_permissions_verified": True,
-            "reader_permissions_verified": True,
-            "finished_at": now.isoformat(),
-            "report_path": "restore.json",
-            "current_publications": {"ak_2026_general": "new-publication"},
-            "database_inventory": {"ak.contest_candidate_results": {"rows": 12}},
-        }
-        config = {
-            "CONTROL_ROOT": str(self.root),
-            "CONTROL_STATE_DIR": str(self.root),
-            "BACKUP_DIR": str(self.root),
-        }
-        with (
-            patch.object(containers, "command", side_effect=["", json.dumps(restored)]) as commands,
-            patch.object(coverage, "free_port", return_value=8009),
-            patch.object(
-                coverage.dashboard, "start", return_value={"url": "http://127.0.0.1:8009"}
-            ) as start,
-            patch.object(coverage.dashboard, "check") as check,
-            patch.object(control, "activate", return_value={"outcome": "activated"}) as activate,
-        ):
-            result = coverage.activate_sources(path, ["ak_2026_general"], {}, config)
-        self.assertEqual(result["outcome"], "activated")
-        self.assertEqual(set(check.call_args.args[1]), {"NC", "AK"})
-        self.assertEqual(start.call_args.kwargs["port"], 8009)
-        self.assertEqual(activate.call_args.args[2], restored)
-        self.assertEqual(
-            path.read_bytes(), before, "Only the existing atomic handoff may change coverage"
-        )
-        self.assertEqual(
-            commands.call_args_list[0].args[0], ["systemctl", "start", "election-backup.service"]
-        )
 
 
 @unittest.skipUnless(
@@ -302,20 +196,8 @@ class AlaskaTests(unittest.TestCase):
 )
 class AlaskaDatabaseTests(unittest.TestCase):
     def test_load_dbt_publication_reader_permissions_and_idempotent_replay(self):
-        name = os.environ["ELECTION_TEST_DATABASE"]
-        if not name.endswith("_test"):
-            raise ValueError("Disposable *_test database required")
-        db = {**connection_settings(), "dbname": name}
+        db = migrated()
         with connect(db) as conn:
-            for file in sorted((ROOT / "migrations").glob("*.sql")):
-                relation = {
-                    "001_initial.sql": "ops.sources",
-                    "002_publication.sql": "serving.publications",
-                    "003_state_schemas.sql": "ky.results",
-                    "004_mn_ne_tx.sql": "tx.results",
-                }.get(file.name, f'"{file.stem[4:]}".results')  # "or" is reserved
-                if conn.execute("SELECT to_regclass(%s) AS t", (relation,)).fetchone()["t"] is None:
-                    conn.execute(file.read_text())
             conn.execute("TRUNCATE ops.sources CASCADE")
         fixture = AlaskaTests()
         fixture.setUp()
@@ -337,26 +219,26 @@ class AlaskaDatabaseTests(unittest.TestCase):
         )
         with connect(db) as conn:
             self.assertEqual(
-                conn.execute("SELECT count(*) AS n FROM ak.contest_candidate_results").fetchone()[
-                    "n"
-                ],
+                conn.execute(
+                    "SELECT count(*) AS n FROM serving.contest_results WHERE state='AK'"
+                ).fetchone()["n"],
                 12,
             )
             self.assertIsNone(
                 conn.execute(
-                    "SELECT choice_party FROM ak.contest_candidate_results WHERE choice=%s",
+                    "SELECT choice_party FROM serving.contest_results WHERE choice=%s",
                     ("Sullivan, Daniel J. Jr.",),
                 ).fetchone()["choice_party"]
             )
             conn.execute("SET ROLE election_dashboard")
             self.assertTrue(
                 conn.execute(
-                    "SELECT has_table_privilege(current_user,"
-                    "'ak.contest_candidate_results','SELECT') AS ok"
+                    "SELECT has_table_privilege(current_user, 'serving.contest_results',"
+                    " 'SELECT') AS ok"
                 ).fetchone()["ok"]
             )
             self.assertFalse(
                 conn.execute(
-                    "SELECT has_table_privilege(current_user,'ak.results','SELECT') AS ok"
+                    "SELECT has_schema_privilege(current_user, 'landing', 'USAGE') AS ok"
                 ).fetchone()["ok"]
             )

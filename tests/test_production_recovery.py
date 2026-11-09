@@ -69,7 +69,7 @@ class ProductionRecoveryTests(unittest.TestCase):
         job.unpack_bundle(self.archive, destination, self.receipt)
         manifest = recovery.verify_bundle(destination)
         self.assertEqual(
-            manifest["deployment"]["image_tag"],
+            manifest["deployment"]["release_revision"],
             "deployed-commit",
         )
         self.assertEqual(

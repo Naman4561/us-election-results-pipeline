@@ -11,16 +11,13 @@ from pathlib import Path
 
 import test_parsing as fixtures
 
+from election_pipeline.parsers.nc import CONTESTS
+
 try:
     import psycopg
+    from loading import copies, migrated
 
-    from election_pipeline.database import (
-        connect,
-        connection_settings,
-        converted_rows,
-        load_parsed,
-        verify,
-    )
+    from election_pipeline.database import connect, csv_rows, load_parsed, verify
 except ImportError:
     psycopg = None
 
@@ -46,26 +43,22 @@ class DatabaseArtifactTests(unittest.TestCase):
         )
 
     def test_verified_records_have_database_types(self):
-        report, _, _, table, name, fields = self.verified()
+        report, _, _, plan = self.verified()
+        loaded = copies(self.f.source, self.f.settings, self.store, self.directory)
+        rows = loaded[("landing", "results")]
 
-        rows = list(
-            converted_rows(
-                self.directory / name,
-                fields,
-                self.f.source,
-                1,
-                report["output_rows"],
-            )
-        )
-
-        self.assertEqual(table, "nc_results")
-        self.assertEqual(len(rows), 10)
-        self.assertEqual(rows[0][3], "001")
-        self.assertIs(rows[0][11], True)
-        self.assertEqual(rows[0][-1], 10)
+        self.assertEqual([entry[1] for entry in plan], [("landing", "results")])
+        self.assertEqual(len(rows), report["output_rows"])
+        # release, line, state, unit, county, precinct ... total, reporting, attributes
+        self.assertEqual(rows[0][:6], (1, 2, "NC", "precinct", "WAKE", "001"))
+        self.assertEqual(rows[0][11], 10)
+        self.assertIs(rows[0][-1].obj["real_precinct"], True)
+        methods = loaded[("landing", "result_methods")]
+        self.assertEqual(len(methods), 4 * len(rows))
+        self.assertEqual(sum(m[3] for m in methods if m[1] == 2), 10)
 
     def test_tampered_artifacts_are_rejected_before_database_copy(self):
-        path = self.directory / "precinct_results.csv"
+        path = self.directory / "results.csv"
         path.write_bytes(path.read_bytes() + b"\n")
 
         with self.assertRaisesRegex(ValueError, "SHA-256"):
@@ -83,31 +76,24 @@ class DatabaseArtifactTests(unittest.TestCase):
             )
 
     def test_detailed_rows_cannot_exceed_declared_count(self):
-        _, _, _, _, name, fields = self.verified()
+        report, *_ = self.verified()
 
         with self.assertRaisesRegex(ValueError, "expected row count"):
-            list(
-                converted_rows(
-                    self.directory / name,
-                    fields,
-                    self.f.source,
-                    1,
-                    9,
-                )
-            )
+            list(csv_rows(self.directory / "results.csv", self.f.source, report["output_rows"] - 1))
 
     def test_nul_in_parsed_text_is_rejected_before_database_copy(self):
-        report, _, _, _, name, fields = self.verified()
-        path = self.directory / name
+        report, *_ = self.verified()
+        path = self.directory / "results.csv"
         with path.open(encoding="utf-8", newline="") as handle:
-            rows = list(csv.DictReader(handle))
+            reader = csv.DictReader(handle)
+            fields, rows = reader.fieldnames, list(reader)
         rows[0]["choice_party"] = "\x00"
         with path.open("w", encoding="utf-8", newline="") as handle:
             writer = csv.DictWriter(handle, fields)
             writer.writeheader()
             writer.writerows(rows)
         with self.assertRaisesRegex(ValueError, "NUL bytes in choice_party"):
-            list(converted_rows(path, fields, self.f.source, 1, report["output_rows"]))
+            list(csv_rows(path, self.f.source, report["output_rows"]))
 
 
 @unittest.skipUnless(
@@ -117,36 +103,7 @@ class DatabaseArtifactTests(unittest.TestCase):
 class DatabaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        name = os.environ["ELECTION_TEST_DATABASE"]
-
-        if not name.endswith("_test"):
-            raise ValueError("Integration tests require a database name ending in _test")
-
-        cls.db = {**connection_settings(), "dbname": name}
-
-        with connect(cls.db) as conn:
-            actual = conn.execute("SELECT current_database() AS name").fetchone()["name"]
-
-            if actual != name:
-                raise ValueError("Unexpected test database")
-
-            exists = conn.execute("SELECT to_regclass('ops.sources') AS t").fetchone()["t"]
-
-            if exists is None:
-                migration = Path(__file__).resolve().parents[1] / "migrations/001_initial.sql"
-                conn.execute(migration.read_text(encoding="utf-8"))
-
-            for relation, filename in [
-                ("serving.publications", "002_publication.sql"),
-                ("ky.results", "003_state_schemas.sql"),
-                ("tx.results", "004_mn_ne_tx.sql"),
-            ]:
-                if conn.execute("SELECT to_regclass(%s) AS t", (relation,)).fetchone()["t"] is None:
-                    conn.execute(
-                        (Path(__file__).resolve().parents[1] / "migrations" / filename).read_text(
-                            encoding="utf-8"
-                        )
-                    )
+        cls.db = migrated()
 
     def setUp(self):
         self.fixture = fixtures.ParsingTests()
@@ -181,11 +138,7 @@ class DatabaseTests(unittest.TestCase):
         report_path = directory / "report.json"
         report = json.loads(report_path.read_text())
 
-        name = (
-            "precinct_results.csv"
-            if self.fixture.source.format == "zip"
-            else "county_demographics.csv"
-        )
+        name = "results.csv" if self.fixture.source.format == "zip" else "county_demographics.csv"
         path = directory / name
 
         with path.open(newline="", encoding="utf-8") as handle:
@@ -210,12 +163,12 @@ class DatabaseTests(unittest.TestCase):
         self.assertEqual(second["outcome"], "skipped")
         self.assertEqual(first["release_id"], second["release_id"])
 
-        count = self.query("SELECT count(*) AS n FROM landing.nc_results")[0]["n"]
+        count = self.query("SELECT count(*) AS n FROM landing.results")[0]["n"]
 
-        total = self.query("SELECT sum(total_votes) AS n FROM landing.nc_results")[0]["n"]
+        total = self.query("SELECT sum(total_votes) AS n FROM landing.results")[0]["n"]
 
-        self.assertEqual(count, 10)
-        self.assertEqual(total, 100)
+        self.assertEqual(count, 2 * len(CONTESTS))
+        self.assertEqual(total, 20 * len(CONTESTS))
         self.assertEqual(len(self.query("SELECT * FROM ops.load_attempts")), 2)
 
     def test_failing_copy_rolls_back_and_preserves_previous_release(self):
@@ -235,8 +188,8 @@ class DatabaseTests(unittest.TestCase):
 
         self.assertEqual(failed["outcome"], "failed")
         self.assertEqual(
-            self.query("SELECT count(*) AS n FROM landing.nc_results")[0]["n"],
-            10,
+            self.query("SELECT count(*) AS n FROM landing.results")[0]["n"],
+            2 * len(CONTESTS),
         )
 
         loaded = self.query(
@@ -276,7 +229,7 @@ class DatabaseTests(unittest.TestCase):
         totals = self.query(
             """
             SELECT sum(total_votes) AS n
-            FROM landing.nc_results
+            FROM landing.results
             WHERE release_id=%s AND contest_id='NC-SEN'
             """,
             (second["release_id"],),
@@ -294,7 +247,7 @@ class DatabaseTests(unittest.TestCase):
         self.assertIn("SHA-256", result["error"])
 
         self.assertEqual(
-            self.query("SELECT count(*) AS n FROM landing.nc_results")[0]["n"],
+            self.query("SELECT count(*) AS n FROM landing.results")[0]["n"],
             0,
         )
 
@@ -390,7 +343,7 @@ class DatabaseTests(unittest.TestCase):
         totals = self.query(
             """
             SELECT sum(ballot_count) AS n
-            FROM landing.nc_absentee_demographics
+            FROM nc.absentee_demographics
             """
         )
 
@@ -399,7 +352,7 @@ class DatabaseTests(unittest.TestCase):
         row = self.query(
             """
             SELECT party_registration
-            FROM landing.nc_absentee_demographics
+            FROM nc.absentee_demographics
             """
         )[0]
 
@@ -419,7 +372,7 @@ class DatabaseTests(unittest.TestCase):
             self.query(
                 """
                 SELECT count(*) AS n
-                FROM landing.nc_absentee_demographics
+                FROM nc.absentee_demographics
                 """
             )[0]["n"],
             0,
@@ -437,6 +390,6 @@ class DatabaseTests(unittest.TestCase):
         )
 
         self.assertEqual(
-            self.query("SELECT count(*) AS n FROM landing.nc_results")[0]["n"],
-            10,
+            self.query("SELECT count(*) AS n FROM landing.results")[0]["n"],
+            2 * len(CONTESTS),
         )

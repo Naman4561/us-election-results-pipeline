@@ -10,7 +10,6 @@ import subprocess
 import tempfile
 import unittest
 import uuid
-from dataclasses import asdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -18,13 +17,13 @@ from unittest.mock import patch
 from xml.etree import ElementTree as ET
 
 from fastapi.testclient import TestClient
+from loading import migrated
 
 from election_pipeline import manual
 from election_pipeline.dashboard.server import create_app
 from election_pipeline.deployment import catalog, containers, control
 from election_pipeline.deployment import manual as deployment_manual
 from election_pipeline.settings import load_config
-from election_pipeline.states import state_adapter
 from election_pipeline.storage import ArchiveStore, atomic_json
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -184,32 +183,23 @@ class ManualDeploymentTests(unittest.TestCase):
         self.value = fixture(self.root)
         self.settings, sources = load_config(ROOT / "config/sources.toml")
         self.source = sources["oh_2026_general"]
-        self.image = "sha256:" + "a" * 64
-        self.revision = "b" * 40
-        entry = catalog.entry(
-            self.source,
-            self.settings,
-            image_id=self.image,
-            revision=self.revision,
-            release_path=self.root,
-            worker="manual",
-            status="unofficial",
-        )
-        entry.update(races=list(state_adapter("OH").races))
-        self.value["sources"][self.source.source_id] = entry
-        catalog.write(self.path, self.value)
-        self.prod = {
-            "DATA_DIR": str(self.root / "data"),
-            "IMAGE_TAG": self.revision,
-            "PIPELINE_SOURCES": "nc_2026_general_all,ky_2026_general",
+        self.image = self.value["release"]["image_id"]
+        self.revision = self.value["release"]["revision"]
+        self.value["sources"][self.source.source_id] = {
+            "enabled": False,
+            "public": False,
+            "status": "unofficial",
+            "acquisition": "manual",
         }
+        catalog.write(self.path, self.value)
+        self.prod = {"DATA_DIR": str(self.root / "data")}
         self.config = {
             "CONTROL_STATE_DIR": str(self.root),
-            "EXPANSION_CPUS": "0.5",
-            "EXPANSION_MEMORY": "768m",
+            "JOB_CPUS": "0.5",
+            "JOB_MEMORY": "768m",
             "CADDYFILE": str(self.root / "Caddyfile"),
             "CADDY_CONTAINER": "caddy",
-            "DEPLOYMENT_CATALOG": str(self.path),
+            "CATALOG_FILE": str(self.path),
             "BACKUP_DIR": str(self.root / "backups"),
         }
 
@@ -218,49 +208,23 @@ class ManualDeploymentTests(unittest.TestCase):
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_configure_keeps_source_private_and_preserves_every_other_source(self):
-        before = catalog.read(self.path)
-        meta = {
-            "source": json.loads(json.dumps(asdict(self.source))),
-            "settings": asdict(self.settings),
-            "races": self.value["sources"][self.source.source_id]["races"],
-            "code_sha256": "c" * 64,
-        }
-        with (
-            patch.object(control, "controls_ready"),
-            patch.object(control, "db_settings", return_value={}),
-            patch.object(control, "connect"),
-            patch.object(catalog, "verify_baseline"),
-            patch.object(containers, "verify_release", return_value=(self.image, self.revision)),
-            patch.object(containers, "metadata", return_value=meta),
-            patch.object(containers, "package_hash", return_value="c" * 64),
-            patch.object(containers, "release_hash", return_value="d" * 64),
-        ):
-            deployment_manual.configure(
-                self.path, self.root, self.image, self.source.source_id, self.prod, self.config
-            )
-            after = catalog.read(self.path)
-            for name in self.value["sources"]:
-                if name != self.source.source_id:
-                    self.assertEqual(after["sources"][name], before["sources"][name])
-            self.assertFalse(after["sources"][self.source.source_id]["public"])
-            after["sources"][self.source.source_id].update(public=True, enabled=True)
-            catalog.write(self.path, after)
-            with self.assertRaisesRegex(ValueError, "disabled"):
-                deployment_manual.configure(
-                    self.path, self.root, self.image, self.source.source_id, self.prod, self.config
-                )
-
-    def test_scheduled_worker_ignores_public_manual_source_but_runs_automatic_expansion(self):
-        self.value["sources"][self.source.source_id].update(public=True, enabled=True)
-        self.value["sources"]["ga_2026_general"].update(public=True, enabled=True)
+        self.value["sources"][self.source.source_id]["acquisition"] = "http"
         self.save()
-        with (
-            patch.object(catalog, "verify_baseline"),
-            patch.object(control, "run_one", return_value={"outcome": "succeeded"}) as run,
-        ):
-            self.assertEqual(control.run_enabled(self.path, self.prod, self.config), 0)
-        self.assertEqual(run.call_count, 1)
-        self.assertEqual(run.call_args.args[0]["source"]["state"], "GA")
+        before = catalog.read(self.path)
+        deployment_manual.configure(self.path, self.source.source_id, final=True)
+        after = catalog.read(self.path)
+        for name in self.value["sources"]:
+            if name != self.source.source_id:
+                self.assertEqual(after["sources"][name], before["sources"][name])
+        entry = after["sources"][self.source.source_id]
+        self.assertEqual((entry["acquisition"], entry["public"]), ("manual", False))
+        self.assertTrue(entry["manual_final"])
+        entry.update(public=True, enabled=True)
+        catalog.write(self.path, after)
+        with self.assertRaisesRegex(ValueError, "disabled"):
+            deployment_manual.configure(self.path, self.source.source_id)
+        with self.assertRaisesRegex(ValueError, "single-file"):
+            deployment_manual.configure(self.path, "ky_2026_general")
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_initial_direct_publication_and_outside_inbox_files_are_rejected(self):
@@ -298,24 +262,14 @@ class ManualDeploymentTests(unittest.TestCase):
         local = self.root / "data/inbox/ohio.xml"
         local.parent.mkdir(parents=True)
         local.write_text("file")
-        receipt = {
-            k: "value"
-            for k in (
-                "downloaded_at",
-                "imported_at",
-                "source_generated_at",
-                "original_sha256",
-                "sha256",
-                "metadata_path",
-            )
-        }
+        receipt = {key: "value" for key in deployment_manual.RECEIPT}
         result = {
             "source_id": self.source.source_id,
             "outcome": "succeeded",
             "publication_id": str(uuid.uuid4()),
             "manual_acquisition": receipt,
         }
-        with patch.object(containers, "run_job", return_value=json.dumps(result)):
+        with patch.object(containers, "run_job", return_value=json.dumps(result)) as run:
             deployment_manual.operate(
                 self.path,
                 self.source.source_id,
@@ -326,27 +280,28 @@ class ManualDeploymentTests(unittest.TestCase):
                 downloaded_at="now",
                 publish=True,
             )
+        self.assertEqual(run.call_args.args[0], self.image)
         current = catalog.read(self.path)["sources"][self.source.source_id]
         self.assertNotIn("candidate_id", current)
         self.assertNotIn("manual_candidate", current)
         self.assertEqual(current["manual_snapshot"]["publication_id"], result["publication_id"])
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
-    def test_manual_activation_preserves_restore_gate_and_enables_only_selected_state(self):
+    def test_manual_activation_keeps_the_restore_gate_and_publishes_only_its_state(self):
         now = datetime.now(timezone.utc)
-        entry = self.value["sources"][self.source.source_id]
-        entry.update(
-            publication_id="manual-p", published_at=(now - timedelta(minutes=3)).isoformat()
+        self.value["sources"][self.source.source_id].update(
+            enabled=True,
+            publication_id="manual-p",
+            published_at=(now - timedelta(minutes=3)).isoformat(),
         )
         self.save()
         (self.root / "Caddyfile").write_text("old")
         candidate = {
             "id": "a" * 32,
-            "name": "election-expansion-dashboard-" + "a" * 32,
+            "name": "election-dashboard-" + "a" * 32,
             "url": "http://candidate",
-            "catalog_generation": 0,
+            "catalog_generation": self.value["generation"],
             "sources": [self.source.source_id],
-            "states": ["NC", "KY", "OH"],
         }
         report = {
             "outcome": "passed",
@@ -355,29 +310,33 @@ class ManualDeploymentTests(unittest.TestCase):
             "reader_permissions_verified": True,
             "finished_at": now.isoformat(),
             "current_publications": {self.source.source_id: "manual-p"},
-            "database_inventory": {"oh.contest_candidate_results": {"rows": 7}},
+            "database_inventory": {"serving.contest_results": {"rows": 7}},
         }
         payload = {"states": {"OH": {"publication": {"publication_id": "manual-p"}}}}
         with (
-            patch.object(control, "controls_ready"),
-            patch.object(catalog, "verify_baseline"),
             patch.object(control.dashboard, "check", return_value=payload),
             patch.object(control, "switch_dashboard") as switch,
         ):
-            result = control.activate(self.path, candidate, report, self.prod, self.config)
+            result = control.activate(self.path, candidate, report, self.config)
             after = switch.call_args.args[2]
             self.assertEqual(result["outcome"], "activated")
-            self.assertEqual(after["sources"][self.source.source_id]["worker"], "manual")
+            self.assertEqual(after["sources"][self.source.source_id]["acquisition"], "manual")
             self.assertTrue(after["sources"][self.source.source_id]["public"])
             self.assertFalse(after["sources"]["ga_2026_general"]["public"])
             report["current_publications"][self.source.source_id] = "wrong"
             with self.assertRaisesRegex(ValueError, "snapshot"):
-                control.activate(self.path, candidate, report, self.prod, self.config)
+                control.activate(self.path, candidate, report, self.config)
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_dashboard_api_marks_manual_source_and_rollback_removes_only_new_coverage(self):
-        entry = self.value["sources"][self.source.source_id]
-        entry.update(public=True, enabled=True)
+        self.value["sources"][self.source.source_id].update(public=True, enabled=True)
+        self.value["previous_dashboard"] = {
+            "name": "election-dashboard-" + "e" * 32,
+            "url": "http://previous",
+            "states": ["NC", "KY"],
+            "caddyfile": "old",
+            "source_flags": {self.source.source_id: {"enabled": False, "public": False}},
+        }
         self.save()
         providers = {
             code: (lambda c=code: {"state": c, "publication": {"publication_id": "p"}, "races": {}})
@@ -388,18 +347,11 @@ class ManualDeploymentTests(unittest.TestCase):
             payload = client.get("/api/national").json()
         self.assertEqual(payload["states"]["OH"]["acquisition"]["method"], "manual")
         self.assertNotIn("acquisition", payload["states"]["NC"])
-        self.value["previous_dashboard"] = {
-            "name": "previous",
-            "url": "http://previous",
-            "states": ["NC", "KY"],
-            "caddyfile": "old",
-        }
-        self.save()
         with (
             patch.object(control.dashboard, "check"),
             patch.object(control, "switch_dashboard") as switch,
         ):
-            control.rollback(self.path, self.config)
+            control.rollback_dashboard(self.path, self.config)
         after = switch.call_args.args[2]
         self.assertFalse(after["sources"][self.source.source_id]["public"])
         self.assertTrue(after["sources"]["nc_2026_general_all"]["public"])
@@ -414,8 +366,7 @@ class ManualDeploymentTests(unittest.TestCase):
             publication_id="manual-p",
             manual_snapshot={"downloaded_at": recent, "publication_id": "manual-p"},
         )
-        self.save()
-        for name in self.prod["PIPELINE_SOURCES"].split(","):
+        for name in ("nc_2026_general_all", "ky_2026_general"):
             atomic_json(
                 self.root / "data/runs" / name / "latest.json",
                 {"outcome": "succeeded", "finished_at": recent},
@@ -435,43 +386,31 @@ class ManualDeploymentTests(unittest.TestCase):
                 for code in ("NC", "KY", "OH")
             },
         }
-        with (
-            patch.object(monitor, "load_config", return_value=(None, {})),
-            patch.object(catalog, "verify_baseline"),
-            patch.object(containers, "inspect_image", return_value=(self.image, self.revision)),
-            patch.object(
-                monitor, "systemd", side_effect=lambda action, unit: action == "is-active"
-            ),
-            patch.object(monitor, "dashboard_payload", return_value=payload),
-            patch.object(
-                monitor.shutil, "disk_usage", return_value=SimpleNamespace(total=100, free=90)
-            ),
-        ):
-            self.assertEqual(monitor.assess(self.prod, self.config, now), {})
-            entry["manual_snapshot"]["downloaded_at"] = (now - timedelta(hours=7)).isoformat()
+
+        def assess():
             self.save()
-            issues = monitor.assess(self.prod, self.config, now)
+            with (
+                patch.object(containers, "inspect_image", return_value=(self.image, self.revision)),
+                patch.object(
+                    monitor, "systemd", side_effect=lambda action, unit: action == "is-active"
+                ),
+                patch.object(monitor, "dashboard_payload", return_value=payload),
+                patch.object(
+                    monitor.shutil, "disk_usage", return_value=SimpleNamespace(total=100, free=90)
+                ),
+            ):
+                return monitor.assess(self.prod, self.config, now)
+
+        self.assertEqual(assess(), {})
+        entry["manual_snapshot"]["downloaded_at"] = (now - timedelta(hours=7)).isoformat()
+        issues = assess()
         self.assertIn("reminder/manual/oh_2026_general", issues)
         self.assertNotIn("poll/oh_2026_general", issues)
         # A final snapshot is never overdue, but its receipt is still checked.
         entry["manual_final"] = True
-        self.save()
-        with (
-            patch.object(monitor, "load_config", return_value=(None, {})),
-            patch.object(catalog, "verify_baseline"),
-            patch.object(containers, "inspect_image", return_value=(self.image, self.revision)),
-            patch.object(
-                monitor, "systemd", side_effect=lambda action, unit: action == "is-active"
-            ),
-            patch.object(monitor, "dashboard_payload", return_value=payload),
-            patch.object(
-                monitor.shutil, "disk_usage", return_value=SimpleNamespace(total=100, free=90)
-            ),
-        ):
-            self.assertEqual(monitor.assess(self.prod, self.config, now), {})
-            entry["manual_snapshot"]["publication_id"] = "other"
-            self.save()
-            self.assertIn("manual/oh_2026_general", monitor.assess(self.prod, self.config, now))
+        self.assertEqual(assess(), {})
+        entry["manual_snapshot"]["publication_id"] = "other"
+        self.assertIn("manual/oh_2026_general", assess())
 
 
 @unittest.skipUnless(
@@ -482,20 +421,8 @@ class ManualDatabaseTests(unittest.TestCase):
         from election_pipeline import database, publication
         from election_pipeline.parsing import parse_source
 
-        name = os.environ["ELECTION_TEST_DATABASE"]
-        if not name.endswith("_test"):
-            raise ValueError("Disposable *_test database required")
-        db = {**database.connection_settings(), "dbname": name}
+        db = migrated()
         with database.connect(db) as conn:
-            for path in sorted((ROOT / "migrations").glob("*.sql")):
-                table = {
-                    "001_initial.sql": "ops.sources",
-                    "002_publication.sql": "serving.publications",
-                    "003_state_schemas.sql": "ky.results",
-                    "004_mn_ne_tx.sql": "tx.results",
-                }.get(path.name, f'"{path.stem[4:]}".results')  # "or" is reserved
-                if conn.execute("SELECT to_regclass(%s) AS t", (table,)).fetchone()["t"] is None:
-                    conn.execute(path.read_text())
             conn.execute("TRUNCATE ops.sources CASCADE")
         f = ManualTests()
         f.setUp()
