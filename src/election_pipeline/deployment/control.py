@@ -168,6 +168,28 @@ def point_current(config, release_path):
     os.replace(temporary, link)
 
 
+def check_sources(image, value, prod, config):
+    """Run every enabled HTTP source once, check-only, in ``image``; return those that failed.
+
+    Each run collects, parses, loads and builds dbt, then discards its candidate.
+    """
+
+    def check(name):
+        try:
+            result = run_one(
+                image, name, value["sources"][name]["status"], prod, config, mode="check-only"
+            )
+        except Exception as error:
+            result = {"source_id": name, "outcome": "failed", "error": str(error)}
+        return name, result
+
+    with ThreadPoolExecutor(max_workers=parallel_jobs(config)) as pool:
+        checks = dict(pool.map(check, collected(value)))
+    return {
+        n: r.get("error") or r["outcome"] for n, r in checks.items() if r["outcome"] != "validated"
+    }
+
+
 def release(path, release_path, image, prod, config):
     """Make a staged release current once it validates every enabled HTTP source."""
     staged = describe(release_path, image)
@@ -176,27 +198,7 @@ def release(path, release_path, image, prod, config):
         return {"outcome": "already_current", "revision": staged["revision"]}
     with connect(db_settings(prod, writer=True)) as conn:
         applied = migrate(conn, root=staged["release_path"])
-    names = collected(value)
-
-    def check(name):
-        try:
-            result = run_one(
-                staged["image_id"],
-                name,
-                value["sources"][name]["status"],
-                prod,
-                config,
-                mode="check-only",
-            )
-        except Exception as error:
-            result = {"source_id": name, "outcome": "failed", "error": str(error)}
-        return name, result
-
-    with ThreadPoolExecutor(max_workers=parallel_jobs(config)) as pool:
-        checks = dict(pool.map(check, names))
-    failed = {
-        n: r.get("error") or r["outcome"] for n, r in checks.items() if r["outcome"] != "validated"
-    }
+    failed = check_sources(staged["image_id"], value, prod, config)
     if failed:
         raise ValueError(redacted("The release did not validate: " + json.dumps(failed), prod))
 
@@ -214,7 +216,7 @@ def release(path, release_path, image, prod, config):
         "revision": staged["revision"],
         "previous_revision": value["release"]["revision"],
         "migrations_applied": applied,
-        "sources_validated": names,
+        "sources_validated": collected(value),
         "note": "Workers use the release from their next cycle; move the dashboard next",
     }
 

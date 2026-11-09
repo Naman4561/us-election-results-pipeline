@@ -8,15 +8,18 @@ Run from the staged release's own venv, as root, after an uploaded backup. With 
 
 The first prints the plan; ``--apply`` performs it.
 
-Steps, in order: stop both collectors and wait for running jobs; apply migration 024
-and copy every per-state row into the shared tables (each schema verified, see
-election_pipeline.consolidate); write the version 2 catalog and deployment settings;
+Steps, in order: stop both collectors and wait for running jobs; apply migration 024;
+run every enabled HTTP source once, check-only, in the new image (if any fails, the
+collectors restart and nothing else changes); copy every per-state row into the shared
+tables (each schema verified, see election_pipeline.consolidate); write the version 2
+catalog and deployment settings;
 point ``current`` at the release; install the units (one worker instead of the
 baseline and expansion collectors); move the public site to a dashboard from the release.
 To undo, restore the backup taken before (scripts/production_recovery.py).
 """
 
 import argparse
+import io
 import json
 import re
 import shutil
@@ -59,8 +62,9 @@ KEPT = (
     "JOB_TIMEOUT",
     "CYCLE_SECONDS",
 )
-RENAMED = {"EXPANSION_CPUS": "JOB_CPUS", "EXPANSION_MEMORY": "JOB_MEMORY",
-           "EXPANSION_PARALLEL": "JOB_PARALLEL"}  # fmt: skip
+# Renamed budgets, with the pinned deployment's defaults for a setting it left out.
+RENAMED = {"EXPANSION_CPUS": ("JOB_CPUS", "0.5"), "EXPANSION_MEMORY": ("JOB_MEMORY", "768m"),
+           "EXPANSION_PARALLEL": ("JOB_PARALLEL", "1")}  # fmt: skip
 SOURCE_KEYS = (
     "enabled",
     "public",
@@ -106,8 +110,8 @@ def convert_settings(old, current_link):
     lines = ["# Written by scripts/cutover.py. Paths and resource budgets, not passwords."]
     for key in KEPT:
         lines.append(f"{key}={old[key]}")
-    for before, after in RENAMED.items():
-        lines.append(f"{after}={old[before]}")
+    for before, (after, default) in RENAMED.items():
+        lines.append(f"{after}={old.get(before, default)}")
     lines.append(f"CURRENT_RELEASE={current_link}")
     return "\n".join(lines) + "\n"
 
@@ -123,6 +127,12 @@ def recent_backup(prod, now):
 
 def systemctl(*args):
     return containers.command(["systemctl", *args], timeout=120)
+
+
+def start_collectors():
+    systemctl(
+        "start", "election-pipeline.timer", "election-expansion.timer", "election-monitor.timer"
+    )
 
 
 def stop_collectors():
@@ -176,6 +186,7 @@ def main():
             n: {k: e[k] for k in ("acquisition", "enabled", "public")}
             for n, e in value["sources"].items()
         },  # fmt: skip
+        "sources_to_validate": control.collected(value),
         "retired_from_catalog": sorted(set(old["sources"]) - set(value["sources"])),
         "units_removed": RETIRED_UNITS,
         "units_installed": INSTALLED_UNITS,
@@ -186,7 +197,16 @@ def main():
 
     stop_collectors()
     with connect(control.db_settings(prod, writer=True)) as conn:
+        # Additive: the pinned images keep working if the cutover stops below.
         plan["migrations_applied"] = migrate(conn, root=release["release_path"])
+    budgets = dotenv_values(stream=io.StringIO(settings), interpolate=False)
+    failed = control.check_sources(release["image_id"], value, prod, budgets)
+    if failed:
+        start_collectors()
+        raise ValueError(
+            control.redacted("The release did not validate: " + json.dumps(failed), prod)
+        )
+    with connect(control.db_settings(prod, writer=True)) as conn:
         plan["consolidation"] = consolidate(conn)
     with catalog.locked(path, exclusive=True):
         catalog.write(path, value)

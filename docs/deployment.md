@@ -102,8 +102,10 @@ sudo "$R/.venv/bin/python" "$R/scripts/cutover.py" --release "$R" --image "elect
 ```
 
 The first run prints the plan. `--apply` refuses without an uploaded backup from the
-last hour, then stops both collectors and waits for running jobs, applies migration 024,
-copies every per-state row into the shared tables (each table's counts and vote sums
+last hour, then stops both collectors and waits for running jobs and applies migration
+024. It runs every enabled HTTP source once, check-only, in the new image; if any fails,
+the collectors restart, nothing else has changed, and the pinned images keep running.
+Otherwise it copies every per-state row into the shared tables (each table's counts and vote sums
 verified before commit), writes the new catalog and settings, points `current` at the
 release, installs the units and moves the public site to a dashboard from the release.
 To undo it, restore that backup.

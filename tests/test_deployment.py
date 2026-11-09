@@ -564,6 +564,52 @@ class DeploymentTests(unittest.TestCase):
         self.assertNotIn("CONTROL_ROOT", text)
         self.assertNotIn("BASELINE_ROOT", text)
         self.assertNotIn("EXPANSION_", text)
+        # The pinned deployment defaulted a missing parallel setting to one job.
+        old.pop("EXPANSION_PARALLEL")
+        self.assertIn("JOB_PARALLEL=1\n", cutover.convert_settings(old, Path("/current")))
+
+    def test_cutover_stops_before_copying_when_a_source_fails_under_the_new_image(self):
+        old = {
+            "version": 1,
+            "generation": 1,
+            "dashboard": {"name": "d", "url": "u", "states": ["NC"]},
+            "sources": {
+                NC: {"worker": "expansion", "enabled": True, "public": True, "status": "test"}
+            },
+        }
+        self.path.write_text(json.dumps(old))
+        settings = self.root / "deployment.env"
+        settings.write_text(
+            "".join(
+                f"{key}={self.config.get(key, 'x')}\n" for key in (*cutover.KEPT, "PRODUCTION_ENV")
+            ).replace("PRODUCTION_ENV=x", f"PRODUCTION_ENV={self.root / 'production.env'}")
+        )
+        (self.root / "production.env").write_text(
+            "".join(f"{key}={value}\n" for key, value in self.prod.items())
+        )
+        connection = MagicMock()
+        connection.__enter__.return_value = connection
+        with (
+            patch.object(cutover, "DEPLOYMENT_ENV", settings),
+            patch.object(cutover, "recent_backup", return_value="backup_x"),
+            patch.object(control, "describe", return_value=self.staged()),
+            patch.object(cutover, "connect", return_value=connection),
+            patch.object(cutover, "migrate", return_value=["024_shared_results.sql"]),
+            patch.object(control, "check_sources", return_value={NC: "validation_failed"}),
+            patch.object(cutover, "stop_collectors") as stop,
+            patch.object(cutover, "start_collectors") as start,
+            patch.object(cutover, "consolidate") as copy,
+            patch.object(cutover, "replace_private") as rewrite,
+            patch("sys.argv", ["cutover", "--release", str(self.root), "--image", NEW_IMAGE,
+                               "--apply"]),
+        ):  # fmt: skip
+            with self.assertRaisesRegex(ValueError, "did not validate"):
+                cutover.main()
+        stop.assert_called_once()
+        start.assert_called_once()
+        copy.assert_not_called()
+        rewrite.assert_not_called()
+        self.assertEqual(json.loads(self.path.read_text()), old)
 
 
 if __name__ == "__main__":
