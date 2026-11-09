@@ -8,6 +8,7 @@ only from each state's own election office.
 | --- | --- |
 | [docs/architecture/](docs/architecture/README.md) | How data moves from official files to the dashboard |
 | [docs/states.md](docs/states.md) | Each state's source, races, county detail, vote methods and known limits |
+| [docs/state-status.md](docs/state-status.md) | Where each state's count stands: counting, pending certification, paused |
 | [docs/adding-a-state.md](docs/adding-a-state.md) | Adding a state: registry entry, parser, config, roster, map |
 | [docs/deployment.md](docs/deployment.md) | Staging and switching releases, adding a state in production, rollback |
 | [docs/manual-results.md](docs/manual-results.md) | Importing an official file saved by hand (Ohio, Kansas) |

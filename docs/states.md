@@ -32,8 +32,11 @@ this page explains them.
 | Washington | Enhanced Voting | House 1–10 (10) | All 39 counties | Total only |
 | West Virginia | Clarity | Senate, House 1–2 (3) | All 55 counties | Total only |
 
-A state without a Senate or Governor race in 2026 has none listed. Every source except
-Ohio, Kansas and Mississippi's reviewed counties is collected every 15 minutes.
+A state without a Senate or Governor race in 2026 has none listed. Ohio, Kansas and
+Mississippi's reviewed counties are imported by hand; every other source is collected
+every 15 minutes, or hourly or every three hours once its count stops
+(`config/sources.toml`). [State status](state-status.md) records where each state's
+count stands.
 
 ## What each source does not give
 
