@@ -86,19 +86,17 @@ primary_filename = "results.xml"
 min_interval_seconds = 840
 expected_members = ["results.xml"]
 
-# The SC resolver selects the newest dated workbook linked by this official page.
-# Both the index and exact workbook bytes are archived for offline replay.
+# The Election Commission's Clarity site, which kept counting after the election-night
+# workbooks on its fallback page stopped.
 [sources.sc_2026_general]
 state = "SC"
 election_date = "2026-11-03"
-url = "https://scvotes.gov/2026-general-election-results/"
+url = "https://www.enr-scvotes.org/SC/127300/current_ver.txt"
 format = "bundle"
-primary_filename = "results.xlsx"
+primary_filename = "current_ver.txt"
 min_interval_seconds = 840
-expected_members = ["index.html", "results.xlsx"]
-
-[sources.sc_2026_general.files]
-"index.html" = "https://scvotes.gov/2026-general-election-results/"
+expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
+supplemental_members = ["detail.zip", "settings.json", "summary.json"]
 
 [sources.tx_2026_general_all]
 state = "TX"

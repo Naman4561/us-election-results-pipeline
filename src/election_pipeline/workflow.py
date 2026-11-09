@@ -15,6 +15,8 @@ from election_pipeline.storage import (
     utc_now,
 )
 
+NO_SNAPSHOT = "No archived snapshot to check"
+
 
 def run_source(
     source,
@@ -109,8 +111,10 @@ def run_source(
 
                 if check_only and not digest:
                     state = store.read_state()
-                    if not store.cached_archive(state):
-                        raise ValueError("No archived snapshot to check")
+                    # A snapshot of the address the source used before it moved would
+                    # check the old feed's format, not the configured one.
+                    if state.get("url") != source.url or not store.cached_archive(state):
+                        raise ValueError(NO_SNAPSHOT)
                     digest = state["sha256"]
 
                 if not digest:

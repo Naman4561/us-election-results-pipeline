@@ -15,7 +15,6 @@ class State:
     governor: bool = False
     county_results: bool = True
     source_page: str = ""
-    bundle_resolver: str = ""
     vote_basis: str = "reported_votes"
     collection_backend: str = ""
     county_feed_status: bool = False
@@ -145,8 +144,8 @@ STATES = {
         tuple(range(1, 8)),
         ("total_votes",),
         governor=True,
-        source_page="https://scvotes.gov/2026-general-election-results/",
-        bundle_resolver="sc",
+        source_page="https://www.enr-scvotes.org/SC/127300/",
+        collection_backend="clarity",
     ),
     "KS": State(
         "KS",

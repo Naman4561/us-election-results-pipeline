@@ -1,4 +1,5 @@
-"""Official Clarity (Scytl) election-night sites (Colorado, Iowa).
+"""Official Clarity (Scytl) election-night sites (Colorado, Iowa, West Virginia, and South
+Carolina, whose site is served from its own host).
 
 A Clarity election publishes numbered versions. ``current_ver.txt`` (the configured source
 URL) names the current one; that version's files live under ``<election>/<version>/``. The
@@ -19,13 +20,14 @@ from election_pipeline.collectors.common import Bundle
 from election_pipeline.states import state_adapter
 
 VERSION_URL = re.compile(r"/[A-Z]{2}(?:/[A-Za-z_]{1,40})?/[0-9]{1,9}/current_ver\.txt")
+HOSTS = {"results.enr.clarityelections.com", "www.enr-scvotes.org"}
 
 
 def version_base(url, raw):
     parts = urlsplit(url)
     if (
         parts.scheme != "https"
-        or parts.netloc != "results.enr.clarityelections.com"
+        or parts.netloc not in HOSTS
         or parts.query
         or not VERSION_URL.fullmatch(parts.path)
     ):

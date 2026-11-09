@@ -14,12 +14,11 @@ import xml.etree.ElementTree as ET
 import zipfile
 from dataclasses import replace
 from pathlib import Path
-from unittest.mock import patch
 
 from loading import copies, migrated
 
-from election_pipeline import bundles, publication
-from election_pipeline.collect import FetchFailure, FetchResponse
+from election_pipeline import publication
+from election_pipeline.collectors.clarity import version_base
 from election_pipeline.collectors.sc import latest_report
 from election_pipeline.dashboard.server import STATIC, make_payload, national_payload
 from election_pipeline.database import (
@@ -38,7 +37,14 @@ FIXTURES = ROOT / "tests/fixtures/five_states"
 CODES = ("GA", "SC", "KS", "OH")
 MEMBERS = {
     "GA": {"results.json": "ga-results.json"},
-    "SC": {"index.html": "sc-general.html", "results.xlsx": "sc-results.xlsx"},
+    "SC": {
+        "current_ver.txt": "sc-current_ver.txt",
+        "summary.json": "sc-summary.json",
+        "settings.json": "sc-settings.json",
+        "detail.zip": "sc-detail.zip",
+    },
+    # Snapshots taken before SC moved to its Clarity site.
+    "SC_WORKBOOK": {"index.html": "sc-general.html", "results.xlsx": "sc-results.xlsx"},
     "KS": {"results.html": "ks.html"},
     "OH": {"results.xml": "oh-results.xml"},
 }
@@ -93,7 +99,17 @@ class FiveStateTests(unittest.TestCase):
         }
 
     def parse(self, code, mutate=None):
-        self.source = self.sources[code.lower() + "_2026_general"]
+        self.source = self.sources[code[:2].lower() + "_2026_general"]
+        if code == "SC_WORKBOOK":
+            page = "https://scvotes.gov/2026-general-election-results/"
+            self.source = replace(
+                self.source,
+                url=page,
+                primary_filename="results.xlsx",
+                expected_members=("index.html", "results.xlsx"),
+                supplemental_members=(),
+                files=(("index.html", page),),
+            )
         members = self.members(code)
         if mutate:
             mutate(members)
@@ -365,14 +381,6 @@ class FiveStateTests(unittest.TestCase):
         second = base + "1030-PM-General-Election-Results-.xlsx"
         index = f'<a href="{second}">later</a><a href="{first}">earlier</a>'
         self.assertEqual(latest_report(index, src), second)
-        # The names SC used on election night; the midnight report is the newest.
-        names = ["955-PM", "1015PM", "11PM", "1130PM", "12AM"]
-        links = [base + n + "-General-Election-Results.xlsx" for n in names]
-        index = "".join(f'<a href="{link}">r</a>' for link in reversed(links))
-        self.assertEqual(latest_report(index, src), links[-1])
-        self.assertEqual(latest_report(index.replace(links[-1], ""), src), links[-2])
-        later = base.replace("11-03", "11-10") + "9AM-General-Election-Results.xlsx"
-        self.assertEqual(latest_report(index + f'<a href="{later}">r</a>', src), later)
         for bad in [
             first.replace("scvotes.gov", "evil.example"),
             first.replace("2026-11-03", "2024-11-05"),
@@ -383,31 +391,60 @@ class FiveStateTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             latest_report("<title>Captcha</title>", src)
 
-    def test_sc_bundle_preserves_index_and_resolves_only_linked_report_under_shared_budget(self):
-        src = self.sources["sc_2026_general"]
-        members = self.members("SC")
-        calls = []
+    def test_sc_clarity_methods_counties_and_election_must_agree(self):
+        report = self.parse("SC")
+        self.assertEqual(report["vote_method_reconciliation"], "passed")
+        self.assertEqual(report["source_update_text"], "11/6/2026 6:26:12 PM EST")
+        totals = {
+            r["choice"]: r["total_votes"]
+            for r in self.read(report, "contest_results.csv")
+            if r["contest_id"] == "SC-GOV"
+        }
+        self.assertEqual(totals["Alan Wilson / Mike Reichenbach"], 1051010)
 
-        def fetch(source, settings, path, headers, *, url=None):
-            calls.append((url, settings.max_download_bytes))
-            body = members["index.html"] if len(calls) == 1 else members["results.xlsx"]
-            path.write_bytes(body)
-            return FetchResponse(200, {}, url, len(body), hashlib.sha256(body).hexdigest())
+        def detail(edit):
+            def mutate(members):
+                with zipfile.ZipFile(io.BytesIO(members["detail.zip"])) as z:
+                    root = ET.fromstring(z.read("detail.xml"))
+                edit(root)
+                out = io.BytesIO()
+                with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
+                    z.writestr("detail.xml", ET.tostring(root))
+                members["detail.zip"] = out.getvalue()
 
-        with patch("election_pipeline.collectors.common.fetch_file", side_effect=fetch):
-            result = bundles.fetch_bundle(src, self.settings, self.root / "bundle.zip")
-        self.assertTrue(calls[1][0].endswith("930-PM-General-Election-Results-.xlsx"))
-        self.assertEqual(calls[1][1], self.settings.max_download_bytes - len(members["index.html"]))
-        self.assertEqual(result.components[1]["url"], calls[1][0])
-        with zipfile.ZipFile(self.root / "bundle.zip") as z:
-            self.assertEqual(z.read("index.html"), members["index.html"])
-            self.assertEqual(z.read("results.xlsx"), members["results.xlsx"])
-        with patch("election_pipeline.collectors.common.fetch_file", side_effect=fetch):
-            calls.clear()
-            with self.assertRaises(FetchFailure):
-                bundles.fetch_bundle(
-                    src, replace(self.settings, max_download_bytes=10), self.root / "small.zip"
-                )
+            return mutate
+
+        def governor(root):
+            return next(c for c in root.findall("Contest") if c.get("key") == "21500")
+
+        def method_vote(root):
+            county = governor(root).find("Choice/VoteType/County")
+            county.set("votes", str(int(county.get("votes")) + 1))
+
+        def missing_county(root):
+            kind = governor(root).find("Choice/VoteType")
+            kind.remove(kind.find("County"))
+
+        def renamed_method(root):
+            governor(root).find("Choice/VoteType").set("name", "Mail")
+
+        def election(root):
+            root.find("ElectionName").text = "2024 Statewide General Election"
+
+        for edit in [method_vote, missing_county, renamed_method, election]:
+            with self.subTest(edit=edit.__name__):
+                self.assertEqual(self.parse("SC", detail(edit))["outcome"], "validation_failed")
+        self.assertEqual(
+            version_base("https://www.enr-scvotes.org/SC/127300/current_ver.txt", b"386034\n"),
+            "https://www.enr-scvotes.org/SC/127300/386034/",
+        )
+        with self.assertRaises(ValueError):
+            version_base("https://enr-scvotes.example/SC/127300/current_ver.txt", b"1")
+
+    def test_sc_workbook_snapshots_from_before_the_switch_still_parse(self):
+        report = self.parse("SC_WORKBOOK")
+        self.assertEqual(report["outcome"], "parsed", report)
+        self.assertEqual((report["output_rows"], report["contest_count"]), (687, 9))
 
     def test_sc_method_mismatch_missing_county_and_formula_rejected(self):
         def apply(edit):
@@ -432,7 +469,7 @@ class FiveStateTests(unittest.TestCase):
             rows.remove(next(r for r in rows if r.get("r") == "4"))
 
         for edit in [formula, vote, missing]:
-            self.assertEqual(self.parse("SC", apply(edit))["outcome"], "validation_failed")
+            self.assertEqual(self.parse("SC_WORKBOOK", apply(edit))["outcome"], "validation_failed")
 
     def test_sc_downward_correction_and_county_method_totals_remain_valid(self):
         def edit(root):
@@ -443,7 +480,7 @@ class FiveStateTests(unittest.TestCase):
                     v.text = str(int(v.text) - 1)
 
         report = self.parse(
-            "SC",
+            "SC_WORKBOOK",
             lambda m: m.update(
                 {
                     "results.xlsx": edit_xml_member(
@@ -469,7 +506,7 @@ class FiveStateTests(unittest.TestCase):
                     members["results.xlsx"], f"xl/worksheets/sheet{number}.xml", zero
                 )
 
-        report = self.parse("SC", mutate)
+        report = self.parse("SC_WORKBOOK", mutate)
         self.assertEqual(report["outcome"], "parsed", report)
         self.assertTrue(report["all_counts_zero"])
 

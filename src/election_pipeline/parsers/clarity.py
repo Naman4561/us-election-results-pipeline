@@ -1,5 +1,5 @@
 """Shared readers for official Clarity (Scytl) election-night files (Colorado, Iowa,
-West Virginia).
+West Virginia, South Carolina).
 
 Every bundle holds one published version's ``summary.json`` (statewide totals, the
 figures the official summary page shows), ``settings.json`` (the site's own
@@ -105,9 +105,9 @@ def choice_key(value, state):
     return int(value)
 
 
-def detail_contests(root, wanted, race, code, state):
+def detail_contests(root, wanted, race, code, state, election="2026 General"):
     if (
-        text(root.findtext("ElectionName"), "election name") != "2026 General"
+        text(root.findtext("ElectionName"), "election name") != election
         or text(root.findtext("ElectionDate"), "election date") != "11/3/2026"
         or text(root.findtext("Region"), "region") != code
     ):

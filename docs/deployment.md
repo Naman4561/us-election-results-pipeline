@@ -42,6 +42,10 @@ deploy status
    deploy release --release "$R" --image "election-pipeline:<revision>"
    ```
 
+   A release that moves a source to a new address has no snapshot of that address to
+   check. Name it with `--moved-source <source_id>`: having no snapshot then passes for
+   that source alone, and its first collection is validated before it publishes.
+
 3. **Move the dashboard** to the release when its code changed:
    `deploy start-dashboard`, then `deploy activate --candidate <id>` (below).
 

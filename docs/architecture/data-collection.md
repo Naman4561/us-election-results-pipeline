@@ -19,18 +19,17 @@ flowchart TB
     end
     BU["Bundle / single file<br/>(settings + common.py)"]
 
-    CO & IA & WV --> CL
+    CO & IA & WV & SC --> CL
     VA & ID & WA --> EV
     SD & NM & OR --> EN
     CA & MD --> GF
     MS --> CF
-    NC & KY & MN & NE & TX & GA & SC & KS & OH & FL & HI & AK --> BU
+    NC & KY & MN & NE & TX & GA & KS & OH & FL & HI & AK --> BU
 
     CL & EV & EN & GF & CF & BU --> CLIENT["Bounded HTTP client<br/>timeouts · size and row limits ·<br/>redirect checks · user agent"]
 ```
 
-Some states need one-off handling: South Carolina resolves dated workbooks from its
-fallback page (`collectors/sc.py`), Texas reads the Civix API (`parsers/tx.py`),
+Some states need one-off handling: Texas reads the Civix API (`parsers/tx.py`),
 and Alaska pins its issuer certificates (`resources/alaska-issuers.pem`).
 
 ## One collection run

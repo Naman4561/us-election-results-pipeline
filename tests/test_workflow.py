@@ -233,6 +233,12 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(store.state_path.read_bytes(), before)
         self.assertFalse((self.f.root / "runs" / self.f.source.source_id / "latest.json").exists())
 
+        # A snapshot of the address the source used before it moved is not checked.
+        store.write_state({**json.loads(before), "url": "https://example.org/old-feed"})
+        result = self.run_source(check_only=True)
+        self.assertEqual(result["outcome"], "failed")
+        self.assertEqual(result["error"], workflow.NO_SNAPSHOT)
+
         store.write_state({"source_signature": "old"})
         result = self.run_source(check_only=True)
         self.assertEqual(result["outcome"], "failed")

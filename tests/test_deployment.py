@@ -19,6 +19,7 @@ from fastapi.testclient import TestClient
 from election_pipeline import recovery
 from election_pipeline.dashboard.server import create_app
 from election_pipeline.deployment import catalog, containers, control, dashboard
+from election_pipeline.workflow import NO_SNAPSHOT
 
 ROOT = Path(__file__).resolve().parents[1]
 IMAGE = "sha256:" + "a" * 64
@@ -250,6 +251,31 @@ class DeploymentTests(unittest.TestCase):
         self.assertNotIn("writer-secret", str(caught.exception))
         self.assertEqual(self.path.read_bytes(), before)
         self.assertFalse(Path(self.config["CURRENT_RELEASE"]).exists())
+
+    def test_only_a_named_moved_source_may_lack_a_snapshot_to_check(self):
+        def check(error):
+            return lambda image, name, *a, **k: (
+                {"source_id": name, "outcome": "failed", "error": error}
+                if name == KY
+                else {"source_id": name, "outcome": "validated"}
+            )
+
+        with patch.object(control, "run_one", side_effect=check(NO_SNAPSHOT)):
+            self.assertEqual(
+                control.check_sources(NEW_IMAGE, self.value, self.prod, self.config),
+                {KY: NO_SNAPSHOT},
+            )
+            self.assertEqual(
+                control.check_sources(NEW_IMAGE, self.value, self.prod, self.config, [KY]), {}
+            )
+            with self.assertRaisesRegex(ValueError, "Not an enabled HTTP source"):
+                control.check_sources(NEW_IMAGE, self.value, self.prod, self.config, [GA])
+        # Any other failure of a moved source still stops the release.
+        with patch.object(control, "run_one", side_effect=check("Parsing failed")):
+            self.assertEqual(
+                control.check_sources(NEW_IMAGE, self.value, self.prod, self.config, [KY]),
+                {KY: "Parsing failed"},
+            )
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock and symlinks")
     def test_rollback_swaps_back_to_the_previous_release(self):

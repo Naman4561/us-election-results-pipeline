@@ -19,7 +19,7 @@ gantt
 
 | Timer | Runs | Does |
 | --- | --- | --- |
-| `election-worker.timer` | every 5 minutes, at :30 s | `deploy.py run`: every enabled HTTP source in the release image, least recently run first, within `CYCLE_SECONDS` (270); `JOB_PARALLEL` jobs at once. Each source is due every 15 minutes (`min_interval_seconds = 840`) |
+| `election-worker.timer` | every 5 minutes, at :30 s | `deploy.py run`: every enabled HTTP source in the release image, least recently run first, within `CYCLE_SECONDS` (270); `JOB_PARALLEL` jobs at once. A source is due every 15 minutes, or hourly or at listed hours once its count stops (`config/sources.toml`) |
 | `election-monitor.timer` | every minute | Freshness, failures, release, timers, backup age, disk, dashboard; SNS alerts and CloudWatch heartbeat |
 | `election-backup.timer` | every 6 hours | Full backup to S3, local prune, S3 retention tags |
 

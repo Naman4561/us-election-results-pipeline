@@ -25,7 +25,7 @@ this page explains them.
 | North Carolina | State Board precinct ZIP | Senate, House 1–14 (15) | All 100 counties | Election Day, early, mail, provisional |
 | Ohio | Saved by hand from the results XML | Senate, Governor, House 1–15 (17) | All 88 counties | Total only |
 | Oregon | ENR export | Senate, Governor, House 1–6 (8) | All 36 counties | Total only |
-| South Carolina | Election Commission report workbook | Senate, Governor, House 1–7 (9) | All 46 counties | Total only |
+| South Carolina | Clarity (Election Commission) | Senate, Governor, House 1–7 (9) | All 46 counties | Total only |
 | South Dakota | ENR export | Senate, Governor, House at-large (3) | All 66 counties | Total only |
 | Texas | Secretary of State Civix API | Senate, Governor, House 1–38 (40) | No | Total only |
 | Virginia | Enhanced Voting | Senate, House 1–11 (12) | All 133 localities | Early, Election Day, mail, provisional, post-election |
@@ -80,8 +80,9 @@ zero.
   write-in rows is stored as no party; no party is inferred. North Carolina's absentee
   demographics are a separate dataset in their own tables.
 - **Ohio:** the official XML is saved by hand ([manual results](manual-results.md)).
-- **South Carolina:** the report is a workbook the commission posts periodically, not a
-  live feed; method columns are checked but only totals are stored.
+- **South Carolina:** six vote methods are checked against each county's count, but
+  only totals are stored. Snapshots from before Nov 9, 2026 hold the commission's
+  election-night workbooks instead, which stopped at midnight on election night.
 - **Texas:** statewide and district totals; no county detail in the feed. Candidate sums
   must equal each contest's reported total.
 

@@ -23,6 +23,7 @@ from election_pipeline.database import connect
 from election_pipeline.deployment import catalog, containers, dashboard
 from election_pipeline.migrations import migrate
 from election_pipeline.storage import atomic_json, utc_now
+from election_pipeline.workflow import NO_SNAPSHOT
 
 # A locked source is held by another run or a backup; it is not a failure.
 GOOD = {"succeeded", "already_current", "not_due", "awaiting_publication", "locked"}
@@ -168,13 +169,20 @@ def point_current(config, release_path):
     os.replace(temporary, link)
 
 
-def check_sources(image, value, prod, config):
+def check_sources(image, value, prod, config, moved=()):
     """Run every enabled HTTP source once, check-only, in ``image``; return those that failed.
 
     Each run parses the source's latest archived snapshot, loads it and builds dbt, then
     discards its candidate. Nothing is requested from the state, so a site that is down
     does not block a release, and the live collector state is left alone.
+
+    A source in ``moved`` now reads a new address, so it has no snapshot to check yet;
+    for it alone, having none is not a failure. Its first collection is validated before
+    it publishes, like any other.
     """
+    unknown = set(moved) - set(collected(value))
+    if unknown:
+        raise ValueError(f"Not an enabled HTTP source: {sorted(unknown)}")
 
     def check(name):
         try:
@@ -188,11 +196,13 @@ def check_sources(image, value, prod, config):
     with ThreadPoolExecutor(max_workers=parallel_jobs(config)) as pool:
         checks = dict(pool.map(check, collected(value)))
     return {
-        n: r.get("error") or r["outcome"] for n, r in checks.items() if r["outcome"] != "validated"
+        n: r.get("error") or r["outcome"]
+        for n, r in checks.items()
+        if r["outcome"] != "validated" and not (n in moved and r.get("error") == NO_SNAPSHOT)
     }
 
 
-def release(path, release_path, image, prod, config):
+def release(path, release_path, image, prod, config, moved=()):
     """Make a staged release current once it validates every enabled HTTP source."""
     staged = describe(release_path, image)
     value = catalog.read(path)
@@ -200,7 +210,7 @@ def release(path, release_path, image, prod, config):
         return {"outcome": "already_current", "revision": staged["revision"]}
     with connect(db_settings(prod, writer=True)) as conn:
         applied = migrate(conn, root=staged["release_path"])
-    failed = check_sources(staged["image_id"], value, prod, config)
+    failed = check_sources(staged["image_id"], value, prod, config, moved)
     if failed:
         raise ValueError(redacted("The release did not validate: " + json.dumps(failed), prod))
 

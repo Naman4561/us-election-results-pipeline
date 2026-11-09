@@ -28,5 +28,29 @@
     "sha256": "70bfd4c472deda15ec0c3b8090a5330a9e10bfe1b9d9e1b445f27bb586470960",
     "bytes": 298521,
     "downloaded_at": "2026-11-04T02:45:26.789165+00:00"
+  },
+  "sc-current_ver.txt": {
+    "url": "https://www.enr-scvotes.org/SC/127300/current_ver.txt",
+    "sha256": "fbf8ae824a7fcaa2e47a4f125bebb5e8659d89a2e0598df22eec86ee37b652ef",
+    "bytes": 6,
+    "downloaded_at": "2026-11-09T20:58:13.084451+00:00"
+  },
+  "sc-summary.json": {
+    "url": "https://www.enr-scvotes.org/SC/127300/386034/json/en/summary.json",
+    "sha256": "945da091073a6e5977f92571f3359bae9c39fe6d249bd44c1cbfbfdf58042cd0",
+    "bytes": 18724,
+    "downloaded_at": "2026-11-09T20:58:13.084451+00:00"
+  },
+  "sc-settings.json": {
+    "url": "https://www.enr-scvotes.org/SC/127300/386034/json/en/electionsettings.json",
+    "sha256": "17d23d7b37d2c981b402ddaad3af747e5a8a6e266aabeefa29e11bfef5d0c63e",
+    "bytes": 33463,
+    "downloaded_at": "2026-11-09T20:58:13.084451+00:00"
+  },
+  "sc-detail.zip": {
+    "url": "https://www.enr-scvotes.org/SC/127300/386034/reports/detailxml.zip",
+    "sha256": "df77df4b734fe117272dd7770cfcd71f951d2f4d76310b6cfb53c58ae2e27640",
+    "bytes": 77998,
+    "downloaded_at": "2026-11-09T20:58:13.084451+00:00"
   }
 }

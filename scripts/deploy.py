@@ -21,6 +21,12 @@ def main():
     staged = sub.add_parser("release", help="Make a staged release current")
     staged.add_argument("--release", type=Path, required=True)
     staged.add_argument("--image", required=True)
+    staged.add_argument(
+        "--moved-source",
+        action="append",
+        default=[],
+        help="A source whose address this release changes; it has no snapshot to check yet",
+    )
     sub.add_parser("rollback-release")
     for name in ("prepare", "promote", "disable"):
         sub.add_parser(name).add_argument("--source", required=True)
@@ -61,7 +67,9 @@ def main():
                 },
             }
         elif action == "release":
-            result = control.release(path, args.release, args.image, prod, config)
+            result = control.release(
+                path, args.release, args.image, prod, config, args.moved_source
+            )
         elif action == "rollback-release":
             result = control.rollback_release(path, config)
         elif action in ("prepare", "promote"):
