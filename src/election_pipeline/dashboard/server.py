@@ -28,6 +28,8 @@ from psycopg.rows import dict_row
 from election_pipeline.states import STATES, state_adapter
 
 STATIC = Path(__file__).with_name("static")
+# A county feed not checked successfully within this long is shown as overdue.
+COUNTY_STALE_SECONDS = 3600
 METHODS = ("total_votes", "election_day", "early_voting", "absentee_by_mail", "provisional")
 
 
@@ -216,7 +218,9 @@ def with_county_feeds(payload, geography, rows, now=None):
                 succeeded = datetime.fromisoformat(succeeded.replace("Z", "+00:00"))
             if succeeded is None or succeeded.utcoffset() is None:
                 raise ValueError("Accepted county lacks its source check timestamp")
-            if payload.get("mode") != "demo" and now - succeeded > timedelta(seconds=900):
+            if payload.get("mode") != "demo" and now - succeeded > timedelta(
+                seconds=COUNTY_STALE_SECONDS
+            ):
                 row["collection_status"] = "stale"
                 row["issue"] = row.get("issue") or "source_check_overdue"
         records[key] = row

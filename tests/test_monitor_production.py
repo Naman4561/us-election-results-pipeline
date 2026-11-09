@@ -172,7 +172,7 @@ class MonitorTests(unittest.TestCase):
     def test_cached_run_success_does_not_hide_stale_official_poll(self):
         atomic_json(
             self.root / "data/state" / (NC + ".json"),
-            {"last_checked_at": (self.now - timedelta(hours=1)).isoformat()},
+            {"last_checked_at": (self.now - timedelta(hours=2)).isoformat()},
         )
         self.assertIn("poll/" + NC, self.assess())
         self.assertNotIn("pipeline/" + NC, self.assess())
@@ -202,12 +202,12 @@ class MonitorTests(unittest.TestCase):
             self.root / "data/runs" / NC / "latest.json",
             {
                 "outcome": "not_due",
-                "finished_at": (self.now - timedelta(hours=1)).isoformat(),
+                "finished_at": (self.now - timedelta(hours=2)).isoformat(),
             },
         )
         atomic_json(
             self.root / "data/state" / (NC + ".json"),
-            {"last_checked_at": (self.now - timedelta(hours=1)).isoformat()},
+            {"last_checked_at": (self.now - timedelta(hours=2)).isoformat()},
         )
         issues = self.assess()
         self.assertIn("pipeline/" + NC, issues)

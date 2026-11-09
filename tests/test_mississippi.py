@@ -355,7 +355,7 @@ class MississippiTests(unittest.TestCase):
         self.assertNotIn("JACKSON", payload["races"]["MS-SEN"]["counties"])
         now = max(
             ms.stamp(r["last_success_at"]) for r in feeds if r["last_success_at"]
-        ) + timedelta(minutes=16)
+        ) + timedelta(minutes=61)
         aged = with_county_feeds(
             payload, json.loads((STATIC / "ms-map.json").read_text()), feeds, now=now
         )

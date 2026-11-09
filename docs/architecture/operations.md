@@ -19,7 +19,7 @@ gantt
 
 | Timer | Runs | Does |
 | --- | --- | --- |
-| `election-worker.timer` | every 5 minutes, at :30 s | `deploy.py run`: every enabled HTTP source in the release image, least recently run first, within `CYCLE_SECONDS` (270); `JOB_PARALLEL` jobs at once |
+| `election-worker.timer` | every 5 minutes, at :30 s | `deploy.py run`: every enabled HTTP source in the release image, least recently run first, within `CYCLE_SECONDS` (270); `JOB_PARALLEL` jobs at once. Each source is due every 15 minutes (`min_interval_seconds = 840`) |
 | `election-monitor.timer` | every minute | Freshness, failures, release, timers, backup age, disk, dashboard; SNS alerts and CloudWatch heartbeat |
 | `election-backup.timer` | every 6 hours | Full backup to S3, local prune, S3 retention tags |
 
@@ -62,7 +62,7 @@ stateDiagram-v2
 ```mermaid
 flowchart LR
     subgraph checks["monitor_production.py (every minute)"]
-        c1["pipeline/{source}<br/>latest run ≤ 15 min, succeeded"]
+        c1["pipeline/{source}<br/>latest run ≤ 1 h, succeeded"]
         c2["poll/{source}<br/>official site checked recently"]
         c3["county/MS/{county} · manual/{source}"]
         c4["backup<br/>uploaded ≤ 7 h · s3-retention"]

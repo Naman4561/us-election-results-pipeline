@@ -10,13 +10,17 @@ max_zip_members = 20
 max_csv_rows = 2000000
 user_agent = "US-Election-Results-Pipeline/0.1"
 
+# Every source is collected every 15 minutes: the worker runs every 5, and 840 s (not 900)
+# keeps a source checked a few seconds later in one cycle than the last from slipping
+# to the fourth cycle.
+
 [sources.ak_2026_general]
 state = "AK"
 election_date = "2026-11-03"
 url = "https://www.elections.alaska.gov/enr/26GENR/results/GA_ENR_Precinct_State_of_Alaska.csv"
 format = "bundle"
 primary_filename = "results.csv"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["election.html", "results.csv"]
 
 [sources.ak_2026_general.files]
@@ -43,7 +47,7 @@ state = "KY"
 election_date = "2026-11-03"
 url = "https://vrsws.sos.ky.gov/liveresults/Data/CurrentResultsExcludeLocal"
 format = "bundle"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["results.xml", "election.xml", "parties.xml", "units.xml", "contests.xml", "candidates.xml"]
 
 [sources.ky_2026_general.files]
@@ -59,7 +63,7 @@ election_date = "2026-11-03"
 url = "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/data"
 format = "bundle"
 primary_filename = "results.json"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["results.json"]
 
 [sources.ks_2026_general]
@@ -68,7 +72,7 @@ election_date = "2026-11-03"
 url = "https://ent.sos.ks.gov/kssos_ent.html"
 format = "bundle"
 primary_filename = "results.html"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["results.html"]
 
 [sources.oh_2026_general]
@@ -77,7 +81,7 @@ election_date = "2026-11-03"
 url = "https://liveresults.ohiosos.gov/Api/v1/download?filename=VSSC1622XmlFileBlob"
 format = "bundle"
 primary_filename = "results.xml"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["results.xml"]
 
 # The SC resolver selects the newest dated workbook linked by this official page.
@@ -88,7 +92,7 @@ election_date = "2026-11-03"
 url = "https://scvotes.gov/2026-general-election-results/"
 format = "bundle"
 primary_filename = "results.xlsx"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["index.html", "results.xlsx"]
 
 [sources.sc_2026_general.files]
@@ -101,7 +105,7 @@ url = "https://goelect.txelections.civixapps.com/api-ivis-system/api/s3/enr/elec
 format = "bundle"
 primary_filename = "results.json"
 expected_members = ["results.json"]
-min_interval_seconds = 300
+min_interval_seconds = 840
 
 [sources.mn_2026_general_all]
 state = "MN"
@@ -110,7 +114,7 @@ url = "https://electionresultsfiles.sos.mn.gov/20261103/ussenatecty.txt"
 format = "bundle"
 primary_filename = "senate-county.txt"
 expected_members = ["senate-county.txt", "senate.txt", "house-county.txt", "house.txt", "counties.txt", "governor.txt", "governor-precinct.txt"]
-min_interval_seconds = 300
+min_interval_seconds = 840
 
 [sources.mn_2026_general_all.files]
 "senate.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/ussenate.txt"
@@ -126,7 +130,7 @@ election_date = "2026-11-03"
 url = "https://s3.amazonaws.com/dl.ncsbe.gov/ENRS/2026_11_03/results_pct_20261103.zip"
 format = "zip"
 expected_members = ["results_pct_20261103.txt"]
-min_interval_seconds = 300
+min_interval_seconds = 840
 
 [sources.ne_2026_general_all]
 state = "NE"
@@ -135,7 +139,7 @@ url = "https://electionresults.nebraska.gov/resultsCSV.aspx?text=All&type=All&ma
 format = "bundle"
 primary_filename = "results.csv"
 expected_members = ["results.csv", "election.html"]
-min_interval_seconds = 300
+min_interval_seconds = 840
 
 [sources.ne_2026_general_all.files]
 "election.html" = "https://electionresults.nebraska.gov/ResultsMedia.aspx"
@@ -146,7 +150,7 @@ election_date = "2026-11-03"
 url = "https://www.sos.ms.gov/MSCountyElectionInfo/"
 format = "bundle"
 primary_filename = "county-status.json"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["county-status.json", "adams.report", "alcorn.report", "amite.report", "attala.report", "benton.report", "bolivar.report", "calhoun.report", "carroll.report", "chickasaw.report", "choctaw.report", "claiborne.report", "clarke.report", "clay.report", "coahoma.report", "copiah.report", "covington.report", "desoto.pdf", "forrest.report", "franklin.report", "george.report", "greene.report", "grenada.report", "hancock.pdf", "harrison.report", "hinds.pdf", "holmes.report", "humphreys.report", "issaquena.report", "itawamba.report", "jackson.report", "jasper.report", "jefferson.report", "jeffersondavis.report", "jones.report", "kemper.report", "lafayette.pdf", "lamar.pdf", "lauderdale.pdf", "lawrence.report", "leake.report", "lee.report", "leflore.report", "lincoln.report", "lowndes.report", "madison.pdf", "marion.report", "marshall.report", "monroe.pdf", "montgomery.report", "neshoba.html", "newton.report", "noxubee.report", "oktibbeha.report", "panola.report", "pearlriver.report", "perry.report", "pike.pdf", "pontotoc.report", "prentiss.report", "quitman.report", "rankin.html", "scott.report", "sharkey.report", "simpson.report", "smith.report", "stone.report", "sunflower.html", "tallahatchie.report", "tate.report", "tippah.report", "tishomingo.report", "tunica.report", "union.report", "walthall.report", "warren.pdf", "washington.report", "wayne.report", "webster.report", "wilkinson.report", "winston.report", "yalobusha.report", "yazoo.report"]
 supplemental_members = ["adams.report", "alcorn.report", "amite.report", "attala.report", "benton.report", "bolivar.report", "calhoun.report", "carroll.report", "chickasaw.report", "choctaw.report", "claiborne.report", "clarke.report", "clay.report", "coahoma.report", "copiah.report", "covington.report", "forrest.report", "franklin.report", "george.report", "greene.report", "grenada.report", "harrison.report", "holmes.report", "humphreys.report", "issaquena.report", "itawamba.report", "jackson.report", "jasper.report", "jefferson.report", "jeffersondavis.report", "jones.report", "kemper.report", "lawrence.report", "leake.report", "lee.report", "leflore.report", "lincoln.report", "lowndes.report", "marion.report", "marshall.report", "montgomery.report", "newton.report", "noxubee.report", "oktibbeha.report", "panola.report", "pearlriver.report", "perry.report", "pontotoc.report", "prentiss.report", "quitman.report", "scott.report", "sharkey.report", "simpson.report", "smith.report", "stone.report", "tallahatchie.report", "tate.report", "tippah.report", "tishomingo.report", "tunica.report", "union.report", "walthall.report", "washington.report", "wayne.report", "webster.report", "wilkinson.report", "winston.report", "yalobusha.report", "yazoo.report"]
 
@@ -176,7 +180,7 @@ election_date = "2026-11-03"
 url = "https://electionresults.sd.gov/resultsCSV.aspx?text=All&type=SWR&map=CTY"
 format = "bundle"
 primary_filename = "results.csv"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["results.csv", "export.html", "statewide.xlsx"]
 supplemental_members = ["statewide.xlsx"]
 
@@ -189,7 +193,7 @@ election_date = "2026-11-03"
 url = "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=FED&map=CTY"
 format = "bundle"
 primary_filename = "fed.csv"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["fed.csv", "sw.csv", "fed.html", "sw.html", "county-nm-01.xlsx", "county-nm-02.xlsx", "county-nm-03.xlsx", "county-nm-gov.xlsx", "county-nm-sen.xlsx"]
 supplemental_members = ["county-nm-01.xlsx", "county-nm-02.xlsx", "county-nm-03.xlsx", "county-nm-gov.xlsx", "county-nm-sen.xlsx"]
 
@@ -204,7 +208,7 @@ election_date = "2026-11-03"
 url = "https://flelectionfiles.floridados.gov/enightfilespublic/20261103_ElecResultsFL.txt"
 format = "bundle"
 primary_filename = "results.txt"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["results.txt"]
 
 [sources.va_2026_general]
@@ -213,7 +217,7 @@ election_date = "2026-11-03"
 url = "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/data"
 format = "bundle"
 primary_filename = "data.json"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["data.json", "item-va-sen.json", "item-va-01.json", "item-va-02.json", "item-va-03.json", "item-va-04.json", "item-va-05.json", "item-va-06.json", "item-va-07.json", "item-va-08.json", "item-va-09.json", "item-va-10.json", "item-va-11.json"]
 supplemental_members = ["item-va-sen.json", "item-va-01.json", "item-va-02.json", "item-va-03.json", "item-va-04.json", "item-va-05.json", "item-va-06.json", "item-va-07.json", "item-va-08.json", "item-va-09.json", "item-va-10.json", "item-va-11.json"]
 
@@ -223,7 +227,7 @@ election_date = "2026-11-03"
 url = "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/data"
 format = "bundle"
 primary_filename = "data.json"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["data.json", "item-id-sen.json", "item-id-gov.json", "item-id-01.json", "item-id-02.json"]
 supplemental_members = ["item-id-sen.json", "item-id-gov.json", "item-id-01.json", "item-id-02.json"]
 
@@ -233,7 +237,7 @@ election_date = "2026-11-03"
 url = "https://results.votewa.gov/results/public/api/elections/washington/20261103/data"
 format = "bundle"
 primary_filename = "data.json"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["data.json", "item-wa-01.json", "item-wa-02.json", "item-wa-03.json", "item-wa-04.json", "item-wa-05.json", "item-wa-06.json", "item-wa-07.json", "item-wa-08.json", "item-wa-09.json", "item-wa-10.json"]
 supplemental_members = ["item-wa-01.json", "item-wa-02.json", "item-wa-03.json", "item-wa-04.json", "item-wa-05.json", "item-wa-06.json", "item-wa-07.json", "item-wa-08.json", "item-wa-09.json", "item-wa-10.json"]
 
@@ -243,7 +247,7 @@ election_date = "2026-11-03"
 url = "https://results.enr.clarityelections.com/CO/127407/current_ver.txt"
 format = "bundle"
 primary_filename = "current_ver.txt"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
 supplemental_members = ["detail.zip", "settings.json", "summary.json"]
 
@@ -253,7 +257,7 @@ election_date = "2026-11-03"
 url = "https://results.enr.clarityelections.com/IA/127077/current_ver.txt"
 format = "bundle"
 primary_filename = "current_ver.txt"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
 supplemental_members = ["detail.zip", "settings.json", "summary.json"]
 
@@ -263,19 +267,18 @@ election_date = "2026-11-03"
 url = "https://results.enr.clarityelections.com/WV/127496/current_ver.txt"
 format = "bundle"
 primary_filename = "current_ver.txt"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
 supplemental_members = ["detail.zip", "settings.json", "summary.json"]
 
-# Oregon's export pages change on every request, so each collection repeats all 38 exports;
-# a 15-minute interval keeps that load modest.
+# Oregon's export pages change on every request, so each collection repeats all 38 exports.
 [sources.or_2026_general]
 state = "OR"
 election_date = "2026-11-03"
 url = "https://results.oregonvotes.gov/ResultsExport.aspx"
 format = "bundle"
 primary_filename = "export.html"
-min_interval_seconds = 900
+min_interval_seconds = 840
 expected_members = ["export.html", "statewide.csv", "governor.csv", "county-baker.csv", "county-benton.csv", "county-clackamas.csv", "county-clatsop.csv", "county-columbia.csv", "county-coos.csv", "county-crook.csv", "county-curry.csv", "county-deschutes.csv", "county-douglas.csv", "county-gilliam.csv", "county-grant.csv", "county-harney.csv", "county-hood-river.csv", "county-jackson.csv", "county-jefferson.csv", "county-josephine.csv", "county-klamath.csv", "county-lake.csv", "county-lane.csv", "county-lincoln.csv", "county-linn.csv", "county-malheur.csv", "county-marion.csv", "county-morrow.csv", "county-multnomah.csv", "county-polk.csv", "county-sherman.csv", "county-tillamook.csv", "county-umatilla.csv", "county-union.csv", "county-wallowa.csv", "county-wasco.csv", "county-washington.csv", "county-wheeler.csv", "county-yamhill.csv"]
 supplemental_members = ["statewide.csv", "governor.csv", "county-baker.csv", "county-benton.csv", "county-clackamas.csv", "county-clatsop.csv", "county-columbia.csv", "county-coos.csv", "county-crook.csv", "county-curry.csv", "county-deschutes.csv", "county-douglas.csv", "county-gilliam.csv", "county-grant.csv", "county-harney.csv", "county-hood-river.csv", "county-jackson.csv", "county-jefferson.csv", "county-josephine.csv", "county-klamath.csv", "county-lake.csv", "county-lane.csv", "county-lincoln.csv", "county-linn.csv", "county-malheur.csv", "county-marion.csv", "county-morrow.csv", "county-multnomah.csv", "county-polk.csv", "county-sherman.csv", "county-tillamook.csv", "county-umatilla.csv", "county-union.csv", "county-wallowa.csv", "county-wasco.csv", "county-washington.csv", "county-wheeler.csv", "county-yamhill.csv"]
 
@@ -291,7 +294,7 @@ election_date = "2026-11-03"
 url = "https://api.sos.ca.gov/returns/governor"
 format = "bundle"
 primary_filename = "governor.json"
-min_interval_seconds = 900
+min_interval_seconds = 840
 expected_members = ["governor.json", "us-rep-01.json", "us-rep-02.json", "us-rep-03.json", "us-rep-04.json", "us-rep-05.json", "us-rep-06.json", "us-rep-07.json", "us-rep-08.json", "us-rep-09.json", "us-rep-10.json", "us-rep-11.json", "us-rep-12.json", "us-rep-13.json", "us-rep-14.json", "us-rep-15.json", "us-rep-16.json", "us-rep-17.json", "us-rep-18.json", "us-rep-19.json", "us-rep-20.json", "us-rep-21.json", "us-rep-22.json", "us-rep-23.json", "us-rep-24.json", "us-rep-25.json", "us-rep-26.json", "us-rep-27.json", "us-rep-28.json", "us-rep-29.json", "us-rep-30.json", "us-rep-31.json", "us-rep-32.json", "us-rep-33.json", "us-rep-34.json", "us-rep-35.json", "us-rep-36.json", "us-rep-37.json", "us-rep-38.json", "us-rep-39.json", "us-rep-40.json", "us-rep-41.json", "us-rep-42.json", "us-rep-43.json", "us-rep-44.json", "us-rep-45.json", "us-rep-46.json", "us-rep-47.json", "us-rep-48.json", "us-rep-49.json", "us-rep-50.json", "us-rep-51.json", "us-rep-52.json"]
 
 [sources.ca_2026_general.files]
@@ -358,7 +361,7 @@ election_date = "2026-11-03"
 url = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_1_1.html"
 format = "bundle"
 primary_filename = "governor.html"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["governor.html", "house-01.html", "house-02.html", "house-03.html", "house-04.html", "house-05.html", "house-06.html", "house-07.html", "house-08.html"]
 
 [sources.md_2026_general.files]
@@ -377,5 +380,5 @@ election_date = "2026-11-03"
 url = "https://elections.hawaii.gov/wp-content/results/2026%20General/summary.txt"
 format = "bundle"
 primary_filename = "summary.txt"
-min_interval_seconds = 300
+min_interval_seconds = 840
 expected_members = ["summary.txt"]
