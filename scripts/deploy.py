@@ -28,7 +28,7 @@ def main():
         help="A source whose address this release changes; it has no snapshot to check yet",
     )
     sub.add_parser("rollback-release")
-    for name in ("prepare", "promote", "disable"):
+    for name in ("prepare", "promote", "disable", "pause", "resume"):
         sub.add_parser(name).add_argument("--source", required=True)
     county = sub.add_parser("import-county", help="Import a reviewed Mississippi county report")
     county.add_argument("--county", required=True)
@@ -76,6 +76,8 @@ def main():
             result = getattr(control, action)(path, args.source, prod, config)
         elif action == "disable":
             result = control.disable(path, args.source)
+        elif action in ("pause", "resume"):
+            result = control.pause(path, args.source, action == "pause")
         elif action == "import-county":
             result = control.import_county(
                 path, args.county, args.file, args.review_json, prod, config

@@ -26,7 +26,7 @@ from election_pipeline.storage import atomic_json, utc_now
 from election_pipeline.workflow import NO_SNAPSHOT
 
 # A locked source is held by another run or a backup; it is not a failure.
-GOOD = {"succeeded", "already_current", "not_due", "awaiting_publication", "locked"}
+GOOD = {"succeeded", "already_current", "not_due", "awaiting_publication", "locked", "paused"}
 
 
 def db_settings(prod, *, writer=False):
@@ -106,6 +106,8 @@ def run_enabled(path, prod, config):
             entry = current["sources"][name]
             if not entry["enabled"]:
                 return None
+            if entry.get("paused"):
+                return {"source_id": name, "outcome": "paused"}
             remaining = max(1, int(deadline - time.monotonic()))
             budget = {
                 **config,
@@ -345,6 +347,20 @@ def disable(path, name):
 
     catalog.update(path, change)
     return {"outcome": "disabled", "source_id": name}
+
+
+def pause(path, name, paused):
+    """Stop or restart collecting a source; its last publication stays served either way."""
+
+    def change(value):
+        entry = value["sources"][name]
+        if paused:
+            entry["paused"] = True
+        else:
+            entry.pop("paused", None)
+
+    catalog.update(path, change)
+    return {"outcome": "paused" if paused else "resumed", "source_id": name}
 
 
 def import_county(path, county, report, review, prod, config):

@@ -115,6 +115,10 @@ def assess(prod, config, now):
             except (KeyError, ValueError, TypeError):
                 issues[f"manual/{name}"] = "Manual publication receipt is missing or invalid"
             continue
+        if entry.get("paused"):
+            # An operator stopped its collection; its publication is still checked below.
+            issues[f"{REMINDER}paused/{name}"] = "Collection is paused by an operator"
+            continue
         run_limit = int(config.get("MAX_RUN_AGE_SECONDS", "3600"))
         poll_limit = max(run_limit, source.poll_seconds * 3)
 

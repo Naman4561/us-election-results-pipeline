@@ -94,6 +94,9 @@ class DeploymentTests(unittest.TestCase):
             lambda v: v["sources"].update(az_2026_general=dict(v["sources"][GA])),
             lambda v: v["sources"][GA].update(public=True),
             lambda v: v["sources"][GA].update(acquisition="ftp"),
+            # Only a collected source can be paused, and only with a boolean.
+            lambda v: v["sources"][GA].update(paused=True),
+            lambda v: v["sources"][NC].update(paused="yes"),
             # Ancillary datasets are collected by hand, never by the worker.
             lambda v: v["sources"].update(nc_absentee_early_demographics_2026={**v["sources"][NC]}),
             lambda v: v["release"].update(image_id="election-pipeline:latest"),
@@ -171,6 +174,19 @@ class DeploymentTests(unittest.TestCase):
                 self.assertEqual(control.run_enabled(self.path, self.prod, self.config), 0)
         latest = json.loads((self.root / "worker-latest.json").read_text())
         self.assertEqual(latest["outcome"], "succeeded")
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_a_paused_source_stays_public_and_is_skipped_not_failed(self):
+        self.assertEqual(control.pause(self.path, NC, True)["outcome"], "paused")
+        self.assertTrue(catalog.read(self.path)["sources"][NC]["public"])
+        with patch.object(control, "run_one", return_value={"outcome": "succeeded"}) as run:
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(control.run_enabled(self.path, self.prod, self.config), 0)
+        self.assertEqual([c.args[1] for c in run.call_args_list], [KY])
+        latest = json.loads((self.root / "worker-latest.json").read_text())
+        self.assertIn({"source_id": NC, "outcome": "paused"}, latest["results"])
+        control.pause(self.path, NC, False)
+        self.assertNotIn("paused", catalog.read(self.path)["sources"][NC])
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_manual_and_disabled_sources_are_never_polled(self):

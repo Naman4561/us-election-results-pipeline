@@ -12,4 +12,4 @@ WorkingDirectory=/opt/election-releases/current
 UMask=0077
 Nice=10
 ExecStart=/opt/election-releases/current/.venv/bin/python scripts/deploy.py run
-TimeoutStartSec=6min
+TimeoutStartSec=12min

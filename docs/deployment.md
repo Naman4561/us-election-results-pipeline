@@ -78,6 +78,11 @@ flags. `deploy disable --source` stops collecting a private source; a public one
 first leave through a dashboard switch. `deploy discard-dashboard --name` removes an
 unused candidate.
 
+`deploy pause --source` stops collecting a source while its last publication stays
+public, such as a site that is down for days; `deploy resume --source` starts it again.
+The worker records a paused source as `paused`, and the monitor shows a reminder in
+place of its collection checks.
+
 Manual sources and Mississippi's reviewed counties have their own procedures:
 [manual results](manual-results.md) and [Mississippi collection](mississippi-collection.md).
 
@@ -91,7 +96,7 @@ paths and resource budgets, never passwords:
 | `JOB_CPUS`, `JOB_MEMORY` | `0.5`, `768m` | Limits of every job and dashboard container |
 | `JOB_PARALLEL` | `1` | Jobs at once (1–4), each with those limits |
 | `JOB_TIMEOUT` | `240` | Seconds before one job is stopped |
-| `CYCLE_SECONDS` | `270` | One worker cycle's budget; the timer fires every 5 minutes |
+| `CYCLE_SECONDS` | `600` | One worker cycle's budget. The timer fires every 5 minutes and skips ticks while a cycle runs; normal cycles take 1–2 minutes, the one after a release, which republishes every source, longer |
 
 Raise `JOB_PARALLEL` only after measuring headroom: PostgreSQL and the dashboard share
 the host. Backups pause collection for a few seconds only; see [backups](backups.md).

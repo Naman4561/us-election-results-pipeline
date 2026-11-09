@@ -164,6 +164,18 @@ class MonitorTests(unittest.TestCase):
         self.publish(MS)
         self.assertIn("dashboard/coverage", self.assess())
 
+    def test_a_paused_source_is_a_reminder_but_its_publication_is_still_checked(self):
+        self.catalog["sources"][NC]["paused"] = True
+        stale = (self.now - timedelta(days=2)).isoformat()
+        atomic_json(
+            self.root / "data/runs" / NC / "latest.json",
+            {"outcome": "failed", "finished_at": stale},
+        )
+        atomic_json(self.root / "data/state" / (NC + ".json"), {"last_checked_at": stale})
+        issues = self.assess()
+        self.assertEqual(set(issues), {monitor.REMINDER + "paused/" + NC})
+        self.assertIn("dashboard/NC", self.assess(dashboard=payload("MN")))
+
     def test_release_image_and_current_symlink_must_match_the_catalog(self):
         self.assertIn("deployment/release", self.assess(image=(IMAGE, "c" * 40)))
         self.config["CURRENT_RELEASE"] = str(self.root / "elsewhere")

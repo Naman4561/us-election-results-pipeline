@@ -15,6 +15,7 @@ release's own ``config/sources.toml`` and ``election_pipeline.states``::
         "<source_id>": {
           "enabled": true, "public": true, "status": "unofficial",
           "acquisition": "http" | "manual",
+          "paused": true,                     # optional: not collected, still served
           ...                                 # publication and manual-snapshot receipts
         }
       }
@@ -70,6 +71,10 @@ def validate(value):
             raise ValueError("Publication status must be explicit")
         if entry["acquisition"] not in ("http", "manual"):
             raise ValueError("Acquisition must be http or manual")
+        if type(entry.get("paused", False)) is not bool:
+            raise ValueError("The paused flag must be boolean")
+        if entry.get("paused") and (not entry["enabled"] or entry["acquisition"] != "http"):
+            raise ValueError("Only an enabled HTTP source can be paused")
         source = sources[name]
         if source.dataset != "election_results":
             if entry["enabled"]:

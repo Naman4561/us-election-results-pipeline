@@ -7,10 +7,10 @@ gantt
     title One hour of scheduled work (UTC)
     dateFormat HH:mm
     axisFormat %H:%M
-    section Worker · every 5 min, ≤ 270 s
-    cycle :00:00, 4m
-    cycle :00:05, 4m
-    cycle :00:10, 4m
+    section Worker · every 5 min, ≤ 600 s
+    cycle :00:00, 2m
+    cycle :00:05, 2m
+    cycle :00:10, 2m
     section Monitor · every minute
     checks :00:00, 15m
     section Backup · four times a day
@@ -19,7 +19,7 @@ gantt
 
 | Timer | Runs | Does |
 | --- | --- | --- |
-| `election-worker.timer` | every 5 minutes, at :30 s | `deploy.py run`: every enabled HTTP source in the release image, least recently run first, within `CYCLE_SECONDS` (270); `JOB_PARALLEL` jobs at once. A source is due every 15 minutes, or hourly or at listed hours once its count stops (`config/sources.toml`) |
+| `election-worker.timer` | every 5 minutes, at :30 s | `deploy.py run`: every enabled HTTP source in the release image, least recently run first, within `CYCLE_SECONDS` (600); `JOB_PARALLEL` jobs at once. A source is due every 15 minutes, or hourly or at listed hours once its count stops (`config/sources.toml`) |
 | `election-monitor.timer` | every minute | Freshness, failures, release, timers, backup age, disk, dashboard; SNS alerts and CloudWatch heartbeat |
 | `election-backup.timer` | every 6 hours | Full backup to S3, local prune, S3 retention tags |
 
