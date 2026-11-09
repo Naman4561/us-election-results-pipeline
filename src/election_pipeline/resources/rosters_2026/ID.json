@@ -1,6 +1,6 @@
 {
  "state": "ID",
- "provenance": "Enhanced Voting ballot-option IDs and counties. Reviewed from the official captures recorded in tests/fixtures/nine_states/provenance.json (November 6, 2026 UTC).",
+ "provenance": "Enhanced Voting ballot-option IDs and counties. Reviewed from the official captures recorded in tests/fixtures/nine_states/provenance.json (November 6, 2026 UTC); ID-GOV's \"Uncertified write-ins\" option was added from the November 9, 2026 23:14 UTC capture.",
  "races": {
   "ID-SEN": {
    "candidates": [
@@ -129,6 +129,7 @@
     "01000000-3891-2312-d6d8-08df23f7fb2c",
     "01000000-3891-2312-d8e6-08df23f7fb2c",
     "01000000-3891-2312-c408-08df23f7fb2c",
+    "01000000-d923-b060-3116-08df308f46db",
     "01000000-0498-e71b-abc2-08df23f80648"
    ],
    "counties": [

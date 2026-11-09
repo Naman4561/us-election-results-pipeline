@@ -145,7 +145,7 @@ class NineStateTests(unittest.TestCase):
     def test_official_snapshots_parse_verify_reconcile_convert_and_replay(self):
         expected = {
             "VA": (1010, 12, {"VA-SEN": 133, "VA-11": 2}),
-            "ID": (665, 4, {"ID-SEN": 44, "ID-GOV": 44, "ID-01": 19}),
+            "ID": (710, 4, {"ID-SEN": 44, "ID-GOV": 44, "ID-01": 19}),
             "WA": (180, 10, {"WA-03": 7, "WA-07": 1}),
             "CO": (1201, 10, {"CO-SEN": 64, "CO-GOV": 64, "CO-05": 1}),
             "IA": (1076, 6, {"IA-SEN": 99, "IA-GOV": 99, "IA-04": 36}),

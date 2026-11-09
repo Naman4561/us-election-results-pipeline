@@ -528,16 +528,16 @@
   "source_id": "ia_2026_general"
  },
  "ID": {
-  "archive_sha256": "85ec1669195f3b5ee275264ed99360112831b66f0f218b834e4b4c5500de09b2",
-  "captured_at": "2026-11-06T05:10:17+00:00",
+  "archive_sha256": "831bb432e288a8e7ef8d1b468aa7da5f446ea26c74fdeed73bce8b09b99136e4",
+  "captured_at": "2026-11-09T23:14:45+00:00",
   "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
   "components": [
    {
-    "bytes": 522796,
+    "bytes": 523185,
     "content_type": "application/json; charset=utf-8",
     "final_url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/data",
     "name": "data.json",
-    "sha256": "93a555d55dc6816cafd93dc983911946e5b76dec75e9eeb1c9582a281d26f507",
+    "sha256": "82d48d8d45fcb556d45984d521968eba0268b1d8ea7e5583679ea22448f66302",
     "url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/data"
    },
    {
@@ -545,7 +545,7 @@
     "content_type": "application/json; charset=utf-8",
     "final_url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-70f4-ca87-27ba-08df23e9954c",
     "name": "item-id-sen.json",
-    "sha256": "5e79948a5b3d2877993cb54485dd19935fdbef4b5d9f86205062768c21bbcc32",
+    "sha256": "422faef9cc7583b9c919755b3ccb44efec066db97b5273043112ff87dd27d450",
     "url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-70f4-ca87-27ba-08df23e9954c"
    },
    {
@@ -553,7 +553,7 @@
     "content_type": "application/json; charset=utf-8",
     "final_url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-9b8a-13bb-e31b-08df23ec9989",
     "name": "item-id-01.json",
-    "sha256": "18054a8dd946dd91a6f49465b1427653dfa7935611ddeb29cc80d3416ba2dca6",
+    "sha256": "af97f7a8d43a9c6d8875ba00bf92f3bb5ff9b02262ca237927622177b372f2d8",
     "url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-9b8a-13bb-e31b-08df23ec9989"
    },
    {
@@ -561,23 +561,23 @@
     "content_type": "application/json; charset=utf-8",
     "final_url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-9b8a-13bb-7a7e-08df23ecc8f3",
     "name": "item-id-02.json",
-    "sha256": "d3f8e2830f62e7b8bc58401364c34722c7bfecc2976941afae6506ad9f70b99d",
+    "sha256": "214b5daa08818eeb7e82070222d6a0d2f4c46c6182d8fa56600f590185d30295",
     "url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-9b8a-13bb-7a7e-08df23ecc8f3"
    },
    {
-    "bytes": 166327,
+    "bytes": 183902,
     "content_type": "application/json; charset=utf-8",
     "final_url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-70f4-ca87-1a95-08df23ecef0e",
     "name": "item-id-gov.json",
-    "sha256": "f63687ccc6c6f4b418cf499f8e54d7044b24767c44294c1f28fd2cb7a82037a9",
+    "sha256": "cde39fab9084cbe1299e960d8b4d7dc0a5d0710876cda869bc230611f412c2d2",
     "url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/ballot-items/01000000-70f4-ca87-1a95-08df23ecef0e"
    },
    {
-    "bytes": 522796,
+    "bytes": 523185,
     "content_type": "application/json; charset=utf-8",
     "final_url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/data",
     "name": ".recheck.json",
-    "sha256": "93a555d55dc6816cafd93dc983911946e5b76dec75e9eeb1c9582a281d26f507",
+    "sha256": "82d48d8d45fcb556d45984d521968eba0268b1d8ea7e5583679ea22448f66302",
     "url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/data"
    }
   ],
