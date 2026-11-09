@@ -123,6 +123,16 @@ class ManualTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "generation time"):
             self.acquire(downloaded_at="2026-11-03T23:00:00+00:00")
 
+    def test_kansas_page_imports_with_its_central_time_as_the_generation_time(self):
+        self.source = load_config(ROOT / "config/sources.toml")[1]["ks_2026_general"]
+        raw = gzip.decompress((ROOT / "tests/fixtures/five_states/ks.html.gz").read_bytes())
+        receipt = self.acquire(raw)
+        # The page says 11/03/2026 8:41 PM, printed in CST.
+        self.assertEqual(receipt["source_generated_at"], "2026-11-03T20:41:00-06:00")
+        self.assertEqual(receipt["acquisition_method"], "manual")
+        with self.assertRaisesRegex(ValueError, "generation time"):
+            self.acquire(raw, downloaded_at="2026-11-04T02:00:00+00:00")
+
     def test_import_runs_real_parser_then_normal_load_and_candidate_validation_without_collection(
         self,
     ):

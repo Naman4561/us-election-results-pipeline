@@ -56,9 +56,9 @@ def import_file(source, settings, data_dir, path, downloaded_at, expected_sha256
         checked = parse_source(source, settings, staged.root, sha256=digest)
         if checked.get("outcome") != "parsed":
             raise ValueError("Manual file rejected: " + str(checked.get("error", checked)))
-        generated = checked.get("source_update_text")
-        # An ISO timestamp is available in Ohio XML. Other adapters retain their
-        # original source text; add a timestamp contract before permitting them here.
+        # Ohio's XML prints an ISO timestamp. Adapters whose source text is not ISO
+        # (Kansas) supply source_generated_at; others cannot be imported manually yet.
+        generated = checked.get("source_generated_at") or checked.get("source_update_text")
         try:
             generated_at = datetime.fromisoformat(generated)
         except (ValueError, TypeError) as error:

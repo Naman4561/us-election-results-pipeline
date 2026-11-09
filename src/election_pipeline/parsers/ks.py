@@ -2,13 +2,17 @@
 
 import re
 import zipfile
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 from election_pipeline.parsers.html import Tree
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import formatted_count, party, row
 from election_pipeline.parsers.totals import database_row, finish, load_contract  # noqa: F401
 from election_pipeline.states import state_adapter
+
+# The Secretary of State prints Central time. The reporting window starts after DST
+# ended on November 1, 2026, so it is CST throughout.
+CENTRAL = timezone(timedelta(hours=-6))
 
 
 def race_name(name):
@@ -145,4 +149,8 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             raise ValueError("Kansas map must identify all 105 counties, including unreported ones")
         verify_scope("KS", race, list(official), counties)
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
-    stats.update(source_update_text=timestamps[0].text, contest_total_reconciliation="passed")
+    stats.update(
+        source_update_text=timestamps[0].text,
+        source_generated_at=updated.replace(tzinfo=CENTRAL).isoformat(),
+        contest_total_reconciliation="passed",
+    )
