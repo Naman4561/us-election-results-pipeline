@@ -317,6 +317,30 @@ class CollectionTests(unittest.TestCase):
         self.assertNotIn("etag", state)
         self.assertIsNotNone(ArchiveStore(self.root, self.source).cached_archive(state))
 
+    def test_listed_hours_are_checked_once_each_and_missed_hours_wait(self) -> None:
+        source = replace(self.source, collect_hours_utc=(1, 4, 22))
+        at = lambda h, m=0: datetime(2026, 11, 9, h, m, tzinfo=timezone.utc)  # noqa: E731
+        nxt = pipeline.next_collection
+        # Checked at 01:00:40: not again in that hour, and next at the start of 04:00.
+        self.assertEqual(nxt(source, at(1, 1), at(1, 30)), at(4))
+        self.assertEqual(nxt(source, at(1, 1), at(4, 0)), at(4))
+        # A missed 04:00 waits for 22:00 rather than running in an unlisted hour.
+        self.assertEqual(nxt(source, at(1, 1), at(5, 10)), at(22))
+        # The last listed hour of the day wraps to the first of the next.
+        self.assertEqual(nxt(source, at(22, 1), at(23)), at(1) + timedelta(days=1))
+        self.assertEqual(source.poll_seconds, 18 * 3600)
+        self.assertEqual(self.source.poll_seconds, 0)
+        # A check in the current hour holds the source until a later listed hour.
+        now = datetime.now(timezone.utc).hour
+        self.source = replace(self.source, collect_hours_utc=(now,))
+        Handler.responses = [self.good()]
+        self.assertEqual(self.collect()["outcome"], "downloaded")
+        waiting = self.collect()
+        self.assertEqual(waiting["outcome"], "not_due")
+        self.assertEqual(len(Handler.requests), 1)
+        with self.assertRaises(ValueError):
+            replace(self.source, collect_hours_utc=(4, 1))
+
     def test_missing_cached_file_forces_a_full_download(self) -> None:
         Handler.responses = [self.good(ETag='"v1"'), self.good(ETag='"v1"')]
         self.collect()

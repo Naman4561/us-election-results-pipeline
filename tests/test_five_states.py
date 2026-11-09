@@ -365,6 +365,14 @@ class FiveStateTests(unittest.TestCase):
         second = base + "1030-PM-General-Election-Results-.xlsx"
         index = f'<a href="{second}">later</a><a href="{first}">earlier</a>'
         self.assertEqual(latest_report(index, src), second)
+        # The names SC used on election night; the midnight report is the newest.
+        names = ["955-PM", "1015PM", "11PM", "1130PM", "12AM"]
+        links = [base + n + "-General-Election-Results.xlsx" for n in names]
+        index = "".join(f'<a href="{link}">r</a>' for link in reversed(links))
+        self.assertEqual(latest_report(index, src), links[-1])
+        self.assertEqual(latest_report(index.replace(links[-1], ""), src), links[-2])
+        later = base.replace("11-03", "11-10") + "9AM-General-Election-Results.xlsx"
+        self.assertEqual(latest_report(index + f'<a href="{later}">r</a>', src), later)
         for bad in [
             first.replace("scvotes.gov", "evil.example"),
             first.replace("2026-11-03", "2024-11-05"),

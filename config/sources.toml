@@ -10,9 +10,11 @@ max_zip_members = 20
 max_csv_rows = 2000000
 user_agent = "US-Election-Results-Pipeline/0.1"
 
-# Every source is collected every 15 minutes: the worker runs every 5, and 840 s (not 900)
-# keeps a source checked a few seconds later in one cycle than the last from slipping
-# to the fourth cycle.
+# A source still counting is collected every 15 minutes. One whose count has stopped is
+# collected hourly (3540 s), or every three hours at hours clear of the backups, which
+# start at 00:02, 06:02, 12:02 and 18:02 UTC and take about half an hour. The worker runs
+# every 5 minutes, and 840 s (not 900) or 3540 s (not 3600) keeps a source checked a few
+# seconds later in one cycle than the last from slipping a cycle.
 
 [sources.ak_2026_general]
 state = "AK"
@@ -106,6 +108,7 @@ format = "bundle"
 primary_filename = "results.json"
 expected_members = ["results.json"]
 min_interval_seconds = 840
+collect_hours_utc = [1, 4, 7, 10, 13, 16, 19, 22]
 
 [sources.mn_2026_general_all]
 state = "MN"
@@ -140,6 +143,7 @@ format = "bundle"
 primary_filename = "results.csv"
 expected_members = ["results.csv", "election.html"]
 min_interval_seconds = 840
+collect_hours_utc = [1, 4, 7, 10, 13, 16, 19, 22]
 
 [sources.ne_2026_general_all.files]
 "election.html" = "https://electionresults.nebraska.gov/ResultsMedia.aspx"
@@ -181,6 +185,7 @@ url = "https://electionresults.sd.gov/resultsCSV.aspx?text=All&type=SWR&map=CTY"
 format = "bundle"
 primary_filename = "results.csv"
 min_interval_seconds = 840
+collect_hours_utc = [1, 4, 7, 10, 13, 16, 19, 22]
 expected_members = ["results.csv", "export.html", "statewide.xlsx"]
 supplemental_members = ["statewide.xlsx"]
 
@@ -193,7 +198,7 @@ election_date = "2026-11-03"
 url = "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=FED&map=CTY"
 format = "bundle"
 primary_filename = "fed.csv"
-min_interval_seconds = 840
+min_interval_seconds = 3540
 expected_members = ["fed.csv", "sw.csv", "fed.html", "sw.html", "county-nm-01.xlsx", "county-nm-02.xlsx", "county-nm-03.xlsx", "county-nm-gov.xlsx", "county-nm-sen.xlsx"]
 supplemental_members = ["county-nm-01.xlsx", "county-nm-02.xlsx", "county-nm-03.xlsx", "county-nm-gov.xlsx", "county-nm-sen.xlsx"]
 
@@ -257,7 +262,7 @@ election_date = "2026-11-03"
 url = "https://results.enr.clarityelections.com/IA/127077/current_ver.txt"
 format = "bundle"
 primary_filename = "current_ver.txt"
-min_interval_seconds = 840
+min_interval_seconds = 3540
 expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
 supplemental_members = ["detail.zip", "settings.json", "summary.json"]
 
@@ -380,5 +385,5 @@ election_date = "2026-11-03"
 url = "https://elections.hawaii.gov/wp-content/results/2026%20General/summary.txt"
 format = "bundle"
 primary_filename = "summary.txt"
-min_interval_seconds = 840
+min_interval_seconds = 3540
 expected_members = ["summary.txt"]

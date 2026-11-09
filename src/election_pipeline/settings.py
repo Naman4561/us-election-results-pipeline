@@ -91,6 +91,8 @@ class Source:
     primary_filename: str = "results.xml"
     supplemental_members: tuple[str, ...] = ()
     collector_overrides: tuple[tuple[str, int], ...] = ()
+    # UTC hours a source may be checked in, once each; empty means any cycle that is due.
+    collect_hours_utc: tuple[int, ...] = ()
 
     def __post_init__(self) -> None:
         if not re.fullmatch(r"[a-z][a-z0-9_-]{0,79}", self.source_id):
@@ -182,6 +184,19 @@ class Source:
             or len(dict(self.collector_overrides)) != len(self.collector_overrides)
         ):
             raise ValueError("Invalid per-source archive limits")
+        if (
+            not isinstance(self.collect_hours_utc, tuple)
+            or any(type(h) is not int or not 0 <= h <= 23 for h in self.collect_hours_utc)
+            or list(self.collect_hours_utc) != sorted(set(self.collect_hours_utc))
+        ):
+            raise ValueError("collect_hours_utc must be distinct UTC hours 0-23 in order")
+
+    @property
+    def poll_seconds(self) -> int:
+        """The longest planned wait between two checks of this source."""
+        hours = self.collect_hours_utc
+        gaps = [(b - a) % 24 or 24 for a, b in zip(hours, hours[1:] + hours[:1])]
+        return max(self.min_interval_seconds, max(gaps, default=0) * 3600)
 
     def effective_settings(self, settings: CollectorSettings) -> CollectorSettings:
         return (
@@ -193,7 +208,7 @@ class Source:
     def signature(self, settings: CollectorSettings) -> str:
         settings = self.effective_settings(settings)
         source_contract = asdict(self)
-        for key in ("supplemental_members", "collector_overrides"):
+        for key in ("supplemental_members", "collector_overrides", "collect_hours_utc"):
             if not source_contract[key]:
                 source_contract.pop(key)
         if self.primary_filename == "results.xml":
@@ -243,6 +258,10 @@ def load_config(path: Path) -> tuple[CollectorSettings, dict[str, Source]]:
         if not isinstance(overrides, dict):
             raise ValueError("collector_overrides must be a table")
         item["collector_overrides"] = tuple(sorted(overrides.items()))
+        hours = item.get("collect_hours_utc", [])
+        if not isinstance(hours, list):
+            raise ValueError(f"collect_hours_utc must be an array of hours: {source_id}")
+        item["collect_hours_utc"] = tuple(hours)
         sources[source_id] = Source(source_id=source_id, **item)
     if not sources:
         raise ValueError("Configure at least one source")

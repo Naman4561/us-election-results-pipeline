@@ -36,6 +36,27 @@ def failure_backoff(failures: int, blocked: bool) -> float:
     return float(min(cap, BACKOFF_BASE_SECONDS * 3 ** min(failures - 1, 10)))
 
 
+def next_collection(source, last_checked: datetime, now: datetime) -> datetime:
+    """When a source that was checked at last_checked is next due.
+
+    A source with collect_hours_utc is checked at most once in each listed hour and never
+    in another, so a missed hour waits for the next listed one; that keeps it clear of
+    hours such as the backups'.
+    """
+    due = last_checked + timedelta(seconds=source.min_interval_seconds)
+    if not source.collect_hours_utc:
+        return due
+    hour = timedelta(hours=1)
+
+    def start(t: datetime) -> datetime:
+        return t.astimezone(timezone.utc).replace(minute=0, second=0, microsecond=0)
+
+    slot = max(start(last_checked) + hour, start(now))
+    while slot.hour not in source.collect_hours_utc:
+        slot += hour
+    return max(due, slot)
+
+
 def collector_code_hash(package_dir: Path | None = None) -> str:
     """Identify the shipped Python sources and reviewed parser data, without needing Git."""
     digest = hashlib.sha256()
@@ -202,16 +223,15 @@ def _collect_locked(
 
     cached = store.cached_archive(state)
     if (
-        source.min_interval_seconds
+        (source.min_interval_seconds or source.collect_hours_utc)
         and not force_download
         and state.get("last_checked_at")
         and (cached is not None or state.get("availability") == "awaiting_publication")
     ):
-        next_check = datetime.fromisoformat(state["last_checked_at"]) + timedelta(
-            seconds=source.min_interval_seconds
-        )
+        now = datetime.now(timezone.utc)
+        next_check = next_collection(source, datetime.fromisoformat(state["last_checked_at"]), now)
 
-        if datetime.now(timezone.utc) < next_check:
+        if now < next_check:
             # No request is made, so no fetch record is written: one per scheduler tick
             # would grow without bound and say nothing the state file does not.
             return {
