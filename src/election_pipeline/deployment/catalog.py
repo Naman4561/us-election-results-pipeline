@@ -81,6 +81,8 @@ def validate(value):
                 age = entry.get("manual_max_age_seconds", 21600)
                 if type(age) is not int or not 900 <= age <= 604800:
                     raise ValueError("Invalid manual snapshot freshness limit")
+                if type(entry.get("manual_final", False)) is not bool:
+                    raise ValueError("Manual final flag must be boolean")
             owners.setdefault(source.state, []).append((name, entry))
         elif entry["enabled"] or entry["public"]:
             raise ValueError("Ancillary sources run manually")

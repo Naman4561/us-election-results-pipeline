@@ -87,6 +87,11 @@ against a per-source operator-update limit (default six hours). It does not
 require an HTTP poll or a periodic run from Ohio. Automatic states retain their
 existing limits. A rejected import does not refresh the manual freshness clock.
 
+When the issuer announces that its unofficial results will no longer be updated
+(Kansas stopped after November 6, 2026), configure the source with `--final`. The
+monitor then never reports the snapshot as overdue, but it still checks that the
+receipt matches the approved publication. A later import is still possible.
+
 ## Validation
 
 ```powershell

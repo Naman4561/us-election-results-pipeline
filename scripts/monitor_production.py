@@ -110,9 +110,9 @@ def assess(prod, config, now):
             entry = catalog["sources"][name]
             try:
                 receipt = entry["manual_snapshot"]
-                if age_seconds(receipt["downloaded_at"], now) > entry.get(
-                    "manual_max_age_seconds", 21600
-                ):
+                if entry.get("manual_final") is not True and age_seconds(
+                    receipt["downloaded_at"], now
+                ) > entry.get("manual_max_age_seconds", 21600):
                     issues[f"{REMINDER}manual/{name}"] = (
                         "Manual snapshot is overdue for an operator update"
                     )

@@ -9,7 +9,7 @@ from election_pipeline.deployment import catalog, containers, control
 from election_pipeline.settings import CollectorSettings
 
 
-def configure(path, release, image, name, prod, config, max_age_seconds=21600):
+def configure(path, release, image, name, prod, config, max_age_seconds=21600, final=False):
     control.controls_ready(config)
     if not 900 <= max_age_seconds <= 604800:
         raise ValueError("Manual freshness limit must be between 15 minutes and seven days")
@@ -55,6 +55,8 @@ def configure(path, release, image, name, prod, config, max_age_seconds=21600):
             races=meta["races"],
             release_sha256=containers.release_hash(release),
             manual_max_age_seconds=max_age_seconds,
+            # The issuer has stopped updating its unofficial results; no import is due.
+            manual_final=final is True,
         )
         value["sources"][name] = entry
 

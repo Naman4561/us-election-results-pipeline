@@ -453,6 +453,25 @@ class ManualDeploymentTests(unittest.TestCase):
             issues = monitor.assess(self.prod, self.config, now)
         self.assertIn("reminder/manual/oh_2026_general", issues)
         self.assertNotIn("poll/oh_2026_general", issues)
+        # A final snapshot is never overdue, but its receipt is still checked.
+        entry["manual_final"] = True
+        self.save()
+        with (
+            patch.object(monitor, "load_config", return_value=(None, {})),
+            patch.object(catalog, "verify_baseline"),
+            patch.object(containers, "inspect_image", return_value=(self.image, self.revision)),
+            patch.object(
+                monitor, "systemd", side_effect=lambda action, unit: action == "is-active"
+            ),
+            patch.object(monitor, "dashboard_payload", return_value=payload),
+            patch.object(
+                monitor.shutil, "disk_usage", return_value=SimpleNamespace(total=100, free=90)
+            ),
+        ):
+            self.assertEqual(monitor.assess(self.prod, self.config, now), {})
+            entry["manual_snapshot"]["publication_id"] = "other"
+            self.save()
+            self.assertIn("manual/oh_2026_general", monitor.assess(self.prod, self.config, now))
 
 
 @unittest.skipUnless(

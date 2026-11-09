@@ -20,6 +20,7 @@ def main():
     setup.add_argument("--release", type=Path, required=True)
     setup.add_argument("--image", required=True)
     setup.add_argument("--max-age-hours", type=int, default=6)
+    setup.add_argument("--final", action="store_true", help="The source no longer updates")
     local = sub.add_parser("import")
     local.add_argument("--source", required=True)
     local.add_argument("--file", type=Path, required=True)
@@ -42,6 +43,7 @@ def main():
                 prod,
                 config,
                 max_age_seconds=args.max_age_hours * 3600,
+                final=args.final,
             )
         else:
             kwargs = (
