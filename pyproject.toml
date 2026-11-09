@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "us-election-results-pipeline"
-version = "0.1.1"
-description = "Collection and provenance of official U.S. election result files"
+version = "0.2.0"
+description = "Official U.S. election results: collection, validation, publication and a dashboard"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = ["pypdf==6.21.4"]

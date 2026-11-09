@@ -14,23 +14,21 @@ flowchart TB
     subgraph LS["Lightsail instance · Ubuntu"]
         subgraph compose["Docker Compose project election-production"]
             CADDY["caddy:2<br/>TLS · GET/HEAD only ·<br/>cache headers"]
-            DASH["dashboard<br/>FastAPI, read-only DB role"]
             DB[("db · postgres:17<br/>volume postgres_data")]
-            PIPE["pipeline job<br/>baseline sources NC NE"]
         end
-        subgraph expansion["Managed by scripts/deploy.py"]
-            JOBS["election-expansion-job-*<br/>one per source run<br/>CPU/RAM capped, read-only fs"]
-            CAND["election-expansion-dashboard-*<br/>active + previous candidates"]
+        subgraph owned["Started by scripts/deploy.py from the release image"]
+            JOBS["election-job-*<br/>one per source run<br/>CPU/RAM capped, read-only fs"]
+            DASH["election-dashboard-*<br/>active + previous"]
         end
-        TIMERS["systemd timers<br/>pipeline · expansion · monitor · backup"]
+        TIMERS["systemd timers<br/>worker · monitor · backup"]
         DATA[("/srv/election-pipeline<br/>data · backups")]
     end
 
-    CADDY --> DASH & CAND
-    DASH & CAND --> DB
-    PIPE & JOBS --> DB
-    PIPE & JOBS --> DATA
-    TIMERS --> PIPE & JOBS
+    CADDY --> DASH
+    DASH --> DB
+    JOBS --> DB
+    JOBS --> DATA
+    TIMERS --> JOBS
 
     TIMERS -- backup --> S3[("S3 bucket<br/>election-pipeline/rolling/")]
     TIMERS -- alerts --> SNS["SNS topic<br/>alerts and recoveries"]
@@ -40,32 +38,16 @@ flowchart TB
     GH["GitHub"] -- "git clone pinned commit" --> LS
 ```
 
-## Isolation on the host
+## Releases on the host
 
-```mermaid
-flowchart LR
-    subgraph baseline["Baseline (accepted release)"]
-        B1["/opt/election-pipeline<br/>image IMAGE_TAG"]
-        B2["NC, NE sources"]
-    end
-    subgraph releases["/opt/election-releases/{commit}"]
-        R1["Control release<br/>CONTROL_ROOT"]
-        R2["Pinned releases<br/>one image per source"]
-    end
-    subgraph catalog["/var/lib/election-pipeline-deployment"]
-        CAT["catalog.json<br/>source → image, flags, publication"]
-    end
-    R1 -- "deploy.py run" --> CAT
-    CAT -- "selects image" --> R2
-    B1 --> B2
-```
-
-- Each expansion source is pinned to one immutable image; a code fix moves it with
-  `deploy.py repin` after a validated prepare-only run.
-- Expansion jobs run in containers with `--read-only`, `--cap-drop ALL`, a non-root
-  user, PID limits and `EXPANSION_CPUS` / `EXPANSION_MEMORY` caps.
-- Candidate dashboards start privately on `127.0.0.1:<port>`; `activate` switches
-  Caddy to one and keeps the previous running for rollback.
+- `/opt/election-releases/<commit>`: an immutable checkout with its control venv; the
+  image `election-pipeline:<commit>` is built from it and tested inside itself.
+- `/opt/election-releases/current`: the symlink the systemd units run from.
+- `/var/lib/election-pipeline-deployment/catalog.json`: the current and previous
+  release, the dashboards, and each source's flags.
+- Jobs run with `--read-only`, `--cap-drop ALL`, a non-root user, PID limits and the
+  `JOB_CPUS` / `JOB_MEMORY` caps. Candidate dashboards start privately on
+  `127.0.0.1:<port>`; `activate` switches Caddy and keeps the previous for rollback.
 
 ## Access and credentials
 

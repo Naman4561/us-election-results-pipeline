@@ -5,7 +5,6 @@ The Compose project (PostgreSQL and Caddy) is never recreated from here.
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import re
@@ -53,19 +52,6 @@ def verify_release(path, image):
 
 def package_hash(path):
     return collector_code_hash(Path(path) / "src/election_pipeline")
-
-
-def release_hash(path):
-    """Fingerprint tracked files; Caddyfile is intentionally mutable runtime routing."""
-    path = Path(path)
-    tracked = command(["git", "-C", str(path), "ls-files", "-z"]).split("\0")
-    digest = hashlib.sha256()
-    for name in sorted(name for name in tracked if name and name != "deploy/Caddyfile"):
-        file = path / name
-        if file.is_symlink():
-            raise ValueError("Registered releases must not contain symlinks")
-        digest.update(name.encode() + b"\0" + file.read_bytes() + b"\0")
-    return digest.hexdigest()
 
 
 def limits(config):

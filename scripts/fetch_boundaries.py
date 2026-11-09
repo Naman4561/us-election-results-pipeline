@@ -9,6 +9,8 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+from election_pipeline.states import STATES as REGISTERED
+
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = ROOT / "src/election_pipeline/dashboard/static"
 BASE = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/"
@@ -113,7 +115,7 @@ def save(name, value):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--states", nargs="+", default=["NC", "KY"])
+    parser.add_argument("--states", nargs="+", default=sorted(REGISTERED))
     args = parser.parse_args()
     sources = {}
     states, sources["states"] = query("State_County", 0, "1=1", "STATE,STUSAB,NAME", offset=1500)

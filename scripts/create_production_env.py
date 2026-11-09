@@ -27,9 +27,6 @@ def main():
         "PIPELINE_DB_PASSWORD": secrets.token_hex(32),
         "DASHBOARD_DB_USER": "election_dashboard_app",
         "DASHBOARD_DB_PASSWORD": secrets.token_hex(32),
-        "PIPELINE_SOURCES": "nc_2026_general",
-        "PIPELINE_STATUS": "test",
-        "PIPELINE_WORKERS": "2",
         "DATA_DIR": "/srv/election-pipeline/data",
         "SITE_DOMAIN": "",
     }

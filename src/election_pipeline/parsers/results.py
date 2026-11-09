@@ -47,7 +47,6 @@ UNIT_FIELDS = (
     "ballots_cast",
     "registered_voters",
 )
-FILES = ("results.csv", "county_results.csv", "contest_results.csv")
 UNITS = ("state", "county", "precinct")
 
 

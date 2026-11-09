@@ -7,12 +7,7 @@ gantt
     title One hour of scheduled work (UTC)
     dateFormat HH:mm
     axisFormat %H:%M
-    section Baseline pipeline · every 5 min
-    run :00:00, 1m
-    run :00:05, 1m
-    run :00:10, 1m
-    run :00:15, 1m
-    section Expansion worker · every 5 min, ≤ 270 s
+    section Worker · every 5 min, ≤ 270 s
     cycle :00:00, 4m
     cycle :00:05, 4m
     cycle :00:10, 4m
@@ -24,28 +19,29 @@ gantt
 
 | Timer | Runs | Does |
 | --- | --- | --- |
-| `election-pipeline.timer` | every 5 minutes | Baseline sources in the accepted image |
-| `election-expansion.timer` | every 5 minutes, at :30 s | `deploy.py run`: each enabled expansion source, oldest first, within `CYCLE_SECONDS` (270); `EXPANSION_PARALLEL` jobs at once |
-| `election-monitor.timer` | every minute | Freshness, failures, timers, backup age, disk, dashboard; SNS alerts and CloudWatch heartbeat |
+| `election-worker.timer` | every 5 minutes, at :30 s | `deploy.py run`: every enabled HTTP source in the release image, least recently run first, within `CYCLE_SECONDS` (270); `JOB_PARALLEL` jobs at once |
+| `election-monitor.timer` | every minute | Freshness, failures, release, timers, backup age, disk, dashboard; SNS alerts and CloudWatch heartbeat |
 | `election-backup.timer` | every 6 hours | Full backup to S3, local prune, S3 retention tags |
 
-## Adding a state
+All three run from `/opt/election-releases/current`, the symlink `deploy.py release`
+moves; see [deployment](../deployment.md).
+
+## Releasing and adding a state
 
 ```mermaid
 flowchart LR
     subgraph dev["On the laptop"]
-        A["State entry<br/>states.py"] --> B["Source contract<br/>sources.toml"]
+        A["State entry · states.py"] --> B["Source · sources.toml"]
         B --> C["Parser + roster<br/>parsers/xx.py · rosters_2026/XX.json"]
-        C --> D["python scripts/new_state.py XX<br/>dbt models, tests, migration"]
-        D --> E["Map + fixtures + tests<br/>fetch_boundaries.py"]
+        C --> E["Map + fixtures + tests<br/>fetch_boundaries.py"]
         E --> F["Push branch · CI"]
     end
     subgraph host["On the Lightsail host"]
-        G["stage_coverage_release.sh<br/>build image, run tests in it"]
-        H["register → migrate → prepare<br/>private, outcome validated"]
-        I["promote<br/>first publication"]
+        G["stage_release.sh<br/>checkout, image, tests in it"]
+        H["deploy.py release<br/>migrate, check every source, switch"]
+        I["prepare → promote<br/>new state's first publication"]
         J["backup + check-restore"]
-        K["start-dashboard<br/>private candidate"]
+        K["start-dashboard --source<br/>private candidate"]
         L["activate<br/>Caddy switches"]
         G --> H --> I --> J --> K --> L
     end
@@ -54,11 +50,10 @@ flowchart LR
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Registered: register (pinned image)
-    Registered --> Migrated: migrate (additive schema only)
-    Migrated --> Validated: prepare (collect, parse, load, dbt, no publish)
+    [*] --> Configured: in the release's sources.toml, disabled
+    Configured --> Validated: prepare (collect, parse, load, dbt, no publish)
     Validated --> Promoted: promote (first publication, private)
-    Promoted --> Public: activate with restore report
+    Promoted --> Public: activate with a restore report
     Public --> Promoted: rollback-dashboard (new coverage withdrawn)
 ```
 
@@ -71,7 +66,7 @@ flowchart LR
         c2["poll/{source}<br/>official site checked recently"]
         c3["county/MS/{county} · manual/{source}"]
         c4["backup<br/>uploaded ≤ 7 h · s3-retention"]
-        c5["timer/* · disk/* · dashboard"]
+        c5["deployment/* · timer/* · disk/* · dashboard"]
     end
     checks --> DEC{"New or changed issue?"}
     DEC -- yes --> SNS["SNS alert"]
@@ -82,18 +77,17 @@ flowchart LR
 ```
 
 Overdue manual snapshots (`manual/*`, manual MS counties) are operator tasks, so they go
-out as separate `REMINDER` messages and never mark the deployment unhealthy. Repeated
-alerts are deduplicated with a periodic reminder; a `--dry-run` prints the
-assessment without sending or saving anything.
+out as separate `REMINDER` messages and never mark the deployment unhealthy; a source
+configured as final (Kansas) is never overdue. Repeated alerts are deduplicated with a
+periodic reminder; a `--dry-run` prints the assessment without sending or saving.
 
 ## Development loop
 
 ```mermaid
 flowchart LR
-    code["Edit code"] --> unit["python -m unittest discover -s tests<br/>(354 tests)"]
+    code["Edit code"] --> unit["python -m unittest discover -s tests"]
     unit --> lint["ruff check · ruff format --check"]
-    lint --> drift["python scripts/new_state.py --check"]
-    drift --> push["Push branch"]
+    lint --> push["Push branch"]
     push --> ci["GitHub Actions<br/>Ubuntu + Windows tests · dashboard JS ·<br/>PostgreSQL integration (check_pipeline.py)"]
     ci --> stage["Stage on host<br/>tests run again inside the image"]
 ```
