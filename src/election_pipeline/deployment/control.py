@@ -24,7 +24,8 @@ from election_pipeline.deployment import catalog, containers, dashboard
 from election_pipeline.migrations import migrate
 from election_pipeline.storage import atomic_json, utc_now
 
-GOOD = {"succeeded", "already_current", "not_due", "awaiting_publication"}
+# A locked source is held by another run or a backup; it is not a failure.
+GOOD = {"succeeded", "already_current", "not_due", "awaiting_publication", "locked"}
 
 
 def db_settings(prod, *, writer=False):

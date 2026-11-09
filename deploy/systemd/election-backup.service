@@ -17,4 +17,5 @@ ExecStart=/opt/election-releases/current/.venv/bin/python scripts/production_rec
 ExecStartPost=/opt/election-releases/current/.venv/bin/python scripts/prune_backups.py --keep 1 --apply
 Restart=on-failure
 RestartSec=30s
-TimeoutStartSec=40min
+# Up to 10 min waiting for running jobs, then about 30 min of copying and the dump.
+TimeoutStartSec=60min

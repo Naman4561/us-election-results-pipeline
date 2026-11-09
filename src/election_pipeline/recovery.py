@@ -8,8 +8,9 @@ import os
 import re
 import shutil
 import subprocess
+import time
 import uuid
-from contextlib import ExitStack
+from contextlib import ExitStack, contextmanager
 from pathlib import Path, PurePosixPath
 
 from psycopg import sql
@@ -18,6 +19,7 @@ from election_pipeline.database import connect
 from election_pipeline.settings import load_config
 from election_pipeline.storage import (
     ArchiveStore,
+    CollectionLocked,
     atomic_json,
     file_hash,
     utc_now,
@@ -42,6 +44,14 @@ DATA_DIRECTORIES = (
     "reports",
     "recovery_checks",
 )
+# Files rewritten in place, copied while jobs are held. Every other file is written once.
+REWRITTEN_DIRECTORIES = ("state", "accuracy", "reports", "recovery_checks")
+# prune_data.py may remove old files here while the unlocked copy runs.
+PRUNABLE_DIRECTORIES = ("runs", "parsed", "publications")
+
+# The backup waits this long for running jobs to finish before giving up.
+QUIESCE_SECONDS = 600
+QUIESCE_RETRY_SECONDS = 5
 
 
 def safe_child(root, relative):
@@ -178,10 +188,12 @@ def docker_command(
     return message.strip()
 
 
-def copy_files(source, destination):
+def files(source):
+    """The files under ``source`` a backup keeps, relative to it."""
     if not source.exists():
-        return
+        return []
 
+    result = []
     for path in sorted(source.rglob("*")):
         relative = path.relative_to(source)
 
@@ -196,13 +208,57 @@ def copy_files(source, destination):
             raise ValueError(f"Refusing symlink in backup: {relative}")
 
         if path.is_file():
-            target = destination / relative
-            target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(path, target)
+            result.append(relative)
+    return result
+
+
+def copy_files(source, destination, relatives=None, *, missing_ok=False):
+    for relative in files(source) if relatives is None else relatives:
+        target = destination / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            shutil.copy2(source / relative, target)
+        except FileNotFoundError:
+            if not missing_ok:
+                raise
+
+
+@contextmanager
+def quiesced(data_dir, sources, conn, wait=QUIESCE_SECONDS):
+    """Hold every source's locks and the exclusive maintenance lock.
+
+    All locks are tried together and released together while any job still runs, so the
+    backup never holds some sources while waiting for another; jobs that start meanwhile
+    run normally. Gives up after ``wait`` seconds.
+    """
+    deadline = time.monotonic() + wait
+    while True:
+        with ExitStack() as held:
+            try:
+                for source in sorted(sources.values(), key=lambda item: item.source_id):
+                    store = ArchiveStore(data_dir, source)
+                    held.enter_context(store.lock(stage="pipeline"))
+                    held.enter_context(store.lock())
+            except CollectionLocked as error:
+                busy = f"source {error}"
+            else:
+                if conn.execute("SELECT pg_try_advisory_lock(20261103, 1) AS ok").fetchone()["ok"]:
+                    yield
+                    # On an error the connection closes and releases it instead.
+                    conn.execute("SELECT pg_advisory_unlock(20261103, 1)")
+                    return
+                busy = "a publication or restore"
+        if time.monotonic() >= deadline:
+            raise ValueError(f"Jobs still running after {wait} s ({busy}); retry backup later")
+        time.sleep(QUIESCE_RETRY_SECONDS)
 
 
 def backup(root, data_dir, config, db, destination, service, *, compose_args=(), catalog=None):
-    """Capture files and a dump using the inventory's DB snapshot."""
+    """Capture files and a dump using the inventory's DB snapshot.
+
+    Jobs are held only while the snapshot is exported, the rewritten files are copied
+    and the write-once files are listed; the long copy, inventory and dump run after.
+    """
     root = Path(root).resolve()
     data_dir = Path(data_dir).resolve()
     destination = Path(destination).resolve()
@@ -230,22 +286,31 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=(),
     }
 
     with ExitStack() as stack:
-        for source in sorted(sources.values(), key=lambda item: item.source_id):
-            store = ArchiveStore(data_dir, source)
-            stack.enter_context(store.lock(stage="pipeline"))
-            stack.enter_context(store.lock())
-
         conn = stack.enter_context(connect(db))
+        written_once = {}
 
-        locked = conn.execute("SELECT pg_try_advisory_lock(20261103, 1) AS ok").fetchone()["ok"]
+        with quiesced(data_dir, sources, conn):
+            stack.enter_context(conn.transaction())
+            conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
 
-        if not locked:
-            raise ValueError("Publication or restore is running; retry backup later")
+            snapshot = conn.execute("SELECT pg_export_snapshot() AS id").fetchone()["id"]
 
-        stack.enter_context(conn.transaction())
-        conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
+            for directory in DATA_DIRECTORIES:
+                listed = files(data_dir / directory)
+                rewritten = directory in REWRITTEN_DIRECTORIES
+                in_place = [r for r in listed if rewritten or r.name == "latest.json"]
+                copy_files(data_dir / directory, temporary / "data" / directory, in_place)
+                written_once[directory] = [
+                    r for r in listed if not rewritten and r.name != "latest.json"
+                ]
 
-        snapshot = conn.execute("SELECT pg_export_snapshot() AS id").fetchone()["id"]
+        for directory, listed in written_once.items():
+            copy_files(
+                data_dir / directory,
+                temporary / "data" / directory,
+                listed,
+                missing_ok=directory in PRUNABLE_DIRECTORIES,
+            )
 
         manifest["database_inventory"] = inventory(conn, database_schemas)
         manifest["database_schemas"] = [
@@ -256,12 +321,6 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=(),
                 (list(database_schemas),),
             ).fetchall()
         ]
-
-        for directory in DATA_DIRECTORIES:
-            copy_files(
-                data_dir / directory,
-                temporary / "data" / directory,
-            )
 
         snapshots = conn.execute("SELECT raw_path, raw_sha256 FROM ops.snapshots").fetchall()
 

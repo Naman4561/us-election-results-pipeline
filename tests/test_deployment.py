@@ -162,6 +162,16 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(json.loads(latest)["outcome"], "failed")
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_source_held_by_a_backup_is_skipped_not_failed(self):
+        with patch.object(
+            control, "run_one", side_effect=lambda image, name, *a, **k: {"outcome": "locked"}
+        ):
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(control.run_enabled(self.path, self.prod, self.config), 0)
+        latest = json.loads((self.root / "worker-latest.json").read_text())
+        self.assertEqual(latest["outcome"], "succeeded")
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_manual_and_disabled_sources_are_never_polled(self):
         self.value["sources"][KY].update(acquisition="manual")
         self.save()

@@ -1,9 +1,11 @@
-"""Backup integrity, binary transport and restore isolation."""
+"""Backup integrity, binary transport, restore isolation and job quiescing."""
 
+import contextlib
 import hashlib
 import json
 import subprocess
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -231,3 +233,133 @@ class RecoveryTests(unittest.TestCase):
                 )
 
         connect.assert_not_called()
+
+
+ROOT = Path(__file__).resolve().parents[1]
+CONFIG = ROOT / "config/sources.toml"
+
+
+class Result:
+    def __init__(self, one=None, rows=()):
+        self.one, self.rows = one, list(rows)
+
+    def fetchone(self):
+        return self.one
+
+    def fetchall(self):
+        return self.rows
+
+
+class FakeConnection:
+    """Enough of a psycopg connection for backup(); records its statements."""
+
+    def __init__(self, advisory=(True,)):
+        self.advisory = list(advisory)
+        self.statements = []
+
+    def execute(self, statement, params=None):
+        self.statements.append(statement)
+        if "pg_try_advisory_lock" in statement:
+            return Result(
+                {"ok": self.advisory.pop(0) if len(self.advisory) > 1 else self.advisory[0]}
+            )
+        if "pg_export_snapshot" in statement:
+            return Result({"id": "00000003-1"})
+        return Result(rows=())
+
+    def transaction(self):
+        return contextlib.nullcontext()
+
+
+class QuiesceTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.data = self.root / "data"
+        _, self.sources = recovery.load_config(CONFIG)
+        self.first, self.last = (
+            recovery.ArchiveStore(self.data, self.sources[name])
+            for name in (min(self.sources), max(self.sources))
+        )
+        patcher = patch.object(recovery, "QUIESCE_RETRY_SECONDS", 0.05)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_waits_for_a_running_job_then_holds_every_source(self):
+        held, release = threading.Event(), threading.Event()
+
+        def job():
+            with self.last.lock(stage="pipeline"):
+                held.set()
+                release.wait(5)
+
+        worker = threading.Thread(target=job)
+        worker.start()
+        held.wait(5)
+        threading.Timer(0.3, release.set).start()
+        conn = FakeConnection()
+
+        with recovery.quiesced(self.data, self.sources, conn, wait=5):
+            self.assertTrue(release.is_set())
+            with self.assertRaises(recovery.CollectionLocked):
+                with self.first.lock():
+                    pass
+        worker.join(5)
+
+        with self.first.lock(), self.last.lock(stage="pipeline"):
+            pass
+        self.assertIn("SELECT pg_advisory_unlock(20261103, 1)", conn.statements)
+
+    def test_never_holds_some_sources_while_waiting_and_gives_up(self):
+        with self.last.lock():
+            with self.assertRaisesRegex(ValueError, "Jobs still running"):
+                with recovery.quiesced(self.data, self.sources, FakeConnection(), wait=0.2):
+                    self.fail("Entered while a job ran")
+            # The sources before the busy one were released between tries.
+            with self.first.lock(), self.first.lock(stage="pipeline"):
+                pass
+
+    def test_waits_for_a_running_publication(self):
+        conn = FakeConnection(advisory=(False, False, True))
+        with recovery.quiesced(self.data, self.sources, conn, wait=5):
+            pass
+        self.assertEqual(sum("pg_try_advisory_lock" in s for s in conn.statements), 3)
+
+    def test_jobs_run_during_the_long_copy_and_dump(self):
+        name = min(self.sources)
+        state = self.data / "state" / f"{name}.json"
+        latest = self.data / "runs" / name / "latest.json"
+        report = self.data / "runs" / name / "old-run.json"
+        raw = self.data / "raw" / "XX" / "archive.zip"
+        for path, text in ((state, "before"), (latest, "before"), (report, "run"), (raw, "raw")):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text)
+        conn = FakeConnection()
+
+        def dump(root, service, db, program, arguments, *, stdout=None, **kwargs):
+            if program == "pg_dump":
+                # A job runs now: it takes its source's locks and rewrites its files.
+                with self.first.lock(stage="pipeline"), self.first.lock():
+                    state.write_text("after")
+                    latest.write_text("after")
+                    (latest.parent / "new-run.json").write_text("new")
+                stdout.write(b"PGDMP")
+            return ""
+
+        with (
+            patch.object(recovery, "connect", return_value=contextlib.nullcontext(conn)),
+            patch.object(recovery, "inventory", return_value={}),
+            patch.object(recovery, "docker_command", side_effect=dump),
+        ):
+            result = recovery.backup(
+                ROOT, self.data, CONFIG, {"dbname": "elections"}, self.root / "out", "db"
+            )
+
+        bundle = Path(result["backup_dir"]) / "data"
+        # Files rewritten in place keep the state that matches the database snapshot.
+        self.assertEqual((bundle / "state" / f"{name}.json").read_text(), "before")
+        self.assertEqual((bundle / "runs" / name / "latest.json").read_text(), "before")
+        self.assertEqual((bundle / "runs" / name / "old-run.json").read_text(), "run")
+        self.assertEqual((bundle / "raw" / "XX" / "archive.zip").read_text(), "raw")
+        self.assertFalse((bundle / "runs" / name / "new-run.json").exists())

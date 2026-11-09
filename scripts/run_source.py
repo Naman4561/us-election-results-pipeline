@@ -31,10 +31,18 @@ def main():
         check_only=args.check_only,
     )
     print(json.dumps(result), flush=True)
+    # "locked": another run or a backup holds the source; the next cycle runs it.
     return (
         0
         if result["outcome"]
-        in {"succeeded", "already_current", "not_due", "awaiting_publication", "validated"}
+        in {
+            "succeeded",
+            "already_current",
+            "not_due",
+            "awaiting_publication",
+            "validated",
+            "locked",
+        }
         else 1
     )
 
