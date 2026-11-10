@@ -526,6 +526,18 @@ class DeploymentTests(unittest.TestCase):
         ):
             control.prune_releases(config, {"release": {"revision": revisions["g"]}})
         self.assertTrue((releases / revisions["d"]).is_dir())
+        # Folders that hold or sit inside the data or backups are never pruned.
+        for guarded in (releases, releases / revisions["a"], self.root):
+            with (
+                patch.object(control.containers, "command", side_effect=command) as calls,
+                self.assertRaisesRegex(ValueError, "Refusing to prune"),
+            ):
+                control.prune_releases(config, value, keep_out=[guarded.resolve()])
+            calls.assert_not_called()
+        self.assertEqual(
+            control.protected({"DATA_DIR": "/srv/d"}, {"BACKUP_DIR": "/srv/b"}),
+            [Path("/srv/d").resolve(), Path("/srv/b").resolve()],
+        )
 
     def test_only_a_named_moved_source_may_lack_a_snapshot_to_check(self):
         def check(error):

@@ -184,7 +184,16 @@ def images_in_use():
     )
 
 
-def prune_releases(config, value, now=None):
+def protected(prod, config):
+    """The data and backup folders, which pruning must never reach."""
+    return [
+        Path(p).resolve()
+        for p in (prod.get("DATA_DIR"), config.get("BACKUP_DIR", "/srv/election-pipeline/backups"))
+        if p
+    ]
+
+
+def prune_releases(config, value, now=None, keep_out=()):
     """Remove the release checkouts, images and host environments no release needs.
 
     Kept: the current and previous releases, the ``KEEP_RECENT_RELEASES`` newest others
@@ -193,10 +202,19 @@ def prune_releases(config, value, now=None):
     environment is kept while a kept release's venv names it, or for an hour after it
     changed (a staging may be building one). The build cache is trimmed to
     ``BUILD_CACHE_BYTES``. Returns what was removed.
+
+    Only folders named like a release (40 hex digits) or a host environment (16) are
+    removed, and nothing is if either parent folder overlaps ``keep_out`` (the data and
+    backup folders): election data is never pruned here.
     """
     now = now or time.time()
     link = Path(config["CURRENT_RELEASE"])
     root = link.parent
+    environments = Path(config.get("HOST_ENVIRONMENTS", "/opt/election-venvs"))
+    for folder in (root.resolve(), environments.resolve()):
+        for guarded in keep_out:
+            if folder.is_relative_to(guarded) or guarded.is_relative_to(folder):
+                raise ValueError(f"Refusing to prune {folder}: it overlaps {guarded}")
     used = images_in_use()
     tagged = dict(
         line.split()
@@ -231,7 +249,6 @@ def prune_releases(config, value, now=None):
             except RuntimeError:
                 continue  # in use after all; the next release tries again
             removed["images"].append(revision)
-    environments = Path(config.get("HOST_ENVIRONMENTS", "/opt/election-venvs"))
     if environments.is_dir():
         named = set()
         for revision in keep:
@@ -360,7 +377,9 @@ def release(path, release_path, image, prod, config, moved=()):
     }
     # The release is made; old artifacts that fail to go are reported, not a failure.
     try:
-        result["pruned"] = prune_releases(config, catalog.read(path))
+        result["pruned"] = prune_releases(
+            config, catalog.read(path), keep_out=protected(prod, config)
+        )
     except Exception as error:
         result["prune_error"] = str(error)
     return result
