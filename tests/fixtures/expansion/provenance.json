@@ -38,6 +38,29 @@
    }
   ]
  },
+ "DE": {
+  "archive_sha256": "bb8e905728e23e7f77df4ccd1eff52dcfa825319348a1e33ebde4c9aaa5270f8",
+  "captured_at": "2026-11-10T16:45:52+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 45414,
+    "content_type": "application/json",
+    "final_url": "https://elections.delaware.gov/results/enr/Election_ByCountyWithWilmington_ID_GE2026.json",
+    "name": "counties.json",
+    "sha256": "595050d1ea97fab154d3d61f328138c53e63688c16dc51b06b8679387f086cff",
+    "url": "https://elections.delaware.gov/results/enr/Election_ByCountyWithWilmington_ID_GE2026.json"
+   },
+   {
+    "bytes": 65250,
+    "content_type": "application/json",
+    "final_url": "https://elections.delaware.gov/results/enr/Election_StatewideResults_ID_GE2026.json",
+    "name": "statewide.json",
+    "sha256": "a7a8282f4a70eafcfb05fc932e2becc0df8371ed69ffef28f05391684ba3ca1c",
+    "url": "https://elections.delaware.gov/results/enr/Election_StatewideResults_ID_GE2026.json"
+   }
+  ]
+ },
  "IN": {
   "archive_sha256": "5c495e99692867e10a7be3a02828fda659e3f1029dee8988b635bc7b172aeabc",
   "captured_at": "2026-11-10T04:18:24+00:00",

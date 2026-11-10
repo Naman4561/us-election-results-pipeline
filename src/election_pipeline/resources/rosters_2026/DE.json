@@ -1,0 +1,28 @@
+{
+ "state": "DE",
+ "provenance": "Delaware candidate IDs and counties from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 16:45 UTC). Pending operator review before release.",
+ "races": {
+  "DE-SEN": {
+   "candidates": [
+    "13804",
+    "27597"
+   ],
+   "counties": [
+    "Kent",
+    "New Castle",
+    "Sussex"
+   ]
+  },
+  "DE-AL": {
+   "candidates": [
+    "88611",
+    "102404"
+   ],
+   "counties": [
+    "Kent",
+    "New Castle",
+    "Sussex"
+   ]
+  }
+ }
+}

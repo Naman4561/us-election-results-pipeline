@@ -30,6 +30,7 @@ SOURCES = {
     "ND": "nd_2026_general",
     "LA": "la_2026_general",
     "RI": "ri_2026_general",
+    "DE": "de_2026_general",
 }
 HOSTS = {
     "UT": "electionresults.utah.gov",
@@ -38,6 +39,7 @@ HOSTS = {
     "ND": "api.resultsnd.sos.nd.gov",
     "LA": "voterportal.sos.la.gov",
     "RI": "electionresults.ri.gov",
+    "DE": "elections.delaware.gov",
 }
 
 
@@ -403,6 +405,62 @@ class ExpansionTests(unittest.TestCase):
 
         self.failed("RI", town, "do not add up to the statewide counts")
         self.failed("RI", federal_ballots_dropped, "do not add up to the statewide counts")
+
+    # Delaware --------------------------------------------------------------------------
+
+    def senate_row(self, data, name="CHRIS COONS"):
+        rows = json.loads(data["counties.json"])
+        return rows, next(
+            r for r in rows if r["Contest Title"] == "U.S. Senator" and r["Candidate Name"] == name
+        )
+
+    def test_de_counties_add_up_through_wilmington_and_official_is_its_results_type(self):
+        report = self.parse("DE")
+        self.assertEqual(report["contest_total_reconciliation"], "passed")
+        self.assertIs(report["official_results"], False)
+        counties = {
+            (r["county"], r["choice"]): r["total_votes"]
+            for r in self.read(report, "county_results.csv")
+            if r["contest_id"] == "DE-SEN"
+        }
+        self.assertEqual(counties[("New Castle", "CHRIS COONS")], 144750)
+
+        def official(data):
+            for name in ("statewide.json", "counties.json"):
+                rows = json.loads(data[name])
+                for r in rows:
+                    r["Results Type"] = "OFFICIAL RESULTS"
+                data[name] = json.dumps(rows).encode()
+
+        self.assertIs(self.parse("DE", official)["official_results"], True)
+
+    def test_de_wilmington_county_and_method_mismatches_are_refused(self):
+        def wilmington(data):
+            rows, coons = self.senate_row(data)
+            coons["Wilmington"] += 1
+            data["counties.json"] = json.dumps(rows).encode()
+
+        def kent(data):
+            rows, coons = self.senate_row(data)
+            coons["Kent"] += 1
+            coons["State"] += 1
+            data["counties.json"] = json.dumps(rows).encode()
+
+        def methods(data):
+            rows = json.loads(data["statewide.json"])
+            coons = next(r for r in rows if r["Candidate Name"] == "CHRIS COONS")
+            coons["Machine Votes"] = "140,653"
+            data["statewide.json"] = json.dumps(rows).encode()
+
+        def party(data):
+            rows = json.loads(data["statewide.json"])
+            next(r for r in rows if r["Candidate Name"] == "CHRIS COONS")["Party Name"] = "Whig"
+            data["statewide.json"] = json.dumps(rows).encode()
+
+        self.failed("DE", wilmington, "do not add up")
+        self.failed("DE", kent, "do not add up")
+        self.failed("DE", methods, "vote methods do not add up")
+        self.failed("DE", party, "not in the reviewed list")
 
 
 if __name__ == "__main__":

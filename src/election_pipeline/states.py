@@ -281,6 +281,15 @@ STATES = {
             "November 3 results."
         ),
     ),
+    # Delaware elects no governor in 2026.
+    "DE": State(
+        "DE",
+        "Delaware",
+        "de_2026_general",
+        (0,),
+        ("total_votes",),
+        source_page="https://elections.delaware.gov/results/enr/GE2026.html",
+    ),
     # Rhode Island reports by city and town, not county.
     "RI": State(
         "RI",

@@ -301,6 +301,18 @@ min_interval_seconds = 840
 "parish-la-05.json" = "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70199.htm"
 "parish-la-06.json" = "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70200.htm"
 
+[sources.de_2026_general]
+state = "DE"
+election_date = "2026-11-03"
+url = "https://elections.delaware.gov/results/enr/Election_StatewideResults_ID_GE2026.json"
+format = "bundle"
+primary_filename = "statewide.json"
+expected_members = ["statewide.json", "counties.json"]
+min_interval_seconds = 840
+
+[sources.de_2026_general.files]
+"counties.json" = "https://elections.delaware.gov/results/enr/Election_ByCountyWithWilmington_ID_GE2026.json"
+
 [sources.ri_2026_general]
 state = "RI"
 election_date = "2026-11-03"
