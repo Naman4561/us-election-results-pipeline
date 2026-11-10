@@ -23,6 +23,7 @@ const colors = {
   awaiting_votes: "#a2b1c4",
   no_election: "#f1f3f6",
   not_covered: "url(#uncovered)",
+  awaiting_certified: "url(#awaiting-certified)",
   tie: "url(#tie)",
   UNKNOWN: "url(#tie)",
   unavailable: "url(#unavailable)",
@@ -32,6 +33,7 @@ const descriptions = {
   awaiting_votes: "Covered · awaiting votes",
   no_election: "No election for this office",
   not_covered: "Election held · outside our coverage",
+  awaiting_certified: "Election held · awaiting certified results",
   tie: "Tied vote",
   UNKNOWN: "Leading candidate party unavailable",
   unavailable: "Published data unavailable",
@@ -102,6 +104,10 @@ function raceFor(code) {
       : racesFor(code)[0]
     : code + (view.office === "senate" ? "-SEN" : "-GOV");
 }
+// No election-night source is collected; results come from the certified canvass.
+function awaitingCertified(code) {
+  return (data.calendar.awaiting_certified || []).includes(code);
+}
 function isElection(code) {
   return (
     view.office === "house" ||
@@ -111,7 +117,9 @@ function isElection(code) {
 function statusFor(code, race, county = null) {
   if (!isElection(code)) return { status: "no_election" };
   if (!(data.coverage[code] || []).includes(race))
-    return { status: "not_covered" };
+    return {
+      status: awaitingCertified(code) ? "awaiting_certified" : "not_covered",
+    };
   const state = data.states[code];
   if (!state || state.availability !== "available")
     return { status: "unavailable" };
@@ -409,9 +417,11 @@ function renderNationalPanel() {
       element(
         "span",
         ids.length
-          ? `${ids.length} covered ${ids.length === 1 ? "race" : "races"} · ${state.availability === "unavailable" ? "Data unavailable" : state.publication ? ({ test: "Test publication", official: "Official results" }[state.publication.status] || "Unofficial publication") : "Awaiting first publication"}`
+          ? `${ids.length} covered ${ids.length === 1 ? "race" : "races"} · ${state.availability === "unavailable" ? "Data unavailable" : state.publication ? { test: "Test publication", official: "Official results" }[state.publication.status] || "Unofficial publication" : "Awaiting first publication"}`
           : isElection(code)
-            ? "Election held · outside our coverage"
+            ? descriptions[
+                awaitingCertified(code) ? "awaiting_certified" : "not_covered"
+              ]
             : "No election for this office",
       ),
     );
@@ -448,6 +458,16 @@ function renderStatePanel() {
       element(
         "p",
         `${state.name} has no ${view.office === "governor" ? "governor" : "Senate"} election on November 3, 2026.`,
+        "empty",
+      ),
+    );
+    return;
+  }
+  if (result.status === "awaiting_certified") {
+    target.append(
+      element(
+        "p",
+        "This state's election-night results are not collected here. Its results will be added from the state's certified canvass.",
         "empty",
       ),
     );

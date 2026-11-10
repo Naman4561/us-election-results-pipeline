@@ -53,7 +53,7 @@ test("national/state map navigation and coverage statuses", async (t) => {
     d.querySelector(`path[data-id="${id}"]`).dataset.status;
   assert.equal(d.querySelectorAll("path.feature").length, 50);
   assert.equal(status("AZ"), "no_election");
-  assert.equal(status("ME"), "not_covered");
+  assert.equal(status("ME"), "awaiting_certified");
   assert.equal(status("MS"), "partial");
   assert(
     d.querySelector('path[data-id="MS"] title').textContent.includes("13/82"),
@@ -199,7 +199,7 @@ test("national/state map navigation and coverage statuses", async (t) => {
   assert.equal(d.querySelector("h1").textContent, "North Carolina");
   click("#national");
   assert.equal(status("NC"), "no_election");
-  assert.equal(status("AZ"), "not_covered");
+  assert.equal(status("AZ"), "awaiting_certified");
   click('[data-office="senate"]');
   click('path[data-id="MN"]');
   await settle();

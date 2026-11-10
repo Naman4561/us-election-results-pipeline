@@ -2,11 +2,12 @@
   "election_date": "2026-11-03",
   "reviewed_on": "2026-11-03",
   "senate_states": ["AL","AK","AR","CO","DE","FL","GA","ID","IL","IA","KS","KY","LA","ME","MA","MI","MN","MS","MT","NE","NH","NJ","NM","NC","OH","OK","OR","RI","SC","SD","TN","TX","VA","WV","WY"],
+  "awaiting_certified": ["AL","AZ","CT","DE","IL","KY","MA","ME","MI","MO","MT","NH","NJ","NV","NY","OK","PA","RI","TN","VA","VT","WI","WY"],
   "governor_states": ["AL","AK","AZ","AR","CA","CO","CT","FL","GA","HI","ID","IL","IA","KS","ME","MD","MA","MI","MN","NE","NV","NH","NM","NY","OH","OK","OR","PA","RI","SC","SD","TN","TX","VT","WI","WY"],
   "sources": {
     "senate": "https://www.fec.gov/documents/5910/2026pdates.pdf",
     "governor": "https://www.nga.org/governors/elections/",
     "districts": "https://www.census.gov/programs-surveys/decennial-census/about/rdo/congressional-districts.120th_Congress.html"
   },
-  "notes": ["Florida and Ohio have special Senate elections.", "Governor coverage counts 36 states; territories are outside this map's scope.", "House map shows 435 voting districts. Missouri uses 119th district geometry per the Census Bureau's 2026 boundary notice."]
+  "notes": ["Florida and Ohio have special Senate elections.", "Governor coverage counts 36 states; territories are outside this map's scope.", "States in awaiting_certified have no election-night source we collect; their results are added from each state's certified canvass.", "House map shows 435 voting districts. Missouri uses 119th district geometry per the Census Bureau's 2026 boundary notice."]
 }

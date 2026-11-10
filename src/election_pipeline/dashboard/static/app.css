@@ -363,6 +363,9 @@ h2 {
     #b9c4d3 5px
   );
 }
+.awaiting-certified {
+  background: radial-gradient(#8a9bb2 1.2px, #e9edf3 1.4px) 0 0 / 6px 6px;
+}
 .tie {
   background: #c8b8e2;
 }

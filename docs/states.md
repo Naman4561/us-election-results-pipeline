@@ -8,6 +8,7 @@ this page explains them.
 | State | Source | Races | County results | Vote methods stored |
 | --- | --- | --- | --- | --- |
 | Alaska | Division of Elections precinct CSV | Senate, Governor, House at-large (3) | No | Total only (first choice) |
+| Arkansas | Tally (Secretary of State) | Senate, Governor, House 1–4 (6) | All 75 counties | Total only |
 | California | Secretary of State results API | Governor, House 1–52 (53) | No | Total only |
 | Colorado | Clarity | Senate, Governor, House 1–8 (10) | All 64 counties | Total only |
 | Florida | Division of Elections results file | Senate, Governor, 27 House (29) | All 67 counties | Total only |
@@ -15,19 +16,23 @@ this page explains them.
 | Hawaii | Office of Elections `summary.txt` | Governor, House 1–2 (3) | No | Mail, in person |
 | Iowa | Clarity | Senate, Governor, House 1–4 (6) | All 99 counties | Election Day, absentee |
 | Idaho | Enhanced Voting | Senate, Governor, House 1–2 (4) | All 44 counties | Total only |
+| Indiana | Election Division results JSON | House 1–9 (9) | All counties of each district | Total only |
 | Kansas | Saved by hand from the results page | Senate, Governor, House 1–4 (6) | Reported counties | Total only |
 | Kentucky | State Board live results | Senate, House 1–6 (7) | All 120 counties | Election Day, absentee |
+| Louisiana | Secretary of State live results | Senate, House 1–6 (7) | All 64 parishes | Total only |
 | Maryland | State Board results pages | Governor, House 1–8 (9) | All 24 jurisdictions | Total only |
 | Minnesota | Secretary of State media files | Senate, Governor, House 1–8 (10) | All 87 counties | Total only |
 | Mississippi | County election offices | Senate (1) | Covered counties | Total only |
 | Nebraska | Secretary of State results CSV | Senate, Governor, House 1–3 (5) | No | Total only |
 | New Mexico | ENR export | Senate, Governor, House 1–3 (5) | All 33 counties, small counts masked | Total only |
 | North Carolina | State Board precinct ZIP | Senate, House 1–14 (15) | All 100 counties | Election Day, early, mail, provisional |
+| North Dakota | Tally (Secretary of State) | House at-large (1) | All 53 counties | Total only |
 | Ohio | Saved by hand from the results XML | Senate, Governor, House 1–15 (17) | All 88 counties | Total only |
 | Oregon | ENR export | Senate, Governor, House 1–6 (8) | All 36 counties | Total only |
 | South Carolina | Clarity (Election Commission) | Senate, Governor, House 1–7 (9) | All 46 counties | Total only |
 | South Dakota | ENR export | Senate, Governor, House at-large (3) | All 66 counties | Total only |
 | Texas | Secretary of State Civix API | Senate, Governor, House 1–38 (40) | No | Total only |
+| Utah | Enhanced Voting | House 1–4 (4) | All counties of each district | Total only |
 | Virginia | Enhanced Voting | Senate, House 1–11 (12) | All 133 localities | Early, Election Day, mail, provisional, post-election |
 | Washington | Enhanced Voting | House 1–10 (10) | All 39 counties | Total only |
 | West Virginia | Clarity | Senate, House 1–2 (3) | All 55 counties | Total only |
@@ -88,6 +93,26 @@ zero.
   election-night workbooks instead, which stopped at midnight on election night.
 - **Texas:** statewide and district totals; no county detail in the feed. Candidate sums
   must equal each contest's reported total.
+
+Every Tally document (Arkansas, North Dakota) repeats the publication's version, so a
+bundle never pairs two publications. Louisiana's documents carry no shared stamp; its
+parish counts must add up to the statewide totals, so a collection that straddles an
+update fails and is retried. Its U.S. House races are open to every candidate, and one
+without a majority goes to a December runoff; the dashboard shows the November 3 count.
+Indiana's settings, Louisiana's election list and Tally's documents each carry the
+state's own official flag, which the parser records.
+
+## Awaiting certified results
+
+These states hold elections this year but have no election-night source collected
+here; the map labels them "Awaiting certified results", and each is added from its
+certified canvass (`deploy certify --certified-file`): Alabama, Arizona, Connecticut,
+Delaware, Illinois, Kentucky, Maine, Massachusetts, Michigan, Missouri, Montana, Nevada,
+New Hampshire, New Jersey, New York, Oklahoma, Pennsylvania, Rhode Island, Tennessee,
+Vermont, Virginia, Wisconsin and Wyoming (`awaiting_certified` in
+`resources/elections_2026.json`). Arizona, Michigan, Missouri, New Jersey, New York,
+Nevada, Oklahoma, Pennsylvania and Tennessee refuse automated clients on their results
+sites.
 
 ## Not covered
 
