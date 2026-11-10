@@ -1,6 +1,6 @@
 {
  "state": "VT",
- "provenance": "Vermont candidate IDs and towns from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 17:05 UTC). Write-ins are one combined line and not listed. Pending operator review before release.",
+ "provenance": "Vermont candidate IDs and towns from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 17:05 UTC). Write-ins are one combined line and not listed. Confirmed by the operator before release on November 10, 2026.",
  "races": {
   "VT-AL": {
    "candidates": [

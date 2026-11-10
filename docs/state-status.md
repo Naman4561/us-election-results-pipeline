@@ -48,7 +48,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | South Dakota | Unofficial, pending certification | Nov 6 20:56 | All precincts in. Collected every 3 hours, clear of backups. |
 | Texas | Unofficial, pending certification | Nov 4 22:21 | All 254 counties in; state's last update Nov 4, 22:48. Collected every 3 hours, clear of backups. |
 | Utah | Unofficial, counting | — | Public since Nov 10 06:51. Totals matched each state's site at activation, as did the other four. |
-| Vermont | Not public yet | — | Results feed added Nov 10; roster awaiting review. Map and results by town. |
+| Vermont | Not public yet | — | Results feed added Nov 10; roster confirmed. Map and results by town. |
 | Virginia | Not public yet | — | Current data passes every check; ready to add. |
 | Washington | Unofficial, counting | Nov 9 23:06 | Counts on weekdays. |
 | West Virginia | Unofficial, counting | Nov 9 22:46 | |
