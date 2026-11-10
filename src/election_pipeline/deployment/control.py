@@ -278,6 +278,34 @@ def rollback_release(path, config):
 # New sources --------------------------------------------------------------------------
 
 
+def register(path, name):
+    """Add a state's results source, new in this release's configuration, to the catalog.
+
+    It starts as every new source does: disabled, private, unofficial and collected over
+    HTTP, so nothing is fetched or shown until it is prepared, promoted and activated.
+    """
+    from election_pipeline.states import STATES
+
+    source = catalog.configured().get(name)
+    if source is None or source.dataset != "election_results":
+        raise ValueError("Register a results source configured in this release")
+    if STATES.get(source.state) is None or STATES[source.state].source_id != name:
+        raise ValueError(f"{name} is not its state's results source")
+
+    def change(value):
+        if name in value["sources"]:
+            raise ValueError(f"{name} is already in the catalog")
+        value["sources"][name] = {
+            "acquisition": "http",
+            "enabled": False,
+            "public": False,
+            "status": "unofficial",
+        }
+
+    catalog.update(path, change)
+    return {"outcome": "registered", "source_id": name, "enabled": False, "public": False}
+
+
 def prepare(path, name, prod, config):
     """Validate a not-yet-enabled source's first publication candidate."""
     value = catalog.read(path)

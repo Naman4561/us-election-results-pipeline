@@ -332,6 +332,22 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual((entry["status"], entry["paused"]), ("official", True))
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_register_adds_a_new_state_disabled_private_and_once(self):
+        name = "ut_2026_general"
+        self.assertNotIn(name, catalog.read(self.path)["sources"])
+        self.assertEqual(control.register(self.path, name)["outcome"], "registered")
+        self.assertEqual(
+            catalog.read(self.path)["sources"][name],
+            {"acquisition": "http", "enabled": False, "public": False, "status": "unofficial"},
+        )
+        with self.assertRaisesRegex(ValueError, "already in the catalog"):
+            control.register(self.path, name)
+        with self.assertRaisesRegex(ValueError, "configured in this release"):
+            control.register(self.path, "zz_2026_general")
+        with self.assertRaisesRegex(ValueError, "configured in this release"):
+            control.register(self.path, "nc_absentee_early_demographics_2026")
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_release_checks_an_official_source_as_unofficial(self):
         self.value["sources"][NC]["status"] = "official"
         self.save()

@@ -58,6 +58,7 @@ The state's source is in the release's `sources.toml` and starts disabled and pr
 Its first publication is checked before it becomes public.
 
 ```bash
+deploy register --source xx_2026_general       # a state new since cutover: add it, disabled
 deploy prepare --source xx_2026_general        # collect, parse, load, dbt; no publish
 deploy promote --source xx_2026_general        # first publication, still private
 sudo systemctl start election-backup.service    # the uploaded backup the check restores

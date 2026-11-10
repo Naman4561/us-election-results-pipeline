@@ -29,7 +29,7 @@ def main():
         help="A source whose address this release changes; it has no snapshot to check yet",
     )
     sub.add_parser("rollback-release")
-    for name in ("prepare", "promote", "disable", "pause", "resume"):
+    for name in ("register", "prepare", "promote", "disable", "pause", "resume"):
         sub.add_parser(name).add_argument("--source", required=True)
     certify = sub.add_parser("certify", help="Publish a source's certified results")
     certify.add_argument("--source", required=True)
@@ -93,6 +93,8 @@ def main():
             result = control.rollback_release(path, config)
         elif action in ("prepare", "promote"):
             result = getattr(control, action)(path, args.source, prod, config)
+        elif action == "register":
+            result = control.register(path, args.source)
         elif action == "disable":
             result = control.disable(path, args.source)
         elif action in ("pause", "resume"):
