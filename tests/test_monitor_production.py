@@ -176,6 +176,20 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual(set(issues), {monitor.REMINDER + "paused/" + NC})
         self.assertIn("dashboard/NC", self.assess(dashboard=payload("MN")))
 
+    def test_an_official_feed_is_a_reminder_until_certified_and_then_needs_none(self):
+        atomic_json(
+            self.root / "data/runs" / NC / "latest.json",
+            {
+                "outcome": "already_current",
+                "finished_at": self.recent,
+                "stages": [{"stage": "parse", "result": {"official_results": True}}],
+            },
+        )
+        self.assertEqual(set(self.assess()), {monitor.REMINDER + "official/" + NC})
+        # Certified: official and paused for good, with nothing left to remind about.
+        self.catalog["sources"][NC].update(status="official", paused=True)
+        self.assertEqual(self.assess(), {})
+
     def test_release_image_and_current_symlink_must_match_the_catalog(self):
         self.assertIn("deployment/release", self.assess(image=(IMAGE, "c" * 40)))
         self.config["CURRENT_RELEASE"] = str(self.root / "elsewhere")

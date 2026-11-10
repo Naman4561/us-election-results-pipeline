@@ -414,6 +414,24 @@ class NineStateTests(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         clarity.settings_check(changed, "IA", self.settings)
 
+    def test_official_flags_are_read_from_each_feed_and_never_guessed(self):
+        def flag(value):
+            def mutate(data):
+                record = json.loads(clarity.document(data["settings.json"], self.settings))
+                record["settings"]["electiondetails"]["chkisfinalupload"] = value
+                data["settings.json"] = json.dumps(record).encode()
+
+            return mutate
+
+        for code in ("CO", "IA"):
+            with self.subTest(code=code):
+                self.assertIs(self.parse(code)["official_results"], False)
+                self.assertIs(self.parse(code, flag(True))["official_results"], True)
+                self.failed(code, flag("yes"), "final-upload flag")
+        for code in ("WA", "ID"):
+            with self.subTest(code=code):
+                self.assertIs(self.parse(code)["official_results"], False)
+
     def test_ia_blank_cells_only_where_total_is_zero(self):
         self.assertEqual(ia.group("", "", "0"), (0, 0, 0))
         self.assertEqual(ia.group("3", "0", "3"), (3, 0, 3))

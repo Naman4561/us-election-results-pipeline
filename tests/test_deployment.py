@@ -97,6 +97,7 @@ class DeploymentTests(unittest.TestCase):
             # Only a collected source can be paused, and only with a boolean.
             lambda v: v["sources"][GA].update(paused=True),
             lambda v: v["sources"][NC].update(paused="yes"),
+            lambda v: v["sources"][NC].update(status="certified"),
             # Ancillary datasets are collected by hand, never by the worker.
             lambda v: v["sources"].update(nc_absentee_early_demographics_2026={**v["sources"][NC]}),
             lambda v: v["release"].update(image_id="election-pipeline:latest"),
@@ -187,6 +188,43 @@ class DeploymentTests(unittest.TestCase):
         self.assertIn({"source_id": NC, "outcome": "paused"}, latest["results"])
         control.pause(self.path, NC, False)
         self.assertNotIn("paused", catalog.read(self.path)["sources"][NC])
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_certify_pauses_first_publishes_official_and_restores_the_pause_on_refusal(self):
+        seen = []
+
+        def run(image, name, status, prod, config, *, mode=None):
+            # The worker must not run the source while its official snapshot publishes.
+            seen.append(
+                (name, status, mode, catalog.read(self.path)["sources"][name].get("paused"))
+            )
+            return outcome
+
+        outcome = {"source_id": NC, "outcome": "failed", "error": "not marked official"}
+        with (
+            patch.object(control, "run_one", side_effect=run),
+            self.assertRaisesRegex(ValueError, "not marked official"),
+        ):
+            control.certify(self.path, NC, self.prod, self.config)
+        entry = catalog.read(self.path)["sources"][NC]
+        self.assertEqual((entry["status"], entry.get("paused")), ("test", None))
+
+        outcome = {"source_id": NC, "outcome": "succeeded", "raw_sha256": "a" * 64}
+        with patch.object(control, "run_one", side_effect=run):
+            self.assertEqual(
+                control.certify(self.path, NC, self.prod, self.config)["outcome"], "certified"
+            )
+        entry = catalog.read(self.path)["sources"][NC]
+        self.assertEqual((entry["status"], entry["paused"]), ("official", True))
+        self.assertEqual(seen, [(NC, "official", None, True)] * 2)
+        with patch.object(control, "run_one") as run:
+            self.assertEqual(
+                control.certify(self.path, NC, self.prod, self.config)["outcome"],
+                "already_official",
+            )
+            run.assert_not_called()
+        with self.assertRaisesRegex(ValueError, "public HTTP source"):
+            control.certify(self.path, GA, self.prod, self.config)
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_manual_and_disabled_sources_are_never_polled(self):

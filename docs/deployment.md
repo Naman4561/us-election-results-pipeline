@@ -83,6 +83,21 @@ public, such as a site that is down for days; `deploy resume --source` starts it
 The worker records a paused source as `paused`, and the monitor shows a reminder in
 place of its collection checks.
 
+## Certified results
+
+Where a state's own feed marks its results official (Enhanced Voting's
+`isOfficialResults`, Clarity's final-upload flag), the parser records it and the monitor
+shows a reminder. Check the totals against the state's certified results, then:
+
+```bash
+deploy certify --source ga_2026_general
+```
+
+It pauses the source, publishes its current snapshot with status `official` (refused
+unless the snapshot is marked official), and leaves it paused for good with status
+`official`; the dashboard labels it "Official results". A refused certification
+restores the pause as it was.
+
 Manual sources and Mississippi's reviewed counties have their own procedures:
 [manual results](manual-results.md) and [Mississippi collection](mississippi-collection.md).
 

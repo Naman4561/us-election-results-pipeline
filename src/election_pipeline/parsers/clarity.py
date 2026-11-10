@@ -48,6 +48,15 @@ def settings_check(raw, state, settings):
     return updated
 
 
+def final_upload(raw, settings):
+    """Whether the state has marked this version its final, official upload."""
+    record = unique_json(document(raw, settings))
+    flag = (record.get("settings") or {}).get("electiondetails", {}).get("chkisfinalupload")
+    if type(flag) is not bool:
+        raise ValueError("Unexpected Clarity final-upload flag")
+    return flag
+
+
 def summary(raw, races, settings):
     """Statewide summary rows for the selected races: {race: (key, [(name, party, votes)])}."""
     found = {}
@@ -143,6 +152,7 @@ def parse_detail_xml(
     wanted = state_adapter(code).races
     with zipfile.ZipFile(archive_path) as archive:
         updated = settings_check(archive.read("settings.json"), code, settings)
+        final = final_upload(archive.read("settings.json"), settings)
         official = summary(archive.read("summary.json"), race, settings)
         root = xml(detail_member(archive.read("detail.zip"), settings, "xml"))
     found = detail_contests(root, wanted, race, code, state)
@@ -208,5 +218,6 @@ def parse_detail_xml(
     stats.update(
         source_update_text=updated,
         source_timestamp=text(root.findtext("Timestamp"), "timestamp"),
+        official_results=final,
         contest_total_reconciliation="passed",
     )

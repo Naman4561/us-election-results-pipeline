@@ -34,7 +34,7 @@ def check(url, expected):
             or set(state.get("races", {})) != set(entry)
         ):
             raise ValueError(f"Candidate dashboard is missing published results for {code}")
-        if publication.get("status") not in ("test", "unofficial"):
+        if publication.get("status") not in ("test", "unofficial", "official"):
             raise ValueError("Unexpected publication label")
     return payload
 

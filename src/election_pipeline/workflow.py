@@ -68,8 +68,8 @@ def run_source(
     replays the source's latest archived snapshot, so it makes no request and leaves the
     collector state and latest run, which collection and monitoring read, as they were.
     """
-    if status not in ("test", "unofficial"):
-        raise ValueError("Choose test or unofficial explicitly")
+    if status not in ("test", "unofficial", "official"):
+        raise ValueError("Choose test, unofficial or official explicitly")
 
     if publish_replay and not replay_sha256:
         raise ValueError("--publish-replay requires --replay-sha256")

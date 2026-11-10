@@ -409,7 +409,7 @@ function renderNationalPanel() {
       element(
         "span",
         ids.length
-          ? `${ids.length} covered ${ids.length === 1 ? "race" : "races"} · ${state.availability === "unavailable" ? "Data unavailable" : state.publication ? (state.publication.status === "test" ? "Test publication" : "Unofficial publication") : "Awaiting first publication"}`
+          ? `${ids.length} covered ${ids.length === 1 ? "race" : "races"} · ${state.availability === "unavailable" ? "Data unavailable" : state.publication ? ({ test: "Test publication", official: "Official results" }[state.publication.status] || "Unofficial publication") : "Awaiting first publication"}`
           : isElection(code)
             ? "Election held · outside our coverage"
             : "No election for this office",

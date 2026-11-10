@@ -21,6 +21,8 @@ from election_pipeline.states import publication_lock, state_adapter
 FLORIDA_SOURCE = "fl_2026_general"
 IOWA_SOURCE = "ia_2026_general"
 SAME_OUTPUT_KEYS = ("output_sha256", "output_rows", "contests")
+# "official": the state's own source marks the snapshot as its certified results.
+STATUSES = ("test", "unofficial", "official")
 DBT_CACHES = ("partial_parse.msgpack", "graph.gpickle")
 
 
@@ -612,12 +614,17 @@ def same_results(conn, metadata, current):
 
 def prepare(root, db, release_id, status, *, skip_current=False):
     """Transform and validate one release; retain an immutable checked checkpoint."""
-    if status not in ("test", "unofficial"):
-        raise ValueError("Status must be test or unofficial")
+    if status not in STATUSES:
+        raise ValueError("Status must be test, unofficial or official")
     root = root.resolve()
     attempt_id = uuid.uuid4()
     with connect(db) as conn:
         metadata = release_metadata(conn, release_id)
+        if (
+            status == "official"
+            and (metadata["parser_report"] or {}).get("official_results") is not True
+        ):
+            raise ValueError("The state's source does not mark this snapshot as official")
         publication_lock(conn, metadata["state"])
         code_hash = project_hash(root)
         if skip_current:

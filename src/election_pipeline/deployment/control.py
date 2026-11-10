@@ -349,6 +349,38 @@ def disable(path, name):
     return {"outcome": "disabled", "source_id": name}
 
 
+def certify(path, name, prod, config):
+    """Publish a public source's official results once its own feed marks them official.
+
+    Run after checking the totals against the state's certified results. Collection is
+    paused first, so the worker cannot publish an unofficial snapshot over the official
+    one; the source then stays paused with status "official". A snapshot the state has
+    not marked official is refused and the pause is restored as it was.
+    """
+    value = catalog.read(path)
+    entry = value["sources"][name]
+    if not entry["public"] or entry["acquisition"] != "http":
+        raise ValueError("Certify a public HTTP source")
+    if entry["status"] == "official":
+        return {"outcome": "already_official", "source_id": name}
+    was_paused = entry.get("paused", False)
+    pause(path, name, True)
+    try:
+        result = run_one(value["release"]["image_id"], name, "official", prod, config)
+    except Exception:
+        pause(path, name, was_paused)
+        raise
+    if result["outcome"] not in ("succeeded", "already_current"):
+        pause(path, name, was_paused)
+        raise ValueError(f"Official publication failed: {result.get('error', result['outcome'])}")
+
+    def change(current):
+        current["sources"][name]["status"] = "official"
+
+    catalog.update(path, change)
+    return {"outcome": "certified", "source_id": name, "raw_sha256": result.get("raw_sha256")}
+
+
 def pause(path, name, paused):
     """Stop or restart collecting a source; its last publication stays served either way."""
 

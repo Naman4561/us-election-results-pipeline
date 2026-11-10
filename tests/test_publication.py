@@ -125,6 +125,26 @@ class PublicationArtifactTests(unittest.TestCase):
         )
         build.assert_not_called()
 
+    def test_an_official_publication_needs_the_states_own_official_flag(self):
+        conn = MagicMock()
+        conn.__enter__.return_value = conn
+        for report in ({"official_results": False}, {}, {"official_results": "yes"}):
+            with (
+                self.subTest(report=report),
+                patch.object(publication, "connect", return_value=conn),
+                patch.object(
+                    publication,
+                    "release_metadata",
+                    return_value={"source_id": "ga", "state": "GA", "parser_report": report},
+                ),
+                patch.object(publication, "build_candidate") as build,
+                self.assertRaisesRegex(ValueError, "does not mark this snapshot as official"),
+            ):
+                publication.prepare(Path(__file__).resolve().parents[1], {}, 12, "official")
+            build.assert_not_called()
+        with self.assertRaisesRegex(ValueError, "Status must be"):
+            publication.prepare(Path(__file__).resolve().parents[1], {}, 12, "certified")
+
     def test_equivalent_iowa_archive_can_reuse_the_current_publication(self):
         conn = MagicMock()
         conn.__enter__.return_value = conn

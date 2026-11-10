@@ -130,6 +130,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     wanted = state_adapter("IA").races
     with zipfile.ZipFile(archive_path) as archive:
         updated = clarity.settings_check(archive.read("settings.json"), "IA", settings)
+        final = clarity.final_upload(archive.read("settings.json"), settings)
         official = clarity.summary(archive.read("summary.json"), race, settings)
         report = blocks(clarity.detail_member(archive.read("detail.zip"), settings, "txt"))
     if set(official) != set(wanted):
@@ -172,5 +173,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=updated,
+        official_results=final,
         contest_total_reconciliation="passed",
     )

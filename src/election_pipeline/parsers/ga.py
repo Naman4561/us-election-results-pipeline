@@ -78,5 +78,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats.update(
         source_version=text(election["publishVersionId"]),
         source_update_text=text(election["asOf"]),
+        official_results=election.get("isOfficialResults") is True,
         contest_total_reconciliation="passed",
     )

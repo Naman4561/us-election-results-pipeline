@@ -76,6 +76,7 @@ def parse_clarity(archive_path, source, settings, output, stats, reference):
     wanted = state_adapter("SC").races
     with zipfile.ZipFile(archive_path) as archive:
         updated = clarity.settings_check(archive.read("settings.json"), "SC", settings)
+        final = clarity.final_upload(archive.read("settings.json"), settings)
         official = clarity.summary(archive.read("summary.json"), clarity_race, settings)
         root = xml(clarity.detail_member(archive.read("detail.zip"), settings, "xml"))
     found = clarity.detail_contests(
@@ -154,6 +155,7 @@ def parse_clarity(archive_path, source, settings, output, stats, reference):
     stats.update(
         source_update_text=updated,
         source_timestamp=text(root.findtext("Timestamp"), "timestamp"),
+        official_results=final,
         contest_total_reconciliation="passed",
         vote_method_reconciliation="passed",
     )

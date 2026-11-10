@@ -193,6 +193,17 @@ class FiveStateTests(unittest.TestCase):
         self.assertEqual(set(national["states"]), set(CODES))
         self.assertNotIn("ME", national["states"])
 
+    def test_ga_and_sc_report_their_own_official_flags(self):
+        self.assertIs(self.parse("GA")["official_results"], False)
+
+        def official(members):
+            data = json.loads(members["results.json"])
+            data["election"]["isOfficialResults"] = True
+            members["results.json"] = json.dumps(data).encode()
+
+        self.assertIs(self.parse("GA", official)["official_results"], True)
+        self.assertIs(self.parse("SC")["official_results"], False)
+
     def test_ga_wrong_election_missing_race_candidate_and_inconsistent_methods_rejected(self):
         def apply(edit):
             def mutate(members):

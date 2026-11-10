@@ -5,6 +5,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 
 | Status | Meaning |
 | --- | --- |
+| **Official** | The state certified its results; we publish them and no longer collect. |
 | **Unofficial, counting** | The state is still posting new counts; we collect them as they appear. |
 | **Unofficial, between counts** | The state counts on a published schedule; the next count is dated. |
 | **Unofficial, pending certification** | Was live, but the state's count has stopped. Collected less often until the state certifies or posts more. |

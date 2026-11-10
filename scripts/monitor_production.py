@@ -30,6 +30,18 @@ def read_json(path):
     return value
 
 
+def official_available(data, name):
+    """Whether the latest run parsed a snapshot its state marks as official."""
+    try:
+        run = read_json(data / "runs" / name / "latest.json")
+    except (OSError, ValueError):
+        return False
+    return any(
+        s.get("stage") == "parse" and (s.get("result") or {}).get("official_results") is True
+        for s in run.get("stages", [])
+    )
+
+
 def age_seconds(value, now):
     timestamp = datetime.fromisoformat(value)
     if timestamp.tzinfo is None or (timestamp - now).total_seconds() > 60:
@@ -115,9 +127,15 @@ def assess(prod, config, now):
             except (KeyError, ValueError, TypeError):
                 issues[f"manual/{name}"] = "Manual publication receipt is missing or invalid"
             continue
+        if entry["status"] != "official" and official_available(data, name):
+            issues[f"{REMINDER}official/{name}"] = (
+                "The state's source marks its results official; check them, then certify"
+            )
         if entry.get("paused"):
             # An operator stopped its collection; its publication is still checked below.
-            issues[f"{REMINDER}paused/{name}"] = "Collection is paused by an operator"
+            # A certified source stays paused for good, which needs no reminder.
+            if entry["status"] != "official":
+                issues[f"{REMINDER}paused/{name}"] = "Collection is paused by an operator"
             continue
         run_limit = int(config.get("MAX_RUN_AGE_SECONDS", "3600"))
         poll_limit = max(run_limit, source.poll_seconds * 3)

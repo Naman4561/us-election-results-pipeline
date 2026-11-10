@@ -67,7 +67,7 @@ def validate(value):
                 raise ValueError("Deployment flags must be boolean")
         if entry["public"] and not entry["enabled"]:
             raise ValueError("Public sources must be enabled")
-        if entry["status"] not in ("test", "unofficial"):
+        if entry["status"] not in ("test", "unofficial", "official"):
             raise ValueError("Publication status must be explicit")
         if entry["acquisition"] not in ("http", "manual"):
             raise ValueError("Acquisition must be http or manual")

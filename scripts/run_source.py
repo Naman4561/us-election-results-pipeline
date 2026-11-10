@@ -11,7 +11,7 @@ from election_pipeline.workflow import run_source
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", required=True)
-    parser.add_argument("--status", required=True, choices=("test", "unofficial"))
+    parser.add_argument("--status", required=True, choices=("test", "unofficial", "official"))
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--prepare-only", action="store_true", help="Keep a validated candidate")
     mode.add_argument("--check-only", action="store_true", help="Validate, then discard it")
