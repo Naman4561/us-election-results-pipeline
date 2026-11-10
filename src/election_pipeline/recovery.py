@@ -283,179 +283,192 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=(),
     temporary = destination / identity
     temporary.mkdir(parents=True, exist_ok=False)
 
-    manifest = {
-        "schema_version": 1,
-        "started_at": utc_now(),
-        "database": db["dbname"],
-    }
-
-    with ExitStack() as stack:
-        conn = stack.enter_context(connect(db))
-        written_once = {}
-
-        with quiesced(data_dir, sources, conn):
-            stack.enter_context(conn.transaction())
-            conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
-
-            snapshot = conn.execute("SELECT pg_export_snapshot() AS id").fetchone()["id"]
-
-            for directory in DATA_DIRECTORIES:
-                listed = files(data_dir / directory)
-                rewritten = directory in REWRITTEN_DIRECTORIES
-                in_place = [r for r in listed if rewritten or r.name == "latest.json"]
-                copy_files(data_dir / directory, temporary / "data" / directory, in_place)
-                written_once[directory] = [
-                    r for r in listed if not rewritten and r.name != "latest.json"
-                ]
-
-        for directory, listed in written_once.items():
-            copy_files(
-                data_dir / directory,
-                temporary / "data" / directory,
-                listed,
-                missing_ok=directory in PRUNABLE_DIRECTORIES,
-            )
-
-        manifest["database_inventory"] = inventory(conn, database_schemas)
-        manifest["database_schemas"] = [
-            row["schema_name"]
-            for row in conn.execute(
-                "SELECT schema_name FROM information_schema.schemata WHERE schema_name=ANY(%s) "
-                "ORDER BY schema_name",
-                (list(database_schemas),),
-            ).fetchall()
-        ]
-
-        snapshots = conn.execute("SELECT raw_path, raw_sha256 FROM ops.snapshots").fetchall()
-
-        for row in snapshots:
-            archived = safe_child(temporary / "data", row["raw_path"])
-
-            if not archived.is_file() or file_hash(archived) != row["raw_sha256"]:
-                raise ValueError("Missing/corrupt raw archive for snapshot: " + row["raw_sha256"])
-
-        shutil.copy2(config, temporary / "sources.toml")
-
-        if catalog is not None:
-            atomic_json(temporary / "deployment-catalog.json", catalog)
-            # Preserve the current release and the rollback one.
-            releases = {}
-            for entry in (catalog["release"], catalog.get("previous_release")):
-                if not entry or entry["revision"] in releases:
-                    continue
-                revision, release = entry["revision"], Path(entry["release_path"])
-                actual = subprocess.check_output(
-                    ["git", "-C", str(release), "rev-parse", "HEAD"], text=True
-                ).strip()
-                dirty = subprocess.check_output(
-                    ["git", "-C", str(release), "status", "--porcelain"], text=True
-                ).strip()
-                if actual != revision or dirty:
-                    raise ValueError("Release checkout changed")
-                releases[revision] = str(release)
-                target = temporary / "releases" / revision
-                for directory in (
-                    "src",
-                    "scripts",
-                    "migrations",
-                    "config",
-                    "dbt/models",
-                    "dbt/macros",
-                    "dbt/tests",
-                    "deploy",
-                ):
-                    copy_files(release / directory, target / directory)
-                for pattern in (
-                    "pyproject.toml",
-                    "requirements-dev.txt",
-                    "Dockerfile",
-                    "compose.production.yml",
-                    "dbt/*.yml",
-                ):
-                    for file in release.glob(pattern):
-                        destination_file = target / file.relative_to(release)
-                        destination_file.parent.mkdir(parents=True, exist_ok=True)
-                        shutil.copy2(file, destination_file)
-            manifest["collector_releases"] = releases
-            for dashboard in (catalog.get("dashboard", {}), catalog.get("previous_dashboard", {})):
-                if dashboard.get("coverage_dir"):
-                    coverage = Path(dashboard["coverage_dir"]) / "catalog.json"
-                    target = temporary / "dashboard-coverage" / dashboard["name"] / "catalog.json"
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copy2(coverage, target)
-
-        for directory in ("src", "scripts", "migrations"):
-            copy_files(
-                root / directory,
-                temporary / "code" / directory,
-            )
-
-        for directory in ("models", "macros", "tests"):
-            copy_files(
-                root / "dbt" / directory,
-                temporary / "code/dbt" / directory,
-            )
-
-        for path in (root / "dbt").glob("*.yml"):
-            if not path.name.startswith("."):
-                shutil.copy2(path, temporary / "code/dbt" / path.name)
-
-        for filename in ("pyproject.toml", "requirements-dev.txt"):
-            if (root / filename).is_file():
-                shutil.copy2(root / filename, temporary / filename)
-
-        dump = temporary / "database.dump"
-
-        with dump.open("wb") as handle:
-            warning = docker_command(
-                root,
-                service,
-                db,
-                "pg_dump",
-                [
-                    "--format=custom",
-                    "--no-owner",
-                    "--no-privileges",
-                    "--snapshot=" + snapshot,
-                    *["--schema=" + schema for schema in manifest["database_schemas"]],
-                ],
-                stdout=handle,
-                compose_args=compose_args,
-            )
-            handle.flush()
-            os.fsync(handle.fileno())
-
-        if warning:
-            manifest["dump_warnings"] = warning
-
-        with dump.open("rb") as handle:
-            docker_command(
-                root,
-                service,
-                db,
-                "pg_restore",
-                ["--list"],
-                stdin=handle,
-                compose_args=compose_args,
-            )
-
-    manifest["finished_at"] = utc_now()
-    manifest["files"] = {
-        path.relative_to(temporary).as_posix(): {
-            "bytes": path.stat().st_size,
-            "sha256": file_hash(path),
+    try:
+        manifest = {
+            "schema_version": 1,
+            "started_at": utc_now(),
+            "database": db["dbname"],
         }
-        for path in sorted(temporary.rglob("*"))
-        if path.is_file()
-    }
 
-    atomic_json(temporary / "manifest.json", manifest)
+        with ExitStack() as stack:
+            conn = stack.enter_context(connect(db))
+            written_once = {}
 
-    return {
-        "outcome": "backed_up",
-        "backup_dir": str(temporary),
-        "files": len(manifest["files"]),
-    }
+            with quiesced(data_dir, sources, conn):
+                stack.enter_context(conn.transaction())
+                conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
+
+                snapshot = conn.execute("SELECT pg_export_snapshot() AS id").fetchone()["id"]
+
+                for directory in DATA_DIRECTORIES:
+                    listed = files(data_dir / directory)
+                    rewritten = directory in REWRITTEN_DIRECTORIES
+                    in_place = [r for r in listed if rewritten or r.name == "latest.json"]
+                    copy_files(data_dir / directory, temporary / "data" / directory, in_place)
+                    written_once[directory] = [
+                        r for r in listed if not rewritten and r.name != "latest.json"
+                    ]
+
+            for directory, listed in written_once.items():
+                copy_files(
+                    data_dir / directory,
+                    temporary / "data" / directory,
+                    listed,
+                    missing_ok=directory in PRUNABLE_DIRECTORIES,
+                )
+
+            manifest["database_inventory"] = inventory(conn, database_schemas)
+            manifest["database_schemas"] = [
+                row["schema_name"]
+                for row in conn.execute(
+                    "SELECT schema_name FROM information_schema.schemata WHERE schema_name=ANY(%s) "
+                    "ORDER BY schema_name",
+                    (list(database_schemas),),
+                ).fetchall()
+            ]
+
+            snapshots = conn.execute("SELECT raw_path, raw_sha256 FROM ops.snapshots").fetchall()
+
+            for row in snapshots:
+                archived = safe_child(temporary / "data", row["raw_path"])
+
+                if not archived.is_file() or file_hash(archived) != row["raw_sha256"]:
+                    raise ValueError(
+                        "Missing/corrupt raw archive for snapshot: " + row["raw_sha256"]
+                    )
+
+            shutil.copy2(config, temporary / "sources.toml")
+
+            if catalog is not None:
+                atomic_json(temporary / "deployment-catalog.json", catalog)
+                # Preserve the current release and the rollback one.
+                releases = {}
+                for entry in (catalog["release"], catalog.get("previous_release")):
+                    if not entry or entry["revision"] in releases:
+                        continue
+                    revision, release = entry["revision"], Path(entry["release_path"])
+                    actual = subprocess.check_output(
+                        ["git", "-C", str(release), "rev-parse", "HEAD"], text=True
+                    ).strip()
+                    dirty = subprocess.check_output(
+                        ["git", "-C", str(release), "status", "--porcelain"], text=True
+                    ).strip()
+                    if actual != revision or dirty:
+                        raise ValueError("Release checkout changed")
+                    releases[revision] = str(release)
+                    target = temporary / "releases" / revision
+                    for directory in (
+                        "src",
+                        "scripts",
+                        "migrations",
+                        "config",
+                        "dbt/models",
+                        "dbt/macros",
+                        "dbt/tests",
+                        "deploy",
+                    ):
+                        copy_files(release / directory, target / directory)
+                    for pattern in (
+                        "pyproject.toml",
+                        "requirements-dev.txt",
+                        "Dockerfile",
+                        "compose.production.yml",
+                        "dbt/*.yml",
+                    ):
+                        for file in release.glob(pattern):
+                            destination_file = target / file.relative_to(release)
+                            destination_file.parent.mkdir(parents=True, exist_ok=True)
+                            shutil.copy2(file, destination_file)
+                manifest["collector_releases"] = releases
+                for dashboard in (
+                    catalog.get("dashboard", {}),
+                    catalog.get("previous_dashboard", {}),
+                ):
+                    if dashboard.get("coverage_dir"):
+                        coverage = Path(dashboard["coverage_dir"]) / "catalog.json"
+                        target = (
+                            temporary / "dashboard-coverage" / dashboard["name"] / "catalog.json"
+                        )
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        shutil.copy2(coverage, target)
+
+            for directory in ("src", "scripts", "migrations"):
+                copy_files(
+                    root / directory,
+                    temporary / "code" / directory,
+                )
+
+            for directory in ("models", "macros", "tests"):
+                copy_files(
+                    root / "dbt" / directory,
+                    temporary / "code/dbt" / directory,
+                )
+
+            for path in (root / "dbt").glob("*.yml"):
+                if not path.name.startswith("."):
+                    shutil.copy2(path, temporary / "code/dbt" / path.name)
+
+            for filename in ("pyproject.toml", "requirements-dev.txt"):
+                if (root / filename).is_file():
+                    shutil.copy2(root / filename, temporary / filename)
+
+            dump = temporary / "database.dump"
+
+            with dump.open("wb") as handle:
+                warning = docker_command(
+                    root,
+                    service,
+                    db,
+                    "pg_dump",
+                    [
+                        "--format=custom",
+                        "--no-owner",
+                        "--no-privileges",
+                        "--snapshot=" + snapshot,
+                        *["--schema=" + schema for schema in manifest["database_schemas"]],
+                    ],
+                    stdout=handle,
+                    compose_args=compose_args,
+                )
+                handle.flush()
+                os.fsync(handle.fileno())
+
+            if warning:
+                manifest["dump_warnings"] = warning
+
+            with dump.open("rb") as handle:
+                docker_command(
+                    root,
+                    service,
+                    db,
+                    "pg_restore",
+                    ["--list"],
+                    stdin=handle,
+                    compose_args=compose_args,
+                )
+
+        manifest["finished_at"] = utc_now()
+        manifest["files"] = {
+            path.relative_to(temporary).as_posix(): {
+                "bytes": path.stat().st_size,
+                "sha256": file_hash(path),
+            }
+            for path in sorted(temporary.rglob("*"))
+            if path.is_file()
+        }
+
+        atomic_json(temporary / "manifest.json", manifest)
+
+        return {
+            "outcome": "backed_up",
+            "backup_dir": str(temporary),
+            "files": len(manifest["files"]),
+        }
+    except BaseException:
+        # An unfinished bundle has no manifest and cannot be restored; left behind, each
+        # failed run would keep a full uncompressed copy of the data on the disk.
+        shutil.rmtree(temporary, ignore_errors=True)
+        raise
 
 
 def verify_bundle(directory):

@@ -364,6 +364,22 @@ class QuiesceTests(unittest.TestCase):
         self.assertEqual((bundle / "raw" / "XX" / "archive.zip").read_text(), "raw")
         self.assertFalse((bundle / "runs" / name / "new-run.json").exists())
 
+    def test_a_failed_backup_leaves_no_unfinished_bundle(self):
+        raw = self.data / "raw" / "XX" / "archive.zip"
+        raw.parent.mkdir(parents=True, exist_ok=True)
+        raw.write_text("raw")
+        out = self.root / "out"
+        # As on Nov 10, 2026: the data is copied, then a database statement fails.
+        with (
+            patch.object(
+                recovery, "connect", return_value=contextlib.nullcontext(FakeConnection())
+            ),
+            patch.object(recovery, "inventory", side_effect=RuntimeError("statement timeout")),
+            self.assertRaisesRegex(RuntimeError, "statement timeout"),
+        ):
+            recovery.backup(ROOT, self.data, CONFIG, {"dbname": "elections"}, out, "db")
+        self.assertEqual(list(out.iterdir()), [])
+
 
 class InventoryTests(unittest.TestCase):
     def test_fingerprinting_lifts_the_statement_limit_for_its_transaction_only(self):
