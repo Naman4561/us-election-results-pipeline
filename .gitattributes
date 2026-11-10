@@ -6,6 +6,7 @@ Dockerfile text eol=lf
 # Preserve captured official bytes across Windows/Linux checkouts.
 tests/fixtures/expansion/*.txt -text whitespace=-blank-at-eol
 tests/fixtures/expansion/*.csv -text whitespace=-blank-at-eol
+tests/fixtures/mississippi/*.html -text whitespace=-blank-at-eol
 # These resources are pinned by their exact bytes, including line endings.
 src/election_pipeline/resources/alaska-issuers.pem text eol=lf
 src/election_pipeline/resources/ak_2026_scope.json text eol=lf
