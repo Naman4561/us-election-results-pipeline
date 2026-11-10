@@ -65,8 +65,11 @@ def import_file(
         staged = ArchiveStore(Path(temporary), source)
         bundle = staged.temporary_download()
         with zipfile.ZipFile(bundle, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            # A feed's archive is the same for the same bytes. A certified file is dated
+            # by its download (UTC), the time a state's reader may record as its check.
+            stamp = observed.astimezone(timezone.utc).timetuple()[:6] if certified else None
             info = zipfile.ZipInfo(
-                certified or source.primary_filename, date_time=(1980, 1, 1, 0, 0, 0)
+                certified or source.primary_filename, date_time=stamp or (1980, 1, 1, 0, 0, 0)
             )
             info.compress_type = zipfile.ZIP_DEFLATED
             info.create_system = 3

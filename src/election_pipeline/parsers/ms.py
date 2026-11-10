@@ -706,3 +706,109 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         ]
         + (["Some configured county sources are stale or unavailable."] if issues else []),
     )
+
+
+# Certified results ---------------------------------------------------------------------
+
+# The Secretary of State's certified recap sheet (2024: 2024ElectionRecapSheets.csv): one
+# row per office, candidate and county, with the candidate's statewide total repeated on
+# each. Every county is present, so its Senate counts are the complete statewide result.
+RECAP = "certified-recap.csv"
+RECAP_HEADER = ["County", "Office", "Candidate", "Party", "County Total", "State Total"]
+RECAP_OFFICE = "United States-Senate"
+RECAP_PARTIES = {"Democrat": "DEM", "Republican": "REP", "Independent": "IND"}
+
+
+def parse_recap(archive_path, name, source, settings, output, stats, reference=None):
+    from election_pipeline.parsers import certified
+
+    contract = validate_source(source)
+    raw = certified.read(archive_path, name, settings)
+    with zipfile.ZipFile(archive_path) as archive:
+        # The manual import dates a certified file by its download.
+        downloaded = datetime(*archive.getinfo(name).date_time, tzinfo=timezone.utc)
+    reader = csv.reader(io.StringIO(raw.decode("utf-8-sig"), newline=""), strict=True)
+    if [" ".join(v.split()) for v in next(reader, [])] != RECAP_HEADER:
+        raise ValueError("Unexpected Mississippi recap header")
+    counties = {c["name"].upper(): c for c in contract["counties"]}
+    candidates = contract["candidates"]
+    counts, totals = {}, {}
+    for line, values in enumerate(reader, 2):
+        if line > settings.max_csv_rows + 1 or len(values) != len(RECAP_HEADER):
+            raise ValueError(f"Mississippi recap line {line}: field count or row limit")
+        place, office, choice, party, county_total, state_total = (
+            " ".join(v.split()) for v in values
+        )
+        if office != RECAP_OFFICE:
+            continue
+        county = counties.get(place.upper())
+        if (
+            county is None
+            or choice not in candidates
+            or (RECAP_PARTIES.get(party) != candidates[choice])
+        ):
+            raise ValueError(f"Mississippi recap line {line}: unexpected county or candidate")
+        if (county["key"], choice) in counts:
+            raise ValueError(f"Mississippi recap line {line}: duplicate county and candidate")
+        counts[county["key"], choice] = integer(county_total)
+        if totals.setdefault(choice, integer(state_total)) != integer(state_total):
+            raise ValueError(f"Mississippi recap: {choice} has more than one state total")
+    if len(counts) != len(counties) * len(candidates):
+        raise ValueError("Mississippi recap lacks a county or candidate for the Senate")
+    for choice, total in totals.items():
+        if sum(v for (_, c), v in counts.items() if c == choice) != total:
+            raise ValueError(f"Mississippi recap: {choice}'s counties do not add up")
+
+    def result(county, choice, votes):
+        return {
+            "unit_type": "county" if county else "state",
+            "county": county,
+            "contest_id": "MS-SEN",
+            "source_contest_id": "MS-SEN",
+            "source_candidate_id": choice,
+            "choice": choice,
+            "choice_party": candidates[choice],
+            "total_votes": votes,
+            "precincts_reporting": None,
+            "precincts_total": None,
+        }
+
+    rows = [result("", c, totals[c]) for c in candidates]
+    rows += [result(k, c, v) for (k, c), v in sorted(counts.items())]
+    finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
+    stamp = downloaded.isoformat()
+    health = [
+        {
+            **dict.fromkeys(FEED_FIELDS),
+            "source_line": line,
+            "election_date": source.election_date,
+            "state": "MS",
+            "county": county["key"],
+            "county_fips": county["fips"],
+            "collection_status": "current",
+            "raw_sha256": hashlib.sha256(raw).hexdigest(),
+            "last_attempt_at": stamp,
+            "last_success_at": stamp,
+            "absentee_scope": "included",
+            "affidavit_scope": "included",
+        }
+        for line, county in enumerate(contract["counties"], 2)
+    ]
+    with (output / "county_feeds.csv").open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, FEED_FIELDS)
+        writer.writeheader()
+        writer.writerows(health)
+    stats.update(
+        certified_format="ms_recap",
+        contest_total_reconciliation="passed",
+        county_feed_rows=82,
+        expected_counties=82,
+        configured_counties=82,
+        counties_with_counts=82,
+        county_feed_issues={},
+        coverage_complete=True,
+        vote_basis="reported_votes",
+    )
+
+
+CERTIFIED = {RECAP: parse_recap}

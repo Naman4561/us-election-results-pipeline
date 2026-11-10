@@ -98,6 +98,12 @@ def within_official(county_rows, contest_rows, method):
     return all(votes <= official[key] for key, votes in counted.items())
 
 
+def certified_file(metadata):
+    """Whether a publication is a state's certified file: complete, never a county feed."""
+    attestation = (metadata or {}).get("attestation") or {}
+    return attestation.get("mode") == "certified_file"
+
+
 def make_payload(
     geography,
     metadata,
@@ -170,14 +176,14 @@ def make_payload(
         "method_note": adapter.method_note,
         "local_unit": adapter.local_unit,
         "county_detail": adapter.county_results,
-        "vote_basis": adapter.vote_basis,
+        "vote_basis": "reported_votes" if certified_file(metadata) else adapter.vote_basis,
         "source_page": adapter.source_page,
         "mode": "demo" if demo else "published",
         "publication": metadata,
         "map_version": geography["version"],
         "races": races,
     }
-    if adapter.county_feed_status and metadata is not None:
+    if adapter.county_feed_status and metadata is not None and not certified_file(metadata):
         if county_feeds is None and not demo:
             raise ValueError("County collection provenance is required for this state")
         if county_feeds is not None:
@@ -485,7 +491,7 @@ class PublishedResults:
                 self.cache = {identity: payload}
                 self.feed_cache = feeds
             payload = {**self.cache[identity], "publication": metadata}
-            if self.state.county_feed_status:
+            if self.state.county_feed_status and not certified_file(metadata):
                 payload = with_county_feeds(payload, self.geography, self.feed_cache)
             return payload
 

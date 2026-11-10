@@ -2,6 +2,7 @@
 
 import csv
 import hashlib
+import io
 import json
 import os
 import tempfile
@@ -26,6 +27,7 @@ from election_pipeline.database import (
     connect,
     load_parsed,
 )
+from election_pipeline.manual import import_file
 from election_pipeline.parsers import ms
 from election_pipeline.parsing import parse_source
 from election_pipeline.pipeline import collect_source
@@ -554,6 +556,128 @@ class MississippiDatabaseTests(unittest.TestCase):
                 ).fetchone()["n"],
                 69,
             )
+
+
+class RecapTests(unittest.TestCase):
+    """The certified recap sheet, in its 2024 layout, as the complete statewide result."""
+
+    PARTIES = {
+        "Scott Colom": "Democrat",
+        "Cindy Hyde-Smith": "Republican",
+        "Ty Pinkins": "Independent",
+    }
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.settings, sources = load_config(ROOT / "config/sources.toml")
+        self.source = sources["ms_2026_general_all"]
+        self.counties = [c["name"] for c in ms.policy()["counties"]]
+        self.rows = [
+            [county, ms.RECAP_OFFICE, name, party, str(100 + 7 * number + position)]
+            for number, county in enumerate(self.counties)
+            for position, (name, party) in enumerate(self.PARTIES.items())
+        ]
+
+    def recap(self, rows, header=ms.RECAP_HEADER):
+        totals = {}
+        for row in rows:
+            if row[1] == ms.RECAP_OFFICE and row[4].isdigit():
+                totals[row[2]] = totals.get(row[2], 0) + int(row[4])
+        lines = [header, ["Adams", "United States-House", "Someone Else", "Libertarian", "5", "9"]]
+        lines += [[*row, str(totals.get(row[2], 0))] if len(row) == 5 else row for row in rows]
+        stream = io.StringIO(newline="")
+        csv.writer(stream, quoting=csv.QUOTE_ALL).writerows(lines)
+        path = self.root / "2026ElectionRecapSheets.csv"
+        # As in 2024, a candidate's name can carry a trailing space.
+        path.write_bytes(stream.getvalue().replace("Ty Pinkins", "Ty Pinkins ").encode())
+        return path
+
+    def imported(self, rows, **options):
+        path = self.recap(rows, **options)
+        receipt = import_file(
+            self.source,
+            self.settings,
+            self.root,
+            path,
+            "2026-11-10T18:00:05+00:00",
+            hashlib.sha256(path.read_bytes()).hexdigest(),
+            certified=ms.RECAP,
+        )
+        return parse_source(self.source, self.settings, self.root, sha256=receipt["sha256"])
+
+    def read(self, report, filename):
+        with (Path(report["output_dir"]) / filename).open(encoding="utf-8", newline="") as handle:
+            return list(csv.DictReader(handle))
+
+    def test_the_recap_is_every_county_and_its_statewide_total(self):
+        report = self.imported(self.rows)
+        self.assertEqual(report["outcome"], "parsed", report)
+        self.assertEqual(report["certified_format"], "ms_recap")
+        self.assertEqual(report["contest_total_reconciliation"], "passed")
+        self.assertTrue(report["coverage_complete"])
+        counties = self.read(report, "county_results.csv")
+        self.assertEqual(len(counties), 82 * 3)
+        contests = {
+            r["choice"]: int(r["total_votes"]) for r in self.read(report, "contest_results.csv")
+        }
+        self.assertEqual(
+            contests["Ty Pinkins"], sum(int(r[4]) for r in self.rows if r[2] == "Ty Pinkins")
+        )
+        feeds = self.read(report, "county_feeds.csv")
+        self.assertEqual({f["collection_status"] for f in feeds}, {"current"})
+        self.assertEqual({f["last_success_at"] for f in feeds}, {"2026-11-10T18:00:04+00:00"})
+        self.assertEqual(len({f["county"] for f in feeds}), 82)
+        self.assertEqual({f["absentee_scope"] for f in feeds}, {"included"})
+
+    def test_a_recap_that_disagrees_or_leaves_anything_out_is_refused(self):
+        def off_by_one(rows):
+            rows[0] = [*rows[0][:4], str(int(rows[0][4]) + 1), "1"]
+
+        def missing_county(rows):
+            rows[:] = [r for r in rows if r[0] != "Pearl River"]
+
+        def write_in(rows):
+            rows.append(["Adams", ms.RECAP_OFFICE, "Write-in", "", "3"])
+
+        def wrong_party(rows):
+            rows[1][3] = "Democrat"
+
+        def duplicate(rows):
+            rows.append(list(rows[0]))
+
+        def unknown_county(rows):
+            rows[0][0] = "Atlantis"
+
+        changes = (off_by_one, missing_county, write_in, wrong_party, duplicate, unknown_county)
+        for change in changes:
+            rows = [list(r) for r in self.rows]
+            change(rows)
+            with self.subTest(change.__name__), self.assertRaisesRegex(ValueError, "rejected"):
+                self.imported(rows)
+        with self.assertRaisesRegex(ValueError, "rejected"):
+            self.imported(self.rows, header=["County", "Office", "Candidate", "Votes"])
+
+    def test_a_certified_recap_is_shown_as_a_complete_result(self):
+        report = self.imported(self.rows)
+        rows = self.read(report, "county_results.csv")
+        contests = self.read(report, "contest_results.csv")
+        for row in rows + contests:
+            row["total_votes"] = int(row["total_votes"])
+        geo = json.loads((STATIC / "ms-map.json").read_text())
+        certified = {
+            "publication_id": "certified",
+            "status": "official",
+            "attestation": {"mode": "certified_file"},
+        }
+        payload = make_payload(geo, certified, rows, contests, state="MS")
+        self.assertEqual(payload["vote_basis"], "reported_votes")
+        self.assertNotIn("county_collection", payload)
+        self.assertEqual(len(payload["races"]["MS-SEN"]["counties"]), 82)
+        # A county feed's publication still needs its collection register.
+        with self.assertRaisesRegex(ValueError, "provenance"):
+            make_payload(geo, {**certified, "attestation": None}, rows, contests, state="MS")
 
 
 if __name__ == "__main__":
