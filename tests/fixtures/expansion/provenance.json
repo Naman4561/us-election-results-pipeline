@@ -1,4 +1,35 @@
 {
+ "IN": {
+  "archive_sha256": "5c495e99692867e10a7be3a02828fda659e3f1029dee8988b635bc7b172aeabc",
+  "captured_at": "2026-11-10T04:18:24+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 3577,
+    "content_type": "application/json",
+    "final_url": "https://enr.indianavoters.in.gov/site/data/settings.json",
+    "name": "settings.json",
+    "sha256": "6ec6aa9e909fa0c02abc6ab349379129bceab030862f4f789e47915f97d74bc5",
+    "url": "https://enr.indianavoters.in.gov/site/data/settings.json"
+   },
+   {
+    "bytes": 116480,
+    "content_type": "application/json",
+    "final_url": "https://enr.indianavoters.in.gov/site/data/OffCatC_1005_B.json",
+    "name": "house.json",
+    "sha256": "4d448ca7bf2880a9b974b257d7c1e5f94bb560292467ab82eb0dfe21c0446855",
+    "url": "https://enr.indianavoters.in.gov/site/data/OffCatC_1005_B.json"
+   },
+   {
+    "bytes": 3577,
+    "content_type": "application/json",
+    "final_url": "https://enr.indianavoters.in.gov/site/data/settings.json",
+    "name": ".recheck.json",
+    "sha256": "6ec6aa9e909fa0c02abc6ab349379129bceab030862f4f789e47915f97d74bc5",
+    "url": "https://enr.indianavoters.in.gov/site/data/settings.json"
+   }
+  ]
+ },
  "UT": {
   "archive_sha256": "0c22ec404d3669bfc2be1048cade5cb6773948298a9d50a5a0584b0a3feef7ae",
   "captured_at": "2026-11-10T04:14:50+00:00",

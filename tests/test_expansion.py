@@ -13,6 +13,7 @@ import unittest
 import zipfile
 from pathlib import Path
 
+from election_pipeline.collectors import indiana as indiana_collector
 from election_pipeline.dashboard.server import STATIC, make_payload
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
@@ -21,8 +22,8 @@ from election_pipeline.storage import ArchiveStore
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests/fixtures/expansion"
 LEDGER = json.loads((FIXTURES / "provenance.json").read_text())
-SOURCES = {"UT": "ut_2026_general"}
-HOSTS = {"UT": "electionresults.utah.gov"}
+SOURCES = {"UT": "ut_2026_general", "IN": "in_2026_general"}
+HOSTS = {"UT": "electionresults.utah.gov", "IN": "enr.indianavoters.in.gov"}
 
 
 def members(code):
@@ -93,9 +94,7 @@ class ExpansionTests(unittest.TestCase):
                     self.read(report, "contest_results.csv"),
                     state=code,
                 )
-                self.assertEqual(
-                    set(payload["races"]), {d["id"] for d in geography["districts"]}
-                )
+                self.assertEqual(set(payload["races"]), {d["id"] for d in geography["districts"]})
 
     # Utah ------------------------------------------------------------------------------
 
@@ -138,6 +137,63 @@ class ExpansionTests(unittest.TestCase):
         self.failed("UT", election, "Wrong Utah election")
         self.failed("UT", county)
         self.failed("UT", stranger)
+
+    # Indiana ---------------------------------------------------------------------------
+
+    def test_in_counties_reconcile_and_certification_is_read_from_settings(self):
+        report = self.parse("IN")
+        self.assertEqual(report["contest_total_reconciliation"], "passed")
+        self.assertIs(report["official_results"], False)
+        counties = {r["county"] for r in self.read(report, "county_results.csv")}
+        self.assertIn("Marion", counties)  # District 7: one county, written as an object
+
+        def certified(data):
+            edit_json(data, "settings.json", lambda v: v["Root"].update(Certified="T"))
+
+        self.assertIs(self.parse("IN", certified)["official_results"], True)
+        self.failed(
+            "IN",
+            lambda d: edit_json(d, "settings.json", lambda v: v["Root"].update(Certified="Y")),
+            "certified flag",
+        )
+
+    def test_in_wrong_election_altered_county_and_missing_county_are_refused(self):
+        def election(data):
+            edit_json(
+                data, "settings.json", lambda v: v["Root"].update(CurrentElection="05/05/2026")
+            )
+
+        def region(value, number):
+            regions = value["Root"]["OfficeCategory"]["Regions"]["Region"]
+            return next(r for r in regions if r["MAP_JURISDICTION_NAME"] == number)
+
+        def county(data):
+            def change(value):
+                local = region(value, "2")["Races"]["Race"][0]
+                local["Candidates"]["Candidate"][0]["TOTAL_VOTES"] += 1
+
+            edit_json(data, "house.json", change)
+
+        def missing(data):
+            edit_json(data, "house.json", lambda v: region(v, "3")["Races"]["Race"].pop())
+
+        self.failed("IN", election, "another election")
+        self.failed("IN", county)
+        self.failed("IN", missing)
+
+    def test_in_collector_reads_only_the_named_publication_file(self):
+        settings = members("IN")["settings.json"]
+        code, letter = indiana_collector.publication(settings)
+        self.assertRegex(code, r"^2026")
+        self.assertEqual(
+            indiana_collector.house_url(self.sources["in_2026_general"].url, letter),
+            f"https://enr.indianavoters.in.gov/site/data/OffCatC_1005_{letter}.json",
+        )
+        for bad in (b"{}", b'{"Root": {"VersionCode": "x", "VersionType": "A"}}'):
+            with self.assertRaises(ValueError):
+                indiana_collector.publication(bad)
+        with self.assertRaises(ValueError):
+            indiana_collector.house_url("https://example.com/site/data/settings.json", "A")
 
 
 if __name__ == "__main__":

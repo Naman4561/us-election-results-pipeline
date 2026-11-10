@@ -244,6 +244,16 @@ min_interval_seconds = 840
 expected_members = ["data.json", "item-wa-01.json", "item-wa-02.json", "item-wa-03.json", "item-wa-04.json", "item-wa-05.json", "item-wa-06.json", "item-wa-07.json", "item-wa-08.json", "item-wa-09.json", "item-wa-10.json"]
 supplemental_members = ["item-wa-01.json", "item-wa-02.json", "item-wa-03.json", "item-wa-04.json", "item-wa-05.json", "item-wa-06.json", "item-wa-07.json", "item-wa-08.json", "item-wa-09.json", "item-wa-10.json"]
 
+[sources.in_2026_general]
+state = "IN"
+election_date = "2026-11-03"
+url = "https://enr.indianavoters.in.gov/site/data/settings.json"
+format = "bundle"
+primary_filename = "settings.json"
+min_interval_seconds = 840
+expected_members = ["settings.json", "house.json"]
+supplemental_members = ["house.json"]
+
 [sources.ut_2026_general]
 state = "UT"
 election_date = "2026-11-03"

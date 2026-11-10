@@ -236,6 +236,18 @@ STATES = {
         source_page="https://results.votewa.gov/results/public/washington/elections/20261103",
         collection_backend="enhanced_voting",
     ),
+    # Indiana elects no senator or governor in 2026; "in" is a Python keyword.
+    "IN": State(
+        "IN",
+        "Indiana",
+        "in_2026_general",
+        tuple(range(1, 10)),
+        ("total_votes",),
+        senate=False,
+        source_page="https://enr.indianavoters.in.gov/site/index.html",
+        collection_backend="indiana",
+        parser_module="indiana",
+    ),
     # Utah elects no senator or governor in 2026.
     "UT": State(
         "UT",

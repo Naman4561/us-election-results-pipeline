@@ -1,0 +1,186 @@
+{
+ "state": "IN",
+ "provenance": "Indiana candidate IDs and counties from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 04:18 UTC). Pending operator review before release.",
+ "races": {
+  "IN-01": {
+   "candidates": [
+    "4042",
+    "4615",
+    "2620",
+    "7901"
+   ],
+   "counties": [
+    "LaPorte",
+    "Lake",
+    "Porter"
+   ]
+  },
+  "IN-02": {
+   "candidates": [
+    "1567",
+    "3689",
+    "7013"
+   ],
+   "counties": [
+    "Cass",
+    "Elkhart",
+    "Fulton",
+    "Kosciusko",
+    "LaPorte",
+    "Marshall",
+    "Miami",
+    "Pulaski",
+    "St. Joseph",
+    "Starke",
+    "Wabash"
+   ]
+  },
+  "IN-03": {
+   "candidates": [
+    "5929",
+    "7059",
+    "6750"
+   ],
+   "counties": [
+    "Adams",
+    "Allen",
+    "Blackford",
+    "DeKalb",
+    "Huntington",
+    "Jay",
+    "Kosciusko",
+    "LaGrange",
+    "Noble",
+    "Randolph",
+    "Steuben",
+    "Wells",
+    "Whitley"
+   ]
+  },
+  "IN-04": {
+   "candidates": [
+    "1060",
+    "4648",
+    "7769"
+   ],
+   "counties": [
+    "Benton",
+    "Boone",
+    "Carroll",
+    "Cass",
+    "Clinton",
+    "Fountain",
+    "Hendricks",
+    "Howard",
+    "Jasper",
+    "Montgomery",
+    "Morgan",
+    "Newton",
+    "Putnam",
+    "Tippecanoe",
+    "Warren",
+    "White"
+   ]
+  },
+  "IN-05": {
+   "candidates": [
+    "4147",
+    "7488"
+   ],
+   "counties": [
+    "Delaware",
+    "Grant",
+    "Hamilton",
+    "Howard",
+    "Madison",
+    "Tipton"
+   ]
+  },
+  "IN-06": {
+   "candidates": [
+    "4199",
+    "4349"
+   ],
+   "counties": [
+    "Bartholomew",
+    "Fayette",
+    "Hancock",
+    "Henry",
+    "Johnson",
+    "Marion",
+    "Randolph",
+    "Rush",
+    "Shelby",
+    "Union",
+    "Wayne"
+   ]
+  },
+  "IN-07": {
+   "candidates": [
+    "3722",
+    "2627",
+    "3924"
+   ],
+   "counties": [
+    "Marion"
+   ]
+  },
+  "IN-08": {
+   "candidates": [
+    "1761",
+    "5440"
+   ],
+   "counties": [
+    "Clay",
+    "Crawford",
+    "Daviess",
+    "Dubois",
+    "Fountain",
+    "Gibson",
+    "Greene",
+    "Knox",
+    "Martin",
+    "Orange",
+    "Owen",
+    "Parke",
+    "Perry",
+    "Pike",
+    "Posey",
+    "Spencer",
+    "Sullivan",
+    "Vanderburgh",
+    "Vermillion",
+    "Vigo",
+    "Warrick"
+   ]
+  },
+  "IN-09": {
+   "candidates": [
+    "3419",
+    "4360",
+    "3710",
+    "5281"
+   ],
+   "counties": [
+    "Bartholomew",
+    "Brown",
+    "Clark",
+    "Dearborn",
+    "Decatur",
+    "Floyd",
+    "Franklin",
+    "Harrison",
+    "Jackson",
+    "Jefferson",
+    "Jennings",
+    "Lawrence",
+    "Monroe",
+    "Ohio",
+    "Ripley",
+    "Scott",
+    "Switzerland",
+    "Washington"
+   ]
+  }
+ }
+}
