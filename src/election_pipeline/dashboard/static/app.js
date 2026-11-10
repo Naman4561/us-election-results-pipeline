@@ -732,13 +732,13 @@ function renderMetadata() {
               : "") +
             ". A party lead is not a race call."
           : manual
-          ? "Manually imported official results. Source report: " +
-            date(publication?.source_modified_at) +
-            ". Results update when a new file is imported. A party lead is not a race call."
-          : "Unofficial returns from official election sources. A party lead is not a race call. Gray and patterned regions are explained in the legend." +
-            (national && anyManual
-              ? " Includes manually updated states; select a state for its report timestamp."
-              : "");
+            ? "Manually imported official results. Source report: " +
+              date(publication?.source_modified_at) +
+              ". Results update when a new file is imported. A party lead is not a race call."
+            : "Unofficial returns from official election sources. A party lead is not a race call. Gray and patterned regions are explained in the legend." +
+              (national && anyManual
+                ? " Includes manually updated states; select a state for its report timestamp."
+                : "");
   if (
     (national &&
       Object.values(data.states).some(
