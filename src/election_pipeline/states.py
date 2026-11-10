@@ -281,6 +281,18 @@ STATES = {
             "November 3 results."
         ),
     ),
+    # Rhode Island reports by city and town, not county.
+    "RI": State(
+        "RI",
+        "Rhode Island",
+        "ri_2026_general",
+        (1, 2),
+        ("total_votes", "election_day", "early_voting", "absentee_by_mail"),
+        governor=True,
+        county_results=False,
+        source_page="https://electionresults.ri.gov/results/public/rhodeisland/elections/2026StatewideGeneralElection",
+        collection_backend="enhanced_voting",
+    ),
     # Utah elects no senator or governor in 2026.
     "UT": State(
         "UT",

@@ -29,6 +29,7 @@ SOURCES = {
     "AR": "ar_2026_general",
     "ND": "nd_2026_general",
     "LA": "la_2026_general",
+    "RI": "ri_2026_general",
 }
 HOSTS = {
     "UT": "electionresults.utah.gov",
@@ -36,6 +37,7 @@ HOSTS = {
     "AR": "enr-results-api.totalresults.com",
     "ND": "api.resultsnd.sos.nd.gov",
     "LA": "voterportal.sos.la.gov",
+    "RI": "electionresults.ri.gov",
 }
 
 
@@ -76,7 +78,9 @@ class ExpansionTests(unittest.TestCase):
         with (Path(report["output_dir"]) / name).open(encoding="utf-8", newline="") as handle:
             rows = list(csv.DictReader(handle))
         for row in rows:
-            row["total_votes"] = int(row["total_votes"]) if row["total_votes"] else None
+            for field in state_adapter(self.source.state).methods:
+                if field in row:
+                    row[field] = int(row[field]) if row[field] else None
         return rows
 
     def failed(self, code, mutate, message=None):
@@ -359,6 +363,46 @@ class ExpansionTests(unittest.TestCase):
         self.failed("LA", parish)
         self.failed("LA", unknown, "unknown or duplicate")
         self.failed("LA", election, "lacks the November 3, 2026 election")
+
+    # Rhode Island ----------------------------------------------------------------------
+
+    def test_ri_keeps_statewide_rows_and_checks_every_town_and_federal_ballot(self):
+        report = self.parse("RI")
+        self.assertEqual(report["locality_reconciliation"], "passed")
+        self.assertIs(report["official_results"], False)
+        rows = self.read(report, "results.csv")
+        self.assertEqual({r["unit_type"] for r in rows}, {"state"})
+        senate = {r["choice"]: r for r in rows if r["contest_id"] == "RI-SEN"}
+        reed = senate["John F. Reed (DEM)"]
+        self.assertEqual(reed["choice_party"], "DEM")
+        self.assertEqual(
+            reed["election_day"] + reed["early_voting"] + reed["absentee_by_mail"],
+            reed["total_votes"],
+        )
+
+        def town(data):
+            def change(value):
+                option = value["breakdownResults"][0]["ballotOptions"][0]
+                option["voteCount"] += 1
+                option["groupResults"][0]["voteCount"] += 1
+                value["breakdownResults"][0]["voteTotal"] += 1
+
+            edit_json(data, "item-ri-sen.json", change)
+
+        def federal_ballots_dropped(data):
+            def change(value):
+                value["breakdownResults"] = [
+                    b
+                    for b in value["breakdownResults"]
+                    if b["locality"]["name"][0]["text"] != "Federal"
+                ]
+                value["breakdownResultCount"] = len(value["breakdownResults"])
+
+            # Federal-only ballots count in federal races; the governor's row is zero.
+            edit_json(data, "item-ri-sen.json", change)
+
+        self.failed("RI", town, "do not add up to the statewide counts")
+        self.failed("RI", federal_ballots_dropped, "do not add up to the statewide counts")
 
 
 if __name__ == "__main__":

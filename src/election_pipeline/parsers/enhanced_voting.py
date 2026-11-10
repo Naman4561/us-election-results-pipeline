@@ -1,4 +1,5 @@
-"""Shared reader for official Enhanced Voting results (Virginia, Idaho, Washington).
+"""Shared reader for official Enhanced Voting results (Virginia, Idaho, Washington, Utah,
+Rhode Island).
 
 A bundle holds the election's ``data`` document (statewide totals for every contest) and
 one ``ballot-items/<id>`` document per selected contest (its county breakdown). For each
@@ -32,7 +33,10 @@ class Site:
     election_id: str
     vote_for: tuple
     race: object  # English contest name -> contest ID or None
-    county: object  # English locality name -> stored county name
+    # English locality name -> stored county name. None for a site whose localities are
+    # not counties (Rhode Island's cities, towns and its "Federal" ballots): they must
+    # add up to the statewide counts, and only statewide rows are kept.
+    county: object
     methods: dict = field(default_factory=dict)  # English group name -> method column
     # English party name -> code, for a site that names parties without abbreviations.
     parties: dict = field(default_factory=dict)
@@ -181,9 +185,10 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
             raise ValueError(f"{race}: county detail belongs to another contest")
         if item["breakdownResultCount"] != len(breakdown) or not breakdown:
             raise ValueError(f"{race}: county detail is incomplete")
-        counties = set()
+        counties, sums = set(), dict.fromkeys(statewide, 0)
         for locality in breakdown:
-            county = site.county(english(locality["locality"]["name"], "county name"))
+            place = english(locality["locality"]["name"], "county name")
+            county = site.county(place) if site.county else place
             if county in counties:
                 raise ValueError(f"{race}: duplicate county {county}")
             counties.add(county)
@@ -197,6 +202,10 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
                 name, label = candidates[identity]
                 if english(option["name"]) != name:
                     raise ValueError(f"{race} {county}: candidate name differs from statewide")
+                sums[identity] += count(option["voteCount"])
+                if site.county is None:
+                    methods(option, site, f"{race} {county}")
+                    continue
                 rows.append(
                     {
                         **row(
@@ -213,6 +222,11 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
                         **methods(option, site, f"{race} {county}"),
                     }
                 )
+        if site.county is None:
+            if any(sums[i] != count(o["voteCount"]) for i, o in statewide.items()):
+                raise ValueError(f"{race}: localities do not add up to the statewide counts")
+            verify_scope(site.state, race, list(statewide))
+            continue
         verify_scope(site.state, race, list(statewide), sorted(counties))
     finish(
         rows,
@@ -221,8 +235,10 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
         output,
         stats,
         reference=reference,
-        reconcile=True,
+        reconcile=site.county is not None,
     )
+    if site.county is None:
+        stats.update(locality_reconciliation="passed")
     stats.update(
         source_version=text(record["publishVersionId"]),
         source_update_text=text(record["asOf"]),

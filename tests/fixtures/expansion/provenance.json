@@ -187,6 +187,61 @@
    }
   ]
  },
+ "RI": {
+  "archive_sha256": "54ef2ba10ed7374500091674d8c48df27f107864c451407821a2dab0c9318843",
+  "captured_at": "2026-11-10T16:41:45+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 1513986,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/data",
+    "name": "data.json",
+    "sha256": "1803784b258cccc1b449331ecb516014b6211175c1da1a06e7c9cd2b9b6adc8b",
+    "url": "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/data"
+   },
+   {
+    "bytes": 173337,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/ballot-items/01000000-59ac-daed-9906-08df1e27a27c",
+    "name": "item-ri-sen.json",
+    "sha256": "b74e29e9b0d978bab9627b75b615c05650496f35215aa221fd00642116c75d63",
+    "url": "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/ballot-items/01000000-59ac-daed-9906-08df1e27a27c"
+   },
+   {
+    "bytes": 88181,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/ballot-items/01000000-59ac-daed-f559-08df1e27a28f",
+    "name": "item-ri-01.json",
+    "sha256": "76c4b079eed0c8a824835071febb64d235e44260a456a2472a0dc7457e525b5f",
+    "url": "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/ballot-items/01000000-59ac-daed-f559-08df1e27a28f"
+   },
+   {
+    "bytes": 78708,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/ballot-items/01000000-59ac-daed-5006-08df1e27a757",
+    "name": "item-ri-02.json",
+    "sha256": "efa373fc5bef592e036d32240e2a3135edc1299ca852548de229e86f6e99bbfa",
+    "url": "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/ballot-items/01000000-59ac-daed-5006-08df1e27a757"
+   },
+   {
+    "bytes": 233598,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/ballot-items/01000000-59ac-daed-9ccb-08df1e27a310",
+    "name": "item-ri-gov.json",
+    "sha256": "d38d4d3cde5ed95d43b88c752c1ab91440bfe25340710f952d227cf40055913c",
+    "url": "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/ballot-items/01000000-59ac-daed-9ccb-08df1e27a310"
+   },
+   {
+    "bytes": 1513986,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/data",
+    "name": ".recheck.json",
+    "sha256": "1803784b258cccc1b449331ecb516014b6211175c1da1a06e7c9cd2b9b6adc8b",
+    "url": "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/data"
+   }
+  ]
+ },
  "UT": {
   "archive_sha256": "0c22ec404d3669bfc2be1048cade5cb6773948298a9d50a5a0584b0a3feef7ae",
   "captured_at": "2026-11-10T04:14:50+00:00",

@@ -1,0 +1,43 @@
+{
+ "state": "RI",
+ "provenance": "Enhanced Voting ballot-option IDs from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 16:41 UTC). Rhode Island reports by city and town, not county, so no counties are listed. Pending operator review before release.",
+ "races": {
+  "RI-SEN": {
+   "candidates": [
+    "01000000-59ac-daed-8a9e-08df1e27a285",
+    "01000000-59ac-daed-4694-08df1e27a285",
+    "01000000-59ac-daed-8d02-08df1e27a285",
+    "01000000-59ac-daed-8e68-08df1e27a285"
+   ],
+   "counties": []
+  },
+  "RI-01": {
+   "candidates": [
+    "01000000-59ac-daed-b9cd-08df1e27a308",
+    "01000000-59ac-daed-b56b-08df1e27a308",
+    "01000000-59ac-daed-babd-08df1e27a308",
+    "01000000-59ac-daed-bb74-08df1e27a308"
+   ],
+   "counties": []
+  },
+  "RI-02": {
+   "candidates": [
+    "01000000-59ac-daed-9a29-08df1e27a763",
+    "01000000-59ac-daed-94dc-08df1e27a763",
+    "01000000-59ac-daed-9c40-08df1e27a763"
+   ],
+   "counties": []
+  },
+  "RI-GOV": {
+   "candidates": [
+    "01000000-59ac-daed-ce1b-08df1e27a340",
+    "01000000-59ac-daed-cf07-08df1e27a340",
+    "01000000-59ac-daed-c9df-08df1e27a340",
+    "01000000-59ac-daed-d08a-08df1e27a340",
+    "01000000-59ac-daed-cfd2-08df1e27a340",
+    "01000000-59ac-daed-d126-08df1e27a340"
+   ],
+   "counties": []
+  }
+ }
+}

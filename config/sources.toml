@@ -301,6 +301,16 @@ min_interval_seconds = 840
 "parish-la-05.json" = "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70199.htm"
 "parish-la-06.json" = "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70200.htm"
 
+[sources.ri_2026_general]
+state = "RI"
+election_date = "2026-11-03"
+url = "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/data"
+format = "bundle"
+primary_filename = "data.json"
+min_interval_seconds = 840
+expected_members = ["data.json", "item-ri-sen.json", "item-ri-gov.json", "item-ri-01.json", "item-ri-02.json"]
+supplemental_members = ["item-ri-sen.json", "item-ri-gov.json", "item-ri-01.json", "item-ri-02.json"]
+
 [sources.ut_2026_general]
 state = "UT"
 election_date = "2026-11-03"
