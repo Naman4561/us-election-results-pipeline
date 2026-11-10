@@ -17,13 +17,24 @@ from election_pipeline.collectors import indiana as indiana_collector
 from election_pipeline.dashboard.server import STATIC, make_payload
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
+from election_pipeline.states import state_adapter
 from election_pipeline.storage import ArchiveStore
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests/fixtures/expansion"
 LEDGER = json.loads((FIXTURES / "provenance.json").read_text())
-SOURCES = {"UT": "ut_2026_general", "IN": "in_2026_general"}
-HOSTS = {"UT": "electionresults.utah.gov", "IN": "enr.indianavoters.in.gov"}
+SOURCES = {
+    "UT": "ut_2026_general",
+    "IN": "in_2026_general",
+    "AR": "ar_2026_general",
+    "ND": "nd_2026_general",
+}
+HOSTS = {
+    "UT": "electionresults.utah.gov",
+    "IN": "enr.indianavoters.in.gov",
+    "AR": "enr-results-api.totalresults.com",
+    "ND": "api.resultsnd.sos.nd.gov",
+}
 
 
 def members(code):
@@ -94,7 +105,10 @@ class ExpansionTests(unittest.TestCase):
                     self.read(report, "contest_results.csv"),
                     state=code,
                 )
-                self.assertEqual(set(payload["races"]), {d["id"] for d in geography["districts"]})
+                self.assertEqual(set(payload["races"]), set(state_adapter(code).races))
+                self.assertLessEqual(
+                    {d["id"] for d in geography["districts"]}, set(payload["races"])
+                )
 
     # Utah ------------------------------------------------------------------------------
 
@@ -194,6 +208,62 @@ class ExpansionTests(unittest.TestCase):
                 indiana_collector.publication(bad)
         with self.assertRaises(ValueError):
             indiana_collector.house_url("https://example.com/site/data/settings.json", "A")
+
+    # Arkansas and North Dakota (Tally) -------------------------------------------------
+
+    def test_tally_states_reconcile_and_read_the_official_flag(self):
+        for code, members_ in (("AR", ("results-federal.json",)), ("ND", ("results-sw.json",))):
+            with self.subTest(code=code):
+                report = self.parse(code)
+                self.assertEqual(report["contest_total_reconciliation"], "passed")
+                self.assertIs(report["official_results"], False)
+
+                def official(data):
+                    for name in data:
+                        edit_json(data, name, lambda v: v.update(isOfficial=True))
+
+                self.assertIs(self.parse(code, official)["official_results"], True)
+                # One document marked official alone is another publication's.
+                self.failed(
+                    code,
+                    lambda d: edit_json(d, members_[0], lambda v: v.update(isOfficial=True)),
+                    "different publications",
+                )
+
+    def test_ar_names_drop_only_their_own_party_prefix(self):
+        rows = self.read(self.parse("AR"), "contest_results.csv")
+        names = {(r["contest_id"], r["choice"], r["choice_party"]) for r in rows}
+        self.assertIn(("AR-SEN", "Tom Cotton", "REP"), names)
+        self.assertIn(("AR-GOV", "Sarah Huckabee Sanders", "REP"), names)
+        self.assertIn(("AR-04", 'James "Rus" Russell, III', "DEM"), names)
+
+    def test_tally_mixed_versions_other_election_and_altered_counties_are_refused(self):
+        def version(data):
+            edit_json(data, "info.json", lambda v: v.update(versionID="v1"))
+
+        def election(data):
+            for name in data:
+                edit_json(data, name, lambda v: v.update(electionID="349"))
+
+        def county(data):
+            def change(value):
+                contest = value["response"]["contests"]["22055"]
+                local = next(iter(contest["locations"].values()))
+                local["choices"][0]["totalVotes"] += 1
+                local["totalVotes"] += 1
+
+            edit_json(data, "results-sw.json", change)
+
+        def write_in(data):
+            def change(value):
+                value["response"]["contests"]["22055"]["writeInChoices"] = [{"choiceID": "1"}]
+
+            edit_json(data, "results-sw.json", change)
+
+        self.failed("ND", version, "different publications")
+        self.failed("ND", election, "another election")
+        self.failed("ND", county)
+        self.failed("ND", write_in, "unexpected")
 
 
 if __name__ == "__main__":

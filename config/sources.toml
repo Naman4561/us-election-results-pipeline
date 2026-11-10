@@ -254,6 +254,33 @@ min_interval_seconds = 840
 expected_members = ["settings.json", "house.json"]
 supplemental_members = ["house.json"]
 
+[sources.ar_2026_general]
+state = "AR"
+election_date = "2026-11-03"
+url = "https://enr-results-api.totalresults.com/Contest/GetContestResults?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd&contestType=Federal"
+format = "bundle"
+primary_filename = "results-federal.json"
+expected_members = ["results-federal.json", "results-statewide.json", "info.json", "contests.json"]
+min_interval_seconds = 840
+
+[sources.ar_2026_general.files]
+"info.json" = "https://enr-results-api.totalresults.com/Election/GetElectionInfo?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd"
+"contests.json" = "https://enr-results-api.totalresults.com/Contest/GetContestSearchList?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd"
+"results-statewide.json" = "https://enr-results-api.totalresults.com/Contest/GetContestResults?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd&contestType=Statewide"
+
+[sources.nd_2026_general]
+state = "ND"
+election_date = "2026-11-03"
+url = "https://api.resultsnd.sos.nd.gov/Contest/GetContestResults?cId=north-dakota&electionID=348&contestType=SW"
+format = "bundle"
+primary_filename = "results-sw.json"
+expected_members = ["results-sw.json", "info.json", "contests.json"]
+min_interval_seconds = 840
+
+[sources.nd_2026_general.files]
+"info.json" = "https://api.resultsnd.sos.nd.gov/Election/GetElectionInfo?cId=north-dakota&electionID=348"
+"contests.json" = "https://api.resultsnd.sos.nd.gov/Contest/GetContestSearchList?cId=north-dakota&electionID=348"
+
 [sources.ut_2026_general]
 state = "UT"
 election_date = "2026-11-03"

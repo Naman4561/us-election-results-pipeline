@@ -248,6 +248,25 @@ STATES = {
         collection_backend="indiana",
         parser_module="indiana",
     ),
+    "AR": State(
+        "AR",
+        "Arkansas",
+        "ar_2026_general",
+        (1, 2, 3, 4),
+        ("total_votes",),
+        governor=True,
+        source_page="https://arkansas.tally-enr.com/",
+    ),
+    # North Dakota elects no senator or governor in 2026.
+    "ND": State(
+        "ND",
+        "North Dakota",
+        "nd_2026_general",
+        (0,),
+        ("total_votes",),
+        senate=False,
+        source_page="https://resultsnd.sos.nd.gov/",
+    ),
     # Utah elects no senator or governor in 2026.
     "UT": State(
         "UT",

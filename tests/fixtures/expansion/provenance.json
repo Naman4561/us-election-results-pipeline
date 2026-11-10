@@ -1,4 +1,43 @@
 {
+ "AR": {
+  "archive_sha256": "47370205a94a8739df3ac133839fbb9729c0a5c4500847d0f09d3bc1e5dceea0",
+  "captured_at": "2026-11-10T04:24:57+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 1299468,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr-results-api.totalresults.com/Contest/GetContestSearchList?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd",
+    "name": "contests.json",
+    "sha256": "763dff0a4e35c9595db4680273a7b48fbf6af44279840b24b4c163fbbd4b5e5c",
+    "url": "https://enr-results-api.totalresults.com/Contest/GetContestSearchList?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd"
+   },
+   {
+    "bytes": 598187,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr-results-api.totalresults.com/Election/GetElectionInfo?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd",
+    "name": "info.json",
+    "sha256": "b3690878f565e706b2db55262db3365043122b20fc1f8021f0b50d4f4c0f769c",
+    "url": "https://enr-results-api.totalresults.com/Election/GetElectionInfo?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd"
+   },
+   {
+    "bytes": 431987,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr-results-api.totalresults.com/Contest/GetContestResults?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd&contestType=Statewide",
+    "name": "results-statewide.json",
+    "sha256": "c08e1d2fe928e1daf708994304722badc712be6f0b73f189c6ebb1adb39be332",
+    "url": "https://enr-results-api.totalresults.com/Contest/GetContestResults?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd&contestType=Statewide"
+   },
+   {
+    "bytes": 102309,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://enr-results-api.totalresults.com/Contest/GetContestResults?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd&contestType=Federal",
+    "name": "results-federal.json",
+    "sha256": "7e1b6ab36c73c32aecea35ed5baa88cccda03c7b147b5f03be1db4fbce3568da",
+    "url": "https://enr-results-api.totalresults.com/Contest/GetContestResults?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd&contestType=Federal"
+   }
+  ]
+ },
  "IN": {
   "archive_sha256": "5c495e99692867e10a7be3a02828fda659e3f1029dee8988b635bc7b172aeabc",
   "captured_at": "2026-11-10T04:18:24+00:00",
@@ -27,6 +66,37 @@
     "name": ".recheck.json",
     "sha256": "6ec6aa9e909fa0c02abc6ab349379129bceab030862f4f789e47915f97d74bc5",
     "url": "https://enr.indianavoters.in.gov/site/data/settings.json"
+   }
+  ]
+ },
+ "ND": {
+  "archive_sha256": "d6f1d9f974806b68041afcf9ea4a04224117656fc1f8741add5979d6e9212ac3",
+  "captured_at": "2026-11-10T04:24:56+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 375852,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://api.resultsnd.sos.nd.gov/Contest/GetContestSearchList?cId=north-dakota&electionID=348",
+    "name": "contests.json",
+    "sha256": "7acdd3e5b7a2bbd977f49b41f822d623e97363442e6eb5b144cb5b34ae99d7ad",
+    "url": "https://api.resultsnd.sos.nd.gov/Contest/GetContestSearchList?cId=north-dakota&electionID=348"
+   },
+   {
+    "bytes": 159124,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://api.resultsnd.sos.nd.gov/Election/GetElectionInfo?cId=north-dakota&electionID=348",
+    "name": "info.json",
+    "sha256": "9aad4c9f139b97ac1c01f34a53bb56896555972a44ee19e28217a54a2fea7072",
+    "url": "https://api.resultsnd.sos.nd.gov/Election/GetElectionInfo?cId=north-dakota&electionID=348"
+   },
+   {
+    "bytes": 310469,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://api.resultsnd.sos.nd.gov/Contest/GetContestResults?cId=north-dakota&electionID=348&contestType=SW",
+    "name": "results-sw.json",
+    "sha256": "203b59dfa788153dec4c8c98dc105328d1e104b90a281f4a18fe6ab3b20558fa",
+    "url": "https://api.resultsnd.sos.nd.gov/Contest/GetContestResults?cId=north-dakota&electionID=348&contestType=SW"
    }
   ]
  },
