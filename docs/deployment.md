@@ -93,6 +93,7 @@ monitor shows a reminder:
 | Georgia, Washington, Idaho, Virginia | Enhanced Voting's `isOfficialResults` |
 | Colorado, Iowa, West Virginia, South Carolina | Clarity's final-upload flag |
 | South Dakota, New Mexico, Nebraska, Oregon, Maryland, Alaska | The results page's own "Unofficial" label reading "Official" |
+| Texas | The feed offering its official canvass report (`OfficialCanvassReport`), as it does for canvassed statewide elections |
 
 The page labels' official wording has not been seen on these sites this election. A
 page whose label reads neither "Unofficial" nor "Official" (for example "Certified"),

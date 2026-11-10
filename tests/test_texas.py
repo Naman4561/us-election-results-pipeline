@@ -98,6 +98,18 @@ def fixture():
         "Home": {"ElecDate": "11032026", "LastUpdatedTime": "Nov 04, 2026 01:28:46"},
         "Federal": {"OffType": "FEDERAL OFFICES", "OffTypeID": 510, "Races": federal},
         "StateWide": {"OffType": "STATEWIDE OFFICES", "OffTypeID": 511, "Races": statewide},
+        # As served on election night: no report is offered yet.
+        "ReportList": {
+            name: {"view": False, "fileTypes": []}
+            for name in (
+                "CountyByCountyCanvassReport",
+                "WinnerListingReport",
+                "OfficialCanvassReport",
+                "UnofficialReport",
+                "UnofficialVoteReport",
+                "VoterTurnoutReport",
+            )
+        },
     }
 
 
@@ -244,6 +256,20 @@ class TexasCivixTests(unittest.TestCase):
             data["Federal"]["Races"][0]["T"] -= 100
 
         self.assertEqual(self.parse(correction)["outcome"], "parsed")
+
+    def test_official_only_once_the_official_canvass_report_is_offered(self):
+        self.assertIs(self.parse()["official_results"], False)
+
+        def canvassed(data):
+            data["ReportList"]["OfficialCanvassReport"] = {"view": True, "fileTypes": ["pdf"]}
+
+        self.assertIs(self.parse(canvassed)["official_results"], True)
+        for broken in (
+            lambda d: d.pop("ReportList"),
+            lambda d: d["ReportList"].pop("OfficialCanvassReport"),
+            lambda d: d["ReportList"]["OfficialCanvassReport"].update(view="true"),
+        ):
+            self.assertEqual(self.parse(broken)["outcome"], "validation_failed")
 
     def test_invalid_envelope_json_base64_and_missing_sections_fail(self):
         for raw in (

@@ -39,6 +39,16 @@ def section(envelope, name):
         raise ValueError(f"Invalid encoded Texas section: {name}") from error
 
 
+def official_canvass(envelope):
+    """Whether the state offers this election's official canvass report. Texas switches it
+    on once the statewide canvass is done, as in its certified 2026 primaries and runoffs;
+    election night has it off."""
+    report = section(envelope, "ReportList").get("OfficialCanvassReport")
+    if not isinstance(report, dict) or type(report.get("view")) is not bool:
+        raise ValueError("Unexpected Texas official canvass report setting")
+    return report["view"]
+
+
 def count(value, label):
     if type(value) is not int or not 0 <= value <= 9223372036854775807:
         raise ValueError(f"Invalid Texas {label}: expected a nonnegative integer")
@@ -145,5 +155,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         source_version=version,
         source_update_text=updated,
         source_update_timezone="not specified by source; no timezone inferred",
+        official_results=official_canvass(envelope),
         contest_total_reconciliation="passed",
     )
