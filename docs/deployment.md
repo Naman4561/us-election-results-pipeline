@@ -24,7 +24,11 @@ deploy status
 ## Releasing
 
 1. **Stage** the pushed branch. Nothing running changes; the tests run again inside the
-   new image, with no network or production mounts.
+   new image, with no network or production mounts. The image installs the locked
+   dependencies (`constraints.txt`) in a layer of its own, before any code, so a release
+   that changes only code reuses it and adds a few megabytes. The host control scripts'
+   dependencies live in one environment per lock under `/opt/election-venvs`, which the
+   release's venv points to, so a code-only release installs nothing on the host.
 
    ```bash
    sudo bash scripts/stage_release.sh refs/heads/main
@@ -34,9 +38,17 @@ deploy status
    source runs once under the new image in check-only mode: its latest archived
    snapshot is parsed, loaded and put through the full dbt build, with the candidate
    discarded and nothing published. No request goes to the state and collector state is
-   untouched, so a state's site being down does not block a release. Only when
-   every source validates does `current` move to the release; the worker uses it from
-   its next cycle. A source that fails leaves the old release current.
+   untouched, so a state's site being down does not block a release. A source the
+   worker is collecting at that moment is locked; its check waits for it, retrying every
+   15 seconds for up to `CHECK_LOCK_WAIT_SECONDS` (default 600). Only when every source
+   validates does `current` move to the release; the worker uses it from its next cycle.
+   A source that fails leaves the old release current.
+
+   Once `current` has moved, old artifacts are pruned: release checkouts and images
+   other than the current and previous releases, the two newest others and any image a
+   container was created from (the active and previous dashboards), host environments no
+   kept release uses, and the Docker build cache beyond 4 GB. The result reports what
+   was removed; a pruning error is reported without undoing the release.
 
    ```bash
    deploy release --release "$R" --image "election-pipeline:<revision>"

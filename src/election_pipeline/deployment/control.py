@@ -12,6 +12,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import shutil
 import socket
 import subprocess
 import time
@@ -29,6 +30,13 @@ from election_pipeline.workflow import NO_SNAPSHOT
 
 # A locked source is held by another run or a backup; it is not a failure.
 GOOD = {"succeeded", "already_current", "not_due", "awaiting_publication", "locked", "paused"}
+# A release check of a locked source is retried this often until CHECK_LOCK_WAIT_SECONDS.
+LOCK_RETRY_SECONDS = 15
+# After a release: the most recent other releases kept beside the current and previous.
+KEEP_RECENT_RELEASES = 2
+# The Docker build cache kept for the next staging; older layers beyond it are pruned.
+BUILD_CACHE_BYTES = 4 * 1024**3
+REVISION = re.compile(r"[0-9a-f]{40}")
 
 
 def db_settings(prod, *, writer=False):
@@ -166,6 +174,90 @@ def describe(release_path, image):
     }
 
 
+def images_in_use():
+    """The image IDs every container, running or stopped, was created from."""
+    identities = containers.command(["docker", "ps", "-aq", "--no-trunc"]).split()
+    if not identities:
+        return set()
+    return set(
+        containers.command(["docker", "inspect", "--format", "{{.Image}}", *identities]).split()
+    )
+
+
+def prune_releases(config, value, now=None):
+    """Remove the release checkouts, images and host environments no release needs.
+
+    Kept: the current and previous releases, the ``KEEP_RECENT_RELEASES`` newest others
+    (a release staged but not yet made current among them), and every release whose image
+    a container was created from, as the active and previous dashboards are. A host
+    environment is kept while a kept release's venv names it, or for an hour after it
+    changed (a staging may be building one). The build cache is trimmed to
+    ``BUILD_CACHE_BYTES``. Returns what was removed.
+    """
+    now = now or time.time()
+    link = Path(config["CURRENT_RELEASE"])
+    root = link.parent
+    used = images_in_use()
+    tagged = dict(
+        line.split()
+        for line in containers.command(
+            ["docker", "images", "--no-trunc", "--format", "{{.Tag}} {{.ID}}", "election-pipeline"]
+        ).splitlines()
+        if line.strip()
+    )
+    keep = {e["revision"] for e in (value["release"], value.get("previous_release")) if e}
+    keep |= {revision for revision, identity in tagged.items() if identity in used}
+    others = sorted(
+        (
+            p
+            for p in root.iterdir()
+            if REVISION.fullmatch(p.name) and p.is_dir() and not p.is_symlink()
+            if p.name not in keep
+        ),
+        key=lambda p: p.stat().st_mtime,
+        reverse=True,
+    )
+    keep |= {p.name for p in others[:KEEP_RECENT_RELEASES]}
+    if link.resolve().name not in keep:
+        raise ValueError("The current release is not among those kept; nothing pruned")
+    removed = {"releases": [], "images": [], "environments": []}
+    for path in others[KEEP_RECENT_RELEASES:]:
+        shutil.rmtree(path)
+        removed["releases"].append(path.name)
+    for revision, identity in sorted(tagged.items()):
+        if REVISION.fullmatch(revision) and revision not in keep and identity not in used:
+            try:
+                containers.command(["docker", "rmi", "election-pipeline:" + revision])
+            except RuntimeError:
+                continue  # in use after all; the next release tries again
+            removed["images"].append(revision)
+    environments = Path(config.get("HOST_ENVIRONMENTS", "/opt/election-venvs"))
+    if environments.is_dir():
+        named = set()
+        for revision in keep:
+            for entry in (root / revision / ".venv").glob("lib/python*/site-packages/*.pth"):
+                named.update(
+                    re.findall(
+                        re.escape(str(environments)) + r"/([0-9a-f]{16})/",
+                        entry.read_text(encoding="utf-8"),
+                    )
+                )
+        for path in sorted(environments.iterdir()):
+            if (
+                re.fullmatch(r"[0-9a-f]{16}", path.name)
+                and path.name not in named
+                and now - path.stat().st_mtime > 3600
+            ):
+                shutil.rmtree(path)
+                removed["environments"].append(path.name)
+    containers.command(["docker", "image", "prune", "-f"], timeout=300)
+    containers.command(
+        ["docker", "builder", "prune", "-f", "--max-used-space", str(BUILD_CACHE_BYTES)],
+        timeout=600,
+    )
+    return removed
+
+
 def point_current(config, release_path):
     """Atomically repoint the ``current`` symlink the systemd units run from."""
     link = Path(config["CURRENT_RELEASE"])
@@ -193,18 +285,24 @@ def check_sources(image, value, prod, config, moved=()):
         # A check publishes nothing. An official source's snapshot may be certified by an
         # operator's attestation rather than its own feed, so it is checked as unofficial.
         status = value["sources"][name]["status"]
-        try:
-            result = run_one(
-                image,
-                name,
-                "unofficial" if status == "official" else status,
-                prod,
-                config,
-                mode="check-only",
-            )
-        except Exception as error:
-            result = {"source_id": name, "outcome": "failed", "error": str(error)}
-        return name, result
+        # A source the worker is collecting right now is locked; wait for it to finish
+        # rather than fail the release.
+        deadline = time.monotonic() + int(config.get("CHECK_LOCK_WAIT_SECONDS", "600"))
+        while True:
+            try:
+                result = run_one(
+                    image,
+                    name,
+                    "unofficial" if status == "official" else status,
+                    prod,
+                    config,
+                    mode="check-only",
+                )
+            except Exception as error:
+                result = {"source_id": name, "outcome": "failed", "error": str(error)}
+            if result["outcome"] != "locked" or time.monotonic() >= deadline:
+                return name, result
+            time.sleep(LOCK_RETRY_SECONDS)
 
     with ThreadPoolExecutor(max_workers=parallel_jobs(config)) as pool:
         checks = dict(pool.map(check, collected(value)))
@@ -252,7 +350,7 @@ def release(path, release_path, image, prod, config, moved=()):
 
     catalog.update(path, change)
     point_current(config, staged["release_path"])
-    return {
+    result = {
         "outcome": "released",
         "revision": staged["revision"],
         "previous_revision": value["release"]["revision"],
@@ -260,6 +358,12 @@ def release(path, release_path, image, prod, config, moved=()):
         "sources_validated": collected(value),
         "note": "Workers use the release from their next cycle; move the dashboard next",
     }
+    # The release is made; old artifacts that fail to go are reported, not a failure.
+    try:
+        result["pruned"] = prune_releases(config, catalog.read(path))
+    except Exception as error:
+        result["prune_error"] = str(error)
+    return result
 
 
 def rollback_release(path, config):

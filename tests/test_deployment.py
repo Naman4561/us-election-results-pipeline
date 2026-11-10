@@ -408,9 +408,11 @@ class DeploymentTests(unittest.TestCase):
             patch.object(control, "migrate", return_value=["024_shared_results.sql"]),
             patch.object(control, "run_one", side_effect=check),
             patch.object(control, "require_no_backup"),
+            patch.object(control, "prune_releases", side_effect=RuntimeError("docker down")),
         ):
             result = control.release(self.path, self.root, NEW_IMAGE, self.prod, self.config)
         self.assertEqual(result["outcome"], "released")
+        self.assertEqual(result["prune_error"], "docker down")  # reported, release stands
         self.assertEqual(
             sorted(validated), [(NEW_IMAGE, KY, "check-only"), (NEW_IMAGE, NC, "check-only")]
         )
@@ -441,6 +443,89 @@ class DeploymentTests(unittest.TestCase):
         self.assertNotIn("writer-secret", str(caught.exception))
         self.assertEqual(self.path.read_bytes(), before)
         self.assertFalse(Path(self.config["CURRENT_RELEASE"]).exists())
+
+    def test_a_locked_source_is_waited_for_rather_than_failing_the_release(self):
+        outcomes = {NC: ["locked", "locked", "validated"], KY: ["validated"]}
+
+        def run(image, name, *a, **k):
+            return {"source_id": name, "outcome": outcomes[name].pop(0)}
+
+        with (
+            patch.object(control, "run_one", side_effect=run) as calls,
+            patch.object(control, "LOCK_RETRY_SECONDS", 0),
+        ):
+            failed = control.check_sources(NEW_IMAGE, self.value, self.prod, self.config)
+        self.assertEqual(failed, {})
+        self.assertEqual(sum(c.args[1] == NC for c in calls.call_args_list), 3)
+        # Past the wait, a source still locked fails the release as before.
+        with (
+            patch.object(control, "run_one", return_value={"source_id": NC, "outcome": "locked"}),
+            patch.object(control, "LOCK_RETRY_SECONDS", 0),
+        ):
+            config = {**self.config, "CHECK_LOCK_WAIT_SECONDS": "0"}
+            failed = control.check_sources(NEW_IMAGE, self.value, self.prod, config)
+        self.assertEqual(failed[NC], "locked")
+
+    @unittest.skipIf(os.name == "nt", "Linux release symlink")
+    def test_pruning_keeps_the_releases_dashboards_and_environments_still_needed(self):
+        releases, environments = self.root / "releases", self.root / "venvs"
+        revisions = {letter: letter * 40 for letter in "abcdefg"}
+        for age, letter in enumerate("gfedcba"):  # a is the oldest, g the newest
+            folder = releases / revisions[letter]
+            (folder / ".venv/lib/python3.12/site-packages").mkdir(parents=True)
+            os.utime(folder, (2000 - age, 2000 - age))
+        (releases / "current").symlink_to(releases / revisions["g"])
+        for key in ("1" * 16, "2" * 16, "3" * 16):
+            (environments / key).mkdir(parents=True)
+        os.utime(environments / ("1" * 16), (0, 0))
+        os.utime(environments / ("2" * 16), (0, 0))
+        packages = releases / revisions["g"] / ".venv/lib/python3.12/site-packages"
+        (packages / "election-dependencies.pth").write_text(
+            f'import site; site.addsitedir("{environments}/{"2" * 16}/lib/python3.12/x")\n'
+        )
+        value = {
+            "release": {"revision": revisions["g"]},
+            "previous_release": {"revision": revisions["f"]},
+        }
+        commands = []
+
+        def command(args, **kwargs):
+            commands.append(args)
+            if args[:2] == ["docker", "ps"]:
+                return "container-1"
+            if args[:2] == ["docker", "inspect"]:
+                return "sha256:image-a"  # the previous dashboard runs the oldest release
+            if args[:2] == ["docker", "images"]:
+                return "\n".join(f"{r} sha256:image-{k}" for k, r in revisions.items())
+            return ""
+
+        config = {
+            "CURRENT_RELEASE": str(releases / "current"),
+            "HOST_ENVIRONMENTS": str(environments),
+        }
+        with patch.object(control.containers, "command", side_effect=command):
+            removed = control.prune_releases(config, value)
+        # Current g, previous f, a (in use) and the two newest others e and d are kept.
+        self.assertEqual(sorted(removed["releases"]), [revisions["b"], revisions["c"]])
+        self.assertEqual(
+            sorted(p.name for p in releases.iterdir()),
+            sorted(["current", *(revisions[k] for k in "adefg")]),
+        )
+        self.assertEqual(sorted(removed["images"]), [revisions["b"], revisions["c"]])
+        # Environment 2 is named by a kept release; 3 changed within the hour.
+        self.assertEqual(removed["environments"], ["1" * 16])
+        self.assertIn(
+            ["docker", "builder", "prune", "-f", "--max-used-space", str(4 * 1024**3)], commands
+        )
+        # A current release that would not be kept stops pruning before anything goes.
+        (releases / "current").unlink()
+        (releases / "current").symlink_to(releases / revisions["d"])
+        with (
+            patch.object(control.containers, "command", side_effect=command),
+            self.assertRaisesRegex(ValueError, "current release"),
+        ):
+            control.prune_releases(config, {"release": {"revision": revisions["g"]}})
+        self.assertTrue((releases / revisions["d"]).is_dir())
 
     def test_only_a_named_moved_source_may_lack_a_snapshot_to_check(self):
         def check(error):

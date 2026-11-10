@@ -14,14 +14,18 @@ WORKDIR /app
 RUN groupadd --gid 10001 election \
     && useradd --uid 10001 --gid 10001 --create-home election
 
-COPY pyproject.toml README.md requirements-dev.txt constraints.txt ./
-COPY src ./src
+# Dependencies first, from the lock alone: this layer is rebuilt only when the lock
+# changes, so a code change reuses it and adds only the layers below.
+COPY constraints.txt ./
+RUN --mount=type=cache,target=/root/.cache/pip \
+    PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=8 python -m pip install --no-deps -r constraints.txt
 
 # Publication fingerprints expect source files underneath /app.
+COPY pyproject.toml README.md requirements-dev.txt ./
+COPY src ./src
 RUN --mount=type=cache,target=/root/.cache/pip \
-    PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=8 python -m pip install -c constraints.txt \
-    -e '.[postgres,transform,dashboard,deployment]' \
-    -r requirements-dev.txt
+    PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=8 python -m pip install --no-deps -e . \
+    && python -m pip check
 
 COPY config ./config
 COPY dbt ./dbt
