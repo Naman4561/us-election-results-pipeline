@@ -7,6 +7,7 @@ import zipfile
 
 from election_pipeline.parsers.common import integer
 from election_pipeline.parsers.results import finish
+from election_pipeline.parsers.status import results_status
 
 HEADER = (
     "RaceID,RaceName,PartyCode,AreaType,AreaNum,OfficeSeqNo,BallotOrder,CandidateID,"
@@ -16,6 +17,7 @@ RACES = {
     "For United States Senator - 6 Year Term": "NE-SEN",
     "For Governor and Lt. Governor": "NE-GOV",
 }
+LABEL = "{} Results General Election November 3, 2026"
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
@@ -29,6 +31,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         index = archive.read("election.html").decode("utf-8-sig")
         if "General Election November 3, 2026" not in re.sub(r"<[^>]*>", "", index):
             raise ValueError("Nebraska index belongs to another election")
+        official = results_status(re.sub(r"<[^>]*>", " ", index), LABEL, "Nebraska")
         reader = csv.reader(
             io.StringIO(archive.read(source.primary_filename).decode("utf-8-sig")), strict=True
         )
@@ -79,3 +82,4 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 )
             )
     finish(rows, source, settings, output, stats, reference=reference)
+    stats.update(official_results=official)

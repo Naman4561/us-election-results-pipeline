@@ -100,6 +100,30 @@ def locate(raw, sheet, label):
     return number, columns, rows[number - 1]
 
 
+def relabel(raw, old, new):
+    """Replace text in every XML part of a workbook, such as its sheets' title."""
+    out = io.BytesIO()
+    with (
+        zipfile.ZipFile(io.BytesIO(raw)) as original,
+        zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as target,
+    ):
+        for item in original.infolist():
+            data = original.read(item.filename)
+            if item.filename.endswith(".xml"):
+                data = data.replace(old, new)
+            target.writestr(item.filename, data)
+    return out.getvalue()
+
+
+def certified(m):
+    """A snapshot as its state would label it once certified: pages and workbooks."""
+    for name, value in m.items():
+        if name.endswith(".html"):
+            m[name] = value.replace(b"Unofficial Results", b"Official Results")
+        elif name.endswith(".xlsx"):
+            m[name] = relabel(value, b"2026 Unofficial General", b"2026 Official General")
+
+
 class NewStateTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -267,6 +291,23 @@ class NewStateTests(unittest.TestCase):
             "SD",
             lambda m: m.update({"export.html": m["export.html"].replace(shown, shown + second)}),
         )
+
+    def test_sd_and_nm_record_official_only_when_page_and_workbooks_all_say_so(self):
+        for code in ("SD", "NM"):
+            with self.subTest(code=code):
+                self.assertIs(self.parse(code)["official_results"], False)
+                self.assertIs(self.parse(code, certified)["official_results"], True)
+
+                def pages_only(m):
+                    for name in [n for n in m if n.endswith(".html")]:
+                        m[name] = m[name].replace(b"Unofficial Results", b"Official Results")
+
+                def unlabeled(m):
+                    for name in [n for n in m if n.endswith(".html")]:
+                        m[name] = m[name].replace(b"Unofficial Results", b"Certified Results")
+
+                self.failed(code, pages_only)
+                self.failed(code, unlabeled)
 
     def test_sd_consistent_downward_correction_is_valid(self):
         sheet = self.sd_senate()

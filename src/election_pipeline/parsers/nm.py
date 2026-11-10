@@ -17,12 +17,14 @@ from election_pipeline.parsers.enr_platform import (
     export_target,
     find_sheet,
     name_key,
+    page_text,
     read_csv,
     sheet_rows,
     statewide_update,
 )
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
+from election_pipeline.parsers.status import results_status
 from election_pipeline.parsers.structured import row
 from election_pipeline.parsers.workbook import Workbook
 
@@ -32,7 +34,8 @@ HEADER = (
     "CandidateEarlyVotes"
 ).split(",")
 CHANGE_MEMBERS = ("fed.csv", "sw.csv")
-TITLES = ("2026 Unofficial General Election Results", "2026 Official General Election Results")
+TITLE = "2026 {} General Election Results"
+LABEL = "{} Results GENERAL 2026 November 3, 2026"
 STATE_LINE = "State of New Mexico"
 METHODS = ("Absentee", "Early", "ElectionDay")
 
@@ -98,14 +101,14 @@ def sheet_name(race, csv_name, area):
     return csv_name, csv_name
 
 
-def methods_state(book, prefix_name, header_name, totals_by_county):
+def methods_state(book, prefix_name, header_name, totals_by_county, title):
     """'not_reported' while every method cell is ``*``; otherwise they must reconcile."""
     reported = False
     method_cells = []
     for method in METHODS:
         sheet = find_sheet(book, method, prefix_name)
         names, counties, totals = sheet_rows(
-            book, sheet, header_name, title=TITLES, state_line=STATE_LINE, unreported=True
+            book, sheet, header_name, title=title, state_line=STATE_LINE, unreported=True
         )
         if set(counties) != set(totals_by_county):
             raise ValueError(f"{header_name}: {method} sheet covers different counties")
@@ -130,16 +133,17 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         raise ValueError("Unsupported New Mexico source/election")
     wanted = state_adapter("NM").races
     with zipfile.ZipFile(archive_path) as archive:
+        pages = [archive.read(p).decode("utf-8", errors="replace") for p in ("fed.html", "sw.html")]
         updates = {
-            statewide_update(
-                archive.read(page).decode("utf-8", errors="replace"),
-                "New Mexico",
-                "GENERAL 2026 November 3, 2026",
-            )
-            for page in ("fed.html", "sw.html")
+            statewide_update(page, "New Mexico", "GENERAL 2026 November 3, 2026") for page in pages
         }
+        statuses = {results_status(page_text(page), LABEL, "New Mexico") for page in pages}
         found = races({m: archive.read(m) for m in CHANGE_MEMBERS}, wanted)
         books = {race: Workbook(archive.read(member(race)), settings) for race in found}
+    if len(statuses) != 1:
+        raise ValueError("New Mexico results pages disagree on whether results are official")
+    official = statuses.pop()
+    title = (TITLE.format("Official" if official else "Unofficial"),)
     output_rows, hidden_counties, method_status = [], {}, {}
     for race, csv_rows in sorted(found.items()):
         race_id = csv_rows[0]["RaceID"]
@@ -183,7 +187,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             find_sheet(book, "Total", prefix_name),
             header_name,
             {name: votes for name, (_, _, votes) in candidates.items()},
-            title=TITLES,
+            title=title,
             state_line=STATE_LINE,
             masked=True,
         )
@@ -191,7 +195,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             **{c: {name_key(n): v for n, v in votes.items()} for c, votes in counties.items()},
             **{county: {} for county in hidden},
         }
-        method_status[race] = methods_state(book, prefix_name, header_name, totals_by_county)
+        method_status[race] = methods_state(book, prefix_name, header_name, totals_by_county, title)
         verify_scope("NM", race, [c[0] for c in candidates.values()], [*counties, *hidden])
         if hidden:
             hidden_counties[race] = hidden
@@ -212,6 +216,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     )
     stats.update(
         source_update_text=updates.pop(),
+        official_results=official,
         contest_total_reconciliation="passed",
         county_reconciliation=(
             "passed_except_privacy_masked_counties" if hidden_counties else "passed"

@@ -25,6 +25,7 @@ import zipfile
 from election_pipeline.parsers.html import Node, Tree
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
+from election_pipeline.parsers.status import results_status
 from election_pipeline.parsers.structured import formatted_count, row, text
 
 MEMBERS = {"MD-GOV": "governor.html", **{f"MD-0{n}": f"house-0{n}.html" for n in range(1, 9)}}
@@ -32,7 +33,7 @@ HEADINGS = {
     "MD-GOV": ("Governor / Lt. Governor",),
     **{f"MD-0{n}": ("Representative in Congress", f"District {n}") for n in range(1, 9)},
 }
-TITLE = "Unofficial 2026 Gubernatorial General Election Results for "
+TITLE = "{} 2026 Gubernatorial General Election Results for "
 
 
 def county(name):
@@ -79,8 +80,9 @@ def page(raw, race):
     body = Tree(raw.decode("utf-8", errors="strict")).root
     words = " ".join(body.text.split())
     contest = HEADINGS[race]
-    if TITLE + contest[0] not in words or "Vote for 1" not in words:
+    if "Vote for 1" not in words:
         raise ValueError(f"{race}: Maryland page belongs to another contest")
+    official = results_status(words, TITLE + contest[0], f"{race}: Maryland")
     if len(contest) == 2 and f"{contest[0]} {contest[1]} Vote for 1" not in words:
         raise ValueError(f"{race}: Maryland page belongs to another district")
     refreshed = re.findall(r"Last refreshed: ([0-9/]{10} [0-9:]{8} [AP]M)", words)
@@ -121,7 +123,7 @@ def page(raw, race):
     for index, value in enumerate(totals):
         if sum(v[index] for v in counties.values()) != value:
             raise ValueError(f"{race}: county rows do not add up to the Totals row")
-    return names, counties, totals, done, total, refreshed[0]
+    return names, counties, totals, done, total, refreshed[0], official
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
@@ -133,7 +135,10 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     rows, times = [], {}
     with zipfile.ZipFile(archive_path) as archive:
         pages = {race: page(archive.read(MEMBERS[race]), race) for race in wanted}
-    for race, (names, counties, totals, done, total, refreshed) in pages.items():
+    statuses = {found[-1] for found in pages.values()}
+    if len(statuses) != 1:
+        raise ValueError("Maryland pages disagree on whether results are official")
+    for race, (names, counties, totals, done, total, refreshed, _) in pages.items():
         times[race] = refreshed
         places = {county(name): values for name, values in counties.items()}
         if len(places) != len(counties):
@@ -151,6 +156,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats.update(
         source_update_text="; ".join(sorted(set(times.values()))),
         source_update_times=times,
+        official_results=statuses.pop(),
         contest_total_reconciliation="passed",
         vote_method_status="reported_not_stored",
     )

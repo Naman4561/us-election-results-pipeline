@@ -65,6 +65,16 @@ class AlaskaTests(unittest.TestCase):
         with (Path(report["output_dir"]) / name).open(encoding="utf-8", newline="") as handle:
             return list(csv.DictReader(handle))
 
+    def test_official_only_from_the_pages_results_status(self):
+        page = (FIXTURE / "election.html").read_bytes()
+        self.assertIs(self.parse()["official_results"], False)
+        status = b'Results Status: <span style="color: #B30000;">Unofficial</span>'
+        self.assertIn(status, page)
+        official = self.parse(page=page.replace(status, status.replace(b"Unofficial", b"Official")))
+        self.assertIs(official["official_results"], True)
+        blank = self.parse(page=page.replace(status, b"Results Status: <span></span>"))
+        self.assertEqual(blank["outcome"], "validation_failed", blank)
+
     def test_real_capture_scope_methods_residuals_and_replay(self):
         ledger = json.loads((FIXTURE / "provenance.json").read_text())
         raw = gzip.decompress((FIXTURE / "results.csv.gz").read_bytes())

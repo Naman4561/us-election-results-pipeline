@@ -25,6 +25,7 @@ from election_pipeline.parsers.enr_platform import export_target, page_text
 from election_pipeline.parsers.html import Tree
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
+from election_pipeline.parsers.status import results_status
 from election_pipeline.parsers.structured import row
 
 HEADER = (
@@ -33,6 +34,8 @@ HEADER = (
     "PrecinctsReporting"
 ).split(",")
 CHANGE_MEMBERS = ("export.html",)
+# The page's header box; its write-in disclaimer says "Unofficial" whatever the status.
+LABEL = "{} General Election November 3, 2026"
 CSV_OPTION = {"ctl00$MainContent$rblTypes": "1"}
 STATEWIDE = {"statewide.csv": "Statewide Export", "governor.csv": "Governor Export"}
 COUNTIES = (
@@ -119,6 +122,7 @@ def selected(raw, label, wanted):
 
 
 def update_text(page):
+    """The page's update time, and whether it labels the results official."""
     body = page_text(page)
     if (
         "Secretary of State, Oregon" not in body
@@ -137,7 +141,7 @@ def update_text(page):
     links = {" ".join(a.text.split()) for a in Tree(page).root.find("a")}
     if not set(COUNTIES) <= links:
         raise ValueError("Oregon export page lacks a county export")
-    return found.pop()
+    return found.pop(), results_status(body, LABEL, "Oregon")
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
@@ -147,7 +151,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         raise ValueError("Unsupported Oregon source/election")
     wanted = state_adapter("OR").races
     with zipfile.ZipFile(archive_path) as archive:
-        updated = update_text(archive.read("export.html").decode("utf-8", errors="replace"))
+        updated, final = update_text(archive.read("export.html").decode("utf-8", errors="replace"))
         official = {}
         for name in STATEWIDE:
             for race, value in selected(archive.read(name), name, wanted).items():
@@ -179,5 +183,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=updated,
+        official_results=final,
         contest_total_reconciliation="passed",
     )

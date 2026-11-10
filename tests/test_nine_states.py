@@ -638,6 +638,36 @@ class NineStateTests(unittest.TestCase):
         self.assertEqual(report["source_update_times"]["MD-01"], "11/05/2026 11:56:33 PM")
         self.assertIn("; ", report["source_update_text"])
 
+    def test_or_and_md_record_official_only_from_their_own_label(self):
+        def oregon(data):
+            data["export.html"] = data["export.html"].replace(
+                b"<h3>Unofficial</h3>", b"<h3>Official</h3>"
+            )
+
+        def maryland(data):
+            for name in [n for n in data if n.endswith(".html")]:
+                data[name] = data[name].replace(b"Unofficial 2026", b"Official 2026")
+
+        for code, certify in (("OR", oregon), ("MD", maryland)):
+            with self.subTest(code=code):
+                self.assertIs(self.parse(code)["official_results"], False)
+                self.assertIs(self.parse(code, certify)["official_results"], True)
+        # The write-in disclaimer's "Unofficial" is not Oregon's status label.
+        self.failed(
+            "OR",
+            lambda d: d.update(
+                {"export.html": d["export.html"].replace(b"<h3>Unofficial</h3>", b"<h3></h3>")}
+            ),
+            "either unofficial or official",
+        )
+        self.failed(
+            "MD",
+            lambda d: d.update(
+                {"house-01.html": d["house-01.html"].replace(b"Unofficial 2026", b"Official 2026")}
+            ),
+            "disagree on whether results are official",
+        )
+
     def test_unexpected_parser_errors_are_reported_as_validation_failures(self):
         def truncated(data):
             raw = clarity.detail_member(data["detail.zip"], self.settings, "txt")

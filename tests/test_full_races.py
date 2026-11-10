@@ -422,6 +422,17 @@ class FullRaceParserTests(unittest.TestCase):
                 data["results.csv"] = data["results.csv"].replace(old, new, 1)
                 self.assertEqual(self.parse("NE", data)[2]["outcome"], "validation_failed")
 
+    def test_ne_records_official_only_from_its_page_label(self):
+        self.assertIs(self.parse("NE")[2]["official_results"], False)
+
+        def labeled(label):
+            data = members("NE")
+            data["election.html"] = data["election.html"].replace(b"Unofficial Results", label)
+            return self.parse("NE", data)[2]
+
+        self.assertIs(labeled(b"Official Results")["official_results"], True)
+        self.assertEqual(labeled(b"Results")["outcome"], "validation_failed")
+
 
 @unittest.skipUnless(
     os.getenv("ELECTION_TEST_DATABASE"), "Requires disposable native PostgreSQL *_test"

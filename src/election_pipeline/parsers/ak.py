@@ -13,6 +13,7 @@ from urllib.parse import urljoin
 from election_pipeline.parsers.common import integer
 from election_pipeline.parsers.html import Tree
 from election_pipeline.parsers.results import finish
+from election_pipeline.parsers.status import results_status
 from election_pipeline.parsers.structured import row
 from election_pipeline.states import state_adapter
 
@@ -75,6 +76,7 @@ def normalized(values):
 
 
 def validate_page(raw):
+    """Check the election page, and return whether its results status reads official."""
     page = Tree(raw.decode("utf-8-sig"))
     headings = [n.text for n in page.root.find("h2")]
     if not any(
@@ -85,6 +87,8 @@ def validate_page(raw):
         raise ValueError("Alaska election page no longer links the configured CSV")
     if not re.search(r"(?:first|1st)\s+choice.{0,60}Round\s*1", page.root.text, re.I):
         raise ValueError("Alaska report is not explicitly identified as first-choice Round 1")
+    # The page also mentions "certified results" of past elections, outside this label.
+    return results_status(page.root.text, "Results Status: {}", "Alaska")
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
@@ -103,7 +107,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     )
     input_rows = 0
     with zipfile.ZipFile(archive_path) as archive:
-        validate_page(archive.read("election.html"))
+        official = validate_page(archive.read("election.html"))
         reader = csv.reader(
             io.StringIO(archive.read(source.primary_filename).decode("utf-8-sig")), strict=True
         )
@@ -207,6 +211,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         selected_rows=len(seen),
         vote_basis="first_choice_listed_candidates",
         vote_round=1,
+        official_results=official,
         reporting_unit_counts={r: sum(race == r for race, _ in identities) for r in wanted},
         candidate_roster="matched_reviewed_capture",
         reporting_unit_roster="matched_reviewed_capture",

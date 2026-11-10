@@ -15,11 +15,13 @@ from election_pipeline.parsers.enr_platform import (
     county_sheet,
     export_target,
     find_sheet,
+    page_text,
     read_csv,
     statewide_update,
 )
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
+from election_pipeline.parsers.status import results_status
 from election_pipeline.parsers.structured import row
 from election_pipeline.parsers.workbook import Workbook
 
@@ -34,7 +36,8 @@ RACES = {
 }
 CHANGE_MEMBERS = ("results.csv",)
 EXPORT = "statewide.xlsx"
-TITLES = ("2026 Unofficial General Election Results", "2026 Official General Election Results")
+TITLE = "2026 {} General Election Results"
+LABEL = "{} Results General Election November 3, 2026"
 
 
 def races(raw, wanted):
@@ -69,6 +72,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     with zipfile.ZipFile(archive_path) as archive:
         page = archive.read("export.html").decode("utf-8", errors="replace")
         updated = statewide_update(page, "South Dakota", "General Election November 3, 2026")
+        official = results_status(page_text(page), LABEL, "South Dakota")
         found = races(archive.read(source.primary_filename), wanted)
         book = Workbook(archive.read(EXPORT), settings)
     stamps = {r["CurrentDateTime"] for rows in found.values() for r in rows}
@@ -112,7 +116,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             find_sheet(book, race_id, race_name),
             race_name,
             {name: int(votes) for name, (_, _, votes) in candidates.items()},
-            title=TITLES,
+            title=(TITLE.format("Official" if official else "Unofficial"),),
             state_line="State of South Dakota",
         )
         verify_scope("SD", race, [c[0] for c in candidates.values()], counties)
@@ -123,5 +127,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     finish(output_rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=updated,
+        official_results=official,
         contest_total_reconciliation="passed",
     )

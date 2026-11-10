@@ -85,9 +85,22 @@ place of its collection checks.
 
 ## Certified results
 
-Where a state's own feed marks its results official (Enhanced Voting's
-`isOfficialResults`, Clarity's final-upload flag), the parser records it and the monitor
-shows a reminder. Check the totals against the state's certified results, then:
+Where a state's own feed marks its results official, the parser records it and the
+monitor shows a reminder:
+
+| States | What marks them official |
+| --- | --- |
+| Georgia, Washington, Idaho, Virginia | Enhanced Voting's `isOfficialResults` |
+| Colorado, Iowa, West Virginia, South Carolina | Clarity's final-upload flag |
+| South Dakota, New Mexico, Nebraska, Oregon, Maryland, Alaska | The results page's own "Unofficial" label reading "Official" |
+
+The page labels' official wording has not been seen on these sites this election. A
+page whose label reads neither "Unofficial" nor "Official" (for example "Certified"),
+or pages that disagree, are refused: the monitor reports the failed parse, the last
+publication stays up, and the new wording is added after it is checked. South Dakota's
+and New Mexico's county workbooks must carry the same label as the page.
+
+Check the totals against the state's certified results, then:
 
 ```bash
 deploy certify --source ga_2026_general
