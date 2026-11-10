@@ -1,6 +1,6 @@
 {
  "state": "LA",
- "provenance": "Louisiana choice IDs and parishes from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 04:29 UTC). Pending operator review before release.",
+ "provenance": "Louisiana choice IDs and parishes from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 04:29 UTC). Confirmed by the operator before release on November 10, 2026.",
  "races": {
   "LA-01": {
    "candidates": [

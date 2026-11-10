@@ -1,6 +1,6 @@
 {
  "state": "UT",
- "provenance": "Enhanced Voting ballot-option IDs and counties, from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 04:14 UTC). Pending operator review before release.",
+ "provenance": "Enhanced Voting ballot-option IDs and counties, from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 04:14 UTC). Confirmed by the operator before release on November 10, 2026.",
  "races": {
   "UT-01": {
    "candidates": [

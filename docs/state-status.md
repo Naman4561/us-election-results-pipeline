@@ -1,7 +1,7 @@
 # State status
 
 Where each state's 2026 general election results stand. Updated by hand; last updated
-**November 10, 2026, 03:50 UTC**. [States](states.md) describes each source.
+**November 10, 2026, 07:05 UTC**. [States](states.md) describes each source.
 
 | Status | Meaning |
 | --- | --- |
@@ -21,31 +21,31 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | State | Status | Last vote change | Notes |
 | --- | --- | --- | --- |
 | Alaska | Unofficial, between counts | Nov 5 01:45 | Counts scheduled Nov 10, 13 and 18; certification targeted Nov 25. |
-| Arkansas | Not public yet | — | Tally feed added Nov 10; roster awaiting review. All 2,768 precincts in. |
+| Arkansas | Unofficial, counting | — | Public since Nov 10 06:51. All 2,768 precincts in. |
 | California | Unofficial, counting | Nov 9 22:52 | |
 | Colorado | Unofficial, counting | Nov 8 01:17 | Counties count through about Nov 12. |
 | Florida | Unofficial, paused | Nov 7 05:21 | Florida's file host serves an expired certificate. Totals match floridaelectionwatch.gov. Resume with `deploy resume --source fl_2026_general`. |
 | Georgia | Unofficial, counting | Nov 9 23:06 | |
 | Hawaii | Unofficial, pending certification | Nov 6 17:27 | Collected hourly. |
 | Idaho | Unofficial, counting | — | Public since Nov 10 03:22. Totals matched Idaho's site at activation. Certification targeted Nov 24. |
-| Indiana | Not public yet | — | Election Division feed added Nov 10; roster awaiting review. Its settings carry a certified flag. |
+| Indiana | Unofficial, counting | — | Public since Nov 10 06:51. Its settings carry a certified flag. |
 | Iowa | Unofficial, pending certification | Nov 6 17:23 | State's last update Nov 4, 12:25 PM CST. Collected hourly. |
 | Kansas | Final unofficial | Nov 9 02:43 | Imported by hand. |
 | Kentucky | Waiting for certification | — | Live feed retired and closed to automated clients; our only snapshot predates poll close. Import certified results from elect.ky.gov when posted. |
-| Louisiana | Not public yet | — | Live results feed added Nov 10; roster awaiting review. House districts 5 and 6 go to a December runoff. |
+| Louisiana | Unofficial, counting | — | Public since Nov 10 06:51. House districts 5 and 6 go to a December runoff. |
 | Maryland | Unofficial, counting | Nov 9 18:00 | |
 | Minnesota | Unofficial, counting | Nov 9 20:21 | |
 | Mississippi | Unofficial, counting | Nov 9 19:38 | County files; Hancock and Pearl River are reviewed manual snapshots. |
 | Nebraska | Unofficial, pending certification | Nov 6 23:02 | All precincts in. Collected every 3 hours, clear of backups. |
 | New Mexico | Unofficial, pending certification | Nov 6 17:00 | State's last update Nov 6, 9:55 AM MT. Collected hourly. |
 | North Carolina | Unofficial, counting | Nov 9 17:21 | |
-| North Dakota | Not public yet | — | Tally feed added Nov 10; roster awaiting review. All 358 precincts in. |
+| North Dakota | Unofficial, counting | — | Public since Nov 10 06:51. All 358 precincts in. |
 | Ohio | Unofficial, counting | Nov 4 18:50 | Imported by hand; the Nov 4 snapshot is the latest, and the monitor reports a newer one as overdue. |
 | Oregon | Unofficial, counting | Nov 9 18:47 | |
 | South Carolina | Unofficial, pending certification | Nov 9 21:41 | State's last update Nov 6, 6:26 PM EST; the Nov 9 change is the move to its Clarity site. |
 | South Dakota | Unofficial, pending certification | Nov 6 20:56 | All precincts in. Collected every 3 hours, clear of backups. |
 | Texas | Unofficial, pending certification | Nov 4 22:21 | All 254 counties in; state's last update Nov 4, 22:48. Collected every 3 hours, clear of backups. |
-| Utah | Not public yet | — | Enhanced Voting feed added Nov 10; roster awaiting review. |
+| Utah | Unofficial, counting | — | Public since Nov 10 06:51. Totals matched each state's site at activation, as did the other four. |
 | Virginia | Not public yet | — | Current data passes every check; ready to add. |
 | Washington | Unofficial, counting | Nov 9 23:06 | Counts on weekdays. |
 | West Virginia | Unofficial, counting | Nov 9 22:46 | |

@@ -131,6 +131,25 @@ class ExpansionTests(unittest.TestCase):
                     choice = " ".join(option["name"][0]["text"].split())
                     self.assertEqual(totals[(race, choice)], option["voteCount"], choice)
 
+    def test_ut_parties_come_from_the_party_names_utah_publishes(self):
+        rows = self.read(self.parse("UT"), "contest_results.csv")
+        parties = {r["choice"]: r["choice_party"] for r in rows}
+        self.assertEqual(parties["BEN MCADAMS"], "DEM")
+        self.assertEqual(parties["RILEY OWEN"], "REP")
+        self.assertEqual(parties["JESSE WEST"], "LIB")
+        self.assertNotIn("", set(parties.values()))
+
+        def renamed(data):
+            def change(value):
+                for item in value["ballotItems"]:
+                    for option in (item.get("summaryResults") or {}).get("ballotOptions") or []:
+                        if (option.get("party") or {}).get("name"):
+                            option["party"]["name"][0]["text"] = "Whig"
+
+            edit_json(data, "data.json", change)
+
+        self.failed("UT", renamed, "not in the reviewed list")
+
     def test_ut_wrong_election_altered_county_and_new_candidate_are_refused(self):
         def election(data):
             edit_json(data, "data.json", lambda v: v["election"].update(isProduction=False))

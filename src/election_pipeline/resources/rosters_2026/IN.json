@@ -1,6 +1,6 @@
 {
  "state": "IN",
- "provenance": "Indiana candidate IDs and counties from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 04:18 UTC). Pending operator review before release.",
+ "provenance": "Indiana candidate IDs and counties from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 04:18 UTC). Confirmed by the operator before release on November 10, 2026.",
  "races": {
   "IN-01": {
    "candidates": [

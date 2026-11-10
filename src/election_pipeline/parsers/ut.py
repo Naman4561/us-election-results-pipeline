@@ -17,7 +17,17 @@ def race(name):
     return f"UT-0{match[1]}" if match else None
 
 
-SITE = ev.Site("UT", "Utah", "Utah", "General11032026", (), race, ev.strip_county)
+# Utah's site names each party but gives no abbreviation.
+PARTIES = {
+    "Democratic": "DEM",
+    "Republican": "REP",
+    "Libertarian": "LIB",
+    "Constitution": "CON",
+    "Forward": "FWD",
+    "Independent American": "IAP",
+    "Unaffiliated": "UNA",
+}
+SITE = ev.Site("UT", "Utah", "Utah", "General11032026", (), race, ev.strip_county, parties=PARTIES)
 
 
 def ballot_items(raw, source):

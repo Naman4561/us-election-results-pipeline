@@ -34,6 +34,8 @@ class Site:
     race: object  # English contest name -> contest ID or None
     county: object  # English locality name -> stored county name
     methods: dict = field(default_factory=dict)  # English group name -> method column
+    # English party name -> code, for a site that names parties without abbreviations.
+    parties: dict = field(default_factory=dict)
 
 
 def english(values, label="name"):
@@ -43,6 +45,18 @@ def english(values, label="name"):
     if len(matches) != 1:
         raise ValueError(f"Expected exactly one English {label}")
     return text(matches[0], label)
+
+
+def party_code(option, site, label):
+    """The candidate's party code: the site's abbreviation, else its reviewed party name."""
+    record = option.get("party") or {}
+    abbreviation = record.get("abbreviation")
+    if abbreviation or not site.parties or not record:
+        return party(abbreviation or "")
+    name = english(record.get("name"), "party name")
+    if name not in site.parties:
+        raise ValueError(f"{label}: party {name!r} is not in the reviewed list")
+    return site.parties[name]
 
 
 def member(race):
@@ -146,11 +160,8 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
             raise ValueError(f"{race}: candidate counts disagree with the contest total")
         candidates = {}
         for identity, option in statewide.items():
-            name, abbreviation = (
-                english(option["name"]),
-                (option.get("party") or {}).get("abbreviation"),
-            )
-            candidates[identity] = (name, party(abbreviation or ""))
+            name = english(option["name"])
+            candidates[identity] = (name, party_code(option, site, race))
             rows.append(
                 {
                     **row(

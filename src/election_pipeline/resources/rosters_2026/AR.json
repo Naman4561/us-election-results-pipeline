@@ -1,6 +1,6 @@
 {
  "state": "AR",
- "provenance": "Tally choice IDs and counties from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 04:24 UTC). Pending operator review before release.",
+ "provenance": "Tally choice IDs and counties from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 04:24 UTC). Confirmed by the operator before release on November 10, 2026.",
  "races": {
   "AR-01": {
    "candidates": [
