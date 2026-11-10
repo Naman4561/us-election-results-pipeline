@@ -1,7 +1,7 @@
 # State status
 
 Where each state's 2026 general election results stand. Updated by hand; last updated
-**November 9, 2026, 23:00 UTC**. [States](states.md) describes each source.
+**November 10, 2026, 03:50 UTC**. [States](states.md) describes each source.
 
 | Status | Meaning |
 | --- | --- |
@@ -25,7 +25,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Florida | Unofficial, paused | Nov 7 05:21 | Florida's file host serves an expired certificate. Totals match floridaelectionwatch.gov. Resume with `deploy resume --source fl_2026_general`. |
 | Georgia | Unofficial, counting | Nov 9 23:06 | |
 | Hawaii | Unofficial, pending certification | Nov 6 17:27 | Collected hourly. |
-| Idaho | Not public yet | — | Governor race added an "Uncertified write-ins" line; the roster needs review before release. |
+| Idaho | Unofficial, counting | — | Public since Nov 10 03:22. Totals matched Idaho's site at activation. Certification targeted Nov 24. |
 | Iowa | Unofficial, pending certification | Nov 6 17:23 | State's last update Nov 4, 12:25 PM CST. Collected hourly. |
 | Kansas | Final unofficial | Nov 9 02:43 | Imported by hand. |
 | Kentucky | Waiting for certification | — | Live feed retired and closed to automated clients; our only snapshot predates poll close. Import certified results from elect.ky.gov when posted. |

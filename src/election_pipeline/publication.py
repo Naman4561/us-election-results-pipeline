@@ -21,8 +21,10 @@ from election_pipeline.states import publication_lock, state_adapter
 FLORIDA_SOURCE = "fl_2026_general"
 IOWA_SOURCE = "ia_2026_general"
 SAME_OUTPUT_KEYS = ("output_sha256", "output_rows", "contests")
-# "official": the state's own source marks the snapshot as its certified results.
+# "official": the state's own source marks the snapshot as its certified results, or an
+# operator attests that the state certified them (see ``attestation``).
 STATUSES = ("test", "unofficial", "official")
+ATTESTATION_MODES = ("approved_snapshot", "certified_file")
 DBT_CACHES = ("partial_parse.msgpack", "graph.gpickle")
 
 
@@ -272,7 +274,7 @@ def current_publication(conn, source_id):
     return conn.execute(
         """
         SELECT p.publication_id, p.release_id, p.snapshot_id, p.source_modified_at,
-               p.transform_sha256, p.status
+               p.transform_sha256, p.status, p.raw_sha256
         FROM serving.current_publications c
         JOIN serving.publications p USING (publication_id)
         WHERE c.source_id = %s
@@ -383,7 +385,7 @@ def equivalent_iowa_release(conn, current, metadata):
     ).fetchone()["equivalent"]
 
 
-def promote(conn, metadata, attempt_id, schema, code_hash, status):
+def promote(conn, metadata, attempt_id, schema, code_hash, status, attested=None):
     current = current_publication(conn, metadata["source_id"])
     require_forward_release(conn, current, metadata)
 
@@ -408,12 +410,14 @@ def promote(conn, metadata, attempt_id, schema, code_hash, status):
         SELECT publication_id FROM serving.publications
         WHERE source_id = %s AND release_id = %s
           AND transform_sha256 = %s AND status = %s
+          AND attestation IS NOT DISTINCT FROM %s
         """,
         (
             metadata["source_id"],
             metadata["release_id"],
             code_hash,
             status,
+            Jsonb(attested) if attested else None,
         ),
     ).fetchone()
 
@@ -428,8 +432,8 @@ def promote(conn, metadata, attempt_id, schema, code_hash, status):
         conn.execute(
             sql.SQL("""
                 INSERT INTO serving.publications
-                    (publication_id, transform_sha256, status, {})
-                VALUES (%s, %s, %s, {})
+                    (publication_id, transform_sha256, status, attestation, {})
+                VALUES (%s, %s, %s, %s, {})
             """).format(
                 sql.SQL(", ").join(map(sql.Identifier, fields)),
                 sql.SQL(", ").join(sql.Placeholder() for _ in fields),
@@ -438,6 +442,7 @@ def promote(conn, metadata, attempt_id, schema, code_hash, status):
                 publication_id,
                 code_hash,
                 status,
+                Jsonb(attested) if attested else None,
                 *[metadata[f] for f in fields],
             ],
         )
@@ -612,24 +617,72 @@ def same_results(conn, metadata, current):
     }
 
 
-def prepare(root, db, release_id, status, *, skip_current=False):
-    """Transform and validate one release; retain an immutable checked checkpoint."""
+def attestation(value):
+    """An operator's attestation that the state certified a snapshot's results.
+
+    ``mode`` is ``approved_snapshot`` (a snapshot of the state's unofficial source is its
+    certified result) or ``certified_file`` (the state's separately published certified
+    file). ``evidence_url`` is the state's own certification notice or file;
+    ``attested_by`` is the operator's name, as they gave it.
+    """
+    from datetime import date, datetime
+
+    keys = {"mode", "evidence_url", "certified_on", "attested_by", "attested_at"}
+    if not isinstance(value, dict) or set(value) != keys:
+        raise ValueError("An attestation needs exactly: " + ", ".join(sorted(keys)))
+    if value["mode"] not in ATTESTATION_MODES:
+        raise ValueError("Attestation mode must be approved_snapshot or certified_file")
+    url = value["evidence_url"]
+    if not isinstance(url, str) or not url.startswith("https://") or len(url) > 2000:
+        raise ValueError("Attestation evidence must be an https URL")
+    by = value["attested_by"]
+    if not isinstance(by, str) or not by.strip() or len(by) > 200:
+        raise ValueError("Attestation must name who attests")
+    certified = date.fromisoformat(value["certified_on"])
+    attested = datetime.fromisoformat(value["attested_at"])
+    if attested.tzinfo is None or certified > attested.date():
+        raise ValueError("Attestation time needs a timezone and must follow certification")
+    return value
+
+
+def prepare(root, db, release_id, status, *, skip_current=False, attested=None):
+    """Transform and validate one release; retain an immutable checked checkpoint.
+
+    An official status needs the state's own source to mark the snapshot official, or
+    an operator's ``attested`` certification (see ``attestation``).
+    """
     if status not in STATUSES:
         raise ValueError("Status must be test, unofficial or official")
+    if attested is not None:
+        attestation(attested)
+        if status != "official":
+            raise ValueError("Only an official publication carries an attestation")
     root = root.resolve()
     attempt_id = uuid.uuid4()
     with connect(db) as conn:
         metadata = release_metadata(conn, release_id)
         if (
             status == "official"
+            and attested is None
             and (metadata["parser_report"] or {}).get("official_results") is not True
         ):
             raise ValueError("The state's source does not mark this snapshot as official")
         publication_lock(conn, metadata["state"])
+        if attested and attested["mode"] == "approved_snapshot":
+            # The operator checked the public dashboard against the certified results, so
+            # only the snapshot it shows may be approved.
+            live = current_publication(conn, metadata["source_id"])
+            if not live or live["raw_sha256"] != metadata["raw_sha256"]:
+                raise ValueError("Only the currently published snapshot can be approved")
         code_hash = project_hash(root)
         if skip_current:
             current = current_publication(conn, metadata["source_id"])
-            if current and current["transform_sha256"] == code_hash and current["status"] == status:
+            if (
+                current
+                and current["transform_sha256"] == code_hash
+                and current["status"] == status
+                and attested is None
+            ):
                 if current["release_id"] == release_id or equivalent_iowa_release(
                     conn, current, metadata
                 ):
@@ -650,8 +703,17 @@ def prepare(root, db, release_id, status, *, skip_current=False):
         conn.execute(
             "INSERT INTO ops.publication_attempts "
             "(attempt_id, release_id, action, artifacts_path, candidate_schema, "
-            "transform_sha256, requested_status) VALUES (%s,%s,'publish',%s,%s,%s,%s)",
-            (attempt_id, release_id, str(artifacts), schema, code_hash, status),
+            "transform_sha256, requested_status, attestation) "
+            "VALUES (%s,%s,'publish',%s,%s,%s,%s,%s)",
+            (
+                attempt_id,
+                release_id,
+                str(artifacts),
+                schema,
+                code_hash,
+                status,
+                Jsonb(attested) if attested else None,
+            ),
         )
         try:
             results = build_candidate(root, db, metadata, schema, artifacts)
@@ -710,6 +772,7 @@ def publish_prepared(root, db, candidate_id):
                 attempt["candidate_schema"],
                 attempt["transform_sha256"],
                 attempt["requested_status"],
+                attempt["attestation"],
             )
         # Promotion is committed before cleanup; a cleanup failure must not undo publication.
         try:
@@ -737,8 +800,8 @@ def discard(db, candidate_id):
     return {"outcome": "discarded", "candidate_id": str(candidate_id)}
 
 
-def publish(root, db, release_id, status, *, skip_current=False):
-    result = prepare(root, db, release_id, status, skip_current=skip_current)
+def publish(root, db, release_id, status, *, skip_current=False, attested=None):
+    result = prepare(root, db, release_id, status, skip_current=skip_current, attested=attested)
     if result["outcome"] == "already_current":
         return result
     return publish_prepared(root, db, result["candidate_id"])

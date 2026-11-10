@@ -112,6 +112,43 @@ unless the snapshot is marked official), and leaves it paused for good with stat
 `official`; the dashboard labels it "Official results". A refused certification
 restores the pause as it was.
 
+### Operator-attested certification
+
+Where the feed has no official marker (North Carolina, Minnesota, Hawaii, Florida), the
+operator attests to the state's certification. Both modes record the attestation with
+the publication (`serving.publications.attestation`): who attests, the state's
+certification date and its own certification notice or file.
+
+**Approve the published snapshot** when the state certifies the same numbers its
+feed already shows. Compare the public dashboard with the certified results, then
+approve the snapshot it shows by its raw SHA-256 (the `raw_sha256` of the source's
+latest run report). Any other snapshot is refused, so a collection between the check
+and the approval cannot slip through.
+
+```bash
+deploy certify --source nc_2026_general_all --approve-snapshot RAW_SHA256 \
+    --certified-on 2026-11-24 --attested-by "NAME" \
+    --evidence-url https://www.ncsbe.gov/...
+```
+
+**Import the certified file** when the state publishes its certified results apart
+from its feed. Place the file under the data inbox, as for [manual
+results](manual-results.md), and name its format. A state's own certified format is
+read by that state's parser (`CERTIFIED` in its module); `certified-results.csv`, the
+default, is the operator's transcription of a certificate published only as a document
+(see `parsers/certified.py`), checked against the state's races, roster and counties,
+with county rows adding up to the statewide totals.
+
+```bash
+deploy certify --source ky_2026_general --certified-file INBOX_FILE \
+    --certified-name certified-results.csv --sha256 HASH --downloaded-at UTC_TIME \
+    --certified-on 2026-11-23 --attested-by "NAME" --evidence-url https://elect.ky.gov/...
+```
+
+The file joins the source's raw archive as a snapshot holding only it. Releases check
+an official source's newest collected snapshot as unofficial; a check publishes
+nothing.
+
 Manual sources and Mississippi's reviewed counties have their own procedures:
 [manual results](manual-results.md) and [Mississippi collection](mississippi-collection.md).
 

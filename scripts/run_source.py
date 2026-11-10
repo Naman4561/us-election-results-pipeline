@@ -15,6 +15,9 @@ def main():
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--prepare-only", action="store_true", help="Keep a validated candidate")
     mode.add_argument("--check-only", action="store_true", help="Validate, then discard it")
+    parser.add_argument("--replay-sha256", help="Parse this archived snapshot; no request")
+    parser.add_argument("--publish-replay", action="store_true")
+    parser.add_argument("--attestation", type=json.loads, help="Operator certification (JSON)")
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     settings, sources = load_config(root / "config/sources.toml")
@@ -29,6 +32,9 @@ def main():
         status=args.status,
         prepare_only=args.prepare_only,
         check_only=args.check_only,
+        replay_sha256=args.replay_sha256,
+        publish_replay=args.publish_replay,
+        attested=args.attestation,
     )
     print(json.dumps(result), flush=True)
     # "locked": another run or a backup holds the source; the next cycle runs it.

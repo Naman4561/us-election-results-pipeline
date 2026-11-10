@@ -22,6 +22,7 @@ from pathlib import Path
 from election_pipeline.database import connect
 from election_pipeline.deployment import catalog, containers, dashboard
 from election_pipeline.migrations import migrate
+from election_pipeline.publication import attestation
 from election_pipeline.storage import atomic_json, utc_now
 from election_pipeline.workflow import NO_SNAPSHOT
 
@@ -58,11 +59,12 @@ def require_no_backup():
 # Jobs ---------------------------------------------------------------------------------
 
 
-def run_one(image, name, status, prod, config, *, mode=None):
+def run_one(image, name, status, prod, config, *, mode=None, extra=()):
     """Run one source in the release image; ``mode`` is prepare-only or check-only."""
     args = ["scripts/run_source.py", "--source", name, "--status", status]
     if mode:
         args.append("--" + mode)
+    args += extra
     output = containers.run_job(
         image, prod, config, args, timeout=int(config.get("JOB_TIMEOUT", "240"))
     )
@@ -187,9 +189,17 @@ def check_sources(image, value, prod, config, moved=()):
         raise ValueError(f"Not an enabled HTTP source: {sorted(unknown)}")
 
     def check(name):
+        # A check publishes nothing. An official source's snapshot may be certified by an
+        # operator's attestation rather than its own feed, so it is checked as unofficial.
+        status = value["sources"][name]["status"]
         try:
             result = run_one(
-                image, name, value["sources"][name]["status"], prod, config, mode="check-only"
+                image,
+                name,
+                "unofficial" if status == "official" else status,
+                prod,
+                config,
+                mode="check-only",
             )
         except Exception as error:
             result = {"source_id": name, "outcome": "failed", "error": str(error)}
@@ -349,24 +359,93 @@ def disable(path, name):
     return {"outcome": "disabled", "source_id": name}
 
 
-def certify(path, name, prod, config):
-    """Publish a public source's official results once its own feed marks them official.
+def certify(path, name, prod, config, *, approve=None, certified=None, attested=None):
+    """Publish a public source's official results.
 
-    Run after checking the totals against the state's certified results. Collection is
-    paused first, so the worker cannot publish an unofficial snapshot over the official
-    one; the source then stays paused with status "official". A snapshot the state has
-    not marked official is refused and the pause is restored as it was.
+    Run after checking the totals against the state's certified results. With neither
+    option, the state's own feed must mark its newest snapshot official. The two
+    operator-attested modes are for states whose feed has no official marker:
+
+    - ``approve``: the raw SHA-256 of the snapshot published now, which the operator
+      found equal to the certified results; it is republished as official.
+    - ``certified``: the state's separately published certified file, as a dict of
+      ``file`` (under the data inbox), ``sha256``, ``downloaded_at`` and ``name``
+      (``certified-<format>``, see ``parsers.certified``); it is imported into the
+      source's archive, parsed and published as official.
+
+    Both need ``attested``: evidence_url, certified_on, attested_by and attested_at.
+
+    Collection is paused first, so the worker cannot publish an unofficial snapshot over
+    the official one; the source then stays paused with status "official". A refused
+    certification restores the pause as it was.
     """
+    if approve is not None and certified is not None:
+        raise ValueError("Approve a snapshot or import a certified file, not both")
+    if (approve is None and certified is None) != (attested is None):
+        raise ValueError("Approving a snapshot needs an attestation, and only then")
     value = catalog.read(path)
     entry = value["sources"][name]
     if not entry["public"] or entry["acquisition"] != "http":
         raise ValueError("Certify a public HTTP source")
     if entry["status"] == "official":
         return {"outcome": "already_official", "source_id": name}
+    image = value["release"]["image_id"]
+    if approve is not None:
+        if not re.fullmatch(r"[0-9a-f]{64}", approve):
+            raise ValueError("Approve a snapshot by its full raw SHA-256")
+        attested = attestation({**attested, "mode": "approved_snapshot"})
+        extra = (
+            "--replay-sha256",
+            approve,
+            "--publish-replay",
+            "--attestation",
+            json.dumps(attested, sort_keys=True),
+        )
+
+        def publish():
+            return run_one(image, name, "official", prod, config, extra=extra)
+
+    elif certified is not None:
+        attested = attestation({**attested, "mode": "certified_file"})
+        inbox = (Path(prod["DATA_DIR"]) / "inbox").resolve()
+        relative = Path(certified["file"]).resolve(strict=True).relative_to(inbox)
+        job = [
+            "scripts/run_manual_source.py",
+            "--source",
+            name,
+            "--file",
+            str(Path("/app/data/inbox") / relative),
+            "--sha256",
+            certified["sha256"],
+            "--downloaded-at",
+            certified["downloaded_at"],
+            "--certified",
+            certified["name"],
+            "--status",
+            "official",
+            "--publish",
+            "--attestation",
+            json.dumps(attested, sort_keys=True),
+        ]
+
+        def publish():
+            output = containers.run_job(
+                image, prod, config, job, timeout=int(config.get("JOB_TIMEOUT", "240"))
+            )
+            result = [json.loads(line) for line in output.splitlines() if line.startswith("{")]
+            if result[-1].get("source_id") != name:
+                raise ValueError("Worker returned the wrong source identity")
+            return result[-1]
+
+    else:
+
+        def publish():
+            return run_one(image, name, "official", prod, config)
+
     was_paused = entry.get("paused", False)
     pause(path, name, True)
     try:
-        result = run_one(value["release"]["image_id"], name, "official", prod, config)
+        result = publish()
     except Exception:
         pause(path, name, was_paused)
         raise
@@ -378,7 +457,12 @@ def certify(path, name, prod, config):
         current["sources"][name]["status"] = "official"
 
     catalog.update(path, change)
-    return {"outcome": "certified", "source_id": name, "raw_sha256": result.get("raw_sha256")}
+    return {
+        "outcome": "certified",
+        "source_id": name,
+        "raw_sha256": result.get("raw_sha256"),
+        "attested": attested is not None,
+    }
 
 
 def pause(path, name, paused):

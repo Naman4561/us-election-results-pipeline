@@ -193,11 +193,12 @@ class DeploymentTests(unittest.TestCase):
     def test_certify_pauses_first_publishes_official_and_restores_the_pause_on_refusal(self):
         seen = []
 
-        def run(image, name, status, prod, config, *, mode=None):
+        def run(image, name, status, prod, config, *, mode=None, extra=()):
             # The worker must not run the source while its official snapshot publishes.
             seen.append(
                 (name, status, mode, catalog.read(self.path)["sources"][name].get("paused"))
             )
+            self.assertEqual(extra, ())
             return outcome
 
         outcome = {"source_id": NC, "outcome": "failed", "error": "not marked official"}
@@ -225,6 +226,125 @@ class DeploymentTests(unittest.TestCase):
             run.assert_not_called()
         with self.assertRaisesRegex(ValueError, "public HTTP source"):
             control.certify(self.path, GA, self.prod, self.config)
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_an_approved_snapshot_is_replayed_and_published_with_its_attestation(self):
+        attested = {
+            "evidence_url": "https://www.ncsbe.gov/news/certified",
+            "certified_on": "2026-11-24",
+            "attested_by": "Operator",
+            "attested_at": "2026-11-24T20:00:00+00:00",
+        }
+        calls = []
+
+        def run(image, name, status, prod, config, *, mode=None, extra=()):
+            calls.append((status, extra))
+            return {"source_id": NC, "outcome": "succeeded", "raw_sha256": "a" * 64}
+
+        for approve, given, error in (
+            ("a" * 64, None, "needs an attestation"),
+            (None, attested, "needs an attestation"),
+            ("A" * 64, attested, "full raw SHA-256"),
+            ("a" * 64, {**attested, "evidence_url": "http://x"}, "https URL"),
+        ):
+            with (
+                self.subTest(error=error),
+                patch.object(control, "run_one", side_effect=run),
+                self.assertRaisesRegex(ValueError, error),
+            ):
+                control.certify(
+                    self.path, NC, self.prod, self.config, approve=approve, attested=given
+                )
+        # Refused before pausing anything.
+        self.assertEqual((calls, catalog.read(self.path)["sources"][NC].get("paused")), ([], None))
+
+        with patch.object(control, "run_one", side_effect=run):
+            result = control.certify(
+                self.path, NC, self.prod, self.config, approve="a" * 64, attested=attested
+            )
+        self.assertEqual((result["outcome"], result["attested"]), ("certified", True))
+        status, extra = calls[0]
+        self.assertEqual(status, "official")
+        self.assertEqual(extra[:3], ("--replay-sha256", "a" * 64, "--publish-replay"))
+        self.assertEqual(json.loads(extra[4]), {**attested, "mode": "approved_snapshot"})
+        entry = catalog.read(self.path)["sources"][NC]
+        self.assertEqual((entry["status"], entry["paused"]), ("official", True))
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_a_certified_file_from_the_inbox_is_imported_and_published_as_official(self):
+        inbox = self.root / "data" / "inbox"
+        inbox.mkdir(parents=True)
+        (inbox / "nc-canvass.csv").write_text("certified", encoding="utf-8")
+        attested = {
+            "evidence_url": "https://www.ncsbe.gov/results-data/canvass.pdf",
+            "certified_on": "2026-11-24",
+            "attested_by": "Operator",
+            "attested_at": "2026-11-24T20:00:00+00:00",
+        }
+        certified = {
+            "file": inbox / "nc-canvass.csv",
+            "sha256": "c" * 64,
+            "downloaded_at": "2026-11-24T19:00:00+00:00",
+            "name": "certified-results.csv",
+        }
+        jobs = []
+
+        def job(image, prod, config, args, timeout):
+            jobs.append(args)
+            # The worker must not collect while the certified file publishes.
+            self.assertTrue(catalog.read(self.path)["sources"][NC]["paused"])
+            return json.dumps({"source_id": NC, "outcome": "succeeded", "raw_sha256": "d" * 64})
+
+        with self.assertRaisesRegex(ValueError, "not both"):
+            control.certify(
+                self.path,
+                NC,
+                self.prod,
+                self.config,
+                approve="a" * 64,
+                certified=certified,
+                attested=attested,
+            )
+        outside = {**certified, "file": self.root / "elsewhere.csv"}
+        outside["file"].write_text("x", encoding="utf-8")
+        with self.assertRaises(ValueError):
+            control.certify(
+                self.path, NC, self.prod, self.config, certified=outside, attested=attested
+            )
+        self.assertNotIn("paused", catalog.read(self.path)["sources"][NC])
+
+        with patch.object(control.containers, "run_job", side_effect=job):
+            result = control.certify(
+                self.path, NC, self.prod, self.config, certified=certified, attested=attested
+            )
+        self.assertEqual((result["outcome"], result["raw_sha256"]), ("certified", "d" * 64))
+        args = jobs[0]
+        self.assertEqual(args[0], "scripts/run_manual_source.py")
+        self.assertEqual(args[args.index("--file") + 1], "/app/data/inbox/nc-canvass.csv")
+        self.assertEqual(args[args.index("--certified") + 1], "certified-results.csv")
+        self.assertEqual(args[args.index("--status") + 1], "official")
+        self.assertIn("--publish", args)
+        self.assertEqual(
+            json.loads(args[args.index("--attestation") + 1]),
+            {**attested, "mode": "certified_file"},
+        )
+        entry = catalog.read(self.path)["sources"][NC]
+        self.assertEqual((entry["status"], entry["paused"]), ("official", True))
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_release_checks_an_official_source_as_unofficial(self):
+        self.value["sources"][NC]["status"] = "official"
+        self.save()
+        statuses = {}
+
+        def run(image, name, status, prod, config, *, mode=None, extra=()):
+            statuses[name] = (status, mode)
+            return {"source_id": name, "outcome": "validated"}
+
+        with patch.object(control, "run_one", side_effect=run):
+            failed = control.check_sources("image", catalog.read(self.path), self.prod, self.config)
+        self.assertEqual(failed, {})
+        self.assertEqual(statuses, {NC: ("unofficial", "check-only"), KY: ("test", "check-only")})
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_manual_and_disabled_sources_are_never_polled(self):

@@ -64,11 +64,20 @@ HANDLED = (OSError, ValueError, KeyError, TypeError, csv.Error, zipfile.BadZipFi
 
 
 def _parse(archive, source, settings, output, stats, reference):
+    from election_pipeline.parsers import certified
     from election_pipeline.states import parser_for
 
-    validate_payload(archive, source, settings)
-    parser = parser_for(source)
+    # A certified snapshot holds the state's certified file, not the feed's members.
+    name = certified.member(archive)
+    if name:
+        parser = certified.parser_for(source, name)
+        stats.update(certified_file=name)
+    else:
+        validate_payload(archive, source, settings)
+        parser = parser_for(source)
     try:
+        if name:
+            return parser(archive, name, source, settings, output, stats, reference)
         return parser(archive, source, settings, output, stats, reference)
     except HANDLED:
         raise

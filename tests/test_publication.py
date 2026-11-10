@@ -145,6 +145,67 @@ class PublicationArtifactTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Status must be"):
             publication.prepare(Path(__file__).resolve().parents[1], {}, 12, "certified")
 
+    def test_an_attested_snapshot_is_official_only_if_it_is_the_one_published(self):
+        attested = {
+            "mode": "approved_snapshot",
+            "evidence_url": "https://www.ncsbe.gov/news/certified",
+            "certified_on": "2026-11-24",
+            "attested_by": "Operator",
+            "attested_at": "2026-11-24T20:00:00+00:00",
+        }
+        conn = MagicMock()
+        conn.__enter__.return_value = conn
+        metadata = {
+            "source_id": "nc",
+            "state": "NC",
+            "release_id": 12,
+            "raw_sha256": "a" * 64,
+            "parser_report": {},
+        }
+        root = Path(__file__).resolve().parents[1]
+        for live, refused in (({"raw_sha256": "b" * 64}, True), (None, True), ({}, False)):
+            with (
+                self.subTest(live=live),
+                patch.object(publication, "connect", return_value=conn),
+                patch.object(publication, "publication_lock"),
+                patch.object(publication, "release_metadata", return_value=metadata),
+                patch.object(
+                    publication,
+                    "current_publication",
+                    return_value=live if live != {} else {"raw_sha256": "a" * 64},
+                ),
+                patch.object(publication, "project_hash", return_value="code-hash"),
+                patch.object(
+                    publication, "build_candidate", side_effect=RuntimeError("built")
+                ) as build,
+            ):
+                expected = "currently published snapshot" if refused else "built"
+                with self.assertRaisesRegex(Exception, expected):
+                    publication.prepare(root, {"password": ""}, 12, "official", attested=attested)
+                self.assertEqual(build.called, not refused)
+        with self.assertRaisesRegex(ValueError, "Only an official"):
+            publication.prepare(root, {}, 12, "unofficial", attested=attested)
+
+    def test_an_attestation_names_its_mode_evidence_date_and_operator(self):
+        good = {
+            "mode": "certified_file",
+            "evidence_url": "https://sos.ms.gov/recap.csv",
+            "certified_on": "2026-11-13",
+            "attested_by": "Operator",
+            "attested_at": "2026-11-13T18:00:00+00:00",
+        }
+        self.assertEqual(publication.attestation(good), good)
+        for change in (
+            {"mode": "trusted"},
+            {"evidence_url": "http://sos.ms.gov/recap.csv"},
+            {"attested_by": " "},
+            {"certified_on": "2026-11-14"},
+            {"attested_at": "2026-11-13T18:00:00"},
+            {"extra": 1},
+        ):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                publication.attestation({**good, **change})
+
     def test_equivalent_iowa_archive_can_reuse_the_current_publication(self):
         conn = MagicMock()
         conn.__enter__.return_value = conn

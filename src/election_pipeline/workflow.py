@@ -60,8 +60,12 @@ def run_source(
     reference=None,
     prepare_only=False,
     check_only=False,
+    attested=None,
 ):
     """Retry committed stages idempotently. Replay does not publish by default.
+
+    ``attested`` is an operator's certification of an official publication (see
+    ``publication.attestation``).
 
     ``prepare_only`` keeps a validated candidate for a later promotion. ``check_only``
     validates and discards one (a new release proving it can publish each source). It
@@ -256,7 +260,9 @@ def run_source(
 
                     candidate = stage(
                         "validate_candidate",
-                        lambda: prepare(Path(root), db, loaded["release_id"], status),
+                        lambda: prepare(
+                            Path(root), db, loaded["release_id"], status, attested=attested
+                        ),
                     )
                     report["candidate_id"] = candidate["candidate_id"]
                     if check_only:
@@ -278,6 +284,7 @@ def run_source(
                         loaded["release_id"],
                         status,
                         skip_current=True,
+                        attested=attested,
                     ),
                 )
 

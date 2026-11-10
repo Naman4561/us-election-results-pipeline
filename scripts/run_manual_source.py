@@ -17,8 +17,10 @@ def main():
     parser.add_argument("--sha256", required=True)
     parser.add_argument("--downloaded-at", required=True)
     parser.add_argument("--minimum-generated-at")
-    parser.add_argument("--status", choices=("test", "unofficial"), required=True)
+    parser.add_argument("--status", choices=("test", "unofficial", "official"), required=True)
     parser.add_argument("--publish", action="store_true")
+    parser.add_argument("--certified", help="Import the state's certified file under this name")
+    parser.add_argument("--attestation", type=json.loads, help="Operator certification (JSON)")
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     settings, sources = load_config(root / "config/sources.toml")
@@ -33,6 +35,7 @@ def main():
             args.downloaded_at,
             args.sha256,
             minimum=args.minimum_generated_at,
+            certified=args.certified,
         )
         result = run_source(
             source,
@@ -43,6 +46,7 @@ def main():
             replay_sha256=receipt["sha256"],
             prepare_only=not args.publish,
             publish_replay=args.publish,
+            attested=args.attestation,
         )
         result.update(mode="manual", manual_acquisition=receipt)
         if result["outcome"] != "locked":

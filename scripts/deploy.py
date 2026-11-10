@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import dotenv_values
@@ -28,8 +29,26 @@ def main():
         help="A source whose address this release changes; it has no snapshot to check yet",
     )
     sub.add_parser("rollback-release")
-    for name in ("prepare", "promote", "disable", "pause", "resume", "certify"):
+    for name in ("prepare", "promote", "disable", "pause", "resume"):
         sub.add_parser(name).add_argument("--source", required=True)
+    certify = sub.add_parser("certify", help="Publish a source's certified results")
+    certify.add_argument("--source", required=True)
+    certify.add_argument(
+        "--approve-snapshot",
+        metavar="RAW_SHA256",
+        help="Attest that this published snapshot is the state's certified result",
+    )
+    certify.add_argument(
+        "--certified-file",
+        type=Path,
+        help="Import the state's certified file, placed under the data inbox",
+    )
+    certify.add_argument("--certified-name", default="certified-results.csv")
+    certify.add_argument("--sha256", help="The certified file's SHA-256 where downloaded")
+    certify.add_argument("--downloaded-at", help="When it was downloaded (UTC, ISO 8601)")
+    certify.add_argument("--evidence-url", help="The state's certification notice or file")
+    certify.add_argument("--certified-on", help="The state's certification date (YYYY-MM-DD)")
+    certify.add_argument("--attested-by", help="Who checked and attests, as they sign")
     county = sub.add_parser("import-county", help="Import a reviewed Mississippi county report")
     county.add_argument("--county", required=True)
     county.add_argument("--file", type=Path, required=True)
@@ -79,7 +98,30 @@ def main():
         elif action in ("pause", "resume"):
             result = control.pause(path, args.source, action == "pause")
         elif action == "certify":
-            result = control.certify(path, args.source, prod, config)
+            attested = certified = None
+            if args.certified_file:
+                certified = {
+                    "file": args.certified_file,
+                    "sha256": args.sha256,
+                    "downloaded_at": args.downloaded_at,
+                    "name": args.certified_name,
+                }
+            if args.approve_snapshot or args.certified_file:
+                attested = {
+                    "evidence_url": args.evidence_url,
+                    "certified_on": args.certified_on,
+                    "attested_by": args.attested_by,
+                    "attested_at": datetime.now(timezone.utc).isoformat(),
+                }
+            result = control.certify(
+                path,
+                args.source,
+                prod,
+                config,
+                approve=args.approve_snapshot,
+                certified=certified,
+                attested=attested,
+            )
         elif action == "import-county":
             result = control.import_county(
                 path, args.county, args.file, args.review_json, prod, config
