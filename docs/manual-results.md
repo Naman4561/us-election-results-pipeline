@@ -51,6 +51,24 @@ spot-check candidate and county totals against the same official report. Then ma
 public as any new state: an uploaded backup, `check-restore`, `deploy start-dashboard
 --source oh_2026_general` and `deploy activate` with the restore report.
 
+## A state added from its certified results
+
+A state with no election-night source (one "awaiting certified results") is added
+from its certified canvass alone. Its source is configured for manual imports as above,
+and its first import is the state's certified file, named for the reader that checks it
+(`certified-<format>`, see `parsers/certified.py`), with the operator's attestation:
+
+```bash
+deploy register --source wy_2026_general
+manual configure --source wy_2026_general --final
+manual import --source wy_2026_general --file INBOX_FILE --sha256 HASH --downloaded-at UTC_TIME     --certified-name certified-results.zip     --evidence-url https://sos.wyo.gov/Elections/Docs/2026/2026GeneralResults.aspx     --certified-on 2026-11-10 --attested-by "NAME"
+manual promote --source wy_2026_general
+```
+
+The candidate is official and carries the attestation; the source's status becomes
+official and no further import is due. It is made public like any new state (backup,
+`check-restore`, `start-dashboard`, `activate`).
+
 ## Later updates
 
 Once public, the operator can submit another official file through the same

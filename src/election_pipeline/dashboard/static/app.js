@@ -691,6 +691,7 @@ function renderMetadata() {
     state = national ? null : data.states[view.scope],
     publication = state?.publication,
     manual = state?.acquisition?.method === "manual",
+    official = publication?.status === "official",
     anyManual = Object.values(data.states).some(
       (s) => s.acquisition?.method === "manual",
     );
@@ -705,9 +706,11 @@ function renderMetadata() {
       : test
         ? "TEST PUBLICATIONS"
         : publication
-          ? manual
-            ? "UNOFFICIAL · MANUAL SNAPSHOT"
-            : "UNOFFICIAL RETURNS"
+          ? official
+            ? "OFFICIAL RESULTS"
+            : manual
+              ? "UNOFFICIAL · MANUAL SNAPSHOT"
+              : "UNOFFICIAL RETURNS"
           : national
             ? "OFFICIAL-SOURCE RETURNS"
             : "AWAITING PUBLICATION";
@@ -722,7 +725,13 @@ function renderMetadata() {
       ? "SIMULATED DEMO — All vote counts and candidate names are examples."
       : test
         ? "TEST DATA — These publications are for pipeline validation. Do not interpret them as live Election Day returns."
-        : manual
+        : official
+          ? "Official results as certified by the state" +
+            (publication.attestation?.certified_on
+              ? " on " + publication.attestation.certified_on
+              : "") +
+            ". A party lead is not a race call."
+          : manual
           ? "Manually imported official results. Source report: " +
             date(publication?.source_modified_at) +
             ". Results update when a new file is imported. A party lead is not a race call."

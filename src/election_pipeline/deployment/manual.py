@@ -51,7 +51,21 @@ def operate(
     downloaded_at=None,
     publish=False,
     promote=False,
+    certified=None,
+    attested=None,
 ):
+    """Import an operator's file for a manual source, or promote its prepared candidate.
+
+    ``certified`` names the state's certified file (``certified-<format>``, see
+    ``parsers.certified``), imported with ``attested`` (evidence_url, certified_on,
+    attested_by, attested_at) as official results. A state with no election-night
+    source is added this way: its first publication is official, and no further import
+    is due.
+    """
+    if (certified is None) != (attested is None):
+        raise ValueError("A certified file needs an attestation, and only it does")
+    if certified is not None:
+        attested = control.attestation({**attested, "mode": "certified_file"})
     # Keep long imports off the shared catalog lock. Only this source is serialized.
     lock = Path(config["CONTROL_STATE_DIR"]) / (name + "-manual-operation")
     with catalog.locked(lock, exclusive=True, nonblocking=True):
@@ -78,8 +92,12 @@ def operate(
             "--downloaded-at",
             downloaded_at,
             "--status",
-            entry["status"],
+            "official" if certified is not None else entry["status"],
         ]
+        if certified is not None:
+            args.extend(
+                ["--certified", certified, "--attestation", json.dumps(attested, sort_keys=True)]
+            )
         previous = entry.get("manual_snapshot", {}).get("source_generated_at")
         if previous:
             args.extend(["--minimum-generated-at", previous])
@@ -102,6 +120,8 @@ def operate(
             if current["release"]["image_id"] != image or source["acquisition"] != "manual":
                 raise ValueError("Deployment changed during import")
             info = {key: result["manual_acquisition"][key] for key in RECEIPT}
+            if certified is not None:
+                source.update(status="official", manual_final=True)
             if result["outcome"] == "validated":
                 source["candidate_id"] = str(uuid.UUID(result["candidate_id"]))
                 source["manual_candidate"] = {**info, "candidate_id": source["candidate_id"]}

@@ -287,6 +287,52 @@ class ManualDeploymentTests(unittest.TestCase):
         self.assertEqual(current["manual_snapshot"]["publication_id"], result["publication_id"])
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_a_certified_file_is_imported_as_official_and_ends_the_manual_updates(self):
+        local = self.root / "data/inbox/results.zip"
+        local.parent.mkdir(parents=True)
+        local.write_text("file")
+        attested = {
+            "evidence_url": "https://sos.wyo.gov/minutes.pdf",
+            "certified_on": "2026-11-10",
+            "attested_by": "Operator",
+            "attested_at": "2026-11-10T21:00:00+00:00",
+        }
+        options = dict(file=local, sha256="a" * 64, downloaded_at="now")
+        with self.assertRaisesRegex(ValueError, "attestation"):
+            deployment_manual.operate(
+                self.path,
+                self.source.source_id,
+                self.prod,
+                self.config,
+                certified="certified-results.zip",
+                **options,
+            )
+        result = {
+            "source_id": self.source.source_id,
+            "outcome": "validated",
+            "candidate_id": str(uuid.uuid4()),
+            "manual_acquisition": {key: "value" for key in deployment_manual.RECEIPT},
+        }
+        with patch.object(containers, "run_job", return_value=json.dumps(result)) as run:
+            deployment_manual.operate(
+                self.path,
+                self.source.source_id,
+                self.prod,
+                self.config,
+                certified="certified-results.zip",
+                attested=attested,
+                **options,
+            )
+        args = run.call_args.args[3]
+        self.assertEqual(args[args.index("--status") + 1], "official")
+        self.assertEqual(args[args.index("--certified") + 1], "certified-results.zip")
+        recorded = json.loads(args[args.index("--attestation") + 1])
+        self.assertEqual(recorded, {**attested, "mode": "certified_file"})
+        current = catalog.read(self.path)["sources"][self.source.source_id]
+        self.assertEqual((current["status"], current["manual_final"]), ("official", True))
+        self.assertEqual(current["candidate_id"], result["candidate_id"])
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_manual_activation_keeps_the_restore_gate_and_publishes_only_its_state(self):
         now = datetime.now(timezone.utc)
         self.value["sources"][self.source.source_id].update(

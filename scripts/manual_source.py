@@ -2,6 +2,7 @@
 
 import argparse
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import dotenv_values
@@ -25,6 +26,13 @@ def main():
     local.add_argument("--sha256", required=True)
     local.add_argument("--downloaded-at", required=True)
     local.add_argument("--publish", action="store_true")
+    local.add_argument(
+        "--certified-name",
+        help="Import the state's certified file under this name (certified-<format>)",
+    )
+    local.add_argument("--evidence-url", help="The state's certification notice or file")
+    local.add_argument("--certified-on", help="The state's certification date (YYYY-MM-DD)")
+    local.add_argument("--attested-by", help="Who checked and attests, as they sign")
     promote = sub.add_parser("promote")
     promote.add_argument("--source", required=True)
     args = parser.parse_args()
@@ -45,6 +53,15 @@ def main():
                     "sha256": args.sha256,
                     "downloaded_at": args.downloaded_at,
                     "publish": args.publish,
+                    "certified": args.certified_name,
+                    "attested": {
+                        "evidence_url": args.evidence_url,
+                        "certified_on": args.certified_on,
+                        "attested_by": args.attested_by,
+                        "attested_at": datetime.now(timezone.utc).isoformat(),
+                    }
+                    if args.certified_name
+                    else None,
                 }
             )
             result = operate(path, args.source, prod, config, **kwargs)

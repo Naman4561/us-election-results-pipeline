@@ -65,9 +65,17 @@ class Workbook:
         previous_row = 0
         for node in root.findall("sheetData/row"):
             number = int(node.get("r"))
-            if number <= previous_row or number > min(self.settings.max_csv_rows, 1000):
+            if number <= previous_row:
                 raise ValueError("Unordered/excessive workbook rows")
             previous_row = number
+            # Formatted but empty rows past the data hold no values and count for nothing.
+            if all(
+                cell.find("v") is None and cell.get("t") != "inlineStr"
+                for cell in node.findall("c")
+            ):
+                continue
+            if number > min(self.settings.max_csv_rows, 1000):
+                raise ValueError("Unordered/excessive workbook rows")
             values = {}
             for cell in node.findall("c"):
                 match = re.fullmatch(r"([A-Z]{1,3})([1-9]\d*)", cell.get("r", ""))

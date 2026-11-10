@@ -1,0 +1,9 @@
+{
+ "file": "2026_Wyoming_General_Results.zip",
+ "sha256": "c378306bd8df97437a3d11fac7792e23a8297a7e3eded8129a9cd61e3e654ff1",
+ "bytes": 647239,
+ "url": "https://sos.wyo.gov/Elections/Docs/2026/Results/General/2026_Wyoming_General_Results.zip",
+ "page": "https://sos.wyo.gov/Elections/Docs/2026/2026GeneralResults.aspx",
+ "downloaded_on": "2026-11-10",
+ "note": "The Secretary of State's official 2026 general election results, posted after the State Canvassing Board met on November 10, 2026. Downloaded with a plain GET and stored unchanged."
+}

@@ -1,0 +1,102 @@
+{
+ "state": "WY",
+ "provenance": "Wyoming candidates (by name; the certified results carry no candidate IDs) and counties from the Secretary of State's official results, 2026_Wyoming_General_Results.zip (SHA-256 c378306bd8df97437a3d11fac7792e23a8297a7e3eded8129a9cd61e3e654ff1), sheet \"Statewide Candidates\" of \"2026 General Results Summaries - OFFICIAL.xlsx\", downloaded November 10, 2026. Awaiting the operator's confirmation.",
+ "races": {
+  "WY-SEN": {
+   "candidates": [
+    "Harriet Hageman",
+    "James Byrd"
+   ],
+   "counties": [
+    "Albany",
+    "Big Horn",
+    "Campbell",
+    "Carbon",
+    "Converse",
+    "Crook",
+    "Fremont",
+    "Goshen",
+    "Hot Springs",
+    "Johnson",
+    "Laramie",
+    "Lincoln",
+    "Natrona",
+    "Niobrara",
+    "Park",
+    "Platte",
+    "Sheridan",
+    "Sublette",
+    "Sweetwater",
+    "Teton",
+    "Uinta",
+    "Washakie",
+    "Weston"
+   ]
+  },
+  "WY-GOV": {
+   "candidates": [
+    "Eric Barlow",
+    "Kenneth R. Casner",
+    "Rebecca Bextel"
+   ],
+   "counties": [
+    "Albany",
+    "Big Horn",
+    "Campbell",
+    "Carbon",
+    "Converse",
+    "Crook",
+    "Fremont",
+    "Goshen",
+    "Hot Springs",
+    "Johnson",
+    "Laramie",
+    "Lincoln",
+    "Natrona",
+    "Niobrara",
+    "Park",
+    "Platte",
+    "Sheridan",
+    "Sublette",
+    "Sweetwater",
+    "Teton",
+    "Uinta",
+    "Washakie",
+    "Weston"
+   ]
+  },
+  "WY-AL": {
+   "candidates": [
+    "Chuck Gray",
+    "Lisa Kinney",
+    "Shawn Johnson",
+    "Jeffrey Haggit"
+   ],
+   "counties": [
+    "Albany",
+    "Big Horn",
+    "Campbell",
+    "Carbon",
+    "Converse",
+    "Crook",
+    "Fremont",
+    "Goshen",
+    "Hot Springs",
+    "Johnson",
+    "Laramie",
+    "Lincoln",
+    "Natrona",
+    "Niobrara",
+    "Park",
+    "Platte",
+    "Sheridan",
+    "Sublette",
+    "Sweetwater",
+    "Teton",
+    "Uinta",
+    "Washakie",
+    "Weston"
+   ]
+  }
+ }
+}

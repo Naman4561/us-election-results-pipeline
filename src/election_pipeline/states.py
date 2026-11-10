@@ -318,6 +318,17 @@ STATES = {
         source_page="https://electionresults.ri.gov/results/public/rhodeisland/elections/2026StatewideGeneralElection",
         collection_backend="enhanced_voting",
     ),
+    # Wyoming has no election-night source collected here; it is added from the State
+    # Canvassing Board's certified results, imported as a manual source.
+    "WY": State(
+        "WY",
+        "Wyoming",
+        "wy_2026_general",
+        (0,),
+        ("total_votes",),
+        governor=True,
+        source_page="https://sos.wyo.gov/Elections/Docs/2026/2026GeneralResults.aspx",
+    ),
     # Utah elects no senator or governor in 2026.
     "UT": State(
         "UT",

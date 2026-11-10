@@ -323,6 +323,23 @@ test("national/state map navigation and coverage statuses", async (t) => {
   assert(
     d.querySelector("#connection").textContent.includes("updated manually"),
   );
+  // A certified state reads as official, with its certification date.
+  for (const s of [payload.national.states.OH, payload.states.OH])
+    Object.assign(s.publication, {
+      status: "official",
+      attestation: { mode: "certified_file", certified_on: "2026-11-10" },
+    });
+  click("#refresh");
+  await settle();
+  assert.equal(
+    d.querySelector("#publication-status").textContent,
+    "OFFICIAL RESULTS",
+  );
+  assert(
+    d
+      .querySelector("#notice")
+      .textContent.includes("certified by the state on 2026-11-10"),
+  );
   w.fetch = async () => {
     throw Error("Network offline");
   };

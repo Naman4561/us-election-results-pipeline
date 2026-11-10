@@ -1,6 +1,6 @@
 # States
 
-Twenty-four states, every 2026 U.S. Senate, Governor and House race each one holds,
+Thirty-three states, every 2026 U.S. Senate, Governor and House race each one holds,
 taken only from the state's own election office. The registry
 (`src/election_pipeline/states.py`) and `config/sources.toml` are the source of truth;
 this page explains them.
@@ -39,9 +39,11 @@ this page explains them.
 | Virginia | Enhanced Voting | Senate, House 1–11 (12) | All 133 localities | Early, Election Day, mail, provisional, post-election |
 | Washington | Enhanced Voting | House 1–10 (10) | All 39 counties | Total only |
 | West Virginia | Clarity | Senate, House 1–2 (3) | All 55 counties | Total only |
+| Wyoming | Secretary of State certified results (State Canvassing Board) | Senate, Governor, House at-large (3) | All 23 counties | Total only |
 
 A state without a Senate or Governor race in 2026 has none listed. Ohio, Kansas and
-Mississippi's reviewed counties are imported by hand; every other source is collected
+Mississippi's reviewed counties are imported by hand, and Wyoming is added from its
+certified results alone (no election-night source); every other source is collected
 every 15 minutes, or hourly or every three hours once its count stops
 (`config/sources.toml`). [State status](state-status.md) records where each state's
 count stands.
@@ -115,8 +117,10 @@ New Castle County is Wilmington plus the rest of the county; both parts are chec
 ## Awaiting certified results
 
 These states hold elections this year but have no election-night source collected
-here; the map labels them "Awaiting certified results", and each is added from its
-certified canvass (`deploy certify --certified-file`): Alabama, Arizona, Connecticut,
+here; the map labels them "Awaiting certified results" until each is added from its
+certified canvass, as a manual source whose first import is the certified file
+([manual results](manual-results.md#a-state-added-from-its-certified-results)). Wyoming,
+certified on November 10, is the first. The list: Alabama, Arizona, Connecticut,
 Illinois, Kentucky, Maine, Massachusetts, Michigan, Missouri, Montana, Nevada, New
 Hampshire, New Jersey, New York, Oklahoma, Pennsylvania, Tennessee, Virginia, Wisconsin
 and Wyoming (`awaiting_certified` in
