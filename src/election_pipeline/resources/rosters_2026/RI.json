@@ -1,6 +1,6 @@
 {
  "state": "RI",
- "provenance": "Enhanced Voting ballot-option IDs from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 16:41 UTC). Rhode Island reports by city and town, not county, so no counties are listed. Pending operator review before release.",
+ "provenance": "Enhanced Voting ballot-option IDs from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 16:41 UTC). Rhode Island reports by city and town, not county, so no counties are listed. Confirmed by the operator before release on November 10, 2026.",
  "races": {
   "RI-SEN": {
    "candidates": [

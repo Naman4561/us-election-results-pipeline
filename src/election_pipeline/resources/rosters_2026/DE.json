@@ -1,6 +1,6 @@
 {
  "state": "DE",
- "provenance": "Delaware candidate IDs and counties from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 16:45 UTC). Pending operator review before release.",
+ "provenance": "Delaware candidate IDs and counties from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 16:45 UTC). Confirmed by the operator before release on November 10, 2026.",
  "races": {
   "DE-SEN": {
    "candidates": [
