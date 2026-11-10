@@ -28,12 +28,14 @@ SOURCES = {
     "IN": "in_2026_general",
     "AR": "ar_2026_general",
     "ND": "nd_2026_general",
+    "LA": "la_2026_general",
 }
 HOSTS = {
     "UT": "electionresults.utah.gov",
     "IN": "enr.indianavoters.in.gov",
     "AR": "enr-results-api.totalresults.com",
     "ND": "api.resultsnd.sos.nd.gov",
+    "LA": "voterportal.sos.la.gov",
 }
 
 
@@ -264,6 +266,53 @@ class ExpansionTests(unittest.TestCase):
         self.failed("ND", election, "another election")
         self.failed("ND", county)
         self.failed("ND", write_in, "unexpected")
+
+    # Louisiana -------------------------------------------------------------------------
+
+    def test_la_parishes_reconcile_are_named_and_official_is_read_from_the_dates(self):
+        report = self.parse("LA")
+        self.assertEqual(report["contest_total_reconciliation"], "passed")
+        self.assertIs(report["official_results"], False)
+        parishes = {r["county"] for r in self.read(report, "county_results.csv")}
+        self.assertEqual(len(parishes), 64)
+        self.assertIn("St. John The Baptist", parishes)
+
+        def certified(data):
+            def change(value):
+                for date in value["Dates"]["Date"]:
+                    if date["PKElectionID"] == "344":
+                        date["ResultsOfficial"] = "1"
+
+            edit_json(data, "dates.json", change)
+
+        self.assertIs(self.parse("LA", certified)["official_results"], True)
+
+    def test_la_mismatched_parish_unknown_parish_and_lost_election_are_refused(self):
+        def parish(data):
+            def change(value):
+                choice = value["Parishes"]["Parish"][0]["Choice"][0]
+                choice["VoteTotal"] = str(int(choice["VoteTotal"]) + 1)
+
+            edit_json(data, "parish-la-sen.json", change)
+
+        def unknown(data):
+            edit_json(
+                data,
+                "parish-la-01.json",
+                lambda v: v["Parishes"]["Parish"][0].update(ParishValue="65"),
+            )
+
+        def election(data):
+            def change(value):
+                value["Dates"]["Date"] = [
+                    d for d in value["Dates"]["Date"] if d["PKElectionID"] != "344"
+                ]
+
+            edit_json(data, "dates.json", change)
+
+        self.failed("LA", parish)
+        self.failed("LA", unknown, "unknown or duplicate")
+        self.failed("LA", election, "lacks the November 3, 2026 election")
 
 
 if __name__ == "__main__":

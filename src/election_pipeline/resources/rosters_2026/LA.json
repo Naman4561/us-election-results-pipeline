@@ -1,0 +1,232 @@
+{
+ "state": "LA",
+ "provenance": "Louisiana choice IDs and parishes from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 04:29 UTC). Pending operator review before release.",
+ "races": {
+  "LA-01": {
+   "candidates": [
+    "124838",
+    "128364",
+    "124814",
+    "128488"
+   ],
+   "counties": [
+    "Jefferson",
+    "Lafourche",
+    "Orleans",
+    "Plaquemines",
+    "St. Bernard",
+    "St. Tammany",
+    "Tangipahoa",
+    "Terrebonne"
+   ]
+  },
+  "LA-02": {
+   "candidates": [
+    "128128",
+    "126704",
+    "124710",
+    "128470",
+    "128392"
+   ],
+   "counties": [
+    "Ascension",
+    "East Baton Rouge",
+    "Iberville",
+    "Jefferson",
+    "Orleans",
+    "St. Bernard",
+    "St. Charles",
+    "St. James",
+    "St. John The Baptist",
+    "West Baton Rouge"
+   ]
+  },
+  "LA-03": {
+   "candidates": [
+    "128096",
+    "128098",
+    "127456",
+    "126289",
+    "128322",
+    "127825"
+   ],
+   "counties": [
+    "Acadia",
+    "Calcasieu",
+    "Cameron",
+    "Iberia",
+    "Jefferson Davis",
+    "Lafayette",
+    "St. Landry",
+    "St. Martin",
+    "St. Mary",
+    "Terrebonne",
+    "Vermilion"
+   ]
+  },
+  "LA-04": {
+   "candidates": [
+    "124916",
+    "128295",
+    "128648",
+    "125565",
+    "126511"
+   ],
+   "counties": [
+    "Allen",
+    "Beauregard",
+    "Bienville",
+    "Bossier",
+    "Caddo",
+    "Calcasieu",
+    "Claiborne",
+    "De Soto",
+    "Evangeline",
+    "Natchitoches",
+    "Red River",
+    "Sabine",
+    "Union",
+    "Vernon",
+    "Webster"
+   ]
+  },
+  "LA-05": {
+   "candidates": [
+    "125294",
+    "127858",
+    "127807",
+    "124686",
+    "125503",
+    "126355",
+    "125791",
+    "128703",
+    "128161"
+   ],
+   "counties": [
+    "Avoyelles",
+    "Caldwell",
+    "Catahoula",
+    "Concordia",
+    "East Carroll",
+    "East Feliciana",
+    "Franklin",
+    "Grant",
+    "Jackson",
+    "Lasalle",
+    "Lincoln",
+    "Madison",
+    "Morehouse",
+    "Ouachita",
+    "Rapides",
+    "Richland",
+    "St. Helena",
+    "St. Landry",
+    "Tangipahoa",
+    "Tensas",
+    "Washington",
+    "West Carroll",
+    "West Feliciana",
+    "Winn"
+   ]
+  },
+  "LA-06": {
+   "candidates": [
+    "124670",
+    "128694",
+    "128130",
+    "125575",
+    "124767",
+    "127150",
+    "127227",
+    "126243",
+    "128372",
+    "128407"
+   ],
+   "counties": [
+    "Ascension",
+    "Assumption",
+    "East Baton Rouge",
+    "Iberville",
+    "Lafourche",
+    "Livingston",
+    "Pointe Coupee",
+    "St. Charles",
+    "St. John The Baptist",
+    "St. Martin",
+    "West Baton Rouge"
+   ]
+  },
+  "LA-SEN": {
+   "candidates": [
+    "124654",
+    "124655"
+   ],
+   "counties": [
+    "Acadia",
+    "Allen",
+    "Ascension",
+    "Assumption",
+    "Avoyelles",
+    "Beauregard",
+    "Bienville",
+    "Bossier",
+    "Caddo",
+    "Calcasieu",
+    "Caldwell",
+    "Cameron",
+    "Catahoula",
+    "Claiborne",
+    "Concordia",
+    "De Soto",
+    "East Baton Rouge",
+    "East Carroll",
+    "East Feliciana",
+    "Evangeline",
+    "Franklin",
+    "Grant",
+    "Iberia",
+    "Iberville",
+    "Jackson",
+    "Jefferson",
+    "Jefferson Davis",
+    "Lafayette",
+    "Lafourche",
+    "Lasalle",
+    "Lincoln",
+    "Livingston",
+    "Madison",
+    "Morehouse",
+    "Natchitoches",
+    "Orleans",
+    "Ouachita",
+    "Plaquemines",
+    "Pointe Coupee",
+    "Rapides",
+    "Red River",
+    "Richland",
+    "Sabine",
+    "St. Bernard",
+    "St. Charles",
+    "St. Helena",
+    "St. James",
+    "St. John The Baptist",
+    "St. Landry",
+    "St. Martin",
+    "St. Mary",
+    "St. Tammany",
+    "Tangipahoa",
+    "Tensas",
+    "Terrebonne",
+    "Union",
+    "Vermilion",
+    "Vernon",
+    "Washington",
+    "Webster",
+    "West Baton Rouge",
+    "West Carroll",
+    "West Feliciana",
+    "Winn"
+   ]
+  }
+ }
+}

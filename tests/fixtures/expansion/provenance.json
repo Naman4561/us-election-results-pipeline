@@ -69,6 +69,93 @@
    }
   ]
  },
+ "LA": {
+  "archive_sha256": "87be6c5cd3a6d979f8f50bccc2a08d18ba9e3a4c7cc7a91c65bae08a706e8af2",
+  "captured_at": "2026-11-10T04:29:37+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 91491,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=ElectionDates.htm",
+    "name": "dates.json",
+    "sha256": "3ca905856cca28b22d7363a09d6fa892d4ff52f0888744627590034045d9faec",
+    "url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=ElectionDates.htm"
+   },
+   {
+    "bytes": 3354,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70195.htm",
+    "name": "parish-la-01.json",
+    "sha256": "fe723378ce84609a4b99d65ee8cfc8045af36be75073af5ab0cc113778daedf3",
+    "url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70195.htm"
+   },
+   {
+    "bytes": 4703,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70196.htm",
+    "name": "parish-la-02.json",
+    "sha256": "57ec114024a39867c4d004518496b2a1d8d0168193f51e2bf3f5dffc01eafb8a",
+    "url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70196.htm"
+   },
+   {
+    "bytes": 5797,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70197.htm",
+    "name": "parish-la-03.json",
+    "sha256": "af718dc49dd83a176bb20121aa88e1b727c0fc12ddc86a17dce348ec3a27894d",
+    "url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70197.htm"
+   },
+   {
+    "bytes": 7031,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70198.htm",
+    "name": "parish-la-04.json",
+    "sha256": "1755397f80fe1c233d28c7c4664c150fe2b6b93cc8e3bea41f1d3017383f6fed",
+    "url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70198.htm"
+   },
+   {
+    "bytes": 16377,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70199.htm",
+    "name": "parish-la-05.json",
+    "sha256": "3bbb56d540d47af648a5f3f967582fd4f18681f90b8df8889c25db0eeacb213a",
+    "url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70199.htm"
+   },
+   {
+    "bytes": 8172,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70200.htm",
+    "name": "parish-la-06.json",
+    "sha256": "84020f17cbe48e7d756231579da099c6232409c0821a7aaede4de2327ce0da7c",
+    "url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70200.htm"
+   },
+   {
+    "bytes": 19241,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_67997.htm",
+    "name": "parish-la-sen.json",
+    "sha256": "2e21b570c520e07cd60570fac10315d79672b00e92ffc0800287461a551ecfc9",
+    "url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_67997.htm"
+   },
+   {
+    "bytes": 51488,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/RacesCandidates_Multiparish.htm",
+    "name": "races.json",
+    "sha256": "5020d35e8dd98be84239264f6abbdf0da1ad60622c36a027c4e34b4e16da3666",
+    "url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/RacesCandidates_Multiparish.htm"
+   },
+   {
+    "bytes": 32769,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/Votes_Multiparish.htm",
+    "name": "votes.json",
+    "sha256": "514be1c0e39c7df7628f3997fa20d9598b3767b0d497a741724c80da28250305",
+    "url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/Votes_Multiparish.htm"
+   }
+  ]
+ },
  "ND": {
   "archive_sha256": "d6f1d9f974806b68041afcf9ea4a04224117656fc1f8741add5979d6e9212ac3",
   "captured_at": "2026-11-10T04:24:56+00:00",

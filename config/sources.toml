@@ -281,6 +281,26 @@ min_interval_seconds = 840
 "info.json" = "https://api.resultsnd.sos.nd.gov/Election/GetElectionInfo?cId=north-dakota&electionID=348"
 "contests.json" = "https://api.resultsnd.sos.nd.gov/Contest/GetContestSearchList?cId=north-dakota&electionID=348"
 
+[sources.la_2026_general]
+state = "LA"
+election_date = "2026-11-03"
+url = "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/Votes_Multiparish.htm"
+format = "bundle"
+primary_filename = "votes.json"
+expected_members = ["votes.json", "dates.json", "races.json", "parish-la-sen.json", "parish-la-01.json", "parish-la-02.json", "parish-la-03.json", "parish-la-04.json", "parish-la-05.json", "parish-la-06.json"]
+min_interval_seconds = 840
+
+[sources.la_2026_general.files]
+"dates.json" = "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=ElectionDates.htm"
+"races.json" = "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/RacesCandidates_Multiparish.htm"
+"parish-la-sen.json" = "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_67997.htm"
+"parish-la-01.json" = "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70195.htm"
+"parish-la-02.json" = "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70196.htm"
+"parish-la-03.json" = "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70197.htm"
+"parish-la-04.json" = "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70198.htm"
+"parish-la-05.json" = "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70199.htm"
+"parish-la-06.json" = "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70200.htm"
+
 [sources.ut_2026_general]
 state = "UT"
 election_date = "2026-11-03"

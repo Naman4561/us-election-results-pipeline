@@ -267,6 +267,20 @@ STATES = {
         senate=False,
         source_page="https://resultsnd.sos.nd.gov/",
     ),
+    # Louisiana elects no governor in 2026; counties are parishes.
+    "LA": State(
+        "LA",
+        "Louisiana",
+        "la_2026_general",
+        tuple(range(1, 7)),
+        ("total_votes",),
+        source_page="https://voterportal.sos.la.gov/graphical",
+        method_note=(
+            "Louisiana's U.S. House races are open to every candidate; one without a "
+            "majority goes to a December runoff between the top two. These are the "
+            "November 3 results."
+        ),
+    ),
     # Utah elects no senator or governor in 2026.
     "UT": State(
         "UT",
