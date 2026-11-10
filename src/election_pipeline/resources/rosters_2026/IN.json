@@ -1,13 +1,13 @@
 {
  "state": "IN",
- "provenance": "Indiana candidate IDs and counties from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 04:18 UTC). Confirmed by the operator before release on November 10, 2026.",
+ "provenance": "Indiana candidate names (Indiana renumbers its candidate IDs between publications) and counties from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 04:18 UTC). The same candidates by ID were confirmed by the operator before release on November 10, 2026; names need confirming.",
  "races": {
   "IN-01": {
    "candidates": [
-    "4042",
-    "4615",
-    "2620",
-    "7901"
+    "Frank J. Mrvan",
+    "Barb Regnitz",
+    "Alexander R (Alex) Degman (W/I)",
+    "Prescription Dope Deaths Johnson, Jr (W/I)"
    ],
    "counties": [
     "LaPorte",
@@ -17,9 +17,9 @@
   },
   "IN-02": {
    "candidates": [
-    "1567",
-    "3689",
-    "7013"
+    "Rudy Yakym",
+    "Jamee Decio",
+    "William Eric Henry"
    ],
    "counties": [
     "Cass",
@@ -37,9 +37,9 @@
   },
   "IN-03": {
    "candidates": [
-    "5929",
-    "7059",
-    "6750"
+    "Marlin A. Stutzman",
+    "Kelly Thompson",
+    "Phillip D. Beachy (Phil) (W/I)"
    ],
    "counties": [
     "Adams",
@@ -59,9 +59,9 @@
   },
   "IN-04": {
    "candidates": [
-    "1060",
-    "4648",
-    "7769"
+    "Jim Baird",
+    "Drew Cox",
+    "David E. Bokash (W/I)"
    ],
    "counties": [
     "Benton",
@@ -84,8 +84,8 @@
   },
   "IN-05": {
    "candidates": [
-    "4147",
-    "7488"
+    "Victoria Spartz",
+    "J.D. Ford"
    ],
    "counties": [
     "Delaware",
@@ -98,8 +98,8 @@
   },
   "IN-06": {
    "candidates": [
-    "4199",
-    "4349"
+    "Jefferson Shreve",
+    "Cynthia (Cinde) Wirth"
    ],
    "counties": [
     "Bartholomew",
@@ -117,9 +117,9 @@
   },
   "IN-07": {
    "candidates": [
-    "3722",
-    "2627",
-    "3924"
+    "André Carson",
+    "Patrick McAuley",
+    "James M Sceniak"
    ],
    "counties": [
     "Marion"
@@ -127,8 +127,8 @@
   },
   "IN-08": {
    "candidates": [
-    "1761",
-    "5440"
+    "Mark Messmer",
+    "Mary Allen"
    ],
    "counties": [
     "Clay",
@@ -156,10 +156,10 @@
   },
   "IN-09": {
    "candidates": [
-    "3419",
-    "4360",
-    "3710",
-    "5281"
+    "Erin Houchin",
+    "Brad A. Meyer",
+    "Tonya L. Hudson",
+    "Floyd Michael Taylor (W/I)"
    ],
    "counties": [
     "Bartholomew",

@@ -10,6 +10,10 @@ The files are converted from XML: a list with one entry is written as that entry
 (District 7 lies in Marion County only), so a single object is read as a list of one.
 Indiana elects no senator or governor in 2026. Its site does not split counts by
 ballot type. Write-in candidates are listed as published.
+
+Candidates are identified by their published name, pinned by the roster: Indiana
+renumbers its candidate IDs from one publication to the next (Nov 10, 2026). Within a
+publication each name must keep one ID in every county.
 """
 
 import re
@@ -127,7 +131,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                     row(
                         contest,
                         office,
-                        identity,
+                        name,
                         name,
                         candidates[name][0],
                         count(candidate["TOTAL_VOTES"]),
@@ -137,8 +141,8 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             if names != set(candidates):
                 raise ValueError(f"{contest} {county}: county lacks a candidate")
         for name, (party, votes) in candidates.items():
-            rows.append(row(contest, office, identities[name], name, party, votes))
-        verify_scope("IN", contest, list(identities.values()), counties)
+            rows.append(row(contest, office, name, name, party, votes))
+        verify_scope("IN", contest, list(identities), counties)
     if seen != set(wanted):
         raise ValueError("Indiana results lack a district's counties")
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)

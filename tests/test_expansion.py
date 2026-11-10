@@ -216,6 +216,33 @@ class ExpansionTests(unittest.TestCase):
         self.failed("IN", county)
         self.failed("IN", missing)
 
+    def test_in_candidates_are_kept_by_name_when_indiana_renumbers_its_ids(self):
+        def candidates(value):
+            for region in value["Root"]["OfficeCategory"]["Regions"]["Region"]:
+                races = region["Races"]["Race"]
+                for race in races if isinstance(races, list) else [races]:
+                    yield from race["Candidates"]["Candidate"]
+
+        def renumbered(data):  # as Indiana's publication of Nov 10, 2026, 07:45 was
+            def change(value):
+                for candidate in candidates(value):
+                    candidate["CANDIDATEID"] = str(int(candidate["CANDIDATEID"]) + 10)
+
+            edit_json(data, "house.json", change)
+
+        before = self.read(self.parse("IN"), "results.csv")
+        after = self.read(self.parse("IN", renumbered), "results.csv")
+        self.assertEqual(before, after)
+        self.assertIn("Frank J. Mrvan", {r["source_candidate_id"] for r in after})
+
+        def split(data):  # one candidate, two IDs within one publication
+            def change(value):
+                next(candidates(value))["CANDIDATEID"] = "99999"
+
+            edit_json(data, "house.json", change)
+
+        self.failed("IN", split, "candidate differs from the summary")
+
     def test_in_collector_reads_only_the_named_publication_file(self):
         settings = members("IN")["settings.json"]
         code, letter = indiana_collector.publication(settings)
