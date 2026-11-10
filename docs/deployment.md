@@ -79,6 +79,10 @@ flags. `deploy disable --source` stops collecting a private source; a public one
 first leave through a dashboard switch. `deploy discard-dashboard --name` removes an
 unused candidate.
 
+Only the active and previous dashboards are kept running. `start-dashboard` removes
+older candidates before starting its own, so at most three run while one is checked,
+and `activate` removes every dashboard but the new active one and the one it replaced.
+
 `deploy pause --source` stops collecting a source while its last publication stays
 public, such as a site that is down for days; `deploy resume --source` starts it again.
 The worker records a paused source as `paused`, and the monitor shows a reminder in

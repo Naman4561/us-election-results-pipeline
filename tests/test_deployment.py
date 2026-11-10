@@ -569,6 +569,17 @@ class DeploymentTests(unittest.TestCase):
                     dashboard.stop_unused(protected, self.value)
         run.assert_not_called()
 
+    def test_prune_removes_every_candidate_but_the_active_and_previous(self):
+        previous, stale, other = ("election-dashboard-" + c * 32 for c in "fea")
+        self.value["previous_dashboard"] = {"name": previous}
+        listed = " ".join([self.value["dashboard"]["name"], previous, stale, other, "caddy"])
+        with (
+            patch.object(dashboard.containers, "command", return_value=listed),
+            patch.object(dashboard.subprocess, "run") as run,
+        ):
+            self.assertEqual(dashboard.prune(self.value), [other, stale])
+        self.assertEqual([c.args[0][-1] for c in run.call_args_list], [other, stale])
+
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_failed_origin_check_rolls_back_route_and_catalog_together(self):
         path, original = self.caddyfile()
@@ -625,11 +636,16 @@ class DeploymentTests(unittest.TestCase):
             patch.object(dashboard, "reload"),
             patch.object(dashboard, "check", return_value={"states": {}}),
             patch.object(control, "recovery_gate") as gate,
+            patch.object(dashboard, "prune", return_value=["stale"]) as prune,
         ):
             result = control.activate(self.path, self.candidate(), {}, self.config)
             gate.assert_not_called()
             self.assertEqual(result["outcome"], "activated")
+            self.assertEqual(result["discarded"], ["stale"])
             value = catalog.read(self.path)
+            kept = prune.call_args.args[0]
+            self.assertEqual(kept["dashboard"]["name"], self.candidate()["name"])
+            self.assertEqual(kept["previous_dashboard"]["name"], self.value["dashboard"]["name"])
             self.assertEqual(value["dashboard"]["name"], self.candidate()["name"])
             self.assertEqual(value["previous_dashboard"]["name"], self.value["dashboard"]["name"])
             self.assertFalse(value["sources"][GA]["enabled"])
@@ -650,10 +666,14 @@ class DeploymentTests(unittest.TestCase):
         with (
             patch.object(dashboard, "reload"),
             patch.object(dashboard, "check", return_value=served),
+            patch.object(dashboard, "prune", side_effect=RuntimeError("docker is down")),
         ):
             with self.assertRaisesRegex(ValueError, "restore"):
                 control.activate(self.path, self.candidate([GA]), {}, self.config)
-            control.activate(self.path, self.candidate([GA]), self.report(now), self.config)
+            result = control.activate(
+                self.path, self.candidate([GA]), self.report(now), self.config
+            )
+        self.assertIn("docker is down", result["discard_error"])
         self.assertEqual(catalog.public_states(catalog.read(self.path)), {"NC", "KY", "GA"})
 
     # Backups --------------------------------------------------------------------------

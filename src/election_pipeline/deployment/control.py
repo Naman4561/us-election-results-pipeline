@@ -13,6 +13,7 @@ import json
 import os
 import re
 import socket
+import subprocess
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -561,6 +562,8 @@ def start_dashboard(path, names, prod, config):
     for name in names:
         if value["sources"][name]["public"] or not value["sources"][name].get("publication_id"):
             raise ValueError(f"{name}: publish its first snapshot (prepare, promote) first")
+    # A new candidate supersedes older ones: at most the active, previous and this one run.
+    dashboard.prune(value)
     identity = uuid.uuid4().hex
     state = Path(config["CONTROL_STATE_DIR"])
     candidate = dashboard.start(
@@ -663,7 +666,13 @@ def activate(path, candidate, report, config):
         prospective["dashboard"] = candidate
         prospective["generation"] += 1
         switch_dashboard(path, value, prospective, candidate["name"], config)
-    return {"outcome": "activated", "sources": names, "dashboard": candidate["name"]}
+    result = {"outcome": "activated", "sources": names, "dashboard": candidate["name"]}
+    # The switch is done; a dashboard that fails to stop is reported, not undone.
+    try:
+        result["discarded"] = dashboard.prune(prospective)
+    except (OSError, RuntimeError, ValueError, subprocess.SubprocessError) as error:
+        result["discard_error"] = str(error)
+    return result
 
 
 def rollback_dashboard(path, config):

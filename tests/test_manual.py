@@ -316,6 +316,7 @@ class ManualDeploymentTests(unittest.TestCase):
         with (
             patch.object(control.dashboard, "check", return_value=payload),
             patch.object(control, "switch_dashboard") as switch,
+            patch.object(control.dashboard, "prune", return_value=[]),
         ):
             result = control.activate(self.path, candidate, report, self.config)
             after = switch.call_args.args[2]

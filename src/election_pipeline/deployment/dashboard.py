@@ -163,10 +163,29 @@ def recover(journal):
     atomic_json(Path(journal), {**record, "outcome": "rolled_back"})
 
 
-def stop_unused(name, value):
-    protected = {
+CANDIDATE = re.compile(r"election-dashboard-[0-9a-f]{32}")
+
+
+def protected(value):
+    """The active and previous dashboards' containers, which serve or can be restored."""
+    return {
         d.get("name") for d in (value.get("dashboard", {}), value.get("previous_dashboard", {}))
     }
-    if not re.fullmatch(r"election-dashboard-[0-9a-f]{32}", name) or name in protected:
+
+
+def stop_unused(name, value):
+    if not CANDIDATE.fullmatch(name) or name in protected(value):
         raise ValueError("Active and previous dashboard containers are protected")
     subprocess.run(["docker", "rm", "-f", name], capture_output=True, check=True, timeout=20)
+
+
+def prune(value):
+    """Remove every candidate dashboard container but the active and previous ones."""
+    listed = containers.command(
+        ["docker", "ps", "-a", "--filter", "name=election-dashboard-", "--format", "{{.Names}}"]
+    )
+    keep = protected(value)
+    removed = sorted(n for n in listed.split() if CANDIDATE.fullmatch(n) and n not in keep)
+    for name in removed:
+        stop_unused(name, value)
+    return removed
