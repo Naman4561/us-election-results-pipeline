@@ -79,7 +79,7 @@ class MultiStateTests(unittest.TestCase):
             {
                 *("NC", "KY", "MN", "NE", "TX", "GA", "SC", "KS", "OH", "AK", "MS", "SD", "NM"),
                 *("FL", "VA", "ID", "WA", "CO", "IA", "OR", "CA", "MD", "HI", "WV"),
-                *("UT", "IN", "AR", "ND", "LA", "RI", "DE"),
+                *("UT", "IN", "AR", "ND", "LA", "RI", "DE", "VT"),
             },
         )
         # A state is labeled awaiting certified results only while it has no public

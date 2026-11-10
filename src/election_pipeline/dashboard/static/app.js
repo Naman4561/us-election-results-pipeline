@@ -446,8 +446,10 @@ function renderStatePanel() {
   const partial = state.county_collection;
   if (!view.county && partial)
     $("result-scope").textContent = "COLLECTED COUNTY TOTALS";
+  // A town (Vermont) is named alone; a county is named as one.
+  const unit = state.local_unit === "town" ? "" : " County";
   $("result-subtitle").textContent =
-    (county || feed ? (county?.name || feed.name) + " County · " : "") +
+    (county || feed ? (county?.name || feed.name) + unit + " · " : "") +
     state.name;
   const target = $("result-content");
   target.replaceChildren();
@@ -810,7 +812,9 @@ function renderControls() {
         ? "Select a covered area…"
         : view.office === "house"
           ? "Select a district…"
-          : "Select a county…",
+          : data.states[view.scope]?.local_unit === "town"
+            ? "Select a town…"
+            : "Select a county…",
       "",
     ),
     ...options

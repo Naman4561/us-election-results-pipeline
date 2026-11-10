@@ -24,6 +24,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Arkansas | Unofficial, counting | — | Public since Nov 10 06:51. All 2,768 precincts in. |
 | California | Unofficial, counting | Nov 9 22:52 | |
 | Colorado | Unofficial, counting | Nov 8 01:17 | Counties count through about Nov 12. |
+| Delaware | Not public yet | — | Department of Elections feed added Nov 10; roster confirmed. |
 | Florida | Unofficial, paused | Nov 7 05:21 | Florida's file host serves an expired certificate. Totals match floridaelectionwatch.gov. Resume with `deploy resume --source fl_2026_general`. |
 | Georgia | Unofficial, counting | Nov 9 23:06 | |
 | Hawaii | Unofficial, pending certification | Nov 6 17:27 | Collected hourly. |
@@ -42,10 +43,12 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | North Dakota | Unofficial, counting | — | Public since Nov 10 06:51. All 358 precincts in. |
 | Ohio | Unofficial, counting | Nov 4 18:50 | Imported by hand; the Nov 4 snapshot is the latest, and the monitor reports a newer one as overdue. |
 | Oregon | Unofficial, counting | Nov 9 18:47 | |
+| Rhode Island | Not public yet | — | Enhanced Voting feed added Nov 10; roster confirmed. Statewide and district totals only (reported by town). |
 | South Carolina | Unofficial, pending certification | Nov 9 21:41 | State's last update Nov 6, 6:26 PM EST; the Nov 9 change is the move to its Clarity site. |
 | South Dakota | Unofficial, pending certification | Nov 6 20:56 | All precincts in. Collected every 3 hours, clear of backups. |
 | Texas | Unofficial, pending certification | Nov 4 22:21 | All 254 counties in; state's last update Nov 4, 22:48. Collected every 3 hours, clear of backups. |
 | Utah | Unofficial, counting | — | Public since Nov 10 06:51. Totals matched each state's site at activation, as did the other four. |
+| Vermont | Not public yet | — | Results feed added Nov 10; roster awaiting review. Map and results by town. |
 | Virginia | Not public yet | — | Current data passes every check; ready to add. |
 | Washington | Unofficial, counting | Nov 9 23:06 | Counts on weekdays. |
 | West Virginia | Unofficial, counting | Nov 9 22:46 | |

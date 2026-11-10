@@ -14,7 +14,9 @@ import zipfile
 from pathlib import Path
 
 from election_pipeline.collectors import indiana as indiana_collector
+from election_pipeline.collectors import vermont as vermont_collector
 from election_pipeline.dashboard.server import STATIC, make_payload
+from election_pipeline.parsers import vt
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
 from election_pipeline.states import state_adapter
@@ -31,6 +33,7 @@ SOURCES = {
     "LA": "la_2026_general",
     "RI": "ri_2026_general",
     "DE": "de_2026_general",
+    "VT": "vt_2026_general",
 }
 HOSTS = {
     "UT": "electionresults.utah.gov",
@@ -40,6 +43,7 @@ HOSTS = {
     "LA": "voterportal.sos.la.gov",
     "RI": "electionresults.ri.gov",
     "DE": "elections.delaware.gov",
+    "VT": "static.electionresults.vermont.gov",
 }
 
 
@@ -461,6 +465,81 @@ class ExpansionTests(unittest.TestCase):
         self.failed("DE", kent, "do not add up")
         self.failed("DE", methods, "vote methods do not add up")
         self.failed("DE", party, "not in the reviewed list")
+
+    # Vermont ---------------------------------------------------------------------------
+
+    def office(self, value, title):
+        return next(o for part in value["d"] for o in part["o"] if o["on"] == title)
+
+    def test_vt_towns_add_up_to_the_statewide_entry_and_match_the_town_map(self):
+        report = self.parse("VT")
+        self.assertIs(report["official_results"], False)
+        rows = self.read(report, "results.csv")
+        towns = {r["county"] for r in rows if r["county"]}
+        geography = json.loads((STATIC / "vt-map.json").read_text())
+        self.assertLessEqual(
+            {t.upper().replace(".", "").replace(" ", "") for t in towns},
+            {c["id"] for c in geography["counties"]},
+        )
+        self.assertIn("Barre City", towns)
+        self.assertIn("St. Albans Town", towns)
+        self.assertIn("Essex Junction", towns)
+        # Burlington is split among six House districts; its entries are added together.
+        burlington = sum(
+            r["total_votes"]
+            for r in rows
+            if r["county"] == "Burlington" and r["contest_id"] == "VT-AL"
+        )
+        federal = self.office(
+            json.loads(members("VT")["federal.json"]), "REPRESENTATIVE TO CONGRESS"
+        )
+        expected = sum(
+            c["vc"] for e in federal["cs"] if e["tn"] == "BURLINGTON" for c in e["rc"] + e["wc"]
+        )
+        self.assertEqual(burlington, expected)
+        self.assertIn("Write-in", {r["choice"] for r in rows})
+
+    def test_vt_mismatched_town_unknown_party_and_other_election_are_refused(self):
+        def town(data):
+            def change(value):
+                entry = next(
+                    e for e in self.office(value, "GOVERNOR")["cs"] if e["tn"] == "ADDISON"
+                )
+                entry["rc"][0]["vc"] += 1
+
+            edit_json(data, "statewide.json", change)
+
+        def party(data):
+            def change(value):
+                entry = self.office(value, "REPRESENTATIVE TO CONGRESS")["cs"][0]
+                entry["rc"][0]["pn"] = "WHIG"
+
+            edit_json(data, "federal.json", change)
+
+        def election(data):
+            edit_json(
+                data, "index.json", lambda v: v["electionDetails"].update(isGeneralElection=False)
+            )
+
+        self.failed("VT", town, "towns do not add up")
+        self.failed("VT", party, "unexpected or duplicate Vermont candidate")
+        self.failed("VT", election, "another election")
+
+    def test_vt_town_names_follow_the_map_and_the_collector_follows_the_index(self):
+        self.assertEqual(vt.town("SAINT ALBANS CITY"), "St. Albans City")
+        self.assertEqual(vt.town("ESSEX TOWN"), "Essex")
+        self.assertEqual(vt.town("BARRE TOWN"), "Barre Town")
+        source = self.sources["vt_2026_general"]
+        urls = vermont_collector.publication(members("VT")["index.json"], source.url)
+        self.assertEqual(set(urls), {"federal.json", "statewide.json"})
+        self.assertTrue(
+            all(
+                u.startswith("https://static.electionresults.vermont.gov/elections/68d61e96")
+                for u in urls.values()
+            )
+        )
+        with self.assertRaises(ValueError):
+            vermont_collector.publication(members("VT")["index.json"], "https://example.com/x.json")
 
 
 if __name__ == "__main__":

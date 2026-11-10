@@ -11,6 +11,7 @@ this page explains them.
 | Arkansas | Tally (Secretary of State) | Senate, Governor, House 1–4 (6) | All 75 counties | Total only |
 | California | Secretary of State results API | Governor, House 1–52 (53) | No | Total only |
 | Colorado | Clarity | Senate, Governor, House 1–8 (10) | All 64 counties | Total only |
+| Delaware | Department of Elections results JSON | Senate, House at-large (2) | All 3 counties | Total only (methods checked) |
 | Florida | Division of Elections results file | Senate, Governor, 27 House (29) | All 67 counties | Total only |
 | Georgia | Secretary of State results API | Senate, Governor, House 1–14 (16) | No | Total only |
 | Hawaii | Office of Elections `summary.txt` | Governor, House 1–2 (3) | No | Mail, in person |
@@ -29,10 +30,12 @@ this page explains them.
 | North Dakota | Tally (Secretary of State) | House at-large (1) | All 53 counties | Total only |
 | Ohio | Saved by hand from the results XML | Senate, Governor, House 1–15 (17) | All 88 counties | Total only |
 | Oregon | ENR export | Senate, Governor, House 1–6 (8) | All 36 counties | Total only |
+| Rhode Island | Enhanced Voting | Senate, Governor, House 1–2 (4) | No (reported by town) | Election Day, early, mail |
 | South Carolina | Clarity (Election Commission) | Senate, Governor, House 1–7 (9) | All 46 counties | Total only |
 | South Dakota | ENR export | Senate, Governor, House at-large (3) | All 66 counties | Total only |
 | Texas | Secretary of State Civix API | Senate, Governor, House 1–38 (40) | No | Total only |
 | Utah | Enhanced Voting | House 1–4 (4) | All counties of each district | Total only |
+| Vermont | Secretary of State results JSON | Governor, House at-large (2) | All 247 voting towns (town map) | Total only |
 | Virginia | Enhanced Voting | Senate, House 1–11 (12) | All 133 localities | Early, Election Day, mail, provisional, post-election |
 | Washington | Enhanced Voting | House 1–10 (10) | All 39 counties | Total only |
 | West Virginia | Clarity | Senate, House 1–2 (3) | All 55 counties | Total only |
@@ -102,14 +105,21 @@ without a majority goes to a December runoff; the dashboard shows the November 3
 Indiana's settings, Louisiana's election list and Tally's documents each carry the
 state's own official flag, which the parser records.
 
+Rhode Island reports by city and town plus a "Federal" locality for federal-only
+ballots, which belongs to no county; its towns must add up to the statewide totals,
+which are kept with no county map. Vermont reports by town, so its map draws towns
+(Census county subdivisions) and its towns are stored where other states store
+counties; each office's "STATE WIDE" entry must equal the sum of its towns. Delaware's
+New Castle County is Wilmington plus the rest of the county; both parts are checked.
+
 ## Awaiting certified results
 
 These states hold elections this year but have no election-night source collected
 here; the map labels them "Awaiting certified results", and each is added from its
 certified canvass (`deploy certify --certified-file`): Alabama, Arizona, Connecticut,
 Illinois, Kentucky, Maine, Massachusetts, Michigan, Missouri, Montana, Nevada, New
-Hampshire, New Jersey, New York, Oklahoma, Pennsylvania, Tennessee, Vermont, Virginia,
-Wisconsin and Wyoming (`awaiting_certified` in
+Hampshire, New Jersey, New York, Oklahoma, Pennsylvania, Tennessee, Virginia, Wisconsin
+and Wyoming (`awaiting_certified` in
 `resources/elections_2026.json`). Arizona, Michigan, Missouri, New Jersey, New York,
 Nevada, Oklahoma, Pennsylvania and Tennessee refuse automated clients on their results
 sites.

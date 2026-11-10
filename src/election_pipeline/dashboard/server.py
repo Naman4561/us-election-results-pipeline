@@ -168,6 +168,7 @@ def make_payload(
         "state": state,
         "methods": methods,
         "method_note": adapter.method_note,
+        "local_unit": adapter.local_unit,
         "county_detail": adapter.county_results,
         "vote_basis": adapter.vote_basis,
         "source_page": adapter.source_page,
@@ -521,6 +522,7 @@ def national_payload(providers, demo=False, detail=False):
                 "source_page": adapter.source_page,
                 "methods": adapter.methods,
                 "method_note": adapter.method_note,
+                "local_unit": adapter.local_unit,
                 "publication": None,
                 "races": {},
             }

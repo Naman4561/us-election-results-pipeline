@@ -313,6 +313,16 @@ min_interval_seconds = 840
 [sources.de_2026_general.files]
 "counties.json" = "https://elections.delaware.gov/results/enr/Election_ByCountyWithWilmington_ID_GE2026.json"
 
+[sources.vt_2026_general]
+state = "VT"
+election_date = "2026-11-03"
+url = "https://static.electionresults.vermont.gov/elections/68d61e96-1d28-4210-8c1d-8e90512ae105.json"
+format = "bundle"
+primary_filename = "index.json"
+min_interval_seconds = 840
+expected_members = ["index.json", "federal.json", "statewide.json"]
+supplemental_members = ["federal.json", "statewide.json"]
+
 [sources.ri_2026_general]
 state = "RI"
 election_date = "2026-11-03"

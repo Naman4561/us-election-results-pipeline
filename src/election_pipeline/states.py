@@ -26,6 +26,9 @@ class State:
     parser_module: str = ""
     # Shown under a race when the state's vote-method breakdown needs explaining.
     method_note: str = ""
+    # What the state's local results units are: "county", or "town" where a state
+    # reports by town and its map draws towns (Vermont).
+    local_unit: str = "county"
 
     @property
     def slug(self):
@@ -289,6 +292,19 @@ STATES = {
         (0,),
         ("total_votes",),
         source_page="https://elections.delaware.gov/results/enr/GE2026.html",
+    ),
+    # Vermont elects no senator in 2026; its map and results are by town.
+    "VT": State(
+        "VT",
+        "Vermont",
+        "vt_2026_general",
+        (0,),
+        ("total_votes",),
+        senate=False,
+        governor=True,
+        source_page="https://electionresults.vermont.gov/",
+        collection_backend="vermont",
+        local_unit="town",
     ),
     # Rhode Island reports by city and town, not county.
     "RI": State(

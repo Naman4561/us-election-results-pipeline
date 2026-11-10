@@ -7,6 +7,7 @@ import re
 import unicodedata
 import urllib.parse
 import urllib.request
+from collections import Counter
 from pathlib import Path
 
 from election_pipeline.states import STATES as REGISTERED
@@ -15,6 +16,9 @@ ROOT = Path(__file__).resolve().parents[1]
 STATIC = ROOT / "src/election_pipeline/dashboard/static"
 BASE = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/"
 FULL_NAME_STATES = {"VA", "MD"}
+# States whose results are reported by town: their map's local units are Census county
+# subdivisions (Vermont's towns and cities), not counties.
+TOWN_STATES = {"VT"}
 STATES = set(
     (
         "AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT "
@@ -197,7 +201,7 @@ def main():
         feature = next(f for f in states if codes[f["attributes"]["STATE"]] == code)
         fips = feature["attributes"]["STATE"]
         counties, county_source = query(
-            "State_County",
+            "Places_CouSub_ConCity_SubMCD" if code in TOWN_STATES else "State_County",
             1,
             f"STATE = '{fips}'",
             "STATE,GEOID,BASENAME,NAME",
@@ -210,6 +214,14 @@ def main():
         # Virginia's independent cities and Baltimore City share base names with counties
         # (Fairfax County / Fairfax city), so those states key counties by full name.
         label = "NAME" if code in FULL_NAME_STATES else "BASENAME"
+        if code in TOWN_STATES:
+            # A city and a town may share a base name (Barre city, Barre town): those
+            # keep their full Census name; every other town keeps its base name.
+            shared = Counter(county_key(f["attributes"]["BASENAME"]) for f in counties)
+            for f in counties:
+                a = f["attributes"]
+                a["LABEL"] = a["NAME"] if shared[county_key(a["BASENAME"])] > 1 else a["BASENAME"]
+            label = "LABEL"
         local_districts = [f for f in districts if f["attributes"]["STATE"] == fips]
         save(
             code.lower() + "-map.json",

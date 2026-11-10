@@ -319,5 +319,44 @@
     "url": "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/data"
    }
   ]
+ },
+ "VT": {
+  "archive_sha256": "f5a81aadae367631d34a6f9897abf09056c07cecc616c307067f28e7f0e23f14",
+  "captured_at": "2026-11-10T17:05:18+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 119973,
+    "content_type": "application/octet-stream",
+    "final_url": "https://static.electionresults.vermont.gov/elections/68d61e96-1d28-4210-8c1d-8e90512ae105.json",
+    "name": "index.json",
+    "sha256": "ca91d344d2cab834f7fb97e09f8f45d80386382a71ff1c8624d73b00ea4c20f5",
+    "url": "https://static.electionresults.vermont.gov/elections/68d61e96-1d28-4210-8c1d-8e90512ae105.json"
+   },
+   {
+    "bytes": 324823,
+    "content_type": "application/octet-stream",
+    "final_url": "https://static.electionresults.vermont.gov/elections/68d61e96-1d28-4210-8c1d-8e90512ae105-f-20261110120312.json",
+    "name": "federal.json",
+    "sha256": "ef883d984c7595f193ed32090fd33468f6e484b755b7c454c7c9f6e4adeb2e75",
+    "url": "https://static.electionresults.vermont.gov/elections/68d61e96-1d28-4210-8c1d-8e90512ae105-f-20261110120312.json"
+   },
+   {
+    "bytes": 1329283,
+    "content_type": "application/octet-stream",
+    "final_url": "https://static.electionresults.vermont.gov/elections/68d61e96-1d28-4210-8c1d-8e90512ae105-s-20261110120312.json",
+    "name": "statewide.json",
+    "sha256": "bb5c5ba6fe6b9e9e43fc21d6528ff929183ca63079fd2c2d867019857d42656a",
+    "url": "https://static.electionresults.vermont.gov/elections/68d61e96-1d28-4210-8c1d-8e90512ae105-s-20261110120312.json"
+   },
+   {
+    "bytes": 119973,
+    "content_type": "application/octet-stream",
+    "final_url": "https://static.electionresults.vermont.gov/elections/68d61e96-1d28-4210-8c1d-8e90512ae105.json",
+    "name": ".recheck.json",
+    "sha256": "ca91d344d2cab834f7fb97e09f8f45d80386382a71ff1c8624d73b00ea4c20f5",
+    "url": "https://static.electionresults.vermont.gov/elections/68d61e96-1d28-4210-8c1d-8e90512ae105.json"
+   }
+  ]
  }
 }
