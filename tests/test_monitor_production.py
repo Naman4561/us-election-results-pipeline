@@ -93,13 +93,15 @@ class MonitorTests(unittest.TestCase):
     def publish(self, name, public=True):
         self.catalog["sources"][name].update(enabled=True, public=public)
 
-    def assess(self, dashboard=None, timer_stopped=False, free=50, image=(IMAGE, REVISION)):
+    def assess(
+        self, dashboard=None, timer_stopped=False, free=50, image=(IMAGE, REVISION), failed=()
+    ):
         from election_pipeline.deployment import catalog
 
         def unit_state(action, unit):
             if action == "is-active":
                 return not (timer_stopped and unit == "election-backup.timer")
-            return False
+            return unit in failed
 
         with patch.object(catalog, "configured", return_value=self.sources):
             catalog.write(self.config["CATALOG_FILE"], self.catalog)
@@ -221,6 +223,38 @@ class MonitorTests(unittest.TestCase):
             {**failing, "last_failure": "HTTP 403", "blocked_since": self.recent},
         )
         self.assertIn("refused by the site", self.assess()["poll/" + NC])
+
+    def test_a_failed_run_says_where_and_why_and_a_failed_service_points_at_it(self):
+        atomic_json(
+            self.root / "data/runs" / NC / "latest.json",
+            {
+                "outcome": "failed",
+                "finished_at": self.recent,
+                "error": "Parsing failed: County and official contest\n candidate totals disagree",
+                "stages": [
+                    {"stage": "collect", "outcome": "not_due"},
+                    {"stage": "parse", "outcome": "validation_failed"},
+                ],
+            },
+        )
+        atomic_json(
+            self.root / "backups/latest-backup.json",
+            {"outcome": "failed", "finished_at": self.recent, "error": "S3 transfer failed"},
+        )
+        issues = self.assess(failed=("election-worker.service", "election-backup.service"))
+        self.assertEqual(
+            issues["pipeline/" + NC],
+            "Latest run failed at parse (validation_failed): "
+            "Parsing failed: County and official contest candidate totals disagree",
+        )
+        self.assertEqual(issues["backup"], "Latest run failed: S3 transfer failed")
+        self.assertEqual(
+            issues["service/election-worker.service"],
+            "Service is in a failed state; see pipeline/" + NC,
+        )
+        self.assertEqual(
+            issues["service/election-backup.service"], "Service is in a failed state; see backup"
+        )
 
     def test_slow_source_poll_interval_does_not_relax_run_monitoring(self):
         self.sources[NC] = replace(self.sources[NC], min_interval_seconds=86400)

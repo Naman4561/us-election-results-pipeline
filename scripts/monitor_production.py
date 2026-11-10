@@ -49,6 +49,19 @@ def age_seconds(value, now):
     return (now - timestamp).total_seconds()
 
 
+def failure(report):
+    """What a run report says went wrong: its outcome, failing stage and error."""
+    stages = [s for s in report.get("stages") or [] if isinstance(s, dict)]
+    stage = next((s for s in reversed(stages) if s.get("error")), stages[-1] if stages else None)
+    error = report.get("error") or (stage or {}).get("error")
+    text = f"Latest run {report.get('outcome') or 'ended without an outcome'}"
+    if stage:
+        text += f" at {stage.get('stage')} ({stage.get('outcome')})"
+    if error:
+        text += ": " + " ".join(str(error).split())[:300]
+    return text
+
+
 def report_problem(path, allowed, max_age, now, allow_running=False):
     try:
         report = read_json(path)
@@ -57,7 +70,7 @@ def report_problem(path, allowed, max_age, now, allow_running=False):
         if age_seconds(stamp, now) > max_age:
             return "Run is overdue or has been running too long"
         if not running and report.get("outcome") not in allowed:
-            return "Latest run did not complete successfully"
+            return failure(report)
     except (OSError, ValueError, TypeError, KeyError):
         return "Run report is missing or invalid"
     return None
@@ -180,11 +193,18 @@ def assess(prod, config, now):
         if retention and retention.get("outcome") != "applied":
             issues["backup/s3-retention"] = "Older S3 backups were not marked for expiry"
 
+    # A failed service points at the reports that say why.
+    causes = {
+        "election-worker": sorted(k for k in issues if k.startswith("pipeline/")),
+        "election-backup": [k for k in ("backup",) if k in issues],
+    }
     for unit in ("election-worker", "election-backup"):
         if not systemd("is-active", unit + ".timer"):
             issues[f"timer/{unit}.timer"] = "Timer is not active"
         if systemd("is-failed", unit + ".service"):
-            issues[f"service/{unit}.service"] = "Service is in a failed state"
+            issues[f"service/{unit}.service"] = "Service is in a failed state" + (
+                "; see " + ", ".join(causes[unit]) if causes[unit] else ""
+            )
 
     try:
         payload = dashboard_payload(config.get("DASHBOARD_URL", "http://127.0.0.1/api/national"))
@@ -396,7 +416,13 @@ def main():
             result = {"outcome": "test_sent"}
         else:
             now = datetime.now(timezone.utc)
-            issues, reminders = split(assess(prod, config, now))
+            found = assess(prod, config, now)
+            # Issues quote run errors; no secret leaves in an alert.
+            for key, text in found.items():
+                for secret in secrets:
+                    text = text.replace(secret, "[redacted]")
+                found[key] = text
+            issues, reminders = split(found)
             result = {
                 "outcome": "unhealthy" if issues else "healthy",
                 "issues": issues,
