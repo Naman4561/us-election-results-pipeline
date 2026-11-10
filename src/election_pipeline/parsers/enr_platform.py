@@ -43,7 +43,12 @@ def page_text(page):
 
 
 def statewide_update(page, state, election):
-    """Check a results page's election identity and return its 'last updated' text."""
+    """Check a results page's election identity and return its 'last updated' text.
+
+    None when the page shows no time: South Dakota emptied its "last updated" box on
+    Nov 10, 2026. The page still has to name the state and the election, and two
+    different times are refused.
+    """
     body = page_text(page)
     if f"{state} Secretary of State" not in body or election not in body:
         raise ValueError(f"{state} results page belongs to another election")
@@ -51,9 +56,9 @@ def statewide_update(page, state, election):
         r"Results last updated: ([0-9]{1,2}/[0-9]{1,2}/2026 [0-9]{1,2}:[0-9]{2} [AP]M [A-Z]{2})",
         body,
     )
-    if len(set(found)) != 1:
-        raise ValueError(f"{state} results page lacks one update time")
-    return found[0]
+    if len(set(found)) > 1:
+        raise ValueError(f"{state} results page shows more than one update time")
+    return found[0] if found else None
 
 
 def export_target(page, *, link_text=None, button_value=None, race_id=None):

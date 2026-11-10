@@ -244,6 +244,30 @@ class NewStateTests(unittest.TestCase):
             "SD", lambda m: m.update({"results.csv": m["results.csv"].replace(b"2026", b"2024")})
         )
 
+    def test_sd_page_without_an_update_time_parses_but_two_times_are_refused(self):
+        shown = (
+            b'<div class="last-updated"><span>Results last updated:</span>'
+            b"<span>11/5/2026 6:45 PM CT</span></div>"
+        )
+        # As South Dakota's page has been since Nov 10, 2026: the box is empty.
+        report = self.parse(
+            "SD",
+            lambda m: m.update(
+                {
+                    "export.html": m["export.html"].replace(
+                        shown, b'<div class="last-updated"></div>'
+                    )
+                }
+            ),
+        )
+        self.assertEqual(report["outcome"], "parsed", report)
+        self.assertIsNone(report["source_update_text"])
+        second = shown.replace(b"6:45 PM", b"7:45 PM")
+        self.failed(
+            "SD",
+            lambda m: m.update({"export.html": m["export.html"].replace(shown, shown + second)}),
+        )
+
     def test_sd_consistent_downward_correction_is_valid(self):
         sheet = self.sd_senate()
         raw = members("SD")["statewide.xlsx"]
