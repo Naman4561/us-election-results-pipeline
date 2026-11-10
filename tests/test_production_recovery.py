@@ -3,6 +3,7 @@
 import importlib.util
 import io
 import json
+import shutil
 import sys
 import tempfile
 import unittest
@@ -306,6 +307,104 @@ class ProductionRecoveryTests(unittest.TestCase):
             (destination / "database.dump").read_bytes(),
             b"synthetic database archive\x00\xff",
         )
+
+
+class PackTests(unittest.TestCase):
+    """Write-once files are uploaded once, in packs, and restored from them."""
+
+    CONFIG = {"BACKUP_BUCKET": "private-bucket", "BACKUP_PREFIX": "election-pipeline"}
+
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.data, self.packs = self.root / "data", self.root / "packs"
+        manifest = None
+        # One backup with a raw archive, then three that each add one run report.
+        for number, files in enumerate(
+            (["raw/XX/a.zip", "runs/one.json"], ["runs/two.json"], ["runs/three.json"]), 1
+        ):
+            for name in files:
+                (self.data / name).parent.mkdir(parents=True, exist_ok=True)
+                (self.data / name).write_text(name)
+            listed = {
+                d: [p.relative_to(self.data / d) for p in (self.data / d).rglob("*.*")]
+                for d in ("raw", "runs")
+            }
+            data, packs = recovery.pack_files(
+                self.data, listed, self.packs, f"backup_{number}", manifest
+            )
+            manifest = {"schema_version": 2, "data": data, "packs": packs}
+        for number, name in enumerate(sorted(manifest["packs"])):
+            manifest["packs"][name]["created_at"] = f"2026-11-1{number}T00:00:00Z"
+        self.manifest = manifest
+
+    def download(self, config, source, destination):
+        self.assertTrue(source.startswith("s3://private-bucket/election-pipeline/objects/packs/"))
+        shutil.copy(self.packs / source.rsplit("/", 1)[1], destination)
+
+    def fetch(self, remote=None, **options):
+        work = self.root / ("work-" + str(len(list(self.root.glob("work-*")))))
+        work.mkdir()
+        sizes = {n: (self.packs / n).stat().st_size for n in self.manifest["packs"]}
+        with (
+            patch.object(job, "remote_packs", return_value=sizes if remote is None else remote),
+            patch.object(job, "aws_copy", side_effect=self.download) as copy,
+        ):
+            return job.fetch_packs(self.CONFIG, self.manifest, work, **options), work, copy
+
+    def test_each_backup_packs_only_its_new_files(self):
+        self.assertEqual(
+            sorted(self.manifest["packs"]),
+            ["backup_1-files.zip", "backup_1-raw.zip", "backup_2-files.zip", "backup_3-files.zip"],
+        )
+        self.assertEqual(self.manifest["data"]["runs/one.json"]["pack"], "backup_1-files.zip")
+
+    def test_check_extracts_every_raw_archive_and_samples_the_newest_other_pack(self):
+        result, work, copy = self.fetch()
+        verified = result["packs_verified"]
+        self.assertEqual(verified["backup_1-raw.zip"], 1)
+        self.assertIn("backup_3-files.zip", verified)
+        self.assertEqual(len(verified), 3)
+        self.assertEqual((work / "bundle/data/raw/XX/a.zip").read_text(), "raw/XX/a.zip")
+        self.assertEqual(copy.call_count, 3)
+        self.assertEqual(list((work / "packs").iterdir()), [])
+
+    def test_fetch_restores_every_file(self):
+        result, work, _ = self.fetch(everything=True)
+        self.assertEqual(len(result["packs_verified"]), 4)
+        for name in self.manifest["data"]:
+            self.assertEqual((work / "bundle/data" / name).read_text(), name)
+
+    def test_a_pack_missing_from_s3_fails_before_any_download(self):
+        sizes = {n: (self.packs / n).stat().st_size for n in self.manifest["packs"]}
+        for remote in ({**sizes, "backup_2-files.zip": 1}, {k: sizes[k] for k in list(sizes)[1:]}):
+            with self.assertRaisesRegex(ValueError, "missing from S3"):
+                _, _, copy = self.fetch(remote)
+
+    def test_packs_upload_before_the_bundle_that_names_them(self):
+        bundle = self.root / ("backup_" + "b" * 32)
+        (bundle / "packs").mkdir(parents=True)
+        (bundle / "packs/one.zip").write_bytes(b"pack")
+        with patch.object(job, "aws_copy") as copy:
+            job.upload_packs(self.CONFIG, bundle, ["one.zip"])
+        self.assertEqual(
+            copy.call_args.args[1:],
+            (bundle / "packs/one.zip", job.packs_location(self.CONFIG) + "one.zip"),
+        )
+
+    def test_the_next_backup_builds_on_the_newest_uploaded_one(self):
+        destination = self.root / "backups"
+        for letter, created in (("a", "2026-11-10T06"), ("c", "2026-11-10T12")):
+            bundle = destination / ("backup_" + letter * 32)
+            bundle.mkdir(parents=True)
+            atomic_json(bundle / "manifest.json", {"schema_version": 2, "id": letter})
+            atomic_json(bundle / "uploaded.json", {"created_at": created})
+        unfinished = destination / ("backup_" + "d" * 32)
+        unfinished.mkdir()
+        atomic_json(unfinished / "manifest.json", {"schema_version": 2, "id": "d"})
+        self.assertEqual(job.previous_manifest(destination)["id"], "c")
+        self.assertIsNone(job.previous_manifest(self.root / "data/raw"))
 
 
 class RemoteRetentionTests(unittest.TestCase):

@@ -356,13 +356,100 @@ class QuiesceTests(unittest.TestCase):
                 ROOT, self.data, CONFIG, {"dbname": "elections"}, self.root / "out", "db"
             )
 
-        bundle = Path(result["backup_dir"]) / "data"
+        bundle = Path(result["backup_dir"])
         # Files rewritten in place keep the state that matches the database snapshot.
-        self.assertEqual((bundle / "state" / f"{name}.json").read_text(), "before")
-        self.assertEqual((bundle / "runs" / name / "latest.json").read_text(), "before")
-        self.assertEqual((bundle / "runs" / name / "old-run.json").read_text(), "run")
-        self.assertEqual((bundle / "raw" / "XX" / "archive.zip").read_text(), "raw")
-        self.assertFalse((bundle / "runs" / name / "new-run.json").exists())
+        self.assertEqual((bundle / "data" / "state" / f"{name}.json").read_text(), "before")
+        self.assertEqual((bundle / "data" / "runs" / name / "latest.json").read_text(), "before")
+        # Files written once go into the packs, and only those listed with the snapshot.
+        manifest = json.loads((bundle / "manifest.json").read_text())
+        self.assertEqual(set(manifest["data"]), {f"runs/{name}/old-run.json", "raw/XX/archive.zip"})
+        restored = self.root / "restored"
+        for pack in result["new_packs"]:
+            recovery.unpack_pack(manifest, bundle / "packs" / pack, restored)
+        self.assertEqual((restored / "runs" / name / "old-run.json").read_text(), "run")
+        self.assertEqual((restored / "raw" / "XX" / "archive.zip").read_text(), "raw")
+        self.assertFalse(any(name.startswith("packs/") for name in manifest["files"]))
+
+    def backup(self, previous=None, snapshots=()):
+        class Connection(FakeConnection):
+            def execute(self, statement, params=None):
+                if "FROM ops.snapshots" in statement:
+                    return Result(rows=snapshots)
+                return super().execute(statement, params)
+
+        def dump(root, service, db, program, arguments, *, stdout=None, **kwargs):
+            if stdout is not None:
+                stdout.write(b"PGDMP")
+            return ""
+
+        with (
+            patch.object(recovery, "connect", return_value=contextlib.nullcontext(Connection())),
+            patch.object(recovery, "inventory", return_value={}),
+            patch.object(recovery, "docker_command", side_effect=dump),
+        ):
+            result = recovery.backup(
+                ROOT,
+                self.data,
+                CONFIG,
+                {"dbname": "elections"},
+                self.root / "out",
+                "db",
+                previous=previous,
+            )
+        bundle = Path(result["backup_dir"])
+        return result, json.loads((bundle / "manifest.json").read_text())
+
+    def test_a_backup_packs_only_the_files_new_since_the_previous_one(self):
+        old, new = self.data / "raw/XX/old.zip", self.data / "publications/p2/run.json"
+        for path in (old, new):
+            path.parent.mkdir(parents=True, exist_ok=True)
+        old.write_bytes(b"old raw")
+        first, previous = self.backup()
+        self.assertEqual(len(first["new_packs"]), 1)
+        new.write_text("{}")
+        second, manifest = self.backup(previous)
+        # The raw archive stays in the first backup's pack; only the new file is packed.
+        self.assertEqual(manifest["data"]["raw/XX/old.zip"], previous["data"]["raw/XX/old.zip"])
+        self.assertEqual(len(second["new_packs"]), 1)
+        self.assertTrue(second["new_packs"][0].endswith("-files.zip"))
+        self.assertEqual(set(manifest["packs"]), set(first["new_packs"] + second["new_packs"]))
+        # A file changed since (same path, new content) is packed again.
+        old.write_bytes(b"rewritten raw archive")
+        third, manifest = self.backup(manifest)
+        self.assertEqual(manifest["data"]["raw/XX/old.zip"]["bytes"], 21)
+        self.assertTrue(third["new_packs"][0].endswith("-raw.zip"))
+
+    def test_a_pruned_file_is_left_out_and_a_lost_raw_archive_fails_the_backup(self):
+        raw = self.data / "raw/XX/archive.zip"
+        raw.parent.mkdir(parents=True)
+        raw.write_bytes(b"raw")
+        snapshots = [{"raw_path": "raw/XX/archive.zip", "raw_sha256": recovery.file_hash(raw)}]
+        _, manifest = self.backup(snapshots=snapshots)
+        self.assertIn("raw/XX/archive.zip", manifest["data"])
+        with self.assertRaisesRegex(ValueError, "raw archive"):
+            self.backup(snapshots=[{**snapshots[0], "raw_sha256": "0" * 64}])
+
+        listed = {"publications": [Path("gone/manifest.json")], "raw": []}
+        data, packs = recovery.pack_files(self.data, listed, self.root / "packs", "backup_x")
+        self.assertEqual((data, packs), ({}, {}))
+        with self.assertRaises(FileNotFoundError):
+            recovery.pack_files(
+                self.data, {"metadata": [Path("gone.json")]}, self.root / "packs", "backup_y"
+            )
+
+    def test_a_tampered_pack_or_file_is_rejected(self):
+        raw = self.data / "raw/XX/archive.zip"
+        raw.parent.mkdir(parents=True)
+        raw.write_bytes(b"raw")
+        result, manifest = self.backup()
+        pack = Path(result["backup_dir"]) / "packs" / result["new_packs"][0]
+        tampered = json.loads(json.dumps(manifest))
+        tampered["data"]["raw/XX/archive.zip"]["sha256"] = "0" * 64
+        with self.assertRaisesRegex(ValueError, "Packed file"):
+            recovery.unpack_pack(tampered, pack, self.root / "one")
+        pack.write_bytes(pack.read_bytes() + b"x")
+        with self.assertRaisesRegex(ValueError, "Pack does not match"):
+            recovery.unpack_pack(manifest, pack, self.root / "two")
 
     def test_a_failed_backup_leaves_no_unfinished_bundle(self):
         raw = self.data / "raw" / "XX" / "archive.zip"

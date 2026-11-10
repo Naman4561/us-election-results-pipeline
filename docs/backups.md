@@ -1,10 +1,22 @@
 # Backups
 
-`election-backup.timer` runs a full backup every six hours (00:02, 06:02, 12:02 and
-18:02 UTC). Each bundle is self-contained: every raw snapshot ever collected, fetch
-metadata, collector state, a PostgreSQL dump of the whole history, the deployment
-catalog and the code of the current and previous releases. The newest bundle therefore holds every
-snapshot an older one does; older bundles only add earlier states of the system.
+`election-backup.timer` runs a backup every six hours (00:02, 06:02, 12:02 and 18:02
+UTC). Each backup is a bundle and the packs it names:
+
+- The **bundle** holds a PostgreSQL dump of the whole history, the files rewritten in
+  place (collector state, `runs/*/latest.json`, reports, accuracy and recovery checks),
+  the deployment catalog, the code of the current and previous releases, and a manifest.
+- **Packs** hold the files written once: raw snapshots, fetch metadata, parsed output,
+  run reports and publication artifacts. A backup packs only the files new since the
+  previous uploaded backup, one pack for raw archives and one for the rest, and uploads
+  them once to `<prefix>/objects/packs/`. They are never expired.
+- The **manifest** maps every write-once file to its hash, size and pack. A file the
+  previous manifest lists with the same size and modification time is not read again.
+  With no previous bundle on disk (the first run, or one lost), every file is packed.
+
+The newest backup therefore restores every snapshot an older one does; older ones only
+add earlier states of the system. Bundles made before packs (manifest version 1) hold
+every file themselves and still restore.
 
 ## Running alongside collection
 
@@ -17,9 +29,8 @@ publication lock just long enough to:
   accuracy and recovery checks);
 - list every other file under the data directory.
 
-After that it releases the locks. The listed files, the table fingerprints and the
-`pg_dump` (which reads that same snapshot) take about 25 minutes while jobs run
-normally. Files written after the snapshot are left for the next backup. A job that
+After that it releases the locks. Packing the new files, the table fingerprints and
+the `pg_dump` (which reads that same snapshot) run while jobs run normally. Files written after the snapshot are left for the next backup. A job that
 starts during the brief hold finds its source `locked` and is skipped, not failed;
 the next cycle runs it.
 
@@ -27,8 +38,9 @@ the next cycle runs it.
 
 | Where | Kept | How |
 | --- | --- | --- |
-| Server disk | The newest uploaded bundle | `prune_backups.py --keep 1` after each run |
-| S3 | Every backup under 3 days old, and always the newest 5 | Tags plus a lifecycle rule, below |
+| Server disk | The newest uploaded bundle (its manifest is the next backup's index) | `prune_backups.py --keep 1` after each run |
+| S3 bundles | Every backup under 3 days old, and always the newest 5 | Tags plus a lifecycle rule, below |
+| S3 packs | All, indefinitely | Never tagged; any backup may name an old pack |
 
 After each successful upload, `production_recovery.py backup` lists
 `<prefix>/rolling/` and tags the objects of every backup outside the newest
@@ -43,11 +55,24 @@ backups for expiry, and S3 would still wait until they are 3 days old.
 A retention failure does not fail the backup (it is already in S3). The run report
 records it under `s3_retention`, and the monitor raises `backup/s3-retention`.
 
+## Restoring
+
+`production_recovery.py check-restore --backup-id <id>` downloads the bundle and checks
+that every pack its manifest names is in S3 at its recorded size. It extracts every raw
+pack, verifying each file's hash, and of the other packs the newest and one chosen at
+random. It then restores the dump into a temporary database and checks it as before.
+
+For a real restore, `production_recovery.py fetch --backup-id <id>` downloads the
+bundle and every pack it names, verifies every file, and prints the directory holding
+the rebuilt `data/`, the dump and the code.
+
 ## One-time AWS setup
 
 Run with an administrator profile, not the backup user.
 
-1. Allow the backup user to tag backup objects. Add to its policy, with your bucket:
+1. The backup user writes, reads and lists `election-pipeline/objects/` as well as
+   `election-pipeline/rolling/`, and never deletes. Allow it to tag backup objects. Add
+   to its policy, with your bucket:
 
    ```json
    {

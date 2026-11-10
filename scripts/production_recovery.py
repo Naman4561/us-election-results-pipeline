@@ -1,8 +1,13 @@
-"""Back up production to S3 and rehearse restoration from a fresh download."""
+"""Back up production to S3 and rehearse restoration from a fresh download.
+
+``fetch`` downloads a backup with every pack it names and rebuilds its data directory,
+for a real restore.
+"""
 
 import argparse
 import json
 import os
+import random
 import re
 import shutil
 import stat
@@ -18,7 +23,9 @@ from dotenv import dotenv_values
 from election_pipeline.recovery import (
     backup,
     check_restore,
+    pack_kind,
     safe_child,
+    unpack_pack,
     verify_bundle,
 )
 from election_pipeline.storage import atomic_json, file_hash, utc_now
@@ -98,6 +105,83 @@ def upload_bundle(config, bundle, archive, receipt):
     # Uploaded last: a partial upload has no completion record.
     aws_copy(config, receipt_path, location + "complete.json")
     atomic_json(bundle / "uploaded.json", receipt)
+
+
+def packs_location(config):
+    return f"s3://{config['BACKUP_BUCKET']}/{config['BACKUP_PREFIX']}/objects/packs/"
+
+
+def upload_packs(config, bundle, names):
+    """Upload a backup's new packs. They go first: the bundle uploaded after names them."""
+    for name in names:
+        aws_copy(config, bundle / "packs" / name, packs_location(config) + name)
+
+
+def remote_packs(config):
+    """{pack name: bytes} of every uploaded pack."""
+    prefix = f"{config['BACKUP_PREFIX']}/objects/packs/"
+    listing = aws_s3api(
+        config, "list-objects-v2", "--bucket", config["BACKUP_BUCKET"], "--prefix", prefix
+    )
+    return {item["Key"][len(prefix) :]: item["Size"] for item in listing.get("Contents", [])}
+
+
+def previous_manifest(destination):
+    """The manifest of the newest uploaded backup still on disk, or None.
+
+    Its packs were uploaded before it was, so the next backup can refer to them.
+    """
+    newest = None
+    for bundle in Path(destination).iterdir():
+        receipt = bundle / "uploaded.json"
+        if re.fullmatch(ID_PATTERN, bundle.name) and receipt.is_file():
+            created = json.loads(receipt.read_text(encoding="utf-8"))["created_at"]
+            if newest is None or created > newest[0]:
+                newest = (created, bundle)
+    if newest is None:
+        return None
+    return json.loads((newest[1] / "manifest.json").read_text(encoding="utf-8"))
+
+
+def download_bundle(config, backup_id, work):
+    """Download and verify a backup's bundle into ``work/bundle``; returns its manifest."""
+    location = f"s3://{config['BACKUP_BUCKET']}/{config['BACKUP_PREFIX']}/rolling/{backup_id}/"
+    aws_copy(config, location + "complete.json", work / "complete.json")
+    receipt = json.loads((work / "complete.json").read_text())
+    if receipt.get("backup_id") != backup_id:
+        raise ValueError("Downloaded completion record has the wrong backup ID")
+    aws_copy(config, location + "bundle.zip", work / "bundle.zip")
+    unpack_bundle(work / "bundle.zip", work / "bundle", receipt)
+    return json.loads((work / "bundle" / "manifest.json").read_text(encoding="utf-8"))
+
+
+def fetch_packs(config, manifest, work, *, everything=False):
+    """Download a version 2 bundle's packs and extract them into ``work/bundle/data``.
+
+    Every pack the manifest names must be in S3 at its recorded size. Every raw pack is
+    extracted and each file verified; of the others, all of them when ``everything``,
+    else the newest and one more chosen at random.
+    """
+    remote = remote_packs(config)
+    for name, expected in manifest["packs"].items():
+        if remote.get(name) != expected["bytes"]:
+            raise ValueError("A pack is missing from S3 or has the wrong size: " + name)
+    raw = sorted(n for n in manifest["packs"] if n.endswith("-raw.zip"))
+    rest = sorted(n for n in manifest["packs"] if n not in raw)
+    if not everything and len(rest) > 2:
+        newest = max(rest, key=lambda n: manifest["packs"][n]["created_at"])
+        rest = [newest, random.SystemRandom().choice([n for n in rest if n != newest])]
+    packs = work / "packs"
+    packs.mkdir()
+    verified = {}
+    for name in raw + rest:
+        aws_copy(config, packs_location(config) + name, packs / name)
+        verified[name] = len(unpack_pack(manifest, packs / name, work / "bundle" / "data"))
+        (packs / name).unlink()
+    wanted = [p for p, e in manifest["data"].items() if everything or pack_kind(p) == "raw"]
+    if sum(verified[n] for n in verified if everything or n in raw) != len(wanted):
+        raise ValueError("Packs did not hold every file the manifest assigns them")
+    return {"packs_listed": len(manifest["packs"]), "packs_verified": verified}
 
 
 KEPT_AFTER_UPLOAD = {"bundle.zip", "manifest.json", "upload.json", "uploaded.json"}
@@ -247,7 +331,7 @@ def unpack_bundle(archive, destination, receipt):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=("backup", "check-restore"))
+    parser.add_argument("action", choices=("backup", "check-restore", "fetch"))
     parser.add_argument("--backup-id")
     parser.add_argument("--catalog-file", type=Path)
     parser.add_argument(
@@ -267,8 +351,8 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.action == "check-restore" and not re.fullmatch(ID_PATTERN, args.backup_id or ""):
-        parser.error("check-restore requires --backup-id backup_<32 hexadecimal characters>")
+    if args.action != "backup" and not re.fullmatch(ID_PATTERN, args.backup_id or ""):
+        parser.error(f"{args.action} requires --backup-id backup_<32 hexadecimal characters>")
 
     os.umask(0o077)
     prod = dict(dotenv_values(args.env_file, interpolate=False))
@@ -324,10 +408,13 @@ def main():
                     "db",
                     compose_args=compose,
                     catalog=catalog,
+                    previous=previous_manifest(args.destination),
                 )
             bundle = Path(result["backup_dir"])
             result["backup_id"] = bundle.name
+            new_packs = {n: (bundle / "packs" / n).stat().st_size for n in result["new_packs"]}
             try:
+                upload_packs(config, bundle, new_packs)
                 archive, receipt = pack_bundle(bundle, catalog["release"]["revision"])
                 upload_bundle(config, bundle, archive, receipt)
             except Exception:
@@ -338,6 +425,7 @@ def main():
                 "outcome": "uploaded",
                 "backup_id": bundle.name,
                 "archive_bytes": receipt["bytes"],
+                "new_packs": new_packs,
             }
             try:
                 result["local_bytes_freed"] = trim_uploaded_bundle(bundle)
@@ -351,24 +439,19 @@ def main():
             except Exception as error:
                 result["s3_retention"] = {"outcome": "failed", "error": str(error)[-500:]}
 
+        elif args.action == "fetch":
+            work = Path(tempfile.mkdtemp(prefix="fetch-", dir=args.destination))
+            manifest = download_bundle(config, args.backup_id, work)
+            result = {"outcome": "passed", "backup_id": args.backup_id}
+            if manifest["schema_version"] == 2:
+                result.update(fetch_packs(config, manifest, work, everything=True))
+            result["restored_dir"] = str(work / "bundle")
+
         else:
             work = Path(tempfile.mkdtemp(prefix="restore-", dir=args.destination))
-            location = (
-                f"s3://{config['BACKUP_BUCKET']}/"
-                f"{config['BACKUP_PREFIX']}/rolling/"
-                f"{args.backup_id}/"
-            )
-            aws_copy(
-                config,
-                location + "complete.json",
-                work / "complete.json",
-            )
-            receipt = json.loads((work / "complete.json").read_text())
-            if receipt.get("backup_id") != args.backup_id:
-                raise ValueError("Downloaded completion record has the wrong backup ID")
-
-            aws_copy(config, location + "bundle.zip", work / "bundle.zip")
-            unpack_bundle(work / "bundle.zip", work / "bundle", receipt)
+            manifest = download_bundle(config, args.backup_id, work)
+            packs = fetch_packs(config, manifest, work) if manifest["schema_version"] == 2 else {}
+            del manifest
 
             result = check_restore(
                 ROOT,
@@ -381,6 +464,7 @@ def main():
                 report_dir=data / "recovery_checks",
             )
             result["backup_id"] = args.backup_id
+            result.update(packs)
             if result.get("outcome") == "passed" and result.get("temporary_database_removed"):
                 # The persistent restore report has already been written outside this directory.
                 try:

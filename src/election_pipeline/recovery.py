@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import time
 import uuid
+import zipfile
 from contextlib import ExitStack, contextmanager
 from pathlib import Path, PurePosixPath
 
@@ -52,6 +53,22 @@ PRUNABLE_DIRECTORIES = ("runs", "parsed", "publications")
 # The backup waits this long for running jobs to finish before giving up.
 QUIESCE_SECONDS = 600
 QUIESCE_RETRY_SECONDS = 5
+
+# Files written once are not copied into every bundle. Each backup writes the ones new
+# since the previous backup into packs (zips, one for raw archives and one for the rest)
+# that are uploaded once and kept; its manifest maps every such file to its pack.
+MANIFEST_VERSIONS = (1, 2)
+PACK_KINDS = ("raw", "files")
+# Already compressed; stored in a pack as they are.
+STORED_SUFFIXES = {".zip", ".gz", ".xlsx", ".png", ".jpg", ".jpeg", ".pdf"}
+
+
+def pack_kind(relative):
+    return "raw" if PurePosixPath(relative).parts[0] == "raw" else "files"
+
+
+def pack_name(identity, kind):
+    return f"{identity}-{kind}.zip"
 
 
 def safe_child(root, relative):
@@ -227,6 +244,108 @@ def copy_files(source, destination, relatives=None, *, missing_ok=False):
                 raise
 
 
+def pack_files(data_dir, written_once, packs_dir, identity, previous=None):
+    """Map every write-once file to a pack, writing the new ones into this backup's packs.
+
+    A file the previous manifest lists with the same size and modification time is
+    already in one of its packs and is not read again. Returns the manifest's ``data``
+    ({data-relative path: sha256, bytes, mtime_ns, pack}) and ``packs`` (every pack
+    those entries name, with its size and hash).
+    """
+    known, known_packs = {}, {}
+    if previous is not None and previous.get("schema_version") == 2:
+        known, known_packs = previous["data"], previous["packs"]
+    data, writers = {}, {}
+    with ExitStack() as open_packs:
+        for directory, listed in written_once.items():
+            for relative in listed:
+                key = PurePosixPath(directory, *relative.parts).as_posix()
+                path = data_dir / directory / relative
+                try:
+                    status = path.stat()
+                    entry = known.get(key)
+                    if (
+                        entry is not None
+                        and entry["bytes"] == status.st_size
+                        and entry["mtime_ns"] == status.st_mtime_ns
+                    ):
+                        data[key] = entry
+                        continue
+                    digest = file_hash(path)
+                except FileNotFoundError:
+                    if directory in PRUNABLE_DIRECTORIES:
+                        continue
+                    raise
+                kind = pack_kind(key)
+                if kind not in writers:
+                    packs_dir.mkdir(parents=True, exist_ok=True)
+                    writers[kind] = open_packs.enter_context(
+                        zipfile.ZipFile(packs_dir / pack_name(identity, kind), "w")
+                    )
+                writers[kind].write(
+                    path,
+                    arcname=key,
+                    compress_type=(
+                        zipfile.ZIP_STORED
+                        if path.suffix.lower() in STORED_SUFFIXES
+                        else zipfile.ZIP_DEFLATED
+                    ),
+                    compresslevel=1,
+                )
+                data[key] = {
+                    "sha256": digest,
+                    "bytes": status.st_size,
+                    "mtime_ns": status.st_mtime_ns,
+                    "pack": pack_name(identity, kind),
+                }
+    packs = {}
+    for name in sorted({entry["pack"] for entry in data.values()}):
+        path = packs_dir / name
+        if name in known_packs:
+            packs[name] = known_packs[name]
+        elif path.is_file():
+            packs[name] = {
+                "bytes": path.stat().st_size,
+                "sha256": file_hash(path),
+                "created_at": utc_now(),
+            }
+        else:
+            raise ValueError("A file's pack is missing from the previous backup: " + name)
+    return data, packs
+
+
+def unpack_pack(manifest, pack, data_dir, wanted=None):
+    """Extract a downloaded pack's files into ``data_dir``, verifying each against the manifest.
+
+    Only the files the manifest assigns to this pack (and in ``wanted``, if given) are
+    extracted. Returns their data-relative paths.
+    """
+    pack = Path(pack)
+    expected = manifest["packs"].get(pack.name)
+    if (
+        expected is None
+        or pack.stat().st_size != expected["bytes"]
+        or file_hash(pack) != expected["sha256"]
+    ):
+        raise ValueError("Pack does not match the backup manifest: " + pack.name)
+    extracted = []
+    with zipfile.ZipFile(pack) as zipped:
+        for member in zipped.infolist():
+            entry = manifest["data"].get(member.filename)
+            if entry is None or entry["pack"] != pack.name:
+                continue  # a file pruned since, or kept in a newer pack
+            if wanted is not None and member.filename not in wanted:
+                continue
+            target = safe_child(data_dir, member.filename)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with zipped.open(member) as source, target.open("xb") as output:
+                shutil.copyfileobj(source, output)
+            if target.stat().st_size != entry["bytes"] or file_hash(target) != entry["sha256"]:
+                raise ValueError("Packed file does not match the backup manifest: " + target.name)
+            extracted.append(member.filename)
+    return extracted
+
+
 @contextmanager
 def quiesced(data_dir, sources, conn, wait=QUIESCE_SECONDS):
     """Hold every source's locks and the exclusive maintenance lock.
@@ -257,11 +376,24 @@ def quiesced(data_dir, sources, conn, wait=QUIESCE_SECONDS):
         time.sleep(QUIESCE_RETRY_SECONDS)
 
 
-def backup(root, data_dir, config, db, destination, service, *, compose_args=(), catalog=None):
+def backup(
+    root,
+    data_dir,
+    config,
+    db,
+    destination,
+    service,
+    *,
+    compose_args=(),
+    catalog=None,
+    previous=None,
+):
     """Capture files and a dump using the inventory's DB snapshot.
 
     Jobs are held only while the snapshot is exported, the rewritten files are copied
-    and the write-once files are listed; the long copy, inventory and dump run after.
+    and the write-once files are listed; packing, the inventory and the dump run after.
+    ``previous`` is the last uploaded backup's manifest: the files it already packed are
+    referenced, not packed again.
     """
     root = Path(root).resolve()
     data_dir = Path(data_dir).resolve()
@@ -285,7 +417,7 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=(),
 
     try:
         manifest = {
-            "schema_version": 1,
+            "schema_version": 2,
             "started_at": utc_now(),
             "database": db["dbname"],
         }
@@ -309,13 +441,10 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=(),
                         r for r in listed if not rewritten and r.name != "latest.json"
                     ]
 
-            for directory, listed in written_once.items():
-                copy_files(
-                    data_dir / directory,
-                    temporary / "data" / directory,
-                    listed,
-                    missing_ok=directory in PRUNABLE_DIRECTORIES,
-                )
+            manifest["data"], manifest["packs"] = pack_files(
+                data_dir, written_once, temporary / "packs", identity, previous
+            )
+            previous = None  # the old manifest is large; it is not needed past this point
 
             manifest["database_inventory"] = inventory(conn, database_schemas)
             manifest["database_schemas"] = [
@@ -330,9 +459,9 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=(),
             snapshots = conn.execute("SELECT raw_path, raw_sha256 FROM ops.snapshots").fetchall()
 
             for row in snapshots:
-                archived = safe_child(temporary / "data", row["raw_path"])
+                entry = manifest["data"].get(PurePosixPath(row["raw_path"]).as_posix())
 
-                if not archived.is_file() or file_hash(archived) != row["raw_sha256"]:
+                if entry is None or entry["sha256"] != row["raw_sha256"]:
                     raise ValueError(
                         "Missing/corrupt raw archive for snapshot: " + row["raw_sha256"]
                     )
@@ -448,13 +577,14 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=(),
                 )
 
         manifest["finished_at"] = utc_now()
+        # The packs are uploaded on their own; the manifest records them under "packs".
         manifest["files"] = {
             path.relative_to(temporary).as_posix(): {
                 "bytes": path.stat().st_size,
                 "sha256": file_hash(path),
             }
             for path in sorted(temporary.rglob("*"))
-            if path.is_file()
+            if path.is_file() and path.relative_to(temporary).parts[0] != "packs"
         }
 
         atomic_json(temporary / "manifest.json", manifest)
@@ -463,6 +593,8 @@ def backup(root, data_dir, config, db, destination, service, *, compose_args=(),
             "outcome": "backed_up",
             "backup_dir": str(temporary),
             "files": len(manifest["files"]),
+            "data_files": len(manifest["data"]),
+            "new_packs": sorted(p.name for p in (temporary / "packs").glob("*.zip")),
         }
     except BaseException:
         # An unfinished bundle has no manifest and cannot be restored; left behind, each
@@ -476,7 +608,13 @@ def verify_bundle(directory):
 
     manifest = json.loads((directory / "manifest.json").read_text(encoding="utf-8"))
 
-    if manifest.get("schema_version") != 1 or "database.dump" not in manifest.get("files", {}):
+    if manifest.get("schema_version") not in MANIFEST_VERSIONS or "database.dump" not in (
+        manifest.get("files", {})
+    ):
+        raise ValueError("Unsupported/incomplete backup manifest")
+    if manifest["schema_version"] == 2 and not (
+        isinstance(manifest.get("data"), dict) and isinstance(manifest.get("packs"), dict)
+    ):
         raise ValueError("Unsupported/incomplete backup manifest")
 
     for relative, expected in manifest["files"].items():
