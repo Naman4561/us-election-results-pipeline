@@ -1,6 +1,6 @@
 {
  "state": "WY",
- "provenance": "Wyoming candidates (by name; the certified results carry no candidate IDs) and counties from the Secretary of State's official results, 2026_Wyoming_General_Results.zip (SHA-256 c378306bd8df97437a3d11fac7792e23a8297a7e3eded8129a9cd61e3e654ff1), sheet \"Statewide Candidates\" of \"2026 General Results Summaries - OFFICIAL.xlsx\", downloaded November 10, 2026. Awaiting the operator's confirmation.",
+ "provenance": "Wyoming candidates (by name; the certified results carry no candidate IDs) and counties from the Secretary of State's official results, 2026_Wyoming_General_Results.zip (SHA-256 c378306bd8df97437a3d11fac7792e23a8297a7e3eded8129a9cd61e3e654ff1), sheet \"Statewide Candidates\" of \"2026 General Results Summaries - OFFICIAL.xlsx\", downloaded November 10, 2026. Confirmed by the operator before release on November 10, 2026.",
  "races": {
   "WY-SEN": {
    "candidates": [
