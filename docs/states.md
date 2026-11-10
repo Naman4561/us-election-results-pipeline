@@ -107,9 +107,9 @@ state's own official flag, which the parser records.
 These states hold elections this year but have no election-night source collected
 here; the map labels them "Awaiting certified results", and each is added from its
 certified canvass (`deploy certify --certified-file`): Alabama, Arizona, Connecticut,
-Delaware, Illinois, Kentucky, Maine, Massachusetts, Michigan, Missouri, Montana, Nevada,
-New Hampshire, New Jersey, New York, Oklahoma, Pennsylvania, Rhode Island, Tennessee,
-Vermont, Virginia, Wisconsin and Wyoming (`awaiting_certified` in
+Illinois, Kentucky, Maine, Massachusetts, Michigan, Missouri, Montana, Nevada, New
+Hampshire, New Jersey, New York, Oklahoma, Pennsylvania, Tennessee, Vermont, Virginia,
+Wisconsin and Wyoming (`awaiting_certified` in
 `resources/elections_2026.json`). Arizona, Michigan, Missouri, New Jersey, New York,
 Nevada, Oklahoma, Pennsylvania and Tennessee refuse automated clients on their results
 sites.
