@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import time
 import uuid
 from pathlib import Path
@@ -16,6 +17,34 @@ from election_pipeline.storage import (
 )
 
 NO_SNAPSHOT = "No archived snapshot to check"
+
+
+def refused_by_worker(store, digest):
+    """Whether the worker's latest run already failed to parse this snapshot."""
+    try:
+        latest = json.loads(
+            (store.root / "runs" / store.source.source_id / "latest.json").read_text("utf-8")
+        )
+    except (OSError, ValueError):
+        return False
+    return latest.get("raw_sha256") == digest and any(
+        s.get("stage") == "parse" and s.get("outcome") == "validation_failed"
+        for s in latest.get("stages", [])
+    )
+
+
+def published_snapshot(source, env_file):
+    """The raw snapshot the source currently publishes, if it came from this address."""
+    from election_pipeline.database import connect, connection_settings
+
+    with connect(connection_settings(env_file)) as conn:
+        row = conn.execute(
+            "SELECT p.raw_sha256 FROM serving.current_publications c "
+            "JOIN serving.publications p USING (publication_id) "
+            "WHERE c.source_id=%s AND p.source_url=%s",
+            (source.source_id, source.url),
+        ).fetchone()
+    return row["raw_sha256"] if row else None
 
 
 def run_source(
@@ -159,6 +188,33 @@ def run_source(
                         reference=reference,
                     ),
                 )
+
+                if (
+                    check_only
+                    and not replay_sha256
+                    and parsed["outcome"] == "validation_failed"
+                    and refused_by_worker(store, digest)
+                ):
+                    # The state changed its format and the running release refuses its
+                    # newest file too: no regression of this release. Check the snapshot
+                    # the source publishes instead, so one state cannot block a release.
+                    fallback = published_snapshot(source, env_file)
+                    if fallback and fallback != digest and store.archive_path(fallback).is_file():
+                        report["refused_snapshot"] = {
+                            "raw_sha256": digest,
+                            "error": parsed.get("error"),
+                        }
+                        digest = report["raw_sha256"] = fallback
+                        parsed = stage(
+                            "parse",
+                            lambda: parse_source(
+                                source,
+                                settings,
+                                store.root,
+                                sha256=digest,
+                                reference=reference,
+                            ),
+                        )
 
                 if parsed["outcome"] not in ("parsed", "already_parsed"):
                     raise ValueError(f"Parsing failed: {parsed.get('error', parsed['outcome'])}")

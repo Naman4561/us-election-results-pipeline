@@ -1,6 +1,7 @@
 """Runner recovery tests and an opt-in PostgreSQL/dbt rehearsal."""
 
 import csv
+import hashlib
 import json
 import os
 import threading
@@ -244,6 +245,55 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(result["outcome"], "failed")
         self.assertIn("No archived snapshot", result["error"])
         self.collect.assert_not_called()
+
+    def test_check_only_falls_back_to_the_published_snapshot_only_for_a_refused_one(self):
+        store = ArchiveStore(self.f.root, self.f.source)
+        # The state changed its format: the newest archive no longer parses.
+        changed = self.raw.read_bytes() + b"\n"
+        newest = hashlib.sha256(changed).hexdigest()
+        store.archive_path(newest).parent.mkdir(parents=True, exist_ok=True)
+        store.archive_path(newest).write_bytes(changed)
+        store.write_state({**store.read_state(), "sha256": newest})
+        latest = self.f.root / "runs" / self.f.source.source_id / "latest.json"
+
+        def parse(source, settings, root, *, sha256, reference=None):
+            if sha256 == newest:
+                return {"outcome": "validation_failed", "error": "page format changed"}
+            return {"outcome": "parsed", "internal_reconciliation": "passed", "output_dir": "x"}
+
+        def check():
+            with (
+                patch.object(workflow, "parse_source", side_effect=parse),
+                patch.object(workflow, "published_snapshot", return_value=self.sha),
+                patch.object(
+                    publication,
+                    "prepare",
+                    return_value={"outcome": "validated", "candidate_id": "c", "release_id": 7},
+                ),
+                patch.object(publication, "discard", return_value={"outcome": "discarded"}),
+            ):
+                return self.run_source(check_only=True)
+
+        # The running release parsed it fine before: this release broke it, so it fails.
+        latest.parent.mkdir(parents=True, exist_ok=True)
+        latest.write_text(
+            json.dumps({"raw_sha256": newest, "stages": [{"stage": "parse", "outcome": "parsed"}]})
+        )
+        self.assertEqual(check()["outcome"], "failed")
+
+        # The running release refused it too: the published snapshot is checked instead.
+        latest.write_text(
+            json.dumps(
+                {
+                    "raw_sha256": newest,
+                    "stages": [{"stage": "parse", "outcome": "validation_failed"}],
+                }
+            )
+        )
+        result = check()
+        self.assertEqual(result["outcome"], "validated")
+        self.assertEqual(result["raw_sha256"], self.sha)
+        self.assertEqual(result["refused_snapshot"]["raw_sha256"], newest)
 
     def test_full_run_lock_rejects_overlap_without_overwriting_latest_report(self):
         first = self.run_source()
