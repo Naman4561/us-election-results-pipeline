@@ -363,3 +363,11 @@ class QuiesceTests(unittest.TestCase):
         self.assertEqual((bundle / "runs" / name / "old-run.json").read_text(), "run")
         self.assertEqual((bundle / "raw" / "XX" / "archive.zip").read_text(), "raw")
         self.assertFalse((bundle / "runs" / name / "new-run.json").exists())
+
+
+class InventoryTests(unittest.TestCase):
+    def test_fingerprinting_lifts_the_statement_limit_for_its_transaction_only(self):
+        conn = FakeConnection()
+        with self.assertRaisesRegex(ValueError, "migrations"):  # no tables in the fake
+            recovery.inventory(conn)
+        self.assertEqual(conn.statements[0], "SET LOCAL statement_timeout = 0")

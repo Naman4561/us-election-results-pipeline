@@ -78,6 +78,10 @@ def safe_child(root, relative):
 
 def inventory(conn, schemas=SCHEMAS):
     """Fingerprint every business/audit table in one DB transaction."""
+    # One sorted read of the shared landing tables (millions of rows) takes minutes, past
+    # the connection's statement limit; this lifts it for the caller's read-only
+    # transaction only.
+    conn.execute("SET LOCAL statement_timeout = 0")
     tables = conn.execute(
         """
         SELECT table_schema, table_name
