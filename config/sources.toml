@@ -244,6 +244,16 @@ min_interval_seconds = 840
 expected_members = ["data.json", "item-wa-01.json", "item-wa-02.json", "item-wa-03.json", "item-wa-04.json", "item-wa-05.json", "item-wa-06.json", "item-wa-07.json", "item-wa-08.json", "item-wa-09.json", "item-wa-10.json"]
 supplemental_members = ["item-wa-01.json", "item-wa-02.json", "item-wa-03.json", "item-wa-04.json", "item-wa-05.json", "item-wa-06.json", "item-wa-07.json", "item-wa-08.json", "item-wa-09.json", "item-wa-10.json"]
 
+[sources.ut_2026_general]
+state = "UT"
+election_date = "2026-11-03"
+url = "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/data"
+format = "bundle"
+primary_filename = "data.json"
+min_interval_seconds = 840
+expected_members = ["data.json", "item-ut-01.json", "item-ut-02.json", "item-ut-03.json", "item-ut-04.json"]
+supplemental_members = ["item-ut-01.json", "item-ut-02.json", "item-ut-03.json", "item-ut-04.json"]
+
 [sources.co_2026_general]
 state = "CO"
 election_date = "2026-11-03"

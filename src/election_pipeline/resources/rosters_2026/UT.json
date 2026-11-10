@@ -1,0 +1,82 @@
+{
+ "state": "UT",
+ "provenance": "Enhanced Voting ballot-option IDs and counties, from the official capture recorded in tests/fixtures/expansion/provenance.json (November 10, 2026, 04:14 UTC). Pending operator review before release.",
+ "races": {
+  "UT-01": {
+   "candidates": [
+    "18bd0000-4292-09ee-271f-08df2b02c31c",
+    "18bd0000-4292-09ee-224e-08df2b02c31c",
+    "18bd0000-4292-09ee-23bf-08df2b02c31c",
+    "18bd0000-4292-09ee-255e-08df2b02c31c",
+    "01000000-b2cc-68ac-609a-08df2fa3963d"
+   ],
+   "counties": [
+    "Salt Lake"
+   ]
+  },
+  "UT-02": {
+   "candidates": [
+    "18bd0000-4292-09ee-2d36-08df2b02c31c",
+    "18bd0000-4292-09ee-2bf0-08df2b02c31c",
+    "18bd0000-4292-09ee-2e7e-08df2b02c31c",
+    "18bd0000-4292-09ee-2a97-08df2b02c31c",
+    "18bd0000-4292-09ee-2fd2-08df2b02c31c"
+   ],
+   "counties": [
+    "Box Elder",
+    "Cache",
+    "Davis",
+    "Rich",
+    "Weber"
+   ]
+  },
+  "UT-03": {
+   "candidates": [
+    "18bd0000-4292-09ee-3335-08df2b02c31c",
+    "18bd0000-4292-09ee-3a12-08df2b02c31c",
+    "18bd0000-4292-09ee-38b3-08df2b02c31c",
+    "18bd0000-4292-09ee-3607-08df2b02c31c",
+    "18bd0000-4292-09ee-3746-08df2b02c31c",
+    "18bd0000-4292-09ee-349d-08df2b02c31c"
+   ],
+   "counties": [
+    "Beaver",
+    "Carbon",
+    "Daggett",
+    "Duchesne",
+    "Emery",
+    "Garfield",
+    "Grand",
+    "Iron",
+    "Kane",
+    "Morgan",
+    "Piute",
+    "San Juan",
+    "Summit",
+    "Uintah",
+    "Utah",
+    "Wasatch",
+    "Washington",
+    "Wayne",
+    "Weber"
+   ]
+  },
+  "UT-04": {
+   "candidates": [
+    "18bd0000-4292-09ee-3edc-08df2b02c31c",
+    "18bd0000-4292-09ee-403c-08df2b02c31c",
+    "18bd0000-4292-09ee-417d-08df2b02c31c",
+    "18bd0000-4292-09ee-3d71-08df2b02c31c"
+   ],
+   "counties": [
+    "Juab",
+    "Millard",
+    "Salt Lake",
+    "Sanpete",
+    "Sevier",
+    "Tooele",
+    "Utah"
+   ]
+  }
+ }
+}

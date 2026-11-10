@@ -1,0 +1,57 @@
+{
+ "UT": {
+  "archive_sha256": "0c22ec404d3669bfc2be1048cade5cb6773948298a9d50a5a0584b0a3feef7ae",
+  "captured_at": "2026-11-10T04:14:50+00:00",
+  "collector": "production collector (election_pipeline.bundles.fetch_bundle), default settings",
+  "components": [
+   {
+    "bytes": 331811,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/data",
+    "name": "data.json",
+    "sha256": "feca4ba9fe8bbaef6ea7094cadf932c2721b496d9b8557d206717d98dfb4e5be",
+    "url": "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/data"
+   },
+   {
+    "bytes": 5928,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/ballot-items/18bd0000-4292-09ee-2072-08df2b02c31c",
+    "name": "item-ut-01.json",
+    "sha256": "4d49ea7c93d43e39f55db5f059f8ffe6b5985570c198d7e57ef5d13524a159ce",
+    "url": "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/ballot-items/18bd0000-4292-09ee-2072-08df2b02c31c"
+   },
+   {
+    "bytes": 18829,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/ballot-items/18bd0000-4292-09ee-28a3-08df2b02c31c",
+    "name": "item-ut-02.json",
+    "sha256": "4b03acadc34d37ce9ce94530fb445f6ac9127a5c245ab80d00a111c97f4cd505",
+    "url": "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/ballot-items/18bd0000-4292-09ee-28a3-08df2b02c31c"
+   },
+   {
+    "bytes": 71949,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/ballot-items/18bd0000-4292-09ee-3148-08df2b02c31c",
+    "name": "item-ut-03.json",
+    "sha256": "b26d9a634c30aca3a2c1465c9042d1744a8d3202afecef88c4d882c28f032e80",
+    "url": "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/ballot-items/18bd0000-4292-09ee-3148-08df2b02c31c"
+   },
+   {
+    "bytes": 21388,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/ballot-items/18bd0000-4292-09ee-3b8d-08df2b02c31c",
+    "name": "item-ut-04.json",
+    "sha256": "dc3b5f2167f476060382ff2906168f089617c6f9f198d6263c599adce96edc4b",
+    "url": "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/ballot-items/18bd0000-4292-09ee-3b8d-08df2b02c31c"
+   },
+   {
+    "bytes": 331811,
+    "content_type": "application/json; charset=utf-8",
+    "final_url": "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/data",
+    "name": ".recheck.json",
+    "sha256": "feca4ba9fe8bbaef6ea7094cadf932c2721b496d9b8557d206717d98dfb4e5be",
+    "url": "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/data"
+   }
+  ]
+ }
+}

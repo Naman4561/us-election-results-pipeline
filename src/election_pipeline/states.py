@@ -236,6 +236,17 @@ STATES = {
         source_page="https://results.votewa.gov/results/public/washington/elections/20261103",
         collection_backend="enhanced_voting",
     ),
+    # Utah elects no senator or governor in 2026.
+    "UT": State(
+        "UT",
+        "Utah",
+        "ut_2026_general",
+        (1, 2, 3, 4),
+        ("total_votes",),
+        senate=False,
+        source_page="https://electionresults.utah.gov/results/public/utah/elections/General11032026",
+        collection_backend="enhanced_voting",
+    ),
     "CO": State(
         "CO",
         "Colorado",
