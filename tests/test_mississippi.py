@@ -161,6 +161,25 @@ class MississippiTests(unittest.TestCase):
             county_feeds=feeds,
         ), feeds
 
+    def test_rankin_report_without_its_affidavit_column_reads_the_same_totals(self):
+        fixture = ROOT / "tests/fixtures/mississippi/rankin-2026-11-10.html"
+        ledger = json.loads(fixture.with_suffix(".json").read_text())
+        raw = fixture.read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), ledger["sha256"])
+        county = self.counties["RANKIN"]
+        before = ms.read_county(self.raw["RANKIN"], county, self.policy)
+        after = ms.read_county(raw, county, self.policy)
+        self.assertEqual(after["counts"], before["counts"])
+        self.assertEqual(after["affidavit_scope"], "column_not_present")
+        self.assertNotIn("affidavit_scope", before)
+        # Any other set of columns is still refused.
+        renamed = raw.replace(b"Election Day Voting", b"Early Voting", 1)
+        with self.assertRaisesRegex(ValueError, "unexpected vote-method columns"):
+            ms.read_county(renamed, county, self.policy)
+        broken = raw.replace(b"18,513", b"18,514", 1)
+        with self.assertRaises(ValueError):
+            ms.read_county(broken, county, self.policy)
+
     def test_all_original_reports_have_exact_known_named_candidate_counts(self):
         with zipfile.ZipFile(FIXTURE) as archive:
             provenance = json.loads(archive.read("provenance.json"))

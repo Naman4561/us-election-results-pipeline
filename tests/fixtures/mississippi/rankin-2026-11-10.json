@@ -1,0 +1,9 @@
+{
+ "url": "https://www2.rankincounty.org/results/index.html",
+ "captured_at": "2026-11-10T16:30:00+00:00",
+ "last_modified": "Tue, 10 Nov 2026 16:07:50 GMT",
+ "bytes": 120705,
+ "sha256": "586f3aeb296597322d620d869b06e4fef20678164436451554dfde0963089091",
+ "capture_method": "One read-only GET with curl, saved unchanged.",
+ "note": "Rankin's report re-run at 9:43 AM CST without its all-zero affidavit column."
+}

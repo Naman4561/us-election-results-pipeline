@@ -294,12 +294,26 @@ def electionware(raw, county, contract):
     )
 
 
+# A Hart Senate table's method columns before "Total": the number of them.
+HART_COLUMNS = {
+    "Absentee Voting Election Day Voting Affidavit Voting": 3,
+    "Absentee Voting Election Day Voting": 2,
+}
+
+
 def hart_html(raw, county, contract):
     text = VisibleText(raw.decode("utf-8-sig")).text
     identity(text, county, numeric_date=True)
     section = one(
         r"For United States Senate 6 YEAR TERM (.*?) For US House", text, "Hart Senate table"
     )
+    # Rankin's report dropped its all-zero affidavit column on Nov 10, 2026; either
+    # layout is read, and nothing else.
+    header = one(r"^Choice Party (.*?) Total ", section, "Hart Senate header")
+    if header not in HART_COLUMNS:
+        raise ValueError("Hart Senate table has unexpected vote-method columns")
+    columns = HART_COLUMNS[header]
+    cell = r"(" + NUMBER + r") [0-9.]+%"
     body = section.split("Total ", 1)[-1].split("Cast Votes:", 1)[0].strip()
     remainder = body
     counts = {}
@@ -307,28 +321,25 @@ def hart_html(raw, county, contract):
         pattern = (
             re.escape(name)
             + r" (Republican|Democrat|Independent) "
-            + r"("
-            + NUMBER
-            + r") [0-9.]+% ("
-            + NUMBER
-            + r") [0-9.]+% "
-            + r"("
-            + NUMBER
-            + r") [0-9.]+% ("
-            + NUMBER
-            + r") [0-9.]+%"
+            + " ".join([cell] * (columns + 1))
         )
         values = one(pattern, body, name)
         remainder = re.sub(pattern, "", remainder)
         party = {"Republican": "REP", "Democrat": "DEM", "Independent": "IND"}[values[0]]
         methods = [integer(v) for v in values[1:]]
-        if party != contract["candidates"][name] or sum(methods[:3]) != methods[3]:
+        if party != contract["candidates"][name] or sum(methods[:-1]) != methods[-1]:
             raise ValueError("Hart candidate party/method counts disagree")
-        counts[name] = methods[3]
+        counts[name] = methods[-1]
     if remainder.strip():
         raise ValueError("Hart report contains an unexpected Senate choice")
     total = one(
-        r"Cast Votes: (?:" + NUMBER + r" [0-9.]+% ){3}(" + NUMBER + r") [0-9.]+%",
+        r"Cast Votes: (?:"
+        + NUMBER
+        + r" [0-9.]+% ){"
+        + str(columns)
+        + r"}("
+        + NUMBER
+        + r") [0-9.]+%",
         section,
         "Hart cast vote total",
     )
@@ -347,6 +358,7 @@ def hart_html(raw, county, contract):
         report_date=generated.date().isoformat(),
         precincts_reporting=int(precinct[0]),
         precincts_total=int(precinct[1]),
+        **({} if columns == 3 else {"affidavit_scope": "column_not_present"}),
     )
 
 
@@ -632,7 +644,8 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 "absentee_scope": record.get("review", {}).get(
                     "absentee_scope", county.get("absentee_scope", "unspecified")
                 ),
-                "affidavit_scope": record.get("review", {}).get(
+                "affidavit_scope": parsed.get("affidavit_scope")
+                or record.get("review", {}).get(
                     "affidavit_scope", county.get("affidavit_scope", "unspecified")
                 ),
                 "write_in_votes": parsed.get("write_in_votes"),
