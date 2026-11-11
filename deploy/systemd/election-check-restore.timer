@@ -1,9 +1,0 @@
-[Unit]
-Description=Hourly: restore-check a new state once a backup holds it (most hours do nothing)
-
-[Timer]
-OnCalendar=*-*-* *:40:00
-AccuracySec=1s
-
-[Install]
-WantedBy=timers.target

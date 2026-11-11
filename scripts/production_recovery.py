@@ -393,7 +393,7 @@ def main():
             return 0
         print(json.dumps({"awaiting": awaiting}), flush=True)
     if args.action == "check-restore" and args.backup_id is None:
-        # The daily check (election-check-restore.timer) restores the newest upload.
+        # The check after a backup (election-check-restore.service) restores the newest upload.
         try:
             latest = json.loads((args.destination / "latest-backup.json").read_text("utf-8"))
         except (OSError, ValueError):
