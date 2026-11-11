@@ -590,7 +590,8 @@ class DeploymentTests(unittest.TestCase):
         # Another state's parser and data, the dashboard and the host-side tools: neither.
         self.assertEqual(changed(package + "parsers/ms.py"), set())
         self.assertEqual(changed(package + "resources/ms_2026_counties.json", str.rstrip), set())
-        self.assertEqual(changed(package + "resources/rosters_2026/OK.json", str.rstrip), set())
+        # Every parser imports every roster.
+        self.assertEqual(changed(package + "resources/rosters_2026/OK.json", str.rstrip), {NC, KY})
         self.assertEqual(changed(package + "dashboard/server.py"), set())
         self.assertEqual(changed(package + "deployment/control.py"), set())
         # Shared parsing, the database models and the image: both.
@@ -676,8 +677,9 @@ class DeploymentTests(unittest.TestCase):
         failing = set()
         self.assertEqual(release()["sources_reused"], [NC])
         self.assertEqual(checked, [KY])
-        self.assertEqual(release()["sources_reused"], [KY, NC])
-        self.assertEqual(checked, [])
+        # With nothing changed, one source is still checked.
+        self.assertEqual(len(release()["sources_reused"]), 1)
+        self.assertEqual(len(checked), 1)
         keys[KY] = "x" * 64
         self.assertEqual(release()["sources_validated"], [KY])
         self.assertEqual(sorted(release(check_all=True)["sources_validated"]), [KY, NC])
