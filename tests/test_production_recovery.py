@@ -205,6 +205,56 @@ class ProductionRecoveryTests(unittest.TestCase):
                 with self.assertRaisesRegex(RuntimeError, "past the id"):
                     job.main()
 
+    def test_a_restore_check_is_due_only_once_a_backup_holds_a_promoted_state(self):
+        from test_deployment import GA, fixture
+
+        from election_pipeline.deployment import catalog
+
+        work, path = self.root / "work", self.root / "catalog.json"
+        work.mkdir(exist_ok=True)
+        value = fixture(self.root)
+        value["sources"][GA].update(
+            publication_id="publication-ga", published_at="2026-11-11T12:00:00+00:00"
+        )
+        catalog.write(path, value)
+
+        def due():
+            return job.awaiting_restore(path, work)
+
+        self.assertEqual(due(), [])  # no uploaded backup yet
+        backup = {"outcome": "uploaded", "backup_id": self.bundle.name}
+        atomic_json(
+            work / "latest-backup.json", {**backup, "finished_at": "2026-11-11T11:00:00+00:00"}
+        )
+        self.assertEqual(due(), [])  # that backup predates the publication
+        atomic_json(
+            work / "latest-backup.json", {**backup, "finished_at": "2026-11-11T13:00:00+00:00"}
+        )
+        self.assertEqual(due(), [GA])
+        atomic_json(
+            work / "latest-check-restore.json",
+            {"outcome": "passed", "current_publications": {GA: "publication-ga"}},
+        )
+        self.assertEqual(due(), [])  # already verified
+        arguments = [
+            "production_recovery.py",
+            "check-restore",
+            "--if-awaiting",
+            "--catalog-file",
+            str(path),
+            "--destination",
+            str(work),
+        ]
+        with (
+            patch.object(sys, "argv", arguments),
+            patch.object(job.os, "umask"),
+            patch.object(job, "dotenv_values") as configuration,
+            redirect_stdout(io.StringIO()) as output,
+        ):
+            self.assertEqual(job.main(), 0)
+        self.assertIn("not_needed", output.getvalue())
+        configuration.assert_not_called()  # nothing restored, nothing read
+
     def test_restore_uses_production_compose_and_writer_ownership(self):
         conn = MagicMock()
         conn.__enter__.return_value = conn

@@ -1,7 +1,7 @@
 [Unit]
-Description=Restore the newest uploaded backup into a temporary database and verify it
+Description=Verify the newest backup restores, when a promoted state awaits activation
 Requires=docker.service
-After=docker.service network-online.target election-backup.service
+After=docker.service network-online.target
 Wants=network-online.target
 OnFailure=election-monitor.service
 
@@ -11,6 +11,8 @@ User=root
 WorkingDirectory=/opt/election-releases/current
 UMask=0077
 Nice=10
-ExecStart=/opt/election-releases/current/.venv/bin/python scripts/production_recovery.py check-restore --catalog-file /var/lib/election-pipeline-deployment/catalog.json
+# Exits at once unless a promoted, not yet public state is in the latest backup and no
+# passed restore check verified it (production_recovery.awaiting_restore).
+ExecStart=/opt/election-releases/current/.venv/bin/python scripts/production_recovery.py check-restore --if-awaiting --catalog-file /var/lib/election-pipeline-deployment/catalog.json
 # About 20 minutes when the host is quiet.
 TimeoutStartSec=60min
