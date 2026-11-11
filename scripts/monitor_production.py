@@ -87,7 +87,9 @@ def systemd(action, unit):
 
 
 def dashboard_payload(url):
-    with urllib.request.urlopen(url, timeout=8) as response:
+    # The dashboard answers from its last payload while refreshing; a slow answer means
+    # the host is overloaded, which the other checks and the next run will show.
+    with urllib.request.urlopen(url, timeout=20) as response:
         return json.load(response)
 
 

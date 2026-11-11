@@ -13,7 +13,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from importlib.resources import files
 from pathlib import Path
-from threading import Lock
+from threading import Lock, Thread
 
 import psycopg
 import uvicorn
@@ -412,6 +412,10 @@ class PublishedResults:
     # Publications change at most every few minutes; a poll within this many seconds
     # reuses the last payload instead of opening another database connection.
     TTL_SECONDS = 10
+    # An older payload is still served while a newer one is read in the background, so
+    # a database busy with collection slows the refresh, not the visitor. Past this age
+    # a request reads it directly, and fails if the database does.
+    STALE_SECONDS = 120
 
     def __init__(self, settings, geography, source_id, state="NC"):
         self.state = state_adapter(state)
@@ -420,14 +424,36 @@ class PublishedResults:
         self.cache, self.lock = {}, Lock()
         self.feed_cache = []
         self.recent = None  # (monotonic time, payload)
+        self.reading, self.refreshing = Lock(), False
 
     def __call__(self):
         with self.lock:
-            if self.recent and time.monotonic() - self.recent[0] < self.TTL_SECONDS:
-                return self.recent[1]
+            if self.recent:
+                age = time.monotonic() - self.recent[0]
+                if age < self.TTL_SECONDS:
+                    return self.recent[1]
+                if age < self.STALE_SECONDS:
+                    if not self.refreshing:
+                        self.refreshing = True
+                        Thread(target=self.refresh, daemon=True).start()
+                    return self.recent[1]
+        return self.load()
+
+    def load(self):
+        with self.reading:
             payload = self.read()
+        with self.lock:
             self.recent = (time.monotonic(), payload)
-            return payload
+        return payload
+
+    def refresh(self):
+        try:
+            self.load()
+        except Exception:
+            logging.getLogger(__name__).warning("Refreshing %s results failed", self.state.code)
+        finally:
+            with self.lock:
+                self.refreshing = False
 
     def read(self):
         with (
