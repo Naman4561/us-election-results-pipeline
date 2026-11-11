@@ -8,7 +8,7 @@ import os
 import tempfile
 import unittest
 import zipfile
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -555,7 +555,9 @@ class MississippiDatabaseTests(unittest.TestCase):
             ).fetchall()
             self.assertTrue(rows)
             for row in rows:
-                self.assertEqual(row["last_attempt_at"].isoformat(), checked[row["county"]])
+                self.assertEqual(
+                    row["last_attempt_at"], datetime.fromisoformat(checked[row["county"]])
+                )
 
         # Capacity check only: the 69 additions are explicitly synthetic test reviews.
         from test_county_scaling import all_imports
