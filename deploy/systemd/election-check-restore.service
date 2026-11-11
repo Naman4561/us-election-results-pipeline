@@ -1,5 +1,6 @@
 [Unit]
 Description=Verify the newest backup restores, when a promoted state awaits activation
+# Started by election-backup.service on success; no timer.
 Requires=docker.service
 After=docker.service network-online.target
 Wants=network-online.target

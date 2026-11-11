@@ -99,11 +99,11 @@ deploy activate --candidate <id> --restore-report <recovery_checks/....json>
 Check the candidate dashboard's totals against the state's own site before
 activating. Activation requires a passed restore check from the last 24 hours that
 verified the new publication, finished after it was published.
-`election-check-restore.timer` fires hourly at :40 and runs a check
-(`check-restore --if-awaiting`, on the newest uploaded backup) only when a promoted state
-that is not yet public is in the latest backup and no passed check has verified it; every
-other hour it exits at once. A state promoted between backups is thus verified within the
-hour after the next six-hourly backup, with no backup of its own, and states promoted
+Each successful backup starts `election-check-restore.service`
+(`check-restore --if-awaiting`, on the newest uploaded backup), which runs a check only
+when a promoted state that is not yet public is in that backup and no passed check has
+verified it; otherwise it exits at once. A state promoted between backups is thus verified
+right after the next six-hourly backup, with no backup of its own, and states promoted
 together share one check. `check-restore --backup-id ID` still runs one on demand. Caddy is switched with a journal, and the switch is
 undone if the public check fails; `deploy recover-handoff` finishes an interrupted one.
 The state is then enabled and public.
