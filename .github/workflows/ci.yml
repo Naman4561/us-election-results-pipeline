@@ -74,4 +74,15 @@ jobs:
         with:
           python-version: "3.12"
       - run: python -m pip install -c constraints.txt -e ".[postgres,transform,dashboard,deployment]" -r requirements-dev.txt
-      - run: python scripts/check_pipeline.py
+      - name: Database tests
+        shell: bash
+        run: |
+          set -o pipefail
+          python scripts/check_pipeline.py 2>&1 | tee unittest.log
+      - name: Annotate test failures
+        if: failure()
+        shell: bash
+        run: |
+          [ -f unittest.log ] || exit 0
+          grep -E -A25 "^(FAIL|ERROR):" unittest.log | head -150 | tr -d '\r' \
+            | python -c "import sys; t = sys.stdin.read().replace('%', '%25').replace('\n', '%0A'); print('::error title=Database test failures::' + (t or 'none parsed; see the log'))"
