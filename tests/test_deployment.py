@@ -121,6 +121,27 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(client.get("/api/national").status_code, 503)
         self.assertEqual(client.get("/api/states/NC").status_code, 503)
 
+    def test_the_source_configuration_is_parsed_once_per_version(self):
+        providers = {"NC": lambda: {"publication": None}, "KY": lambda: {"publication": None}}
+        client = TestClient(create_app(state_providers=providers, catalog_file=self.path))
+        catalog.parsed.cache_clear()
+        with patch.object(catalog, "load_config", wraps=catalog.load_config) as load:
+            for _ in range(3):
+                self.assertEqual(client.get("/api/national").status_code, 200)
+            self.assertEqual(load.call_count, 1)
+            catalog.configured().clear()  # callers get their own copy
+            self.assertIn(NC, catalog.configured())
+
+    def test_a_dashboard_may_have_its_own_cpu_budget(self):
+        def cpus(arguments):
+            return arguments[arguments.index("--cpus") + 1]
+
+        name = "election-dashboard-" + "0" * 32
+        self.assertEqual(cpus(containers.base_args(name, IMAGE, self.config)), "0.5")
+        self.assertEqual(cpus(containers.base_args(name, IMAGE, self.config, cpus="1.0")), "1.0")
+        with self.assertRaisesRegex(ValueError, "CPU budget"):
+            containers.base_args(name, IMAGE, self.config, cpus="all")
+
     # Worker ---------------------------------------------------------------------------
 
     def test_job_timeout_removes_only_its_owned_container_and_keeps_secrets_out_of_argv(self):

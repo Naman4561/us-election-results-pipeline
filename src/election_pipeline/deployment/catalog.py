@@ -24,6 +24,7 @@ release's own ``config/sources.toml`` and ``election_pipeline.states``::
 
 from __future__ import annotations
 
+import functools
 import json
 import os
 import re
@@ -40,7 +41,15 @@ CONFIG = Path(__file__).resolve().parents[3] / "config/sources.toml"
 
 
 def configured():
-    return load_config(CONFIG)[1]
+    # The dashboard validates the catalog on every request; parse each version of the
+    # configuration once.
+    stat = CONFIG.stat()
+    return dict(parsed(CONFIG, stat.st_mtime_ns, stat.st_size))
+
+
+@functools.lru_cache(maxsize=4)
+def parsed(path, modified, size):
+    return load_config(path)[1]
 
 
 def validate_release(release):

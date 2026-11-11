@@ -54,8 +54,9 @@ def package_hash(path):
     return collector_code_hash(Path(path) / "src/election_pipeline")
 
 
-def limits(config):
-    cpus, memory = config.get("JOB_CPUS", ""), config.get("JOB_MEMORY", "")
+def limits(config, cpus=None):
+    """Resource limits for a job, or with ``cpus`` another container's CPU budget."""
+    cpus, memory = cpus or config.get("JOB_CPUS", ""), config.get("JOB_MEMORY", "")
     if not re.fullmatch(r"(?:[0-9]+(?:\.[0-9]+)?)", cpus) or not 0 < float(cpus) <= 8:
         raise ValueError("Set JOB_CPUS to a measured CPU budget between 0 and 8")
     if not re.fullmatch(r"[1-9][0-9]*[mg]", memory, re.I):
@@ -63,7 +64,7 @@ def limits(config):
     return ["--cpus", cpus, "--memory", memory, "--memory-swap", memory, "--pids-limit", "256"]
 
 
-def base_args(name, image, config, *, network=True):
+def base_args(name, image, config, *, network=True, cpus=None):
     if not re.fullmatch(r"election-(?:job|import|dashboard)-[0-9a-f]{32}", name) or not (
         IMAGE.fullmatch(image)
     ):
@@ -87,7 +88,7 @@ def base_args(name, image, config, *, network=True):
         "max-size=10m",
         "--log-opt",
         "max-file=2",
-        *limits(config),
+        *limits(config, cpus),
         "--network",
         config.get("DOCKER_NETWORK", "election-production_default") if network else "none",
     ]

@@ -799,7 +799,7 @@ def free_port():
     raise ValueError("No free localhost dashboard port in 8001–8099")
 
 
-def wait_for(url, expected, seconds=30):
+def wait_for(url, expected, seconds=180):
     deadline = time.monotonic() + seconds
     while True:
         try:
@@ -830,7 +830,13 @@ def start_dashboard(path, names, prod, config):
         release=value["release"],
     )
     candidate["id"] = identity
-    wait_for(candidate["url"], dashboard.expected_races(catalog.published(value, names)))
+    # A new dashboard reads every state at startup; on a host busy with collection that
+    # can take minutes.
+    wait_for(
+        candidate["url"],
+        dashboard.expected_races(catalog.published(value, names)),
+        int(config.get("DASHBOARD_READY_SECONDS", "180")),
+    )
     atomic_json(state / ("candidate-" + identity + ".json"), candidate)
     return candidate
 
