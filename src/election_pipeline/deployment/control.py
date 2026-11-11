@@ -58,7 +58,8 @@ IDLE_RUN_SECONDS = 1800
 IDLE_LEDGER = "worker-idle.json"
 # How old a restore check may be when it admits a new state. It must have verified that
 # state's exact published snapshot, after it was published, so its age only bounds how
-# long ago the backup path itself last worked; a daily check keeps it within a day.
+# long ago the backup path itself last worked. election-check-restore.timer runs one
+# within the hour after the first backup that holds a newly promoted state.
 RESTORE_CHECK_SECONDS = 24 * 3600
 
 

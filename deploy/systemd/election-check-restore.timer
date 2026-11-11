@@ -1,9 +1,8 @@
 [Unit]
-Description=Verify the newest backup restores, once a day after the 06:02 UTC backup
+Description=Hourly: restore-check a new state once a backup holds it (most hours do nothing)
 
 [Timer]
-OnCalendar=*-*-* 06:20:00
-Persistent=true
+OnCalendar=*-*-* *:40:00
 AccuracySec=1s
 
 [Install]

@@ -329,11 +329,44 @@ def unpack_bundle(archive, destination, receipt):
         raise ValueError("Archive files do not match the verified manifest")
 
 
+def awaiting_restore(catalog_file, destination):
+    """Sources a restore check would admit now: promoted but not yet public, in the latest
+    uploaded backup (it finished after their publication), not yet verified by a passed
+    restore check. Certified states added from their certified file are among them."""
+    from election_pipeline.deployment import catalog as registry
+
+    def record(name):
+        try:
+            return json.loads((destination / name).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return {}
+
+    backup, checked = record("latest-backup.json"), record("latest-check-restore.json")
+    if backup.get("outcome") != "uploaded" or not backup.get("finished_at"):
+        return []
+    verified = checked.get("current_publications", {}) if checked.get("outcome") == "passed" else {}
+    return sorted(
+        name
+        for name, entry in registry.read(catalog_file)["sources"].items()
+        if entry.get("publication_id")
+        and not entry["public"]
+        and entry.get("published_at")
+        and datetime.fromisoformat(entry["published_at"])
+        < datetime.fromisoformat(backup["finished_at"])
+        and verified.get(name) != entry["publication_id"]
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("backup", "check-restore", "fetch"))
     parser.add_argument("--backup-id")
     parser.add_argument("--catalog-file", type=Path)
+    parser.add_argument(
+        "--if-awaiting",
+        action="store_true",
+        help="check-restore only when a promoted state awaits one (see awaiting_restore)",
+    )
     parser.add_argument(
         "--env-file",
         type=Path,
@@ -351,6 +384,14 @@ def main():
     )
     args = parser.parse_args()
 
+    if args.action == "check-restore" and args.if_awaiting:
+        if not args.catalog_file:
+            parser.error("--if-awaiting reads the deployment: pass --catalog-file")
+        awaiting = awaiting_restore(args.catalog_file, args.destination)
+        if not awaiting:
+            print(json.dumps({"outcome": "not_needed"}), flush=True)
+            return 0
+        print(json.dumps({"awaiting": awaiting}), flush=True)
     if args.action == "check-restore" and args.backup_id is None:
         # The daily check (election-check-restore.timer) restores the newest upload.
         try:
