@@ -201,7 +201,7 @@ def run_enabled(path, prod, config):
         marker = result.pop("_idle", None)
         encoded = redacted(json.dumps(result), prod)
         print(encoded, flush=True)
-        return {**json.loads(encoded), "_idle": marker}
+        return {**json.loads(encoded), "_idle": (name, marker)}
 
     # Each job has its own container limits, so N parallel jobs use N times the budget.
     with ThreadPoolExecutor(max_workers=parallel_jobs(config)) as pool:
@@ -209,11 +209,12 @@ def run_enabled(path, prod, config):
             r for r in pool.map(job, sorted(collected(value), key=last_run)) if r is not None
         ]
     for r in results:
-        marker = r.pop("_idle", None)
+        name, marker = r.pop("_idle", (r.get("source_id"), None))
         if marker:
-            ledger[r["source_id"]] = marker
-        elif r.get("skipped") != "idle":
-            ledger.pop(r["source_id"], None)
+            ledger[name] = marker
+        elif r["outcome"] not in ("deferred", "paused") and r.get("skipped") != "idle":
+            # Only a run that did not publish its snapshot clears the record.
+            ledger.pop(name, None)
     atomic_json(ledger_path, {"schema_version": 1, "sources": ledger})
     ok = all(r["outcome"] in GOOD for r in results)
     atomic_json(
@@ -414,9 +415,10 @@ def check_keys(release_path, value, prod, names):
     settings, sources = load_config(root / "config/sources.toml")
     resources = root / "src/election_pipeline/resources"
     registry = root / "src/election_pipeline/states.py"
+    # A state's own data (``<slug>_*.json``) is read by its parser alone. Rosters are not
+    # theirs alone: every parser imports all of them (parsers.scope_2026).
     owners = {}
     for code, state in STATES.items():
-        owners[resources / "rosters_2026" / f"{code}.json"] = code
         for item in resources.glob(f"{state.slug}_*.json"):
             owners[item] = code
     files = {}
@@ -546,6 +548,13 @@ def release(path, release_path, image, prod, config, moved=(), check_all=False):
         # Without keys every source is checked, as before.
         keys, passed = {}, {}
     reused = [] if check_all else sorted(n for n in keys if passed.get(n) == keys[n])
+    if reused and len(reused) == len(names):
+        # One source is always checked, a different one each release: it proves the new
+        # image runs end to end, which no key can show (a manual-only state's registry
+        # entry, say, is in no collected source's key).
+        reused.remove(
+            min(reused, key=lambda n: hashlib.sha256((staged["revision"] + n).encode()).digest())
+        )
     checked = [n for n in names if n not in reused]
     failed = check_sources(staged["image_id"], value, prod, config, moved, checked)
     # A pass holds for its key whether or not this release goes ahead.
