@@ -4,8 +4,9 @@ Manual acquisition replaces HTTP collection for one source. It keeps the same
 state parser, raw archive contract, database tables, dbt checks, publication gate,
 backup/restore gate and dashboard.
 
-Ohio's official XML and Kansas's results page are imported this way. The importer
-accepts a configured single-file result bundle with an ISO report timestamp.
+Ohio's official XML, Kansas's results page and Oklahoma's county results export are
+imported this way. The importer accepts a configured single-file result bundle with an
+ISO report timestamp.
 Multi-file sources and adapters without that timestamp contract are rejected.
 
 ## Provenance and validation

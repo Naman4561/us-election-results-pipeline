@@ -168,6 +168,15 @@ STATES = {
         governor=True,
         source_page="https://liveresults.ohiosos.gov/",
     ),
+    "OK": State(
+        "OK",
+        "Oklahoma",
+        "ok_2026_general",
+        tuple(range(1, 6)),
+        ("total_votes", "election_day", "early_voting", "absentee_by_mail"),
+        governor=True,
+        source_page="https://results.okelections.gov/",
+    ),
     "SD": State(
         "SD",
         "South Dakota",
