@@ -877,6 +877,21 @@ class DeploymentTests(unittest.TestCase):
         ):
             with self.subTest(changes=changes), self.assertRaises(ValueError):
                 control.recovery_gate(self.value, [GA], self.report(now, **changes), now)
+        # A daily check after the publication admits it within a day, not after.
+        self.value["sources"][GA]["published_at"] = (now - timedelta(hours=30)).isoformat()
+        control.recovery_gate(
+            self.value,
+            [GA],
+            self.report(now, finished_at=(now - timedelta(hours=20)).isoformat()),
+            now,
+        )
+        with self.assertRaisesRegex(ValueError, "last 24 hours"):
+            control.recovery_gate(
+                self.value,
+                [GA],
+                self.report(now, finished_at=(now - timedelta(hours=25)).isoformat()),
+                now,
+            )
 
     def caddyfile(self):
         path = self.root / "Caddyfile"
