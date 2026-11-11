@@ -441,12 +441,14 @@ class MississippiTests(unittest.TestCase):
         conn = MagicMock()
         conn.__enter__.return_value = conn
         role = {"rolsuper": False, "rolcreatedb": False, "rolcreaterole": False}
-        responses = [MagicMock() for _ in range(9)]
+        # Per read: transaction, role, metadata, feed health (read every time, it is
+        # refreshed in place), then on a new publication only, counties and contests.
+        responses = [MagicMock() for _ in range(10)]
         responses[1].fetchone.return_value = responses[7].fetchone.return_value = role
         responses[2].fetchone.return_value = responses[8].fetchone.return_value = metadata
-        responses[3].fetchall.return_value = counties
-        responses[4].fetchall.return_value = contests
-        responses[5].fetchall.return_value = feeds
+        responses[3].fetchall.return_value = responses[9].fetchall.return_value = feeds
+        responses[4].fetchall.return_value = counties
+        responses[5].fetchall.return_value = contests
         conn.execute.side_effect = responses
         geo = json.loads((STATIC / "ms-map.json").read_text())
         provider = PublishedResults({}, geo, self.source.source_id, state="MS")
@@ -457,7 +459,7 @@ class MississippiTests(unittest.TestCase):
         self.assertEqual(first["county_collection"]["with_results"], 13)
         for call in conn.execute.call_args_list[3:6]:
             self.assertEqual(call.args[1], ("ms-frozen",))
-        self.assertEqual(len(conn.execute.call_args_list), 9)
+        self.assertEqual(len(conn.execute.call_args_list), 10)
 
 
 @unittest.skipUnless(
@@ -518,6 +520,42 @@ class MississippiDatabaseTests(unittest.TestCase):
                 (fixture.source.source_id,),
             ).fetchone()
             self.assertEqual(str(current["publication_id"]), published["publication_id"])
+
+        # Another collection with the same county reports: new feed health, same votes.
+        # The live publication keeps its tables and gets the new health in place.
+        path, again = fixture.collect(previous=path)
+        self.assertNotEqual(again.sha256, report["identity"]["raw_sha256"])
+        health = fixture.parse(path)
+        self.assertEqual(health["outcome"], "parsed", health)
+        same = {k: v for k, v in health["output_sha256"].items() if k != "county_feeds.csv"}
+        self.assertEqual(
+            same, {k: v for k, v in report["output_sha256"].items() if k != "county_feeds.csv"}
+        )
+        self.assertNotEqual(
+            health["output_sha256"]["county_feeds.csv"], report["output_sha256"]["county_feeds.csv"]
+        )
+        loaded = load_parsed(
+            fixture.source, fixture.settings, fixture.root, Path(health["output_dir"]), db
+        )
+        kept = publication.publish(ROOT, db, loaded["release_id"], "unofficial", skip_current=True)
+        self.assertEqual(kept["outcome"], "already_current", kept)
+        self.assertTrue(kept["county_feeds_refreshed"])
+        self.assertEqual(kept["publication_id"], published["publication_id"])
+        checked = {
+            r["county"]: r["last_attempt_at"] for r in fixture.read(health, "county_feeds.csv")
+        }
+        with connect(db) as conn:
+            self.assertEqual(
+                conn.execute("SELECT count(*) AS n FROM serving.publications").fetchone()["n"], 1
+            )
+            rows = conn.execute(
+                "SELECT county, last_attempt_at FROM ms.county_feed_status "
+                "WHERE publication_id=%s AND last_attempt_at IS NOT NULL",
+                (published["publication_id"],),
+            ).fetchall()
+            self.assertTrue(rows)
+            for row in rows:
+                self.assertEqual(row["last_attempt_at"].isoformat(), checked[row["county"]])
 
         # Capacity check only: the 69 additions are explicitly synthetic test reviews.
         from test_county_scaling import all_imports

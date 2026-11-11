@@ -489,6 +489,16 @@ class PublishedResults:
                     self.geography, None, [], [], state=self.state.code, races=self.races
                 )
             identity = str(metadata["publication_id"])
+            # County feed health is refreshed in place between publications
+            # (publication.refresh_county_feeds), so it is read every time.
+            feeds = (
+                conn.execute(
+                    "SELECT * FROM ms.county_feed_status WHERE publication_id=%s",
+                    (identity,),
+                ).fetchall()
+                if self.state.county_feed_status
+                else None
+            )
             if identity not in self.cache:
                 methods = self.state.methods[1:]
                 counties = (
@@ -497,14 +507,6 @@ class PublishedResults:
                     else []
                 )
                 contests = published_rows(conn, identity, "contest_results", (), methods)
-                feeds = (
-                    conn.execute(
-                        "SELECT * FROM ms.county_feed_status WHERE publication_id=%s",
-                        (identity,),
-                    ).fetchall()
-                    if self.state.county_feed_status
-                    else None
-                )
                 payload = make_payload(
                     self.geography,
                     metadata,
@@ -515,10 +517,10 @@ class PublishedResults:
                     county_feeds=feeds,
                 )
                 self.cache = {identity: payload}
-                self.feed_cache = feeds
+            self.feed_cache = feeds
             payload = {**self.cache[identity], "publication": metadata}
             if self.state.county_feed_status and not certified_file(metadata):
-                payload = with_county_feeds(payload, self.geography, self.feed_cache)
+                payload = with_county_feeds(payload, self.geography, feeds)
             return payload
 
 

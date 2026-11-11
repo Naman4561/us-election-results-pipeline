@@ -146,6 +146,10 @@ def assess(prod, config, now):
             issues[f"{REMINDER}official/{name}"] = (
                 "The state's source marks its results official; check them, then certify"
             )
+        if entry["public"] and entry["status"] == "test":
+            issues[f"status/{name}"] = (
+                "Public source is labelled test; deploy mark-unofficial relabels it"
+            )
         if entry.get("paused"):
             # An operator stopped its collection; its publication is still checked below.
             # A certified source stays paused for good, which needs no reminder.
