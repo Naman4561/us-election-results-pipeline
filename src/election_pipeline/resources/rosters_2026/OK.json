@@ -1,6 +1,6 @@
 {
  "state": "OK",
- "provenance": "Oklahoma candidates (by name, with the export's ballot numbers checked for consistency) and counties from the State Election Board's county results export, 20261103_CountyResults_csv.zip (SHA-256 13de6887cfb57ad88b61ffd7f2b250cb07a60747895e552d409517d2dedffc86), downloaded from results.okelections.gov on November 11, 2026 01:58 UTC. Awaiting the operator's confirmation.",
+ "provenance": "Oklahoma candidates (by name, with the export's ballot numbers checked for consistency) and counties from the State Election Board's county results export, 20261103_CountyResults_csv.zip (SHA-256 13de6887cfb57ad88b61ffd7f2b250cb07a60747895e552d409517d2dedffc86), downloaded from results.okelections.gov on November 11, 2026 01:58 UTC. Confirmed by the operator before release on November 10, 2026 (Central).",
  "races": {
   "OK-SEN": {
    "candidates": [
