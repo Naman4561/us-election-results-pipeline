@@ -28,6 +28,11 @@ def main():
         default=[],
         help="A source whose address this release changes; it has no snapshot to check yet",
     )
+    staged.add_argument(
+        "--check-all",
+        action="store_true",
+        help="Check every source, even one whose check passed before with the same inputs",
+    )
     sub.add_parser("rollback-release")
     for name in ("register", "prepare", "promote", "disable", "pause", "resume"):
         sub.add_parser(name).add_argument("--source", required=True)
@@ -87,7 +92,7 @@ def main():
             }
         elif action == "release":
             result = control.release(
-                path, args.release, args.image, prod, config, args.moved_source
+                path, args.release, args.image, prod, config, args.moved_source, args.check_all
             )
         elif action == "rollback-release":
             result = control.rollback_release(path, config)
