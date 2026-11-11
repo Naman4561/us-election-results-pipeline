@@ -323,6 +323,16 @@ test("national/state map navigation and coverage statuses", async (t) => {
   assert(
     d.querySelector("#connection").textContent.includes("updated manually"),
   );
+  // The time the votes last changed is shown beside the publication time.
+  for (const s of [payload.national.states.OH, payload.states.OH])
+    s.publication.votes_changed_at = "2026-11-09T21:31:00Z";
+  click("#refresh");
+  await settle();
+  assert(
+    d
+      .querySelector("#published-time")
+      .textContent.includes("votes last changed"),
+  );
   // A certified state reads as official, with its certification date.
   for (const s of [payload.national.states.OH, payload.states.OH])
     Object.assign(s.publication, {
@@ -339,6 +349,11 @@ test("national/state map navigation and coverage statuses", async (t) => {
     d
       .querySelector("#notice")
       .textContent.includes("certified by the state on 2026-11-10"),
+  );
+  assert(
+    d
+      .querySelector("#results-note")
+      .textContent.includes("certified official results"),
   );
   w.fetch = async () => {
     throw Error("Network offline");

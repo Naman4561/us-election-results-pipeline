@@ -694,6 +694,9 @@ function renderMetadata() {
     official = publication?.status === "official",
     anyManual = Object.values(data.states).some(
       (s) => s.acquisition?.method === "manual",
+    ),
+    anyOfficial = Object.values(data.states).some(
+      (s) => s.publication?.status === "official",
     );
   const test =
     data.mode === "demo" ||
@@ -717,7 +720,11 @@ function renderMetadata() {
   $("published-time").textContent = national
     ? "Each state publishes independently"
     : publication
-      ? "Published " + date(publication.published_at)
+      ? "Published " +
+        date(publication.published_at) +
+        (publication.votes_changed_at
+          ? " · votes last changed " + date(publication.votes_changed_at)
+          : "")
       : "Awaiting a validated state release";
   $("notice").textContent = stale
     ? "Refresh failed. Showing the last successful snapshot; displayed results may be stale."
@@ -738,7 +745,15 @@ function renderMetadata() {
             : "Unofficial returns from official election sources. A party lead is not a race call. Gray and patterned regions are explained in the legend." +
               (national && anyManual
                 ? " Includes manually updated states; select a state for its report timestamp."
+                : "") +
+              (national && anyOfficial
+                ? " States whose results are certified show their official results."
                 : "");
+  $("results-note").textContent =
+    "Reported candidate votes are not ballot turnout. " +
+    (official
+      ? "These are the state's certified official results; no projections or race calls."
+      : "These are unofficial returns; no projections or race calls.");
   if (
     (national &&
       Object.values(data.states).some(
