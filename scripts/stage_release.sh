@@ -19,6 +19,41 @@ if [[ ! "$revision" =~ ^[0-9a-f]{40}$ ]]; then
     printf 'The requested branch was not found on GitHub.\n' >&2
     exit 1
 fi
+
+# The tests run in GitHub Actions on every push (.github/workflows/ci.yml): the full suite
+# on Linux and Windows, the dashboard's JavaScript and PostgreSQL. A revision is staged
+# only once every one of those jobs passed for it, so this host, whose CPU also collects
+# and serves results, does not run them again. STAGE_FULL_TESTS=1 runs the suite here too.
+python3 - "$revision" <<'PY'
+import json, sys, urllib.request
+
+revision = sys.argv[1]
+required = {"test (ubuntu-latest)", "test (windows-latest)", "dashboard", "postgres"}
+url = (
+    "https://api.github.com/repos/Naman4561/us-election-results-pipeline/commits/"
+    f"{revision}/check-runs?per_page=100"
+)
+request = urllib.request.Request(
+    url, headers={"Accept": "application/vnd.github+json", "User-Agent": "election-stage"}
+)
+with urllib.request.urlopen(request, timeout=30) as response:
+    runs = json.load(response)["check_runs"]
+latest = {}
+for run in sorted(runs, key=lambda r: r["id"]):
+    latest[run["name"]] = run  # a re-run supersedes the earlier attempt
+problems = sorted(
+    f"{name}: {latest[name]['status']}/{latest[name]['conclusion']}"
+    if name in latest
+    else f"{name}: not run"
+    for name in required
+    if name not in latest
+    or (latest[name]["status"], latest[name]["conclusion"]) != ("completed", "success")
+)
+if problems:
+    sys.exit(f"CI has not passed for {revision}: " + "; ".join(problems))
+print("CI passed: " + ", ".join(sorted(required)))
+PY
+
 release="/opt/election-releases/$revision"
 if [[ ! -d "$release/.git" ]]; then
     git clone --no-checkout "$repository" "$release"
@@ -68,8 +103,26 @@ printf '%s\n' "$release/src" > "$packages/election-pipeline.pth"
 
 docker build --build-arg "VCS_REF=$revision" --tag "election-pipeline:$revision" "$release"
 
-# Run the Linux-only controls tests with no production mounts, credentials or network.
-docker run --rm --network none --cpus 0.5 --memory 768m --memory-swap 768m --cap-drop ALL --security-opt no-new-privileges "election-pipeline:$revision" python -m unittest discover -s tests -v
+# A smoke test of the image itself, with no production mounts, credentials or network:
+# every module imports with the image's dependencies, the source configuration loads,
+# and a manual import and the dashboard run end to end.
+isolated=(docker run --rm --network none --cpus 0.5 --memory 768m --memory-swap 768m --cap-drop ALL --security-opt no-new-privileges "election-pipeline:$revision")
+"${isolated[@]}" python -c '
+import importlib, pkgutil
+from pathlib import Path
+import election_pipeline
+from election_pipeline.settings import load_config
+names = [m.name for m in pkgutil.walk_packages(election_pipeline.__path__, "election_pipeline.") if not m.name.endswith("__main__")]
+for name in names:
+    importlib.import_module(name)
+print(len(names), "modules and", len(load_config(Path("config/sources.toml"))[1]), "sources load")
+'
+for tests in test_oklahoma.py test_dashboard.py; do
+    "${isolated[@]}" python -m unittest discover -s tests -p "$tests"
+done
+if [[ "${STAGE_FULL_TESTS:-0}" == 1 ]]; then
+    "${isolated[@]}" python -m unittest discover -s tests -v
+fi
 
 printf '\nRelease staged: %s\nMake it current with:\n  sudo %s/.venv/bin/python %s/scripts/deploy.py release --release %s --image election-pipeline:%s\n' \
     "$release" "$release" "$release" "$release" "$revision"
