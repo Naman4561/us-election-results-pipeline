@@ -217,6 +217,10 @@ def electionware(raw, county, contract):
         section,
     ):
         label = re.sub(r"^[DRI]\s+", "", match[1].strip())
+        # Some reports print each row's vote-method columns on a line of their own under
+        # it (Madison, November 11), and their over- and undervote rows carry them too.
+        if re.fullmatch(r"[0-9,\s]+", label) or re.match(r"(?:Over|Under)votes\b", label):
+            continue
         if label not in {
             "Vote For",
             "Write-In Totals",
@@ -402,6 +406,10 @@ def read_county(raw, county, contract=None):
     if "scanned" in county["format"]:
         sha = hashlib.sha256(raw).hexdigest()
         record = contract["reviewed_scans"].get(county["key"], {}).get(sha)
+        if record is None and len(pdf_text(raw).strip()) > 80:
+            # The county now posts a text PDF from the same system (Madison, November 11):
+            # read it as one, with all of that reader's identity and reconciliation checks.
+            return electionware(raw, county, contract)
         if record is None:
             raise ReviewRequired("Changed scanned PDF requires a reviewed SHA-bound transcription")
         result = {
