@@ -2,7 +2,9 @@
 
 import copy
 import json
+import time
 import unittest
+from threading import Event
 from unittest.mock import MagicMock, patch
 
 try:
@@ -152,9 +154,33 @@ class DashboardTests(unittest.TestCase):
             first, second = reader(), reader()
             self.assertIs(first, second)
             self.assertEqual(read.call_count, 1)
-            reader.recent = (reader.recent[0] - reader.TTL_SECONDS - 1, reader.recent[1])
+            reader.recent = (reader.recent[0] - reader.STALE_SECONDS - 1, reader.recent[1])
             reader()
             self.assertEqual(read.call_count, 2)
+
+    def test_reader_serves_a_stale_payload_while_refreshing_in_the_background(self):
+        reader = PublishedResults({}, self.geo, "nc_2026_general_all")
+        started, release = Event(), Event()
+
+        def slow():
+            started.set()
+            release.wait(5)
+            return {"races": {}, "new": True}
+
+        with patch.object(reader, "read", return_value={"races": {}}):
+            old = reader()
+        reader.recent = (reader.recent[0] - reader.TTL_SECONDS - 1, old)
+        with patch.object(reader, "read", side_effect=slow) as read:
+            self.assertIs(reader(), old)
+            self.assertTrue(started.wait(5))
+            self.assertIs(reader(), old)  # one refresh at a time
+            release.set()
+            for _ in range(100):
+                if not reader.refreshing:
+                    break
+                time.sleep(0.01)
+            self.assertEqual(read.call_count, 1)
+            self.assertTrue(reader()["new"])
 
     def test_national_summary_omits_county_detail_served_per_state(self):
         full = demo_payload(self.geo)
