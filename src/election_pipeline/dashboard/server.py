@@ -415,7 +415,7 @@ class PublishedResults:
     # An older payload is still served while a newer one is read in the background, so
     # a database busy with collection slows the refresh, not the visitor. Past this age
     # a request reads it directly, and fails if the database does.
-    STALE_SECONDS = 120
+    STALE_SECONDS = 300
 
     def __init__(self, settings, geography, source_id, state="NC"):
         self.state = state_adapter(state)
@@ -578,6 +578,7 @@ def create_app(
     catalog_file=None,
 ):
     catalog_file = catalog_file or os.environ.get("DASHBOARD_CATALOG")
+    state_providers_given = state_providers
     if state_providers is None:
         settings = None if demo else dashboard_settings(env_file)
         state_providers = {}
@@ -591,6 +592,18 @@ def create_app(
                 else PublishedResults(settings, geography, state.source_id, code)
             )
 
+    if not demo and state_providers_given is None:
+        # Load every state once at startup, so the first visitor (or the readiness check
+        # of a new dashboard) does not wait for all of them to be read in turn.
+        def warm():
+            for code, provider in state_providers.items():
+                try:
+                    provider()
+                except Exception:
+                    logging.getLogger(__name__).warning("Published %s snapshot unavailable", code)
+
+        Thread(target=warm, daemon=True).start()
+
     def approved_providers():
         """The catalog's public states; a manually imported one is labelled as such."""
         if not catalog_file:
@@ -598,12 +611,13 @@ def create_app(
         from election_pipeline.deployment import catalog as registry
 
         deployment = registry.read(catalog_file)
+        configured = registry.configured()
         codes = registry.public_states(deployment)
         if not codes <= state_providers.keys():
             raise ValueError("This dashboard image cannot serve all approved states")
         approved = {code: state_providers[code] for code in sorted(codes)}
         for name, entry in deployment["sources"].items():
-            code = registry.configured()[name].state
+            code = configured[name].state
             if entry["public"] and entry["acquisition"] == "manual" and code in approved:
 
                 def manual_provider(provider=approved[code]):

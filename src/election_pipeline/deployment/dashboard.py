@@ -57,7 +57,9 @@ def start(value, names, prod, config, directory, *, port, release):
     }
     containers.command(
         [
-            *containers.base_args(name, image_id, config),
+            # A dashboard serves visitors while jobs load the host; it may have its own
+            # CPU budget (DASHBOARD_CPUS), else a job's.
+            *containers.base_args(name, image_id, config, cpus=config.get("DASHBOARD_CPUS")),
             "--detach",
             "--restart",
             "unless-stopped",

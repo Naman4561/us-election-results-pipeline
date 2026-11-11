@@ -189,6 +189,8 @@ paths and resource budgets, never passwords:
 | Setting | Default | Meaning |
 | --- | --- | --- |
 | `JOB_CPUS`, `JOB_MEMORY` | `0.5`, `768m` | Limits of every job and dashboard container |
+| `DASHBOARD_CPUS` | `JOB_CPUS` | A dashboard container's CPU budget, if it differs |
+| `DASHBOARD_READY_SECONDS` | `180` | How long a new dashboard may take to read every state |
 | `JOB_PARALLEL` | `1` | Jobs at once (1–4), each with those limits |
 | `JOB_TIMEOUT` | `240` | Seconds before one job is stopped |
 | `CYCLE_SECONDS` | `600` | One worker cycle's budget. The timer fires every 5 minutes and skips ticks while a cycle runs; normal cycles take 1–2 minutes, the one after a release, which republishes every source, longer |
