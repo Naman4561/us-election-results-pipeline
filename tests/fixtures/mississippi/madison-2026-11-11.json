@@ -1,0 +1,9 @@
+{
+ "url": "https://www.madison-co.com/elections/election_results.pdf",
+ "captured_at": "2026-11-11T20:20:00+00:00",
+ "last_modified": "Wed, 11 Nov 2026 20:18:29 GMT",
+ "bytes": 44208,
+ "sha256": "9f73741f3d1e9aef2cf42bdb5bea52ae7530f8d75beccf838a3125420b1ad76c",
+ "capture_method": "One read-only GET with curl, saved unchanged.",
+ "note": "Madison's official results (11/11/2026 9:50 AM), now a text PDF; Senate totals unchanged from the reviewed November 10 scan."
+}

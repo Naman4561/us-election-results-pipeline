@@ -1,5 +1,6 @@
 """Original county captures, failed-source recovery, explicit coverage and safe publication."""
 
+import copy
 import csv
 import hashlib
 import io
@@ -181,6 +182,34 @@ class MississippiTests(unittest.TestCase):
         broken = raw.replace(b"18,513", b"18,514", 1)
         with self.assertRaises(ValueError):
             ms.read_county(broken, county, self.policy)
+
+    def test_a_scanned_county_posting_a_text_report_is_read_from_its_text(self):
+        fixture = ROOT / "tests/fixtures/mississippi/madison-2026-11-11.pdf"
+        ledger = json.loads(fixture.with_suffix(".json").read_text())
+        raw = fixture.read_bytes()
+        self.assertEqual(hashlib.sha256(raw).hexdigest(), ledger["sha256"])
+        county = self.counties["MADISON"]
+        unreviewed = copy.deepcopy(self.policy)
+        unreviewed["reviewed_scans"]["MADISON"].pop(ledger["sha256"], None)
+        result = ms.read_county(raw, county, unreviewed)
+        self.assertEqual(
+            result["counts"], {"Scott Colom": 23258, "Cindy Hyde-Smith": 22787, "Ty Pinkins": 704}
+        )
+        self.assertEqual(
+            (result["write_in_votes"], result["precincts_reporting"], result["precincts_total"]),
+            (66, 46, 46),
+        )
+        self.assertEqual(result["report_generated_at"], "2026-11-11T09:50:00-06:00")
+        # Its reviewed transcription agrees with its text.
+        self.assertEqual(ms.read_county(raw, county, self.policy)["counts"], result["counts"])
+        # A total that does not reconcile is refused, and a scan without text still
+        # needs a reviewed transcription.
+        text = ms.pdf_text(raw)
+        with patch.object(ms, "pdf_text", return_value=text.replace("46,815", "46,816")):
+            with self.assertRaisesRegex(ValueError, "does not reconcile"):
+                ms.read_county(raw, county, unreviewed)
+        with self.assertRaises(ms.ReviewRequired):
+            ms.read_county(self.raw["MADISON"] + b"\n", county, unreviewed)
 
     def test_all_original_reports_have_exact_known_named_candidate_counts(self):
         with zipfile.ZipFile(FIXTURE) as archive:
