@@ -560,8 +560,11 @@ class DeploymentTests(unittest.TestCase):
             target.parent.mkdir(parents=True, exist_ok=True)
             if source.is_dir():
                 shutil.copytree(source, target, ignore=ignore)
-            else:
+            elif source.exists():
                 shutil.copy2(source, target)
+            else:
+                # Run from inside the image, which has no Dockerfile of its own.
+                target.write_text(f"stand-in for {entry}\n", encoding="utf-8")
         settings, sources = load_config(tree / "config/sources.toml")
         state = Path(self.prod["DATA_DIR"]) / "state"
         state.mkdir(parents=True)
