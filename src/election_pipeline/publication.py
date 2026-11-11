@@ -389,6 +389,39 @@ def equivalent_iowa_release(conn, current, metadata):
     ).fetchone()["equivalent"]
 
 
+def votes_changed(conn, publication_id, previous_id):
+    """Record when a new publication's vote totals were first seen.
+
+    If every contest total equals the previous publication's, the totals have not
+    changed and its time is kept; otherwise it is this publication's first observation.
+    """
+    conn.execute(
+        """
+        UPDATE serving.publications p
+        SET votes_changed_at = CASE
+            WHEN %(previous)s::uuid IS NOT NULL AND NOT EXISTS (
+                (SELECT contest_id, choice, total_votes FROM serving.contest_results
+                 WHERE publication_id = %(new)s
+                 EXCEPT
+                 SELECT contest_id, choice, total_votes FROM serving.contest_results
+                 WHERE publication_id = %(previous)s)
+                UNION ALL
+                (SELECT contest_id, choice, total_votes FROM serving.contest_results
+                 WHERE publication_id = %(previous)s
+                 EXCEPT
+                 SELECT contest_id, choice, total_votes FROM serving.contest_results
+                 WHERE publication_id = %(new)s)
+            )
+            THEN (SELECT coalesce(votes_changed_at, first_observed_at)
+                  FROM serving.publications WHERE publication_id = %(previous)s)
+            ELSE p.first_observed_at
+        END
+        WHERE p.publication_id = %(new)s
+        """,
+        {"new": publication_id, "previous": previous_id},
+    )
+
+
 def promote(conn, metadata, attempt_id, schema, code_hash, status, attested=None):
     current = current_publication(conn, metadata["source_id"])
     require_forward_release(conn, current, metadata)
@@ -468,6 +501,9 @@ def promote(conn, metadata, attempt_id, schema, code_hash, status, attested=None
 
             if count == 0:
                 raise ValueError(f"No rows copied from {model}")
+
+        if metadata["dataset"] == "election_results":
+            votes_changed(conn, publication_id, current and current["publication_id"])
 
     activate(conn, publication_id, metadata["source_id"])
     outcome = "skipped" if current and current["publication_id"] == publication_id else "published"
