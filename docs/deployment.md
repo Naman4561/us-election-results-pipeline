@@ -23,8 +23,12 @@ deploy status
 
 ## Releasing
 
-1. **Stage** the pushed branch. Nothing running changes; the tests run again inside the
-   new image, with no network or production mounts. The image installs the locked
+1. **Stage** the pushed branch. Nothing running changes. Staging starts only once every
+   GitHub Actions job (`ci.yml`: the suite on Linux and Windows, the dashboard and
+   PostgreSQL) has passed for that commit, so this host does not run the suite again;
+   inside the new image, with no network or production mounts, it imports every module,
+   loads the source configuration and runs two quick end-to-end test files
+   (`STAGE_FULL_TESTS=1` runs the whole suite as well). The image installs the locked
    dependencies (`constraints.txt`) in a layer of its own, before any code, so a release
    that changes only code reuses it and adds a few megabytes. The host control scripts'
    dependencies live in one environment per lock under `/opt/election-venvs`, which the
@@ -193,7 +197,7 @@ paths and resource budgets, never passwords:
 | `DASHBOARD_READY_SECONDS` | `180` | How long a new dashboard may take to read every state |
 | `JOB_PARALLEL` | `1` | Jobs at once (1–4), each with those limits |
 | `JOB_TIMEOUT` | `240` | Seconds before one job is stopped |
-| `CYCLE_SECONDS` | `600` | One worker cycle's budget. The timer fires every 5 minutes and skips ticks while a cycle runs; normal cycles take 1–2 minutes, the one after a release, which republishes every source, longer |
+| `CYCLE_SECONDS` | `600` | One worker cycle's budget. The timer fires every 15 minutes (the host's CPU is burstable, with a 20% baseline) and skips ticks while a cycle runs; normal cycles take 1–2 minutes, the one after a release that changes a state's publication, longer |
 
 A source that is not due for collection, and whose last run published the snapshot it
 holds under the current image and status, is skipped without starting a container (its
