@@ -903,6 +903,20 @@
         "precincts_total": 46,
         "report_generated_local": "2026-11-10T19:38:00",
         "review_method": "Official countywide PDF (scanned November 10, 2026) visually reviewed. Page 1 gives the report time and Senate totals by Election Day, in-person absentee, mail-in absentee, 5-day absentee and affidavit; each candidate's columns add up to its total. Affidavit ballots (852 Senate votes) are now included."
+      },
+      "9f73741f3d1e9aef2cf42bdb5bea52ae7530f8d75beccf838a3125420b1ad76c": {
+        "counts": {
+          "Scott Colom": 23258,
+          "Cindy Hyde-Smith": 22787,
+          "Ty Pinkins": 704
+        },
+        "write_in_votes": 66,
+        "write_in_label": "Write-In Totals",
+        "reported_candidate_vote_total": 46815,
+        "precincts_reporting": 46,
+        "precincts_total": 46,
+        "report_generated_local": "2026-11-11T09:50:00",
+        "review_method": "Official countywide PDF (a text PDF, posted November 11, 2026) reviewed from its extracted text. Headed \"Official Results\": the county's certified count. Senate totals are unchanged from the November 10 report, including 852 affidavit votes; each candidate's method columns add up to its total."
       }
     },
     "WARREN": {
@@ -957,6 +971,7 @@
   "compatible_policy_sha256": [
     "7107622d0b781a8ac8091f1ff61dbbeebc167bff0c7308b2001f86ba646aa7e5",
     "61b564006562819358a771f27842a0d5474d585be96e4821904a132669b97c7a",
-    "d6609e6d1b03503b6a461a4d217d31f79f20c9a1604b0b6d38fc180f056bc56b"
+    "d6609e6d1b03503b6a461a4d217d31f79f20c9a1604b0b6d38fc180f056bc56b",
+    "299d2851a0098c98d52f50c1de516569c5371e1e694bf11303a4fef785cd0957"
   ]
 }
