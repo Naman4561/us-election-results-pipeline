@@ -15,7 +15,7 @@ from election_pipeline.parsers.html import Tree
 from election_pipeline.parsers.results import finish
 from election_pipeline.storage import member_path
 
-POLICY_SHA256 = "d6609e6d1b03503b6a461a4d217d31f79f20c9a1604b0b6d38fc180f056bc56b"
+POLICY_SHA256 = "299d2851a0098c98d52f50c1de516569c5371e1e694bf11303a4fef785cd0957"
 NUMBER = r"(?:0|[1-9][0-9]*|[1-9][0-9]{0,2}(?:,[0-9]{3})+)"
 FEED_FIELDS = (
     "source_line",
