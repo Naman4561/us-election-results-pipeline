@@ -621,9 +621,13 @@ class DeploymentTests(unittest.TestCase):
         registry = tree / package / "states.py"
 
         def hashes():
-            return publication.project_hash(tree, "NC"), publication.project_hash(tree, "KY")
+            # Callers pass a resolved root, as the module's own path is (8.3 names differ).
+            root = tree.resolve()
+            return publication.project_hash(root, "NC"), publication.project_hash(root, "KY")
 
-        with patch.object(publication, "__file__", str(tree / package / "publication.py")):
+        with patch.object(
+            publication, "__file__", str(tree.resolve() / package / "publication.py")
+        ):
             before = hashes()
             registry.write_text(
                 registry.read_text(encoding="utf-8").replace("ky.gov/live/", "ky.gov/results/"),
