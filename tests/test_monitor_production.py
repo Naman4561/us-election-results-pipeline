@@ -67,7 +67,7 @@ class MonitorTests(unittest.TestCase):
                 name: {
                     "enabled": name != MS,
                     "public": name != MS,
-                    "status": "test",
+                    "status": "unofficial",
                     "acquisition": "http",
                 }
                 for name in self.sources
@@ -165,6 +165,11 @@ class MonitorTests(unittest.TestCase):
         self.assertNotIn("dashboard/MS", issues)
         self.publish(MS)
         self.assertIn("dashboard/coverage", self.assess())
+
+    def test_a_public_source_still_labelled_test_is_an_issue(self):
+        self.catalog["sources"][NC]["status"] = "test"
+        issues = self.assess()
+        self.assertEqual(set(issues) & {f"status/{NC}", f"status/{MN}"}, {f"status/{NC}"})
 
     def test_a_paused_source_is_a_reminder_but_its_publication_is_still_checked(self):
         self.catalog["sources"][NC]["paused"] = True

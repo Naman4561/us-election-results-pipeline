@@ -373,11 +373,11 @@ class CollectionTests(unittest.TestCase):
             with store.lock():
                 pass
             owner = (self.root / "locks").stat()
-            chown.assert_called_once_with(
-                self.root / "locks" / f"{self.source.source_id}.lock",
-                owner.st_uid,
-                owner.st_gid,
+            (path, uid, gid), _ = chown.call_args  # paths compared resolved (8.3 names)
+            self.assertEqual(
+                path.resolve(), (self.root / "locks" / f"{self.source.source_id}.lock").resolve()
             )
+            self.assertEqual((uid, gid), (owner.st_uid, owner.st_gid))
             with store.lock():  # an existing lock is left as it is
                 pass
             self.assertEqual(chown.call_count, 1)

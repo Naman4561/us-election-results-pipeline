@@ -406,6 +406,8 @@ class ManualDeploymentTests(unittest.TestCase):
     def test_manual_freshness_does_not_require_http_poll_but_overdue_import_alerts(self):
         now = datetime.now(timezone.utc)
         recent = (now - timedelta(minutes=2)).isoformat()
+        for other in self.value["sources"].values():
+            other["status"] = "unofficial"  # a public source labelled test is an issue
         entry = self.value["sources"][self.source.source_id]
         entry.update(
             public=True,

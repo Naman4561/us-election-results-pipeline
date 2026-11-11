@@ -21,6 +21,14 @@ from election_pipeline.states import own_registry, publication_lock, state_adapt
 FLORIDA_SOURCE = "fl_2026_general"
 IOWA_SOURCE = "ia_2026_general"
 SAME_OUTPUT_KEYS = ("output_sha256", "output_rows", "contests")
+# Mississippi's county feed health (when each county was last checked) changes with every
+# collection while the votes do not; it is refreshed in place, not republished.
+FEED_FILE = "county_feeds.csv"
+FEED_COLUMNS = (
+    "county county_fips collection_status source_url raw_sha256 last_attempt_at "
+    "last_success_at report_generated_at report_date precincts_reporting precincts_total "
+    "absentee_scope affidavit_scope write_in_votes write_in_label issue"
+).split()
 # "official": the state's own source marks the snapshot as its certified results, or an
 # operator attests that the state certified them (see ``attestation``).
 STATUSES = ("test", "unofficial", "official")
@@ -642,19 +650,49 @@ def same_results(conn, metadata, current):
     snapshot even when no vote changed. Publishing it again would rebuild identical
     tables, so the scheduled runner keeps the live publication instead. The new raw
     snapshot and its release stay recorded; only the redundant publication is skipped.
+
+    A state with county feed health (``State.county_feed_status``) writes when each
+    county was last checked beside its results, so that file differs every collection.
+    Identical votes with new feed health refresh the live publication's health rows from
+    this release, in place, instead of rebuilding its tables.
     """
     report = metadata.get("parser_report") or {}
     if not report.get("output_sha256"):
         return None
     previous = parser_report(conn, current["release_id"])
-    if any(previous.get(key) != report.get(key) for key in SAME_OUTPUT_KEYS):
+    if any(previous.get(key) != report.get(key) for key in SAME_OUTPUT_KEYS[1:]):
         return None
+    mine, theirs = dict(report["output_sha256"]), dict(previous.get("output_sha256") or {})
+    feeds_changed = False
+    if state_adapter(metadata["state"]).county_feed_status:
+        feeds_changed = mine.pop(FEED_FILE, None) != theirs.pop(FEED_FILE, None)
+    if mine != theirs:
+        return None
+    if feeds_changed:
+        refresh_county_feeds(conn, metadata["release_id"], current["publication_id"])
     return {
         "outcome": "already_current",
         "publication_id": str(current["publication_id"]),
         "release_id": metadata["release_id"],
         "identical_to_release": current["release_id"],
+        **({"county_feeds_refreshed": True} if feeds_changed else {}),
     }
+
+
+def refresh_county_feeds(conn, release_id, publication_id):
+    """Replace a publication's county feed health with the rows ``release_id`` loaded."""
+    columns = sql.SQL(", ").join(map(sql.Identifier, FEED_COLUMNS))
+    with conn.transaction():
+        conn.execute("DELETE FROM ms.county_feed_status WHERE publication_id=%s", (publication_id,))
+        inserted = conn.execute(
+            sql.SQL(
+                "INSERT INTO ms.county_feed_status (publication_id, {columns}) "
+                "SELECT %s, {columns} FROM ms.county_feeds WHERE release_id=%s"
+            ).format(columns=columns),
+            (publication_id, release_id),
+        ).rowcount
+        if inserted != 82:
+            raise ValueError(f"County feed health has {inserted} rows, not 82")
 
 
 def attestation(value):
