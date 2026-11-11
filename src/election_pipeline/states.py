@@ -1,7 +1,9 @@
 """Every covered state: its races, vote methods and parser, shared by jobs and the dashboard."""
 
+import ast
 from dataclasses import dataclass
 from importlib import import_module
+from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -428,6 +430,30 @@ STATES = {
         source_page="https://elections.hawaii.gov/election-results/",
     ),
 }
+
+
+def own_registry(path, code):
+    """This registry's source with only state ``code`` in ``STATES``.
+
+    What one state's results depend on: adding or changing another state does not change
+    it. Everything else in the file (the ``State`` class, its helpers) is kept.
+    """
+    tree = ast.parse(Path(path).read_text(encoding="utf-8"))
+    for node in tree.body:
+        if (
+            isinstance(node, ast.Assign)
+            and [getattr(t, "id", None) for t in node.targets] == ["STATES"]
+            and isinstance(node.value, ast.Dict)
+        ):
+            kept = [
+                (key, value)
+                for key, value in zip(node.value.keys, node.value.values)
+                if isinstance(key, ast.Constant) and key.value == code
+            ]
+            node.value.keys = [key for key, _ in kept]
+            node.value.values = [value for _, value in kept]
+            return ast.unparse(tree)
+    raise ValueError("The state registry has no STATES table")
 
 
 def state_adapter(code):

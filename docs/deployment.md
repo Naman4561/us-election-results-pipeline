@@ -195,6 +195,14 @@ paths and resource budgets, never passwords:
 | `JOB_TIMEOUT` | `240` | Seconds before one job is stopped |
 | `CYCLE_SECONDS` | `600` | One worker cycle's budget. The timer fires every 5 minutes and skips ticks while a cycle runs; normal cycles take 1–2 minutes, the one after a release, which republishes every source, longer |
 
+A source that is not due for collection, and whose last run published the snapshot it
+holds under the current image and status, is skipped without starting a container (its
+result reads `not_due` with `skipped: idle`). It still runs at least every 30 minutes,
+so its run report stays fresh for the monitor. `worker-idle.json` in the control state
+directory records what each source's last good run published. A release republishes
+only the states whose own registry entry, dbt models or publication code changed
+(`publication.project_hash`), not every state when one is added.
+
 Raise `JOB_PARALLEL` only after measuring headroom: PostgreSQL and the dashboard share
 the host. Backups pause collection for a few seconds only; see [backups](backups.md).
 

@@ -16,7 +16,7 @@ from psycopg import sql
 from psycopg.types.json import Jsonb
 
 from election_pipeline.database import connect
-from election_pipeline.states import publication_lock, state_adapter
+from election_pipeline.states import own_registry, publication_lock, state_adapter
 
 FLORIDA_SOURCE = "fl_2026_general"
 IOWA_SOURCE = "ia_2026_general"
@@ -28,13 +28,15 @@ ATTESTATION_MODES = ("approved_snapshot", "certified_file")
 DBT_CACHES = ("partial_parse.msgpack", "graph.gpickle")
 
 
-def project_hash(root):
+def project_hash(root, state):
+    """What turns a loaded release into a publication of ``state``: dbt, these modules,
+    their packages, and the registry as far as it concerns ``state`` (``own_registry``),
+    so that adding another state does not republish every one."""
     paths = [
         root / "pyproject.toml",
         root / "scripts/run_dbt.py",
         root / "scripts/publish.py",
         Path(__file__).resolve(),
-        root / "src/election_pipeline/states.py",
         root / "src/election_pipeline/database.py",
     ]
     paths += [p for p in (root / "dbt").glob("*.yml") if not p.name.startswith(".")]
@@ -54,6 +56,8 @@ def project_hash(root):
     for path in sorted(set(paths)):
         digest.update(path.relative_to(root).as_posix().encode() + b"\0")
         digest.update(path.read_bytes() + b"\0")
+    registry = root / "src/election_pipeline/states.py"
+    digest.update(b"states.py\0" + own_registry(registry, state).encode() + b"\0")
 
     return digest.hexdigest()
 
@@ -710,7 +714,7 @@ def prepare(root, db, release_id, status, *, skip_current=False, attested=None):
             live = current_publication(conn, metadata["source_id"])
             if not live or live["raw_sha256"] != metadata["raw_sha256"]:
                 raise ValueError("Only the currently published snapshot can be approved")
-        code_hash = project_hash(root)
+        code_hash = project_hash(root, metadata["state"])
         if skip_current:
             current = current_publication(conn, metadata["source_id"])
             if (
@@ -753,7 +757,7 @@ def prepare(root, db, release_id, status, *, skip_current=False, attested=None):
         )
         try:
             results = build_candidate(root, db, metadata, schema, artifacts)
-            if code_hash != project_hash(root):
+            if code_hash != project_hash(root, metadata["state"]):
                 raise ValueError("Project files changed during the candidate build; retry")
             with conn.transaction():
                 fingerprints = candidate_fingerprints(conn, schema, lock=True)
@@ -795,7 +799,7 @@ def publish_prepared(root, db, candidate_id):
             }
         if attempt["outcome"] != "running" or not attempt["validated_at"]:
             raise ValueError("Candidate has not passed validation")
-        if attempt["transform_sha256"] != project_hash(root.resolve()):
+        if attempt["transform_sha256"] != project_hash(root.resolve(), metadata["state"]):
             raise ValueError("Project changed after validation; transform again")
         with conn.transaction():
             actual = candidate_fingerprints(conn, attempt["candidate_schema"], lock=True)
