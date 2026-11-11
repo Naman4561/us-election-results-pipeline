@@ -44,6 +44,18 @@ deploy status
    validates does `current` move to the release; the worker uses it from its next cycle.
    A source that fails leaves the old release current.
 
+   A check that passed is not repeated while nothing it depends on changes. Each
+   source's check key (`control.check_keys`) covers the release files its check can
+   run: the image's build inputs, dbt models, migrations, the job scripts, the package
+   modules reachable from them and from the source's own parser and collector, and the
+   reviewed data other than other states'. It also covers the source's configuration,
+   its status and the snapshot it would check. Passes are recorded by key in
+   `release-checks.json` in the control state directory, kept even when a release fails,
+   so a retry checks only what failed. A change to one state's parser or data re-checks
+   that state; a change to shared parsing code, `states.py`, dbt, migrations or
+   dependencies re-checks every source; dashboard and host-side changes re-check none.
+   `deploy.py release --check-all` checks every source regardless.
+
    Once `current` has moved, old artifacts are pruned: release checkouts and images
    other than the current and previous releases, the two newest others and any image a
    container was created from (the active and previous dashboards), host environments no

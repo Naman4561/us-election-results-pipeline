@@ -9,6 +9,7 @@ separately, after a candidate dashboard from the release passes its checks.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
@@ -37,6 +38,19 @@ KEEP_RECENT_RELEASES = 2
 # The Docker build cache kept for the next staging; older layers beyond it are pruned.
 BUILD_CACHE_BYTES = 4 * 1024**3
 REVISION = re.compile(r"[0-9a-f]{40}")
+# What a source's release check can run: the image's build inputs, dbt models,
+# migrations, the job scripts and the package (see check_keys for which modules).
+CHECK_INPUTS = (
+    "Dockerfile", "constraints.txt", "pyproject.toml", "dbt/dbt_project.yml",
+    "dbt/macros", "dbt/models", "dbt/tests", "migrations", "src/election_pipeline",
+    "scripts/run_source.py", "scripts/run_dbt.py",
+)  # fmt: skip
+IMPORT = re.compile(
+    r"^\s*(?:from\s+(election_pipeline[\w.]*)\s+import\s+(\([^)]*\)|[^\n]+)"
+    r"|import\s+(election_pipeline[\w.]*))",
+    re.M,
+)
+CHECK_LEDGER = "release-checks.json"
 
 
 def db_settings(prod, *, writer=False):
@@ -283,7 +297,103 @@ def point_current(config, release_path):
     os.replace(temporary, link)
 
 
-def check_sources(image, value, prod, config, moved=()):
+def check_modules(root, code):
+    """The package modules a check of state ``code`` can run: everything the two job
+    scripts import, its own parser and collector (imported by name), and what they import.
+    A module only another state's parser or a host-side tool reaches is left out."""
+    from election_pipeline.states import STATES
+
+    state = STATES[code]
+    package = root / "src"
+
+    def path(name):
+        for found in (
+            package / (name.replace(".", "/") + ".py"),
+            package / name.replace(".", "/") / "__init__.py",
+        ):
+            if found.is_file():
+                return found
+        return None
+
+    pending = [root / "scripts/run_source.py", root / "scripts/run_dbt.py"]
+    pending.append(path(f"election_pipeline.parsers.{state.parser_module or state.slug}"))
+    if state.collection_backend:
+        pending.append(path(f"election_pipeline.collectors.{state.collection_backend}"))
+    seen = set()
+    while pending:
+        current = pending.pop()
+        if current is None or current in seen:
+            continue
+        seen.add(current)
+        for match in IMPORT.finditer(current.read_text(encoding="utf-8")):
+            module, names, plain = match.groups()
+            module = module or plain
+            parts = module.split(".")
+            # A module's packages run their __init__ first.
+            pending += [path(".".join(parts[:n])) for n in range(1, len(parts) + 1)]
+            for name in re.findall(r"\w+", names or ""):
+                pending.append(path(f"{module}.{name}"))
+    return {item for item in seen if package in item.parents}
+
+
+def check_keys(release_path, value, prod, names):
+    """{source: what its release check depends on}; a source with an unchanged key and a
+    recorded pass need not be checked again. The key covers the release files its check
+    runs (build inputs, dbt, migrations, job scripts, the modules ``check_modules`` finds,
+    reviewed data other than other states'), the source's configuration and status, and
+    the snapshot it would check. A source without a snapshot gets no key."""
+    from election_pipeline.settings import load_config
+    from election_pipeline.states import STATES
+
+    root = Path(release_path)
+    settings, sources = load_config(root / "config/sources.toml")
+    resources = root / "src/election_pipeline/resources"
+    owners = {}
+    for code, state in STATES.items():
+        owners[resources / "rosters_2026" / f"{code}.json"] = code
+        for item in resources.glob(f"{state.slug}_*.json"):
+            owners[item] = code
+    files = {}
+    for entry in CHECK_INPUTS:
+        found = root / entry
+        if not found.exists():
+            raise ValueError(f"Release lacks {entry}")
+        for item in sorted(found.rglob("*")) if found.is_dir() else [found]:
+            if item.is_file() and "__pycache__" not in item.parts:
+                digest = hashlib.sha256(item.read_bytes()).hexdigest()
+                files[item] = f"{item.relative_to(root).as_posix()}:{digest}"
+    keys, modules = {}, {}
+    for name in names:
+        source = sources[name]
+        state = json.loads(
+            (Path(prod["DATA_DIR"]) / "state" / f"{name}.json").read_text(encoding="utf-8")
+        )
+        if not state.get("sha256") or state.get("url") != source.url:
+            continue
+        if source.state not in modules:
+            modules[source.state] = check_modules(root, source.state)
+        used = [
+            text
+            for item, text in files.items()
+            if (
+                item.suffix != ".py" or item in modules[source.state]
+                if resources not in item.parents
+                else owners.get(item, source.state) == source.state
+            )
+        ]
+        digest = hashlib.sha256()
+        for part in (
+            source.signature(settings),
+            value["sources"][name]["status"],
+            state["sha256"],
+            *used,
+        ):
+            digest.update(str(part).encode() + b"\0")
+        keys[name] = digest.hexdigest()
+    return keys
+
+
+def check_sources(image, value, prod, config, moved=(), names=None):
     """Run every enabled HTTP source once, check-only, in ``image``; return those that failed.
 
     Each run parses the source's latest archived snapshot, loads it and builds dbt, then
@@ -322,7 +432,7 @@ def check_sources(image, value, prod, config, moved=()):
             time.sleep(LOCK_RETRY_SECONDS)
 
     with ThreadPoolExecutor(max_workers=parallel_jobs(config)) as pool:
-        checks = dict(pool.map(check, collected(value)))
+        checks = dict(pool.map(check, collected(value) if names is None else names))
     return {
         n: r.get("error") or r["outcome"]
         for n, r in checks.items()
@@ -346,15 +456,35 @@ def no_snapshot(error):
     return error == NO_SNAPSHOT
 
 
-def release(path, release_path, image, prod, config, moved=()):
-    """Make a staged release current once it validates every enabled HTTP source."""
+def release(path, release_path, image, prod, config, moved=(), check_all=False):
+    """Make a staged release current once it validates every enabled HTTP source.
+
+    A source whose check key (``check_keys``) passed before, under this or an earlier
+    release, is not checked again unless ``check_all``.
+    """
     staged = describe(release_path, image)
     value = catalog.read(path)
     if staged["revision"] == value["release"]["revision"]:
         return {"outcome": "already_current", "revision": staged["revision"]}
     with connect(db_settings(prod, writer=True)) as conn:
         applied = migrate(conn, root=staged["release_path"])
-    failed = check_sources(staged["image_id"], value, prod, config, moved)
+    names = collected(value)
+    ledger = Path(config["CONTROL_STATE_DIR"]) / CHECK_LEDGER
+    try:
+        keys = check_keys(staged["release_path"], value, prod, set(names) - set(moved))
+        passed = json.loads(ledger.read_text(encoding="utf-8"))["passed"] if ledger.exists() else {}
+    except Exception:
+        # Without keys every source is checked, as before.
+        keys, passed = {}, {}
+    reused = [] if check_all else sorted(n for n in keys if passed.get(n) == keys[n])
+    checked = [n for n in names if n not in reused]
+    failed = check_sources(staged["image_id"], value, prod, config, moved, checked)
+    # A pass holds for its key whether or not this release goes ahead.
+    passed = {
+        **{n: k for n, k in passed.items() if n not in failed},
+        **{n: keys[n] for n in checked if n in keys and n not in failed},
+    }
+    atomic_json(ledger, {"schema_version": 1, "passed": passed})
     if failed:
         raise ValueError(redacted("The release did not validate: " + json.dumps(failed), prod))
 
@@ -372,7 +502,8 @@ def release(path, release_path, image, prod, config, moved=()):
         "revision": staged["revision"],
         "previous_revision": value["release"]["revision"],
         "migrations_applied": applied,
-        "sources_validated": collected(value),
+        "sources_validated": checked,
+        "sources_reused": reused,
         "note": "Workers use the release from their next cycle; move the dashboard next",
     }
     # The release is made; old artifacts that fail to go are reported, not a failure.

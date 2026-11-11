@@ -5,6 +5,7 @@ import importlib.util
 import io
 import json
 import os
+import shutil
 import subprocess
 import tempfile
 import threading
@@ -19,6 +20,7 @@ from fastapi.testclient import TestClient
 from election_pipeline import recovery
 from election_pipeline.dashboard.server import create_app
 from election_pipeline.deployment import catalog, containers, control, dashboard
+from election_pipeline.settings import load_config
 from election_pipeline.workflow import NO_SNAPSHOT
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -443,6 +445,105 @@ class DeploymentTests(unittest.TestCase):
         self.assertNotIn("writer-secret", str(caught.exception))
         self.assertEqual(self.path.read_bytes(), before)
         self.assertFalse(Path(self.config["CURRENT_RELEASE"]).exists())
+
+    def release_tree(self):
+        """A release checkout of what a source check runs, with NC and KY snapshots."""
+        tree = self.root / "release"
+        ignore = shutil.ignore_patterns("__pycache__", "target", "logs")
+        for entry in (*control.CHECK_INPUTS, "config/sources.toml"):
+            source, target = ROOT / entry, tree / entry
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if source.is_dir():
+                shutil.copytree(source, target, ignore=ignore)
+            else:
+                shutil.copy2(source, target)
+        settings, sources = load_config(tree / "config/sources.toml")
+        state = Path(self.prod["DATA_DIR"]) / "state"
+        state.mkdir(parents=True)
+        for name in (NC, KY):
+            (state / f"{name}.json").write_text(
+                json.dumps({"sha256": "a" * 64, "url": sources[name].url}), encoding="utf-8"
+            )
+        return tree
+
+    def test_a_check_key_changes_only_with_what_that_source_check_runs(self):
+        tree = self.release_tree()
+
+        def keys():
+            return control.check_keys(tree, self.value, self.prod, [NC, KY])
+
+        def changed(relative, edit=lambda text: text + "\n# changed\n"):
+            path = tree / relative
+            before = keys()
+            path.write_text(edit(path.read_text(encoding="utf-8")), encoding="utf-8")
+            after = keys()
+            return {name for name in before if before[name] != after[name]}
+
+        package = "src/election_pipeline/"
+        self.assertEqual(changed(package + "parsers/ky.py"), {KY})
+        self.assertEqual(changed(package + "parsers/nc.py"), {NC})
+        # Another state's parser and data, the dashboard and the host-side tools: neither.
+        self.assertEqual(changed(package + "parsers/ms.py"), set())
+        self.assertEqual(changed(package + "resources/ms_2026_counties.json", str.rstrip), set())
+        self.assertEqual(changed(package + "resources/rosters_2026/OK.json", str.rstrip), set())
+        self.assertEqual(changed(package + "dashboard/server.py"), set())
+        self.assertEqual(changed(package + "deployment/control.py"), set())
+        # Shared parsing, the database models and the image: both.
+        self.assertEqual(changed(package + "parsers/results.py"), {NC, KY})
+        self.assertEqual(changed(package + "states.py"), {NC, KY})
+        self.assertEqual(changed("dbt/dbt_project.yml"), {NC, KY})
+        self.assertEqual(changed("constraints.txt"), {NC, KY})
+        # A new snapshot or status changes only that source's key.
+        before = keys()
+        state = Path(self.prod["DATA_DIR"]) / "state" / f"{NC}.json"
+        state.write_text(state.read_text().replace("a" * 64, "b" * 64), encoding="utf-8")
+        self.value["sources"][KY]["status"] = "unofficial"
+        after = keys()
+        self.assertTrue(before[NC] != after[NC] and before[KY] != after[KY])
+        # A source without a snapshot of its configured address gets no key.
+        state.write_text(json.dumps({"sha256": "b" * 64, "url": "https://old"}), "utf-8")
+        self.assertEqual(set(keys()), {KY})
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock and symlinks")
+    def test_a_release_reuses_passed_checks_with_unchanged_keys(self):
+        checked, keys = [], {NC: "n" * 64, KY: "k" * 64}
+
+        def check(image, name, *a, **k):
+            checked.append(name)
+            return {"source_id": name, "outcome": "failed" if name in failing else "validated"}
+
+        def release(**options):
+            checked.clear()
+            catalog.write(self.path, self.value)
+            with (
+                patch.object(control, "describe", return_value=self.staged()),
+                patch.object(control, "connect", MagicMock()),
+                patch.object(control, "migrate", return_value=[]),
+                patch.object(control, "check_keys", return_value=dict(keys)),
+                patch.object(control, "run_one", side_effect=check),
+                patch.object(control, "require_no_backup"),
+                patch.object(control, "prune_releases", return_value={}),
+            ):
+                return control.release(
+                    self.path, self.root, NEW_IMAGE, self.prod, self.config, **options
+                )
+
+        failing = {KY}
+        with self.assertRaisesRegex(ValueError, "ky_2026_general"):
+            release()
+        self.assertEqual(sorted(checked), [KY, NC])
+        # NC's pass stands although that release failed; KY is checked again.
+        failing = set()
+        self.assertEqual(release()["sources_reused"], [NC])
+        self.assertEqual(checked, [KY])
+        self.assertEqual(release()["sources_reused"], [KY, NC])
+        self.assertEqual(checked, [])
+        keys[KY] = "x" * 64
+        self.assertEqual(release()["sources_validated"], [KY])
+        self.assertEqual(sorted(release(check_all=True)["sources_validated"]), [KY, NC])
+        # A source without a key (no snapshot, or none computed) is always checked.
+        keys.clear()
+        self.assertEqual(sorted(release()["sources_validated"]), [KY, NC])
 
     def test_a_locked_source_is_waited_for_rather_than_failing_the_release(self):
         outcomes = {NC: ["locked", "locked", "validated"], KY: ["validated"]}
