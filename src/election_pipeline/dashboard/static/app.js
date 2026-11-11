@@ -752,7 +752,7 @@ function renderMetadata() {
   $("results-note").textContent =
     "Reported candidate votes are not ballot turnout. " +
     (official
-      ? "These are the state's certified official results; no projections or race calls."
+      ? "These are the state's certified official results."
       : "These are unofficial returns; no projections or race calls.");
   if (
     (national &&
