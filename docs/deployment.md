@@ -11,7 +11,7 @@ release, the public dashboard, and each source's flags:
 | --- | --- |
 | `enabled` | The worker collects it (HTTP) or imports are accepted (manual) |
 | `public` | The public dashboard shows it |
-| `status` | `test` or `unofficial`, carried into every publication |
+| `status` | `test` or `unofficial`, carried into every publication; `deploy mark-unofficial --source NAME` moves a source from `test` to `unofficial`, and the worker's next run republishes it so labelled |
 | `acquisition` | `http`, polled by the worker, or `manual`, imported by an operator |
 
 Commands below run as root from the release's venv. With `R` the release directory:

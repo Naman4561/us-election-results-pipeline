@@ -201,6 +201,19 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(latest["outcome"], "succeeded")
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_only_a_test_source_is_marked_unofficial(self):
+        self.assertEqual(control.mark_unofficial(self.path, NC)["outcome"], "marked_unofficial")
+        self.assertEqual(catalog.read(self.path)["sources"][NC]["status"], "unofficial")
+        with self.assertRaisesRegex(ValueError, "not test"):
+            control.mark_unofficial(self.path, NC)  # already unofficial
+        self.value["sources"][KY]["status"] = "official"
+        self.save()
+        before = self.path.read_bytes()
+        with self.assertRaisesRegex(ValueError, "not test"):
+            control.mark_unofficial(self.path, KY)
+        self.assertEqual(self.path.read_bytes(), before)
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_a_paused_source_stays_public_and_is_skipped_not_failed(self):
         self.assertEqual(control.pause(self.path, NC, True)["outcome"], "paused")
         self.assertTrue(catalog.read(self.path)["sources"][NC]["public"])

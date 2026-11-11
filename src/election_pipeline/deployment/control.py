@@ -840,6 +840,23 @@ def pause(path, name, paused):
     return {"outcome": "paused" if paused else "resumed", "source_id": name}
 
 
+def mark_unofficial(path, name):
+    """Label a source that was brought up as ``test`` as the state's unofficial results.
+
+    Only ``test`` moves, and only to ``unofficial``: an official source stays official.
+    The worker's next run publishes its current snapshot again under the new status.
+    """
+
+    def change(value):
+        entry = value["sources"][name]
+        if entry["status"] != "test":
+            raise ValueError(f"{name} is {entry['status']}, not test")
+        entry["status"] = "unofficial"
+
+    catalog.update(path, change)
+    return {"outcome": "marked_unofficial", "source_id": name}
+
+
 def import_county(path, county, report, review, prod, config):
     from election_pipeline.county_import import selected
     from election_pipeline.states import STATES
