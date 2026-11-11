@@ -9,6 +9,7 @@ import shutil
 import subprocess
 import tempfile
 import threading
+import time
 import unittest
 from contextlib import redirect_stdout
 from datetime import datetime, timedelta, timezone
@@ -17,7 +18,7 @@ from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
 
-from election_pipeline import recovery
+from election_pipeline import publication, recovery
 from election_pipeline.dashboard.server import create_app
 from election_pipeline.deployment import catalog, containers, control, dashboard
 from election_pipeline.settings import load_config
@@ -385,6 +386,89 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(failed, {})
         self.assertEqual(statuses, {NC: ("unofficial", "check-only"), KY: ("test", "check-only")})
 
+    def idle_source(self, name, checked_minutes_ago=1):
+        """A collected source holding snapshot "a…" and a recent run report."""
+        settings, sources = load_config(catalog.CONFIG)
+        data = Path(self.prod["DATA_DIR"])
+        (data / "state").mkdir(parents=True, exist_ok=True)
+        (data / "runs" / name).mkdir(parents=True, exist_ok=True)
+        checked = datetime.now(timezone.utc) - timedelta(minutes=checked_minutes_ago)
+        (data / "state" / f"{name}.json").write_text(
+            json.dumps(
+                {
+                    "sha256": "a" * 64,
+                    "url": sources[name].url,
+                    "source_signature": sources[name].signature(settings),
+                    "last_checked_at": checked.isoformat(),
+                }
+            ),
+            encoding="utf-8",
+        )
+        (data / "runs" / name / "latest.json").write_text("{}", encoding="utf-8")
+        return settings, sources
+
+    def test_a_source_is_idle_only_while_a_run_would_change_nothing(self):
+        settings, sources = self.idle_source(NC)
+        entry = self.value["sources"][NC]
+        ledger = {NC: {"image": IMAGE, "status": "test", "raw_sha256": "a" * 64}}
+        now = datetime.now(timezone.utc)
+
+        def idle(**changes):
+            arguments = {"entry": entry, "image": IMAGE, "ledger": ledger, "now": now, **changes}
+            return control.idle(
+                NC,
+                arguments["entry"],
+                arguments["image"],
+                self.prod,
+                arguments["ledger"],
+                settings,
+                sources,
+                arguments["now"],
+            )
+
+        self.assertTrue(idle())
+        self.assertFalse(idle(image=NEW_IMAGE))  # a new release
+        self.assertFalse(idle(entry={**entry, "status": "unofficial"}))
+        self.assertFalse(idle(ledger={}))  # its last run did not publish
+        self.assertFalse(idle(now=now + timedelta(minutes=14)))  # due for collection
+        report = Path(self.prod["DATA_DIR"]) / "runs" / NC / "latest.json"
+        old = time.time() - control.IDLE_RUN_SECONDS - 60
+        os.utime(report, (old, old))
+        self.assertFalse(idle())  # its run report is due a refresh
+        self.idle_source(NC)
+        state = Path(self.prod["DATA_DIR"]) / "state" / f"{NC}.json"
+        state.write_text(state.read_text().replace("a" * 64, "b" * 64), encoding="utf-8")
+        self.assertFalse(idle())  # a new snapshot
+        self.idle_source(NC)
+        value = json.loads(state.read_text())
+        state.write_text(json.dumps({**value, "consecutive_failures": 1}), encoding="utf-8")
+        self.assertFalse(idle())
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_the_worker_skips_idle_sources_and_records_what_it_ran(self):
+        for name in (NC, KY):
+            self.idle_source(name)
+        ran = []
+
+        def run(image, name, status, prod, config):
+            ran.append(name)
+            outcome = "failed" if name == KY else "already_current"
+            return {"source_id": name, "outcome": outcome, "raw_sha256": "a" * 64}
+
+        def cycle():
+            ran.clear()
+            with patch.object(control, "run_one", side_effect=run):
+                with redirect_stdout(io.StringIO()):
+                    control.run_enabled(self.path, self.prod, self.config)
+            return sorted(ran)
+
+        self.assertEqual(cycle(), [KY, NC])
+        ledger = json.loads((self.root / control.IDLE_LEDGER).read_text())["sources"]
+        self.assertEqual(set(ledger), {NC})  # a failed run is never skipped
+        self.assertEqual(cycle(), [KY])
+        latest = json.loads((self.root / "worker-latest.json").read_text())["results"]
+        self.assertIn({"source_id": NC, "outcome": "not_due", "skipped": "idle"}, latest)
+
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_manual_and_disabled_sources_are_never_polled(self):
         self.value["sources"][KY].update(acquisition="manual")
@@ -511,7 +595,42 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(changed(package + "deployment/control.py"), set())
         # Shared parsing, the database models and the image: both.
         self.assertEqual(changed(package + "parsers/results.py"), {NC, KY})
-        self.assertEqual(changed(package + "states.py"), {NC, KY})
+        # The registry counts as far as it concerns each state; its shared code for all.
+        self.assertEqual(
+            changed(package + "states.py", lambda text: text.replace("liveresults/", "live/")),
+            {KY},
+        )
+        self.assertEqual(
+            changed(
+                package + "states.py",
+                lambda text: text.replace(
+                    '    "KY": State(',
+                    '    "ZZ": State("ZZ", "Z", "zz", (0,), ("total_votes",)),\n    "KY": State(',
+                    1,
+                ),
+            ),
+            set(),
+        )
+        self.assertEqual(changed(package + "states.py"), set())  # a comment
+        self.assertEqual(
+            changed(package + "states.py", lambda text: text + "\n\ndef helper():\n    return 1\n"),
+            {NC, KY},
+        )
+        # So does what makes a publication: a state added elsewhere republishes no other.
+        registry = tree / package / "states.py"
+
+        def hashes():
+            return publication.project_hash(tree, "NC"), publication.project_hash(tree, "KY")
+
+        with patch.object(publication, "__file__", str(tree / package / "publication.py")):
+            before = hashes()
+            registry.write_text(
+                registry.read_text(encoding="utf-8").replace("ky.gov/live/", "ky.gov/results/"),
+                "utf-8",
+            )
+            after = hashes()
+        self.assertEqual(before[0], after[0])
+        self.assertNotEqual(before[1], after[1])
         self.assertEqual(changed("dbt/dbt_project.yml"), {NC, KY})
         self.assertEqual(changed("constraints.txt"), {NC, KY})
         # A new snapshot or status changes only that source's key.

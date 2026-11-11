@@ -43,7 +43,7 @@ REVISION = re.compile(r"[0-9a-f]{40}")
 CHECK_INPUTS = (
     "Dockerfile", "constraints.txt", "pyproject.toml", "dbt/dbt_project.yml",
     "dbt/macros", "dbt/models", "dbt/tests", "migrations", "src/election_pipeline",
-    "scripts/run_source.py", "scripts/run_dbt.py",
+    "scripts/run_source.py", "scripts/run_dbt.py", "scripts/publish.py",
 )  # fmt: skip
 IMPORT = re.compile(
     r"^\s*(?:from\s+(election_pipeline[\w.]*)\s+import\s+(\([^)]*\)|[^\n]+)"
@@ -51,6 +51,11 @@ IMPORT = re.compile(
     re.M,
 )
 CHECK_LEDGER = "release-checks.json"
+# A source that is not due and whose last run already published its snapshot under the
+# current image is skipped, not started in a container to say so; it still runs at
+# least this often, which keeps its run report fresh for monitoring.
+IDLE_RUN_SECONDS = 1800
+IDLE_LEDGER = "worker-idle.json"
 
 
 def db_settings(prod, *, writer=False):
@@ -113,11 +118,47 @@ def collected(value):
     )
 
 
+def idle(name, entry, image, prod, ledger, settings, sources, now):
+    """Whether running ``name`` now would only find its publication current again: it is
+    not due for collection, and its last run, recent, published the snapshot it holds
+    under this image and status."""
+    from election_pipeline.pipeline import next_collection
+
+    data, source = Path(prod["DATA_DIR"]), sources[name]
+    try:
+        state = json.loads((data / "state" / f"{name}.json").read_text(encoding="utf-8"))
+        ran = (data / "runs" / name / "latest.json").stat().st_mtime
+    except (OSError, ValueError):
+        return False
+    waiting = [state.get(k) for k in ("retry_not_before", "failure_backoff_until")]
+    if (
+        ledger.get(name)
+        != {"image": image, "status": entry["status"], "raw_sha256": state.get("sha256")}
+        or now.timestamp() - ran >= IDLE_RUN_SECONDS
+        or not (source.min_interval_seconds or source.collect_hours_utc)
+        or state.get("source_signature") != source.signature(settings)
+        or state.get("url") != source.url
+        or state.get("consecutive_failures")
+        or any(waiting)
+        or not state.get("last_checked_at")
+    ):
+        return False
+    return now < next_collection(source, datetime.fromisoformat(state["last_checked_at"]), now)
+
+
 def run_enabled(path, prod, config):
     """One bounded cycle over every enabled HTTP source, least recently run first."""
+    from election_pipeline.settings import load_config
+
     value = catalog.read(path)
     containers.limits(config)
     deadline = time.monotonic() + int(config.get("CYCLE_SECONDS", "270"))
+    settings, sources = load_config(catalog.CONFIG)
+    ledger_path = Path(config["CONTROL_STATE_DIR"]) / IDLE_LEDGER
+    try:
+        ledger = json.loads(ledger_path.read_text(encoding="utf-8"))["sources"]
+    except (OSError, ValueError, KeyError):
+        ledger = {}
 
     def last_run(name):
         latest = Path(prod["DATA_DIR"]) / "runs" / name / "latest.json"
@@ -133,23 +174,47 @@ def run_enabled(path, prod, config):
                 return None
             if entry.get("paused"):
                 return {"source_id": name, "outcome": "paused"}
+            image = current["release"]["image_id"]
+            now = datetime.now(timezone.utc)
+            try:
+                skip = idle(name, entry, image, prod, ledger, settings, sources, now)
+            except Exception:
+                skip = False  # unsure: run it
+            if skip:
+                return {"source_id": name, "outcome": "not_due", "skipped": "idle"}
             remaining = max(1, int(deadline - time.monotonic()))
             budget = {
                 **config,
                 "JOB_TIMEOUT": str(min(int(config.get("JOB_TIMEOUT", "240")), remaining)),
             }
-            result = run_one(current["release"]["image_id"], name, entry["status"], prod, budget)
+            result = run_one(image, name, entry["status"], prod, budget)
+            if result.get("outcome") in ("already_current", "succeeded") and result.get(
+                "raw_sha256"
+            ):
+                result["_idle"] = {
+                    "image": image,
+                    "status": entry["status"],
+                    "raw_sha256": result["raw_sha256"],
+                }
         except Exception as error:
             result = {"source_id": name, "outcome": "failed", "error": str(error)}
+        marker = result.pop("_idle", None)
         encoded = redacted(json.dumps(result), prod)
         print(encoded, flush=True)
-        return json.loads(encoded)
+        return {**json.loads(encoded), "_idle": marker}
 
     # Each job has its own container limits, so N parallel jobs use N times the budget.
     with ThreadPoolExecutor(max_workers=parallel_jobs(config)) as pool:
         results = [
             r for r in pool.map(job, sorted(collected(value), key=last_run)) if r is not None
         ]
+    for r in results:
+        marker = r.pop("_idle", None)
+        if marker:
+            ledger[r["source_id"]] = marker
+        elif r.get("skipped") != "idle":
+            ledger.pop(r["source_id"], None)
+    atomic_json(ledger_path, {"schema_version": 1, "sources": ledger})
     ok = all(r["outcome"] in GOOD for r in results)
     atomic_json(
         Path(config["CONTROL_STATE_DIR"]) / "worker-latest.json",
@@ -343,11 +408,12 @@ def check_keys(release_path, value, prod, names):
     reviewed data other than other states'), the source's configuration and status, and
     the snapshot it would check. A source without a snapshot gets no key."""
     from election_pipeline.settings import load_config
-    from election_pipeline.states import STATES
+    from election_pipeline.states import STATES, own_registry
 
     root = Path(release_path)
     settings, sources = load_config(root / "config/sources.toml")
     resources = root / "src/election_pipeline/resources"
+    registry = root / "src/election_pipeline/states.py"
     owners = {}
     for code, state in STATES.items():
         owners[resources / "rosters_2026" / f"{code}.json"] = code
@@ -375,12 +441,15 @@ def check_keys(release_path, value, prod, names):
         used = [
             text
             for item, text in files.items()
-            if (
+            if item != registry
+            and (
                 item.suffix != ".py" or item in modules[source.state]
                 if resources not in item.parents
                 else owners.get(item, source.state) == source.state
             )
         ]
+        # The registry counts only as far as it concerns this state.
+        used.append(own_registry(registry, source.state))
         digest = hashlib.sha256()
         for part in (
             source.signature(settings),
