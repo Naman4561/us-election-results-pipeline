@@ -1,6 +1,6 @@
 # States
 
-Thirty-three states, every 2026 U.S. Senate, Governor and House race each one holds,
+Thirty-four states, every 2026 U.S. Senate, Governor and House race each one holds,
 taken only from the state's own election office. The registry
 (`src/election_pipeline/states.py`) and `config/sources.toml` are the source of truth;
 this page explains them.
@@ -29,6 +29,7 @@ this page explains them.
 | North Carolina | State Board precinct ZIP | Senate, House 1–14 (15) | All 100 counties | Election Day, early, mail, provisional |
 | North Dakota | Tally (Secretary of State) | House at-large (1) | All 53 counties | Total only |
 | Ohio | Saved by hand from the results XML | Senate, Governor, House 1–15 (17) | All 88 counties | Total only |
+| Oklahoma | Saved by hand from the State Election Board's county results export | Senate, Governor, House 1–5 (7) | All 77 counties | Election Day, early, mail |
 | Oregon | ENR export | Senate, Governor, House 1–6 (8) | All 36 counties | Total only |
 | Rhode Island | Enhanced Voting | Senate, Governor, House 1–2 (4) | No (reported by town) | Election Day, early, mail |
 | South Carolina | Clarity (Election Commission) | Senate, Governor, House 1–7 (9) | All 46 counties | Total only |
@@ -41,9 +42,9 @@ this page explains them.
 | West Virginia | Clarity | Senate, House 1–2 (3) | All 55 counties | Total only |
 | Wyoming | Secretary of State certified results (State Canvassing Board) | Senate, Governor, House at-large (3) | All 23 counties | Total only |
 
-A state without a Senate or Governor race in 2026 has none listed. Ohio, Kansas and
-Mississippi's reviewed counties are imported by hand, and Wyoming is added from its
-certified results alone (no election-night source); every other source is collected
+A state without a Senate or Governor race in 2026 has none listed. Ohio, Kansas,
+Oklahoma and Mississippi's reviewed counties are imported by hand, and Wyoming is added
+from its certified results alone (no election-night source); every other source is collected
 every 15 minutes, or hourly or every three hours once its count stops
 (`config/sources.toml`). [State status](state-status.md) records where each state's
 count stands.
@@ -93,6 +94,9 @@ zero.
   write-in rows is stored as no party; no party is inferred. North Carolina's absentee
   demographics are a separate dataset in their own tables.
 - **Ohio:** the official XML is saved by hand ([manual results](manual-results.md)).
+- **Oklahoma:** the county results export is saved by hand (the results site refuses
+  automated clients). It has no statewide rows: statewide totals are the county sums,
+  and its report time is the date the site gives the export's one file when building it.
 - **South Carolina:** six vote methods are checked against each county's count, but
   only totals are stored. Snapshots from before Nov 9, 2026 hold the commission's
   election-night workbooks instead, which stopped at midnight on election night.

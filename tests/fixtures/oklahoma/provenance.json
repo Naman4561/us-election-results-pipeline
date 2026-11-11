@@ -1,0 +1,8 @@
+{
+ "file": "20261103_CountyResults_csv.zip",
+ "sha256": "13de6887cfb57ad88b61ffd7f2b250cb07a60747895e552d409517d2dedffc86",
+ "bytes": 75906,
+ "page": "https://results.okelections.gov/",
+ "downloaded_at": "2026-11-11T01:58:18Z",
+ "note": "The Oklahoma State Election Board's unofficial county results export, downloaded by the operator in a browser (the site refuses automated clients) and stored unchanged."
+}

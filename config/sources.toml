@@ -86,6 +86,18 @@ primary_filename = "results.xml"
 min_interval_seconds = 840
 expected_members = ["results.xml"]
 
+# Oklahoma's results site refuses automated clients; its county results export (a zip
+# holding one CSV) is downloaded in a browser and imported by hand. See
+# docs/manual-results.md.
+[sources.ok_2026_general]
+state = "OK"
+election_date = "2026-11-03"
+url = "https://results.okelections.gov/"
+format = "bundle"
+primary_filename = "results.zip"
+min_interval_seconds = 840
+expected_members = ["results.zip"]
+
 # The Election Commission's Clarity site, which kept counting after the election-night
 # workbooks on its fallback page stopped.
 [sources.sc_2026_general]
