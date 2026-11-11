@@ -56,6 +56,10 @@ CHECK_LEDGER = "release-checks.json"
 # least this often, which keeps its run report fresh for monitoring.
 IDLE_RUN_SECONDS = 1800
 IDLE_LEDGER = "worker-idle.json"
+# How old a restore check may be when it admits a new state. It must have verified that
+# state's exact published snapshot, after it was published, so its age only bounds how
+# long ago the backup path itself last worked; a daily check keeps it within a day.
+RESTORE_CHECK_SECONDS = 24 * 3600
 
 
 def db_settings(prod, *, writer=False):
@@ -948,8 +952,8 @@ def recovery_gate(value, names, report, now):
     ):
         raise ValueError("A successful isolated restore and permission check is required")
     finished = datetime.fromisoformat(report["finished_at"])
-    if not 0 <= (now - finished).total_seconds() <= 1800:
-        raise ValueError("Restore check must be from the last 30 minutes")
+    if not 0 <= (now - finished).total_seconds() <= RESTORE_CHECK_SECONDS:
+        raise ValueError("Restore check must be from the last 24 hours")
     for name in names:
         entry = value["sources"][name]
         if finished < datetime.fromisoformat(entry["published_at"]):

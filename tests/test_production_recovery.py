@@ -8,7 +8,7 @@ import sys
 import tempfile
 import unittest
 import zipfile
-from contextlib import redirect_stdout
+from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -187,6 +187,23 @@ class ProductionRecoveryTests(unittest.TestCase):
                 self.assertTrue(report.exists())
                 self.assertTrue(self.bundle.exists())
                 self.assertNotIn("private-bucket", output.getvalue())
+
+    def test_a_restore_check_without_an_id_checks_the_newest_uploaded_backup(self):
+        work = self.root / "work"
+        work.mkdir(exist_ok=True)
+        arguments = ["production_recovery.py", "check-restore", "--destination", str(work)]
+        with patch.object(sys, "argv", arguments), patch.object(job.os, "umask"):
+            with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                job.main()  # no uploaded backup to check
+            atomic_json(work / "latest-backup.json", {"outcome": "failed", "backup_id": "x"})
+            with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                job.main()
+            atomic_json(
+                work / "latest-backup.json", {"outcome": "uploaded", "backup_id": self.bundle.name}
+            )
+            with patch.object(job, "dotenv_values", side_effect=RuntimeError("past the id")):
+                with self.assertRaisesRegex(RuntimeError, "past the id"):
+                    job.main()
 
     def test_restore_uses_production_compose_and_writer_ownership(self):
         conn = MagicMock()

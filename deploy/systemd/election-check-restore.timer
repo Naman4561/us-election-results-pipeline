@@ -1,0 +1,10 @@
+[Unit]
+Description=Verify the newest backup restores, once a day after the 06:02 UTC backup
+
+[Timer]
+OnCalendar=*-*-* 06:20:00
+Persistent=true
+AccuracySec=1s
+
+[Install]
+WantedBy=timers.target

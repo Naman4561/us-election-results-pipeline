@@ -351,6 +351,14 @@ def main():
     )
     args = parser.parse_args()
 
+    if args.action == "check-restore" and args.backup_id is None:
+        # The daily check (election-check-restore.timer) restores the newest upload.
+        try:
+            latest = json.loads((args.destination / "latest-backup.json").read_text("utf-8"))
+        except (OSError, ValueError):
+            latest = {}
+        if latest.get("outcome") == "uploaded":
+            args.backup_id = latest.get("backup_id")
     if args.action != "backup" and not re.fullmatch(ID_PATTERN, args.backup_id or ""):
         parser.error(f"{args.action} requires --backup-id backup_<32 hexadecimal characters>")
 
