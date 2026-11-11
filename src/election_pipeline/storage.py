@@ -83,7 +83,13 @@ class ArchiveStore:
         suffix = "" if stage == "collection" else ".pipeline"
         lock_path = self.root / "locks" / f"{self.source.source_id}{suffix}.lock"
         lock_path.parent.mkdir(parents=True, exist_ok=True)
+        created = not lock_path.exists()
         with lock_path.open("a+b") as handle:
+            if created and getattr(os, "geteuid", lambda: None)() == 0:
+                # A lock a root process (the backup) creates belongs to the owner of the
+                # locks directory, as one a job creates does; else jobs cannot open it.
+                owner = lock_path.parent.stat()
+                os.chown(lock_path, owner.st_uid, owner.st_gid)
             if os.name == "nt":
                 import msvcrt
 

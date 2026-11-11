@@ -364,6 +364,24 @@ class CollectionTests(unittest.TestCase):
             self.assertEqual(self.collect()["outcome"], "locked")
         self.assertEqual(len(Handler.requests), 0)
 
+    def test_a_lock_created_by_root_belongs_to_the_locks_directory_owner(self) -> None:
+        store = ArchiveStore(self.root, self.source)
+        with (
+            patch("election_pipeline.storage.os.geteuid", create=True, return_value=0),
+            patch("election_pipeline.storage.os.chown", create=True) as chown,
+        ):
+            with store.lock():
+                pass
+            owner = (self.root / "locks").stat()
+            chown.assert_called_once_with(
+                self.root / "locks" / f"{self.source.source_id}.lock",
+                owner.st_uid,
+                owner.st_gid,
+            )
+            with store.lock():  # an existing lock is left as it is
+                pass
+            self.assertEqual(chown.call_count, 1)
+
     def test_download_limit_with_and_without_content_length(self) -> None:
         self.settings = replace(self.settings, max_download_bytes=10)
         Handler.responses = [self.good(), {**self.good(), "omit_length": True}]
