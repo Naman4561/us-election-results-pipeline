@@ -98,8 +98,14 @@ def run_one(image, name, status, prod, config, *, mode=None, extra=()):
     if mode:
         args.append("--" + mode)
     args += extra
+    source = catalog.configured().get(name)
     output = containers.run_job(
-        image, prod, config, args, timeout=int(config.get("JOB_TIMEOUT", "240"))
+        image,
+        prod,
+        config,
+        args,
+        timeout=int(config.get("JOB_TIMEOUT", "240")),
+        ipv6=bool(source and source.prefer_ipv6),
     )
     # run_dbt directs logs to stderr; tolerate separate JSON/log lines from dependencies.
     result = [json.loads(line) for line in output.splitlines() if line.startswith("{")][-1]

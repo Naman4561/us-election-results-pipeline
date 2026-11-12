@@ -105,11 +105,24 @@ def database_env(prod, *, reader=False):
     }
 
 
-def run_job(image, prod, config, arguments, *, timeout=240):
+def ipv6_network(config):
+    """The extra network that gives a job IPv6 (``JOB_IPV6_NETWORK``), or None if unset.
+    The jobs' own network carries the database and stays IPv4-only, so nothing else
+    running changes."""
+    network = config.get("JOB_IPV6_NETWORK", "")
+    if network and not re.fullmatch(r"[a-z0-9][a-z0-9_.-]{0,62}", network):
+        raise ValueError("JOB_IPV6_NETWORK must be a Docker network name")
+    return network or None
+
+
+def run_job(image, prod, config, arguments, *, timeout=240, ipv6=False):
+    """``ipv6``: also join the IPv6 network, for a source that prefers IPv6."""
     name = "election-job-" + uuid.uuid4().hex
     env = {**database_env(prod), "HOME": "/tmp"}
+    extra = ipv6_network(config) if ipv6 else None
     args = [
         *base_args(name, image, config),
+        *(["--network", extra] if extra else []),
         "--rm",
         "--mount",
         f"type=bind,src={prod['DATA_DIR']},dst=/app/data",

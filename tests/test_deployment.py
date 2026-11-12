@@ -165,6 +165,21 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(run.call_args_list[1].args[0][-1], args[args.index("--name") + 1])
         self.assertNotIn("administrator-secret", str(first))
 
+    def test_only_a_source_preferring_ipv6_joins_the_ipv6_network_when_one_is_set(self):
+        def networks(config, **options):
+            with patch.object(containers, "command", return_value="") as command:
+                containers.run_job(IMAGE, self.prod, config, ["scripts/run_source.py"], **options)
+            args = command.call_args.args[0]
+            return [args[i + 1] for i, a in enumerate(args) if a == "--network"]
+
+        ipv6 = {**self.config, "JOB_IPV6_NETWORK": "election-jobs-ipv6"}
+        default = self.config.get("DOCKER_NETWORK", "election-production_default")
+        self.assertEqual(networks(ipv6), [default])
+        self.assertEqual(networks(ipv6, ipv6=True), [default, "election-jobs-ipv6"])
+        self.assertEqual(networks(self.config, ipv6=True), [default])  # none configured
+        with self.assertRaisesRegex(ValueError, "Docker network name"):
+            networks({**ipv6, "JOB_IPV6_NETWORK": "bad name; rm"}, ipv6=True)
+
     def test_missing_resource_budget_fails_before_starting_a_container(self):
         with patch.object(containers, "command") as command:
             with self.assertRaises(ValueError):

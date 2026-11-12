@@ -233,6 +233,8 @@ url = "https://enr.elections.virginia.gov/results/public/api/elections/virginia/
 format = "bundle"
 primary_filename = "data.json"
 min_interval_seconds = 840
+# Its CDN refuses the server's IPv4 address (403) and answers its IPv6 one.
+prefer_ipv6 = true
 expected_members = ["data.json", "item-va-sen.json", "item-va-01.json", "item-va-02.json", "item-va-03.json", "item-va-04.json", "item-va-05.json", "item-va-06.json", "item-va-07.json", "item-va-08.json", "item-va-09.json", "item-va-10.json", "item-va-11.json"]
 supplemental_members = ["item-va-sen.json", "item-va-01.json", "item-va-02.json", "item-va-03.json", "item-va-04.json", "item-va-05.json", "item-va-06.json", "item-va-07.json", "item-va-08.json", "item-va-09.json", "item-va-10.json", "item-va-11.json"]
 

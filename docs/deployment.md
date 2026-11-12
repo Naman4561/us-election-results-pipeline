@@ -213,6 +213,7 @@ paths and resource budgets, never passwords:
 | `DASHBOARD_CPUS` | `JOB_CPUS` | A dashboard container's CPU budget, if it differs |
 | `DASHBOARD_READY_SECONDS` | `180` | How long a new dashboard may take to read every state |
 | `JOB_PARALLEL` | `1` | Jobs at once (1–4), each with those limits |
+| `JOB_IPV6_NETWORK` | unset | A Docker network with IPv6 (`docker network create --ipv6 NAME`) that a job also joins when its source sets `prefer_ipv6`; the jobs' own network stays IPv4-only |
 | `JOB_TIMEOUT` | `240` | Seconds before one job is stopped |
 | `CYCLE_SECONDS` | `600` | One worker cycle's budget. The timer fires every 15 minutes (the host's CPU is burstable, with a 20% baseline) and skips ticks while a cycle runs; normal cycles take 1–2 minutes, the one after a release that changes a state's publication, longer |
 
