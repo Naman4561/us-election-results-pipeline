@@ -50,7 +50,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Texas | Unofficial, pending certification | Nov 4 22:21 | All 254 counties in; state's last update Nov 4, 22:48. Collected every 3 hours, clear of backups. |
 | Utah | Unofficial, counting | Nov 12 02:32 | |
 | Vermont | Official | Nov 10 17:54 | Certified Nov 12 16:35 from its feed's official marker, checked against the state's results; collection paused. Map and results by town. |
-| Virginia | Not public yet | — | Its results API’s CDN refuses the server’s IPv4 address (403) and answers its IPv6 one; jobs reach the internet over IPv4 only. Its source now prefers IPv6 (`prefer_ipv6`), through `JOB_IPV6_NETWORK`. Its data passes every check. |
+| Virginia | Not public yet | — | Its results API’s CDN refuses the server’s IPv4 address (403) and answers its IPv6 one; jobs reach the internet over IPv4 only. Its source now prefers IPv6 (`prefer_ipv6`), through `JOB_IPV6_NETWORK`. Statewide and district totals only for now: while provisional ballots are added, its statewide counts trail the sum of its localities' by a few votes (Nov 12), so localities are not kept (`county_results=False` in `states.py`). |
 | Washington | Unofficial, counting | Nov 11 23:47 | Counts on weekdays. |
 | West Virginia | Unofficial, counting | Nov 10 16:01 | |
 | Wyoming | Official | Nov 10 21:37 | Added from its certified results (certified Nov 10). |

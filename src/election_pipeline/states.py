@@ -227,6 +227,9 @@ STATES = {
             "https://enr.elections.virginia.gov/results/public/virginia/elections/"
             "2026-November-General"
         ),
+        # Statewide totals only: while provisional ballots are added, Virginia's statewide
+        # counts trail the sum of its localities' (Nov 12), so its localities are not kept.
+        county_results=False,
         collection_backend="enhanced_voting",
     ),
     "ID": State(
