@@ -21,7 +21,7 @@ import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
-from loading import copies, migrated
+from loading import copies, migrated, requires_database
 
 from election_pipeline import bundles, publication
 from election_pipeline.collect import FetchFailure, FetchResponse
@@ -736,9 +736,7 @@ class NineStateTests(unittest.TestCase):
         self.failed("HI", split, "Vote methods do not add up")
 
 
-@unittest.skipUnless(
-    os.getenv("ELECTION_TEST_DATABASE"), "Requires disposable native PostgreSQL *_test"
-)
+@requires_database
 class NineStateDatabaseTests(unittest.TestCase):
     def test_nine_states_load_validate_publish_and_enforce_reader_permissions(self):
         db = migrated()

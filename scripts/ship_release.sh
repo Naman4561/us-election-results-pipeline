@@ -35,7 +35,9 @@ import json, sys, urllib.error, urllib.request
 from datetime import datetime, timezone
 
 api, revision, queued = sys.argv[1], sys.argv[2], int(sys.argv[3])
-required = {"test (ubuntu-latest)", "test (windows-latest)", "dashboard", "postgres"}
+required = {
+    "test (ubuntu-latest)", "test (windows-latest)", "dashboard", "postgres-1", "postgres-2"
+}
 
 
 def get(path):

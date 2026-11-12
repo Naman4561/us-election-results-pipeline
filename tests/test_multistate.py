@@ -8,7 +8,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from fastapi.testclient import TestClient
-from loading import migrated
+from loading import migrated, requires_database
 
 from election_pipeline import publication
 from election_pipeline.dashboard.server import STATIC, create_app, demo_payload, national_payload
@@ -133,7 +133,7 @@ class MultiStateTests(unittest.TestCase):
             promote.assert_not_called()
 
 
-@unittest.skipUnless(os.getenv("ELECTION_TEST_DATABASE"), "Requires disposable PostgreSQL *_test")
+@requires_database
 class MultiStateDatabaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

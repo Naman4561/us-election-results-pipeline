@@ -3,7 +3,6 @@
 import csv
 import io
 import json
-import os
 import tempfile
 import unittest
 import uuid
@@ -14,7 +13,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import test_parsing as fixtures
-from loading import migrated
+from loading import migrated, requires_database
 
 from election_pipeline import publication
 from election_pipeline.database import connect, load_parsed
@@ -387,10 +386,7 @@ class PublicationArtifactTests(unittest.TestCase):
                 self.assertIsNone(publication.florida_file_modified_range(conn, 42, "source"))
 
 
-@unittest.skipUnless(
-    os.getenv("ELECTION_TEST_DATABASE"),
-    "Set ELECTION_TEST_DATABASE to *_test",
-)
+@requires_database
 class PublicationDatabaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

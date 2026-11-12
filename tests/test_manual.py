@@ -17,7 +17,7 @@ from unittest.mock import patch
 from xml.etree import ElementTree as ET
 
 from fastapi.testclient import TestClient
-from loading import migrated
+from loading import migrated, requires_database
 
 from election_pipeline import manual
 from election_pipeline.dashboard.server import create_app
@@ -480,9 +480,7 @@ class ManualDeploymentTests(unittest.TestCase):
         self.assertIn("manual/oh_2026_general", assess())
 
 
-@unittest.skipUnless(
-    os.getenv("ELECTION_TEST_DATABASE"), "Requires disposable native PostgreSQL *_test"
-)
+@requires_database
 class ManualDatabaseTests(unittest.TestCase):
     def test_manual_provenance_timestamps_publication_and_identical_file_replay(self):
         from election_pipeline import database, publication

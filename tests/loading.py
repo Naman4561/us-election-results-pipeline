@@ -1,11 +1,21 @@
 """Shared test helpers: the migrated test database, and what a release would load."""
 
 import os
+import unittest
 from pathlib import Path
 
 from election_pipeline.database import connect, connection_settings, converted, verify
 from election_pipeline.migrations import migrate
 from election_pipeline.states import state_adapter
+
+
+def requires_database(cls):
+    """Run ``cls`` only against the disposable ``*_test`` database. ``check_pipeline.py
+    --database-only`` runs just these classes; the plain unit-test jobs skip them."""
+    cls.requires_database = True
+    return unittest.skipUnless(
+        os.getenv("ELECTION_TEST_DATABASE"), "Requires disposable PostgreSQL *_test"
+    )(cls)
 
 
 def copies(source, settings, store, directory, release=1):

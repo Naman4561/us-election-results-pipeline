@@ -8,14 +8,13 @@ candidates and counties are the reviewed roster's.
 import csv
 import hashlib
 import io
-import os
 import tempfile
 import unittest
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-from loading import migrated
+from loading import migrated, requires_database
 from test_new_states import members
 
 from election_pipeline.manual import import_file
@@ -150,9 +149,7 @@ ATTESTED = {
 }
 
 
-@unittest.skipUnless(
-    os.getenv("ELECTION_TEST_DATABASE"), "Requires disposable native PostgreSQL *_test"
-)
+@requires_database
 class AttestedPublicationDatabaseTests(unittest.TestCase):
     def test_both_attested_modes_publish_official_results_with_their_attestation(self):
         from election_pipeline import database, publication

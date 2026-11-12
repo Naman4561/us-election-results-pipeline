@@ -88,6 +88,6 @@ flowchart LR
     code["Edit code"] --> unit["python -m unittest discover -s tests"]
     unit --> lint["ruff check · ruff format --check"]
     lint --> push["Push branch"]
-    push --> ci["GitHub Actions<br/>Ubuntu + Windows tests · dashboard JS ·<br/>PostgreSQL integration (check_pipeline.py)"]
+    push --> ci["GitHub Actions<br/>Ubuntu + Windows tests · dashboard JS ·<br/>PostgreSQL integration, 2 shards (check_pipeline.py)"]
     ci --> stage["Stage on host<br/>tests run again inside the image"]
 ```

@@ -2,7 +2,6 @@
 
 import csv
 import json
-import os
 import unittest
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -20,6 +19,8 @@ try:
     from election_pipeline.database import connect, csv_rows, load_parsed, verify
 except ImportError:
     psycopg = None
+
+from loading import requires_database
 
 from election_pipeline.storage import ArchiveStore, file_hash, utc_now
 
@@ -96,10 +97,8 @@ class DatabaseArtifactTests(unittest.TestCase):
             list(csv_rows(path, self.f.source, report["output_rows"]))
 
 
-@unittest.skipUnless(
-    psycopg and os.getenv("ELECTION_TEST_DATABASE"),
-    "Set ELECTION_TEST_DATABASE to a disposable database ending in _test",
-)
+@requires_database
+@unittest.skipUnless(psycopg, "Requires psycopg")
 class DatabaseTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
