@@ -231,9 +231,8 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
                 sums[i] != count(o["voteCount"]) for i, o in statewide.items()
             ):
                 raise ValueError(f"{race}: localities do not add up to the statewide counts")
-            verify_scope(site.state, race, list(statewide))
-            continue
-        verify_scope(site.state, race, list(statewide), sorted(counties))
+        # Counties not kept are still checked against the state's roster.
+        verify_scope(site.state, race, list(statewide), sorted(counties) if site.county else None)
     finish(
         rows,
         source,
