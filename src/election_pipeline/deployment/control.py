@@ -930,6 +930,24 @@ def import_county(path, county, report, review, prod, config):
         )
 
 
+def county_final(path, county):
+    """Record that a Mississippi county's reviewed manual snapshot is its last before the
+    state certifies (its official report is posted): the monitor stops reminding that it
+    is over six hours old. A later reviewed import is still possible."""
+    from election_pipeline.county_import import selected
+    from election_pipeline.states import STATES
+
+    name = STATES["MS"].source_id
+    selected(catalog.configured()[name], county)
+
+    def change(value):
+        entry = value["sources"][name]
+        entry["manual_final_counties"] = sorted({*entry.get("manual_final_counties", []), county})
+
+    catalog.update(path, change)
+    return {"outcome": "county_final", "source_id": name, "county": county}
+
+
 # Dashboard ----------------------------------------------------------------------------
 
 

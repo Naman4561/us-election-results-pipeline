@@ -118,7 +118,10 @@ alone never updates the public database.
 
 Manual counties remain labelled **manual snapshot**, with their original
 observation time, until another reviewed import. They are not confirmed by polling
-other counties. After six hours the monitor sends a reminder (not an alert).
+other counties. After six hours the monitor sends a reminder (not an alert), unless the
+county is marked final: `deploy.py county-final --county PEARLRIVER` records that its
+reviewed report is its last before the state certifies (for example, its official
+report), and a later reviewed import is still possible.
 Automatic stale or unavailable sources alert separately; uncollected counties are not operational failures.
 
 ## Certification
