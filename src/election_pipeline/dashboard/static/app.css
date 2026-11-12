@@ -259,7 +259,8 @@ h2 {
   max-height: 590px;
 }
 .feature {
-  stroke: #fff;
+  /* Grey, not white: states with no election are filled near-white. */
+  stroke: #8e9cab;
   stroke-width: 1;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
