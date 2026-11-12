@@ -23,6 +23,14 @@ deploy status
 
 ## Releasing
 
+`scripts/ship_release.sh refs/heads/BRANCH REVISION` does both steps below for one
+approved revision, run detached (its header shows how). It waits for that revision's CI,
+polling GitHub every two minutes, and gives up without changing anything if a job fails,
+CI stays queued for 30 minutes without starting (`SHIP_QUEUED_SECONDS`) or does not finish
+within six hours (`SHIP_CI_SECONDS`), or the branch has moved past the revision. It then
+holds the worker timer, lets a run in progress finish, stages, waits out a running backup
+and releases; the timer is restarted however it ends.
+
 1. **Stage** the pushed branch. Nothing running changes. Staging starts only once every
    GitHub Actions job (`ci.yml`: the suite on Linux and Windows, the dashboard and
    PostgreSQL) has passed for that commit, so this host does not run the suite again;
