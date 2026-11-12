@@ -107,12 +107,15 @@ def import_county(source, settings, data_dir, county_key, file, review_file):
                     raise ValueError(
                         "The same file has a different review; resolve the discrepancy"
                     )
-                return dict(
-                    outcome="already_imported",
-                    source_id=source.source_id,
-                    county=county_key,
-                    sha256=state["sha256"],
-                )
+                # A later check that found the same file confirms the snapshot is still
+                # current: it refreshes the observation time, never the report time.
+                if observed <= ms.stamp(prior[1]["last_success_at"]):
+                    return dict(
+                        outcome="already_imported",
+                        source_id=source.source_id,
+                        county=county_key,
+                        sha256=state["sha256"],
+                    )
             if observed < ms.stamp(prior[1]["last_success_at"]) or (
                 parsed["report_generated_at"]
                 and prior[2]["report_generated_at"]
@@ -183,8 +186,9 @@ def import_county(source, settings, data_dir, county_key, file, review_file):
                     "availability": "available",
                 }
             )
+            confirmed = prior and prior[1]["raw_sha256"] == review["raw_sha256"]
             return dict(
-                outcome="manual_imported",
+                outcome="manual_confirmed" if confirmed else "manual_imported",
                 source_id=source.source_id,
                 county=county_key,
                 sha256=fetched.sha256,

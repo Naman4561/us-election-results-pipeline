@@ -252,6 +252,28 @@ class CountyScalingTests(unittest.TestCase):
         feed = next(r for r in f.read(report, "county_feeds.csv") if r["county"] == "HANCOCK")
         self.assertEqual(feed["issue"], "manual_snapshot")
 
+        # A later check that finds the same file refreshes the observation time only.
+        later = {**review, "observed_at": "2026-11-12T03:42:54+00:00"}
+        (f.root / "later.json").write_text(json.dumps(later), encoding="utf-8")
+        with patch.object(county_files, "fetch_file", side_effect=AssertionError("import HTTP")):
+            result = import_county(
+                f.source, f.settings, f.root, "HANCOCK", original, f.root / "later.json"
+            )
+            repeat = import_county(f.source, f.settings, f.root, "HANCOCK", original, template)
+        self.assertEqual(result["outcome"], "manual_confirmed", result)
+        self.assertEqual(repeat["outcome"], "already_imported")
+        _, manifest, accepted = ms.read_bundle(
+            f.store.cached_archive(f.store.read_state()), f.source
+        )
+        record = manifest["counties"]["HANCOCK"]
+        self.assertEqual(record["last_success_at"], later["observed_at"])
+        self.assertEqual(record["issue"], "ManualSnapshot")
+        self.assertEqual(accepted["HANCOCK"][2]["counts"], review["counts"])
+        self.assertEqual(
+            ms.stamp(accepted["HANCOCK"][2]["report_generated_at"]),
+            ms.stamp(review["report_generated_at"]),
+        )
+
         # Once the site answers, the automatic response replaces the manual snapshot.
         with patch.object(county_files, "fetch_file", side_effect=f.fetcher()):
             collect_source(f.source, f.settings, f.root, force_download=True)

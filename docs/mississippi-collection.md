@@ -109,7 +109,10 @@ holds its lock, retry after that cycle finishes. No timers need to be stopped.
 Import holds the same per-source lock as collection. It makes no HTTP requests and
 preserves other counties' status/timestamps and the source's `last_checked_at`.
 Repeating the same original/review is a no-op; changing counts for the same file is
-rejected. A new corrected original may reduce counts. A normal pipeline cycle
+rejected. Re-checking a county and finding the same file is recorded by importing
+it with the same review and a later `observed_at` (`outcome=manual_confirmed`): the
+observation time moves forward, while counts and report time stay. A new corrected
+original may reduce counts. A normal pipeline cycle
 then parses, loads, runs dbt checks and publishes the imported bundle. Importing
 alone never updates the public database.
 
