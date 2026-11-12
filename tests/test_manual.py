@@ -239,6 +239,7 @@ class ManualDeploymentTests(unittest.TestCase):
         changed = after["sources"][self.source.source_id]
         self.assertTrue(changed.pop("manual_final"))
         before["sources"][self.source.source_id].pop("manual_final", None)
+        self.assertEqual(after.pop("generation"), before.pop("generation") + 1)
         self.assertEqual(after, before)
         with self.assertRaisesRegex(ValueError, "Only a manual source"):
             deployment_manual.mark_final(self.path, "ky_2026_general")
