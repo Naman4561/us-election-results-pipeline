@@ -227,6 +227,22 @@ class ManualDeploymentTests(unittest.TestCase):
             deployment_manual.configure(self.path, "ky_2026_general")
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_a_public_manual_source_can_be_marked_final_and_nothing_else_changes(self):
+        entry = self.value["sources"][self.source.source_id]
+        entry.update(acquisition="manual", public=True, enabled=True, manual_final=None)
+        self.save()
+        before = catalog.read(self.path)
+        result = deployment_manual.mark_final(self.path, self.source.source_id)
+        self.assertEqual(result["outcome"], "marked_final")
+        after = catalog.read(self.path)
+        changed = after["sources"][self.source.source_id]
+        self.assertTrue(changed.pop("manual_final"))
+        before["sources"][self.source.source_id].pop("manual_final")
+        self.assertEqual(after, before)
+        with self.assertRaisesRegex(ValueError, "Only a manual source"):
+            deployment_manual.mark_final(self.path, "ky_2026_general")
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_initial_direct_publication_and_outside_inbox_files_are_rejected(self):
         with self.assertRaisesRegex(ValueError, "Initial"):
             deployment_manual.operate(

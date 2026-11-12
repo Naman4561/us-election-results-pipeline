@@ -30,6 +30,21 @@ def configure(path, name, max_age_seconds=21600, final=False):
     return {"outcome": "configured", "source_id": name, "acquisition": "manual", "public": False}
 
 
+def mark_final(path, name):
+    """Record that a manual source's issuer will post nothing more before certification:
+    no import is due, so its snapshot is never reported overdue. Public or not; a later
+    import is still possible."""
+
+    def change(value):
+        entry = value["sources"][name]
+        if entry["acquisition"] != "manual":
+            raise ValueError("Only a manual source can be marked final")
+        entry["manual_final"] = True
+
+    catalog.update(path, change)
+    return {"outcome": "marked_final", "source_id": name}
+
+
 RECEIPT = (
     "downloaded_at",
     "imported_at",
