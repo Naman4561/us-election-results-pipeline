@@ -134,6 +134,43 @@ def label_point(rings, precision=0.5):
     return [round(best[1], 1), round(best[2], 1)]
 
 
+def callouts(states, room=10.5, gap=24, offset=8):
+    """Give each drawn state too small to hold its label (its label point nearer than
+    ``room`` to its border: Rhode Island, Delaware…) a ``callout``: a point in a column
+    just past their eastmost edge, in north-to-south order at least ``gap`` apart, where
+    the map writes the label at the end of a leader line."""
+
+    def rings(path):
+        return [
+            [tuple(map(float, p.split(","))) for p in part[1:].rstrip("Z").split("L") if p]
+            for part in re.findall(r"M[^M]+", path)
+        ]
+
+    def clearance(x, y, shape):
+        best = float("inf")
+        for ring in shape:
+            for (ax, ay), (bx, by) in zip(ring, ring[1:] + ring[:1]):
+                dx, dy = bx - ax, by - ay
+                t = max(0.0, min(1.0, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy or 1)))
+                best = min(best, ((ax + t * dx - x) ** 2 + (ay + t * dy - y) ** 2) ** 0.5)
+        return best
+
+    small = []
+    for state in states:
+        shape = rings(state["path"])
+        state.pop("callout", None)
+        if clearance(*state["center"], shape) < room:
+            small.append((state, max(x for ring in shape for x, _ in ring)))
+    if not small:
+        return states
+    column = max(east for _, east in small) + offset
+    y = float("-inf")
+    for state, _ in sorted(small, key=lambda s: s[0]["center"][1]):
+        y = max(state["center"][1], y + gap)
+        state["callout"] = [round(column, 1), round(y, 1)]
+    return states
+
+
 def layout(features, box):
     left, bottom, right, top = bounds(features)
     x, y, width, height = box
@@ -239,10 +276,12 @@ def main():
         "viewBox": [0, 0, 1200, 720],
         "plan": "120th Congress / Missouri 119th override",
         "sources": sources,
-        "states": [
-            {"id": codes[f["attributes"]["STATE"]], "name": f["attributes"]["NAME"], **drawn(f)}
-            for f in states
-        ],
+        "states": callouts(
+            [
+                {"id": codes[f["attributes"]["STATE"]], "name": f["attributes"]["NAME"], **drawn(f)}
+                for f in states
+            ]
+        ),
         "districts": [district(f, drawn) for f in districts],
     }
     save("us-map.json", national)
