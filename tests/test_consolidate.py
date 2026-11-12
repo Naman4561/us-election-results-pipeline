@@ -1,9 +1,9 @@
 """The one-time copy of per-state tables into the shared ones (migration 024)."""
 
-import os
 import unittest
 import uuid
 
+from loading import requires_database
 from psycopg import sql
 
 from election_pipeline.consolidate import consolidate
@@ -13,9 +13,7 @@ from election_pipeline.migrations import migrate
 SHA = "a" * 64
 
 
-@unittest.skipUnless(
-    os.getenv("ELECTION_TEST_DATABASE"), "Requires disposable native PostgreSQL *_test"
-)
+@requires_database
 class ConsolidationTests(unittest.TestCase):
     def setUp(self):
         admin = {**connection_settings(), "dbname": "postgres"}

@@ -13,7 +13,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import test_parsing as fixtures
-from loading import migrated
+from loading import migrated, requires_database
 from test_collection import Handler
 
 from election_pipeline import database, publication, workflow
@@ -339,10 +339,7 @@ class WorkflowTests(unittest.TestCase):
         self.assertEqual(self.run_source()["outcome"], "succeeded")
 
 
-@unittest.skipUnless(
-    os.getenv("ELECTION_TEST_DATABASE"),
-    "Requires a disposable *_test PostgreSQL DB",
-)
+@requires_database
 class IntegratedWorkflowTests(unittest.TestCase):
     def test_http_to_dashboard_retry_correction_and_replay(self):
         name = os.environ["ELECTION_TEST_DATABASE"]

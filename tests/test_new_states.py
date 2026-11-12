@@ -23,7 +23,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 from urllib.parse import parse_qs
 
-from loading import copies, migrated
+from loading import copies, migrated, requires_database
 
 from election_pipeline import bundles, publication
 from election_pipeline.collect import FetchFailure, FetchResponse, fetch_file
@@ -662,9 +662,7 @@ class EnrCollectorTests(unittest.TestCase):
             )
 
 
-@unittest.skipUnless(
-    os.getenv("ELECTION_TEST_DATABASE"), "Requires disposable native PostgreSQL *_test"
-)
+@requires_database
 class NewStateDatabaseTests(unittest.TestCase):
     def test_three_states_load_validate_publish_and_enforce_reader_permissions(self):
         db = migrated()

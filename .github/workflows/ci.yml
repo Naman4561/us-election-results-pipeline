@@ -22,7 +22,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          python -m unittest discover -s tests -v 2>&1 | tee unittest.log
+          python -m unittest discover -s tests -v --durations 15 2>&1 | tee unittest.log
       # Job logs need a GitHub login; annotations are public, so failures are readable
       # from the checks API too.
       - name: Annotate test failures
@@ -49,7 +49,14 @@ jobs:
       - run: npm run format:check
       - run: npm test
 
+  # The unit-test jobs run everything else; this runs only the database tests, split in
+  # two. scripts/ship_release.sh waits for both by name.
   postgres:
+    name: postgres-${{ matrix.shard }}
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -78,7 +85,7 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          python scripts/check_pipeline.py 2>&1 | tee unittest.log
+          python scripts/check_pipeline.py --database-only --shard ${{ matrix.shard }}/2 2>&1 | tee unittest.log
       - name: Annotate test failures
         if: failure()
         shell: bash

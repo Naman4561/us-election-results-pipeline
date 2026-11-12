@@ -5,7 +5,6 @@ import csv
 import hashlib
 import io
 import json
-import os
 import tempfile
 import unittest
 import zipfile
@@ -13,7 +12,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from loading import copies, migrated
+from loading import copies, migrated, requires_database
 
 from election_pipeline import accuracy, publication
 from election_pipeline.collect import FetchFailure, FetchResponse
@@ -491,9 +490,7 @@ class MississippiTests(unittest.TestCase):
         self.assertEqual(len(conn.execute.call_args_list), 10)
 
 
-@unittest.skipUnless(
-    os.getenv("ELECTION_TEST_DATABASE"), "Requires disposable native PostgreSQL *_test"
-)
+@requires_database
 class MississippiDatabaseTests(unittest.TestCase):
     def test_load_publish_reader_provenance_and_failed_validation_keep_live_publication(self):
         db = migrated()

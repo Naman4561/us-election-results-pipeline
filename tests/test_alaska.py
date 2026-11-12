@@ -5,7 +5,6 @@ import gzip
 import hashlib
 import io
 import json
-import os
 import tempfile
 import unittest
 import zipfile
@@ -13,7 +12,7 @@ from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
-from loading import copies, migrated
+from loading import copies, migrated, requires_database
 
 from election_pipeline import publication
 from election_pipeline.dashboard.server import STATIC, make_payload, party_group
@@ -201,9 +200,7 @@ class AlaskaTests(unittest.TestCase):
             ak.scope()
 
 
-@unittest.skipUnless(
-    os.getenv("ELECTION_TEST_DATABASE"), "Requires disposable native PostgreSQL *_test"
-)
+@requires_database
 class AlaskaDatabaseTests(unittest.TestCase):
     def test_load_dbt_publication_reader_permissions_and_idempotent_replay(self):
         db = migrated()

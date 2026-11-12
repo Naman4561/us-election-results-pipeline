@@ -6,7 +6,6 @@ import hashlib
 import html
 import io
 import json
-import os
 import re
 import tempfile
 import unittest
@@ -15,7 +14,7 @@ import zipfile
 from dataclasses import replace
 from pathlib import Path
 
-from loading import copies, migrated
+from loading import copies, migrated, requires_database
 
 from election_pipeline import publication
 from election_pipeline.collectors.clarity import version_base
@@ -522,9 +521,7 @@ class FiveStateTests(unittest.TestCase):
         self.assertTrue(report["all_counts_zero"])
 
 
-@unittest.skipUnless(
-    os.getenv("ELECTION_TEST_DATABASE"), "Requires disposable native PostgreSQL *_test"
-)
+@requires_database
 class FiveStateDatabaseTests(unittest.TestCase):
     def test_four_states_load_validate_publish_replay_and_enforce_reader_permissions(self):
         db = migrated()

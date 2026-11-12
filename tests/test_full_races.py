@@ -5,7 +5,6 @@ import csv
 import hashlib
 import io
 import json
-import os
 import tempfile
 import unittest
 import zipfile
@@ -13,7 +12,7 @@ from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
-from loading import migrated
+from loading import migrated, requires_database
 
 from election_pipeline import bundles, publication
 from election_pipeline.collect import FetchResponse
@@ -434,9 +433,7 @@ class FullRaceParserTests(unittest.TestCase):
         self.assertEqual(labeled(b"Results")["outcome"], "validation_failed")
 
 
-@unittest.skipUnless(
-    os.getenv("ELECTION_TEST_DATABASE"), "Requires disposable native PostgreSQL *_test"
-)
+@requires_database
 class FullRaceDatabaseTests(unittest.TestCase):
     def test_loads_publish_into_shared_tables_the_dashboard_may_read(self):
         from election_pipeline.database import connect, load_parsed
