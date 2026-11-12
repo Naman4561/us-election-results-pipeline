@@ -36,7 +36,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Louisiana | Unofficial, counting | Nov 10 11:11 | House districts 5 and 6 go to a December runoff. |
 | Maryland | Unofficial, counting | Nov 12 12:46 | |
 | Minnesota | Unofficial, counting | Nov 10 21:21 | |
-| Mississippi | Unofficial, counting | Nov 12 04:02 | County files. Madison now posts its official text report, read automatically. Pearl River (official Nov 10 report) and Hancock (Nov 3 report, re-checked Nov 12) are reviewed manual snapshots. The state certifies Nov 13: import its recap ([Mississippi](mississippi-collection.md#certification)). |
+| Mississippi | Unofficial, counting | Nov 12 04:02 | County files. Madison now posts its official text report, read automatically. Pearl River (official Nov 10 report) and Hancock (Nov 3 report, re-checked Nov 12) are reviewed manual snapshots. Counties certify by Nov 13 and may post certified reports (a changed scan needs review); the state’s statewide recap follows later: import it then ([Mississippi](mississippi-collection.md#certification)). |
 | Nebraska | Unofficial, pending certification | Nov 6 23:02 | All precincts in. Collected every 3 hours, clear of backups. |
 | New Mexico | Unofficial, pending certification | Nov 6 17:00 | State's last update Nov 6, 9:55 AM MT. Collected hourly. |
 | North Carolina | Unofficial, counting | Nov 11 17:01 | |
