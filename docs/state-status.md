@@ -50,7 +50,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Texas | Unofficial, pending certification | Nov 4 22:21 | All 254 counties in; state's last update Nov 4, 22:48. Collected every 3 hours, clear of backups. |
 | Utah | Unofficial, counting | Nov 12 02:32 | |
 | Vermont | Official | Nov 10 17:54 | Certified Nov 12 16:35 from its feed's official marker, checked against the state's results; collection paused. Map and results by town. |
-| Virginia | Not public yet | — | Current data passes every check; ready to add. |
+| Virginia | Not public yet | — | Its results API’s CDN refuses our collector (403) while answering a plain request; we do not disguise the collector. Its data passes every check, so it can be added from a hand download or its certified results. |
 | Washington | Unofficial, counting | Nov 11 23:47 | Counts on weekdays. |
 | West Virginia | Unofficial, counting | Nov 10 16:01 | |
 | Wyoming | Official | Nov 10 21:37 | Added from its certified results (certified Nov 10). |
