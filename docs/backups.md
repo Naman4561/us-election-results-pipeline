@@ -18,6 +18,17 @@ The newest backup therefore restores every snapshot an older one does; older one
 add earlier states of the system. Bundles made before packs (manifest version 1) hold
 every file themselves and still restore.
 
+A backup with nothing new to hold is skipped (`--skip-unchanged`, on in the timer's
+service). Each upload records a fingerprint of what a backup exists to keep: the raw
+snapshots, publications and restore checks on disk, the snapshot and publication rows,
+and the deployment catalog. Every new result arrives as a new raw snapshot. When the
+fingerprint is unchanged and the last upload finished less than a day ago, the run writes
+`latest-backup-unchanged.json` instead and the last upload stays the latest backup.
+Poll logs (run reports, collector state, fetch and load attempts) change on every poll
+and are left out, so a skip loses at most a day of them, never a result. While states
+are collected this rarely skips: Mississippi alone saves a new county manifest every
+poll. Once states are certified and their collection stops, it skips most backups.
+
 ## Running alongside collection
 
 A backup pauses collection for a few seconds, not for the whole run. It waits until no
@@ -116,4 +127,6 @@ Run with an administrator profile, not the backup user.
 ## Monitoring
 
 The monitor flags `backup` when the newest report is older than
-`MAX_BACKUP_AGE_SECONDS` (25200, seven hours, in `monitor.env`) or did not upload.
+`MAX_BACKUP_AGE_SECONDS` (25200, seven hours, in `monitor.env`) or did not upload, unless
+a backup within that time was skipped as unchanged against that same upload and the
+upload is less than a day plus that limit old.

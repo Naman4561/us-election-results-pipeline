@@ -306,6 +306,28 @@ class MonitorTests(unittest.TestCase):
         )
         self.assertNotIn("backup", self.assess())
 
+    def test_a_backup_skipped_as_unchanged_keeps_the_last_upload_current_for_a_day(self):
+        def ago(hours):
+            return (self.now - timedelta(hours=hours)).isoformat()
+
+        def state(upload, skip, backup_id="backup_" + "a" * 32):
+            atomic_json(
+                self.root / "backups/latest-backup.json",
+                {"outcome": "uploaded", "backup_id": "backup_" + "a" * 32, "finished_at": upload},
+            )
+            atomic_json(
+                self.root / "backups/latest-backup-unchanged.json",
+                {"outcome": "unchanged", "backup_id": backup_id, "finished_at": skip},
+            )
+            return self.assess()
+
+        self.assertNotIn("backup", state(ago(20), ago(1)))
+        # Too long since anything was uploaded, too long since the last skip, or a skip
+        # recorded against another backup: overdue as before.
+        self.assertIn("backup", state(ago(32), ago(1)))
+        self.assertIn("backup", state(ago(20), ago(8)))
+        self.assertIn("backup", state(ago(20), ago(1), backup_id="backup_" + "b" * 32))
+
     def test_failed_s3_retention_is_reported_beside_an_uploaded_backup(self):
         atomic_json(
             self.root / "backups/latest-backup.json",

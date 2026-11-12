@@ -255,6 +255,62 @@ class ProductionRecoveryTests(unittest.TestCase):
         self.assertIn("not_needed", output.getvalue())
         configuration.assert_not_called()  # nothing restored, nothing read
 
+    def test_a_backup_is_skipped_only_while_nothing_it_keeps_has_changed(self):
+        data, catalog_file = self.root / "data", self.root / "catalog.json"
+        for relative in ("raw/MS/a.zip", "publications/p.json", "runs/MS/latest.json"):
+            (data / relative).parent.mkdir(parents=True, exist_ok=True)
+            (data / relative).write_text("x", encoding="utf-8")
+        catalog_file.write_text('{"generation": 1}', encoding="utf-8")
+        rows = {"snapshots": [{"n": 5, "last": 9}]}
+        conn = MagicMock()
+        conn.execute.side_effect = lambda query: MagicMock(
+            fetchall=lambda: rows["snapshots"] if "ops.snapshots" in query else []
+        )
+
+        def current():
+            return job.fingerprint(conn, data, catalog_file)
+
+        first = current()
+        # Poll logs change on every poll; they are not what a backup is for.
+        (data / "runs/MS/latest.json").write_text("newer run", encoding="utf-8")
+        (data / "state").mkdir()
+        (data / "state/ms.json").write_text("checked again", encoding="utf-8")
+        self.assertEqual(current(), first)
+        # A new raw snapshot, publication change, database snapshot or deployment does.
+        for change in (
+            lambda: (data / "raw/MS/b.zip").write_text("y", encoding="utf-8"),
+            lambda: (data / "publications/p.json").write_text("changed", encoding="utf-8"),
+            lambda: rows.update(snapshots=[{"n": 6, "last": 10}]),
+            lambda: catalog_file.write_text('{"generation": 2}', encoding="utf-8"),
+        ):
+            before = current()
+            change()
+            self.assertNotEqual(current(), before)
+
+        work = self.root / "work"
+        work.mkdir()
+        now = datetime(2026, 11, 20, 12, tzinfo=timezone.utc)
+        fingerprint = current()
+
+        def last(**changes):
+            record = {
+                "outcome": "uploaded",
+                "backup_id": self.bundle.name,
+                "fingerprint": fingerprint,
+                "finished_at": (now - timedelta(hours=6)).isoformat(),
+                **changes,
+            }
+            atomic_json(work / "latest-backup.json", record)
+            return job.unchanged_since(work, fingerprint, now)
+
+        self.assertEqual(last()["backup_id"], self.bundle.name)
+        self.assertIsNone(last(fingerprint="0" * 64))  # something new
+        self.assertIsNone(last(outcome="failed"))
+        self.assertIsNone(last(finished_at=(now - timedelta(hours=24)).isoformat()))  # daily
+        self.assertIsNone(last(fingerprint=None))  # a backup from before fingerprints
+        (work / "latest-backup.json").unlink()
+        self.assertIsNone(job.unchanged_since(work, fingerprint, now))
+
     def test_restore_uses_production_compose_and_writer_ownership(self):
         conn = MagicMock()
         conn.__enter__.return_value = conn
