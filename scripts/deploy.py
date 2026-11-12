@@ -66,6 +66,10 @@ def main():
     county.add_argument("--county", required=True)
     county.add_argument("--file", type=Path, required=True)
     county.add_argument("--review-json", type=Path, required=True)
+    sub.add_parser(
+        "county-final",
+        help="A Mississippi county's manual snapshot is its last before certification",
+    ).add_argument("--county", required=True)
     start = sub.add_parser("start-dashboard", help="A private candidate from the release")
     start.add_argument("--source", action="append", default=[], help="Also make public")
     activate = sub.add_parser("activate")
@@ -143,6 +147,8 @@ def main():
             result = control.import_county(
                 path, args.county, args.file, args.review_json, prod, config
             )
+        elif action == "county-final":
+            result = control.county_final(path, args.county)
         elif action == "start-dashboard":
             result = control.start_dashboard(path, args.source, prod, config)
         elif action == "activate":

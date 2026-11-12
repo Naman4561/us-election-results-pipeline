@@ -96,6 +96,14 @@ def validate(value):
                 raise ValueError("Invalid manual snapshot freshness limit")
             if type(entry.get("manual_final", False)) is not bool:
                 raise ValueError("Manual final flag must be boolean")
+        final = entry.get("manual_final_counties", [])
+        if final and (
+            source.state != "MS"
+            or type(final) is not list
+            or any(type(c) is not str for c in final)
+            or final != sorted(set(final))
+        ):
+            raise ValueError("Final counties are a sorted list of Mississippi county keys")
     return value
 
 

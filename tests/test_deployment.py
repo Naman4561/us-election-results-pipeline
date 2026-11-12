@@ -213,6 +213,48 @@ class DeploymentTests(unittest.TestCase):
             control.mark_unofficial(self.path, KY)
         self.assertEqual(self.path.read_bytes(), before)
 
+    def test_final_counties_are_a_sorted_list_of_mississippi_county_keys(self):
+        ms_source = "ms_2026_general_all"
+        self.value["sources"][ms_source] = {
+            "enabled": True,
+            "public": True,
+            "status": "unofficial",
+            "acquisition": "http",
+            "manual_final_counties": ["HANCOCK", "PEARLRIVER"],
+        }
+        catalog.validate(self.value)
+        for wrong in (["PEARLRIVER", "HANCOCK"], ["HANCOCK", "HANCOCK"], "PEARLRIVER", [1]):
+            self.value["sources"][ms_source]["manual_final_counties"] = wrong
+            with self.assertRaisesRegex(ValueError, "Final counties"):
+                catalog.validate(self.value)
+        self.value["sources"][ms_source].pop("manual_final_counties")
+        self.value["sources"][NC]["manual_final_counties"] = ["WAKE"]
+        with self.assertRaisesRegex(ValueError, "Final counties"):
+            catalog.validate(self.value)
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_a_county_is_marked_final_once_and_only_a_configured_one(self):
+        ms_source = "ms_2026_general_all"
+        self.value["sources"][ms_source] = {
+            "enabled": True,
+            "public": True,
+            "status": "unofficial",
+            "acquisition": "http",
+        }
+        self.save()
+        result = control.county_final(self.path, "PEARLRIVER")
+        self.assertEqual(result["outcome"], "county_final")
+        control.county_final(self.path, "HANCOCK")
+        control.county_final(self.path, "PEARLRIVER")
+        after = catalog.read(self.path)
+        self.assertEqual(
+            after["sources"][ms_source]["manual_final_counties"], ["HANCOCK", "PEARLRIVER"]
+        )
+        before = self.path.read_bytes()
+        with self.assertRaisesRegex(ValueError, "configured Mississippi county"):
+            control.county_final(self.path, "ATLANTIS")
+        self.assertEqual(self.path.read_bytes(), before)
+
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_a_paused_source_stays_public_and_is_skipped_not_failed(self):
         self.assertEqual(control.pause(self.path, NC, True)["outcome"], "paused")

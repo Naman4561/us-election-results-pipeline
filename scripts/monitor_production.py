@@ -227,9 +227,14 @@ def assess(prod, config, now):
                 issues[f"dashboard/{code}"] = "State dashboard results are unavailable"
             elif not state.get("publication"):
                 issues[f"dashboard/{code}"] = "State dashboard has no approved publication"
+            final = set(catalog["sources"][name].get("manual_final_counties", []))
             for county, record in state.get("county_feeds", {}).items():
                 if record.get("issue") == "manual_snapshot":
-                    if age_seconds(record.get("last_success_at"), now) > 21600:
+                    # A county whose last report before certification is in is never due.
+                    if (
+                        county not in final
+                        and age_seconds(record.get("last_success_at"), now) > 21600
+                    ):
                         issues[f"{REMINDER}county/{code}/{county}"] = (
                             "Manual county snapshot is over six hours old"
                         )

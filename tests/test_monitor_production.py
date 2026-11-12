@@ -153,6 +153,9 @@ class MonitorTests(unittest.TestCase):
         alerts, reminders = monitor.split(issues)
         self.assertEqual(alerts, {})
         self.assertIn("Manual county snapshot", reminders["county/MS/JACKSON"])
+        # A county whose last report before certification is in is never due.
+        self.catalog["sources"][MS]["manual_final_counties"] = ["JACKSON"]
+        self.assertEqual(self.assess(dashboard=payload("MN", MS=ms)), {})
 
     def test_enabling_a_source_adds_its_checks_and_private_ones_stay_off_the_dashboard(self):
         (self.root / "data/runs" / MS / "latest.json").unlink()
