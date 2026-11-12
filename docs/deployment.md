@@ -52,10 +52,13 @@ deploy status
    source's check key (`control.check_keys`) covers the release files its check can
    run: the image's build inputs, dbt models, migrations, the job scripts, the package
    modules reachable from them and from the source's own parser and collector, and the
-   reviewed data other than other states'. It also covers the source's configuration,
-   its status and the snapshot it would check. Passes are recorded by key in
+   reviewed data other than other states'. It also covers the source's configuration
+   and its status. Passes are recorded by key, with the snapshot checked, in
    `release-checks.json` in the control state directory, kept even when a release fails,
-   so a retry checks only what failed. A change to one state's parser or data re-checks
+   so a retry checks only what failed. A pass is reused for a newer snapshot only when
+   the worker has already published that snapshot under the live release, whose key for
+   the source is the same (`worker-idle.json`: same image, status and snapshot), so new
+   results alone do not make a source's check run again. A change to one state's parser or data re-checks
    that state; a change to shared parsing code, `states.py`, dbt, migrations or
    dependencies re-checks every source; dashboard and host-side changes re-check none.
    `deploy.py release --check-all` checks every source regardless.

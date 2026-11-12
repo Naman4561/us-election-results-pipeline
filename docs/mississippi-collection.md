@@ -121,6 +121,27 @@ observation time, until another reviewed import. They are not confirmed by polli
 other counties. After six hours the monitor sends a reminder (not an alert).
 Automatic stale or unavailable sources alert separately; uncollected counties are not operational failures.
 
+## Certification
+
+When the Secretary of State certifies, its recap sheet (in 2024,
+`2024ElectionRecapSheets.csv`) replaces the county collection. The recap lists every
+county's Senate count with each candidate's statewide total; `parsers/ms.py`
+(`parse_recap`, imported as `certified-recap.csv`) requires all 82 counties and the
+three candidates with their parties, sums each candidate's counties to the printed
+statewide total, and refuses anything else, including Senate write-in rows. Download it
+in a browser, then import it as the source's certified file ([deployment](deployment.md)):
+
+```bash
+deploy certify --source ms_2026_general_all --certified-file INBOX_FILE \
+    --certified-name certified-recap.csv --sha256 HASH --downloaded-at UTC_TIME \
+    --certified-on 2026-11-13 --attested-by "NAME" --evidence-url https://www.sos.ms.gov/...
+```
+
+Collection pauses first and the source stays paused as official, so county changes
+after certification are not collected. Every county then reads as current, from the
+recap, and the manual-county reminders end. A recap in another layout is refused
+rather than misread; its reader then needs the new layout.
+
 ## Database and presentation
 
 Mississippi's vote rows go into the shared results tables like every state's. Its
