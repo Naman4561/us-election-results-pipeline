@@ -260,7 +260,7 @@ h2 {
 }
 .feature {
   /* Grey, not white: states with no election are filled near-white. */
-  stroke: #8e9cab;
+  stroke: #c4cdd7;
   stroke-width: 1;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
