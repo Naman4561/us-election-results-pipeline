@@ -2,6 +2,7 @@
 
 import argparse
 import hashlib
+import heapq
 import json
 import re
 import unicodedata
@@ -76,6 +77,63 @@ def bounds(features):
     )
 
 
+def label_point(rings, precision=0.5):
+    """Where a label fits best: the point inside the largest ring farthest from its edge
+    (the pole of inaccessibility, found as in Mapbox's polylabel). A bounding box's centre
+    can fall outside an L-shaped state: Florida's is in the Gulf."""
+
+    def area(ring):
+        return sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(ring, ring[1:] + ring[:1])) / 2
+
+    ring = [tuple(p) for p in max((r for r in rings if len(r) > 2), key=lambda r: abs(area(r)))]
+    edges = list(zip(ring, ring[1:] + ring[:1]))
+
+    def distance(x, y):
+        """Distance to the ring's edge: positive inside, negative outside."""
+        inside, best = False, float("inf")
+        for (ax, ay), (bx, by) in edges:
+            if (ay > y) != (by > y) and x < (bx - ax) * (y - ay) / (by - ay) + ax:
+                inside = not inside
+            dx, dy = bx - ax, by - ay
+            t = max(0.0, min(1.0, ((x - ax) * dx + (y - ay) * dy) / (dx * dx + dy * dy or 1)))
+            best = min(best, (ax + t * dx - x) ** 2 + (ay + t * dy - y) ** 2)
+        return (1 if inside else -1) * best**0.5
+
+    def cell(x, y, half):
+        d = distance(x, y)
+        return (-(d + half * 2**0.5), x, y, half, d)  # ordered by the most it can hold
+
+    xs, ys = [p[0] for p in ring], [p[1] for p in ring]
+    left, top, right, bottom = min(xs), min(ys), max(xs), max(ys)
+    size = min(right - left, bottom - top)
+    if size <= 0:
+        return [(left + right) / 2, (top + bottom) / 2]
+    heap = [
+        cell(left + size * (i + 0.5), top + size * (j + 0.5), size / 2)
+        for i in range(int((right - left) / size) + 1)
+        for j in range(int((bottom - top) / size) + 1)
+    ]
+    heapq.heapify(heap)
+    best = max(
+        (
+            cell(sum(xs) / len(xs), sum(ys) / len(ys), 0),
+            cell((left + right) / 2, (top + bottom) / 2, 0),
+        ),
+        key=lambda c: c[4],
+    )
+    while heap:
+        candidate = heapq.heappop(heap)
+        if candidate[4] > best[4]:
+            best = candidate
+        if -candidate[0] - best[4] <= precision:
+            continue
+        half = candidate[3] / 2
+        for dx in (-half, half):
+            for dy in (-half, half):
+                heapq.heappush(heap, cell(candidate[1] + dx, candidate[2] + dy, half))
+    return [round(best[1], 1), round(best[2], 1)]
+
+
 def layout(features, box):
     left, bottom, right, top = bounds(features)
     x, y, width, height = box
@@ -92,14 +150,7 @@ def layout(features, box):
             for ring in rings
             if len(ring) > 2
         )
-        points = [p for ring in rings for p in ring]
-        return {
-            "path": path,
-            "center": [
-                (min(p[0] for p in points) + max(p[0] for p in points)) / 2,
-                (min(p[1] for p in points) + max(p[1] for p in points)) / 2,
-            ],
-        }
+        return {"path": path, "center": label_point(rings)}
 
     return draw
 
