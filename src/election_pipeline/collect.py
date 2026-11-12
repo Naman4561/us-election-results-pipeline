@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import http.client
 import os
+import socket
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -51,11 +52,49 @@ class CheckedRedirect(HTTPRedirectHandler):
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
-def open_url(request, *, timeout, context=None, cookies=None):
+def connect_ipv6_first(address, timeout=socket._GLOBAL_DEFAULT_TIMEOUT, source_address=None):
+    """socket.create_connection, trying the host's IPv6 addresses before its IPv4 ones.
+
+    With only a private (ULA) IPv6 address, as in a job container, the system's address
+    order puts IPv4 first for public hosts; a source that needs IPv6 asks for this."""
+    host, port = address
+    addresses = sorted(
+        socket.getaddrinfo(host, port, 0, socket.SOCK_STREAM),
+        key=lambda a: a[0] != socket.AF_INET6,
+    )
+    errors = []
+    for family, kind, protocol, _, target in addresses:
+        sock = socket.socket(family, kind, protocol)
+        try:
+            if timeout is not socket._GLOBAL_DEFAULT_TIMEOUT:
+                sock.settimeout(timeout)
+            if source_address:
+                sock.bind(source_address)
+            sock.connect(target)
+            return sock
+        except OSError as error:
+            sock.close()
+            errors.append(error)
+    raise errors[-1] if errors else OSError(f"No address for {host}")
+
+
+class IPv6FirstConnection(http.client.HTTPSConnection):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._create_connection = connect_ipv6_first
+
+
+class IPv6FirstHTTPSHandler(HTTPSHandler):
+    def https_open(self, req):
+        return self.do_open(IPv6FirstConnection, req, context=self._context)
+
+
+def open_url(request, *, timeout, context=None, cookies=None, prefer_ipv6=False):
     """Open with verified TLS (the host's context when it needs one) and checked redirects."""
+    https = IPv6FirstHTTPSHandler if prefer_ipv6 else HTTPSHandler
     handlers = [
         CheckedRedirect(),
-        HTTPSHandler(context=context) if context is not None else HTTPSHandler(),
+        https(context=context) if context is not None else https(),
     ]
     if cookies is not None:
         handlers.append(HTTPCookieProcessor(cookies))
@@ -107,6 +146,8 @@ def fetch_file(
         options = {"context": context} if context is not None else {}
         if cookies is not None:
             options["cookies"] = cookies
+        if source.prefer_ipv6:
+            options["prefer_ipv6"] = True
         response = open_url(request, timeout=settings.timeout_seconds, **options)
     except HTTPError as error:
         # urllib represents 304 as HTTPError; it is a normal conditional-GET result.

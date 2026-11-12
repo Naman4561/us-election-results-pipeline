@@ -93,6 +93,9 @@ class Source:
     collector_overrides: tuple[tuple[str, int], ...] = ()
     # UTC hours a source may be checked in, once each; empty means any cycle that is due.
     collect_hours_utc: tuple[int, ...] = ()
+    # Connect over IPv6 first when the site has an IPv6 address (IPv4 stays the fallback).
+    # Virginia's CDN refuses the server's IPv4 address but answers it over IPv6.
+    prefer_ipv6: bool = False
 
     def __post_init__(self) -> None:
         if not re.fullmatch(r"[a-z][a-z0-9_-]{0,79}", self.source_id):
@@ -171,6 +174,8 @@ class Source:
 
         if type(self.allow_missing) is not bool:
             raise ValueError("allow_missing must be true or false")
+        if type(self.prefer_ipv6) is not bool:
+            raise ValueError("prefer_ipv6 must be true or false")
         if (
             not isinstance(self.collector_overrides, tuple)
             or any(
@@ -208,7 +213,12 @@ class Source:
     def signature(self, settings: CollectorSettings) -> str:
         settings = self.effective_settings(settings)
         source_contract = asdict(self)
-        for key in ("supplemental_members", "collector_overrides", "collect_hours_utc"):
+        for key in (
+            "supplemental_members",
+            "collector_overrides",
+            "collect_hours_utc",
+            "prefer_ipv6",
+        ):
             if not source_contract[key]:
                 source_contract.pop(key)
         if self.primary_filename == "results.xml":
