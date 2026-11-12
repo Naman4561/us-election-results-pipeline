@@ -408,11 +408,11 @@ def check_modules(root, code):
 
 
 def check_keys(release_path, value, prod, names):
-    """{source: what its release check depends on}; a source with an unchanged key and a
-    recorded pass need not be checked again. The key covers the release files its check
-    runs (build inputs, dbt, migrations, job scripts, the modules ``check_modules`` finds,
-    reviewed data other than other states'), the source's configuration and status, and
-    the snapshot it would check. A source without a snapshot gets no key."""
+    """{source: the code its release check depends on}; a source with an unchanged key and
+    a recorded pass need not be checked again (see ``release`` for its snapshot). The key
+    covers the release files its check runs (build inputs, dbt, migrations, job scripts,
+    the modules ``check_modules`` finds, reviewed data other than other states'), and the
+    source's configuration and status. A source without a snapshot gets no key."""
     from election_pipeline.settings import load_config
     from election_pipeline.states import STATES, own_registry
 
@@ -458,15 +458,44 @@ def check_keys(release_path, value, prod, names):
         # The registry counts only as far as it concerns this state.
         used.append(own_registry(registry, source.state))
         digest = hashlib.sha256()
-        for part in (
-            source.signature(settings),
-            value["sources"][name]["status"],
-            state["sha256"],
-            *used,
-        ):
+        for part in (source.signature(settings), value["sources"][name]["status"], *used):
             digest.update(str(part).encode() + b"\0")
         keys[name] = digest.hexdigest()
     return keys
+
+
+def snapshots(prod, names):
+    """{source: the snapshot its release check would read}."""
+    found = {}
+    for name in names:
+        try:
+            state = json.loads(
+                (Path(prod["DATA_DIR"]) / "state" / f"{name}.json").read_text(encoding="utf-8")
+            )
+        except (OSError, ValueError):
+            continue
+        if state.get("sha256"):
+            found[name] = state["sha256"]
+    return found
+
+
+def published(value, config, current):
+    """Sources whose current snapshot the worker last published under the live release's
+    image and status. For one whose check key the live release shares, checking that
+    snapshot again would only repeat that run."""
+    try:
+        ledger = json.loads(
+            (Path(config["CONTROL_STATE_DIR"]) / IDLE_LEDGER).read_text(encoding="utf-8")
+        )["sources"]
+    except (OSError, ValueError, KeyError):
+        return set()
+    image = value["release"]["image_id"]
+    return {
+        name
+        for name, snapshot in current.items()
+        if ledger.get(name)
+        == {"image": image, "status": value["sources"][name]["status"], "raw_sha256": snapshot}
+    }
 
 
 def check_sources(image, value, prod, config, moved=(), names=None):
@@ -536,7 +565,9 @@ def release(path, release_path, image, prod, config, moved=(), check_all=False):
     """Make a staged release current once it validates every enabled HTTP source.
 
     A source whose check key (``check_keys``) passed before, under this or an earlier
-    release, is not checked again unless ``check_all``.
+    release, is not checked again unless ``check_all``, provided its snapshot is the one
+    that passed or one the worker has since published under a live release with the same
+    key.
     """
     staged = describe(release_path, image)
     value = catalog.read(path)
@@ -548,11 +579,24 @@ def release(path, release_path, image, prod, config, moved=(), check_all=False):
     ledger = Path(config["CONTROL_STATE_DIR"]) / CHECK_LEDGER
     try:
         keys = check_keys(staged["release_path"], value, prod, set(names) - set(moved))
-        passed = json.loads(ledger.read_text(encoding="utf-8"))["passed"] if ledger.exists() else {}
+        current = snapshots(prod, keys)
+        proven = published(value, config, current)
+        recorded = json.loads(ledger.read_text(encoding="utf-8")) if ledger.exists() else {}
+        if recorded.get("schema_version") != 2:
+            recorded = {}  # a version 1 key covered its snapshot: check once more
+        passed, live = recorded.get("passed", {}), recorded.get("released", {})
     except Exception:
         # Without keys every source is checked, as before.
-        keys, passed = {}, {}
-    reused = [] if check_all else sorted(n for n in keys if passed.get(n) == keys[n])
+        keys, current, proven, passed, live = {}, {}, set(), {}, {}
+
+    def reusable(name):
+        recorded = passed.get(name, {})
+        return recorded.get("key") == keys[name] and (
+            recorded.get("snapshot") == current.get(name)
+            or (live.get(name) == keys[name] and name in proven)
+        )
+
+    reused = [] if check_all else sorted(n for n in keys if reusable(n))
     if reused and len(reused) == len(names):
         # One source is always checked, a different one each release: it proves the new
         # image runs end to end, which no key can show (a manual-only state's registry
@@ -565,9 +609,13 @@ def release(path, release_path, image, prod, config, moved=(), check_all=False):
     # A pass holds for its key whether or not this release goes ahead.
     passed = {
         **{n: k for n, k in passed.items() if n not in failed},
-        **{n: keys[n] for n in checked if n in keys and n not in failed},
+        **{
+            n: {"key": keys[n], "snapshot": current.get(n)}
+            for n in checked
+            if n in keys and n not in failed
+        },
     }
-    atomic_json(ledger, {"schema_version": 1, "passed": passed})
+    atomic_json(ledger, {"schema_version": 2, "passed": passed, "released": live})
     if failed:
         raise ValueError(redacted("The release did not validate: " + json.dumps(failed), prod))
 
@@ -580,6 +628,8 @@ def release(path, release_path, image, prod, config, moved=(), check_all=False):
 
     catalog.update(path, change)
     point_current(config, staged["release_path"])
+    # The worker now runs this release: its keys say which later releases share its code.
+    atomic_json(ledger, {"schema_version": 2, "passed": passed, "released": dict(keys)})
     result = {
         "outcome": "released",
         "revision": staged["revision"],

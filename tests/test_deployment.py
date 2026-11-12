@@ -654,20 +654,48 @@ class DeploymentTests(unittest.TestCase):
         self.assertNotEqual(before[1], after[1])
         self.assertEqual(changed("dbt/dbt_project.yml"), {NC, KY})
         self.assertEqual(changed("constraints.txt"), {NC, KY})
-        # A new snapshot or status changes only that source's key.
+        # A new status changes only that source's key; a new snapshot changes none (the
+        # release weighs snapshots itself).
         before = keys()
         state = Path(self.prod["DATA_DIR"]) / "state" / f"{NC}.json"
         state.write_text(state.read_text().replace("a" * 64, "b" * 64), encoding="utf-8")
         self.value["sources"][KY]["status"] = "unofficial"
         after = keys()
-        self.assertTrue(before[NC] != after[NC] and before[KY] != after[KY])
+        self.assertTrue(before[NC] == after[NC] and before[KY] != after[KY])
         # A source without a snapshot of its configured address gets no key.
         state.write_text(json.dumps({"sha256": "b" * 64, "url": "https://old"}), "utf-8")
         self.assertEqual(set(keys()), {KY})
 
+    def test_the_worker_proves_a_snapshot_only_under_the_live_image_and_status(self):
+        state = Path(self.prod["DATA_DIR"]) / "state"
+        state.mkdir(parents=True)
+        (state / f"{NC}.json").write_text(json.dumps({"sha256": "a" * 64}), encoding="utf-8")
+        (state / f"{KY}.json").write_text(json.dumps({"sha256": None}), encoding="utf-8")
+        current = control.snapshots(self.prod, [NC, KY, "missing"])
+        self.assertEqual(current, {NC: "a" * 64})
+        ledger = Path(self.config["CONTROL_STATE_DIR"]) / control.IDLE_LEDGER
+        self.assertEqual(control.published(self.value, self.config, current), set())
+
+        def marker(**changes):
+            entry = {
+                "image": IMAGE,
+                "status": self.value["sources"][NC]["status"],
+                "raw_sha256": "a" * 64,
+                **changes,
+            }
+            ledger.write_text(json.dumps({"sources": {NC: entry}}), encoding="utf-8")
+            return control.published(self.value, self.config, current)
+
+        self.assertEqual(marker(), {NC})
+        # Another snapshot, image or status proves nothing about this one.
+        self.assertEqual(marker(raw_sha256="b" * 64), set())
+        self.assertEqual(marker(image=NEW_IMAGE), set())
+        self.assertEqual(marker(status="official"), set())
+
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock and symlinks")
     def test_a_release_reuses_passed_checks_with_unchanged_keys(self):
         checked, keys = [], {NC: "n" * 64, KY: "k" * 64}
+        current, proven = {NC: "a" * 64, KY: "a" * 64}, set()
 
         def check(image, name, *a, **k):
             checked.append(name)
@@ -681,6 +709,12 @@ class DeploymentTests(unittest.TestCase):
                 patch.object(control, "connect", MagicMock()),
                 patch.object(control, "migrate", return_value=[]),
                 patch.object(control, "check_keys", return_value=dict(keys)),
+                patch.object(
+                    control,
+                    "snapshots",
+                    side_effect=lambda prod, names: {n: current[n] for n in names},
+                ),
+                patch.object(control, "published", side_effect=lambda *a: set(proven)),
                 patch.object(control, "run_one", side_effect=check),
                 patch.object(control, "require_no_backup"),
                 patch.object(control, "prune_releases", return_value={}),
@@ -700,9 +734,23 @@ class DeploymentTests(unittest.TestCase):
         # With nothing changed, one source is still checked.
         self.assertEqual(len(release()["sources_reused"]), 1)
         self.assertEqual(len(checked), 1)
+        # A new snapshot is checked unless the worker published it under a live release
+        # with the same key.
+        current[NC] = "b" * 64
+        self.assertEqual(release()["sources_validated"], [NC])
+        current[NC], proven = "c" * 64, {NC}
         keys[KY] = "x" * 64
-        self.assertEqual(release()["sources_validated"], [KY])
+        result = release()
+        self.assertEqual((result["sources_validated"], result["sources_reused"]), ([KY], [NC]))
+        # Not when the code that would check it changed.
+        current[NC], keys[NC] = "d" * 64, "y" * 64
+        result = release()
+        self.assertEqual((result["sources_validated"], result["sources_reused"]), ([NC], [KY]))
         self.assertEqual(sorted(release(check_all=True)["sources_validated"]), [KY, NC])
+        # A version 1 pass, whose key covered its snapshot, is checked once more.
+        ledger = Path(self.config["CONTROL_STATE_DIR"]) / control.CHECK_LEDGER
+        ledger.write_text(json.dumps({"schema_version": 1, "passed": dict(keys)}), encoding="utf-8")
+        self.assertEqual(sorted(release()["sources_validated"]), [KY, NC])
         # A source without a key (no snapshot, or none computed) is always checked.
         keys.clear()
         self.assertEqual(sorted(release()["sources_validated"]), [KY, NC])
