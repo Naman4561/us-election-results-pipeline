@@ -7,7 +7,7 @@ from pathlib import Path
 
 from dotenv import dotenv_values
 
-from election_pipeline.deployment.manual import configure, operate
+from election_pipeline.deployment.manual import configure, mark_final, operate
 
 
 def main():
@@ -35,6 +35,8 @@ def main():
     local.add_argument("--attested-by", help="Who checked and attests, as they sign")
     promote = sub.add_parser("promote")
     promote.add_argument("--source", required=True)
+    final = sub.add_parser("final", help="The issuer posts nothing more before certifying")
+    final.add_argument("--source", required=True)
     args = parser.parse_args()
     config = dict(dotenv_values(args.config, interpolate=False))
     prod = dict(dotenv_values(config["PRODUCTION_ENV"], interpolate=False))
@@ -44,6 +46,8 @@ def main():
             result = configure(
                 path, args.source, max_age_seconds=args.max_age_hours * 3600, final=args.final
             )
+        elif args.action == "final":
+            result = mark_final(path, args.source)
         else:
             kwargs = (
                 {"promote": True}
