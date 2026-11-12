@@ -420,6 +420,8 @@ def check_keys(release_path, value, prod, names):
     settings, sources = load_config(root / "config/sources.toml")
     resources = root / "src/election_pipeline/resources"
     registry = root / "src/election_pipeline/states.py"
+    # The dashboard's own files (styles, maps, its script) are served, never read by a check.
+    static = root / "src/election_pipeline/dashboard/static"
     # A state's own data (``<slug>_*.json``) is read by its parser alone. Rosters are not
     # theirs alone: every parser imports all of them (parsers.scope_2026).
     owners = {}
@@ -449,6 +451,7 @@ def check_keys(release_path, value, prod, names):
             text
             for item, text in files.items()
             if item != registry
+            and static not in item.parents
             and (
                 item.suffix != ".py" or item in modules[source.state]
                 if resources not in item.parents
