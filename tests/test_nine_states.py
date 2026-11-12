@@ -6,6 +6,7 @@ and hash. Adversarial cases edit temporary copies.
 """
 
 import csv
+import dataclasses
 import gzip
 import hashlib
 import importlib
@@ -35,7 +36,7 @@ from election_pipeline.parsers import clarity, ia, md
 from election_pipeline.parsers import oregon as OREGON
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
-from election_pipeline.states import state_adapter
+from election_pipeline.states import STATES, state_adapter
 from election_pipeline.storage import ArchiveStore
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -144,7 +145,8 @@ class NineStateTests(unittest.TestCase):
 
     def test_official_snapshots_parse_verify_reconcile_convert_and_replay(self):
         expected = {
-            "VA": (1010, 12, {"VA-SEN": 133, "VA-11": 2}),
+            # Statewide rows only (see states.py); its localities are read, not kept.
+            "VA": (50, 12, {}),
             "ID": (710, 4, {"ID-SEN": 44, "ID-GOV": 44, "ID-01": 19}),
             "WA": (180, 10, {"WA-03": 7, "WA-07": 1}),
             "CO": (1201, 10, {"CO-SEN": 64, "CO-GOV": 64, "CO-05": 1}),
@@ -234,6 +236,42 @@ class NineStateTests(unittest.TestCase):
     # Enhanced Voting (Virginia, Idaho, Washington) -----------------------------------------
 
     def test_ev_altered_county_count_or_method_split_rejected(self):
+        # Virginia keeps statewide rows only, so these use its fixture with county results on.
+        counties = dataclasses.replace(STATES["VA"], county_results=True)
+        with patch.dict(STATES, {"VA": counties}):
+            self.ev_county_checks()
+
+    def test_ev_statewide_only_state_ignores_locality_sums(self):
+        def county(data):
+            def change(item):
+                option = item["breakdownResults"][0]["ballotOptions"][0]
+                option["voteCount"] += 1
+                item["breakdownResults"][0]["voteTotal"] += 1
+                option["groupResults"][0]["voteCount"] += 1
+
+            edit_json(data, "item-va-sen.json", change)
+
+        report = self.parse("VA", county)
+        self.assertEqual(report["outcome"], "parsed", report)
+        self.assertEqual(report["locality_reconciliation"], "not_checked")
+        self.assertEqual(report["county_reconciliation"], "not_available")
+        rows = self.read(report, "results.csv")
+        self.assertTrue(rows)
+        self.assertFalse([r for r in rows if r["unit_type"] != "state"])
+
+        def total(data):
+            edit_json(
+                data,
+                "item-va-sen.json",
+                lambda item: item["breakdownResults"][0].update(
+                    voteTotal=item["breakdownResults"][0]["voteTotal"] + 1
+                ),
+            )
+
+        # Each locality is still checked on its own.
+        self.failed("VA", total, "candidate counts disagree with county total")
+
+    def ev_county_checks(self):
         def county(data):
             def change(item):
                 option = item["breakdownResults"][0]["ballotOptions"][0]

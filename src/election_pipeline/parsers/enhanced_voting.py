@@ -7,7 +7,8 @@ selected contest the parser checks:
 
 - the election, jurisdiction and publication identifiers are the configured ones;
 - candidate counts add up to the contest total;
-- every county's candidate counts add up, per candidate, to the statewide count;
+- every county's candidate counts add up, per candidate, to the statewide count (unless
+  its state keeps statewide results only: then only statewide rows are kept);
 - where a state publishes vote methods, each candidate's methods add up to its count, in
   every county and statewide, and are stored; otherwise none may be present.
 
@@ -152,6 +153,9 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
     if source.format != "bundle" or source.election_date != "2026-11-03":
         raise ValueError(f"Unsupported {site.name} source/election")
     wanted = state_adapter(site.state).races
+    # A state that keeps no county results publishes statewide rows only; its localities
+    # are still read and checked one by one, but not summed against the statewide counts.
+    counties_kept = site.county is not None and state_adapter(site.state).county_results
     with zipfile.ZipFile(archive_path) as archive:
         data = unique_json(archive.read(source.primary_filename))
         record = election(data, site, source)
@@ -203,7 +207,7 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
                 if english(option["name"]) != name:
                     raise ValueError(f"{race} {county}: candidate name differs from statewide")
                 sums[identity] += count(option["voteCount"])
-                if site.county is None:
+                if not counties_kept:
                     methods(option, site, f"{race} {county}")
                     continue
                 rows.append(
@@ -222,8 +226,10 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
                         **methods(option, site, f"{race} {county}"),
                     }
                 )
-        if site.county is None:
-            if any(sums[i] != count(o["voteCount"]) for i, o in statewide.items()):
+        if not counties_kept:
+            if site.county is None and any(
+                sums[i] != count(o["voteCount"]) for i, o in statewide.items()
+            ):
                 raise ValueError(f"{race}: localities do not add up to the statewide counts")
             verify_scope(site.state, race, list(statewide))
             continue
@@ -235,10 +241,10 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
         output,
         stats,
         reference=reference,
-        reconcile=site.county is not None,
+        reconcile=counties_kept,
     )
-    if site.county is None:
-        stats.update(locality_reconciliation="passed")
+    if not counties_kept:
+        stats.update(locality_reconciliation="passed" if site.county is None else "not_checked")
     stats.update(
         source_version=text(record["publishVersionId"]),
         source_update_text=text(record["asOf"]),
