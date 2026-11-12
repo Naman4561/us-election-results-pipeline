@@ -289,6 +289,15 @@ h2 {
   stroke-width: 2px;
   pointer-events: none;
 }
+.map-label.callout {
+  text-anchor: start;
+}
+.map-leader {
+  stroke: #8e9cab;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
 .zoom-controls {
   position: absolute;
   right: 9px;

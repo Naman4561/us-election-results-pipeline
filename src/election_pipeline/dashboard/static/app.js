@@ -341,9 +341,20 @@ function drawMap() {
     shapes.append(p);
     if (view.scope === "US" && view.office !== "house") {
       const t = document.createElementNS(ns, "text");
-      t.setAttribute("x", f.center[0]);
-      t.setAttribute("y", f.center[1]);
-      t.setAttribute("class", "map-label");
+      // A state too small for its label has it off the coast, joined by a leader line.
+      const [x, y] = f.callout || f.center;
+      if (f.callout) {
+        const leader = document.createElementNS(ns, "line");
+        leader.setAttribute("x1", f.center[0]);
+        leader.setAttribute("y1", f.center[1]);
+        leader.setAttribute("x2", x - 3);
+        leader.setAttribute("y2", y - 4);
+        leader.setAttribute("class", "map-leader");
+        labels.append(leader);
+      }
+      t.setAttribute("x", x);
+      t.setAttribute("y", y);
+      t.setAttribute("class", f.callout ? "map-label callout" : "map-label");
       t.textContent = f.id;
       labels.append(t);
     }
