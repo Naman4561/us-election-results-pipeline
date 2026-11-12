@@ -651,6 +651,8 @@ class DeploymentTests(unittest.TestCase):
         # Every parser imports every roster.
         self.assertEqual(changed(package + "resources/rosters_2026/OK.json", str.rstrip), {NC, KY})
         self.assertEqual(changed(package + "dashboard/server.py"), set())
+        self.assertEqual(changed(package + "dashboard/static/app.css"), set())
+        self.assertEqual(changed(package + "dashboard/static/ms-map.json", str.rstrip), set())
         self.assertEqual(changed(package + "deployment/control.py"), set())
         # Shared parsing, the database models and the image: both.
         self.assertEqual(changed(package + "parsers/results.py"), {NC, KY})
