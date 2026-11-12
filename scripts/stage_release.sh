@@ -21,14 +21,16 @@ if [[ ! "$revision" =~ ^[0-9a-f]{40}$ ]]; then
 fi
 
 # The tests run in GitHub Actions on every push (.github/workflows/ci.yml): the full suite
-# on Linux and Windows, the dashboard's JavaScript and PostgreSQL. A revision is staged
-# only once every one of those jobs passed for it, so this host, whose CPU also collects
-# and serves results, does not run them again. STAGE_FULL_TESTS=1 runs the suite here too.
+# on Linux and Windows, the dashboard's JavaScript and the PostgreSQL tests in two shards.
+# A revision is staged only once the jobs production depends on passed for it (Windows
+# runs for local development and does not hold a release), so this host, whose CPU also
+# collects and serves results, does not run them again. STAGE_FULL_TESTS=1 runs the suite
+# here too. ship_release.sh waits for the same jobs (tests/test_check_pipeline.py).
 python3 - "$revision" <<'PY'
 import json, sys, urllib.request
 
 revision = sys.argv[1]
-required = {"test (ubuntu-latest)", "test (windows-latest)", "dashboard", "postgres"}
+required = {"test (ubuntu-latest)", "dashboard", "postgres-1", "postgres-2"}
 url = (
     "https://api.github.com/repos/Naman4561/us-election-results-pipeline/commits/"
     f"{revision}/check-runs?per_page=100"

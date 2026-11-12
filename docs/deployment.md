@@ -31,9 +31,11 @@ within six hours (`SHIP_CI_SECONDS`), or the branch has moved past the revision.
 holds the worker timer, lets a run in progress finish, stages, waits out a running backup
 and releases; the timer is restarted however it ends.
 
-1. **Stage** the pushed branch. Nothing running changes. Staging starts only once every
-   GitHub Actions job (`ci.yml`: the suite on Linux and Windows, the dashboard and
-   the PostgreSQL tests, in two shards) has passed for that commit, so this host does not run the suite again;
+1. **Stage** the pushed branch. Nothing running changes. Staging starts only once the
+   GitHub Actions jobs production depends on (`ci.yml`: the suite on Linux, the dashboard
+   and the PostgreSQL tests, in two shards) have passed for that commit, so this host does
+   not run the suite again (the Windows suite runs too, for local development, but does
+   not hold a release);
    inside the new image, with no network or production mounts, it imports every module,
    loads the source configuration and runs two quick end-to-end test files
    (`STAGE_FULL_TESTS=1` runs the whole suite as well). The image installs the locked
