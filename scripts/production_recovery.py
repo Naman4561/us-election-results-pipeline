@@ -5,6 +5,7 @@ for a real restore.
 """
 
 import argparse
+import hashlib
 import json
 import os
 import random
@@ -20,6 +21,7 @@ from pathlib import Path
 
 from dotenv import dotenv_values
 
+from election_pipeline.database import connect
 from election_pipeline.recovery import (
     backup,
     check_restore,
@@ -32,6 +34,50 @@ from election_pipeline.storage import atomic_json, file_hash, utc_now
 
 ROOT = Path(__file__).resolve().parents[1]
 ID_PATTERN = r"backup_[0-9a-f]{32}"
+# A backup with nothing new to hold is skipped (--if-unchanged), but one is uploaded at
+# least this often whatever happens.
+UNCHANGED_SECONDS = 24 * 3600
+SKIP_RECORD = "latest-backup-unchanged.json"
+
+
+def fingerprint(conn, data, catalog_file):
+    """What a backup exists to keep: the raw snapshots, publications and restore checks
+    on disk, the snapshots and publications in the database, and the deployment. Every
+    new result arrives as a new raw snapshot. Poll logs (run reports, collector state,
+    fetch and load attempts), which change on every poll, are left out: a backup skipped
+    while only they changed loses at most a day of them, never a result."""
+    digest = hashlib.sha256(Path(catalog_file).read_bytes())
+    for directory in ("raw", "publications", "recovery_checks"):
+        for path in sorted((Path(data) / directory).rglob("*")):
+            if path.is_file():
+                info = path.stat()
+                name = path.relative_to(data).as_posix()
+                digest.update(f"{name}\0{info.st_size}\0{info.st_mtime_ns}\n".encode())
+    for query in (
+        "SELECT count(*) AS n, max(snapshot_id) AS last FROM ops.snapshots",
+        "SELECT count(*) AS n, max(published_at) AS last FROM serving.publications",
+        "SELECT source_id, publication_id FROM serving.current_publications ORDER BY 1",
+    ):
+        digest.update(json.dumps(conn.execute(query).fetchall(), default=str).encode())
+    return digest.hexdigest()
+
+
+def unchanged_since(destination, current, now=None):
+    """The last uploaded backup, if it already holds everything ``current`` describes and
+    finished less than UNCHANGED_SECONDS ago; otherwise None (back up)."""
+    try:
+        last = json.loads((destination / "latest-backup.json").read_text(encoding="utf-8"))
+        finished = datetime.fromisoformat(last["finished_at"])
+    except (OSError, ValueError, KeyError, TypeError):
+        return None
+    now = now or datetime.now(timezone.utc)
+    if (
+        last.get("outcome") == "uploaded"
+        and last.get("fingerprint") == current
+        and timedelta(0) <= now - finished < timedelta(seconds=UNCHANGED_SECONDS)
+    ):
+        return last
+    return None
 
 
 def aws_copy(config, source, destination):
@@ -368,6 +414,11 @@ def main():
         help="check-restore only when a promoted state awaits one (see awaiting_restore)",
     )
     parser.add_argument(
+        "--skip-unchanged",
+        action="store_true",
+        help="skip a backup with nothing new to hold (see fingerprint), for at most a day",
+    )
+    parser.add_argument(
         "--env-file",
         type=Path,
         default=Path("/etc/election-pipeline/production.env"),
@@ -448,6 +499,22 @@ def main():
                 raise ValueError("A backup records the deployment: pass --catalog-file")
             with registry.locked(args.catalog_file):
                 catalog = registry.read(args.catalog_file)
+                # Taken first: anything that lands while the backup runs differs next time.
+                with connect(db) as conn:
+                    current = fingerprint(conn, data, args.catalog_file)
+                last = unchanged_since(args.destination, current) if args.skip_unchanged else None
+                if last:
+                    # The last upload stays the latest backup: restores and restore checks
+                    # use it. This record tells the monitor the skip was deliberate.
+                    skipped = {
+                        "outcome": "unchanged",
+                        "backup_id": last["backup_id"],
+                        "fingerprint": current,
+                        "finished_at": utc_now(),
+                    }
+                    atomic_json(args.destination / SKIP_RECORD, skipped)
+                    print(json.dumps(skipped, indent=2), flush=True)
+                    return 0
                 result = backup(
                     ROOT,
                     data,
@@ -475,6 +542,7 @@ def main():
                 "backup_id": bundle.name,
                 "archive_bytes": receipt["bytes"],
                 "new_packs": new_packs,
+                "fingerprint": current,
             }
             try:
                 result["local_bytes_freed"] = trim_uploaded_bundle(bundle)

@@ -184,12 +184,25 @@ def assess(prod, config, now):
         except (OSError, ValueError, TypeError, KeyError):
             issues[f"poll/{name}"] = "Collector state is missing or invalid"
 
-    problem = report_problem(
-        Path(config.get("BACKUP_DIR", "/srv/election-pipeline/backups")) / "latest-backup.json",
-        {"uploaded"},
-        int(config.get("MAX_BACKUP_AGE_SECONDS", "25200")),
-        now,
-    )
+    backups = Path(config.get("BACKUP_DIR", "/srv/election-pipeline/backups"))
+    backup_age = int(config.get("MAX_BACKUP_AGE_SECONDS", "25200"))
+    problem = report_problem(backups / "latest-backup.json", {"uploaded"}, backup_age, now)
+    if problem:
+        # A backup skipped because nothing new arrived keeps the last upload current, for
+        # up to a day (production_recovery.py --skip-unchanged).
+        try:
+            latest = read_json(backups / "latest-backup.json")
+            skipped = read_json(backups / "latest-backup-unchanged.json")
+            if (
+                latest["outcome"] == "uploaded"
+                and skipped["outcome"] == "unchanged"
+                and skipped["backup_id"] == latest["backup_id"]
+                and age_seconds(skipped["finished_at"], now) <= backup_age
+                and age_seconds(latest["finished_at"], now) <= 24 * 3600 + backup_age
+            ):
+                problem = None
+        except (OSError, ValueError, TypeError, KeyError):
+            pass
     if problem:
         issues["backup"] = problem
     else:

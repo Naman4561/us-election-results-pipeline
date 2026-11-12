@@ -16,7 +16,9 @@ User=root
 WorkingDirectory=/opt/election-releases/current
 UMask=0077
 Nice=10
-ExecStart=/opt/election-releases/current/.venv/bin/python scripts/production_recovery.py backup --catalog-file /var/lib/election-pipeline-deployment/catalog.json
+# A backup with nothing new to hold (no new snapshot, publication or deployment change) is
+# skipped and recorded; one is still uploaded at least daily.
+ExecStart=/opt/election-releases/current/.venv/bin/python scripts/production_recovery.py backup --skip-unchanged --catalog-file /var/lib/election-pipeline-deployment/catalog.json
 ExecStartPost=/opt/election-releases/current/.venv/bin/python scripts/prune_backups.py --keep 1 --apply
 Restart=on-failure
 RestartSec=30s
