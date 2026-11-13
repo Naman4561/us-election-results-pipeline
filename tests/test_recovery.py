@@ -7,10 +7,16 @@ import subprocess
 import tempfile
 import threading
 import unittest
+import uuid
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import test_parsing as fixtures
+from loading import migrated, requires_database
+
 from election_pipeline import recovery
+from election_pipeline.database import connect, load_parsed
 
 
 class RecoveryTests(unittest.TestCase):
@@ -474,3 +480,96 @@ class InventoryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "migrations"):  # no tables in the fake
             recovery.inventory(conn)
         self.assertEqual(conn.statements[0], "SET LOCAL statement_timeout = 0")
+
+    def test_a_backup_fingerprints_only_new_releases_and_ones_whose_rows_changed(self):
+        conn = MagicMock()
+        conn.execute.return_value.fetchall.return_value = [
+            {"release_id": 1, "n": 2},
+            {"release_id": 2, "n": 3},  # was 4: recomputed, not reused
+            {"release_id": 3, "n": 1},  # new
+        ]
+        known = {"1": {"rows": 2, "sha256": "one"}, "2": {"rows": 4, "sha256": "two"}}
+        fresh = {"2": {"rows": 3, "sha256": "two again"}, "3": {"rows": 1, "sha256": "three"}}
+        order = recovery.PER_RELEASE["landing.results"]
+        with patch.object(recovery, "release_digests", return_value=fresh) as digests:
+            found = recovery.per_release(conn, "landing", "results", order, known)
+        self.assertEqual(digests.call_args.args[4], [2, 3])
+        self.assertEqual(found["releases"], {"1": known["1"], "2": fresh["2"], "3": fresh["3"]})
+        self.assertEqual(found["rows"], 6)
+
+        # Nothing to reuse (the first backup, and every restore check): one full read.
+        with patch.object(recovery, "release_digests", return_value=fresh) as digests:
+            with self.assertRaisesRegex(ValueError, "changed while fingerprinting"):
+                recovery.per_release(conn, "landing", "results", order)
+        self.assertIsNone(digests.call_args.args[4])
+
+    def test_a_report_leaves_out_the_release_fingerprints(self):
+        found = {"landing.results": {"rows": 1, "sha256": "a", "releases": {"1": {}}}}
+        self.assertEqual(recovery.summary(found), {"landing.results": {"rows": 1, "sha256": "a"}})
+
+
+@requires_database
+class InventoryDatabaseTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.db = migrated()
+
+    def setUp(self):
+        self.f = fixtures.ParsingTests()
+        self.f.setUp()
+        self.addCleanup(self.f.doCleanups)
+        self.f.source = replace(self.f.source, source_id="inventory_" + uuid.uuid4().hex)
+        with connect(self.db) as conn:
+            conn.execute("TRUNCATE ops.sources CASCADE")
+
+    def load(self, rows):
+        self.f.archive(rows)
+        directory = Path(self.f.parse()["output_dir"])
+        return load_parsed(self.f.source, self.f.settings, self.f.root, directory, self.db)[
+            "release_id"
+        ]
+
+    def inventory(self, **options):
+        with connect(self.db) as conn, conn.transaction():
+            conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
+            return recovery.inventory(conn, **options)
+
+    def test_reused_release_fingerprints_match_a_full_recompute_and_catch_a_change(self):
+        first = self.load(self.f.rows)
+        backup = self.inventory()
+        self.assertEqual(set(backup["landing.results"]["releases"]), {str(first)})
+        self.assertEqual(set(backup["landing.result_methods"]["releases"]), {str(first)})
+
+        rows = [row.copy() for row in self.f.rows]
+        rows[0][9], rows[0][13] = "1", "9"
+        second = self.load(rows)
+        with patch.object(recovery, "release_digests", wraps=recovery.release_digests) as digests:
+            later = self.inventory(previous=backup)
+        # Only the new release is read; the first is reused.
+        self.assertEqual({tuple(call.args[4]) for call in digests.call_args_list}, {(second,)})
+        # What a restore check computes from scratch is the same fingerprint.
+        restored = self.inventory(layout=later)
+        self.assertEqual(restored, later)
+
+        # A row of an old release changed in place: the backup's reused fingerprint no
+        # longer matches a full recompute, so the restore check fails rather than passes.
+        with connect(self.db) as conn:
+            conn.execute(
+                "UPDATE landing.results SET total_votes = total_votes + 1 "
+                "WHERE release_id = %s AND source_line = 2",
+                (first,),
+            )
+        self.assertEqual(self.inventory(previous=later), later)
+        self.assertNotEqual(self.inventory(layout=later), later)
+
+    def test_a_backup_from_before_release_fingerprints_is_checked_whole(self):
+        self.load(self.f.rows)
+        current = self.inventory()
+        whole = {
+            **current,
+            "landing.results": {"rows": current["landing.results"]["rows"], "sha256": "old"},
+        }
+        checked = self.inventory(layout=whole)
+        self.assertNotIn("releases", checked["landing.results"])
+        self.assertIn("releases", checked["landing.result_methods"])
+        self.assertEqual(checked["landing.results"]["rows"], current["landing.results"]["rows"])

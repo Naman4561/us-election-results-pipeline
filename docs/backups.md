@@ -45,6 +45,16 @@ the `pg_dump` (which reads that same snapshot) run while jobs run normally. File
 starts during the brief hold finds its source `locked` and is skipped, not failed;
 the next cycle runs it.
 
+The table fingerprints are what a restore check compares the restored database against.
+Most rows are in `landing.results` and `landing.result_methods`, whose rows a release
+loads in one transaction and never changes. These two are fingerprinted per release, in
+primary-key order: a backup reuses the previous backup's fingerprint of each release
+whose row count is unchanged and reads only the new ones (on Nov 13, 2026 the full read
+took about 15 minutes; six hours of new releases are about 7% of those rows). A restore
+check recomputes every release from the restored copy, so a row changed in place after
+its release was fingerprinted fails the check. A backup from before per-release
+fingerprints is checked whole, as it was made.
+
 ## Retention
 
 | Where | Kept | How |
