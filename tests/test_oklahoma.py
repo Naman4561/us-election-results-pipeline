@@ -16,6 +16,7 @@ from election_pipeline.manual import import_file
 from election_pipeline.parsers import ok
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
+from election_pipeline.storage import ArchiveStore
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/fixtures/oklahoma/20261103_CountyResults_csv.zip"
@@ -56,7 +57,7 @@ class OklahomaTests(unittest.TestCase):
         self.settings, sources = load_config(ROOT / "config/sources.toml")
         self.source = sources["ok_2026_general"]
 
-    def imported(self, raw):
+    def imported(self, raw, certified=None):
         path = self.root / "inbox" / FIXTURE.name
         path.parent.mkdir(exist_ok=True)
         path.write_bytes(raw)
@@ -67,6 +68,7 @@ class OklahomaTests(unittest.TestCase):
             path,
             DOWNLOADED,
             hashlib.sha256(raw).hexdigest(),
+            certified=certified,
         )
         report = parse_source(self.source, self.settings, self.root, sha256=receipt["sha256"])
         return receipt, report
@@ -125,6 +127,26 @@ class OklahomaTests(unittest.TestCase):
             self.assertNotEqual(raw, self.changed(lambda text: text))
             with self.subTest(name), self.assertRaisesRegex(ValueError, "rejected"):
                 self.imported(raw)
+
+    def test_the_official_export_is_imported_as_the_certified_file_and_checked_alike(self):
+        name = "certified-county-results.zip"
+        receipt, report = self.imported(FIXTURE.read_bytes(), certified=name)
+        self.assertEqual(receipt["certified_file"], name)
+        archive = ArchiveStore(self.root, self.source).archive_path(receipt["sha256"])
+        with zipfile.ZipFile(archive) as zipped:
+            self.assertEqual(zipped.namelist(), [name])
+        self.assertEqual(report["outcome"], "parsed", report)
+        self.assertEqual(report["source_generated_at"], "2026-11-11T01:58:16+00:00")
+        statewide = {}
+        for found in self.read(report, "contest_results.csv"):
+            statewide.setdefault(found["contest_id"], {})[found["choice"]] = int(
+                found["total_votes"]
+            )
+        self.assertEqual(statewide, EXPECTED)
+        # The certified file gets the export's checks: a changed one is refused too.
+        raw = self.changed(lambda text: text.replace('"MIKE MAZZEI",REP', '"MIKE MAZZEI",GRN', 1))
+        with self.assertRaisesRegex(ValueError, "rejected"):
+            self.imported(raw, certified=name)
 
 
 if __name__ == "__main__":

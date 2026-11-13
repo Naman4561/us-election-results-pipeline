@@ -68,12 +68,26 @@ def number(value, label):
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
+    with zipfile.ZipFile(archive_path) as archive:
+        export = archive.read(source.primary_filename)
+    read_export(export, source, settings, output, stats, reference)
+
+
+def parse_certified(archive_path, name, source, settings, output, stats, reference=None):
+    """The same export, once the State Election Board labels its results official; the
+    import's attestation records the board's notice."""
+    from election_pipeline.parsers import certified
+
+    read_export(
+        certified.read(archive_path, name, settings), source, settings, output, stats, reference
+    )
+
+
+def read_export(export, source, settings, output, stats, reference=None):
     from election_pipeline.states import state_adapter
 
     if source.election_date != "2026-11-03" or source.state != "OK":
         raise ValueError("Unsupported Oklahoma source/election")
-    with zipfile.ZipFile(archive_path) as archive:
-        export = archive.read(source.primary_filename)
     with zipfile.ZipFile(io.BytesIO(export)) as results:
         members = results.infolist()
         if [m.filename for m in members] != [MEMBER]:
@@ -139,3 +153,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         source_update_text=f"{MEMBER} dated {generated:%Y-%m-%d %H:%M:%S} UTC",
         source_generated_at=generated.isoformat(),
     )
+
+
+CERTIFIED = {"certified-county-results.zip": parse_certified}
