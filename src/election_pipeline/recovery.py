@@ -93,11 +93,91 @@ def safe_child(root, relative):
     return result
 
 
-def inventory(conn, schemas=SCHEMAS):
-    """Fingerprint every business/audit table in one DB transaction."""
-    # One sorted read of the shared landing tables (millions of rows) takes minutes, past
-    # the connection's statement limit; this lifts it for the caller's read-only
-    # transaction only.
+# The shared landing tables hold most of the database's rows. A release's rows are
+# loaded in one transaction with its loaded_at and never changed, so each release is
+# fingerprinted once, in primary-key order, and a backup reuses the previous backup's
+# fingerprint of a release whose row count is unchanged. A restore check recomputes them
+# all. The table's fingerprint covers the releases' in release order.
+PER_RELEASE = {
+    "landing.results": sql.SQL("release_id, source_line"),
+    "landing.result_methods": sql.SQL('release_id, source_line, method COLLATE "C"'),
+}
+
+
+def release_digests(conn, schema, table, order, releases=None):
+    """{release_id as text: {rows, sha256}} for ``releases`` (every release if None)."""
+    where = sql.SQL("" if releases is None else "WHERE release_id = ANY(%s)")
+    query = sql.SQL(
+        "SELECT release_id, to_jsonb(t)::text AS value FROM {} t {} ORDER BY {}"
+    ).format(sql.Identifier(schema, table), where, order)
+    result, digest, current = {}, None, None
+    with conn.cursor(name="backup_" + uuid.uuid4().hex) as cursor:
+        cursor.execute(query, None if releases is None else (list(releases),))
+        for row in cursor:
+            if row["release_id"] != current:
+                current, digest = row["release_id"], hashlib.sha256()
+                result[str(current)] = {"rows": 0, "digest": digest}
+            digest.update(row["value"].encode("utf-8") + b"\n")
+            result[str(current)]["rows"] += 1
+    return {
+        key: {"rows": entry["rows"], "sha256": entry["digest"].hexdigest()}
+        for key, entry in result.items()
+    }
+
+
+def per_release(conn, schema, table, order, known=None):
+    """A landing table's fingerprint from its releases', reusing ``known`` ones."""
+    counts = {
+        str(row["release_id"]): row["n"]
+        for row in conn.execute(
+            sql.SQL("SELECT release_id, count(*) AS n FROM {} GROUP BY release_id").format(
+                sql.Identifier(schema, table)
+            )
+        ).fetchall()
+    }
+    reused = {
+        key: entry
+        for key, entry in (known or {}).items()
+        if key in counts and counts[key] == entry["rows"]
+    }
+    missing = [int(key) for key in counts if key not in reused]
+    computed = (
+        release_digests(conn, schema, table, order, None if not reused else missing)
+        if missing
+        else {}
+    )
+    merged = {**reused, **computed}
+    releases = {key: merged[key] for key in sorted(counts, key=int) if key in merged}
+    if {key: entry["rows"] for key, entry in releases.items()} != counts:
+        raise ValueError(f"Release row counts changed while fingerprinting {schema}.{table}")
+    digest = hashlib.sha256()
+    for key, entry in releases.items():
+        digest.update(f"{key} {entry['rows']} {entry['sha256']}\n".encode())
+    return {
+        "rows": sum(counts.values()),
+        "sha256": digest.hexdigest(),
+        "releases": releases,
+    }
+
+
+def summary(found):
+    """An inventory without its per-release fingerprints, for reports."""
+    return {
+        name: {key: value for key, value in entry.items() if key != "releases"}
+        for name, entry in found.items()
+    }
+
+
+def inventory(conn, schemas=SCHEMAS, *, previous=None, layout=None):
+    """Fingerprint every business/audit table in one DB transaction.
+
+    ``previous`` is the last backup's inventory, whose release fingerprints are reused.
+    ``layout`` is the inventory being checked: a table it fingerprinted whole (a backup
+    from before per-release fingerprints) is fingerprinted whole again.
+    """
+    # One read of the shared landing tables (millions of rows) takes minutes, past the
+    # connection's statement limit; this lifts it for the caller's read-only transaction
+    # only.
     conn.execute("SET LOCAL statement_timeout = 0")
     tables = conn.execute(
         """
@@ -118,6 +198,14 @@ def inventory(conn, schemas=SCHEMAS):
     result = {}
 
     for table in tables:
+        name = table["table_schema"] + "." + table["table_name"]
+        if name in PER_RELEASE and (layout is None or "releases" in layout.get(name, {})):
+            known = (previous or {}).get(name, {}).get("releases")
+            result[name] = per_release(
+                conn, table["table_schema"], table["table_name"], PER_RELEASE[name], known
+            )
+            continue
+
         digest = hashlib.sha256()
         count = 0
 
@@ -141,7 +229,6 @@ def inventory(conn, schemas=SCHEMAS):
                 digest.update(row["value"].encode("utf-8") + b"\n")
                 count += 1
 
-        name = table["table_schema"] + "." + table["table_name"]
         result[name] = {
             "rows": count,
             "sha256": digest.hexdigest(),
@@ -444,9 +531,11 @@ def backup(
             manifest["data"], manifest["packs"] = pack_files(
                 data_dir, written_once, temporary / "packs", identity, previous
             )
+            known = (previous or {}).get("database_inventory")
             previous = None  # the old manifest is large; it is not needed past this point
 
-            manifest["database_inventory"] = inventory(conn, database_schemas)
+            manifest["database_inventory"] = inventory(conn, database_schemas, previous=known)
+            known = None
             manifest["database_schemas"] = [
                 row["schema_name"]
                 for row in conn.execute(
@@ -724,7 +813,11 @@ def check_restore(
 
         with connect(temporary_db) as restored, restored.transaction():
             restored.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
-            actual = inventory(restored, manifest.get("database_schemas", SCHEMAS))
+            actual = inventory(
+                restored,
+                manifest.get("database_schemas", SCHEMAS),
+                layout=manifest["database_inventory"],
+            )
             if actual != manifest["database_inventory"]:
                 raise ValueError("Restored table counts/hashes do not match the backup snapshot")
 
@@ -819,7 +912,7 @@ def check_restore(
 
         report.update(
             outcome="passed",
-            database_inventory=actual,
+            database_inventory=summary(actual),
             raw_archives_verified=len(snapshots),
             current_publications=restored_publications,
             writer_permissions_verified=bool(writer_role),
