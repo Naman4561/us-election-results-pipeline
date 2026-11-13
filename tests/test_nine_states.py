@@ -145,8 +145,7 @@ class NineStateTests(unittest.TestCase):
 
     def test_official_snapshots_parse_verify_reconcile_convert_and_replay(self):
         expected = {
-            # Statewide rows only (see states.py); its localities are read, not kept.
-            "VA": (50, 12, {}),
+            "VA": (1010, 12, {"VA-SEN": 133, "VA-11": 2}),
             "ID": (710, 4, {"ID-SEN": 44, "ID-GOV": 44, "ID-01": 19}),
             "WA": (180, 10, {"WA-03": 7, "WA-07": 1}),
             "CO": (1201, 10, {"CO-SEN": 64, "CO-GOV": 64, "CO-05": 1}),
@@ -236,12 +235,15 @@ class NineStateTests(unittest.TestCase):
     # Enhanced Voting (Virginia, Idaho, Washington) -----------------------------------------
 
     def test_ev_altered_county_count_or_method_split_rejected(self):
-        # Virginia keeps statewide rows only, so these use its fixture with county results on.
-        counties = dataclasses.replace(STATES["VA"], county_results=True)
-        with patch.dict(STATES, {"VA": counties}):
-            self.ev_county_checks()
+        self.ev_county_checks()
 
     def test_ev_statewide_only_state_ignores_locality_sums(self):
+        # A state that keeps no county results (Virginia did, Nov 12): its fixture, so set.
+        statewide = dataclasses.replace(STATES["VA"], county_results=False)
+        with patch.dict(STATES, {"VA": statewide}):
+            self.ev_statewide_only_checks()
+
+    def ev_statewide_only_checks(self):
         def county(data):
             def change(item):
                 option = item["breakdownResults"][0]["ballotOptions"][0]
