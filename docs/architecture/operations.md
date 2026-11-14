@@ -14,7 +14,7 @@ gantt
     section Monitor · every minute
     checks :00:00, 15m
     section Backup · four times a day
-    full backup (~21 min) :00:02, 21m
+    full backup (~6 min) :00:08, 6m
 ```
 
 | Timer | Runs | Does |

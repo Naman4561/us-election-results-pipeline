@@ -75,7 +75,7 @@ once tagged, so a compromised host cannot erase recent backups.
 ```mermaid
 sequenceDiagram
     autonumber
-    participant T as Backup timer (00/6:02 UTC)
+    participant T as Backup timer (00/6:08 UTC)
     participant B as production_recovery.py
     participant PG as PostgreSQL
     participant D as Host disk
