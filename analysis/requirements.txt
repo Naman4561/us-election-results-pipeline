@@ -1,0 +1,11 @@
+# The analysis workspace's own environment, apart from the pipeline's: nothing here is in
+# the production image or a release's check keys. Python 3.12, Windows or Linux.
+#   python -m venv .venv-analysis && .venv-analysis/Scripts/python -m pip install -r analysis/requirements.txt
+duckdb==2.0.0
+marimo==0.25.2
+pandas==3.1.1
+pyarrow==26.0.1
+psycopg[binary]==3.3.9
+python-dotenv==1.2.4
+# DuckDB returns time-zone-aware timestamps through it.
+pytz==2026.6
