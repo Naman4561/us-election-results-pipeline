@@ -35,8 +35,7 @@ def _():
                     ELSE 'House' END AS office,
                r.county, a.fips, r.choice, r.choice_party AS party, r.total_votes,
                p.status, p.published_at
-          FROM elections.serving.current_publications c
-          JOIN elections.serving.publications p USING (publication_id)
+          FROM elections.ref.current_publications p
           JOIN elections.serving.county_results r USING (publication_id)
           LEFT JOIN elections.ref.county_aliases a ON a.state = p.state AND a.county = r.county
     """)
@@ -48,9 +47,38 @@ def _():
                     ELSE 'House' END AS office,
                r.choice, r.choice_party AS party, r.total_votes, r.vote_share,
                p.status, p.published_at
-          FROM elections.serving.current_publications c
-          JOIN elections.serving.publications p USING (publication_id)
+          FROM elections.ref.current_publications p
           JOIN elections.serving.contest_results r USING (publication_id)
+    """)
+    # Each Senate and House candidate's FEC money (newest download), beside the result.
+    # Independent expenditures can count a 24/48-hour report twice when Schedule E repeats
+    # it: check large sums by filing before publishing them.
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW candidate_finance AS
+        WITH totals AS (
+            SELECT * FROM elections.finance.fec_candidate_totals
+             WHERE dataset_id = (SELECT dataset_id FROM elections.ref.datasets
+                                  WHERE name = 'fec_totals_2026'
+                                  ORDER BY downloaded_at DESC LIMIT 1)
+        ), outside AS (
+            SELECT cand_id,
+                   sum(amount) FILTER (WHERE support_oppose = 'S') AS outside_for,
+                   sum(amount) FILTER (WHERE support_oppose = 'O') AS outside_against
+              FROM elections.finance.independent_expenditures_in_effect
+             GROUP BY cand_id
+        )
+        SELECT r.state, r.office, r.contest_id, r.choice, r.party, r.total_votes,
+               r.vote_share, i.external_id AS fec_id, t.coverage_end,
+               t.receipts, t.disbursements, t.cash_on_hand_end, t.individual_contributions,
+               t.candidate_contributions + t.candidate_loans AS self_funding,
+               o.outside_for, o.outside_against
+          FROM contest_results r
+          JOIN elections.ref.candidates c USING (contest_id, choice)
+          LEFT JOIN elections.ref.candidate_ids i
+                 ON i.candidate_key = c.candidate_key AND i.system = 'fec'
+          LEFT JOIN totals t ON t.cand_id = i.external_id
+          LEFT JOIN outside o ON o.cand_id = i.external_id
+         WHERE r.office IN ('Senate', 'House')
     """)
     return con, mo
 
@@ -167,14 +195,32 @@ def _(con, mo):
         SELECT p.state, m.contest_id, m.choice, m.method, m.votes,
                round(100 * m.votes / sum(m.votes) OVER (PARTITION BY m.contest_id, m.choice), 1)
                    AS share_of_candidate
-          FROM elections.serving.current_publications c
-          JOIN elections.serving.publications p USING (publication_id)
+          FROM elections.ref.current_publications p
           JOIN elections.serving.contest_method_results m USING (publication_id)
          ORDER BY m.contest_id, m.choice, m.method
         """,
         engine=con,
     )
     return (methods,)
+
+
+@app.cell
+def _(con, mo):
+    money = mo.sql(
+        """
+        -- Money beside the result, Senate races: candidate spending and outside spending.
+        SELECT contest_id, choice, party, round(100 * vote_share, 1) AS pct,
+               round(disbursements / 1e6, 2) AS spent_m,
+               round(coalesce(outside_for, 0) / 1e6, 2) AS outside_for_m,
+               round(coalesce(outside_against, 0) / 1e6, 2) AS outside_against_m,
+               coverage_end
+          FROM candidate_finance
+         WHERE office = 'Senate' AND vote_share >= 0.05
+         ORDER BY contest_id, vote_share DESC
+        """,
+        engine=con,
+    )
+    return (money,)
 
 
 if __name__ == "__main__":

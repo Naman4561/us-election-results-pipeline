@@ -15,7 +15,7 @@ from pathlib import Path
 
 from psycopg import sql
 
-from analysis import local
+from analysis import local, registry
 
 HOST = os.environ.get("ANALYSIS_SSH_HOST", "election-prod")
 BACKUPS = "/srv/election-pipeline/backups"
@@ -109,7 +109,8 @@ def restore(dump, backup, db):
     if result.returncode:
         raise RuntimeError("pg_restore failed: " + result.stderr.decode(errors="replace")[-2000:])
     with local.connect(db) as conn:
-        conn.execute(Path(__file__).with_name("sql").joinpath("ref.sql").read_text("utf-8"))
+        local.apply_schemas(conn)
+        registry.sync(conn)
         conn.execute(
             "INSERT INTO ref.restores (backup_id, backup_finished_at, dump_sha256, restore_checked)"
             " VALUES (%s, %s, %s, %s) ON CONFLICT (backup_id) DO UPDATE"

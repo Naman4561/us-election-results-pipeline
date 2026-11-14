@@ -9,11 +9,11 @@ reported, never guessed.
 
 import csv
 import re
-import sys
 import unicodedata
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+from analysis import registry
+
 REVIEWED = Path(__file__).with_name("ref") / "county_aliases.csv"
 KINDS = re.compile(r"\s+(county|parish|borough|census area|city and borough|municipality)$", re.I)
 
@@ -62,10 +62,7 @@ def matches(spellings, counties, manual=None):
 def by_county():
     """The states whose local results are counties, from the pipeline's own registry
     (Vermont's are towns: a town named like its county is not that county)."""
-    sys.path.insert(0, str(ROOT / "src"))
-    from election_pipeline.states import STATES
-
-    return {code for code, state in STATES.items() if state.local_unit == "county"}
+    return {code for code, state in registry.states().items() if state.local_unit == "county"}
 
 
 def link(conn):
@@ -73,7 +70,8 @@ def link(conn):
     spellings = [
         (row["state"], row["county"])
         for row in conn.execute(
-            # Every publication, not only the current ones: history joins on FIPS too.
+            # Every publication, of every source, not only the current ones: history and
+            # older sources join on FIPS too.
             "SELECT DISTINCT p.state, r.county FROM serving.publications p"
             " JOIN serving.county_results r USING (publication_id) ORDER BY 1, 2"
         ).fetchall()
