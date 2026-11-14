@@ -8,7 +8,8 @@
 #
 # It gives up without changing anything if CI fails, stays queued (a GitHub outage),
 # or does not finish in time, or if the branch has moved past the approved revision.
-# While it stages and releases, the worker timer is held; it is restarted on any exit.
+# The worker keeps running throughout: release checks reuse unchanged sources, so a ship
+# takes about a minute, and a worker run in progress finishes on the image it started on.
 set -euo pipefail
 
 if [[ "$EUID" -ne 0 ]]; then
@@ -93,16 +94,6 @@ if [[ "$head" != "$revision" ]]; then
     printf '== %s moved to %s; not shipping %s\n' "$ref" "$head" "$revision"
     exit 1
 fi
-
-resume() { systemctl start election-worker.timer; printf '== worker timer restarted %s\n' "$(now)"; }
-# Hold the timer first, then let a run in progress finish: an idle run can take under a
-# second, too short to catch by waiting for one to start.
-systemctl stop election-worker.timer
-trap resume EXIT
-printf '== worker timer held %s\n' "$(now)"
-while [[ "$(systemctl show -p ActiveState --value election-worker.service)" == activating ]]; do
-    sleep 5
-done
 
 printf '== staging %s\n' "$(now)"
 stage="/tmp/stage_release_$revision.sh"
