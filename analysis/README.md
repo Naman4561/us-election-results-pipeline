@@ -23,6 +23,7 @@ Run every command from the repository root with that environment's Python.
 | `python -m analysis fetch counties` | Downloads the Census county list and loads `ref.counties` (FIPS codes). |
 | `python -m analysis link` | Matches every county spelling in the results to its FIPS code (`ref.county_aliases`) and lists any it cannot match. |
 | `python -m analysis fetch fec` | Downloads the FEC's 2026 bulk files (candidates, their totals, independent expenditures) into `finance`. Run again after the FEC updates them (post-general reports are due Dec 3); each download is kept beside the last. |
+| `python -m analysis fetch census` | Downloads seven ACS 2020-2024 5-year tables (population, citizen voting-age population, median age, race and Hispanic origin, education, median household income, poverty) from the Census Bureau's summary files and loads their county and congressional district rows into `census`. About 600 MB of downloads, kept as received; the Census API now needs a key, these files do not. |
 | `python -m analysis match` | Gives every candidate a key (`ref.candidates`) and links each Senate and House candidate to its FEC registration (`ref.candidate_ids`); lists any it cannot match. |
 | `python -m analysis open` | Opens the workspace (a marimo notebook) in the browser. |
 | `python -m analysis status` | Which backup the local copy is and which datasets are loaded. |
@@ -55,6 +56,9 @@ changed by accident. Three views are ready:
 - `candidate_finance`: each Senate and House candidate's result beside their FEC totals
   (raised, spent, cash, individual money, self-funding) and the independent expenditures
   for and against them.
+- `county_demographics`: `county_results` beside each county's ACS profile (population,
+  citizen voting-age population, median age, race and ethnicity shares, college share,
+  median income, poverty rate).
 
 They read each state's one results source (`ref.current_publications`): some states keep
 an older election-night source, and North Carolina a demographics dataset, beside it.
@@ -73,7 +77,10 @@ save: the notebook is a starting point.
   - `ref.state_sources`, `ref.candidates`, `ref.candidate_ids`;
   - `finance`: `fec_candidates`, `fec_candidate_totals`, `fec_independent_expenditures`
     (as filed) and `independent_expenditures_in_effect` (amended filings replaced);
-  - later: `census` (ACS), `history` (past results), `analytics` (dbt).
+  - `census`: `acs_variables` (labels), `acs_estimates` (every estimate and its margin
+    of error, long form) and `profile` (the measures above, one row per county or
+    district);
+  - later: `history` (past results), `analytics` (dbt).
 - **Downloads** under `~/election-analysis/raw/<dataset>/<sha256>`, kept as received.
 - **Backups** under `~/election-analysis/backups/<backup_id>/database.dump`.
 
@@ -93,6 +100,11 @@ $38.5 billion) and reviewed exclusions (`analysis/ref/excluded_spenders.csv`) ar
 out, each excluded row keeping its reason. Outside spending is by spender, not donor:
 money given to a super PAC is spent in the PAC's name (contributions are not loaded yet).
 Governor races are not in FEC data.
+ACS figures are survey estimates with margins of error (`census.acs_estimates.moe`), for
+2020-2024, not the electorate of 2026. Congressional districts are the 119th Congress's
+(the 2024 lines): states that redrew for 2026, Texas and California among them, need
+their new lines built from smaller areas before district comparisons. County patterns
+(a county's college share against its margin) are not how a group of people voted.
 
 ## Tests
 
