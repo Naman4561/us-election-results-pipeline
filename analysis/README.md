@@ -25,10 +25,31 @@ Run every command from the repository root with that environment's Python.
 | `python -m analysis fetch fec` | Downloads the FEC's 2026 bulk files (candidates, their totals, independent expenditures) into `finance`. Run again after the FEC updates them (post-general reports are due Dec 3); each download is kept beside the last. |
 | `python -m analysis fetch census` | Downloads seven ACS 2020-2024 5-year tables (population, citizen voting-age population, median age, race and Hispanic origin, education, median household income, poverty) from the Census Bureau's summary files and loads their county and congressional district rows into `census`. About 600 MB of downloads, kept as received; the Census API now needs a key, these files do not. |
 | `python -m analysis match` | Gives every candidate a key (`ref.candidates`) and links each Senate and House candidate to its FEC registration (`ref.candidate_ids`); lists any it cannot match. |
+| `python -m analysis build` | Builds and tests the `analytics` tables with dbt (`analysis/dbt`). A failing test fails the build: findings come from a passing one. |
 | `python -m analysis open` | Opens the workspace (a marimo notebook) in the browser. |
 | `python -m analysis status` | Which backup the local copy is and which datasets are loaded. |
 
-After `restore`, run `link` and `match` again (new publications may bring new spellings).
+After `restore`, run `link`, `match` and `build` again (new publications may bring new
+spellings and labels).
+
+## The analytics tables
+
+`python -m analysis build` makes these in the `analytics` schema, with 25 tests:
+
+| Table | One row per |
+| --- | --- |
+| `dim_contests` | race (state, office, House district, status, publication) |
+| `dim_candidates` | ballot choice, write-ins included: party code, FEC ID |
+| `dim_counties` | county, with its ACS profile |
+| `fct_contest_results` | candidate's result: votes, share, place, margin (leader against runner-up, everyone else against the leader, whatever the parties) |
+| `fct_county_results` | candidate's votes in a county (or Vermont town), with FIPS |
+| `fct_county_contest` | race and county: total, leader, leader's margin, Democratic minus Republican |
+| `fct_method_results` | candidate and vote method, where published |
+| `fct_candidate_finance` | Senate or House candidate's FEC totals and reviewed outside spending |
+
+Parties are coded in `analysis/dbt/seeds/party_codes.csv` (DEM, REP, LIB, GRE, CON, IND,
+OTH, WRITE_IN, NONE): states print parties dozens of ways (`DFL`, `D`, `Democratic`). A
+label not in the file fails the build until it is coded there.
 
 ### Reviewing matches
 

@@ -1,6 +1,8 @@
 # The analysis workspace's own environment, apart from the pipeline's: nothing here is in
 # the production image or a release's check keys. Python 3.12, Windows or Linux.
 #   python -m venv .venv-analysis && .venv-analysis/Scripts/python -m pip install -r analysis/requirements.txt
+dbt-core==1.12.6
+dbt-postgres==1.11.0
 duckdb==2.0.0
 marimo==0.25.2
 pandas==3.1.1

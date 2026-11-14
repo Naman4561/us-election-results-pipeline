@@ -1,4 +1,4 @@
-"""python -m analysis restore | fetch counties|fec|census | link | match | open | status"""
+"""python -m analysis restore | fetch counties|fec|census | link | match | build | open | status"""
 
 import argparse
 import os
@@ -6,7 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from analysis import candidates, census, fec, fetch, link, local, registry, restore
+from analysis import build, candidates, census, fec, fetch, link, local, registry, restore
 
 
 def status():
@@ -37,6 +37,7 @@ def main():
     get.add_argument("dataset", choices=["counties", "fec", "census"])
     sub.add_parser("link", help="Match the results' county names to FIPS codes")
     sub.add_parser("match", help="Key every candidate and match Senate/House ones to the FEC")
+    sub.add_parser("build", help="Build and test the analytics tables (dbt)")
     sub.add_parser("open", help="Open the workspace in the browser")
     sub.add_parser("status", help="Which backup and datasets the local database holds")
     args = parser.parse_args()
@@ -71,6 +72,8 @@ def main():
         print(f"{len(found)} county spellings matched; {len(missing)} not matched")
         for state, county in missing:
             print(f"  {state}  {county}")
+    elif args.command == "build":
+        return build.build()
     elif args.command == "open":
         local.start()
         root = Path(__file__).resolve().parents[1]

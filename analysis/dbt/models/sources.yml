@@ -1,0 +1,37 @@
+version: 2
+
+sources:
+  - name: serving
+    description: The pipeline's published results, restored from a backup.
+    tables:
+      - name: contest_results
+      - name: county_results
+      - name: contest_method_results
+      - name: county_method_results
+
+  - name: ref
+    description: Keys and provenance (analysis/sql/ref.sql).
+    tables:
+      - name: current_publications
+        description: Each state's current publication of its one results source.
+      - name: candidate_ids
+      - name: state_sources
+      - name: counties
+      - name: county_aliases
+      - name: restores
+
+  - name: finance
+    description: FEC 2026 bulk files (analysis/sql/finance.sql).
+    tables:
+      - name: fec_candidate_totals
+      - name: independent_expenditures_reviewed
+
+  - name: census
+    description: ACS 2020-2024 5-year estimates (analysis/sql/census.sql).
+    tables:
+      - name: profile
+
+  - name: provenance
+    schema: ref
+    tables:
+      - name: datasets

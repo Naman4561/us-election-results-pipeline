@@ -23,3 +23,6 @@ node_modules/
 # Patches are exchanged outside the repository.
 /*.patch
 /*.mbox
+analysis/dbt/target/
+analysis/dbt/logs/
+analysis/dbt/dbt_packages/

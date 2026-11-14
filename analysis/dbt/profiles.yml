@@ -1,0 +1,14 @@
+# The local analysis database; python -m analysis build sets these from
+# ~/election-analysis/.env.
+election_analysis:
+  target: local
+  outputs:
+    local:
+      type: postgres
+      host: "{{ env_var('ANALYSIS_HOST') }}"
+      port: "{{ env_var('ANALYSIS_PORT') | int }}"
+      user: "{{ env_var('ANALYSIS_USER') }}"
+      password: "{{ env_var('ANALYSIS_PASSWORD') }}"
+      dbname: "{{ env_var('ANALYSIS_DBNAME') }}"
+      schema: analytics
+      threads: 4

@@ -1,0 +1,26 @@
+# The analysis layer: tested tables across states, built in the local analysis database
+# (schema analytics) from the restored results and the outside data. Run it with
+# python -m analysis build. Separate from the pipeline's own dbt project in /dbt.
+name: election_analysis
+version: "1.0.0"
+config-version: 2
+profile: election_analysis
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+target-path: "target"
+clean-targets: ["target", "dbt_packages"]
+
+models:
+  election_analysis:
+    +materialized: table
+
+seeds:
+  election_analysis:
+    party_codes:
+      +column_types:
+        label: text
+        party: text
+        note: text
