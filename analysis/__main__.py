@@ -51,6 +51,7 @@ def main():
         with local.connect(local.start()) as conn:
             local.apply_schemas(conn)
             registry.sync(conn)
+            fec.exclusions(conn)
             ids, ambiguous, missing = candidates.build(conn)
         print(f"{len(ids)} Senate/House candidates have an FEC ID")
         print(f"{sum(not agrees for *_, agrees in ids)} of them under a different party label")
