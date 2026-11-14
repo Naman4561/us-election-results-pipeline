@@ -2,7 +2,9 @@
 Description=Upload an election backup every six hours
 
 [Timer]
-OnCalendar=*-*-* 00/6:02:00
+# :08, after the worker run that starts at :00:30 (90% finish within 6 min): the backup
+# waits for a running worker, and it is done before the run at :15:30.
+OnCalendar=*-*-* 00/6:08:00
 Persistent=true
 AccuracySec=1s
 
