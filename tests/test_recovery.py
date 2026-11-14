@@ -484,9 +484,9 @@ class InventoryTests(unittest.TestCase):
     def test_a_backup_fingerprints_only_new_releases_and_ones_whose_rows_changed(self):
         conn = MagicMock()
         conn.execute.return_value.fetchall.return_value = [
-            {"release_id": 1, "n": 2},
-            {"release_id": 2, "n": 3},  # was 4: recomputed, not reused
-            {"release_id": 3, "n": 1},  # new
+            {"grouped_by": 1, "n": 2},
+            {"grouped_by": 2, "n": 3},  # was 4: recomputed, not reused
+            {"grouped_by": 3, "n": 1},  # new
         ]
         known = {"1": {"rows": 2, "sha256": "one"}, "2": {"rows": 4, "sha256": "two"}}
         fresh = {"2": {"rows": 3, "sha256": "two again"}, "3": {"rows": 1, "sha256": "three"}}
@@ -502,6 +502,26 @@ class InventoryTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "changed while fingerprinting"):
                 recovery.per_release(conn, "landing", "results", order)
         self.assertIsNone(digests.call_args.args[4])
+
+    def test_a_publication_table_reuses_fingerprints_by_publication(self):
+        old, new = uuid.uuid4(), uuid.uuid4()
+        conn = MagicMock()
+        conn.execute.return_value.fetchall.return_value = [
+            {"grouped_by": old, "n": 2},
+            {"grouped_by": new, "n": 1},
+        ]
+        known = {str(old): {"rows": 2, "sha256": "old"}}
+        fresh = {str(new): {"rows": 1, "sha256": "new"}}
+        name = "serving.county_results"
+        order = recovery.PER_PUBLICATION[name]
+        with patch.object(recovery, "release_digests", return_value=fresh) as digests:
+            found = recovery.per_release(
+                conn, "serving", "county_results", order, known, "publication_id"
+            )
+        # Only the new publication is read, by its own id, grouped by publication.
+        self.assertEqual(digests.call_args.args[4:], ([new], "publication_id"))
+        self.assertEqual(list(found["releases"]), [str(old), str(new)])
+        self.assertEqual(found["rows"], 3)
 
     def test_a_report_leaves_out_the_release_fingerprints(self):
         found = {"landing.results": {"rows": 1, "sha256": "a", "releases": {"1": {}}}}
@@ -561,6 +581,13 @@ class InventoryDatabaseTests(unittest.TestCase):
             )
         self.assertEqual(self.inventory(previous=later), later)
         self.assertNotEqual(self.inventory(layout=later), later)
+
+    def test_tables_keyed_by_release_line_are_found_and_others_are_not(self):
+        with connect(self.db) as conn:
+            found = recovery.keyed_by_line(conn, recovery.SCHEMAS)
+        self.assertLessEqual({"landing.results", "nc.results", "nc.absentee_demographics"}, found)
+        # Keyed by more than the line, or by publication: not this rule.
+        self.assertFalse({"landing.result_methods", "serving.county_results"} & found)
 
     def test_a_backup_from_before_release_fingerprints_is_checked_whole(self):
         self.load(self.f.rows)

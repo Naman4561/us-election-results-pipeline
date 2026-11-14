@@ -102,20 +102,59 @@ PER_RELEASE = {
     "landing.results": sql.SQL("release_id, source_line"),
     "landing.result_methods": sql.SQL('release_id, source_line, method COLLATE "C"'),
 }
+# A source's own tables keyed (release_id, source_line), nc.results and the pre-024 state
+# schemas among them, are loaded in the same transaction and fingerprinted the same way.
+KEYED_BY_LINE = sql.SQL("release_id, source_line")
+
+# A publication's county rows are copied into these once, when it is built, and never
+# changed, so each publication is fingerprinted once the same way. ms.county_feed_status
+# is not one: a live publication's feed health is rewritten in place.
+PER_PUBLICATION = {
+    "serving.county_results": sql.SQL(
+        'publication_id, county COLLATE "C", contest_id COLLATE "C", choice COLLATE "C"'
+    ),
+    "serving.county_method_results": sql.SQL(
+        'publication_id, county COLLATE "C", contest_id COLLATE "C", choice COLLATE "C", '
+        'method COLLATE "C"'
+    ),
+}
 
 
-def release_digests(conn, schema, table, order, releases=None):
-    """{release_id as text: {rows, sha256}} for ``releases`` (every release if None)."""
-    where = sql.SQL("" if releases is None else "WHERE release_id = ANY(%s)")
+def keyed_by_line(conn, schemas):
+    """The tables in ``schemas`` whose primary key is exactly (release_id, source_line)."""
+    return {
+        row["name"]
+        for row in conn.execute(
+            """
+            SELECT n.nspname || '.' || c.relname AS name
+            FROM pg_index i
+            JOIN pg_class c ON c.oid = i.indrelid
+            JOIN pg_namespace n ON n.oid = c.relnamespace
+            CROSS JOIN LATERAL unnest(i.indkey) WITH ORDINALITY AS k(attnum, position)
+            JOIN pg_attribute a ON a.attrelid = c.oid AND a.attnum = k.attnum
+            WHERE i.indisprimary AND n.nspname = ANY(%s)
+            GROUP BY 1
+            HAVING array_agg(a.attname::text ORDER BY k.position)
+                = ARRAY['release_id', 'source_line']
+            """,
+            (list(schemas),),
+        ).fetchall()
+    }
+
+
+def release_digests(conn, schema, table, order, releases=None, group="release_id"):
+    """{``group`` value as text: {rows, sha256}} for ``releases`` (every one if None)."""
+    column = sql.Identifier(group)
+    where = sql.SQL("") if releases is None else sql.SQL("WHERE {} = ANY(%s)").format(column)
     query = sql.SQL(
-        "SELECT release_id, to_jsonb(t)::text AS value FROM {} t {} ORDER BY {}"
-    ).format(sql.Identifier(schema, table), where, order)
+        "SELECT {} AS grouped_by, to_jsonb(t)::text AS value FROM {} t {} ORDER BY {}"
+    ).format(column, sql.Identifier(schema, table), where, order)
     result, digest, current = {}, None, None
     with conn.cursor(name="backup_" + uuid.uuid4().hex) as cursor:
         cursor.execute(query, None if releases is None else (list(releases),))
         for row in cursor:
-            if row["release_id"] != current:
-                current, digest = row["release_id"], hashlib.sha256()
+            if row["grouped_by"] != current:
+                current, digest = row["grouped_by"], hashlib.sha256()
                 result[str(current)] = {"rows": 0, "digest": digest}
             digest.update(row["value"].encode("utf-8") + b"\n")
             result[str(current)]["rows"] += 1
@@ -125,29 +164,30 @@ def release_digests(conn, schema, table, order, releases=None):
     }
 
 
-def per_release(conn, schema, table, order, known=None):
-    """A landing table's fingerprint from its releases', reusing ``known`` ones."""
-    counts = {
-        str(row["release_id"]): row["n"]
-        for row in conn.execute(
-            sql.SQL("SELECT release_id, count(*) AS n FROM {} GROUP BY release_id").format(
-                sql.Identifier(schema, table)
-            )
-        ).fetchall()
-    }
+def per_release(conn, schema, table, order, known=None, group="release_id"):
+    """A table's fingerprint from its releases' (or publications'), reusing ``known`` ones."""
+    column = sql.Identifier(group)
+    values, counts = {}, {}
+    for row in conn.execute(
+        sql.SQL("SELECT {} AS grouped_by, count(*) AS n FROM {} GROUP BY 1 ORDER BY 1").format(
+            column, sql.Identifier(schema, table)
+        )
+    ).fetchall():
+        values[str(row["grouped_by"])], counts[str(row["grouped_by"])] = row["grouped_by"], row["n"]
     reused = {
         key: entry
         for key, entry in (known or {}).items()
         if key in counts and counts[key] == entry["rows"]
     }
-    missing = [int(key) for key in counts if key not in reused]
+    missing = [values[key] for key in counts if key not in reused]
     computed = (
-        release_digests(conn, schema, table, order, None if not reused else missing)
+        release_digests(conn, schema, table, order, None if not reused else missing, group)
         if missing
         else {}
     )
     merged = {**reused, **computed}
-    releases = {key: merged[key] for key in sorted(counts, key=int) if key in merged}
+    # In the database's order of the group: release_id numerically, as before.
+    releases = {key: merged[key] for key in counts if key in merged}
     if {key: entry["rows"] for key, entry in releases.items()} != counts:
         raise ValueError(f"Release row counts changed while fingerprinting {schema}.{table}")
     digest = hashlib.sha256()
@@ -195,14 +235,20 @@ def inventory(conn, schemas=SCHEMAS, *, previous=None, layout=None):
     if not {"ops", "landing", "serving"}.issubset(found):
         raise ValueError("Apply the ingestion and publication migrations first")
 
+    grouped = {
+        **{name: (KEYED_BY_LINE, "release_id") for name in keyed_by_line(conn, schemas)},
+        **{name: (order, "release_id") for name, order in PER_RELEASE.items()},
+        **{name: (order, "publication_id") for name, order in PER_PUBLICATION.items()},
+    }
     result = {}
 
     for table in tables:
         name = table["table_schema"] + "." + table["table_name"]
-        if name in PER_RELEASE and (layout is None or "releases" in layout.get(name, {})):
+        if name in grouped and (layout is None or "releases" in layout.get(name, {})):
+            order, group = grouped[name]
             known = (previous or {}).get(name, {}).get("releases")
             result[name] = per_release(
-                conn, table["table_schema"], table["table_name"], PER_RELEASE[name], known
+                conn, table["table_schema"], table["table_name"], order, known, group
             )
             continue
 
