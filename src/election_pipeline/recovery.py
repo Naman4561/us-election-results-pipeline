@@ -479,6 +479,20 @@ def unpack_pack(manifest, pack, data_dir, wanted=None):
     return extracted
 
 
+class Steps(dict):
+    """Seconds per backup step. Each lap runs from the end of the one before, so the steps
+    add up to the whole run."""
+
+    def __init__(self):
+        super().__init__()
+        self.last = time.monotonic()
+
+    def lap(self, name):
+        now = time.monotonic()
+        self[name] = round(self.get(name, 0) + now - self.last, 1)
+        self.last = now
+
+
 @contextmanager
 def quiesced(data_dir, sources, conn, wait=QUIESCE_SECONDS):
     """Hold every source's locks and the exclusive maintenance lock.
@@ -520,14 +534,16 @@ def backup(
     compose_args=(),
     catalog=None,
     previous=None,
+    steps=None,
 ):
     """Capture files and a dump using the inventory's DB snapshot.
 
     Jobs are held only while the snapshot is exported, the rewritten files are copied
     and the write-once files are listed; packing, the inventory and the dump run after.
     ``previous`` is the last uploaded backup's manifest: the files it already packed are
-    referenced, not packed again.
+    referenced, not packed again. ``steps`` (a ``Steps``) gets each step's seconds.
     """
+    steps = Steps() if steps is None else steps
     root = Path(root).resolve()
     data_dir = Path(data_dir).resolve()
     destination = Path(destination).resolve()
@@ -559,7 +575,9 @@ def backup(
             conn = stack.enter_context(connect(db))
             written_once = {}
 
+            steps.lap("prepare")
             with quiesced(data_dir, sources, conn):
+                steps.lap("wait_for_jobs")
                 stack.enter_context(conn.transaction())
                 conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
 
@@ -573,15 +591,18 @@ def backup(
                     written_once[directory] = [
                         r for r in listed if not rewritten and r.name != "latest.json"
                     ]
+                steps.lap("list_and_copy_files")
 
             manifest["data"], manifest["packs"] = pack_files(
                 data_dir, written_once, temporary / "packs", identity, previous
             )
+            steps.lap("pack_files")
             known = (previous or {}).get("database_inventory")
             previous = None  # the old manifest is large; it is not needed past this point
 
             manifest["database_inventory"] = inventory(conn, database_schemas, previous=known)
             known = None
+            steps.lap("fingerprint_tables")
             manifest["database_schemas"] = [
                 row["schema_name"]
                 for row in conn.execute(
@@ -675,6 +696,7 @@ def backup(
             for filename in ("pyproject.toml", "requirements-dev.txt"):
                 if (root / filename).is_file():
                     shutil.copy2(root / filename, temporary / filename)
+            steps.lap("check_snapshots_and_copy_code")
 
             dump = temporary / "database.dump"
 
@@ -696,6 +718,7 @@ def backup(
                 )
                 handle.flush()
                 os.fsync(handle.fileno())
+            steps.lap("dump_database")
 
             if warning:
                 manifest["dump_warnings"] = warning
@@ -710,6 +733,7 @@ def backup(
                     stdin=handle,
                     compose_args=compose_args,
                 )
+            steps.lap("check_dump")
 
         manifest["finished_at"] = utc_now()
         # The packs are uploaded on their own; the manifest records them under "packs".
@@ -721,8 +745,11 @@ def backup(
             for path in sorted(temporary.rglob("*"))
             if path.is_file() and path.relative_to(temporary).parts[0] != "packs"
         }
+        steps.lap("hash_bundle")
+        manifest["step_seconds"] = dict(steps)
 
         atomic_json(temporary / "manifest.json", manifest)
+        steps.lap("write_manifest")
 
         return {
             "outcome": "backed_up",

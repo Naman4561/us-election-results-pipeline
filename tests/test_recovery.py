@@ -457,6 +457,35 @@ class QuiesceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Pack does not match"):
             recovery.unpack_pack(manifest, pack, self.root / "two")
 
+    def test_a_backup_records_how_long_each_step_took(self):
+        _, manifest = self.backup()
+        # The manifest is written with sorted keys; the order the steps ran is not kept.
+        self.assertCountEqual(
+            manifest["step_seconds"],
+            [
+                "prepare",
+                "wait_for_jobs",
+                "list_and_copy_files",
+                "pack_files",
+                "fingerprint_tables",
+                "check_snapshots_and_copy_code",
+                "dump_database",
+                "check_dump",
+                "hash_bundle",
+            ],
+        )
+        self.assertTrue(all(seconds >= 0 for seconds in manifest["step_seconds"].values()))
+
+    def test_steps_are_laps_that_add_up_to_the_run(self):
+        steps = recovery.Steps()
+        with patch.object(recovery.time, "monotonic", side_effect=[1.0, 1.0]):
+            steps.last = 0.0
+            steps.lap("one")
+            steps.lap("two")
+        with patch.object(recovery.time, "monotonic", return_value=3.5):
+            steps.lap("one")
+        self.assertEqual(steps, {"one": 3.5, "two": 0.0})
+
     def test_a_failed_backup_leaves_no_unfinished_bundle(self):
         raw = self.data / "raw" / "XX" / "archive.zip"
         raw.parent.mkdir(parents=True, exist_ok=True)

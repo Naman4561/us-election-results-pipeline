@@ -1,7 +1,10 @@
 # Backups
 
 `election-backup.timer` runs a backup every six hours (00:08, 06:08, 12:08 and 18:08
-UTC, after the worker run at :00:30, which a backup would otherwise wait for). Each backup is a bundle and the packs it names:
+UTC, after the worker run at :00:30, which a backup would otherwise wait for). Each backup
+records how long each of its steps took (`step_seconds`, which add up to the run) in
+`latest-backup.json` and the journal; the steps inside the bundle are in its manifest too.
+Each backup is a bundle and the packs it names:
 
 - The **bundle** holds a PostgreSQL dump of the whole history, the files rewritten in
   place (collector state, `runs/*/latest.json`, reports, accuracy and recovery checks),
