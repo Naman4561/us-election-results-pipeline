@@ -85,9 +85,14 @@ alias is not `election-prod`.
 Results are unofficial unless `status` is `official`. Mississippi covers some counties
 only; Vermont reports by town (not linked to counties yet); AK, CA, GA, HI, NE, RI and TX
 publish statewide totals only; vote methods come from NC, VA, OK, IA, RI and HI only.
-FEC totals run through the last report filed (Oct 14 before the post-general reports);
-independent expenditure sums can count a 24/48-hour report that Schedule E repeats, so
-check large ones by filing. Governor races are not in FEC data.
+FEC totals run through the last report filed (Oct 14 before the post-general reports).
+Sum outside spending over `finance.independent_expenditures_reviewed` where `counted`:
+amended filings are replaced, a transaction filed again on a later report counts once,
+and junk filers (any entry of $100 million or more; the 2026 file has three claiming
+$38.5 billion) and reviewed exclusions (`analysis/ref/excluded_spenders.csv`) are left
+out, each excluded row keeping its reason. Outside spending is by spender, not donor:
+money given to a super PAC is spent in the PAC's name (contributions are not loaded yet).
+Governor races are not in FEC data.
 
 ## Tests
 

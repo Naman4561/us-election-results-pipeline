@@ -67,9 +67,8 @@ CREATE TABLE IF NOT EXISTS finance.fec_independent_expenditures (
     PRIMARY KEY (dataset_id, line)
 );
 
--- The filings in effect: an amended report replaces the report it names. (The FEC file
--- also repeats some 24/48-hour transactions on later Schedule E filings; sums by
--- candidate over this view can count those twice, so check large totals by filing.)
+-- The filings in effect: an amended report replaces the report it names. Repeated
+-- reports and junk filings are still here: sum over independent_expenditures_reviewed.
 CREATE OR REPLACE VIEW finance.independent_expenditures_in_effect AS
 SELECT e.*
   FROM finance.fec_independent_expenditures e
@@ -77,3 +76,45 @@ SELECT e.*
      SELECT 1 FROM finance.fec_independent_expenditures later
       WHERE later.dataset_id = e.dataset_id AND later.previous_file_num = e.file_num
  );
+
+-- Spenders whose filings are excluded after review (analysis/ref/excluded_spenders.csv).
+CREATE TABLE IF NOT EXISTS finance.excluded_spenders (
+    spender_id text PRIMARY KEY,
+    reason text NOT NULL
+);
+
+-- Every independent expenditure in effect, and whether it counts, with the reason when
+-- it does not. Sum ``amount`` where ``counted``; the other rows stay visible for audit.
+--   repeated report: the same transaction (spender, transaction ID, candidate, amount,
+--     support or oppose, dates) filed again on a later report, as a 24/48-hour report's
+--     items are on the periodic report after it; the first received is counted.
+--   implausible filer: a filer with any single entry of $100 million or more (the junk
+--     filings of Nov 2026 claimed billions); none of its entries is counted.
+--   excluded after review: finance.excluded_spenders.
+CREATE OR REPLACE VIEW finance.independent_expenditures_reviewed AS
+WITH ranked AS (
+    SELECT e.*,
+           row_number() OVER (
+               PARTITION BY e.spender_id, coalesce(e.transaction_id, e.line::text), e.cand_id,
+                            e.amount, e.support_oppose, e.dissemination_date, e.expenditure_date
+               ORDER BY e.received_date, e.file_num, e.line
+           ) AS copy,
+           first_value(e.line) OVER (
+               PARTITION BY e.spender_id, coalesce(e.transaction_id, e.line::text), e.cand_id,
+                            e.amount, e.support_oppose, e.dissemination_date, e.expenditure_date
+               ORDER BY e.received_date, e.file_num, e.line
+           ) AS first_line,
+           max(e.amount) OVER (PARTITION BY e.dataset_id, e.spender_id) AS largest
+      FROM finance.independent_expenditures_in_effect e
+)
+SELECT r.dataset_id, r.line, r.cand_id, r.spender_id, r.spender_name, r.office_state,
+       r.office, r.district, r.support_oppose, r.amount, r.expenditure_date,
+       r.dissemination_date, r.purpose, r.payee, r.file_num, r.amendment, r.transaction_id,
+       r.received_date,
+       x.spender_id IS NULL AND r.largest < 100000000 AND r.copy = 1 AS counted,
+       CASE WHEN x.spender_id IS NOT NULL THEN 'excluded after review: ' || x.reason
+            WHEN r.largest >= 100000000 THEN 'implausible filer'
+            WHEN r.copy > 1 THEN 'repeated report of line ' || r.first_line
+       END AS reason
+  FROM ranked r
+  LEFT JOIN finance.excluded_spenders x ON x.spender_id = r.spender_id;

@@ -51,8 +51,8 @@ def _():
           JOIN elections.serving.contest_results r USING (publication_id)
     """)
     # Each Senate and House candidate's FEC money (newest download), beside the result.
-    # Independent expenditures can count a 24/48-hour report twice when Schedule E repeats
-    # it: check large sums by filing before publishing them.
+    # Outside spending counts only reviewed rows: amended filings replaced, repeated reports
+    # once, junk filers excluded (finance.independent_expenditures_reviewed says why).
     con.execute("""
         CREATE OR REPLACE TEMP VIEW candidate_finance AS
         WITH totals AS (
@@ -64,7 +64,8 @@ def _():
             SELECT cand_id,
                    sum(amount) FILTER (WHERE support_oppose = 'S') AS outside_for,
                    sum(amount) FILTER (WHERE support_oppose = 'O') AS outside_against
-              FROM elections.finance.independent_expenditures_in_effect
+              FROM elections.finance.independent_expenditures_reviewed
+             WHERE counted
              GROUP BY cand_id
         )
         SELECT r.state, r.office, r.contest_id, r.choice, r.party, r.total_votes,

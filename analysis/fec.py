@@ -121,8 +121,23 @@ FILES = (
 )
 
 
+EXCLUDED = Path(__file__).with_name("ref") / "excluded_spenders.csv"
+
+
+def exclusions(conn):
+    """Rewrite finance.excluded_spenders from analysis/ref/excluded_spenders.csv."""
+    with EXCLUDED.open(encoding="utf-8", newline="") as handle:
+        rows = [(r["spender_id"], r["reason"]) for r in csv.DictReader(handle)]
+    with conn.transaction():
+        conn.execute("DELETE FROM finance.excluded_spenders")
+        for row in rows:
+            conn.execute("INSERT INTO finance.excluded_spenders VALUES (%s, %s)", row)
+    return len(rows)
+
+
 def load(conn):
     """Download and load each file; a file already loaded (same bytes) is skipped."""
+    exclusions(conn)
     loaded = {}
     for name, filename, suffix, loader, table in FILES:
         with conn.transaction():
