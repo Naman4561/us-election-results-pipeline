@@ -1,4 +1,4 @@
-"""python -m analysis restore | fetch counties | link | open | status"""
+"""python -m analysis restore | fetch counties|fec|census | link | match | open | status"""
 
 import argparse
 import os
@@ -6,7 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from analysis import candidates, fec, fetch, link, local, registry, restore
+from analysis import candidates, census, fec, fetch, link, local, registry, restore
 
 
 def status():
@@ -34,7 +34,7 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("restore", help="Copy the newest verified backup into the local database")
     get = sub.add_parser("fetch", help="Download an outside dataset with its provenance")
-    get.add_argument("dataset", choices=["counties", "fec"])
+    get.add_argument("dataset", choices=["counties", "fec", "census"])
     sub.add_parser("link", help="Match the results' county names to FIPS codes")
     sub.add_parser("match", help="Key every candidate and match Senate/House ones to the FEC")
     sub.add_parser("open", help="Open the workspace in the browser")
@@ -46,7 +46,8 @@ def main():
     elif args.command == "fetch":
         with local.connect(local.start()) as conn:
             local.apply_schemas(conn)
-            print(fetch.counties(conn) if args.dataset == "counties" else fec.load(conn))
+            loaders = {"counties": fetch.counties, "fec": fec.load, "census": census.load}
+            print(loaders[args.dataset](conn))
     elif args.command == "match":
         with local.connect(local.start()) as conn:
             local.apply_schemas(conn)

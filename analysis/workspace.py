@@ -81,6 +81,15 @@ def _():
           LEFT JOIN outside o ON o.cand_id = i.external_id
          WHERE r.office IN ('Senate', 'House')
     """)
+    # Each county's result beside its ACS 2020-2024 profile (census.profile).
+    con.execute("""
+        CREATE OR REPLACE TEMP VIEW county_demographics AS
+        SELECT r.*, d.population, d.citizen_voting_age, d.median_age, d.white_share,
+               d.black_share, d.hispanic_share, d.asian_share, d.native_share,
+               d.bachelors_share, d.median_household_income, d.poverty_rate
+          FROM county_results r
+          JOIN elections.census.profile d ON d.geo_type = 'county' AND d.geoid = r.fips
+    """)
     return con, mo
 
 
@@ -222,6 +231,35 @@ def _(con, mo):
         engine=con,
     )
     return (money,)
+
+
+@app.cell
+def _(con, mo):
+    counties = mo.sql(
+        """
+        -- Each county's two-party margin in each Senate race beside its demographics. The
+        -- link between them is a pattern across places, not how any group of people voted.
+        WITH two AS (
+            SELECT state, contest_id, county, fips,
+                   sum(total_votes) FILTER (WHERE party ILIKE 'DEM%' OR party = 'DFL') AS dem,
+                   sum(total_votes) FILTER (WHERE party ILIKE 'REP%') AS rep,
+                   any_value(population) AS population, any_value(white_share) AS white_share,
+                   any_value(black_share) AS black_share,
+                   any_value(hispanic_share) AS hispanic_share,
+                   any_value(bachelors_share) AS bachelors_share,
+                   any_value(median_household_income) AS median_household_income
+              FROM county_demographics
+             WHERE office = 'Senate'
+             GROUP BY ALL
+        )
+        SELECT *, round(100 * (dem - rep) / nullif(dem + rep, 0), 1) AS dem_margin_points
+          FROM two
+         WHERE dem + rep > 0
+         ORDER BY contest_id, county
+        """,
+        engine=con,
+    )
+    return (counties,)
 
 
 if __name__ == "__main__":

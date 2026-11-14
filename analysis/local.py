@@ -72,7 +72,7 @@ def start(db=None):
     raise RuntimeError("The local analysis database did not start within a minute")
 
 
-SCHEMAS = ("ref.sql", "finance.sql")
+SCHEMAS = ("ref.sql", "finance.sql", "census.sql")
 
 
 def apply_schemas(conn):
