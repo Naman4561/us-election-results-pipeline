@@ -28,8 +28,9 @@ approved revision, run detached (its header shows how). It waits for that revisi
 polling GitHub every two minutes, and gives up without changing anything if a job fails,
 CI stays queued for 30 minutes without starting (`SHIP_QUEUED_SECONDS`) or does not finish
 within six hours (`SHIP_CI_SECONDS`), or the branch has moved past the revision. It then
-holds the worker timer, lets a run in progress finish, stages, waits out a running backup
-and releases; the timer is restarted however it ends.
+stages, waits out a running backup and releases. The worker keeps running: release checks
+reuse unchanged sources, so a ship takes about a minute, and a run in progress finishes on
+the image it started on.
 
 1. **Stage** the pushed branch. Nothing running changes. Staging starts only once the
    GitHub Actions jobs production depends on (`ci.yml`: the suite on Linux, the dashboard
@@ -196,6 +197,14 @@ deploy certify --source ky_2026_general --certified-file INBOX_FILE \
     --certified-name certified-results.csv --sha256 HASH --downloaded-at UTC_TIME \
     --certified-on 2026-11-23 --attested-by "NAME" --evidence-url https://elect.ky.gov/...
 ```
+
+Where the state certifies by labeling its own results file official, in the format we
+already read (Oklahoma's county results export, Ohio's XML), import that file as
+`certified-official-<primary_filename>` (`certified-official-results.zip`,
+`certified-official-results.xml`): it passes the feed's payload checks and is read by the
+state's own parser. A manual source does this through `manual import`, which certifies
+too (see [manual results](manual-results.md#certification)); `deploy certify` takes
+polled sources only.
 
 The file joins the source's raw archive as a snapshot holding only it. Releases check
 an official source's newest collected snapshot as unofficial; a check publishes
