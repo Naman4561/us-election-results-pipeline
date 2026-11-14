@@ -17,11 +17,10 @@ import tempfile
 import time
 import zipfile
 from datetime import datetime, timedelta, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from dotenv import dotenv_values
 
-from election_pipeline.database import connect
 from election_pipeline.recovery import (
     Steps,
     backup,
@@ -41,19 +40,20 @@ UNCHANGED_SECONDS = 24 * 3600
 SKIP_RECORD = "latest-backup-unchanged.json"
 
 
-def fingerprint(conn, data, catalog_file):
+def fingerprint(conn, listed, catalog_file):
     """What a backup exists to keep: the raw snapshots, publications and restore checks
     on disk, the snapshots and publications in the database, and the deployment. Every
     new result arrives as a new raw snapshot. Poll logs (run reports, collector state,
     fetch and load attempts), which change on every poll, are left out: a backup skipped
-    while only they changed loses at most a day of them, never a result."""
+    while only they changed loses at most a day of them, never a result.
+
+    ``listed`` is the backup's own listing of the data directory and ``conn`` reads the
+    same snapshot, so the files are walked once and the two always agree."""
     digest = hashlib.sha256(Path(catalog_file).read_bytes())
     for directory in ("raw", "publications", "recovery_checks"):
-        for path in sorted((Path(data) / directory).rglob("*")):
-            if path.is_file():
-                info = path.stat()
-                name = path.relative_to(data).as_posix()
-                digest.update(f"{name}\0{info.st_size}\0{info.st_mtime_ns}\n".encode())
+        for relative, info in listed.get(directory, {}).items():
+            name = PurePosixPath(directory, *relative.parts).as_posix()
+            digest.update(f"{name}\0{info.st_size}\0{info.st_mtime_ns}\n".encode())
     for query in (
         "SELECT count(*) AS n, max(snapshot_id) AS last FROM ops.snapshots",
         "SELECT count(*) AS n, max(published_at) AS last FROM serving.publications",
@@ -502,11 +502,34 @@ def main():
             with registry.locked(args.catalog_file):
                 steps.lap("wait_for_catalog")
                 catalog = registry.read(args.catalog_file)
-                # Taken first: anything that lands while the backup runs differs next time.
-                with connect(db) as conn:
-                    current = fingerprint(conn, data, args.catalog_file)
-                last = unchanged_since(args.destination, current) if args.skip_unchanged else None
-                steps.lap("check_unchanged")
+                # Handed over below so that backup() holds the only reference to it (it
+                # is large, and backup() drops it once the files are packed).
+                held = [previous_manifest(args.destination)]
+                steps.lap("load_previous_manifest")
+                checked = {}
+
+                def nothing_new(listed, conn):
+                    # From the backup's own listing and snapshot: anything that lands
+                    # after them differs next time.
+                    checked["current"] = fingerprint(conn, listed, args.catalog_file)
+                    if args.skip_unchanged:
+                        checked["last"] = unchanged_since(args.destination, checked["current"])
+                    return checked.get("last") is not None
+
+                result = backup(
+                    ROOT,
+                    data,
+                    ROOT / "config/sources.toml",
+                    db,
+                    args.destination,
+                    "db",
+                    compose_args=compose,
+                    catalog=catalog,
+                    previous=held.pop(),
+                    steps=steps,
+                    skip=nothing_new,
+                )
+                current, last = checked["current"], checked.get("last")
                 if last:
                     # The last upload stays the latest backup: restores and restore checks
                     # use it. This record tells the monitor the skip was deliberate.
@@ -519,22 +542,6 @@ def main():
                     atomic_json(args.destination / SKIP_RECORD, skipped)
                     print(json.dumps(skipped, indent=2), flush=True)
                     return 0
-                # Handed over below so that backup() holds the only reference to it (it
-                # is large, and backup() drops it once the files are packed).
-                held = [previous_manifest(args.destination)]
-                steps.lap("load_previous_manifest")
-                result = backup(
-                    ROOT,
-                    data,
-                    ROOT / "config/sources.toml",
-                    db,
-                    args.destination,
-                    "db",
-                    compose_args=compose,
-                    catalog=catalog,
-                    previous=held.pop(),
-                    steps=steps,
-                )
             bundle = Path(result["backup_dir"])
             result["backup_id"] = bundle.name
             new_packs = {n: (bundle / "packs" / n).stat().st_size for n in result["new_packs"]}

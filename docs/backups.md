@@ -27,6 +27,9 @@ snapshots, publications and restore checks on disk, the snapshot and publication
 and the deployment catalog. Every new result arrives as a new raw snapshot. When the
 fingerprint is unchanged and the last upload finished less than a day ago, the run writes
 `latest-backup-unchanged.json` instead and the last upload stays the latest backup.
+The fingerprint is taken from the backup's own listing of the data directory and its
+database snapshot, so the files are walked once and a skip is decided after the brief
+hold below, before anything is packed or dumped.
 Poll logs (run reports, collector state, fetch and load attempts) change on every poll
 and are left out, so a skip loses at most a day of them, never a result. While states
 are collected this rarely skips: Mississippi alone saves a new county manifest every
@@ -41,7 +44,8 @@ publication lock just long enough to:
 - export the database snapshot;
 - copy the files rewritten in place (collector state, `runs/*/latest.json`, reports,
   accuracy and recovery checks);
-- list every other file under the data directory.
+- list every other file under the data directory, with its size and modification time
+  (one walk; about 15 s for the 375,000 files on Nov 14, 2026).
 
 After that it releases the locks. Packing the new files, the table fingerprints and
 the `pg_dump` (which reads that same snapshot) run while jobs run normally. Files written after the snapshot are left for the next backup. A job that

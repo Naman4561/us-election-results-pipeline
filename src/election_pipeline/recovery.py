@@ -342,28 +342,36 @@ def docker_command(
     return message.strip()
 
 
+def listing(source):
+    """The files under ``source`` a backup keeps, relative to it and in order, each with
+    its stat. One walk, one stat per file: the directory entries say which are files."""
+    found = {}
+    pending = [Path()] if source.exists() else []
+    while pending:
+        directory = pending.pop()
+        try:
+            entries = list(os.scandir(source / directory))
+        except FileNotFoundError:  # pruned while listed
+            continue
+        for entry in entries:
+            relative = directory / entry.name
+            if entry.name.startswith(".") or entry.name == "__pycache__":
+                continue
+            if entry.is_symlink():
+                raise ValueError(f"Refusing symlink in backup: {relative}")
+            if entry.is_dir():
+                pending.append(relative)
+            elif entry.is_file() and relative.suffix not in (".part", ".tmp", ".pyc"):
+                try:
+                    found[relative] = entry.stat()
+                except FileNotFoundError:
+                    continue
+    return dict(sorted(found.items()))
+
+
 def files(source):
     """The files under ``source`` a backup keeps, relative to it."""
-    if not source.exists():
-        return []
-
-    result = []
-    for path in sorted(source.rglob("*")):
-        relative = path.relative_to(source)
-
-        if (
-            any(part.startswith(".") for part in relative.parts)
-            or path.suffix in (".part", ".tmp", ".pyc")
-            or "__pycache__" in relative.parts
-        ):
-            continue
-
-        if path.is_symlink():
-            raise ValueError(f"Refusing symlink in backup: {relative}")
-
-        if path.is_file():
-            result.append(relative)
-    return result
+    return list(listing(source))
 
 
 def copy_files(source, destination, relatives=None, *, missing_ok=False):
@@ -380,8 +388,9 @@ def copy_files(source, destination, relatives=None, *, missing_ok=False):
 def pack_files(data_dir, written_once, packs_dir, identity, previous=None):
     """Map every write-once file to a pack, writing the new ones into this backup's packs.
 
-    A file the previous manifest lists with the same size and modification time is
-    already in one of its packs and is not read again. Returns the manifest's ``data``
+    ``written_once`` maps each directory to its ``listing``. A file the previous manifest
+    lists with the size and modification time it was listed with is already in one of
+    its packs and is not read again. Returns the manifest's ``data``
     ({data-relative path: sha256, bytes, mtime_ns, pack}) and ``packs`` (every pack
     those entries name, with its size and hash).
     """
@@ -391,11 +400,10 @@ def pack_files(data_dir, written_once, packs_dir, identity, previous=None):
     data, writers = {}, {}
     with ExitStack() as open_packs:
         for directory, listed in written_once.items():
-            for relative in listed:
+            for relative, status in listed.items():
                 key = PurePosixPath(directory, *relative.parts).as_posix()
                 path = data_dir / directory / relative
                 try:
-                    status = path.stat()
                     entry = known.get(key)
                     if (
                         entry is not None
@@ -535,6 +543,7 @@ def backup(
     catalog=None,
     previous=None,
     steps=None,
+    skip=None,
 ):
     """Capture files and a dump using the inventory's DB snapshot.
 
@@ -542,6 +551,9 @@ def backup(
     and the write-once files are listed; packing, the inventory and the dump run after.
     ``previous`` is the last uploaded backup's manifest: the files it already packed are
     referenced, not packed again. ``steps`` (a ``Steps``) gets each step's seconds.
+    ``skip(listed, conn)``, given every directory's ``listing`` and the connection in the
+    snapshot, decides whether there is anything new to back up; when it returns true
+    nothing is written and the result's outcome is ``unchanged``.
     """
     steps = Steps() if steps is None else steps
     root = Path(root).resolve()
@@ -573,7 +585,7 @@ def backup(
 
         with ExitStack() as stack:
             conn = stack.enter_context(connect(db))
-            written_once = {}
+            listed, written_once = {}, {}
 
             steps.lap("prepare")
             with quiesced(data_dir, sources, conn):
@@ -584,14 +596,24 @@ def backup(
                 snapshot = conn.execute("SELECT pg_export_snapshot() AS id").fetchone()["id"]
 
                 for directory in DATA_DIRECTORIES:
-                    listed = files(data_dir / directory)
+                    found = listed[directory] = listing(data_dir / directory)
                     rewritten = directory in REWRITTEN_DIRECTORIES
-                    in_place = [r for r in listed if rewritten or r.name == "latest.json"]
+                    in_place = [r for r in found if rewritten or r.name == "latest.json"]
                     copy_files(data_dir / directory, temporary / "data" / directory, in_place)
-                    written_once[directory] = [
-                        r for r in listed if not rewritten and r.name != "latest.json"
-                    ]
+                    written_once[directory] = {
+                        r: status
+                        for r, status in found.items()
+                        if not rewritten and r.name != "latest.json"
+                    }
                 steps.lap("list_and_copy_files")
+
+            if skip is not None:
+                unchanged = skip(listed, conn)
+                steps.lap("check_unchanged")
+                if unchanged:
+                    shutil.rmtree(temporary, ignore_errors=True)
+                    return {"outcome": "unchanged"}
+            listed = None
 
             manifest["data"], manifest["packs"] = pack_files(
                 data_dir, written_once, temporary / "packs", identity, previous
