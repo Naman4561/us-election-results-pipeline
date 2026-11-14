@@ -23,6 +23,7 @@ from dotenv import dotenv_values
 
 from election_pipeline.database import connect
 from election_pipeline.recovery import (
+    Steps,
     backup,
     check_restore,
     pack_kind,
@@ -497,12 +498,15 @@ def main():
 
             if not args.catalog_file:
                 raise ValueError("A backup records the deployment: pass --catalog-file")
+            steps = Steps()
             with registry.locked(args.catalog_file):
+                steps.lap("wait_for_catalog")
                 catalog = registry.read(args.catalog_file)
                 # Taken first: anything that lands while the backup runs differs next time.
                 with connect(db) as conn:
                     current = fingerprint(conn, data, args.catalog_file)
                 last = unchanged_since(args.destination, current) if args.skip_unchanged else None
+                steps.lap("check_unchanged")
                 if last:
                     # The last upload stays the latest backup: restores and restore checks
                     # use it. This record tells the monitor the skip was deliberate.
@@ -515,6 +519,10 @@ def main():
                     atomic_json(args.destination / SKIP_RECORD, skipped)
                     print(json.dumps(skipped, indent=2), flush=True)
                     return 0
+                # Handed over below so that backup() holds the only reference to it (it
+                # is large, and backup() drops it once the files are packed).
+                held = [previous_manifest(args.destination)]
+                steps.lap("load_previous_manifest")
                 result = backup(
                     ROOT,
                     data,
@@ -524,15 +532,19 @@ def main():
                     "db",
                     compose_args=compose,
                     catalog=catalog,
-                    previous=previous_manifest(args.destination),
+                    previous=held.pop(),
+                    steps=steps,
                 )
             bundle = Path(result["backup_dir"])
             result["backup_id"] = bundle.name
             new_packs = {n: (bundle / "packs" / n).stat().st_size for n in result["new_packs"]}
             try:
                 upload_packs(config, bundle, new_packs)
+                steps.lap("upload_packs")
                 archive, receipt = pack_bundle(bundle, catalog["release"]["revision"])
+                steps.lap("zip_bundle")
                 upload_bundle(config, bundle, archive, receipt)
+                steps.lap("upload_bundle")
             except Exception:
                 # Nothing complete reached S3; the next run starts a fresh bundle.
                 shutil.rmtree(bundle, ignore_errors=True)
@@ -555,6 +567,8 @@ def main():
                 )
             except Exception as error:
                 result["s3_retention"] = {"outcome": "failed", "error": str(error)[-500:]}
+            steps.lap("trim_and_retention")
+            result["step_seconds"] = steps
 
         elif args.action == "fetch":
             work = Path(tempfile.mkdtemp(prefix="fetch-", dir=args.destination))
