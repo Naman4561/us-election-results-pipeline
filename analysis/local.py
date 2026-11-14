@@ -72,6 +72,16 @@ def start(db=None):
     raise RuntimeError("The local analysis database did not start within a minute")
 
 
+SCHEMAS = ("ref.sql", "finance.sql")
+
+
+def apply_schemas(conn):
+    """Create the analysis schemas' missing tables (each file is safe to run again)."""
+    folder = Path(__file__).with_name("sql")
+    for name in SCHEMAS:
+        conn.execute((folder / name).read_text("utf-8"))
+
+
 def connect(db=None, **options):
     import psycopg
     from psycopg.rows import dict_row

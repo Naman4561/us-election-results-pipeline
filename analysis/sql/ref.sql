@@ -33,6 +33,46 @@ CREATE TABLE IF NOT EXISTS ref.counties (
     dataset_id text NOT NULL REFERENCES ref.datasets
 );
 
+-- Each state's one results source, from the pipeline's state registry. Join publications
+-- on it: some states keep an older source (and NC a demographics dataset) beside it.
+CREATE TABLE IF NOT EXISTS ref.state_sources (
+    state char(2) PRIMARY KEY,
+    source_id text NOT NULL UNIQUE,
+    -- "county", or "town" where the state reports by town (Vermont).
+    local_unit text NOT NULL,
+    county_results boolean NOT NULL
+);
+
+-- Each state's current publication of its results source.
+CREATE OR REPLACE VIEW ref.current_publications AS
+SELECT p.*
+  FROM serving.current_publications c
+  JOIN serving.publications p USING (publication_id)
+  JOIN ref.state_sources s ON s.source_id = p.source_id;
+
+-- Every Senate, House and Governor candidate in the results, under one key.
+CREATE TABLE IF NOT EXISTS ref.candidates (
+    candidate_key text PRIMARY KEY,
+    state char(2) NOT NULL,
+    contest_id text NOT NULL,
+    office text NOT NULL CHECK (office IN ('Senate', 'House', 'Governor')),
+    choice text NOT NULL,
+    party text,
+    UNIQUE (contest_id, choice)
+);
+
+-- A candidate's identity in an outside system (the FEC; state agencies later). Built by
+-- ``python -m analysis match``: a unique name match within the same state, office and
+-- district, or a reviewed row of analysis/ref/candidate_ids.csv, which wins.
+CREATE TABLE IF NOT EXISTS ref.candidate_ids (
+    candidate_key text NOT NULL REFERENCES ref.candidates ON DELETE CASCADE,
+    system text NOT NULL CHECK (system IN ('fec')),
+    external_id text NOT NULL,
+    method text NOT NULL CHECK (method IN ('matched', 'reviewed')),
+    party_agrees boolean,
+    PRIMARY KEY (candidate_key, system)
+);
+
 -- How each state's results spell a county, matched to its FIPS code. Built by
 -- ``python -m analysis link``: exact and normalized name matches, and the reviewed
 -- exceptions in analysis/ref/county_aliases.csv. Units that are not counties (Vermont's

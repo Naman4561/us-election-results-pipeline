@@ -6,7 +6,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from analysis import fetch, link, local, restore
+from analysis import candidates, fec, fetch, link, local, registry, restore
 
 
 def status():
@@ -34,8 +34,9 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("restore", help="Copy the newest verified backup into the local database")
     get = sub.add_parser("fetch", help="Download an outside dataset with its provenance")
-    get.add_argument("dataset", choices=["counties"])
+    get.add_argument("dataset", choices=["counties", "fec"])
     sub.add_parser("link", help="Match the results' county names to FIPS codes")
+    sub.add_parser("match", help="Key every candidate and match Senate/House ones to the FEC")
     sub.add_parser("open", help="Open the workspace in the browser")
     sub.add_parser("status", help="Which backup and datasets the local database holds")
     args = parser.parse_args()
@@ -44,7 +45,24 @@ def main():
         restore.main()
     elif args.command == "fetch":
         with local.connect(local.start()) as conn:
-            print(fetch.counties(conn))
+            local.apply_schemas(conn)
+            print(fetch.counties(conn) if args.dataset == "counties" else fec.load(conn))
+    elif args.command == "match":
+        with local.connect(local.start()) as conn:
+            local.apply_schemas(conn)
+            registry.sync(conn)
+            ids, ambiguous, missing = candidates.build(conn)
+        print(f"{len(ids)} Senate/House candidates have an FEC ID")
+        print(f"{sum(not agrees for *_, agrees in ids)} of them under a different party label")
+        for label, people in (("Ambiguous", ambiguous), ("No FEC registration found", missing)):
+            notable = [p for p in people if (p["vote_share"] or 0) >= 0.05]
+            print(f"{label}: {len(people)} ({len(notable)} with 5%+ of the vote)")
+            for p in notable:
+                options = ", ".join(f"{r['cand_id']} {r['name']}" for r in p["found"])
+                print(
+                    f"  {p['contest_id']}  {p['choice']} ({p['party']}, {p['vote_share']:.1%})"
+                    + (f": {options}" if options else "")
+                )
     elif args.command == "link":
         with local.connect(local.start()) as conn:
             found, missing = link.link(conn)
