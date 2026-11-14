@@ -13,11 +13,18 @@ one per candidate and county. Every configured contest must be present; county r
 must add up to the statewide totals; candidates and counties must match the state's
 reviewed roster where one is pinned. The publication's attestation names the state's
 certified document the rows were taken from.
+
+A single-file source also accepts ``certified-official-<primary_filename>``: the state's
+own results file, in the same format as the source's (Oklahoma's county results export,
+Ohio's XML), once the state labels its results official. It passes the same payload checks
+and is read by the state's own parser; the attestation records the state's notice.
 """
 
 import csv
 import io
+import tempfile
 import zipfile
+from pathlib import Path
 
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
@@ -26,6 +33,7 @@ from election_pipeline.parsers.structured import count, row
 
 PREFIX = "certified-"
 TRANSCRIPTION = "certified-results.csv"
+OFFICIAL = "certified-official-"
 HEADER = [
     "contest_id",
     "county",
@@ -57,6 +65,8 @@ def parser_for(source, name):
 
     module = state_adapter(source.state).parser
     readers = {TRANSCRIPTION: parse_transcription, **getattr(module, "CERTIFIED", {})}
+    if single_file(source):
+        readers.setdefault(OFFICIAL + source.primary_filename, parse_official)
     if name not in readers:
         raise ValueError(f"{source.state} has no reader for the certified file {name}")
     return readers[name]
@@ -68,6 +78,31 @@ def read(archive_path, name, settings):
         if info.flag_bits & 1 or info.file_size > settings.max_uncompressed_bytes:
             raise ValueError("Certified file is encrypted or exceeds its size budget")
         return archive.read(info)
+
+
+def single_file(source):
+    """A source whose archive is its one results file (the manual imports' contract)."""
+    return (
+        source.format == "bundle"
+        and not source.files
+        and list(source.expected_members or [source.primary_filename]) == [source.primary_filename]
+    )
+
+
+def parse_official(archive_path, name, source, settings, output, stats, reference=None):
+    """The state's own results file, labeled official by the state, read as its feed."""
+    from election_pipeline.checks import validate_payload
+    from election_pipeline.states import parser_for
+
+    if not single_file(source):
+        raise ValueError(f"{source.source_id} is not a single-file source")
+    data = read(archive_path, name, settings)
+    with tempfile.TemporaryDirectory(prefix=".certified-") as work:
+        feed = Path(work) / "feed.zip"
+        with zipfile.ZipFile(feed, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+            archive.writestr(source.primary_filename, data)
+        validate_payload(feed, source, settings)
+        return parser_for(source)(feed, source, settings, output, stats, reference)
 
 
 def parse_transcription(archive_path, name, source, settings, output, stats, reference=None):

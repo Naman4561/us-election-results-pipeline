@@ -23,6 +23,7 @@ from election_pipeline import manual
 from election_pipeline.dashboard.server import create_app
 from election_pipeline.deployment import catalog, containers, control
 from election_pipeline.deployment import manual as deployment_manual
+from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
 from election_pipeline.storage import ArchiveStore, atomic_json
 
@@ -111,6 +112,27 @@ class ManualTests(unittest.TestCase):
             self.acquire(expected_sha256="0" * 64)
         self.assertFalse((self.data / "raw").exists())
         self.assertFalse((self.data / "metadata").exists())
+
+    def test_the_states_own_file_labeled_official_imports_as_its_certified_file(self):
+        def outputs(receipt):
+            report = parse_source(self.source, self.settings, self.data, sha256=receipt["sha256"])
+            self.assertEqual(report["outcome"], "parsed", report)
+            directory = Path(report["output_dir"])
+            return report, (directory / "contest_results.csv").read_bytes()
+
+        feed = outputs(self.acquire())[1]
+        name = "certified-official-results.xml"
+        receipt = self.acquire(certified=name)
+        self.assertEqual(receipt["certified_file"], name)
+        report, certified = outputs(receipt)
+        self.assertEqual(report["certified_file"], name)
+        self.assertEqual(certified, feed)  # the same file, read by the same parser
+        # The feed's checks still apply: a challenge page or a changed count is refused,
+        # and only the source's own file name is accepted.
+        with self.assertRaisesRegex(ValueError, "rejected"):
+            self.acquire(b"<html>Cloudflare challenge</html>", certified=name)
+        with self.assertRaisesRegex(ValueError, "no reader for the certified file"):
+            self.acquire(self.raw, certified="certified-official-results.zip")
 
     def test_naive_future_download_and_old_report_are_rejected(self):
         with self.assertRaises(ValueError):

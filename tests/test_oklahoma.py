@@ -129,7 +129,13 @@ class OklahomaTests(unittest.TestCase):
                 self.imported(raw)
 
     def test_the_official_export_is_imported_as_the_certified_file_and_checked_alike(self):
-        name = "certified-county-results.zip"
+        # The general name, and the one Oklahoma's certification was imported under.
+        for name in ("certified-official-results.zip", "certified-county-results.zip"):
+            with self.subTest(name):
+                self.root = Path(tempfile.mkdtemp(dir=self.root))
+                self.certified_alike(name)
+
+    def certified_alike(self, name):
         receipt, report = self.imported(FIXTURE.read_bytes(), certified=name)
         self.assertEqual(receipt["certified_file"], name)
         archive = ArchiveStore(self.root, self.source).archive_path(receipt["sha256"])

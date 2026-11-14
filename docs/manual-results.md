@@ -70,6 +70,25 @@ The candidate is official and carries the attestation; the source's status becom
 official and no further import is due. It is made public like any new state (backup,
 `check-restore`, `start-dashboard`, `activate`).
 
+## Certification
+
+When the state certifies a manual source's results by labeling its own file official
+(Oklahoma's board marked its county results export "OFFICIAL RESULTS"), check the totals,
+then import that file as the certified file `certified-official-<primary_filename>`,
+with the attestation and `--publish`:
+
+```bash
+manual import --source ok_2026_general --file INBOX_FILE --sha256 HASH --downloaded-at UTC_TIME \
+    --certified-name certified-official-results.zip --publish \
+    --certified-on 2026-11-10 --attested-by "NAME" --evidence-url https://oklahoma.gov/elections/...
+```
+
+It is read by the state's own parser after the feed's payload checks, published as
+official with the attestation, and the source is marked final: no further import is due.
+Oklahoma was certified this way on Nov 13, 2026, under the name `certified-county-results.zip`
+(still read). A certificate published only as a document is transcribed instead
+(`certified-results.csv`, see [deployment](deployment.md#operator-attested-certification)).
+
 ## Later updates
 
 Once public, the operator can submit another official file through the same
