@@ -1,0 +1,94 @@
+version: 2
+
+models:
+  - name: dim_contests
+    description: Each race of each state's current publication.
+    columns:
+      - name: contest_id
+        tests: [unique, not_null]
+      - name: office
+        tests:
+          - accepted_values:
+              arguments:
+                values: [Senate, Governor, House]
+      - name: status
+        tests:
+          - accepted_values:
+              arguments:
+                values: [unofficial, official, test]
+
+  - name: dim_candidates
+    description: Every ballot choice with its party code and FEC ID.
+    columns:
+      - name: candidate_key
+        tests: [unique, not_null]
+      - name: contest_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_contests')
+                field: contest_id
+      - name: party
+        description: >
+          DEM, REP, LIB, GRE, CON, IND (independent or no party), OTH (another party),
+          WRITE_IN, or NONE (no label printed). A label missing from seeds/party_codes.csv
+          fails this test until it is coded.
+        tests:
+          - accepted_values:
+              arguments:
+                values: [DEM, REP, LIB, GRE, CON, IND, OTH, WRITE_IN, NONE]
+
+  - name: fct_contest_results
+    columns:
+      - name: candidate_key
+        tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_candidates')
+                field: candidate_key
+
+  - name: dim_counties
+    columns:
+      - name: fips
+        tests: [unique, not_null]
+
+  - name: fct_county_results
+    tests:
+      - dbt_utils_free_unique_combination:
+          arguments:
+            columns: [candidate_key, local_unit]
+    columns:
+      - name: candidate_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_candidates')
+                field: candidate_key
+      - name: fips
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_counties')
+                field: fips
+
+  - name: fct_county_contest
+    tests:
+      - dbt_utils_free_unique_combination:
+          arguments:
+            columns: [contest_id, local_unit]
+
+  - name: fct_method_results
+    tests:
+      - dbt_utils_free_unique_combination:
+          arguments:
+            columns: [candidate_key, method]
+
+  - name: fct_candidate_finance
+    columns:
+      - name: candidate_key
+        tests: [unique, not_null]
+      - name: fec_id
+        tests: [not_null]

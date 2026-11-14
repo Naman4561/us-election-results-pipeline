@@ -1,0 +1,57 @@
+label,party,note
+DEM,DEM,
+D,DEM,Indiana
+DFL,DEM,"Minnesota's Democratic-Farmer-Labor Party"
+Democratic,DEM,Maryland
+DEM/NON,DEM,"Alaska governor ticket: Democratic governor, nonpartisan lieutenant governor"
+REP,REP,
+R,REP,"Indiana, Minnesota"
+Republican,REP,Maryland
+LIB,LIB,
+L,LIB,Indiana
+LBR,LIB,Colorado
+LPF,LIB,"Libertarian Party of Florida"
+LBT,LIB,Louisiana
+GRN,GRE,
+GRE,GRE,
+Green,GRE,Maryland
+GP,GRE,Minnesota
+CON,CON,Constitution Party
+IND,IND,Independent or no party
+I,IND,
+INDEP,IND,Ohio
+NPA,IND,"Florida: no party affiliation"
+NPP,IND,"California: no party preference (the candidate's own ballot label)"
+NON,IND,"Alaska: nonpartisan"
+N,IND,"Hawaii: nonpartisan"
+NONPARTISAN,IND,North Dakota
+NONPRTYCAN,IND,"Ohio: nonparty candidate"
+NOPTY,IND,"Louisiana: no party"
+UNA,IND,"Utah: unaffiliated"
+UAF,IND,"Colorado: unaffiliated"
+Unaffiliated,IND,Maryland
+PET,IND,"Nebraska: on the ballot by petition (Dan Osborn)"
+WI,WRITE_IN,Minnesota
+W,WRITE_IN,Texas
+WRI,WRITE_IN,Florida
+WRITE-IN,WRITE_IN,Ohio
+OTHER-PART,OTH,Ohio
+PROGRESSIVE,OTH,Oregon Progressive Party
+FWD,OTH,Forward Party
+AFP,OTH,Nebraska
+LMN,OTH,Legal Marijuana Now
+NWP,OTH,Nebraska
+ACN,OTH,Colorado
+APV,OTH,Approval Voting Party
+IAP,OTH,"Independent American Party (Utah)"
+CST,OTH,West Virginia
+UNI,OTH,"Unity Party (Colorado)"
+UNC,OTH,"United Citizens Party (South Carolina)"
+WRK,OTH,"South Carolina"
+Working Class Party,OTH,Maryland
+FFP,OTH,Florida
+PJ,OTH,Vermont
+FU,OTH,Vermont
+KEN,OTH,Kentucky
+O,OTH,Indiana
+Other Candidates,OTH,"Maryland: votes for all other candidates together"
