@@ -268,7 +268,8 @@ class ProductionRecoveryTests(unittest.TestCase):
         )
 
         def current():
-            return job.fingerprint(conn, data, catalog_file)
+            listed = {d: recovery.listing(data / d) for d in recovery.DATA_DIRECTORIES}
+            return job.fingerprint(conn, listed, catalog_file)
 
         first = current()
         # Poll logs change on every poll; they are not what a backup is for.
@@ -450,10 +451,7 @@ class PackTests(unittest.TestCase):
             for name in files:
                 (self.data / name).parent.mkdir(parents=True, exist_ok=True)
                 (self.data / name).write_text(name)
-            listed = {
-                d: [p.relative_to(self.data / d) for p in (self.data / d).rglob("*.*")]
-                for d in ("raw", "runs")
-            }
+            listed = {d: recovery.listing(self.data / d) for d in ("raw", "runs")}
             data, packs = recovery.pack_files(
                 self.data, listed, self.packs, f"backup_{number}", manifest
             )

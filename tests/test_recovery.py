@@ -435,12 +435,20 @@ class QuiesceTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "raw archive"):
             self.backup(snapshots=[{**snapshots[0], "raw_sha256": "0" * 64}])
 
-        listed = {"publications": [Path("gone/manifest.json")], "raw": []}
-        data, packs = recovery.pack_files(self.data, listed, self.root / "packs", "backup_x")
+        # Listed, then removed before it was packed: prune_data.py may do that to old
+        # publications, but a file elsewhere is never removed.
+        for name in ("publications/gone/manifest.json", "metadata/gone.json"):
+            (self.data / name).parent.mkdir(parents=True, exist_ok=True)
+            (self.data / name).write_text("{}")
+        listed = {d: recovery.listing(self.data / d) for d in ("publications", "metadata")}
+        for name in ("publications/gone/manifest.json", "metadata/gone.json"):
+            (self.data / name).unlink()
+        publications = {"publications": listed["publications"], "raw": {}}
+        data, packs = recovery.pack_files(self.data, publications, self.root / "packs", "backup_x")
         self.assertEqual((data, packs), ({}, {}))
         with self.assertRaises(FileNotFoundError):
             recovery.pack_files(
-                self.data, {"metadata": [Path("gone.json")]}, self.root / "packs", "backup_y"
+                self.data, {"metadata": listed["metadata"]}, self.root / "packs", "backup_y"
             )
 
     def test_a_tampered_pack_or_file_is_rejected(self):
@@ -475,6 +483,40 @@ class QuiesceTests(unittest.TestCase):
             ],
         )
         self.assertTrue(all(seconds >= 0 for seconds in manifest["step_seconds"].values()))
+
+    def test_a_backup_with_nothing_new_writes_nothing(self):
+        raw = self.data / "raw/XX/archive.zip"
+        raw.parent.mkdir(parents=True)
+        raw.write_bytes(b"raw")
+        (self.data / "raw/XX/.partial").write_bytes(b"skipped")
+        seen = []
+
+        def skip(listed, conn):
+            seen.append({d: list(found) for d, found in listed.items() if found})
+            return True
+
+        conn = contextlib.nullcontext(FakeConnection())
+        with (
+            patch.object(recovery, "connect", return_value=conn),
+            patch.object(recovery, "docker_command") as docker,
+        ):
+            result = recovery.backup(
+                ROOT, self.data, CONFIG, {"dbname": "elections"}, self.root / "out", "db", skip=skip
+            )
+        self.assertEqual(result, {"outcome": "unchanged"})
+        # The check is given the backup's own listing, with each file's stat.
+        self.assertEqual(seen, [{"raw": [Path("XX/archive.zip")]}])
+        docker.assert_not_called()
+        self.assertEqual(list((self.root / "out").iterdir()), [])
+
+    def test_the_listing_walks_once_and_leaves_out_what_a_backup_does_not_keep(self):
+        for name in ("a/b.json", "a/.hidden/c.json", "a/d.tmp", "__pycache__/e.pyc", "f.zip"):
+            (self.data / name).parent.mkdir(parents=True, exist_ok=True)
+            (self.data / name).write_text(name)
+        found = recovery.listing(self.data)
+        self.assertEqual(list(found), [Path("a/b.json"), Path("f.zip")])
+        self.assertEqual(found[Path("f.zip")].st_size, 5)
+        self.assertEqual(recovery.listing(self.root / "missing"), {})
 
     def test_steps_are_laps_that_add_up_to_the_run(self):
         steps = recovery.Steps()
