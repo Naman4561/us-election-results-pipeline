@@ -1,7 +1,7 @@
 # State status
 
 Where each state's 2026 general election results stand. Updated by hand; last updated
-**November 12, 2026, 16:40 UTC**. [States](states.md) describes each source.
+**November 14, 2026, 00:50 UTC**. [States](states.md) describes each source.
 
 | Status | Meaning |
 | --- | --- |
@@ -42,15 +42,15 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | North Carolina | Unofficial, counting | Nov 11 17:01 | |
 | North Dakota | Unofficial, counting | Nov 10 05:18 | All 358 precincts in. |
 | Ohio | Final unofficial | Nov 12 03:26 | Imported by hand; the Nov 11, 10:24 PM EST report is the last before certification (re-checked Nov 12, 10:16 AM EST); marked final with `manual final` from the next release. |
-| Oklahoma | Unofficial, counting | Nov 11 01:58 | County results export imported by hand. |
+| Oklahoma | Official | Nov 13 23:24 | Certified: the State Election Board labels its Nov 3 results “OFFICIAL RESULTS” (state certification scheduled Nov 10). Its county results export, imported by hand, was published as official on Nov 13 with an operator attestation; totals unchanged from Nov 11. |
 | Oregon | Unofficial, counting | Nov 11 03:41 | |
 | Rhode Island | Unofficial, counting | Nov 10 21:35 | Statewide and district totals only (reported by town). |
-| South Carolina | Unofficial, pending certification | Nov 10 22:26 | |
+| South Carolina | Official | Nov 11 19:48 | The State Election Commission certified on Nov 11. Its feed sets no final flag, so the published snapshot was checked against the certified results and approved (operator attestation, Nov 13); collection paused. |
 | South Dakota | Unofficial, pending certification | Nov 6 20:56 | All precincts in. Collected every 3 hours, clear of backups. |
 | Texas | Unofficial, pending certification | Nov 4 22:21 | All 254 counties in; state's last update Nov 4, 22:48. Collected every 3 hours, clear of backups. |
 | Utah | Unofficial, counting | Nov 12 02:32 | |
 | Vermont | Official | Nov 10 17:54 | Certified Nov 12 16:35 from its feed's official marker, checked against the state's results; collection paused. Map and results by town. |
-| Virginia | Unofficial, counting | Nov 12 23:29 | Public since Nov 12, 7:48 PM EST. Its results API’s CDN refuses the server’s IPv4 address (403) and answers its IPv6 one, so its source prefers IPv6 (`prefer_ipv6`, through `JOB_IPV6_NETWORK`). Map and results by locality. While provisional ballots are added, its statewide counts can trail its localities’ sum; such a file is refused and the last matching one stays public (it was statewide-only on Nov 12 for that reason: `county_results=False` in `states.py`). |
+| Virginia | Unofficial, counting | Nov 12 23:29 | Public since Nov 12, 7:48 PM EST. Its results API’s CDN refuses the server’s IPv4 address (403) and answers its IPv6 one, so its source prefers IPv6 (`prefer_ipv6`, through `JOB_IPV6_NETWORK`). Map and results by locality. While provisional ballots are added, its statewide counts can trail its localities’ sum; such a file is refused and the last matching one stays public (it was statewide-only on Nov 12 for that reason: `county_results=False` in `states.py`). On Nov 13 its VA-03 provisional counts lagged this way several times, each clearing within an hour or two. |
 | Washington | Unofficial, counting | Nov 11 23:47 | Counts on weekdays. |
 | West Virginia | Unofficial, counting | Nov 10 16:01 | |
 | Wyoming | Official | Nov 10 21:37 | Added from its certified results (certified Nov 10). |
