@@ -13,6 +13,7 @@ import uuid
 import zipfile
 from contextlib import ExitStack, contextmanager
 from pathlib import Path, PurePosixPath
+from typing import NamedTuple
 
 from psycopg import sql
 
@@ -342,9 +343,48 @@ def docker_command(
     return message.strip()
 
 
-def listing(source):
+class Listed(NamedTuple):
+    """A file's size and modification time as an earlier backup listed them."""
+
+    st_size: int
+    st_mtime_ns: int
+
+
+def previous_attempts(previous):
+    """The previous manifest's ``publications/`` files, by attempt folder: {attempt:
+    {path inside it: Listed}}."""
+    if previous is None or previous.get("schema_version") != 2:
+        return {}
+    found = {}
+    for key, entry in previous["data"].items():
+        parts = key.split("/", 2)
+        if parts[0] == "publications" and len(parts) == 3:
+            found.setdefault(parts[1], {})[Path(parts[2])] = Listed(
+                entry["bytes"], entry["mtime_ns"]
+            )
+    return found
+
+
+def sealed_attempts(conn, before):
+    """Publication attempts whose folders were complete before ``before``.
+
+    Only an attempt's own dbt build writes its folder, and it finishes before the
+    attempt is validated or fails; prune_data.py only removes whole folders."""
+    rows = conn.execute(
+        "SELECT attempt_id::text AS attempt FROM ops.publication_attempts "
+        "WHERE coalesce(validated_at, finished_at) < %s::timestamptz",
+        (before,),
+    ).fetchall()
+    return {row["attempt"] for row in rows}
+
+
+def listing(source, reuse=None):
     """The files under ``source`` a backup keeps, relative to it and in order, each with
-    its stat. One walk, one stat per file: the directory entries say which are files."""
+    its stat. One walk, one stat per file: the directory entries say which are files.
+
+    ``reuse`` maps a folder directly under ``source`` to its files as listed before
+    ({path inside it: Listed}); such a folder is taken from there, not walked."""
+    reuse = reuse or {}
     found = {}
     pending = [Path()] if source.exists() else []
     while pending:
@@ -360,7 +400,11 @@ def listing(source):
             if entry.is_symlink():
                 raise ValueError(f"Refusing symlink in backup: {relative}")
             if entry.is_dir():
-                pending.append(relative)
+                if not directory.parts and entry.name in reuse:
+                    for inside, status in reuse[entry.name].items():
+                        found[relative / inside] = status
+                else:
+                    pending.append(relative)
             elif entry.is_file() and relative.suffix not in (".part", ".tmp", ".pyc"):
                 try:
                     found[relative] = entry.stat()
@@ -586,6 +630,10 @@ def backup(
         with ExitStack() as stack:
             conn = stack.enter_context(connect(db))
             listed, written_once = {}, {}
+            # Most files are publication artifacts, in folders complete long ago. The
+            # previous backup listed those; walking them again each time is slow once
+            # their directory entries are no longer cached (83 s on Nov 15, 2026).
+            attempts = previous_attempts(previous)
 
             steps.lap("prepare")
             with quiesced(data_dir, sources, conn):
@@ -594,9 +642,14 @@ def backup(
                 conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
 
                 snapshot = conn.execute("SELECT pg_export_snapshot() AS id").fetchone()["id"]
+                if attempts:
+                    sealed = sealed_attempts(conn, previous["started_at"])
+                    attempts = {a: inside for a, inside in attempts.items() if a in sealed}
+                manifest["reused_attempt_listings"] = len(attempts)
 
                 for directory in DATA_DIRECTORIES:
-                    found = listed[directory] = listing(data_dir / directory)
+                    reuse = attempts if directory == "publications" else None
+                    found = listed[directory] = listing(data_dir / directory, reuse)
                     rewritten = directory in REWRITTEN_DIRECTORIES
                     in_place = [r for r in found if rewritten or r.name == "latest.json"]
                     copy_files(data_dir / directory, temporary / "data" / directory, in_place)
@@ -613,7 +666,7 @@ def backup(
                 if unchanged:
                     shutil.rmtree(temporary, ignore_errors=True)
                     return {"outcome": "unchanged"}
-            listed = None
+            listed = attempts = None
 
             manifest["data"], manifest["packs"] = pack_files(
                 data_dir, written_once, temporary / "packs", identity, previous
