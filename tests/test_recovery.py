@@ -3,6 +3,7 @@
 import contextlib
 import hashlib
 import json
+import shutil
 import subprocess
 import tempfile
 import threading
@@ -376,11 +377,16 @@ class QuiesceTests(unittest.TestCase):
         self.assertEqual((restored / "raw" / "XX" / "archive.zip").read_text(), "raw")
         self.assertFalse(any(name.startswith("packs/") for name in manifest["files"]))
 
-    def backup(self, previous=None, snapshots=()):
+    def backup(self, previous=None, snapshots=(), sealed=()):
+        asked = self.sealed_before = []
+
         class Connection(FakeConnection):
             def execute(self, statement, params=None):
                 if "FROM ops.snapshots" in statement:
                     return Result(rows=snapshots)
+                if "FROM ops.publication_attempts" in statement:
+                    asked.append(params[0])
+                    return Result(rows=[{"attempt": attempt} for attempt in sealed])
                 return super().execute(statement, params)
 
         def dump(root, service, db, program, arguments, *, stdout=None, **kwargs):
@@ -509,6 +515,44 @@ class QuiesceTests(unittest.TestCase):
         docker.assert_not_called()
         self.assertEqual(list((self.root / "out").iterdir()), [])
 
+    def test_a_publication_folder_sealed_before_the_last_backup_is_not_walked_again(self):
+        for name in ("publications/sealed/a.json", "publications/open/b.json"):
+            (self.data / name).parent.mkdir(parents=True, exist_ok=True)
+            (self.data / name).write_text(name)
+        _, previous = self.backup()
+        # Neither can happen to a sealed attempt; here they show which folders were read.
+        (self.data / "publications/sealed/late.json").write_text("never written")
+        (self.data / "publications/open/c.json").write_text("still building")
+        _, manifest = self.backup(previous, sealed=["sealed", "gone"])
+        self.assertEqual(self.sealed_before, [previous["started_at"]])
+        self.assertEqual(manifest["reused_attempt_listings"], 1)
+        self.assertEqual(
+            sorted(manifest["data"]),
+            ["publications/open/b.json", "publications/open/c.json", "publications/sealed/a.json"],
+        )
+        self.assertEqual(
+            manifest["data"]["publications/sealed/a.json"],
+            previous["data"]["publications/sealed/a.json"],
+        )
+        # A folder that is gone is not listed, sealed or not.
+        shutil.rmtree(self.data / "publications/sealed")
+        _, manifest = self.backup(manifest, sealed=["sealed"])
+        self.assertEqual(manifest["reused_attempt_listings"], 1)
+        self.assertNotIn("publications/sealed/a.json", manifest["data"])
+        # Without a previous backup every folder is walked.
+        _, manifest = self.backup(sealed=["open"])
+        self.assertEqual(manifest["reused_attempt_listings"], 0)
+        self.assertEqual(self.sealed_before, [])
+
+    def test_the_listing_takes_a_reused_folder_from_the_earlier_listing(self):
+        for name in ("a/new.json", "b/c/d.json"):
+            (self.data / name).parent.mkdir(parents=True, exist_ok=True)
+            (self.data / name).write_text(name)
+        earlier = {"a": {Path("old.json"): recovery.Listed(3, 7)}, "c": {Path("x"): None}}
+        found = recovery.listing(self.data, earlier)
+        self.assertEqual(list(found), [Path("a/old.json"), Path("b/c/d.json")])
+        self.assertEqual(found[Path("a/old.json")], (3, 7))
+
     def test_the_listing_walks_once_and_leaves_out_what_a_backup_does_not_keep(self):
         for name in ("a/b.json", "a/.hidden/c.json", "a/d.tmp", "__pycache__/e.pyc", "f.zip"):
             (self.data / name).parent.mkdir(parents=True, exist_ok=True)
@@ -624,6 +668,30 @@ class InventoryDatabaseTests(unittest.TestCase):
         with connect(self.db) as conn, conn.transaction():
             conn.execute("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ, READ ONLY")
             return recovery.inventory(conn, **options)
+
+    def test_an_attempt_is_sealed_once_validated_or_finished(self):
+        release = self.load(self.f.rows)
+        attempts = {name: uuid.uuid4() for name in ("validated", "failed", "building", "late")}
+        with connect(self.db) as conn:
+            for name, validated, finished in (
+                ("validated", "2026-11-15 06:00Z", None),
+                ("failed", None, "2026-11-15 06:00Z"),
+                ("building", None, None),
+                ("late", "2026-11-15 13:00Z", None),
+            ):
+                conn.execute(
+                    "INSERT INTO ops.publication_attempts (attempt_id, release_id, action, "
+                    "outcome, validated_at, finished_at) VALUES (%s, %s, 'publish', %s, %s, %s)",
+                    (
+                        attempts[name],
+                        release,
+                        "failed" if finished else "running",
+                        validated,
+                        finished,
+                    ),
+                )
+            sealed = recovery.sealed_attempts(conn, "2026-11-15T12:08:01.832+00:00")
+        self.assertEqual(sealed, {str(attempts["validated"]), str(attempts["failed"])})
 
     def test_reused_release_fingerprints_match_a_full_recompute_and_catch_a_change(self):
         first = self.load(self.f.rows)

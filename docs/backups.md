@@ -44,8 +44,13 @@ publication lock just long enough to:
 - export the database snapshot;
 - copy the files rewritten in place (collector state, `runs/*/latest.json`, reports,
   accuracy and recovery checks);
-- list every other file under the data directory, with its size and modification time
-  (one walk; about 15 s for the 375,000 files on Nov 14, 2026).
+- list every other file under the data directory, with its size and modification time.
+  A publication attempt's folder is written only by its own dbt build, so a folder
+  whose attempt was validated or had failed before the previous backup started is taken
+  from that backup's manifest instead of walked. On Nov 15, 2026 that was 5,224 of 5,264
+  folders: `publications/` (279,000 files) listed in 8 s, where walking it took 83 to
+  101 s once its directory entries had dropped out of the server's cache. The manifest
+  records how many folders were reused (`reused_attempt_listings`).
 
 After that it releases the locks. Packing the new files, the table fingerprints and
 the `pg_dump` (which reads that same snapshot) run while jobs run normally. Files written after the snapshot are left for the next backup. A job that
