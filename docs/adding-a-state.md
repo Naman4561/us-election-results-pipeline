@@ -11,7 +11,7 @@ depends on the official source: where it is, how to read it, and who is on the b
    `county_results`, `county_privacy_masking`, `collection_backend`, `method_note`).
    A code that is a Python keyword (`in`, `or`) needs `parser_module`.
 2. **Describe the source** in `config/sources.toml` under `sources.<source_id>`: URL,
-   format, expected bundle members, and `min_interval_seconds = 840` (every 15 minutes).
+   format, expected bundle members, and `min_interval_seconds = 600` (every 15 minutes; see the note in that file).
 3. **Write the parser** `src/election_pipeline/parsers/<code>.py`. Its `parse` reads the
    official format, reusing a platform reader where the state uses one (`clarity`,
    `enhanced_voting`, `enr_platform`, `workbook`, `structured`, `html`), and hands the rows
