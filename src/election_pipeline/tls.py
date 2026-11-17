@@ -5,6 +5,9 @@
 - Hinds County's IIS server negotiates only ECDHE-RSA CBC suites with SHA-1 MACs.
   Python's default cipher list excludes them, so the server resets the connection.
   Only that exact host gets those two forward-secret suites added back.
+- Florida's file host chains to GoDaddy TLS Root CA - R1 (2025), which the image's
+  trust store does not carry yet. Only that exact host also trusts that one reviewed,
+  packaged root (``resources/florida-root.json`` records how it was checked).
 """
 
 import hashlib
@@ -16,6 +19,15 @@ ALASKA_HOSTS = {"elections.alaska.gov", "www.elections.alaska.gov"}
 ISSUERS_SHA256 = "d843cd9900279123e130f0c9ac443451f5a9963254c7f199d61df0e8628f0aa0"
 LEGACY_CBC_HOSTS = {"www.co.hinds.ms.us"}
 LEGACY_CBC_SUITES = ("ECDHE-RSA-AES256-SHA", "ECDHE-RSA-AES128-SHA")
+FLORIDA_HOSTS = {"flelectionfiles.floridados.gov"}
+FLORIDA_ROOT_SHA256 = "471c59d5851cb2be394bce8fc814301233cdd7a92e513d8a3360dfe52965cc62"
+
+
+def packaged(name, sha256, label):
+    pem = files("election_pipeline").joinpath("resources/" + name).read_bytes()
+    if hashlib.sha256(pem).hexdigest() != sha256:
+        raise ValueError(f"{label} failed its integrity check")
+    return pem.decode("ascii")
 
 
 def legacy_cbc_context():
@@ -32,14 +44,19 @@ def context_for_url(url):
     host = urlsplit(url).hostname
     if host in LEGACY_CBC_HOSTS:
         return legacy_cbc_context()
+    if host in FLORIDA_HOSTS:
+        root = packaged("florida-root.pem", FLORIDA_ROOT_SHA256, "Florida root certificate")
+        context = ssl.create_default_context()
+        # A self-signed root, added beside the platform store; verification and the
+        # hostname check are unchanged.
+        context.load_verify_locations(cadata=root)
+        return context
     if host not in ALASKA_HOSTS:
         return None
-    issuers = files("election_pipeline").joinpath("resources/alaska-issuers.pem").read_bytes()
-    if hashlib.sha256(issuers).hexdigest() != ISSUERS_SHA256:
-        raise ValueError("Alaska issuer bundle failed its integrity check")
+    issuers = packaged("alaska-issuers.pem", ISSUERS_SHA256, "Alaska issuer bundle")
     context = ssl.create_default_context()
     # These are issuer certificates, not additional trust anchors. Require a chain
     # to a root in the existing platform trust store, including on Python 3.13+.
     context.verify_flags &= ~getattr(ssl, "VERIFY_X509_PARTIAL_CHAIN", 0)
-    context.load_verify_locations(cadata=issuers.decode("ascii"))
+    context.load_verify_locations(cadata=issuers)
     return context
