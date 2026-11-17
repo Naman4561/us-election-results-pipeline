@@ -18,6 +18,7 @@ dbt/dbt_packages/
 dbt/.user.yml
 *.pem
 !/src/election_pipeline/resources/alaska-issuers.pem
+!/src/election_pipeline/resources/florida-root.pem
 node_modules/
 
 # Patches are exchanged outside the repository.

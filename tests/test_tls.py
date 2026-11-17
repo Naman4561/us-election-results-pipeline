@@ -15,10 +15,18 @@ from urllib.error import HTTPError
 
 from election_pipeline.collect import FetchFailure, fetch_file
 from election_pipeline.settings import CollectorSettings, Source
-from election_pipeline.tls import ISSUERS_SHA256, LEGACY_CBC_SUITES, context_for_url
+from election_pipeline.tls import (
+    FLORIDA_ROOT_SHA256,
+    ISSUERS_SHA256,
+    LEGACY_CBC_SUITES,
+    context_for_url,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 URL = "https://www.elections.alaska.gov/enr/26GENR/results/GA_ENR_Precinct_State_of_Alaska.csv"
+FLORIDA = "https://flelectionfiles.floridados.gov/enightfilespublic/20261103_ElecResultsFL.txt"
+# GoDaddy TLS Root CA - R1, as GoDaddy's repository lists its thumbprint.
+FLORIDA_ROOT_DER_SHA256 = "25cf3da8e9b97addbf92543c2b82527c8a4e2cff2062a6483040d4b64ace719f"
 
 
 class AlaskaTLSTests(unittest.TestCase):
@@ -65,6 +73,55 @@ class AlaskaTLSTests(unittest.TestCase):
                     )
                 self.assertEqual(result.status, 404)
                 self.assertEqual("context" in request.call_args.kwargs, custom)
+
+
+class FloridaTLSTests(unittest.TestCase):
+    def test_the_packaged_root_is_godaddys_and_verification_stays_enabled(self):
+        pem = (ROOT / "src/election_pipeline/resources/florida-root.pem").read_bytes()
+        self.assertEqual(hashlib.sha256(pem).hexdigest(), FLORIDA_ROOT_SHA256)
+        self.assertEqual(pem.count(b"-----BEGIN CERTIFICATE-----"), 1)
+        der = ssl.PEM_cert_to_DER_cert(pem.decode("ascii"))
+        self.assertEqual(hashlib.sha256(der).hexdigest(), FLORIDA_ROOT_DER_SHA256)
+        context = context_for_url(FLORIDA)
+        self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
+        self.assertTrue(context.check_hostname)
+        self.assertIn(der, context.get_ca_certs(binary_form=True))
+
+    def test_only_the_florida_file_host_trusts_the_root(self):
+        from election_pipeline.settings import load_config
+
+        _, sources = load_config(ROOT / "config/sources.toml")
+        self.assertEqual(sources["fl_2026_general"].url, FLORIDA)
+        for url in (
+            "https://floridados.gov/",
+            "https://www.floridados.gov/",
+            "https://flelectionfiles.floridados.gov.example.com/",
+            "https://example.com/?host=flelectionfiles.floridados.gov",
+            "https://floridaelectionwatch.gov/",
+        ):
+            with self.subTest(url=url):
+                self.assertIsNone(context_for_url(url))
+
+    def test_bad_root_fails_before_http_and_is_not_retried(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            source = Source("fl_probe", "FL", "2026-11-03", FLORIDA)
+            with (
+                patch("election_pipeline.tls.FLORIDA_ROOT_SHA256", "0" * 64),
+                patch("election_pipeline.collect.open_url") as request,
+                self.assertRaisesRegex(FetchFailure, "integrity") as failure,
+            ):
+                fetch_file(source, CollectorSettings(), Path(temporary) / "download", {})
+            self.assertFalse(failure.exception.retryable)
+            request.assert_not_called()
+
+    def test_an_untrusted_certificate_still_fails(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        cert = make_test_certificate(Path(temporary.name), self)
+        server = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        server.load_cert_chain(cert)
+        with self.assertRaises(ssl.SSLCertVerificationError):
+            handshake(context_for_url(FLORIDA), server)
 
 
 # Python's built-in default cipher string, used by the official python:3.12 image.

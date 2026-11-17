@@ -30,7 +30,8 @@ flowchart TB
 ```
 
 Some states need one-off handling: Texas reads the Civix API (`parsers/tx.py`),
-and Alaska pins its issuer certificates (`resources/alaska-issuers.pem`).
+Alaska pins its issuer certificates (`resources/alaska-issuers.pem`), and Florida's file
+host alone also trusts one reviewed root the image lacks (`resources/florida-root.pem`).
 
 ## One collection run
 

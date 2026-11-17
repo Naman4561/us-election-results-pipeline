@@ -1,0 +1,12 @@
+{
+  "purpose": "Trust GoDaddy TLS Root CA - R1 for flelectionfiles.floridados.gov only; the image's trust store does not carry this 2025 root yet. A certificate, not a private key.",
+  "subject": "C=US, O=GoDaddy.com, CN=GoDaddy TLS Root CA - R1",
+  "valid": "2025-08-28T12:00:00Z/2040-08-24T11:59:59Z",
+  "der_sha256": "25cf3da8e9b97addbf92543c2b82527c8a4e2cff2062a6483040d4b64ace719f",
+  "verified_against": [
+    "GoDaddy's repository thumbprint, https://certs.godaddy.com/repository (gd_tls_root-r1.crt)",
+    "The Windows trusted root store (exported from there)",
+    "The root presented by flelectionfiles.floridados.gov on 2026-11-17"
+  ],
+  "bundle_sha256": "471c59d5851cb2be394bce8fc814301233cdd7a92e513d8a3360dfe52965cc62"
+}
