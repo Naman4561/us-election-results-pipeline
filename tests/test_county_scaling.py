@@ -12,7 +12,7 @@ from pypdf import PdfWriter
 
 from election_pipeline.checks import validate_payload
 from election_pipeline.collectors import county_files
-from election_pipeline.county_import import import_county, write_template
+from election_pipeline.county_import import import_county, set_house, write_template
 from election_pipeline.database import import_fetches
 from election_pipeline.deployment import containers
 from election_pipeline.parsers import ms
@@ -284,6 +284,202 @@ class CountyScalingTests(unittest.TestCase):
         self.assertNotIn("review", manifest["counties"]["HANCOCK"])
         with self.assertRaisesRegex(ValueError, "already has accepted results"):
             import_county(f.source, f.settings, f.root, "HANCOCK", original, template)
+
+    def test_certified_recap_replaces_an_automatic_feed_and_ends_its_polling(self):
+        f = self.f
+        with patch.object(county_files, "fetch_file", side_effect=f.fetcher()):
+            collect_source(f.source, f.settings, f.root, force_download=True)
+        _, before, accepted = ms.read_bundle(f.store.cached_archive(f.store.read_state()), f.source)
+        self.assertEqual(before["counties"]["PIKE"]["status"], "current")
+
+        raw, review = synthetic_review(f, "PIKE")
+        sos = "https://www.sos.ms.gov/elections/electionresults/2026General/Pike%20County.pdf"
+        review.update(
+            source_url=sos,
+            official_page_url="https://www.sos.ms.gov/elections-voting/election-results",
+            observed_at="2026-11-17T21:00:00+00:00",
+            certified=True,
+            certified_on="2026-11-11",
+        )
+        original, path = f.root / "pike.pdf", f.root / "pike.json"
+        original.write_bytes(raw)
+
+        # Without the certified flag it is an ordinary manual copy, which a fed county refuses.
+        path.write_text(json.dumps({**review, "certified": False}), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "configured URL"):
+            import_county(f.source, f.settings, f.root, "PIKE", original, path)
+        for changes in (
+            dict(certified_on=None),
+            dict(certified_on="2026-11-02"),
+            dict(certified_on="2026-11-18"),
+            dict(certified="yes"),
+        ):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                reviewed_file(raw, f.counties["PIKE"], f.policy, {**review, **changes})
+
+        path.write_text(json.dumps(review), encoding="utf-8")
+        with patch.object(county_files, "fetch_file", side_effect=AssertionError("import HTTP")):
+            result = import_county(f.source, f.settings, f.root, "PIKE", original, path)
+        self.assertEqual(result["outcome"], "manual_imported", result)
+        _, manifest, accepted = ms.read_bundle(
+            f.store.cached_archive(f.store.read_state()), f.source
+        )
+        record = manifest["counties"]["PIKE"]
+        self.assertEqual(
+            (record["status"], record["issue"], record["url"]), ("stale", ms.COUNTY_CERTIFIED, sos)
+        )
+        self.assertEqual(accepted["PIKE"][2]["counts"], review["counts"])
+
+        # Later polls leave the certified county alone and still collect the others.
+        requested = []
+        fetch = f.fetcher()
+
+        def tracked(source, limits, target, conditions, *, url):
+            requested.append(url)
+            return fetch(source, limits, target, conditions, url=url)
+
+        with patch.object(county_files, "fetch_file", side_effect=tracked):
+            collect_source(f.source, f.settings, f.root, force_download=True)
+        self.assertNotIn(f.counties["PIKE"]["url"], requested)
+        self.assertIn(f.counties["HINDS"]["url"], requested)
+        archive = f.store.cached_archive(f.store.read_state())
+        _, manifest, accepted = ms.read_bundle(archive, f.source)
+        self.assertEqual(manifest["counties"]["PIKE"], record)
+        self.assertEqual(manifest["counties"]["HINDS"]["status"], "current")
+
+        report = f.parse(archive)
+        self.assertEqual(report["outcome"], "parsed", report)
+        self.assertNotIn("PIKE", report["county_feed_issues"])
+        feed = next(r for r in f.read(report, "county_feeds.csv") if r["county"] == "PIKE")
+        self.assertEqual(feed["issue"], "certified")
+        payload, _ = f.payload(report)
+        self.assertEqual(payload["county_feeds"]["PIKE"]["acquisition"], "certified")
+        self.assertEqual(payload["county_collection"]["certified"], 1)
+
+        # Only another certified recap may replace it.
+        plain = {
+            **review,
+            "certified": False,
+            "certified_on": None,
+            "source_url": f.counties["PIKE"]["url"],
+            "observed_at": "2026-11-18T00:00:00+00:00",
+        }
+        path.write_text(json.dumps(plain), encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "Only another certified recap"):
+            import_county(f.source, f.settings, f.root, "PIKE", original, path)
+
+    def certify_all(self, skip=()):
+        """Every county but ``skip`` takes a synthetic certified recap with its House TOTAL."""
+        f = self.f
+        original, _ = f.collect()
+        districts = ms.house_policy()
+        imports = {}
+        for county in f.policy["counties"]:
+            key = county["key"]
+            if key in skip:
+                continue
+            raw, review = synthetic_review(f, key)
+            contest = districts["primary_district"][key]
+            review.update(
+                source_url="https://www.sos.ms.gov/elections/electionresults/2026General/x.pdf",
+                certified=True,
+                certified_on="2026-11-04",
+                house={contest: dict.fromkeys(districts["districts"][contest], 5)},
+            )
+            record = dict(
+                status="stale",
+                url=review["source_url"],
+                raw_sha256=review["raw_sha256"],
+                issue=ms.COUNTY_CERTIFIED,
+                headers={},
+                last_success_at=review["observed_at"],
+                last_attempt_at=review["observed_at"],
+                review=review,
+            )
+            parsed = reviewed_file(raw, county, f.policy, review)
+            imports[key] = (county, record, parsed, raw)
+        target = f.store.temporary_download()
+        fetched = county_files.fetch_bundle(
+            f.source,
+            f.settings,
+            target,
+            previous=original,
+            store=f.store,
+            imports=imports,
+            offline=True,
+        )
+        archive, _ = f.store.commit_download(target, fetched.sha256)
+        f.store.write_state({**f.store.read_state(), "sha256": fetched.sha256})
+        return archive
+
+    def test_house_districts_turn_on_only_once_every_county_has_a_certified_count(self):
+        f = self.f
+        archive = self.certify_all(skip={"WALTHALL"})
+        report = f.parse(archive)
+        self.assertEqual(report["contests"], ["MS-SEN"])
+        payload, _ = f.payload(report)
+        self.assertEqual(set(payload["races"]), {"MS-SEN"})
+
+        with self.assertRaisesRegex(ValueError, "WALTHALL"):
+            set_house(f.source, f.settings, f.root, True)
+        result = set_house(f.source, f.settings, f.root, True, ["WALTHALL"])
+        self.assertEqual(result["outcome"], "house_enabled", result)
+        self.assertEqual(
+            set_house(f.source, f.settings, f.root, True, ["WALTHALL"])["outcome"], "unchanged"
+        )
+        report = f.parse(f.store.cached_archive(f.store.read_state()))
+        self.assertEqual(report["outcome"], "parsed", report)
+        self.assertEqual(report["contests"], ["MS-01", "MS-02", "MS-03", "MS-04", "MS-SEN"])
+        self.assertEqual(report["house_coverage"]["MS-03"], ["WALTHALL"])
+        self.assertEqual(report["house_coverage"]["MS-01"], [])
+        payload, _ = f.payload(report)
+        self.assertEqual(payload["races"]["MS-03"]["missing_counties"], ["Walthall"])
+        self.assertEqual(payload["races"]["MS-02"]["missing_counties"], [])
+        self.assertNotIn("missing_counties", payload["races"]["MS-SEN"])
+
+        # Polls carry the setting forward; every county is certified, so none is fetched.
+        with patch.object(county_files, "fetch_file", side_effect=AssertionError("polled")):
+            collect_source(f.source, f.settings, f.root, force_download=True)
+        manifest = ms.read_bundle(f.store.cached_archive(f.store.read_state()), f.source)[1]
+        self.assertEqual(manifest["options"], {"house": True})
+
+        set_house(f.source, f.settings, f.root, False)
+        report = f.parse(f.store.cached_archive(f.store.read_state()))
+        self.assertEqual(report["contests"], ["MS-SEN"])
+
+    def test_house_counts_need_a_certified_recap_and_the_district_candidates(self):
+        f = self.f
+        raw, review = synthetic_review(f, "NESHOBA")
+        house = {"MS-03": dict.fromkeys(ms.house_policy()["districts"]["MS-03"], 7)}
+        certified = {**review, "certified": True, "certified_on": "2026-11-04", "house": house}
+        self.assertEqual(
+            reviewed_file(raw, f.counties["NESHOBA"], f.policy, certified)["house"], house
+        )
+        for changes in (
+            dict(certified=False, certified_on=None),
+            dict(house={"MS-05": house["MS-03"]}),
+            dict(house={"MS-03": {**house["MS-03"], "Someone Else": 1}}),
+            dict(house={"MS-03": {**house["MS-03"], "Michael Guest": -1}}),
+            dict(house={}),
+        ):
+            with self.subTest(changes=changes), self.assertRaisesRegex(ValueError, "House"):
+                reviewed_file(raw, f.counties["NESHOBA"], f.policy, {**certified, **changes})
+
+    def test_certified_recap_allows_a_long_scan_that_an_ordinary_review_refuses(self):
+        f = self.f
+        writer = PdfWriter()
+        for _ in range(51):
+            writer.add_blank_page(width=100, height=100)
+        target = io.BytesIO()
+        writer.write(target)
+        raw = target.getvalue()
+        _, review = synthetic_review(f, "HINDS")
+        review.update(raw_sha256=hashlib.sha256(raw).hexdigest())
+        with self.assertRaisesRegex(ValueError, "supported contract"):
+            reviewed_file(raw, f.counties["HINDS"], f.policy, review)
+        certified = {**review, "certified": True, "certified_on": "2026-11-04"}
+        parsed = reviewed_file(raw, f.counties["HINDS"], f.policy, certified)
+        self.assertEqual(parsed["counts"], review["counts"])
 
     def test_missing_review_values_wrong_original_and_impossible_totals_are_rejected(self):
         f = self.f

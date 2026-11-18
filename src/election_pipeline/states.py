@@ -31,6 +31,9 @@ class State:
     # What the state's local results units are: "county", or "town" where a state
     # reports by town and its map draws towns (Vermont).
     local_unit: str = "county"
+    # The House races are published only once an operator turns them on (Mississippi's
+    # come from certified county recaps); until then a release has the other races only.
+    optional_house: bool = False
 
     @property
     def slug(self):
@@ -51,6 +54,17 @@ class State:
         }
 
     @property
+    def base_races(self):
+        """The races a release must have; the House is left out where it is optional."""
+        if not self.optional_house:
+            return self.races
+        return {k: v for k, v in self.races.items() if k.endswith(("-SEN", "-GOV"))}
+
+    def accepts(self, contests):
+        """A release's contests are every race, or (House optional) every base race."""
+        return set(contests) in (set(self.races), set(self.base_races))
+
+    @property
     def parser(self):
         return import_module(f"election_pipeline.parsers.{self.parser_module or self.slug}")
 
@@ -65,12 +79,13 @@ STATES = {
         "MS",
         "Mississippi",
         "ms_2026_general_all",
-        (),
+        (1, 2, 3, 4),
         ("total_votes",),
         source_page="https://www.sos.ms.gov/MSCountyElectionInfo/",
         vote_basis="covered_counties_named_candidates",
         collection_backend="county_files",
         county_feed_status=True,
+        optional_house=True,
     ),
     "AK": State(
         "AK",

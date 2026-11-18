@@ -157,6 +157,22 @@ class MonitorTests(unittest.TestCase):
         self.catalog["sources"][MS]["manual_final_counties"] = ["JACKSON"]
         self.assertEqual(self.assess(dashboard=payload("MN", MS=ms)), {})
 
+    def test_certified_county_recap_is_never_due_or_failing(self):
+        self.catalog["sources"][NC].update(enabled=False, public=False)
+        self.publish(MS)
+        old = (self.now - timedelta(days=3)).isoformat()
+        feeds = {
+            "NESHOBA": dict(collection_status="stale", issue="certified", last_success_at=old),
+            "HINDS": dict(collection_status="stale", issue="source_check_failed"),
+        }
+        ms = dict(
+            availability="available",
+            races={"MS-SEN": {}},
+            publication={"id": "county"},
+            county_feeds=feeds,
+        )
+        self.assertEqual(set(self.assess(dashboard=payload("MN", MS=ms))), {"county/MS/HINDS"})
+
     def test_enabling_a_source_adds_its_checks_and_private_ones_stay_off_the_dashboard(self):
         (self.root / "data/runs" / MS / "latest.json").unlink()
         (self.root / "data/state" / (MS + ".json")).unlink()

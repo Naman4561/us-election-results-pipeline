@@ -44,6 +44,34 @@ class ReviewRequired(ValueError):
     """A changed scan needs a checked transcription, never an OCR guess."""
 
 
+# A county's certified Official Recapitulation, filed with the Secretary of State, is its
+# final count: it replaces any earlier snapshot and the county is no longer polled.
+COUNTY_CERTIFIED = "CertifiedRecap"
+FINAL_ISSUES = {COUNTY_CERTIFIED}
+# Recaps are scans of every precinct (Hinds: 51 pages, Harrison: 32 MB).
+CERTIFIED_BYTES = 40_000_000
+CERTIFIED_PAGES = 120
+HOUSE_SHA256 = "30b07c8c0c65e1312b1998b54e51453d3499b919dbc39893ca4f7f16b293cfa6"
+
+
+def house_policy():
+    """Each district's candidates and each county's district, for certified House counts."""
+    raw = files("election_pipeline").joinpath("resources/ms_2026_house.json").read_bytes()
+    raw = raw.replace(b"\r\n", b"\n")
+    if hashlib.sha256(raw).hexdigest() != HOUSE_SHA256:
+        raise ValueError("Mississippi House contract fingerprint changed")
+    value = json.loads(raw)
+    if (
+        value["state"] != "MS"
+        or value["election_date"] != "2026-11-03"
+        or set(value["districts"]) != {"MS-01", "MS-02", "MS-03", "MS-04"}
+        or len(value["primary_district"]) != 82
+        or not set(value["primary_district"].values()) <= set(value["districts"])
+    ):
+        raise ValueError("Invalid Mississippi House contract")
+    return value
+
+
 def policy():
     raw = files("election_pipeline").joinpath("resources/ms_2026_counties.json").read_bytes()
     # Git may write CRLF when applying a patch that also introduces its LF attribute.
@@ -139,14 +167,14 @@ class VisibleText(HTMLParser):
         return " ".join(" ".join(self.parts).split())
 
 
-def pdf_text(raw):
+def pdf_text(raw, *, max_bytes=8_000_000, max_pages=20):
     from pypdf import PdfReader
 
-    if not raw.startswith(b"%PDF-") or len(raw) > 8_000_000:
+    if not raw.startswith(b"%PDF-") or len(raw) > max_bytes:
         raise ValueError("County report is not a bounded PDF")
     try:
         reader = PdfReader(io.BytesIO(raw), strict=True)
-        if reader.is_encrypted or not 1 <= len(reader.pages) <= 20:
+        if reader.is_encrypted or not 1 <= len(reader.pages) <= max_pages:
             raise ValueError("Encrypted or excessive county report pages")
         parts = []
         for page in reader.pages:
@@ -460,7 +488,8 @@ def read_county(raw, county, contract=None):
 
 
 def read_snapshot(raw, county, contract, record):
-    if county.get("url"):
+    certified = record.get("issue") == COUNTY_CERTIFIED
+    if county.get("url") and not certified:
         if record.get("url") != county["url"]:
             raise ValueError("Automatic county source identity changed")
         if not record.get("review"):
@@ -473,10 +502,11 @@ def read_snapshot(raw, county, contract, record):
     if (
         record.get("url") != review["source_url"]
         or record.get("status") != "stale"
-        or record.get("issue") != "ManualSnapshot"
+        or record.get("issue")
+        != (COUNTY_CERTIFIED if review.get("certified") else "ManualSnapshot")
         or stamp(record.get("last_success_at")) != stamp(review.get("observed_at"))
     ):
-        raise ValueError("Imported county must remain labelled as a manual snapshot")
+        raise ValueError("Imported county must keep its reviewed-import label")
     return parsed
 
 
@@ -487,7 +517,7 @@ def checked_manifest(archive, source, contract):
         or len({m.filename for m in entries}) != len(entries)
         or sum(m.file_size for m in entries) > 134217728
         or any(
-            m.file_size > (1_000_000 if m.filename == source.primary_filename else 8_000_000)
+            m.file_size > (1_000_000 if m.filename == source.primary_filename else CERTIFIED_BYTES)
             for m in entries
         )
     ):
@@ -502,6 +532,9 @@ def checked_manifest(archive, source, contract):
         or (d.get("state"), d.get("election_date")) != (source.state, source.election_date)
         or d.get("source_id") != source.source_id
         or d.get("policy_sha256") not in allowed
+        or not isinstance(d.get("options", {}), dict)
+        or not set(d.get("options", {})) <= {"house"}
+        or type(d.get("options", {}).get("house", False)) is not bool
     ):
         raise ValueError("Wrong county bundle identity or unapproved policy")
     stamp(d.get("checked_at"))
@@ -516,7 +549,8 @@ def county_bytes(archive, county, record, external):
     if raw:
         raise ValueError("A version 3 bundle keeps county reports outside the archive")
     path = member_path(Path(archive.filename).parent, record.get("raw_sha256"))
-    if path.is_symlink() or not path.is_file() or path.stat().st_size > 8_000_000:
+    limit = CERTIFIED_BYTES if record.get("issue") == COUNTY_CERTIFIED else 8_000_000
+    if path.is_symlink() or not path.is_file() or path.stat().st_size > limit:
         raise ValueError("County report is missing from the member store")
     return path.read_bytes()
 
@@ -587,7 +621,11 @@ def read_bundle(archive_path, source):
             else:
                 if stamp(r.get("last_attempt_at")) > checked:
                     raise ValueError("Attempt follows manifest")
-                if county.get("url") and r.get("url") != county["url"]:
+                if (
+                    county.get("url")
+                    and r.get("url") != county["url"]
+                    and r.get("issue") != COUNTY_CERTIFIED
+                ):
                     raise ValueError("County source identity mismatch")
                 if (status == "current") != (r.get("issue") is None):
                     raise ValueError("County status disagrees with its issue")
@@ -626,9 +664,15 @@ AUXILIARY = {
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
+    from election_pipeline.states import state_adapter
+
     contract, manifest, accepted = read_bundle(archive_path, source)
     if not accepted:
         raise ValueError("No accepted county Senate counts are available")
+    # House rows come only from certified county recaps, once the operator turns them on
+    # (`deploy ms-house --enable`, which records it in the bundle and checks coverage).
+    house_on = manifest.get("options", {}).get("house") is True
+    districts = house_policy()["districts"] if house_on else {}
     rows, health, issues = [], [], {}
     for county in contract["counties"]:
         record = manifest["counties"][county["key"]]
@@ -659,7 +703,9 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 "write_in_votes": parsed.get("write_in_votes"),
                 "write_in_label": parsed.get("write_in_label"),
                 "issue": (
-                    "manual_snapshot"
+                    "certified"
+                    if record.get("issue") == COUNTY_CERTIFIED
+                    else "manual_snapshot"
                     if record.get("issue") == "ManualSnapshot"
                     else "review_required"
                     if (record.get("issue") or "").startswith("ReviewRequired:")
@@ -669,7 +715,11 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 ),
             }
         )
-        if county.get("url") and record["status"] != "current":
+        if (
+            county.get("url")
+            and record["status"] != "current"
+            and record.get("issue") != COUNTY_CERTIFIED
+        ):
             issues[county["key"]] = record.get("issue") or record["status"]
         for name, value in parsed.get("counts", {}).items():
             rows.append(
@@ -686,8 +736,41 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                     "precincts_total": parsed["precincts_total"],
                 }
             )
+        if house_on and record.get("issue") == COUNTY_CERTIFIED:
+            for contest, votes in parsed.get("house", {}).items():
+                for name, value in votes.items():
+                    rows.append(
+                        {
+                            "unit_type": "county",
+                            "county": county["key"],
+                            "contest_id": contest,
+                            "source_contest_id": contest,
+                            "source_candidate_id": name,
+                            "choice": name,
+                            "choice_party": districts[contest][name],
+                            "total_votes": value,
+                            "precincts_reporting": None,
+                            "precincts_total": None,
+                        }
+                    )
     # Statewide totals are the sum of accepted counties; the state publishes none.
-    finish(rows, source, settings, output, stats, reference=reference)
+    adapter = state_adapter("MS")
+    races = adapter.races if house_on else adapter.base_races
+    finish(rows, source, settings, output, stats, reference=reference, races=races)
+    if house_on:
+        house = {r["contest_id"]: set() for r in rows if r["contest_id"] != "MS-SEN"}
+        for row in rows:
+            if row["contest_id"] in house:
+                house[row["contest_id"]].add(row["county"])
+        # A district is partial while a county mapped to it has no certified House count.
+        stats["house_coverage"] = {
+            contest: sorted(
+                key
+                for key, primary in house_policy()["primary_district"].items()
+                if primary == contest and key not in counties
+            )
+            for contest, counties in sorted(house.items())
+        }
     stats["reference_comparison"]["scope"] = (
         "Three named Senate candidates across accepted county snapshots only; "
         "not a complete statewide comparison and not a write-in comparison."
@@ -703,7 +786,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         counties_with_counts=len(accepted),
         county_feed_issues=issues,
         coverage_complete=len(accepted) == 82
-        and all(r["collection_status"] == "current" for r in health),
+        and all(r["collection_status"] == "current" or r["issue"] == "certified" for r in health),
         vote_basis="covered_counties_named_candidates",
         warnings=[
             f"Only {len(accepted)} of 82 counties have accepted counts; "
@@ -712,7 +795,15 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             "write-in tallies and status are stored separately.",
             "All precincts reporting does not mean all absentee/affidavit ballots are counted.",
         ]
-        + (["Some configured county sources are stale or unavailable."] if issues else []),
+        + (["Some configured county sources are stale or unavailable."] if issues else [])
+        + (
+            [
+                "House districts are summed from certified county recaps only; "
+                "a district missing a county is partial."
+            ]
+            if house_on
+            else []
+        ),
     )
 
 
@@ -783,7 +874,19 @@ def parse_recap(archive_path, name, source, settings, output, stats, reference=N
 
     rows = [result("", c, totals[c]) for c in candidates]
     rows += [result(k, c, v) for (k, c), v in sorted(counts.items())]
-    finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
+    # The state's recap is read for the Senate only; House districts are not taken from it.
+    from election_pipeline.states import state_adapter
+
+    finish(
+        rows,
+        source,
+        settings,
+        output,
+        stats,
+        reference=reference,
+        reconcile=True,
+        races=state_adapter("MS").base_races,
+    )
     stamp = downloaded.isoformat()
     health = [
         {

@@ -581,3 +581,27 @@ class PublicationDatabaseTests(unittest.TestCase):
                     ) AS ok
                 """).fetchone()["ok"]
             )
+
+
+class ContestContractTests(unittest.TestCase):
+    def metadata(self, state, contests):
+        return {
+            "release_id": 1,
+            "election_date": "2026-11-03",
+            "state": state,
+            "dataset": "election_results",
+            "parser_report": {"contests": contests},
+        }
+
+    def test_an_optional_house_release_has_every_race_or_every_other_race(self):
+        full = ["MS-01", "MS-02", "MS-03", "MS-04", "MS-SEN"]
+        for contests in (["MS-SEN"], full):
+            variables = publication.build_variables(self.metadata("MS", contests))
+            self.assertEqual(variables["races"], contests)
+        for contests in (["MS-01", "MS-SEN"], full[::-1], [], None):
+            with self.subTest(contests=contests), self.assertRaisesRegex(ValueError, "contract"):
+                publication.build_variables(self.metadata("MS", contests))
+        # A state without an optional House still needs every race.
+        senate_only = [c for c in sorted(CONTESTS.values()) if c.endswith("-SEN")]
+        with self.assertRaisesRegex(ValueError, "contract"):
+            publication.build_variables(self.metadata("NC", senate_only))

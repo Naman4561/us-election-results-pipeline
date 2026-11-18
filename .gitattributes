@@ -12,3 +12,4 @@ src/election_pipeline/resources/alaska-issuers.pem text eol=lf
 src/election_pipeline/resources/florida-root.pem text eol=lf
 src/election_pipeline/resources/ak_2026_scope.json text eol=lf
 src/election_pipeline/resources/ms_2026_counties.json text eol=lf
+src/election_pipeline/resources/ms_2026_house.json text eol=lf

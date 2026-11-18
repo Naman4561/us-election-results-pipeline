@@ -8,8 +8,16 @@ from election_pipeline.settings import validate_url
 
 
 def reviewed_file(raw, county, contract, review):
-    from election_pipeline.parsers.ms import VisibleText, local_stamp, pdf_text, stamp
+    from election_pipeline.parsers.ms import (
+        CERTIFIED_BYTES,
+        CERTIFIED_PAGES,
+        VisibleText,
+        local_stamp,
+        pdf_text,
+        stamp,
+    )
 
+    certified = isinstance(review, dict) and review.get("certified", False)
     if not isinstance(review, dict) or (
         review.get("state") != contract["state"]
         or review.get("county") != county["key"]
@@ -19,14 +27,44 @@ def reviewed_file(raw, county, contract, review):
         or review.get("countywide_report_confirmed") is not True
         or not isinstance(review.get("reviewed_by"), str)
         or not review["reviewed_by"].strip()
-        or len(raw) > 8_000_000
+        or type(certified) is not bool
+        or len(raw) > (CERTIFIED_BYTES if certified else 8_000_000)
         or not raw.startswith((b"%PDF-", b"<!DOCTYPE", b"<!doctype", b"<html"))
     ):
         raise ValueError("Review must identify the original countywide official report")
-    text = pdf_text(raw) if raw.startswith(b"%PDF-") else VisibleText(raw.decode("utf-8-sig")).text
-    if len(text.strip()) > 80 and (
+    if certified:
+        # The county election commission's signed Official Recapitulation: a scanned PDF.
+        if not raw.startswith(b"%PDF-"):
+            raise ValueError("A certified county recap is the commission's PDF")
+        certified_on = review.get("certified_on")
+        if not isinstance(certified_on, str) or not (
+            date(2026, 11, 3)
+            <= date.fromisoformat(certified_on)
+            <= stamp(review["observed_at"]).date()
+        ):
+            raise ValueError("A certified county recap needs its certification date")
+    text = (
+        pdf_text(
+            raw,
+            max_bytes=CERTIFIED_BYTES if certified else 8_000_000,
+            max_pages=CERTIFIED_PAGES if certified else 20,
+        )
+        if raw.startswith(b"%PDF-")
+        else VisibleText(raw.decode("utf-8-sig")).text
+    )
+    # A recap's text layer, where it has one, is OCR of the scan and often garbled; it is
+    # checked only when it reads cleanly enough to name every candidate. The scan itself is
+    # what the reviewer read, and the review is bound to its exact bytes.
+    readable = len(text.strip()) > 80 and (
+        not certified or all(n in text for n in contract["candidates"])
+    )
+    if readable and (
         not re.search(r"\b" + re.escape(county["name"]) + r"\b", text, re.I)
-        or not re.search(r"(?:November|Nov\.?)\s+0?3,?\s+2026|11/0?3/2026", text, re.I)
+        or not re.search(
+            r"(?:November|Nov\.?)\s+0?3,?\s+2026|11/0?3/2026|3rd\s+day\s+of\s+November,?\s+2026",
+            text,
+            re.I,
+        )
         or not all(n in text for n in contract["candidates"])
     ):
         raise ValueError("Readable original disagrees with reviewed county/election identity")
@@ -41,6 +79,25 @@ def reviewed_file(raw, county, contract, review):
         or any(type(n) is not int or not 0 <= n <= 10_000_000 for n in counts.values())
     ):
         raise ValueError("Invalid reviewed candidate counts")
+    house = review.get("house")
+    if house is not None:
+        # A certified recap's TOTAL for each House district the county votes in.
+        from election_pipeline.parsers.ms import house_policy
+
+        districts = house_policy()["districts"]
+        if (
+            not certified
+            or not isinstance(house, dict)
+            or not house
+            or not set(house) <= set(districts)
+            or any(
+                not isinstance(votes, dict)
+                or set(votes) != set(districts[contest])
+                or any(type(n) is not int or not 0 <= n <= 10_000_000 for n in votes.values())
+                for contest, votes in house.items()
+            )
+        ):
+            raise ValueError("Invalid reviewed House counts")
     write_in = review.get("write_in_votes")
     printed = review.get("reported_candidate_vote_total")
     if write_in is not None and (
@@ -88,6 +145,7 @@ def reviewed_file(raw, county, contract, review):
         report_date=generated.date().isoformat() if generated else reported_date,
         precincts_reporting=reporting,
         precincts_total=total,
+        house=house or {},
     )
 
 

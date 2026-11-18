@@ -1336,5 +1336,33 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(json.loads(self.path.read_text()), old)
 
 
+class DashboardCoverageCheckTests(unittest.TestCase):
+    def check(self, races):
+        payload = {
+            "mode": "published",
+            "states": {
+                "MS": {
+                    "availability": "available",
+                    "publication": {"publication_id": "p", "status": "unofficial"},
+                    "races": dict.fromkeys(races, {}),
+                }
+            },
+        }
+        response = MagicMock()
+        response.__enter__.return_value = io.BytesIO(json.dumps(payload).encode())
+        with patch.object(dashboard.urllib.request, "urlopen", return_value=response):
+            return dashboard.check("http://127.0.0.1:8001", {"MS": ["MS-SEN", *HOUSE]})
+
+    def test_a_state_with_an_optional_house_may_serve_its_senate_alone(self):
+        self.check(["MS-SEN"])
+        self.check(["MS-SEN", *HOUSE])
+        for races in (["MS-SEN", "MS-01"], ["MS-01"]):
+            with self.subTest(races=races), self.assertRaisesRegex(ValueError, "missing"):
+                self.check(races)
+
+
+HOUSE = ["MS-01", "MS-02", "MS-03", "MS-04"]
+
+
 if __name__ == "__main__":
     unittest.main()

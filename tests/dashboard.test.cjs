@@ -119,8 +119,21 @@ test("national/state map navigation and coverage statuses", async (t) => {
       .querySelector("#result-content")
       .textContent.includes("generation time is unknown"),
   );
-  delete payload.states.MS.county_feeds.HINDS.acquisition;
+  // A certified county recap is final: labelled as such and not drawn as stale.
   delete payload.states.MS.county_feeds.HINDS.source_note;
+  payload.states.MS.county_feeds.HINDS.issue = "certified";
+  payload.states.MS.county_feeds.HINDS.acquisition = "certified";
+  click("#refresh");
+  await settle();
+  assert(d.querySelector("#result-content").textContent.includes("CERTIFIED"));
+  assert(
+    !d.querySelector("#result-content").textContent.includes("STALE SOURCE"),
+  );
+  assert.equal(
+    d.querySelector('path[data-id="HINDS"]').dataset.stale,
+    undefined,
+  );
+  delete payload.states.MS.county_feeds.HINDS.acquisition;
   payload.states.MS.county_feeds.HINDS.issue = "source_check_failed";
   delete payload.states.MS.races["MS-SEN"].counties.HINDS;
   payload.states.MS.county_feeds.HINDS.collection_status = "unavailable";
@@ -140,6 +153,29 @@ test("national/state map navigation and coverage statuses", async (t) => {
       .querySelector("#result-content")
       .textContent.includes("has no governor election"),
   );
+  // A House district summed from certified county recaps is partial while one is missing.
+  payload.national.coverage.MS.push("MS-03");
+  payload.states.MS.races["MS-03"] = {
+    name: "U.S. House · MS-03",
+    stats: payload.states.MS.races["MS-SEN"].stats,
+    counties: {},
+    missing_counties: ["Walthall"],
+  };
+  click("#refresh");
+  await settle();
+  click('[data-office="house"]');
+  assert.equal(status("MS-03"), "partial");
+  click('path[data-id="MS-03"]');
+  assert.equal(d.querySelector("#result-title").textContent, "MS-03");
+  assert(
+    d
+      .querySelector("#result-content")
+      .textContent.includes("No certified recap yet for Walthall"),
+  );
+  payload.national.coverage.MS.pop();
+  delete payload.states.MS.races["MS-03"];
+  click("#refresh");
+  await settle();
   click("#national");
   click('[data-office="senate"]');
   assert(

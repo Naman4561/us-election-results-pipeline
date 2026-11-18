@@ -198,10 +198,15 @@ def build_variables(metadata):
     }
     if metadata["dataset"] == "election_results":
         state = state_adapter(metadata["state"])
-        if metadata.get("parser_report", {}).get("contests") != sorted(state.races):
+        contests = metadata.get("parser_report", {}).get("contests")
+        if (
+            not isinstance(contests, list)
+            or contests != sorted(contests)
+            or not state.accepts(contests)
+        ):
             raise ValueError("Ingestion release has an invalid contest contract")
         variables.update(
-            races=sorted(state.races),
+            races=contests,
             methods=list(state.methods[1:]),
             county_reconciliation=(
                 "none"

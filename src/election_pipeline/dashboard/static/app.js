@@ -138,19 +138,19 @@ function statusFor(code, race, county = null) {
   const stats = county
     ? contest?.counties?.[county]?.stats[view.method]
     : contest?.stats[view.scope === "US" ? "total_votes" : view.method];
-  if (
-    !county &&
-    state.publication &&
-    state.county_collection &&
-    !state.county_collection.complete
-  )
+  // A House district from certified county recaps is partial while a county is missing.
+  const incomplete = contest?.missing_counties
+    ? contest.missing_counties.length > 0
+    : !state.county_collection?.complete;
+  if (!county && state.publication && state.county_collection && incomplete)
     return { status: "partial", stats };
   if (!state.publication || !stats || stats.total == null || stats.total === 0)
     return { status: "awaiting_votes", stats };
   return {
     status: stats.status === "tie" ? "tie" : stats.leader || "UNKNOWN",
     stats,
-    staleCounty: feed?.collection_status === "stale",
+    staleCounty:
+      feed?.collection_status === "stale" && feed.acquisition !== "certified",
   };
 }
 async function loadGeometry(code) {
@@ -546,11 +546,21 @@ function renderStatePanel() {
   const total = element("div", undefined, "total");
   const firstChoice = state.vote_basis === "first_choice_listed_candidates";
   const countyBasis = state.vote_basis === "covered_counties_named_candidates";
-  if (partial && !view.county)
+  if (contest?.missing_counties && !view.county)
     target.append(
       element(
         "p",
-        `${partial.with_results} of ${partial.expected} counties have accepted counts; ${partial.current} sources currently confirmed, ${partial.manual || 0} manual snapshots, ${partial.stale - (partial.manual || 0)} stale, ${partial.unavailable} unavailable. This is a partial county aggregate, not a statewide total.`,
+        contest.missing_counties.length
+          ? `PARTIAL · Summed from certified county recaps. No certified recap yet for ${contest.missing_counties.join(", ")}.`
+          : "Summed from every county's certified recap.",
+        "empty",
+      ),
+    );
+  else if (partial && !view.county)
+    target.append(
+      element(
+        "p",
+        `${partial.with_results} of ${partial.expected} counties have accepted counts; ${partial.certified || 0} certified county recaps, ${partial.current} sources currently confirmed, ${partial.manual || 0} manual snapshots, ${partial.stale - (partial.manual || 0) - (partial.certified || 0)} stale, ${partial.unavailable} unavailable. This is a partial county aggregate, not a statewide total.`,
         "empty",
       ),
     );
@@ -562,7 +572,7 @@ function renderStatePanel() {
         "empty",
       ),
     );
-  if (countyBasis)
+  if (countyBasis && !contest?.missing_counties)
     target.append(
       element(
         "p",
@@ -574,12 +584,14 @@ function renderStatePanel() {
     target.append(
       element(
         "p",
-        (feed.acquisition === "manual"
-          ? "MANUAL SNAPSHOT · A new reviewed import is required to update these counts. "
-          : feed.collection_status === "stale"
-            ? "STALE SOURCE · Last accepted counts retained. "
-            : "") +
-          (feed.acquisition === "manual"
+        (feed.acquisition === "certified"
+          ? "CERTIFIED · The county election commission's Official Recapitulation, filed with the Secretary of State. "
+          : feed.acquisition === "manual"
+            ? "MANUAL SNAPSHOT · A new reviewed import is required to update these counts. "
+            : feed.collection_status === "stale"
+              ? "STALE SOURCE · Last accepted counts retained. "
+              : "") +
+          (feed.acquisition === "certified" || feed.acquisition === "manual"
             ? "Imported report observed: "
             : "Last successful check: ") +
           date(feed.last_success_at) +

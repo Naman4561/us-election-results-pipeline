@@ -124,6 +124,53 @@ reviewed report is its last before the state certifies (for example, its officia
 report), and a later reviewed import is still possible.
 Automatic stale or unavailable sources alert separately; uncollected counties are not operational failures.
 
+## Certified county recaps
+
+Each county election commission certifies within ten days of the election and files a
+signed **Official Recapitulation** (precinct columns and a TOTAL column) with the Secretary
+of State, which posts the scans at
+`https://www.sos.ms.gov/elections/electionresults/2026General/<County> County.pdf` (a few
+as `<County>.pdf`). A county takes its recap through the same `import-county` command,
+with `"certified": true` and `"certified_on"` (the date on the commission's signature
+block) in its review:
+
+- Any county may take it, including an automatic one whose feed was accepted, and the
+  review names the Secretary of State's URL, not the county's configured one.
+- It is the county's final count: the record is labelled `CertifiedRecap` (the dashboard
+  shows **CERTIFIED**), the county is no longer polled, the monitor expects nothing more,
+  and only another certified recap can replace it.
+- Recaps are scans of every precinct, so they may be up to 40 MB and 120 pages. Their
+  text layer, where present, is OCR of the scan; it is checked against the county and
+  election only when it reads cleanly enough to name every candidate. The review is bound
+  to the file's SHA-256 either way.
+
+The reviewer reads the three Senate candidates from the recap's TOTAL column, never from
+precinct columns, and leaves write-ins null when the recap prints none.
+
+### House districts
+
+A certified review may also carry `"house"`: the TOTAL of each congressional district the
+recap lists, `{"MS-03": {"Michael Guest": n, "Michael A. Chiaradio": n, "Erik Kiehle": n}}`.
+Each district's candidates, and the district covering most of each county, are in
+`resources/ms_2026_house.json`; a split county's recap lists both of its districts.
+
+The districts are published only once turned on, after the recaps are in:
+
+```bash
+deploy ms-house --enable --allow-missing WALTHALL
+```
+
+It refuses while any county other than those named lacks a certified House count, or while
+a district has no county at all. It records the setting in the county bundle, which every
+poll carries forward, and the next run publishes MS-01 to MS-04 as sums of certified
+counties. A district with a county still missing is labelled partial on the dashboard,
+naming that county. `--disable` returns to the Senate alone. Until it is turned on, and
+for a release made before it, a Mississippi publication has the Senate only; every check
+(publication contract, dashboard coverage, accuracy) accepts either set.
+
+The Secretary of State's statewide recap is still read for the Senate only, so certifying
+Mississippi from it publishes the Senate alone.
+
 ## Certification
 
 When the Secretary of State certifies, its recap sheet (in 2024,

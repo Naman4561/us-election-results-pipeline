@@ -35,31 +35,44 @@ def fetch_bundle(
     force_download=False,
     imports=None,
     offline=False,
+    options=None,
 ):
+    """``options``: operator settings recorded in the bundle (Mississippi's ``house``);
+    by default the previous bundle's are carried forward."""
     settings = source.effective_settings(settings)
     adapter = state_adapter(source.state)
     parser = adapter.parser
     contract = parser.validate_source(source)
     old = {}
     scheduling = {}
+    carried = {}
     if previous is not None:
         # Revalidate cached bytes under the current parser before they can be fallback data.
         try:
             old = parser.previous_counties(previous, source)
             with zipfile.ZipFile(previous) as archive:
-                scheduling = json.loads(archive.read(source.primary_filename))["counties"]
+                earlier = json.loads(archive.read(source.primary_filename))
+            scheduling = earlier["counties"]
+            carried = earlier.get("options", {})
         except (ValueError, OSError, KeyError, zipfile.BadZipFile):
             old = {}
+    options = carried if options is None else options
     old.update(imports or {})
-    configured = [c for c in contract["counties"] if c.get("url")]
+    if not any(c.get("url") for c in contract["counties"]):
+        raise FetchFailure("No county feeds configured", retryable=False)
+    # A county whose accepted record is final (a certified recap) is never polled again.
+    final = {
+        key
+        for key, cached in old.items()
+        if cached[1].get("issue") in getattr(parser, "FINAL_ISSUES", set())
+    }
+    configured = [c for c in contract["counties"] if c.get("url") and c["key"] not in final]
     configured.sort(
         key=lambda c: scheduling.get(c["key"], {}).get("retry_priority_at")
         or scheduling.get(c["key"], {}).get("last_attempt_at")
         or "1970"
     )
     budget_lock, budget = Lock(), [min(32 * 1024 * 1024, settings.max_download_bytes)]
-    if not configured:
-        raise FetchFailure("No county feeds configured", retryable=False)
     started = time.monotonic()
     components, paths = [], {}
     records = {
@@ -91,7 +104,7 @@ def fetch_bundle(
             key = county["key"]
             path = directory / county["member"]
             cached = old.get(key)
-            if cached and (offline or not county.get("url")):
+            if cached and (offline or not county.get("url") or key in final):
                 records[key] = dict(cached[1])
                 path.write_bytes(keep(cached[3]))
             else:
@@ -226,7 +239,7 @@ def fetch_bundle(
             }
             return key, record, accepted_path, component
 
-        with ThreadPoolExecutor(max_workers=min(3, len(configured))) as pool:
+        with ThreadPoolExecutor(max_workers=max(1, min(3, len(configured)))) as pool:
             futures = (
                 [] if offline else [pool.submit(county_fetch, county) for county in configured]
             )
@@ -248,6 +261,8 @@ def fetch_bundle(
             "checked_at": utc_now(),
             "counties": records,
         }
+        if options:
+            manifest["options"] = options
         manifest_path = directory / source.primary_filename
         manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
         paths[source.primary_filename] = manifest_path
