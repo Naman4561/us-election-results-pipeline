@@ -242,6 +242,9 @@ def assess(prod, config, now):
                 issues[f"dashboard/{code}"] = "State dashboard has no approved publication"
             final = set(catalog["sources"][name].get("manual_final_counties", []))
             for county, record in state.get("county_feeds", {}).items():
+                if record.get("issue") == "certified":
+                    # A certified county recap is final: nothing is due or overdue.
+                    continue
                 if record.get("issue") == "manual_snapshot":
                     # A county whose last report before certification is in is never due.
                     if (

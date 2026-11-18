@@ -70,6 +70,19 @@ def main():
         "county-final",
         help="A Mississippi county's manual snapshot is its last before certification",
     ).add_argument("--county", required=True)
+    house = sub.add_parser(
+        "ms-house", help="Turn Mississippi's House districts (certified county recaps) on/off"
+    )
+    switch = house.add_mutually_exclusive_group(required=True)
+    switch.add_argument("--enable", action="store_true")
+    switch.add_argument("--disable", action="store_true")
+    house.add_argument(
+        "--allow-missing",
+        action="append",
+        default=[],
+        metavar="COUNTY",
+        help="A county without a certified recap yet; its district is shown as partial",
+    )
     start = sub.add_parser("start-dashboard", help="A private candidate from the release")
     start.add_argument("--source", action="append", default=[], help="Also make public")
     activate = sub.add_parser("activate")
@@ -149,6 +162,8 @@ def main():
             )
         elif action == "county-final":
             result = control.county_final(path, args.county)
+        elif action == "ms-house":
+            result = control.ms_house(path, args.enable, args.allow_missing, prod, config)
         elif action == "start-dashboard":
             result = control.start_dashboard(path, args.source, prod, config)
         elif action == "activate":

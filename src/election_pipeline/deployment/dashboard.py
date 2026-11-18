@@ -25,13 +25,17 @@ def check(url, expected):
         payload = json.load(response)
     if payload.get("mode") != "published" or set(payload.get("states", {})) != set(expected):
         raise ValueError("Candidate dashboard has incorrect coverage")
+    from election_pipeline.states import STATES
+
     for code, entry in expected.items():
         state = payload["states"][code]
         publication = state.get("publication") or {}
+        races = set(state.get("races", {}))
         if (
             state.get("availability") != "available"
             or not publication.get("publication_id")
-            or set(state.get("races", {})) != set(entry)
+            # A state whose House is optional may serve its other races alone.
+            or not (races == set(entry) or (races <= set(entry) and STATES[code].accepts(races)))
         ):
             raise ValueError(f"Candidate dashboard is missing published results for {code}")
         if publication.get("status") not in ("test", "unofficial", "official"):

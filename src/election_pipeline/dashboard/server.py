@@ -142,6 +142,9 @@ def make_payload(
             if row[method] is not None and (type(row[method]) is not int or row[method] < 0):
                 raise ValueError("Invalid published contest vote count")
         totals[row["contest_id"]].append(row)
+    if adapter.optional_house and not set(totals) - adapter.base_races.keys():
+        # The House is not turned on for this publication: serve the other races alone.
+        races_config = {k: v for k, v in races_config.items() if k in adapter.base_races}
     if metadata is not None and (
         set(totals) != set(races_config)
         or (adapter.county_results and set(by_race) != set(races_config))
@@ -212,7 +215,9 @@ def with_county_feeds(payload, geography, rows, now=None):
         row["name"] = names[key]["name"]
         row["source_note"] = notes.get(key)
         row["acquisition"] = (
-            "manual"
+            "certified"
+            if row.get("issue") == "certified"
+            else "manual"
             if row.get("issue") == "manual_snapshot"
             else "automatic"
             if status != "not_collected"
@@ -233,13 +238,29 @@ def with_county_feeds(payload, geography, rows, now=None):
         records[key] = row
     if set(records) != set(names):
         raise ValueError("Published county collection register is incomplete")
-    for contest in payload["races"].values():
-        if set(contest["counties"]) != accepted:
-            raise ValueError("County result/provenance coverage disagrees")
+    adapter = state_adapter(payload["state"])
+    for identity, contest in payload["races"].items():
+        counties = set(contest["counties"])
+        if identity in adapter.base_races:
+            if counties != accepted:
+                raise ValueError("County result/provenance coverage disagrees")
+            continue
+        # A House district comes from certified county recaps only: a subset of the
+        # accepted counties. It is partial while a county mapped to it has no count.
+        certified = {k for k, r in records.items() if r.get("issue") == "certified"}
+        if not counties <= certified:
+            raise ValueError("House district counts must come from certified county recaps")
+        primary = adapter.parser.house_policy()["primary_district"]
+        contest["missing_counties"] = sorted(
+            names[key]["name"]
+            for key, district in primary.items()
+            if district == identity and key not in counties
+        )
     counts = {
         s: sum(r["collection_status"] == s for r in records.values())
         for s in ("current", "stale", "unavailable", "not_collected")
     }
+    certified = sum(r["acquisition"] == "certified" for r in records.values())
     return {
         **payload,
         "county_feeds": records,
@@ -248,8 +269,10 @@ def with_county_feeds(payload, geography, rows, now=None):
             "configured": len(names) - counts["not_collected"],
             "with_results": len(accepted),
             "manual": sum(r["acquisition"] == "manual" for r in records.values()),
+            "certified": certified,
             **counts,
-            "complete": len(accepted) == len(names) and not counts["stale"],
+            # A certified recap is final, so it counts as complete coverage, not stale.
+            "complete": len(accepted) == len(names) and counts["stale"] == certified,
             "basis": "named_candidates_from_collected_counties",
         },
     }
@@ -266,7 +289,7 @@ def demo_methods(total, methods):
 
 def demo_payload(geography, state="NC"):
     """Synthetic fixtures, explicitly labelled; never a database fallback."""
-    races_config, methods = state_adapter(state).races, state_adapter(state).methods
+    races_config, methods = state_adapter(state).base_races, state_adapter(state).methods
     rows = []
     for feature in geography["counties"] or (
         [geography["outline"]] if not state_adapter(state).county_results else []

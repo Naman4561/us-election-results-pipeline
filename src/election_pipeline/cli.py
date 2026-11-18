@@ -114,6 +114,15 @@ def main(argv: list[str] | None = None) -> int:
         else:
             command.add_argument("--output", type=Path, required=True)
 
+    house = commands.add_parser("ms-house", help="Turn Mississippi's House districts on or off")
+    house.add_argument("--config", type=Path, default=Path("config/sources.toml"))
+    house.add_argument("--source", required=True)
+    house.add_argument("--data-dir", type=Path, default=Path("data"))
+    switch = house.add_mutually_exclusive_group(required=True)
+    switch.add_argument("--enable", action="store_true")
+    switch.add_argument("--disable", action="store_true")
+    house.add_argument("--allow-missing", action="append", default=[], metavar="COUNTY")
+
     args = parser.parse_args(argv)
     try:
         settings, sources = load_config(args.config)
@@ -146,6 +155,14 @@ def main(argv: list[str] | None = None) -> int:
                     args.file,
                     args.review_json,
                 )
+            print(json.dumps(result, sort_keys=True))
+            return 0
+        if args.command == "ms-house":
+            from election_pipeline.county_import import set_house
+
+            result = set_house(
+                sources[args.source], settings, args.data_dir, args.enable, args.allow_missing
+            )
             print(json.dumps(result, sort_keys=True))
             return 0
         if args.command == "run":

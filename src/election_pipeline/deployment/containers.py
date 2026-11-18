@@ -151,6 +151,27 @@ def import_county(image, source_id, prod, config, county, report, review):
         if not path.is_file():
             raise ValueError("County input must be a file within DATA_DIR")
         paths.append("/app/data/" + path.relative_to(root).as_posix())
+    return offline_command(
+        image,
+        prod,
+        config,
+        [
+            "import-county",
+            "--source",
+            source_id,
+            "--county",
+            county,
+            "--file",
+            paths[0],
+            "--review-json",
+            paths[1],
+        ],
+    )
+
+
+def offline_command(image, prod, config, arguments):
+    """Run a pipeline command on the data mount, with no database credentials or network."""
+    root = Path(prod["DATA_DIR"]).resolve()
     name = "election-import-" + uuid.uuid4().hex
     args = [
         *base_args(name, image, config, network=False),
@@ -161,17 +182,9 @@ def import_county(image, source_id, prod, config, county, report, review):
         "python",
         "-m",
         "election_pipeline",
-        "import-county",
-        "--source",
-        source_id,
-        "--county",
-        county,
+        *arguments,
         "--data-dir",
         "/app/data",
-        "--file",
-        paths[0],
-        "--review-json",
-        paths[1],
     ]
     try:
         return command(args, timeout=120)

@@ -79,19 +79,25 @@ def write_groups(path, groups, dimensions, measures):
             writer.writerow((*key, *("" if v is None else v for v in values)))
 
 
-def finish(rows, source, settings, output, stats, *, reference=None, reconcile=False, units=()):
+def finish(
+    rows, source, settings, output, stats, *, reference=None, reconcile=False, units=(), races=None
+):
     """Check rows against the state's races and methods; write the shared outputs.
 
     ``reconcile``: the source publishes statewide and county rows that must agree exactly.
     Without it, published statewide rows are authoritative (county detail may be partial
     or privacy-masked), and a contest without statewide rows is summed from its counties.
+    ``races``: the release's races, where the state accepts more than one set (see
+    ``State.accepts``); by default every race of the state.
     """
     from election_pipeline.parsing import reference_check
     from election_pipeline.states import state_adapter
 
     adapter = state_adapter(source.state)
     methods = adapter.methods[1:]
-    wanted = adapter.races
+    wanted = adapter.races if races is None else races
+    if not adapter.accepts(wanted):
+        raise ValueError("Unsupported contest set for this state")
     keys, names, reported, county, precinct = set(), set(), {}, {}, {}
     coverage = defaultdict(set)
     if not rows or len(rows) > settings.max_csv_rows:

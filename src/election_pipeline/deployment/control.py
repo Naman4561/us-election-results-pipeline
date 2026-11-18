@@ -939,6 +939,29 @@ def import_county(path, county, report, review, prod, config):
         )
 
 
+def ms_house(path, enabled, allow_missing, prod, config):
+    """Turn Mississippi's House districts on (checked) or off, offline in the release image."""
+    from election_pipeline.states import STATES
+
+    name = STATES["MS"].source_id
+    with catalog.locked(path):
+        value = catalog.read(path)
+        entry = value["sources"][name]
+        if not entry["enabled"] or not entry["public"]:
+            raise ValueError("Mississippi must be enabled and public")
+        arguments = ["--enable" if enabled else "--disable"]
+        for county in allow_missing:
+            arguments += ["--allow-missing", county]
+        return json.loads(
+            containers.offline_command(
+                value["release"]["image_id"],
+                prod,
+                config,
+                ["ms-house", "--source", name, *arguments],
+            )
+        )
+
+
 def county_final(path, county):
     """Record that a Mississippi county's reviewed manual snapshot is its last before the
     state certifies (its official report is posted): the monitor stops reminding that it

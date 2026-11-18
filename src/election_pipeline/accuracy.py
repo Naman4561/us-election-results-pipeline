@@ -76,7 +76,7 @@ def compare_publication(
             (publication_id,),
         ).fetchall()
 
-    if {row["contest_id"] for row in rows} != set(adapter.races):
+    if not adapter.accepts({row["contest_id"] for row in rows}):
         raise ValueError("Publication does not contain every race of its state")
     if any(row["total_votes"] is None for row in rows):
         raise ValueError("Unknown vote counts cannot be verified against a numerical reference")
