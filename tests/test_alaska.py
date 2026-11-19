@@ -159,6 +159,7 @@ class AlaskaTests(unittest.TestCase):
         for edited in (
             page.replace(b"2026 General Election", b"2024 General Election"),
             page.replace(b"Round 1", b"Round 2"),
+            page.replace(b"from Round 1", b"from the final round"),
             page.replace(b"State_of_Alaska.csv", b"other.csv"),
             b"<html><title>Captcha</title>November 3, 2026</html>",
         ):
@@ -166,6 +167,11 @@ class AlaskaTests(unittest.TestCase):
         # Official pages can link the same file with a relative URL.
         relative = page.replace(b"https://www.elections.alaska.gov/enr/", b"/enr/")
         self.assertEqual(self.parse(page=relative)["outcome"], "parsed")
+        # After its tabulation the page dropped the first-choice label (Nov 18).
+        unlabelled = page.replace(
+            b"<p>The Summary Report only shows first choice results from Round 1.</p>", b""
+        )
+        self.assertEqual(self.parse(page=unlabelled)["outcome"], "parsed")
 
     def test_zero_and_downward_correction_are_valid_without_changing_rosters(self):
         def zero(rows):

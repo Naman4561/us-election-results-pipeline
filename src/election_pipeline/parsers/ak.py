@@ -85,8 +85,11 @@ def validate_page(raw):
         raise ValueError("Alaska page belongs to another election or is a challenge page")
     if not any(urljoin(PAGE_URL, n.attrs.get("href", "")) == CSV_URL for n in page.root.find("a")):
         raise ValueError("Alaska election page no longer links the configured CSV")
-    if not re.search(r"(?:first|1st)\s+choice.{0,60}Round\s*1", page.root.text, re.I):
-        raise ValueError("Alaska report is not explicitly identified as first-choice Round 1")
+    # The page labelled the summary "first choice results from Round 1" until the Nov 18
+    # tabulation, then dropped the label; the CSV stayed the precinct first-choice export.
+    # A page naming any later round is refused.
+    if re.search(r"\bRound\s*(?:[2-9]|\d{2,})\b|\bfinal\s+round\b", page.root.text, re.I):
+        raise ValueError("Alaska report is not identified as first-choice Round 1")
     # The page also mentions "certified results" of past elections, outside this label.
     return results_status(page.root.text, "Results Status: {}", "Alaska")
 
