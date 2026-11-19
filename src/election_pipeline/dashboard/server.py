@@ -30,6 +30,10 @@ from election_pipeline.states import STATES, state_adapter
 STATIC = Path(__file__).with_name("static")
 # A county feed not checked successfully within this long is shown as overdue.
 COUNTY_STALE_SECONDS = 3600
+# Races whose November 3 count goes to a later runoff, with the runoff's date. The
+# dashboard marks them "Runoff pending"; kept here, not in the state registry, because
+# it changes no result a release check reads.
+RUNOFFS = {"LA-05": "2026-12-12", "LA-06": "2026-12-12"}
 METHODS = ("total_votes", "election_day", "early_voting", "absentee_by_mail", "provisional")
 
 
@@ -174,8 +178,8 @@ def make_payload(
         }
         if masked:
             races[identity]["county_privacy_masked"] = True
-        if identity in dict(adapter.runoffs):
-            races[identity]["runoff"] = dict(adapter.runoffs)[identity]
+        if identity in RUNOFFS:
+            races[identity]["runoff"] = RUNOFFS[identity]
     payload = {
         "state": state,
         "methods": methods,

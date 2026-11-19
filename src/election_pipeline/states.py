@@ -39,9 +39,6 @@ class State:
     # The House races are published only once an operator turns them on (Mississippi's
     # come from certified county recaps); until then a release has the other races only.
     optional_house: bool = False
-    # Races whose November 3 count goes to a later runoff, as (race, ISO runoff date). The
-    # dashboard marks them "Runoff pending" under the race's header.
-    runoffs: tuple[tuple[str, str], ...] = ()
 
     @property
     def slug(self):
@@ -377,7 +374,6 @@ STATES = {
             "majority goes to a December runoff between the top two. These are the "
             "November 3 results."
         ),
-        runoffs=(("LA-05", "2026-12-12"), ("LA-06", "2026-12-12")),
     ),
     # Delaware elects no governor in 2026.
     "DE": State(
