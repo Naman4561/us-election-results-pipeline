@@ -20,6 +20,7 @@ from election_pipeline.settings import load_config
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/fixtures/arizona/export_without_precincts.json.gz"
 DOWNLOADED = "2026-11-19T05:00:00+00:00"
+METHODS = ("early_ballot", "early_ars_16_579", "late_early", "election_day", "provisional")
 EXPECTED = {
     "AZ-GOV": {
         "Katie Hobbs / John Giles": 1434824,
@@ -85,6 +86,43 @@ class ArizonaTests(unittest.TestCase):
         counties = {r["county"] for r in self.read(report, "county_results.csv")}
         self.assertEqual(len(counties), 15)
         self.assertIn("Santa Cruz", counties)
+
+    def test_each_count_is_stored_by_arizonas_five_vote_groups(self):
+        _, report = self.imported(self.raw)
+        rows = self.read(report, "results.csv")
+        hobbs = next(
+            r for r in rows if r["choice"] == "Katie Hobbs / John Giles" and not r["county"]
+        )
+        self.assertEqual(
+            {m: int(hobbs[m]) for m in METHODS},
+            {
+                "early_ballot": 1209806,
+                "early_ars_16_579": 23436,
+                "late_early": 17901,
+                "election_day": 180201,
+                "provisional": 3480,
+            },
+        )
+        for found in rows:
+            self.assertEqual(sum(int(found[m]) for m in METHODS), int(found["total_votes"]))
+
+    def test_vote_groups_that_do_not_add_up_are_refused(self):
+        for change in ("count", "county", "name"):
+            data = json.loads(self.raw)
+            items = data["localResults"][0] if change == "county" else data["results"]
+            governor = next(
+                b for b in items["ballotItems"] if b["name"] == "Governor and Lieutenant Governor"
+            )
+            group = governor["ballotOptions"][0]["groupResults"][0]
+            if change == "name":
+                group["groupName"] = "Early Mail"
+            else:
+                # Moved between groups: the candidate's count still adds up, the county's
+                # group no longer matches statewide (or the statewide group its counties).
+                group["voteCount"] += 1
+                governor["ballotOptions"][0]["groupResults"][1]["voteCount"] -= 1
+            with self.subTest(change), self.assertRaisesRegex(ValueError, "rejected"):
+                self.imported(json.dumps(data).encode())
 
     def test_a_county_that_does_not_add_up_is_refused(self):
         data = json.loads(self.raw)

@@ -9,7 +9,7 @@ this page explains them.
 | --- | --- | --- | --- | --- |
 | Alaska | Division of Elections precinct CSV | Senate, Governor, House at-large (3) | By State House district (40) | Total only (first choice) |
 | Arkansas | Tally (Secretary of State) | Senate, Governor, House 1–4 (6) | All 75 counties | Total only |
-| Arizona | Saved by hand from the Secretary of State's Enhanced Voting export (JSON) | Governor, House 1–9 (10) | All 15 counties | Total only |
+| Arizona | Saved by hand from the Secretary of State's Enhanced Voting export (JSON) | Governor, House 1–9 (10) | All 15 counties | Early ballots, Early A.R.S. 16-579, Late Early, Election Day, provisional (Arizona's own groups) |
 | California | Secretary of State results API | Governor, House 1–52 (53) | No | Total only |
 | Colorado | Clarity | Senate, Governor, House 1–8 (10) | All 64 counties | Total only |
 | Delaware | Department of Elections results JSON | Senate, House at-large (2) | All 3 counties | Total only (methods checked) |
@@ -104,8 +104,12 @@ zero.
   demographics are a separate dataset in their own tables.
 - **Arizona:** the Enhanced Voting export (JSON, about 72 MB with precinct detail) is
   saved by hand. Every county adds up to the statewide counts; county party labels vary,
-  so the statewide party is used. Its five vote groups match no stored method and are
-  not stored. Its `createdAt` is the report time.
+  so the statewide party is used. Its five vote groups are stored under Arizona's own
+  names (`early_ballot`, `early_ars_16_579`, `late_early`, `election_day`,
+  `provisional`; migration 028): its "Early Voting" group is its early ballots, most
+  cast by mail, so it is not stored as in-person `early_voting`. Each count's groups add
+  up to it, and the counties' groups to the statewide ones. Its `createdAt` is the
+  report time.
 - **Michigan:** the county results export (tab-separated text) is saved by hand (the
   results site refuses automated clients). It has no statewide rows: statewide totals are
   the county sums, with each office's write-ins as one line. It prints no report time,

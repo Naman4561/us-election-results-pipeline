@@ -198,10 +198,22 @@ STATES = {
         "Arizona",
         "az_2026_general",
         tuple(range(1, 10)),
-        ("total_votes",),
+        (
+            "total_votes",
+            "early_ballot",
+            "early_ars_16_579",
+            "late_early",
+            "election_day",
+            "provisional",
+        ),
         senate=False,
         governor=True,
         source_page="https://results.arizona.vote/",
+        method_note=(
+            "Arizona reports its count in five groups, shown under its own names. Early "
+            "ballots are Arizona's early ballots, most of them cast by mail, not in-person "
+            "early voting alone."
+        ),
     ),
     # Michigan's results site refuses automated clients: its county export is imported by
     # hand (parsers/mi.py).

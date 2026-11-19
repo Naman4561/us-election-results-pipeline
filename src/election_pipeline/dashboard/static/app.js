@@ -15,6 +15,10 @@ const methodNames = {
   post_election: "Post-election (late mail)",
   mail: "Mail ballots",
   in_person: "In person",
+  // Arizona's own groups, named as it names them.
+  early_ballot: "Early ballots",
+  early_ars_16_579: "Early (A.R.S. 16-579)",
+  late_early: "Late early",
 };
 const colors = {
   DEM: "#2775c7",
