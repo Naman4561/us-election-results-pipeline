@@ -10,7 +10,7 @@ from pathlib import Path
 from election_pipeline import pipeline
 from election_pipeline.deployment.containers import package_hash
 from election_pipeline.parsers.scope import recording, verify_scope
-from election_pipeline.parsers.scope_2026 import ROSTERS
+from election_pipeline.parsers.scope_2026 import ROSTERS, Rosters
 from election_pipeline.settings import load_config
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -31,6 +31,22 @@ class RosterTests(unittest.TestCase):
                 self.assertEqual(len(entry["candidates"]), len(set(entry["candidates"])), race)
                 self.assertEqual(len(entry["counties"]), len(set(entry["counties"])), race)
         self.assertEqual(set(ROSTERS), {p.stem for p in FOLDER.glob("*.json")})
+
+    def test_a_state_reads_its_own_roster_alone(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            folder = Path(temporary)
+            shutil.copy(FOLDER / "HI.json", folder)
+            (folder / "OK.json").write_text("not a roster", encoding="utf-8")
+            (folder / "WY.json").write_text('{"state": "VT", "races": {}}', encoding="utf-8")
+            rosters = Rosters(folder)
+            # Another state's broken file does not stop Hawaii's parse.
+            self.assertEqual(rosters["HI"], ROSTERS["HI"])
+            self.assertEqual(set(rosters), {"HI", "OK", "WY"})
+            self.assertNotIn("ZZ", rosters)
+            with self.assertRaises(ValueError):
+                rosters["OK"]
+            with self.assertRaisesRegex(ValueError, "does not match its state"):
+                rosters["WY"]
 
     def test_roster_data_is_part_of_the_parser_code_hash(self):
         before = pipeline.collector_code_hash()

@@ -30,6 +30,7 @@ REVISION = "b" * 40
 NEW_IMAGE = "sha256:" + "c" * 64
 NEW_REVISION = "d" * 40
 NC, KY, GA, SC = "nc_2026_general_all", "ky_2026_general", "ga_2026_general", "sc_2026_general"
+MS = "ms_2026_general_all"
 
 
 def fixture(root):
@@ -646,9 +647,10 @@ class DeploymentTests(unittest.TestCase):
 
     def test_a_check_key_changes_only_with_what_that_source_check_runs(self):
         tree = self.release_tree()
+        names = [NC, KY]
 
         def keys():
-            return control.check_keys(tree, self.value, self.prod, [NC, KY])
+            return control.check_keys(tree, self.value, self.prod, names)
 
         def changed(relative, edit=lambda text: text + "\n# changed\n"):
             path = tree / relative
@@ -663,8 +665,14 @@ class DeploymentTests(unittest.TestCase):
         # Another state's parser and data, the dashboard and the host-side tools: neither.
         self.assertEqual(changed(package + "parsers/ms.py"), set())
         self.assertEqual(changed(package + "resources/ms_2026_counties.json", str.rstrip), set())
-        # Every parser imports every roster.
-        self.assertEqual(changed(package + "resources/rosters_2026/OK.json", str.rstrip), {NC, KY})
+        # A roster is read by its own state's parse alone, a new one too.
+        self.assertEqual(changed(package + "resources/rosters_2026/OK.json", str.rstrip), set())
+        before = keys()
+        roster = tree / package / "resources/rosters_2026/KY.json"
+        roster.write_text('{"state": "KY", "races": {}}', encoding="utf-8")
+        after = keys()
+        self.assertEqual({n for n in before if before[n] != after[n]}, {KY})
+        roster.unlink()
         self.assertEqual(changed(package + "dashboard/server.py"), set())
         self.assertEqual(changed(package + "dashboard/static/app.css"), set())
         self.assertEqual(changed(package + "dashboard/static/ms-map.json", str.rstrip), set())
@@ -698,7 +706,10 @@ class DeploymentTests(unittest.TestCase):
         def hashes():
             # Callers pass a resolved root, as the module's own path is (8.3 names differ).
             root = tree.resolve()
-            return publication.project_hash(root, "NC"), publication.project_hash(root, "KY")
+            return tuple(
+                publication.project_hash(root, {"state": code, "dataset": "election_results"})
+                for code in ("NC", "KY", "MS")
+            )
 
         with patch.object(
             publication, "__file__", str(tree.resolve() / package / "publication.py")
@@ -709,10 +720,36 @@ class DeploymentTests(unittest.TestCase):
                 "utf-8",
             )
             after = hashes()
-        self.assertEqual(before[0], after[0])
-        self.assertNotEqual(before[1], after[1])
+            self.assertEqual(before[0], after[0])
+            self.assertNotEqual(before[1], after[1])
+            # Mississippi's own models and tests republish Mississippi alone.
+            for relative in (
+                "tests/ms_county_status.sql",
+                "models/ms/marts/ms_county_feed_status.sql",
+            ):
+                path = tree / "dbt" / relative
+                before = hashes()
+                path.write_text(path.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+                after = hashes()
+                self.assertEqual([b == a for b, a in zip(before, after)], [True, True, False])
         self.assertEqual(changed("dbt/dbt_project.yml"), {NC, KY})
         self.assertEqual(changed("constraints.txt"), {NC, KY})
+        # dbt files tagged for a build no checked source runs count for every source (dbt
+        # parses the whole project); once a source runs that build, for it alone.
+        ms_test = "dbt/tests/ms_county_status.sql"
+        self.assertEqual(changed(ms_test), {NC, KY})
+        settings, sources = load_config(tree / "config/sources.toml")
+        (Path(self.prod["DATA_DIR"]) / "state" / f"{MS}.json").write_text(
+            json.dumps({"sha256": "a" * 64, "url": sources[MS].url}), encoding="utf-8"
+        )
+        self.value["sources"][MS] = {**self.value["sources"][NC]}
+        names.append(MS)
+        self.assertEqual(changed(ms_test), {MS})
+        self.assertEqual(changed("dbt/models/ms/staging/stg_ms_county_feeds.sql"), {MS})
+        self.assertEqual(changed("dbt/tests/county_reconciliation.sql"), {NC, KY, MS})
+        self.assertEqual(changed("dbt/models/results/marts/contest_results.sql"), {NC, KY, MS})
+        self.assertEqual(changed("dbt/tests/demographics_release_completeness.sql"), {NC, KY, MS})
+        names.remove(MS)
         # A new status changes only that source's key; a new snapshot changes none (the
         # release weighs snapshots itself).
         before = keys()
@@ -724,6 +761,30 @@ class DeploymentTests(unittest.TestCase):
         # A source without a snapshot of its configured address gets no key.
         state.write_text(json.dumps({"sha256": "b" * 64, "url": "https://old"}), "utf-8")
         self.assertEqual(set(keys()), {KY})
+
+    def test_dbt_files_carry_the_tags_their_builds_select(self):
+        import yaml
+
+        project = yaml.safe_load((ROOT / "dbt/dbt_project.yml").read_text(encoding="utf-8"))
+        folders = project["models"]["election_analytics"]
+        # publication.dbt_tags names a model by its folder: each folder's tag is its name.
+        for folder in (ROOT / "dbt/models").iterdir():
+            if folder.is_dir():
+                self.assertEqual(folders[folder.name]["+tags"], [folder.name])
+        tags = {
+            p.relative_to(ROOT).as_posix(): publication.dbt_tags(ROOT, p)
+            for p in publication.dbt_files(ROOT)
+        }
+        self.assertEqual(tags["dbt/tests/ms_county_status.sql"], {"ms"})
+        self.assertEqual(tags["dbt/tests/demographics_release_completeness.sql"], {"demographics"})
+        self.assertEqual(tags["dbt/tests/county_reconciliation.sql"], {"results"})
+        self.assertIsNone(tags["dbt/models/sources.yml"])
+        self.assertIsNone(tags["dbt/macros/releases.sql"])
+        self.assertEqual(tags["dbt/models/results/schema.yml"], {"results"})
+        self.assertEqual(
+            publication.build_tags({"dataset": "election_results", "state": "MS"}),
+            ["results", "ms"],
+        )
 
     def test_the_worker_proves_a_snapshot_only_under_the_live_image_and_status(self):
         state = Path(self.prod["DATA_DIR"]) / "state"

@@ -25,7 +25,7 @@ from pathlib import Path
 from election_pipeline.database import connect
 from election_pipeline.deployment import catalog, containers, dashboard
 from election_pipeline.migrations import migrate
-from election_pipeline.publication import attestation
+from election_pipeline.publication import attestation, build_tags, dbt_tags
 from election_pipeline.storage import atomic_json, utc_now
 from election_pipeline.workflow import NO_SNAPSHOT
 
@@ -417,8 +417,9 @@ def check_keys(release_path, value, prod, names):
     """{source: the code its release check depends on}; a source with an unchanged key and
     a recorded pass need not be checked again (see ``release`` for its snapshot). The key
     covers the release files its check runs (build inputs, dbt, migrations, job scripts,
-    the modules ``check_modules`` finds, reviewed data other than other states'), and the
-    source's configuration and status. A source without a snapshot gets no key."""
+    the modules ``check_modules`` finds, reviewed data other than other states', the dbt
+    files its build selects), and the source's configuration and status. A source without
+    a snapshot gets no key."""
     from election_pipeline.settings import load_config
     from election_pipeline.states import STATES, own_registry
 
@@ -428,13 +429,25 @@ def check_keys(release_path, value, prod, names):
     registry = root / "src/election_pipeline/states.py"
     # The dashboard's own files (styles, maps, its script) are served, never read by a check.
     static = root / "src/election_pipeline/dashboard/static"
-    # A state's own data (``<slug>_*.json``) is read by its parser alone. Rosters are not
-    # theirs alone: every parser imports all of them (parsers.scope_2026).
-    owners = {}
+    # A state's own data (``<slug>_*.json``) and its roster (``rosters_2026/<STATE>.json``,
+    # read on first use by parsers.scope_2026) are read by its parser alone.
+    owners = {item: item.stem for item in (resources / "rosters_2026").glob("*.json")}
     for code, state in STATES.items():
         for item in resources.glob(f"{state.slug}_*.json"):
             owners[item] = code
-    files = {}
+    keyed = {}
+    for name in names:
+        source = sources[name]
+        state = json.loads(
+            (Path(prod["DATA_DIR"]) / "state" / f"{name}.json").read_text(encoding="utf-8")
+        )
+        if state.get("sha256") and state.get("url") == source.url:
+            keyed[name] = set(build_tags({"dataset": source.dataset, "state": source.state}))
+    # A dbt file tagged for builds no checked source runs still counts for every source:
+    # dbt parses the whole project, so only a check that reads it would find it broken.
+    checked_tags = set().union(*keyed.values())
+    dbt = root / "dbt"
+    files, tagged = {}, {}
     for entry in CHECK_INPUTS:
         found = root / entry
         if not found.exists():
@@ -443,14 +456,13 @@ def check_keys(release_path, value, prod, names):
             if item.is_file() and "__pycache__" not in item.parts:
                 digest = hashlib.sha256(item.read_bytes()).hexdigest()
                 files[item] = f"{item.relative_to(root).as_posix()}:{digest}"
+                if dbt in item.parents and item.suffix in (".sql", ".yml", ".yaml"):
+                    found = dbt_tags(root, item)
+                    if found is not None and found & checked_tags:
+                        tagged[item] = found
     keys, modules = {}, {}
-    for name in names:
+    for name, tags in keyed.items():
         source = sources[name]
-        state = json.loads(
-            (Path(prod["DATA_DIR"]) / "state" / f"{name}.json").read_text(encoding="utf-8")
-        )
-        if not state.get("sha256") or state.get("url") != source.url:
-            continue
         if source.state not in modules:
             modules[source.state] = check_modules(root, source.state)
         used = [
@@ -458,6 +470,7 @@ def check_keys(release_path, value, prod, names):
             for item, text in files.items()
             if item != registry
             and static not in item.parents
+            and (item not in tagged or tagged[item] & tags)
             and (
                 item.suffix != ".py" or item in modules[source.state]
                 if resources not in item.parents
