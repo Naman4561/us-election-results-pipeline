@@ -125,6 +125,17 @@ primary_filename = "results.txt"
 min_interval_seconds = 600
 expected_members = ["results.txt"]
 
+# The 21 county clerks' results, assembled into one zip (scripts/nj_bundle.py): New
+# Jersey posts no statewide results before certification.
+[sources.nj_2026_general]
+state = "NJ"
+election_date = "2026-11-03"
+url = "https://nj.gov/state/elections/election-information-results.shtml"
+format = "bundle"
+primary_filename = "results.zip"
+min_interval_seconds = 600
+expected_members = ["results.zip"]
+
 # The results app's manifest, overview and contest files, saved by hand and imported as
 # one zip: the results site and its data files refuse automated clients.
 [sources.nv_2026_general]

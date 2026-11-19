@@ -226,6 +226,17 @@ STATES = {
         governor=True,
         source_page="https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026",
     ),
+    # New Jersey posts no statewide results before certification: its 21 county clerks'
+    # results are assembled into one zip (scripts/nj_bundle.py, parsers/nj.py). No
+    # Governor race in 2026.
+    "NJ": State(
+        "NJ",
+        "New Jersey",
+        "nj_2026_general",
+        tuple(range(1, 13)),
+        ("total_votes",),
+        source_page="https://nj.gov/state/elections/election-information-results.shtml",
+    ),
     # Nevada's results site and data files refuse automated clients: the app's manifest,
     # overview and contest files are saved by hand and imported as one zip (parsers/nv.py).
     # No Senate race in 2026.

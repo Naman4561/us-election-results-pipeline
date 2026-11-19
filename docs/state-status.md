@@ -47,6 +47,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Nebraska | Unofficial, pending certification | Nov 14 01:00 | All precincts in. Collected every 3 hours, clear of backups. |
 | Nevada | Not public yet | — | Its results app's data files saved by hand (release 90, Nov 13, 23:36 UTC); every county adds up to the statewide totals; Lincoln's District 2 votes are masked by the state. |
 | New Hampshire | Not public yet | — | Its four results spreadsheets imported by hand (its site refuses automated clients); every race by county. |
+| New Jersey | Not public yet | — | Its 21 county clerks' results assembled into one zip (15 Clarity counties fetched; Bergen, Hunterdon and Warren saved by hand); newest county update Nov 19, 1:06 PM EST. |
 | New Mexico | Unofficial, pending certification | Nov 12 19:01 | The State Board of Canvass certifies Nov 24. Collected hourly. |
 | New York | Unofficial, imported by hand | Nov 19 05:15 | The State Board of Elections' election night page, saved as a PDF. Fusion party lines are added up per candidate. |
 | North Carolina | Unofficial, counting | Nov 14 00:31 | |
@@ -68,4 +69,4 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Wyoming | Official | Nov 10 21:37 | Added from its certified results (certified Nov 10). |
 | Maine | Awaiting certified results | — | Municipal reporting with no statewide endpoint. |
 | Illinois, Massachusetts | Awaiting certified results | — | Their official results sites answer automated requests but list no Nov 3 results yet (Illinois's State Board after its canvass; Massachusetts's PD43+ once certified); both should then be collected automatically. |
-| New Jersey, Wisconsin | Awaiting certified results | — | Their results sites refuse automated clients (Wisconsin: Cloudflare); they need an operator download. |
+| Wisconsin | Awaiting certified results | — | Its results site refuses automated clients (Cloudflare); it needs an operator download. |

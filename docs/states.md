@@ -33,6 +33,7 @@ this page explains them.
 | Nebraska | Secretary of State results CSV | Senate, Governor, House 1–3 (5) | No | Total only |
 | Nevada | Saved by hand: the results app's manifest, overview and contest files, imported as one zip | Governor, House 1–4 (5) | All 17 counties | Total only |
 | New Hampshire | Saved by hand: the Secretary of State's four results spreadsheets, imported as one zip | Senate, Governor, House 1–2 (4) | All 10 counties (House from its towns) | Total only |
+| New Jersey | Its 21 county clerks' results, assembled into one zip by `scripts/nj_bundle.py` | Senate, House 1–12 (13) | All 21 counties | Total only |
 | New Mexico | ENR export | Senate, Governor, House 1–3 (5) | All 33 counties, small counts masked | Total only |
 | New York | Saved by hand from the State Board's election night page (PDF) | Governor, House 1–26 (27) | All 62 counties | Total only |
 | North Carolina | State Board precinct ZIP | Senate, House 1–14 (15) | All 100 counties | Election Day, early, mail, provisional |
@@ -141,6 +142,18 @@ zero.
   privacy (Lincoln in District 2) is in neither and is left out of that contest. "None
   of These Candidates" is kept as a choice. The manifest's generation time is the
   report time.
+- **New Jersey:** no statewide results before certification, so each county clerk's
+  own results are assembled into one zip (`scripts/nj_bundle.py`, a `sources.json` with
+  every member's address and SHA-256): 15 Clarity counties' summaries (fetched as the
+  pipeline fetches any page), Camden's, Hunterdon's, Sussex's and Warren's ES&S summary
+  reports, Salem's results page and Bergen's printed summary (Bergen, Hunterdon and
+  Warren saved by hand). `resources/nj_2026_contests.json` maps each county's contest
+  titles to races and lists every ballot candidate with its spellings; minor-party
+  labels are ballot slogans and stand as IND. Every ballot candidate must be found in
+  every county of its race; any other line is a write-in. Each county is checked on its
+  own terms (Clarity totals, ES&S Total Votes Cast or vote methods, Bergen's
+  percentages, Salem's precincts); statewide totals are the county sums. Refresh:
+  rerun the bundle tool and import again.
 - **New Hampshire:** the results site refuses automated clients (Akamai). The operator
   downloads its Senate and Governor county summaries and its two congressional district
   sheets (by town and city ward) and imports them, unchanged, as one zip. Each sheet's
@@ -204,14 +217,14 @@ but has no public source (`awaiting_certified` in `resources/elections_2026.json
 state leaves the label once a source of its is public). Such a state is added from its
 certified canvass, as a manual source whose first import is the certified file
 ([manual results](manual-results.md#a-state-added-from-its-certified-results)), or from
-any results file it posts. As of November 19, 2026 six states remain:
+any results file it posts. As of November 19, 2026 five states remain:
 
 - **Illinois** and **Massachusetts** answer automated requests but list no November 3
   results yet: Illinois's State Board vote totals (`elections.il.gov`) show the primary
   only, and Massachusetts's PD43+ (`electionstats.state.ma.us`, CSV per contest, by city
   and town) only two special elections. Both should be collectable once certified.
-- **New Jersey** and **Wisconsin** (Cloudflare) refuse automated clients: an operator
-  downloads their files.
+- **Wisconsin** (Cloudflare) refuses automated clients: an operator downloads its
+  files.
 - **Kentucky** waits for its certified results (its live feed retired; see above) and
   **Maine** is not covered (below).
 
