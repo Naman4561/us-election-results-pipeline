@@ -41,6 +41,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Minnesota | Unofficial, counting | Nov 13 20:04 | The State Canvassing Board certifies Nov 19. |
 | Mississippi | Final unofficial | Nov 19 04:32 | All 82 counties imported from their certified Official Recapitulations (reviewed Nov 17–19; Walthall's was posted as “Walthal County.pdf”). Collection paused Nov 19 (`deploy pause`, `deploy final`): every county had certified, and each run saved a new bundle differing only in its status time. House districts published Nov 18 (`deploy ms-house`); all four are complete. The state certifies Dec 1 or 3: import its statewide recap then ([Mississippi](mississippi-collection.md#certification)). |
 | Missouri | Unofficial, imported by hand | Nov 19 05:00 | The Secretary of State's All Results page, saved as a PDF. Statewide and congressional district totals only (no county results); no Senate race in 2026. |
+| Montana | Unofficial, counting | Nov 19 18:50 | Collected from its Statewide Export since Nov 19; the site's TEST banner is hidden now and its export answered every request. 726 of 728 precincts. |
 | Nebraska | Unofficial, pending certification | Nov 14 01:00 | All precincts in. Collected every 3 hours, clear of backups. |
 | New Mexico | Unofficial, pending certification | Nov 12 19:01 | The State Board of Canvass certifies Nov 24. Collected hourly. |
 | New York | Unofficial, imported by hand | Nov 19 05:15 | The State Board of Elections' election night page, saved as a PDF. Fusion party lines are added up per candidate. |
@@ -62,5 +63,4 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | West Virginia | Unofficial, counting | Nov 10 16:01 | |
 | Wyoming | Official | Nov 10 21:37 | Added from its certified results (certified Nov 10). |
 | Maine | Awaiting certified results | — | Municipal reporting with no statewide endpoint. |
-| Montana | Awaiting certified results | — | Results pages marked "TEST"; export fails on about half of requests. |
 | Other states holding elections | Awaiting certified results | — | No election-night source collected; see [states](states.md#awaiting-certified-results). |

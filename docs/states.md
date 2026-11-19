@@ -27,6 +27,7 @@ this page explains them.
 | Minnesota | Secretary of State media files | Senate, Governor, House 1–8 (10) | All 87 counties | Total only |
 | Mississippi | County election offices | Senate (1) | Covered counties | Total only |
 | Missouri | Saved by hand from the Secretary of State's All Results page (PDF) | House 1–8 (8) | No | Total only |
+| Montana | Secretary of State's Statewide Export (collected) | Senate, House 1–2 (3) | All 56 counties | Total only |
 | Nebraska | Secretary of State results CSV | Senate, Governor, House 1–3 (5) | No | Total only |
 | New Mexico | ENR export | Senate, Governor, House 1–3 (5) | All 33 counties, small counts masked | Total only |
 | New York | Saved by hand from the State Board's election night page (PDF) | Governor, House 1–26 (27) | All 62 counties | Total only |
@@ -111,6 +112,12 @@ zero.
   cast by mail, so it is not stored as in-person `early_voting`. Each count's groups add
   up to it, and the counties' groups to the statewide ones. Its `createdAt` is the
   report time.
+- **Montana:** the site is South Dakota's platform without its statewide CSV. The
+  collector posts the export page's "Statewide Export" button (`collectors/montana.py`);
+  each sheet's county rows must add up to its TOTALS row. Every download embeds its own
+  time, so the collector compares the worksheets without it and keeps the previous
+  bundle while they match (refreshed hourly). Its "TEST" banner, shown on Nov 6, is in
+  the page but hidden since. No write-ins or vote methods are reported.
 - **Pennsylvania:** the county results export (`UnOfficial_<time>.txt`, comma-separated) is
   saved by hand: the results site and its RSS feeds refuse automated clients, and the
   feeds stopped updating on November 10. It has no statewide rows (statewide totals
@@ -177,5 +184,3 @@ sites.
 
 - **Maine** reports by municipality on election night, with no statewide endpoint, and
   its federal races need a first-choice/ranked-choice distinction.
-- **Montana**'s results pages carry a "TEST" banner and its export fails on about half of
-  requests, so its figures cannot be validated as official returns.

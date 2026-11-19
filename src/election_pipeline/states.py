@@ -226,6 +226,17 @@ STATES = {
         governor=True,
         source_page="https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026",
     ),
+    # Montana's site is South Dakota's platform without its statewide CSV: the Statewide
+    # Export workbook is collected (collectors/montana.py). No Governor race in 2026.
+    "MT": State(
+        "MT",
+        "Montana",
+        "mt_2026_general",
+        (1, 2),
+        ("total_votes",),
+        source_page="https://electionresults.mt.gov/",
+        collection_backend="montana",
+    ),
     # Pennsylvania's results site and feeds refuse automated clients: its county export is
     # imported by hand (parsers/pa.py). No Senate race in 2026.
     "PA": State(

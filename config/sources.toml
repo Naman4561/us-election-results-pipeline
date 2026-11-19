@@ -125,6 +125,17 @@ primary_filename = "results.txt"
 min_interval_seconds = 600
 expected_members = ["results.txt"]
 
+# The results site's export page and its "Statewide Export" workbook (collectors/montana).
+[sources.mt_2026_general]
+state = "MT"
+election_date = "2026-11-03"
+url = "https://electionresults.mt.gov/ResultsExport.aspx"
+format = "bundle"
+primary_filename = "export.html"
+min_interval_seconds = 600
+expected_members = ["export.html", "statewide.xlsx"]
+supplemental_members = ["statewide.xlsx"]
+
 # The Department of State's county results export, downloaded by hand: the results site
 # and its RSS feeds refuse automated clients.
 [sources.pa_2026_general]
