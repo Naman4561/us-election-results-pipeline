@@ -136,7 +136,9 @@ Every Tally document (Arkansas, North Dakota) repeats the publication's version,
 bundle never pairs two publications. Louisiana's documents carry no shared stamp; its
 parish counts must add up to the statewide totals, so a collection that straddles an
 update fails and is retried. Its U.S. House races are open to every candidate, and one
-without a majority goes to a December runoff; the dashboard shows the November 3 count.
+without a majority goes to a December runoff; the dashboard shows the November 3 count
+and marks the 5th and 6th districts “Runoff pending · December 12” under their header
+and on the map (`RUNOFFS` in `dashboard/server.py`).
 Indiana's settings, Louisiana's election list and Tally's documents each carry the
 state's own official flag, which the parser records.
 
