@@ -27,6 +27,11 @@ def main():
     local.add_argument("--downloaded-at", required=True)
     local.add_argument("--publish", action="store_true")
     local.add_argument(
+        "--generated-at",
+        help="The report time the state's site showed (ISO, with zone), for a file that "
+        "prints none",
+    )
+    local.add_argument(
         "--certified-name",
         help="Import the state's certified file under this name (certified-<format>)",
     )
@@ -57,6 +62,7 @@ def main():
                     "sha256": args.sha256,
                     "downloaded_at": args.downloaded_at,
                     "publish": args.publish,
+                    "generated_at": args.generated_at,
                     "certified": args.certified_name,
                     "attested": {
                         "evidence_url": args.evidence_url,

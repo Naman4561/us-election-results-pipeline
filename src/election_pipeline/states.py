@@ -191,6 +191,17 @@ STATES = {
         governor=True,
         source_page="https://liveresults.ohiosos.gov/",
     ),
+    # Michigan's results site refuses automated clients: its county export is imported by
+    # hand (parsers/mi.py).
+    "MI": State(
+        "MI",
+        "Michigan",
+        "mi_2026_general",
+        tuple(range(1, 14)),
+        ("total_votes",),
+        governor=True,
+        source_page="https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026",
+    ),
     "OK": State(
         "OK",
         "Oklahoma",

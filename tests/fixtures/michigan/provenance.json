@@ -1,0 +1,10 @@
+{
+ "file": "2026STATE_GENERAL_MI_CENR_BY_COUNTY.txt",
+ "sha256": "4cb0e2737583184ea5bb7b130b97f5ca8dbc9dc36de0be604bfa094c1f9ee42a",
+ "bytes": 1182457,
+ "source": "https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026",
+ "site_status": "STATE GENERAL, UNOFFICIAL",
+ "site_updated": "11/18/2026 7:17:44 PM (Eastern)",
+ "counties": "83/83",
+ "downloaded_by": "operator, in a browser"
+}

@@ -68,8 +68,12 @@ def operate(
     promote=False,
     certified=None,
     attested=None,
+    generated_at=None,
 ):
     """Import an operator's file for a manual source, or promote its prepared candidate.
+
+    ``generated_at``: the report time the state's site showed, for a file that prints
+    none (see ``manual.import_file``).
 
     ``certified`` names the state's certified file (``certified-<format>``, see
     ``parsers.certified``), imported with ``attested`` (evidence_url, certified_on,
@@ -113,6 +117,8 @@ def operate(
             args.extend(
                 ["--certified", certified, "--attestation", json.dumps(attested, sort_keys=True)]
             )
+        if generated_at is not None:
+            args.extend(["--generated-at", generated_at])
         previous = entry.get("manual_snapshot", {}).get("source_generated_at")
         if previous:
             args.extend(["--minimum-generated-at", previous])

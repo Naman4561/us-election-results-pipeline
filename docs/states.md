@@ -22,6 +22,7 @@ this page explains them.
 | Kentucky | State Board live results | Senate, House 1–6 (7) | All 120 counties | Election Day, absentee |
 | Louisiana | Secretary of State live results | Senate, House 1–6 (7) | All 64 parishes | Total only |
 | Maryland | State Board results pages | Governor, House 1–8 (9) | All 24 jurisdictions | Total only |
+| Michigan | Saved by hand from the Secretary of State's county results export | Senate, Governor, House 1–13 (15) | All 83 counties | Total only |
 | Minnesota | Secretary of State media files | Senate, Governor, House 1–8 (10) | All 87 counties | Total only |
 | Mississippi | County election offices | Senate (1) | Covered counties | Total only |
 | Nebraska | Secretary of State results CSV | Senate, Governor, House 1–3 (5) | No | Total only |
@@ -97,6 +98,10 @@ zero.
 - **North Carolina:** county totals are derived from precincts. A NUL party marker on
   write-in rows is stored as no party; no party is inferred. North Carolina's absentee
   demographics are a separate dataset in their own tables.
+- **Michigan:** the county results export (tab-separated text) is saved by hand (the
+  results site refuses automated clients). It has no statewide rows: statewide totals are
+  the county sums, with each office's write-ins as one line. It prints no report time,
+  so the operator declares the site's "Updated" time at import.
 - **Ohio:** the official XML is saved by hand ([manual results](manual-results.md)).
 - **Oklahoma:** the county results export is saved by hand (the results site refuses
   automated clients). It has no statewide rows: statewide totals are the county sums,

@@ -99,6 +99,17 @@ primary_filename = "results.zip"
 min_interval_seconds = 600
 expected_members = ["results.zip"]
 
+# The Secretary of State's county results export (tab-separated text), downloaded by hand:
+# the results site refuses automated clients.
+[sources.mi_2026_general]
+state = "MI"
+election_date = "2026-11-03"
+url = "https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026"
+format = "bundle"
+primary_filename = "results.txt"
+min_interval_seconds = 600
+expected_members = ["results.txt"]
+
 # The Election Commission's Clarity site, which kept counting after the election-night
 # workbooks on its fallback page stopped.
 [sources.sc_2026_general]

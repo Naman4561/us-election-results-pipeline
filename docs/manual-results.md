@@ -23,6 +23,10 @@ committed. HTML challenges, wrong elections, missing roster/geography coverage,
 inconsistent counts, future report timestamps and reports older than the previous
 published manual report are rejected. Vote corrections may decrease totals.
 
+A file that prints no report time (Michigan's export) is imported with the time the
+state's site showed beside it, `--generated-at` (ISO, with its zone). The receipt records
+it as `source_generated_basis=operator_declared`; a file that dates itself refuses one.
+
 Successful receipts use `outcome=manual_imported` and `acquisition_method=manual`.
 HTTP status is NULL. The receipt retains the configured official URL, submitted
 filename, original file hash/size, archive hash, parser code fingerprint, declared
