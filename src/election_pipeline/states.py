@@ -226,6 +226,18 @@ STATES = {
         county_results=False,
         source_page="https://enr.sos.mo.gov/",
     ),
+    # Tennessee's Followed Races dashboard is saved as a PDF by hand and gives statewide
+    # totals only (parsers/tn.py).
+    "TN": State(
+        "TN",
+        "Tennessee",
+        "tn_2026_general",
+        tuple(range(1, 10)),
+        ("total_votes",),
+        governor=True,
+        county_results=False,
+        source_page="https://elections.tn.gov/",
+    ),
     "OK": State(
         "OK",
         "Oklahoma",

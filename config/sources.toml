@@ -136,6 +136,16 @@ primary_filename = "results.pdf"
 min_interval_seconds = 600
 expected_members = ["results.pdf"]
 
+# The Secretary of State's Followed Races dashboard, saved as a PDF by hand.
+[sources.tn_2026_general]
+state = "TN"
+election_date = "2026-11-03"
+url = "https://elections.tn.gov/"
+format = "bundle"
+primary_filename = "results.pdf"
+min_interval_seconds = 600
+expected_members = ["results.pdf"]
+
 # The Election Commission's Clarity site, which kept counting after the election-night
 # workbooks on its fallback page stopped.
 [sources.sc_2026_general]

@@ -37,6 +37,7 @@ this page explains them.
 | Rhode Island | Enhanced Voting | Senate, Governor, House 1–2 (4) | No (reported by town) | Election Day, early, mail |
 | South Carolina | Clarity (Election Commission) | Senate, Governor, House 1–7 (9) | All 46 counties | Total only |
 | South Dakota | ENR export | Senate, Governor, House at-large (3) | All 66 counties | Total only |
+| Tennessee | Saved by hand from the Secretary of State's Followed Races dashboard (PDF) | Senate, Governor, House 1–9 (11) | No | Total only |
 | Texas | Secretary of State Civix API | Senate, Governor, House 1–38 (40) | No | Total only |
 | Utah | Enhanced Voting | House 1–4 (4) | All counties of each district | Total only |
 | Vermont | Secretary of State results JSON | Governor, House at-large (2) | All 247 voting towns (town map) | Total only |
@@ -111,6 +112,10 @@ zero.
 - **Missouri:** the All Results page is saved as a PDF by hand (the results site refuses
   automated clients). It gives statewide district totals only; each district's
   candidates must add up to its printed Total Votes. Write-ins are one line.
+- **Tennessee:** the Followed Races dashboard is saved as a PDF by hand. It gives
+  statewide totals with percentages but no race totals: one total must fit every printed
+  percentage (within 0.01) and be at least the candidates' sum. It prints no report time;
+  the operator declares one.
 - **Ohio:** the official XML is saved by hand ([manual results](manual-results.md)).
 - **Oklahoma:** the county results export is saved by hand (the results site refuses
   automated clients). It has no statewide rows: statewide totals are the county sums,
