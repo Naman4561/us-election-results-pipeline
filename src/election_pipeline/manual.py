@@ -56,8 +56,10 @@ def import_file(
         raise ValueError("Supply the original file SHA-256 from the downloading computer")
     path = Path(path)
     with path.open("rb") as handle:
-        raw = handle.read(settings.max_download_bytes + 1)
-    if not raw or len(raw) > settings.max_download_bytes:
+        # The source's own budget (its collector_overrides), as a download would have.
+        budget = source.effective_settings(settings).max_download_bytes
+        raw = handle.read(budget + 1)
+    if not raw or len(raw) > budget:
         raise ValueError("The local file is empty or exceeds the source size budget")
     original_sha = hashlib.sha256(raw).hexdigest()
     if original_sha != expected_sha256.lower():

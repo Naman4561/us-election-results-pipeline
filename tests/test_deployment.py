@@ -94,7 +94,7 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(catalog.read(self.path), self.value)
         self.assertEqual(catalog.public_states(self.value), {"NC", "KY"})
         for change in (
-            lambda v: v["sources"].update(az_2026_general=dict(v["sources"][GA])),
+            lambda v: v["sources"].update(xx_2026_general=dict(v["sources"][GA])),
             lambda v: v["sources"][GA].update(public=True),
             lambda v: v["sources"][GA].update(acquisition="ftp"),
             # Only a collected source can be paused, and only with a boolean.

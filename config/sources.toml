@@ -99,6 +99,21 @@ primary_filename = "results.zip"
 min_interval_seconds = 600
 expected_members = ["results.zip"]
 
+# The Secretary of State's Enhanced Voting export (JSON), saved and imported by hand. It
+# holds precinct detail, about 72 MB.
+[sources.az_2026_general]
+state = "AZ"
+election_date = "2026-11-03"
+url = "https://app.enhancedvoting.com/cdn/results/Arizona/export-110326GeneralElection.json"
+format = "bundle"
+primary_filename = "results.json"
+min_interval_seconds = 600
+expected_members = ["results.json"]
+
+[sources.az_2026_general.collector_overrides]
+max_download_bytes = 134217728
+max_uncompressed_bytes = 268435456
+
 # The Secretary of State's county results export (tab-separated text), downloaded by hand:
 # the results site refuses automated clients.
 [sources.mi_2026_general]

@@ -191,6 +191,18 @@ STATES = {
         governor=True,
         source_page="https://liveresults.ohiosos.gov/",
     ),
+    # Arizona's Enhanced Voting export is saved and imported by hand (parsers/az.py). No
+    # Senate race in 2026.
+    "AZ": State(
+        "AZ",
+        "Arizona",
+        "az_2026_general",
+        tuple(range(1, 10)),
+        ("total_votes",),
+        senate=False,
+        governor=True,
+        source_page="https://results.arizona.vote/",
+    ),
     # Michigan's results site refuses automated clients: its county export is imported by
     # hand (parsers/mi.py).
     "MI": State(
