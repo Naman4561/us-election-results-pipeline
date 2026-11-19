@@ -31,6 +31,7 @@ this page explains them.
 | Missouri | Saved by hand from the Secretary of State's All Results page (PDF) | House 1–8 (8) | No | Total only |
 | Montana | Secretary of State's Statewide Export (collected) | Senate, House 1–2 (3) | All 56 counties | Total only |
 | Nebraska | Secretary of State results CSV | Senate, Governor, House 1–3 (5) | No | Total only |
+| New Hampshire | Saved by hand: the Secretary of State's four results spreadsheets, imported as one zip | Senate, Governor, House 1–2 (4) | All 10 counties (House from its towns) | Total only |
 | New Mexico | ENR export | Senate, Governor, House 1–3 (5) | All 33 counties, small counts masked | Total only |
 | New York | Saved by hand from the State Board's election night page (PDF) | Governor, House 1–26 (27) | All 62 counties | Total only |
 | North Carolina | State Board precinct ZIP | Senate, House 1–14 (15) | All 100 counties | Election Day, early, mail, provisional |
@@ -132,6 +133,14 @@ zero.
   time, so the collector compares the worksheets without it and keeps the previous
   bundle while they match (refreshed hourly). Its "TEST" banner, shown on Nov 6, is in
   the page but hidden since. No write-ins or vote methods are reported.
+- **New Hampshire:** the results site refuses automated clients (Akamai). The operator
+  downloads its Senate and Governor county summaries and its two congressional district
+  sheets (by town and city ward) and imports them, unchanged, as one zip. Each sheet's
+  rows must add up to its TOTALS row, but those are Excel `SUM` formulas over the same
+  rows (read from their stored values), so this checks the file is unedited rather than
+  checking it against a second source. House towns are added up into their counties
+  (`resources/nh_2026_towns.json`, from Census; a ward counts for its city). No report
+  time is printed: it is declared at import.
 - **Pennsylvania:** the county results export (`UnOfficial_<time>.txt`, comma-separated) is
   saved by hand: the results site and its RSS feeds refuse automated clients, and the
   feeds stopped updating on November 10. It has no statewide rows (statewide totals
@@ -187,14 +196,14 @@ but has no public source (`awaiting_certified` in `resources/elections_2026.json
 state leaves the label once a source of its is public). Such a state is added from its
 certified canvass, as a manual source whose first import is the certified file
 ([manual results](manual-results.md#a-state-added-from-its-certified-results)), or from
-any results file it posts. As of November 19, 2026 eight states remain:
+any results file it posts. As of November 19, 2026 seven states remain:
 
 - **Illinois** and **Massachusetts** answer automated requests but list no November 3
   results yet: Illinois's State Board vote totals (`elections.il.gov`) show the primary
   only, and Massachusetts's PD43+ (`electionstats.state.ma.us`, CSV per contest, by city
   and town) only two special elections. Both should be collectable once certified.
-- **Nevada**, **New Hampshire** (Akamai), **New Jersey** and **Wisconsin** (Cloudflare)
-  refuse automated clients: an operator downloads their files.
+- **Nevada**, **New Jersey** and **Wisconsin** (Cloudflare) refuse automated clients: an
+  operator downloads their files.
 - **Kentucky** waits for its certified results (its live feed retired; see above) and
   **Maine** is not covered (below).
 

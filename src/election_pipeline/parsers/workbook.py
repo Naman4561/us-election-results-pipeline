@@ -59,11 +59,13 @@ class Workbook:
     def close(self):
         self.archive.close()
 
-    def rows(self, sheet, max_rows=1000, decimals=False):
+    def rows(self, sheet, max_rows=1000, decimals=False, sums=False):
         """The sheet's rows; one past ``max_rows`` (and the CSV row budget) is refused.
         Most official sheets are a few hundred rows; Alabama's one-sheet export is not.
         Numbers must be integers; with ``decimals`` a decimal number is kept as its text
-        (Alabama's statistics sheet dates each county's update as an Excel serial)."""
+        (Alabama's statistics sheet dates each county's update as an Excel serial).
+        Formulas are refused; with ``sums`` a ``SUM(...)`` cell gives its stored value
+        (New Hampshire's TOTALS rows), which the caller must check against the rows."""
         root = xml(self.archive.read(self.sheets[sheet]))
         rows = []
         previous_row = 0
@@ -83,7 +85,17 @@ class Workbook:
             values = {}
             for cell in node.findall("c"):
                 match = re.fullmatch(r"([A-Z]{1,3})([1-9]\d*)", cell.get("r", ""))
-                if not match or int(match[2]) != number or cell.find("f") is not None:
+                formula = cell.find("f")
+                if formula is not None and sums and cell.get("t") in (None, "n"):
+                    # A shared formula's later cells name only its group ("si").
+                    text = formula.text or ""
+                    if not (
+                        re.fullmatch(r"SUM\([A-Z]{1,3}[0-9]+:[A-Z]{1,3}[0-9]+\)", text)
+                        or (not text and formula.get("t") == "shared")
+                    ):
+                        raise ValueError("Unsupported workbook formula")
+                    formula = None
+                if not match or int(match[2]) != number or formula is not None:
                     raise ValueError("Invalid workbook cell address or formula")
                 column = 0
                 for character in match[1]:

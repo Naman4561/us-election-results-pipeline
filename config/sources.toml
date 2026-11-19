@@ -125,6 +125,17 @@ primary_filename = "results.txt"
 min_interval_seconds = 600
 expected_members = ["results.txt"]
 
+# The Secretary of State's four results spreadsheets, downloaded by hand and imported as
+# one zip: the results site refuses automated clients.
+[sources.nh_2026_general]
+state = "NH"
+election_date = "2026-11-03"
+url = "https://www.sos.nh.gov/2026-general-election-results"
+format = "bundle"
+primary_filename = "results.zip"
+min_interval_seconds = 600
+expected_members = ["results.zip"]
+
 # The statewide results page and its Export Data workbook (collectors/alabama).
 [sources.al_2026_general]
 state = "AL"

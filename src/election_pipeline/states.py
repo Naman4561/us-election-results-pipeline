@@ -226,6 +226,17 @@ STATES = {
         governor=True,
         source_page="https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026",
     ),
+    # New Hampshire's results site refuses automated clients: its four results
+    # spreadsheets are imported by hand, as one zip (parsers/nh.py).
+    "NH": State(
+        "NH",
+        "New Hampshire",
+        "nh_2026_general",
+        (1, 2),
+        ("total_votes",),
+        governor=True,
+        source_page="https://www.sos.nh.gov/2026-general-election-results",
+    ),
     # Alabama's statewide page and its Export Data workbook (collectors/alabama.py).
     "AL": State(
         "AL",

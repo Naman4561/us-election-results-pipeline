@@ -99,6 +99,7 @@ class MultiStateTests(unittest.TestCase):
                     "MT",
                     "AL",
                     "CT",
+                    "NH",
                 ),
             },
         )
@@ -107,7 +108,7 @@ class MultiStateTests(unittest.TestCase):
         awaiting = set(payload["calendar"]["awaiting_certified"])
         self.assertEqual(
             awaiting & set(payload["states"]),
-            {"KY", "VA", "WY", "OK", "MI", "MO", "AZ", "TN", "NY", "PA", "MT", "AL", "CT"},
+            {"KY", "VA", "WY", "OK", "MI", "MO", "AZ", "TN", "NY", "PA", "MT", "AL", "CT", "NH"},
         )
         self.assertEqual(len(awaiting | set(payload["states"])), 50)
         self.assertEqual(len(payload["coverage"]["KY"]), 7)

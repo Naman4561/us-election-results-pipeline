@@ -45,6 +45,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Missouri | Unofficial, imported by hand | Nov 19 05:00 | The Secretary of State's All Results page, saved as a PDF. Statewide and congressional district totals only (no county results); no Senate race in 2026. |
 | Montana | Unofficial, counting | Nov 19 18:50 | Public since Nov 19, 3:45 PM EST, collected from its Statewide Export; the site's TEST banner is hidden now and its export answered every request. 726 of 728 precincts; site updated Nov 19, 11:50 AM Mountain. |
 | Nebraska | Unofficial, pending certification | Nov 14 01:00 | All precincts in. Collected every 3 hours, clear of backups. |
+| New Hampshire | Not public yet | — | Its four results spreadsheets imported by hand (its site refuses automated clients); every race by county. |
 | New Mexico | Unofficial, pending certification | Nov 12 19:01 | The State Board of Canvass certifies Nov 24. Collected hourly. |
 | New York | Unofficial, imported by hand | Nov 19 05:15 | The State Board of Elections' election night page, saved as a PDF. Fusion party lines are added up per candidate. |
 | North Carolina | Unofficial, counting | Nov 14 00:31 | |
@@ -66,4 +67,4 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Wyoming | Official | Nov 10 21:37 | Added from its certified results (certified Nov 10). |
 | Maine | Awaiting certified results | — | Municipal reporting with no statewide endpoint. |
 | Illinois, Massachusetts | Awaiting certified results | — | Their official results sites answer automated requests but list no Nov 3 results yet (Illinois's State Board after its canvass; Massachusetts's PD43+ once certified); both should then be collected automatically. |
-| Nevada, New Hampshire, New Jersey, Wisconsin | Awaiting certified results | — | Their results sites refuse automated clients (New Hampshire: Akamai; Wisconsin: Cloudflare); they need an operator download. |
+| Nevada, New Jersey, Wisconsin | Awaiting certified results | — | Their results sites refuse automated clients (Wisconsin: Cloudflare); they need an operator download. |

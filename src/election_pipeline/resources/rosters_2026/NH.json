@@ -1,0 +1,76 @@
+{
+ "state": "NH",
+ "provenance": "New Hampshire candidates (by name, with party letters) and counties from the Secretary of State's 2026 general election spreadsheets, downloaded by the operator on Nov 19, 2026: 2026-ge-us-senator-summary.xlsx (SHA-256 76a2c1fa69239c16733aff2ef54f66b606a0842a8eaaa10e863a0a640c66c409), 2026-ge-governor-summary.xlsx (847bd28331973ad4dbe20cb68f588a965609f55bc1c9f14bccf832dabb803e1f), 2026-ge-congressional-district-1.xlsx (3fd062a9033a86bf899628552e829962fa7b122536e26cc89fc5dd16d877d2c3) and -2.xlsx (56cf7747354537b53170d7ce97c766d639980cfe3f5c29938852435af4985f5d). House counties are the counties of the district's towns (resources/nh_2026_towns.json). Write-ins are excluded. Confirmed by the operator before release.",
+ "races": {
+  "NH-SEN": {
+   "candidates": [
+    "Chris Pappas",
+    "John E. Sununu",
+    "Edmond Laplante"
+   ],
+   "counties": [
+    "Belknap",
+    "Carroll",
+    "Cheshire",
+    "Coos",
+    "Grafton",
+    "Hillsborough",
+    "Merrimack",
+    "Rockingham",
+    "Strafford",
+    "Sullivan"
+   ]
+  },
+  "NH-GOV": {
+   "candidates": [
+    "Cinde Warmington",
+    "Kelly Ayotte",
+    "Stephen Villee"
+   ],
+   "counties": [
+    "Belknap",
+    "Carroll",
+    "Cheshire",
+    "Coos",
+    "Grafton",
+    "Hillsborough",
+    "Merrimack",
+    "Rockingham",
+    "Strafford",
+    "Sullivan"
+   ]
+  },
+  "NH-01": {
+   "candidates": [
+    "Stefany Shaheen",
+    "Anthony DiLorenzo"
+   ],
+   "counties": [
+    "Belknap",
+    "Carroll",
+    "Hillsborough",
+    "Merrimack",
+    "Rockingham",
+    "Strafford"
+   ]
+  },
+  "NH-02": {
+   "candidates": [
+    "Maggie Goodlander",
+    "Lily Tang Williams",
+    "Robbie Mahrou"
+   ],
+   "counties": [
+    "Belknap",
+    "Carroll",
+    "Cheshire",
+    "Coos",
+    "Grafton",
+    "Hillsborough",
+    "Merrimack",
+    "Rockingham",
+    "Sullivan"
+   ]
+  }
+ }
+}
