@@ -226,6 +226,19 @@ STATES = {
         governor=True,
         source_page="https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026",
     ),
+    # Nevada's results site and data files refuse automated clients: the app's manifest,
+    # overview and contest files are saved by hand and imported as one zip (parsers/nv.py).
+    # No Senate race in 2026.
+    "NV": State(
+        "NV",
+        "Nevada",
+        "nv_2026_general",
+        tuple(range(1, 5)),
+        ("total_votes",),
+        senate=False,
+        governor=True,
+        source_page="https://silverstateelection.nv.gov/",
+    ),
     # New Hampshire's results site refuses automated clients: its four results
     # spreadsheets are imported by hand, as one zip (parsers/nh.py).
     "NH": State(

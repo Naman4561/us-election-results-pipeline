@@ -125,6 +125,17 @@ primary_filename = "results.txt"
 min_interval_seconds = 600
 expected_members = ["results.txt"]
 
+# The results app's manifest, overview and contest files, saved by hand and imported as
+# one zip: the results site and its data files refuse automated clients.
+[sources.nv_2026_general]
+state = "NV"
+election_date = "2026-11-03"
+url = "https://silverstateelection.nv.gov/data/v2/elections/2a6d1aef-f8eb-424f-9130-ac9bdc2cced5/manifest.json"
+format = "bundle"
+primary_filename = "results.zip"
+min_interval_seconds = 600
+expected_members = ["results.zip"]
+
 # The Secretary of State's four results spreadsheets, downloaded by hand and imported as
 # one zip: the results site refuses automated clients.
 [sources.nh_2026_general]

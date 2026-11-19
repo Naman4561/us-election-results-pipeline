@@ -1,0 +1,17 @@
+{
+ "file": "results.zip",
+ "sha256": "af3bdd6cff7611180755e98d70dfd03d54a04d903e46ac9051bdf835fe7f54ce",
+ "packed": "the saved files below, unchanged; contest files under their own SHA-256 names (scratchpad nv_pack.py)",
+ "members": {
+  "manifest.json": "b73a80dbff124b52c3dd563846768a5c0b5e657b32c16b9685ba49fd5b9b6af9",
+  "overview.json": "071af879cc52991877f6f77c5ab94587c62f087c530faae45adb03d8d6e790c1",
+  "9c3f603616365ee909467b2bb295abda2ea28c1de2f20ea0cf51001d99128ac0.json": "Governor",
+  "eabe98b7864692cae497f2c84aff3733c96c8bcf6a5c581f8dc9aec9fcf23841.json": "House 1",
+  "d2973c4c2d29445299f29ec8da7fea119d50981a35d2665a776be617c157cfde.json": "House 2",
+  "b9432f022d4387757e7e04671293c329028468555a0bfd1a590f5b77e90a31e8.json": "House 3",
+  "e9e547c2af8c3de4db7c1348c6b1f3a53565694e8fbdb210d5aca17365280a16.json": "House 4"
+ },
+ "source": "https://silverstateelection.nv.gov/data/v2/elections/2a6d1aef-f8eb-424f-9130-ac9bdc2cced5/",
+ "manifest": "release sequence 90, generated 2026-11-13T23:36:19Z; results status Unofficial",
+ "downloaded": "2026-11-19, 5:03-5:11 PM Eastern, by the operator in a browser"
+}
