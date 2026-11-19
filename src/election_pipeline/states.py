@@ -226,6 +226,18 @@ STATES = {
         governor=True,
         source_page="https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026",
     ),
+    # Pennsylvania's results site and feeds refuse automated clients: its county export is
+    # imported by hand (parsers/pa.py). No Senate race in 2026.
+    "PA": State(
+        "PA",
+        "Pennsylvania",
+        "pa_2026_general",
+        tuple(range(1, 18)),
+        ("total_votes", "election_day", "mail", "provisional"),
+        senate=False,
+        governor=True,
+        source_page="https://www.electionreturns.pa.gov/",
+    ),
     # Missouri's results site refuses automated clients: its All Results page is saved as a
     # PDF by hand and gives statewide totals only (parsers/mo.py). No Senate or Governor.
     "MO": State(

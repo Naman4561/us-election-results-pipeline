@@ -35,6 +35,7 @@ this page explains them.
 | Ohio | Saved by hand from the results XML | Senate, Governor, House 1–15 (17) | All 88 counties | Total only |
 | Oklahoma | Saved by hand from the State Election Board's county results export | Senate, Governor, House 1–5 (7) | All 77 counties | Election Day, early, mail |
 | Oregon | ENR export | Senate, Governor, House 1–6 (8) | All 36 counties | Total only |
+| Pennsylvania | Saved by hand from the Department of State's county results export (CSV text) | Governor, House 1–17 (18) | All 67 counties | Election Day, mail, provisional |
 | Rhode Island | Enhanced Voting | Senate, Governor, House 1–2 (4) | No (reported by town) | Election Day, early, mail |
 | South Carolina | Clarity (Election Commission) | Senate, Governor, House 1–7 (9) | All 46 counties | Total only |
 | South Dakota | ENR export | Senate, Governor, House at-large (3) | All 66 counties | Total only |
@@ -110,6 +111,11 @@ zero.
   cast by mail, so it is not stored as in-person `early_voting`. Each count's groups add
   up to it, and the counties' groups to the statewide ones. Its `createdAt` is the
   report time.
+- **Pennsylvania:** the county results export (`UnOfficial_<time>.txt`, comma-separated) is
+  saved by hand: the results site and its RSS feeds refuse automated clients, and the
+  feeds stopped updating on November 10. It has no statewide rows (statewide totals
+  are the county sums), no write-ins and no report time (declared at import). Each
+  row's Election Day, mail and provisional votes must add up to its count.
 - **Michigan:** the county results export (tab-separated text) is saved by hand (the
   results site refuses automated clients). It has no statewide rows: statewide totals are
   the county sums, with each office's write-ins as one line. It prints no report time,
