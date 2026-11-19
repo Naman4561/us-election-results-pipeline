@@ -110,6 +110,17 @@ primary_filename = "results.txt"
 min_interval_seconds = 600
 expected_members = ["results.txt"]
 
+# The Secretary of State's All Results page, saved as a PDF by hand: the results site
+# refuses automated clients.
+[sources.mo_2026_general]
+state = "MO"
+election_date = "2026-11-03"
+url = "https://enr.sos.mo.gov/"
+format = "bundle"
+primary_filename = "results.pdf"
+min_interval_seconds = 600
+expected_members = ["results.pdf"]
+
 # The Election Commission's Clarity site, which kept counting after the election-night
 # workbooks on its fallback page stopped.
 [sources.sc_2026_general]

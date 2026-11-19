@@ -202,6 +202,18 @@ STATES = {
         governor=True,
         source_page="https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026",
     ),
+    # Missouri's results site refuses automated clients: its All Results page is saved as a
+    # PDF by hand and gives statewide totals only (parsers/mo.py). No Senate or Governor.
+    "MO": State(
+        "MO",
+        "Missouri",
+        "mo_2026_general",
+        tuple(range(1, 9)),
+        ("total_votes",),
+        senate=False,
+        county_results=False,
+        source_page="https://enr.sos.mo.gov/",
+    ),
     "OK": State(
         "OK",
         "Oklahoma",

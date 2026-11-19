@@ -25,6 +25,7 @@ this page explains them.
 | Michigan | Saved by hand from the Secretary of State's county results export | Senate, Governor, House 1–13 (15) | All 83 counties | Total only |
 | Minnesota | Secretary of State media files | Senate, Governor, House 1–8 (10) | All 87 counties | Total only |
 | Mississippi | County election offices | Senate (1) | Covered counties | Total only |
+| Missouri | Saved by hand from the Secretary of State's All Results page (PDF) | House 1–8 (8) | No | Total only |
 | Nebraska | Secretary of State results CSV | Senate, Governor, House 1–3 (5) | No | Total only |
 | New Mexico | ENR export | Senate, Governor, House 1–3 (5) | All 33 counties, small counts masked | Total only |
 | North Carolina | State Board precinct ZIP | Senate, House 1–14 (15) | All 100 counties | Election Day, early, mail, provisional |
@@ -102,6 +103,9 @@ zero.
   results site refuses automated clients). It has no statewide rows: statewide totals are
   the county sums, with each office's write-ins as one line. It prints no report time,
   so the operator declares the site's "Updated" time at import.
+- **Missouri:** the All Results page is saved as a PDF by hand (the results site refuses
+  automated clients). It gives statewide district totals only; each district's
+  candidates must add up to its printed Total Votes. Write-ins are one line.
 - **Ohio:** the official XML is saved by hand ([manual results](manual-results.md)).
 - **Oklahoma:** the county results export is saved by hand (the results site refuses
   automated clients). It has no statewide rows: statewide totals are the county sums,

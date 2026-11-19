@@ -1,0 +1,70 @@
+{
+ "state": "MO",
+ "provenance": "Missouri candidates from the Secretary of State's All Results page (enr.sos.mo.gov), saved as a PDF by the operator: 'State of Missouri - Election Night Results.pdf' (SHA-256 bfa9c5dfe080cd5e4433c76fb39133edb77c635b33551c7579807856e564e1b7), Unofficial Results as of 11/18/2026 10:53:42 PM Central, all precincts reported. Write-in candidates are excluded. Confirmed by the operator before release.",
+ "races": {
+  "MO-01": {
+   "candidates": [
+    "Paul Berry III",
+    "Wesley Bell",
+    "Tom Schmitz"
+   ],
+   "counties": []
+  },
+  "MO-02": {
+   "candidates": [
+    "Ann Wagner",
+    "Fred Wellman",
+    "Brandon Coulter Daugherty"
+   ],
+   "counties": []
+  },
+  "MO-03": {
+   "candidates": [
+    "Bob Onder",
+    "Bethany E Mann",
+    "Jim Higgins"
+   ],
+   "counties": []
+  },
+  "MO-04": {
+   "candidates": [
+    "Mark Alford",
+    "Jordan Herrera",
+    "Thomas Holbrook"
+   ],
+   "counties": []
+  },
+  "MO-05": {
+   "candidates": [
+    "Rick Brattin",
+    "Emanuel Cleaver, II",
+    "Randall (Randy) Langkraehr"
+   ],
+   "counties": []
+  },
+  "MO-06": {
+   "candidates": [
+    "Chris Stigall",
+    "Josh Smead",
+    "Andy Maidment"
+   ],
+   "counties": []
+  },
+  "MO-07": {
+   "candidates": [
+    "Eric W. Burlison",
+    "Missi Hesketh",
+    "Kevin Craig"
+   ],
+   "counties": []
+  },
+  "MO-08": {
+   "candidates": [
+    "Jason T. Smith",
+    "Chris Reichard",
+    "Rebecca Sharpe Lombard"
+   ],
+   "counties": []
+  }
+ }
+}
