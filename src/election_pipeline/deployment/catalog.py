@@ -84,6 +84,10 @@ def validate(value):
             raise ValueError("The paused flag must be boolean")
         if entry.get("paused") and (not entry["enabled"] or entry["acquisition"] != "http"):
             raise ValueError("Only an enabled HTTP source can be paused")
+        if type(entry.get("final", False)) is not bool or (
+            entry.get("final") and not entry.get("paused")
+        ):
+            raise ValueError("Only a paused source can be final, with a boolean")
         source = sources[name]
         if source.dataset != "election_results":
             if entry["enabled"]:

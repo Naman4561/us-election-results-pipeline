@@ -101,6 +101,9 @@ class DeploymentTests(unittest.TestCase):
             # Only a collected source can be paused, and only with a boolean.
             lambda v: v["sources"][GA].update(paused=True),
             lambda v: v["sources"][NC].update(paused="yes"),
+            # Only a paused source can be final, and only with a boolean.
+            lambda v: v["sources"][NC].update(final=True),
+            lambda v: v["sources"][NC].update(paused=True, final="yes"),
             lambda v: v["sources"][NC].update(status="certified"),
             # Ancillary datasets are collected by hand, never by the worker.
             lambda v: v["sources"].update(nc_absentee_early_demographics_2026={**v["sources"][NC]}),
@@ -281,8 +284,14 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual([c.args[1] for c in run.call_args_list], [KY])
         latest = json.loads((self.root / "worker-latest.json").read_text())
         self.assertIn({"source_id": NC, "outcome": "paused"}, latest["results"])
+        # Final only while paused; resuming clears it.
+        self.assertEqual(control.mark_final(self.path, NC)["outcome"], "marked_final")
+        self.assertTrue(catalog.read(self.path)["sources"][NC]["final"])
+        with self.assertRaisesRegex(ValueError, "pause it first"):
+            control.mark_final(self.path, KY)
         control.pause(self.path, NC, False)
         self.assertNotIn("paused", catalog.read(self.path)["sources"][NC])
+        self.assertNotIn("final", catalog.read(self.path)["sources"][NC])
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_certify_pauses_first_publishes_official_and_restores_the_pause_on_refusal(self):

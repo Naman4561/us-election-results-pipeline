@@ -41,6 +41,7 @@ def main():
         "disable",
         "pause",
         "resume",
+        "final",
         "mark-unofficial",
     ):
         sub.add_parser(name).add_argument("--source", required=True)
@@ -129,6 +130,8 @@ def main():
             result = control.disable(path, args.source)
         elif action in ("pause", "resume"):
             result = control.pause(path, args.source, action == "pause")
+        elif action == "final":
+            result = control.mark_final(path, args.source)
         elif action == "mark-unofficial":
             result = control.mark_unofficial(path, args.source)
         elif action == "certify":

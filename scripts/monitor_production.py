@@ -152,8 +152,9 @@ def assess(prod, config, now):
             )
         if entry.get("paused"):
             # An operator stopped its collection; its publication is still checked below.
-            # A certified source stays paused for good, which needs no reminder.
-            if entry["status"] != "official":
+            # A certified source stays paused for good, which needs no reminder; nor does
+            # one marked final until the state certifies (deploy final).
+            if entry["status"] != "official" and not entry.get("final"):
                 issues[f"{REMINDER}paused/{name}"] = "Collection is paused by an operator"
             continue
         run_limit = int(config.get("MAX_RUN_AGE_SECONDS", "3600"))

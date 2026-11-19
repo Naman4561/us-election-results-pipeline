@@ -201,6 +201,9 @@ class MonitorTests(unittest.TestCase):
         issues = self.assess()
         self.assertEqual(set(issues), {monitor.REMINDER + "paused/" + NC})
         self.assertIn("dashboard/NC", self.assess(dashboard=payload("MN")))
+        # Marked final until the state certifies: nothing to remind about.
+        self.catalog["sources"][NC]["final"] = True
+        self.assertEqual(self.assess(), {})
 
     def test_an_official_feed_is_a_reminder_until_certified_and_then_needs_none(self):
         atomic_json(

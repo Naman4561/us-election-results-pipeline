@@ -904,7 +904,8 @@ def certify(path, name, prod, config, *, approve=None, certified=None, attested=
 
 
 def pause(path, name, paused):
-    """Stop or restart collecting a source; its last publication stays served either way."""
+    """Stop or restart collecting a source; its last publication stays served either way.
+    Resuming also clears ``final``: a collected source is no longer done."""
 
     def change(value):
         entry = value["sources"][name]
@@ -912,9 +913,25 @@ def pause(path, name, paused):
             entry["paused"] = True
         else:
             entry.pop("paused", None)
+            entry.pop("final", None)
 
     catalog.update(path, change)
     return {"outcome": "paused" if paused else "resumed", "source_id": name}
+
+
+def mark_final(path, name):
+    """Record that a paused collected source's results are final until the state certifies
+    (Mississippi, every county certified before the statewide canvass): its pause is then
+    no reminder. Certifying it later is unchanged; resuming clears the mark."""
+
+    def change(value):
+        entry = value["sources"][name]
+        if not entry.get("paused") or entry["acquisition"] != "http":
+            raise ValueError("Only a paused HTTP source can be marked final; pause it first")
+        entry["final"] = True
+
+    catalog.update(path, change)
+    return {"outcome": "marked_final", "source_id": name}
 
 
 def mark_unofficial(path, name):

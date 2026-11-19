@@ -142,7 +142,9 @@ and `activate` removes every dashboard but the new active one and the one it rep
 `deploy pause --source` stops collecting a source while its last publication stays
 public, such as a site that is down for days; `deploy resume --source` starts it again.
 The worker records a paused source as `paused`, and the monitor shows a reminder in
-place of its collection checks.
+place of its collection checks. `deploy final --source` marks a paused source's results
+final until the state certifies them (Mississippi, once every county had certified): its
+pause is then no reminder. Certifying it later is unchanged, and resuming clears the mark.
 
 ## Certified results
 
