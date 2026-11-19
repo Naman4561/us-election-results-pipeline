@@ -458,7 +458,8 @@ function renderStatePanel() {
   if (!view.county && partial)
     $("result-scope").textContent = "COLLECTED COUNTY TOTALS";
   // A town (Vermont) or House district (Alaska) is named alone; a county is named as one.
-  const unit = state.local_unit === "county" || !state.local_unit ? " County" : "";
+  const unit =
+    state.local_unit === "county" || !state.local_unit ? " County" : "";
   $("result-subtitle").textContent =
     (county || feed ? (county?.name || feed.name) + unit + " · " : "") +
     state.name;
