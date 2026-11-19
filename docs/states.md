@@ -7,11 +7,13 @@ this page explains them.
 
 | State | Source | Races | County results | Vote methods stored |
 | --- | --- | --- | --- | --- |
+| Alabama | Secretary of State's statewide page and its Export Data workbook (collected) | Senate, Governor, House 1–7 (9) | All 67 counties | Total only |
 | Alaska | Division of Elections precinct CSV | Senate, Governor, House at-large (3) | By State House district (40) | Total only (first choice) |
 | Arkansas | Tally (Secretary of State) | Senate, Governor, House 1–4 (6) | All 75 counties | Total only |
 | Arizona | Saved by hand from the Secretary of State's Enhanced Voting export (JSON) | Governor, House 1–9 (10) | All 15 counties | Early ballots, Early A.R.S. 16-579, Late Early, Election Day, provisional (Arizona's own groups) |
 | California | Secretary of State results API | Governor, House 1–52 (53) | No | Total only |
 | Colorado | Clarity | Senate, Governor, House 1–8 (10) | All 64 counties | Total only |
+| Connecticut | Secretary of the State's results app data files (collected) | Governor, House 1–5 (6) | No (reported by town; 169 towns) | Total only |
 | Delaware | Department of Elections results JSON | Senate, House at-large (2) | All 3 counties | Total only (methods checked) |
 | Florida | Division of Elections results file | Senate, Governor, 27 House (29) | All 67 counties | Total only |
 | Georgia | Secretary of State results API | Senate, Governor, House 1–14 (16) | No | Total only |
@@ -112,6 +114,18 @@ zero.
   cast by mail, so it is not stored as in-person `early_voting`. Each count's groups add
   up to it, and the counties' groups to the statewide ones. Its `createdAt` is the
   report time.
+- **Alabama:** the statewide results page and its "Export Data" workbook
+  (`collectors/alabama.py`, posting the page's results form, not its search forms).
+  Every county row adds up, candidate by candidate, to the page's statewide votes, and
+  those to its contest total. Write-ins are one line; each county's precincts come from
+  the workbook's Statistics sheet. Identical re-downloads (a new zip, same sheets) keep
+  the previous bundle.
+- **Connecticut:** the results app's static files: `Version.json`, then that version's
+  lookup, statewide, town and status files (`collectors/connecticut.py`; a version
+  change mid-collection fails the attempt). Candidates on several party lines (fusion)
+  are added up under their major party; write-ins are one line. Towns must add up to
+  statewide line by line. The map draws its 169 towns. The app prints no update time of
+  its own, so the version number is recorded.
 - **Montana:** the site is South Dakota's platform without its statewide CSV. The
   collector posts the export page's "Statewide Export" button (`collectors/montana.py`);
   each sheet's county rows must add up to its TOTALS row. Every download embeds its own

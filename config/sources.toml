@@ -125,6 +125,29 @@ primary_filename = "results.txt"
 min_interval_seconds = 600
 expected_members = ["results.txt"]
 
+# The statewide results page and its Export Data workbook (collectors/alabama).
+[sources.al_2026_general]
+state = "AL"
+election_date = "2026-11-03"
+url = "https://www2.alabamavotes.gov/electionNight/statewideResultsByContest.aspx?ecode=1001305"
+format = "bundle"
+primary_filename = "results.html"
+min_interval_seconds = 600
+expected_members = ["results.html", "export.xlsx"]
+supplemental_members = ["export.xlsx"]
+
+# The official results app's version file and that version's data files
+# (collectors/connecticut).
+[sources.ct_2026_general]
+state = "CT"
+election_date = "2026-11-03"
+url = "https://ctemspublic.tgstg.net/ng-app/data/election/108/Version.json"
+format = "bundle"
+primary_filename = "version.json"
+min_interval_seconds = 600
+expected_members = ["version.json", "lookup.json", "election.json", "state.json", "towns.json", "status.json"]
+supplemental_members = ["lookup.json", "election.json", "state.json", "towns.json", "status.json"]
+
 # The results site's export page and its "Statewide Export" workbook (collectors/montana).
 [sources.mt_2026_general]
 state = "MT"

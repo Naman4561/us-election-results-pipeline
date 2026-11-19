@@ -21,11 +21,13 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 
 | State | Status | Last vote change | Notes |
 | --- | --- | --- | --- |
+| Alabama | Unofficial, pending certification | Nov 4 17:16 | Collected from its statewide page and Export Data workbook since Nov 19; 67 of 67 counties reported; the page last updated Nov 4, 11:16 AM Central. |
 | Alaska | Unofficial, between counts | Nov 19 01:33 | Results by State House district (overseas ballots are statewide only). No ranked-choice tabulation posted yet (checked Nov 19); certification targeted Nov 25. |
 | Arizona | Unofficial, imported by hand | Nov 19 05:00 | The Secretary of State's Enhanced Voting export (JSON, about 72 MB), statewide and by county; generic write-ins combined. |
 | Arkansas | Official | Nov 19 16:36 | Certified: its feed marks the results official (`isOfficial`, version of Nov 19, 11:36 AM EST, 23 votes more than Nov 16's). Published as official Nov 19 with `deploy certify`. Collection paused. |
 | California | Unofficial, counting | Nov 18 01:47 | |
 | Colorado | Unofficial, counting | Nov 13 23:50 | |
+| Connecticut | Unofficial, counting | — | Collected from its results app since Nov 19 (version 55530); results by town; 774 of 774 polling places. |
 | Delaware | Official | Nov 10 19:30 | Certified; collection paused. |
 | Florida | Unofficial, counting | Nov 17 16:15 | Collection resumed: GoDaddy TLS Root CA - R1 is trusted for Florida's file host only. |
 | Georgia | Unofficial, counting | Nov 18 00:48 | |

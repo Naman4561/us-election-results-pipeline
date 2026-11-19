@@ -59,7 +59,11 @@ class Workbook:
     def close(self):
         self.archive.close()
 
-    def rows(self, sheet):
+    def rows(self, sheet, max_rows=1000, decimals=False):
+        """The sheet's rows; one past ``max_rows`` (and the CSV row budget) is refused.
+        Most official sheets are a few hundred rows; Alabama's one-sheet export is not.
+        Numbers must be integers; with ``decimals`` a decimal number is kept as its text
+        (Alabama's statistics sheet dates each county's update as an Excel serial)."""
         root = xml(self.archive.read(self.sheets[sheet]))
         rows = []
         previous_row = 0
@@ -74,7 +78,7 @@ class Workbook:
                 for cell in node.findall("c")
             ):
                 continue
-            if number > min(self.settings.max_csv_rows, 1000):
+            if number > min(self.settings.max_csv_rows, max_rows):
                 raise ValueError("Unordered/excessive workbook rows")
             values = {}
             for cell in node.findall("c"):
@@ -97,9 +101,12 @@ class Workbook:
                 elif kind not in (None, "n"):
                     raise ValueError("Unsupported workbook cell type")
                 elif value is not None:
-                    if not re.fullmatch(r"[0-9]+", value):
+                    if decimals and re.fullmatch(r"[0-9]+\.[0-9]+", value):
+                        pass
+                    elif not re.fullmatch(r"[0-9]+", value):
                         raise ValueError("Expected an integer workbook number")
-                    value = int(value)
+                    else:
+                        value = int(value)
                 values[column] = value
             while len(rows) < number:
                 rows.append([])

@@ -1,0 +1,10 @@
+{
+ "file": "bundle.zip",
+ "sha256": "1e29c3428a50a663e904deea8bef0b52a03b5a1af393beab4d2aac2645d05ef8",
+ "members": {
+  "results.html": "https://www2.alabamavotes.gov/electionNight/statewideResultsByContest.aspx?ecode=1001305 (GET)",
+  "export.xlsx": "the same page's Export Data link (POST of its results form, form1): sosEnrExport.xlsx"
+ },
+ "captured": "2026-11-19, about 2:45 PM Eastern, from the production server",
+ "site_status": "unofficial; Counties Reported 67 of 67; Last Updated 11/04/2026 11:16:06 AM"
+}

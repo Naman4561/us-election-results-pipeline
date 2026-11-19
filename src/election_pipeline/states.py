@@ -226,6 +226,34 @@ STATES = {
         governor=True,
         source_page="https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026",
     ),
+    # Alabama's statewide page and its Export Data workbook (collectors/alabama.py).
+    "AL": State(
+        "AL",
+        "Alabama",
+        "al_2026_general",
+        tuple(range(1, 8)),
+        ("total_votes",),
+        governor=True,
+        source_page=(
+            "https://www2.alabamavotes.gov/electionNight/statewideResultsByContest.aspx"
+            "?ecode=1001305"
+        ),
+        collection_backend="alabama",
+    ),
+    # Connecticut reports by town, not county; candidates can run on several party lines
+    # (parsers/ct.py). No Senate race in 2026.
+    "CT": State(
+        "CT",
+        "Connecticut",
+        "ct_2026_general",
+        tuple(range(1, 6)),
+        ("total_votes",),
+        senate=False,
+        governor=True,
+        source_page="https://ctemspublic.tgstg.net/#/home",
+        collection_backend="connecticut",
+        local_unit="town",
+    ),
     # Montana's site is South Dakota's platform without its statewide CSV: the Statewide
     # Export workbook is collected (collectors/montana.py). No Governor race in 2026.
     "MT": State(
