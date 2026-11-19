@@ -200,6 +200,14 @@ class DashboardTests(unittest.TestCase):
             self.assertEqual(national_ms["county_feeds"], detail_ms["county_feeds"])
             self.assertNotIn("counties", national_ms["races"]["MS-SEN"])
             self.assertLess(len(whole.content), 1_000_000)
+            # A runoff date rides on its race, in the summary and the detail alike.
+            national_la = whole.json()["states"]["LA"]["races"]
+            detail_la = client.get("/api/states/LA").json()["races"]
+            for races in (national_la, detail_la):
+                self.assertEqual(
+                    {r: c["runoff"] for r, c in races.items() if "runoff" in c},
+                    {"LA-05": "2026-12-12", "LA-06": "2026-12-12"},
+                )
             self.assertEqual(client.get("/nc-map.json").headers["cache-control"], "no-cache")
             self.assertIn("no-cache", whole.headers["cache-control"])
 

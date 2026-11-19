@@ -174,6 +174,8 @@ def make_payload(
         }
         if masked:
             races[identity]["county_privacy_masked"] = True
+        if identity in dict(adapter.runoffs):
+            races[identity]["runoff"] = dict(adapter.runoffs)[identity]
     payload = {
         "state": state,
         "methods": methods,

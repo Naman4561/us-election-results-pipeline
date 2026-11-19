@@ -176,6 +176,26 @@ test("national/state map navigation and coverage statuses", async (t) => {
   delete payload.states.MS.races["MS-03"];
   click("#refresh");
   await settle();
+  // Louisiana's 5th and 6th go to a December runoff; no other district does.
+  click("#national");
+  click('[data-office="house"]');
+  const tip = (id) =>
+    d.querySelector(`path[data-id="${id}"] title`).textContent;
+  assert(tip("LA-05").includes("Runoff pending · December 12"));
+  assert(!tip("LA-04").includes("Runoff"));
+  assert(d.querySelector("#result-runoff").hidden);
+  click('path[data-id="LA-05"]');
+  await settle();
+  assert.equal(d.querySelector("#result-title").textContent, "LA-05");
+  assert.equal(
+    d.querySelector("#result-runoff").textContent,
+    "Runoff pending · December 12",
+  );
+  assert(!d.querySelector("#result-runoff").hidden);
+  click('path[data-id="LA-04"]');
+  assert(d.querySelector("#result-runoff").hidden);
+  click('[data-office="senate"]');
+  assert(d.querySelector("#result-runoff").hidden);
   click("#national");
   click('[data-office="senate"]');
   assert(

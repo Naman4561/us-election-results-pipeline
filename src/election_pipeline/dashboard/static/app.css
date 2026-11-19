@@ -423,6 +423,11 @@ h2 {
   font-size: 12px;
   margin: 0 0 22px;
 }
+.results-panel #result-runoff {
+  font-size: 12px;
+  font-weight: 600;
+  margin: -16px 0 22px;
+}
 .total {
   padding: 18px 0;
   border-top: 1px solid var(--line);

@@ -45,6 +45,18 @@ const descriptions = {
 const number = (n) => n.toLocaleString("en-US");
 const date = (value) =>
   value ? new Date(value).toLocaleString() : "Unavailable";
+// "Runoff pending · December 12" for a race whose November count goes to a runoff.
+const runoffText = (code, race) => {
+  const day = data.states[code]?.races?.[race]?.runoff;
+  if (!day) return "";
+  // The date is a calendar day: read and printed in UTC so no time zone shifts it.
+  const when = new Date(day + "T00:00:00Z").toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+  return `Runoff pending · ${when}`;
+};
 const view = {
   office: "senate",
   scope: "US",
@@ -313,7 +325,8 @@ function drawMap() {
       result.status === "partial"
         ? ` · ${partial.with_results}/${partial.expected} counties with accepted counts`
         : "";
-    const description = `${f.name}: ${descriptions[result.status]}${partialText}${result.staleCounty ? " · stale county source" : ""}${firstChoice ? " · listed candidates, first choice only" : ""}${result.stats?.total ? " · " + number(result.stats.total) + " votes" : ""}`;
+    const runoff = view.office === "house" ? runoffText(code, f.id) : "";
+    const description = `${f.name}: ${descriptions[result.status]}${runoff ? " · " + runoff : ""}${partialText}${result.staleCounty ? " · stale county source" : ""}${firstChoice ? " · listed candidates, first choice only" : ""}${result.stats?.total ? " · " + number(result.stats.total) + " votes" : ""}`;
     const title = document.createElementNS(ns, "title");
     title.textContent = description;
     p.append(title);
@@ -367,6 +380,7 @@ function renderNationalPanel() {
   $("result-scope").textContent = "OUR COVERAGE";
   $("result-title").textContent = offices[view.office];
   $("result-subtitle").textContent = "United States · Reported leads only";
+  $("result-runoff").hidden = true;
   const target = $("result-content");
   target.replaceChildren();
   let count = 0,
@@ -463,6 +477,9 @@ function renderStatePanel() {
   $("result-subtitle").textContent =
     (county || feed ? (county?.name || feed.name) + unit + " · " : "") +
     state.name;
+  const runoff = view.office === "house" ? runoffText(code, race) : "";
+  $("result-runoff").textContent = runoff;
+  $("result-runoff").hidden = !runoff;
   const target = $("result-content");
   target.replaceChildren();
   const result = statusFor(code, race, view.county),
