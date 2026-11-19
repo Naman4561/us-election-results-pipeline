@@ -182,17 +182,21 @@ New Castle County is Wilmington plus the rest of the county; both parts are chec
 
 ## Awaiting certified results
 
-These states hold elections this year but have no election-night source collected
-here; the map labels them "Awaiting certified results" until each is added from its
+The map labels a state "Awaiting certified results" while it holds elections this year
+but has no public source (`awaiting_certified` in `resources/elections_2026.json`; a
+state leaves the label once a source of its is public). Such a state is added from its
 certified canvass, as a manual source whose first import is the certified file
-([manual results](manual-results.md#a-state-added-from-its-certified-results)). Wyoming,
-certified on November 10, is the first. The list: Alabama, Arizona, Connecticut,
-Illinois, Kentucky, Maine, Massachusetts, Michigan, Missouri, Montana, Nevada, New
-Hampshire, New Jersey, New York, Oklahoma, Pennsylvania, Tennessee, Virginia, Wisconsin
-and Wyoming (`awaiting_certified` in
-`resources/elections_2026.json`). Arizona, Michigan, Missouri, New Jersey, New York,
-Nevada, Oklahoma, Pennsylvania and Tennessee refuse automated clients on their results
-sites.
+([manual results](manual-results.md#a-state-added-from-its-certified-results)), or from
+any results file it posts. As of November 19, 2026 eight states remain:
+
+- **Illinois** and **Massachusetts** answer automated requests but list no November 3
+  results yet: Illinois's State Board vote totals (`elections.il.gov`) show the primary
+  only, and Massachusetts's PD43+ (`electionstats.state.ma.us`, CSV per contest, by city
+  and town) only two special elections. Both should be collectable once certified.
+- **Nevada**, **New Hampshire** (Akamai), **New Jersey** and **Wisconsin** (Cloudflare)
+  refuse automated clients: an operator downloads their files.
+- **Kentucky** waits for its certified results (its live feed retired; see above) and
+  **Maine** is not covered (below).
 
 ## Not covered
 

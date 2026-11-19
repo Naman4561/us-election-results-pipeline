@@ -21,13 +21,13 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 
 | State | Status | Last vote change | Notes |
 | --- | --- | --- | --- |
-| Alabama | Unofficial, pending certification | Nov 4 17:16 | Collected from its statewide page and Export Data workbook since Nov 19; 67 of 67 counties reported; the page last updated Nov 4, 11:16 AM Central. |
+| Alabama | Unofficial, pending certification | Nov 4 17:16 | Public since Nov 19, 3:45 PM EST, collected from its statewide page and Export Data workbook; every county adds up to the page's statewide votes. 67 of 67 counties reported; the page last updated Nov 4, 11:16 AM Central. |
 | Alaska | Unofficial, between counts | Nov 19 01:33 | Results by State House district (overseas ballots are statewide only). No ranked-choice tabulation posted yet (checked Nov 19); certification targeted Nov 25. |
 | Arizona | Unofficial, imported by hand | Nov 19 05:00 | The Secretary of State's Enhanced Voting export (JSON, about 72 MB), statewide and by county; generic write-ins combined. |
 | Arkansas | Official | Nov 19 16:36 | Certified: its feed marks the results official (`isOfficial`, version of Nov 19, 11:36 AM EST, 23 votes more than Nov 16's). Published as official Nov 19 with `deploy certify`. Collection paused. |
 | California | Unofficial, counting | Nov 18 01:47 | |
 | Colorado | Unofficial, counting | Nov 13 23:50 | |
-| Connecticut | Unofficial, counting | — | Collected from its results app since Nov 19 (version 55530); results by town; 774 of 774 polling places. |
+| Connecticut | Unofficial, counting | Nov 19 19:53 | Public since Nov 19, 3:45 PM EST, collected from its results app (version 55530); results by town (169); fusion party lines added up per candidate. 774 of 774 polling places. The app shows no update time of its own, so the time here is when we first saw these totals. |
 | Delaware | Official | Nov 10 19:30 | Certified; collection paused. |
 | Florida | Unofficial, counting | Nov 17 16:15 | Collection resumed: GoDaddy TLS Root CA - R1 is trusted for Florida's file host only. |
 | Georgia | Unofficial, counting | Nov 18 00:48 | |
@@ -43,7 +43,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Minnesota | Unofficial, counting | Nov 13 20:04 | The State Canvassing Board certifies Nov 19. |
 | Mississippi | Final unofficial | Nov 19 04:32 | All 82 counties imported from their certified Official Recapitulations (reviewed Nov 17–19; Walthall's was posted as “Walthal County.pdf”). Collection paused Nov 19 (`deploy pause`, `deploy final`): every county had certified, and each run saved a new bundle differing only in its status time. House districts published Nov 18 (`deploy ms-house`); all four are complete. The state certifies Dec 1 or 3: import its statewide recap then ([Mississippi](mississippi-collection.md#certification)). |
 | Missouri | Unofficial, imported by hand | Nov 19 05:00 | The Secretary of State's All Results page, saved as a PDF. Statewide and congressional district totals only (no county results); no Senate race in 2026. |
-| Montana | Unofficial, counting | Nov 19 18:50 | Collected from its Statewide Export since Nov 19; the site's TEST banner is hidden now and its export answered every request. 726 of 728 precincts. |
+| Montana | Unofficial, counting | Nov 19 18:50 | Public since Nov 19, 3:45 PM EST, collected from its Statewide Export; the site's TEST banner is hidden now and its export answered every request. 726 of 728 precincts; site updated Nov 19, 11:50 AM Mountain. |
 | Nebraska | Unofficial, pending certification | Nov 14 01:00 | All precincts in. Collected every 3 hours, clear of backups. |
 | New Mexico | Unofficial, pending certification | Nov 12 19:01 | The State Board of Canvass certifies Nov 24. Collected hourly. |
 | New York | Unofficial, imported by hand | Nov 19 05:15 | The State Board of Elections' election night page, saved as a PDF. Fusion party lines are added up per candidate. |
@@ -52,7 +52,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Ohio | Final unofficial | Nov 12 03:26 | Imported by hand; the Nov 11, 10:24 PM EST report is the last before certification (re-checked Nov 12, 10:16 AM EST); marked final with `manual final` from the next release. |
 | Oklahoma | Official | Nov 13 23:24 | Certified: the State Election Board labels its Nov 3 results “OFFICIAL RESULTS” (state certification scheduled Nov 10). Its county results export, imported by hand, was published as official on Nov 13 with an operator attestation; totals unchanged from Nov 11. |
 | Oregon | Unofficial, counting | Nov 18 20:18 | Its file host sometimes answers a county CSV with another file type; that run stops unpublished and a later one collects it. |
-| Pennsylvania | Unofficial, imported by hand | Nov 19 17:32 | The Department of State's county results export (its site and RSS feeds refuse automated clients; the feeds stopped updating Nov 10). Report time declared at import (the export's own, 12:32:52 PM EST). Election Day, mail and provisional votes. |
+| Pennsylvania | Unofficial, imported by hand | Nov 19 17:32 | Public since Nov 19, 1:29 PM EST. The Department of State's county results export (its site and RSS feeds refuse automated clients; the feeds stopped updating Nov 10). Report time declared at import (the export's own, 12:32:52 PM EST). Election Day, mail and provisional votes. |
 | Rhode Island | Unofficial, counting | Nov 18 01:18 | Statewide and district totals only (reported by town). |
 | South Carolina | Official | Nov 11 19:48 | The State Election Commission certified on Nov 11. Its feed sets no final flag, so the published snapshot was checked against the certified results and approved (operator attestation, Nov 13); collection paused. |
 | South Dakota | Unofficial, pending certification | Nov 6 20:56 | All precincts in. Collected every 3 hours, clear of backups. |
@@ -65,4 +65,5 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | West Virginia | Unofficial, counting | Nov 10 16:01 | |
 | Wyoming | Official | Nov 10 21:37 | Added from its certified results (certified Nov 10). |
 | Maine | Awaiting certified results | — | Municipal reporting with no statewide endpoint. |
-| Other states holding elections | Awaiting certified results | — | No election-night source collected; see [states](states.md#awaiting-certified-results). |
+| Illinois, Massachusetts | Awaiting certified results | — | Their official results sites answer automated requests but list no Nov 3 results yet (Illinois's State Board after its canvass; Massachusetts's PD43+ once certified); both should then be collected automatically. |
+| Nevada, New Hampshire, New Jersey, Wisconsin | Awaiting certified results | — | Their results sites refuse automated clients (New Hampshire: Akamai; Wisconsin: Cloudflare); they need an operator download. |
