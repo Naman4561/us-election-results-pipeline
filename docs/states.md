@@ -29,6 +29,7 @@ this page explains them.
 | Missouri | Saved by hand from the Secretary of State's All Results page (PDF) | House 1–8 (8) | No | Total only |
 | Nebraska | Secretary of State results CSV | Senate, Governor, House 1–3 (5) | No | Total only |
 | New Mexico | ENR export | Senate, Governor, House 1–3 (5) | All 33 counties, small counts masked | Total only |
+| New York | Saved by hand from the State Board's election night page (PDF) | Governor, House 1–26 (27) | All 62 counties | Total only |
 | North Carolina | State Board precinct ZIP | Senate, House 1–14 (15) | All 100 counties | Election Day, early, mail, provisional |
 | North Dakota | Tally (Secretary of State) | House at-large (1) | All 53 counties | Total only |
 | Ohio | Saved by hand from the results XML | Senate, Governor, House 1–15 (17) | All 88 counties | Total only |
@@ -116,6 +117,11 @@ zero.
   statewide totals with percentages but no race totals: one total must fit every printed
   percentage (within 0.01) and be at least the candidates' sum. It prints no report time;
   the operator declares one.
+- **New York:** the State Board's election night page is saved as a PDF by hand and read
+  in layout mode. Candidates run on several party lines (fusion): each candidate's lines
+  must add up to its printed total, each area's candidates, blanks, voids and write-ins to
+  its Total Votes, and the counties to All Counties. Candidates are stored under their
+  first party line; blanks and voids are not stored.
 - **Ohio:** the official XML is saved by hand ([manual results](manual-results.md)).
 - **Oklahoma:** the county results export is saved by hand (the results site refuses
   automated clients). It has no statewide rows: statewide totals are the county sums,

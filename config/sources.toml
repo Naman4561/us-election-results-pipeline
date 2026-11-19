@@ -136,6 +136,16 @@ primary_filename = "results.pdf"
 min_interval_seconds = 600
 expected_members = ["results.pdf"]
 
+# The State Board of Elections' election night page, saved as a PDF by hand.
+[sources.ny_2026_general]
+state = "NY"
+election_date = "2026-11-03"
+url = "https://nyenr.elections.ny.gov/"
+format = "bundle"
+primary_filename = "results.pdf"
+min_interval_seconds = 600
+expected_members = ["results.pdf"]
+
 # The Secretary of State's Followed Races dashboard, saved as a PDF by hand.
 [sources.tn_2026_general]
 state = "TN"

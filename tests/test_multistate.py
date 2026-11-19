@@ -94,6 +94,7 @@ class MultiStateTests(unittest.TestCase):
                     "MO",
                     "AZ",
                     "TN",
+                    "NY",
                 ),
             },
         )
@@ -101,7 +102,8 @@ class MultiStateTests(unittest.TestCase):
         # source; every other state with an election is in one list or the other.
         awaiting = set(payload["calendar"]["awaiting_certified"])
         self.assertEqual(
-            awaiting & set(payload["states"]), {"KY", "VA", "WY", "OK", "MI", "MO", "AZ", "TN"}
+            awaiting & set(payload["states"]),
+            {"KY", "VA", "WY", "OK", "MI", "MO", "AZ", "TN", "NY"},
         )
         self.assertEqual(len(awaiting | set(payload["states"])), 50)
         self.assertEqual(len(payload["coverage"]["KY"]), 7)

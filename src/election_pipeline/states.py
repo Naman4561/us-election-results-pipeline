@@ -226,6 +226,18 @@ STATES = {
         county_results=False,
         source_page="https://enr.sos.mo.gov/",
     ),
+    # New York's State Board election night page is saved as a PDF by hand (parsers/ny.py).
+    # No Senate race in 2026.
+    "NY": State(
+        "NY",
+        "New York",
+        "ny_2026_general",
+        tuple(range(1, 27)),
+        ("total_votes",),
+        senate=False,
+        governor=True,
+        source_page="https://nyenr.elections.ny.gov/",
+    ),
     # Tennessee's Followed Races dashboard is saved as a PDF by hand and gives statewide
     # totals only (parsers/tn.py).
     "TN": State(
