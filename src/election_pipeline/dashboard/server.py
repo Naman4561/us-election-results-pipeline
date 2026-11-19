@@ -158,11 +158,12 @@ def make_payload(
             if not adapter.county_results or summarize(by_race[identity], method) == stats[method]:
                 continue
             if not (
-                adapter.county_privacy_masking
+                (adapter.county_privacy_masking or adapter.statewide_only_votes)
                 and within_official(by_race[identity], totals[identity], method)
             ):
                 raise ValueError("Published county and contest results disagree")
-            masked = True
+            # Statewide-only votes are a known remainder, not a hidden county count.
+            masked = adapter.county_privacy_masking
         races[identity] = {
             "name": name,
             "stats": stats,
@@ -178,6 +179,7 @@ def make_payload(
         "methods": methods,
         "method_note": adapter.method_note,
         "local_unit": adapter.local_unit,
+        "statewide_only_votes": adapter.statewide_only_votes,
         "county_detail": adapter.county_results,
         "vote_basis": "reported_votes" if certified_file(metadata) else adapter.vote_basis,
         "source_page": adapter.source_page,

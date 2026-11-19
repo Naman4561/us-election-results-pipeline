@@ -457,8 +457,8 @@ function renderStatePanel() {
   const partial = state.county_collection;
   if (!view.county && partial)
     $("result-scope").textContent = "COLLECTED COUNTY TOTALS";
-  // A town (Vermont) is named alone; a county is named as one.
-  const unit = state.local_unit === "town" ? "" : " County";
+  // A town (Vermont) or House district (Alaska) is named alone; a county is named as one.
+  const unit = state.local_unit === "county" || !state.local_unit ? " County" : "";
   $("result-subtitle").textContent =
     (county || feed ? (county?.name || feed.name) + unit + " · " : "") +
     state.name;
@@ -561,6 +561,14 @@ function renderStatePanel() {
       element(
         "p",
         `${partial.with_results} of ${partial.expected} counties have accepted counts; ${partial.certified || 0} certified county recaps, ${partial.current} sources currently confirmed, ${partial.manual || 0} manual snapshots, ${partial.stale - (partial.manual || 0) - (partial.certified || 0)} stale, ${partial.unavailable} unavailable. This is a partial county aggregate, not a statewide total.`,
+        "empty",
+      ),
+    );
+  if (state.statewide_only_votes && !view.county)
+    target.append(
+      element(
+        "p",
+        `The statewide total includes ${state.statewide_only_votes}, so the House districts add up to less than it.`,
         "empty",
       ),
     );
@@ -831,7 +839,7 @@ function renderControls() {
     ? "Collected county totals"
     : "Statewide results";
   $("map-title").textContent =
-    `${offices[view.office]} · ${national ? "National results" : view.office === "house" ? "District results" : aggregate ? "State totals · county detail unavailable" : "County results"}`;
+    `${offices[view.office]} · ${national ? "National results" : view.office === "house" ? "District results" : aggregate ? "State totals · county detail unavailable" : state.local_unit === "house_district" ? "House district results" : "County results"}`;
   $("map-description").textContent = national
     ? "Select a covered state to explore its returns."
     : state.county_collection
@@ -861,7 +869,9 @@ function renderControls() {
           ? "Select a district…"
           : data.states[view.scope]?.local_unit === "town"
             ? "Select a town…"
-            : "Select a county…",
+            : data.states[view.scope]?.local_unit === "house_district"
+              ? "Select a House district…"
+              : "Select a county…",
       "",
     ),
     ...options

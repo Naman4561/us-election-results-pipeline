@@ -191,13 +191,34 @@ test("national/state map navigation and coverage statuses", async (t) => {
   click('path[data-id="AK"]');
   await settle();
   assert.equal(d.querySelector("h1").textContent, "Alaska");
-  assert.equal(d.querySelectorAll("path.feature").length, 1);
+  // Alaska has no counties: its map and results are by State House district.
+  assert.equal(d.querySelectorAll("path.feature").length, 40);
+  assert.equal(
+    d.querySelector("#map-title").textContent,
+    "U.S. Senate · House district results",
+  );
+  assert.equal(
+    d.querySelector("#area option").textContent,
+    "Select a House district…",
+  );
   assert(
     d
       .querySelector("#result-content")
       .textContent.includes("CSV-listed candidates"),
   );
   assert(d.querySelector("#result-content").textContent.includes("Round 1"));
+  assert(
+    d
+      .querySelector("#result-content")
+      .textContent.includes("overseas federal absentee ballots"),
+  );
+  click('path[data-id="HOUSEDISTRICT1"]');
+  assert.equal(
+    d.querySelector("#result-subtitle").textContent,
+    "House District 1 · Alaska",
+  );
+  assert(d.querySelector(".candidate-votes"));
+  click("#overview");
   const alaskaCalls = calls;
   click('[data-office="governor"]');
   assert.equal(d.querySelector("h1").textContent, "Alaska");

@@ -26,8 +26,9 @@ from county_methods c
 full outer join {{ ref('contest_method_results') }} s using (release_id, contest_id, choice, method)
 where c.votes is distinct from s.votes
 {% elif mode == 'masked' %}
--- Privacy-masked counties are left out of a race, so county rows may add up to less than
--- the official total, never more, and never name a candidate the contest lacks.
+-- Privacy-masked counties are left out of a race, or some votes are reported statewide
+-- only (Alaska's overseas ballots), so county rows may add up to less than the official
+-- total, never more, and never name a candidate the contest lacks.
 select c.release_id, c.contest_id
 from counties c left join official s using (release_id, contest_id, choice, party)
 where s.votes is null or c.votes > s.votes

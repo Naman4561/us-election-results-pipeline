@@ -212,7 +212,7 @@ def build_variables(metadata):
                 "none"
                 if not state.county_results
                 else "masked"
-                if state.county_privacy_masking
+                if state.county_privacy_masking or state.statewide_only_votes
                 else "exact"
             ),
         )

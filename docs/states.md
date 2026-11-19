@@ -7,7 +7,7 @@ this page explains them.
 
 | State | Source | Races | County results | Vote methods stored |
 | --- | --- | --- | --- | --- |
-| Alaska | Division of Elections precinct CSV | Senate, Governor, House at-large (3) | No | Total only (first choice) |
+| Alaska | Division of Elections precinct CSV | Senate, Governor, House at-large (3) | By State House district (40) | Total only (first choice) |
 | Arkansas | Tally (Secretary of State) | Senate, Governor, House 1–4 (6) | All 75 counties | Total only |
 | California | Secretary of State results API | Governor, House 1–52 (53) | No | Total only |
 | Colorado | Clarity | Senate, Governor, House 1–8 (10) | All 64 counties | Total only |
@@ -55,8 +55,12 @@ Where a state publishes something only partly, or in a form that cannot be check
 the pipeline leaves it out rather than estimate it. A missing count is unknown, never
 zero.
 
-- **Alaska:** statewide totals for the candidates in the first-choice CSV (round 1).
-  Ranked-choice rounds are not imported, and reporting units are not mapped to boroughs.
+- **Alaska:** totals for the candidates in the first-choice CSV (round 1), statewide and
+  by State House district (Alaska has no counties). Each precinct and each district's
+  absentee, early and questioned row belongs to one district; overseas federal absentee
+  ballots belong to none, so the districts add up to the statewide total less those.
+  Ranked-choice rounds are not imported, and precincts are not mapped (about 45% of
+  votes are reported by district only).
 - **California:** statewide and district totals only. County results would take about
   190 more requests per collection, and the results website is behind a JavaScript
   challenge the pipeline does not attempt. The other 52 contest documents are fetched

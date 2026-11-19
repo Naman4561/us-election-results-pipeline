@@ -28,9 +28,14 @@ class State:
     parser_module: str = ""
     # Shown under a race when the state's vote-method breakdown needs explaining.
     method_note: str = ""
-    # What the state's local results units are: "county", or "town" where a state
-    # reports by town and its map draws towns (Vermont).
+    # What the state's local results units are: "county", "town" where a state reports by
+    # town and its map draws towns (Vermont), or "house_district" (Alaska, which has no
+    # counties).
     local_unit: str = "county"
+    # Votes the state reports statewide but in no local unit (Alaska's overseas federal
+    # absentee ballots), described for the dashboard. Its local units then add up to
+    # less than the statewide total, never more; the parser checks the remainder.
+    statewide_only_votes: str = ""
     # The House races are published only once an operator turns them on (Mississippi's
     # come from certified county recaps); until then a release has the other races only.
     optional_house: bool = False
@@ -94,9 +99,10 @@ STATES = {
         (0,),
         ("total_votes",),
         governor=True,
-        county_results=False,
         source_page="https://www.elections.alaska.gov/election-results/e/?id=26genr",
         vote_basis="first_choice_listed_candidates",
+        local_unit="house_district",
+        statewide_only_votes="overseas federal absentee ballots, reported in no House district",
     ),
     "NC": State(
         "NC",
