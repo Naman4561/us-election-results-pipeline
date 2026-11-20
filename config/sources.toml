@@ -133,6 +133,17 @@ primary_filename = "results.zip"
 min_interval_seconds = 600
 expected_members = ["results.zip"]
 
+# Each county's own results report (or a signed review of it), assembled into one zip as
+# the counties come in: the Elections Commission posts results only once certified.
+[sources.wi_2026_general]
+state = "WI"
+election_date = "2026-11-03"
+url = "https://elections.wi.gov/elections/election-results"
+format = "bundle"
+primary_filename = "results.zip"
+min_interval_seconds = 600
+expected_members = ["results.zip"]
+
 # The results app's manifest, overview and contest files, saved by hand and imported as
 # one zip: the results site and its data files refuse automated clients.
 [sources.nv_2026_general]

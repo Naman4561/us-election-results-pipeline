@@ -39,6 +39,11 @@ class State:
     # The House races are published only once an operator turns them on (Mississippi's
     # come from certified county recaps); until then a release has the other races only.
     optional_house: bool = False
+    # Results come county by county, from each county's own report, before the state
+    # posts any (Wisconsin): a release has the counties collected so far, and its
+    # statewide votes are theirs alone. A House district is published once one of its
+    # counties is in, and is complete once every county in it is.
+    collected_counties: bool = False
 
     @property
     def slug(self):
@@ -61,12 +66,15 @@ class State:
     @property
     def base_races(self):
         """The races a release must have; the House is left out where it is optional."""
-        if not self.optional_house:
+        if not (self.optional_house or self.collected_counties):
             return self.races
         return {k: v for k, v in self.races.items() if k.endswith(("-SEN", "-GOV"))}
 
     def accepts(self, contests):
-        """A release's contests are every race, or (House optional) every base race."""
+        """A release's contests are every race, or (House optional) every base race, or
+        (collected counties) every base race and the House districts collected so far."""
+        if self.collected_counties:
+            return set(self.base_races) <= set(contests) <= set(self.races)
         return set(contests) in (set(self.races), set(self.base_races))
 
     @property
@@ -235,6 +243,21 @@ STATES = {
         tuple(range(1, 13)),
         ("total_votes",),
         source_page="https://nj.gov/state/elections/election-information-results.shtml",
+    ),
+    # Wisconsin's Elections Commission posts no results before certification, and its
+    # site refuses automated clients: each county's own results report is saved and
+    # imported as one zip, as the counties come in (parsers/wi.py). No Senate race in 2026.
+    "WI": State(
+        "WI",
+        "Wisconsin",
+        "wi_2026_general",
+        tuple(range(1, 9)),
+        ("total_votes",),
+        senate=False,
+        governor=True,
+        source_page="https://elections.wi.gov/elections/election-results",
+        vote_basis="collected_county_reports",
+        collected_counties=True,
     ),
     # Nevada's results site and data files refuse automated clients: the app's manifest,
     # overview and contest files are saved by hand and imported as one zip (parsers/nv.py).

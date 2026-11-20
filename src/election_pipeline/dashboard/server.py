@@ -25,6 +25,7 @@ from fastapi.staticfiles import StaticFiles
 from psycopg import sql
 from psycopg.rows import dict_row
 
+from election_pipeline.parsers.scope_2026 import ROSTERS
 from election_pipeline.states import STATES, state_adapter
 
 STATIC = Path(__file__).with_name("static")
@@ -149,7 +150,12 @@ def make_payload(
     if adapter.optional_house and not set(totals) - adapter.base_races.keys():
         # The House is not turned on for this publication: serve the other races alone.
         races_config = {k: v for k, v in races_config.items() if k in adapter.base_races}
-    if metadata is not None and (
+    collected = adapter.collected_counties and metadata is not None
+    if collected:
+        # A House district none of whose counties is in yet is served empty.
+        if not (adapter.accepts(totals) and set(by_race) == set(totals)):
+            raise ValueError("A published snapshot must contain its state's collected races")
+    elif metadata is not None and (
         set(totals) != set(races_config)
         or (adapter.county_results and set(by_race) != set(races_config))
     ):
@@ -194,12 +200,57 @@ def make_payload(
         "map_version": geography["version"],
         "races": races,
     }
+    if collected and not certified_file(metadata):
+        return with_collected_counties(payload, geography)
     if adapter.county_feed_status and metadata is not None and not certified_file(metadata):
         if county_feeds is None and not demo:
             raise ValueError("County collection provenance is required for this state")
         if county_feeds is not None:
             return with_county_feeds(payload, geography, county_feeds)
     return payload
+
+
+def with_collected_counties(payload, geography):
+    """A collected-counties state's coverage, from its publication alone: the counties
+    with the Governor's votes are in, every other county is not collected, and a House
+    district lists the reviewed roster's counties it still lacks."""
+    names = {f["id"]: f["name"] for f in geography["counties"]}
+    base = next(iter(state_adapter(payload["state"]).base_races))
+    accepted = set(payload["races"][base]["counties"])
+    roster = ROSTERS[payload["state"]]
+    for identity, contest in payload["races"].items():
+        if not set(contest["counties"]) <= accepted:
+            raise ValueError("A county reports a House district but not the Governor")
+        if identity != base:
+            contest["missing_counties"] = sorted(
+                names[key]
+                for key in map(county_key, roster[identity]["counties"])
+                if key not in contest["counties"]
+            )
+    return {
+        **payload,
+        "county_feeds": {
+            key: {
+                "name": name,
+                "collection_status": "current" if key in accepted else "not_collected",
+                "acquisition": "manual",
+            }
+            for key, name in names.items()
+        },
+        "county_collection": {
+            "expected": len(names),
+            "configured": len(accepted),
+            "with_results": len(accepted),
+            "manual": len(accepted),
+            "certified": 0,
+            "current": len(accepted),
+            "stale": 0,
+            "unavailable": 0,
+            "not_collected": len(names) - len(accepted),
+            "complete": accepted == set(names),
+            "basis": "collected_county_reports",
+        },
+    }
 
 
 def with_county_feeds(payload, geography, rows, now=None):

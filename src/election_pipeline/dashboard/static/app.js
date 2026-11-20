@@ -568,13 +568,27 @@ function renderStatePanel() {
   const total = element("div", undefined, "total");
   const firstChoice = state.vote_basis === "first_choice_listed_candidates";
   const countyBasis = state.vote_basis === "covered_counties_named_candidates";
+  // Wisconsin: each county's own results report, collected county by county.
+  const collected = partial?.basis === "collected_county_reports";
   if (contest?.missing_counties && !view.county)
     target.append(
       element(
         "p",
-        contest.missing_counties.length
-          ? `PARTIAL · Summed from certified county recaps. No certified recap yet for ${contest.missing_counties.join(", ")}.`
-          : "Summed from every county's certified recap.",
+        collected
+          ? contest.missing_counties.length
+            ? `PARTIAL · Summed from the counties' own results reports. Not yet collected: ${contest.missing_counties.join(", ")}.`
+            : "Summed from every county's own results report."
+          : contest.missing_counties.length
+            ? `PARTIAL · Summed from certified county recaps. No certified recap yet for ${contest.missing_counties.join(", ")}.`
+            : "Summed from every county's certified recap.",
+        "empty",
+      ),
+    );
+  else if (collected && !view.county)
+    target.append(
+      element(
+        "p",
+        `${partial.with_results} of ${partial.expected} counties collected, each from its own results report (its canvass where posted, otherwise its election-night results). ${partial.complete ? "Every county is in." : "This is a partial county aggregate, not a statewide total."}`,
         "empty",
       ),
     );
@@ -610,7 +624,15 @@ function renderStatePanel() {
         "empty",
       ),
     );
-  if (feed) {
+  if (feed && collected)
+    target.append(
+      element(
+        "p",
+        "From the county's own results report, imported by hand. Write-ins are shown as one line.",
+        "empty",
+      ),
+    );
+  if (feed && !collected) {
     target.append(
       element(
         "p",
@@ -816,15 +838,18 @@ function renderMetadata() {
   )
     $("notice").textContent +=
       " Alaska shows first-choice votes for CSV-listed candidates. Later ranked-choice results and unlisted vote categories are not included.";
-  if (
-    (national &&
-      Object.values(data.states).some(
-        (s) => s.county_collection && !s.county_collection.complete,
-      )) ||
-    state?.county_collection
-  )
+  const partialStates = (
+    national
+      ? Object.values(data.states).filter(
+          (s) => s.county_collection && !s.county_collection.complete,
+        )
+      : state?.county_collection
+        ? [state]
+        : []
+  ).map((s) => s.name || s.state);
+  if (partialStates.length)
     $("notice").textContent +=
-      " Mississippi has partial county collection. The national map does not assign it a statewide party lead; select the state to inspect collected counties and source timestamps.";
+      ` ${partialStates.join(" and ")} ${partialStates.length > 1 ? "have" : "has"} partial county collection. The national map does not assign ${partialStates.length > 1 ? "them" : "it"} a statewide party lead; select the state to inspect collected counties.`;
   $("notice").classList.toggle("alert", stale || test);
   $("connection").textContent = stale
     ? "Refresh failed · stale view"

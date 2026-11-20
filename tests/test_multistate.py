@@ -102,6 +102,7 @@ class MultiStateTests(unittest.TestCase):
                     "NH",
                     "NV",
                     "NJ",
+                    "WI",
                 ),
             },
         )
@@ -127,6 +128,7 @@ class MultiStateTests(unittest.TestCase):
                 "NH",
                 "NV",
                 "NJ",
+                "WI",
             },
         )
         self.assertEqual(len(awaiting | set(payload["states"])), 50)

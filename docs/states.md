@@ -52,6 +52,7 @@ this page explains them.
 | Virginia | Enhanced Voting | Senate, House 1–11 (12) | All 133 localities | Early, Election Day, mail, provisional, post-election |
 | Washington | Enhanced Voting | House 1–10 (10) | All 39 counties | Total only |
 | West Virginia | Clarity | Senate, House 1–2 (3) | All 55 counties | Total only |
+| Wisconsin | Each county's own results report, saved or transcribed by hand | Governor, House 1–8 (9) | Collected counties | Total only |
 | Wyoming | Secretary of State certified results (State Canvassing Board) | Senate, Governor, House at-large (3) | All 23 counties | Total only |
 
 A state without a Senate or Governor race in 2026 has none listed. Ohio, Kansas,
@@ -157,6 +158,23 @@ zero.
   own terms (Clarity totals, ES&S Total Votes Cast or vote methods, Bergen's
   percentages, Salem's precincts); statewide totals are the county sums. Refresh:
   rerun the bundle tool and import again.
+- **Wisconsin:** the Elections Commission posts results only once it certifies (about
+  December 1) and its site refuses automated clients, so each county's own report is
+  collected as the counties post them (`parsers/wi.py`): fetched as the pipeline fetches
+  any page where the county answers, saved by the operator where it does not. One zip
+  holds every collected county's report unchanged and a `manifest.json` naming each
+  report's file and SHA-256, address, save time, report time, whether it is the
+  county's canvass or its election-night results, and how it is read. Readers take the
+  layouts that recur (Election Summary Report, ES&S Summary Results Report, the canvass
+  summary statement, Chippewa's summary, Oneida's results page), each checked against
+  the totals it prints; any other report (a scan, a one-off layout) is transcribed into
+  a review for its SHA-256, which the operator checks and signs. Each county must report
+  the Governor and exactly the House districts the roster places it in (the Census
+  county–district relationship file); `resources/wi_2026_contests.json` lists every
+  ballot candidate (the Commission's candidate list) and the spellings counties print.
+  Statewide votes are the collected counties' sums: the dashboard shows "N of 72
+  counties collected" and no statewide lead until every county is in, and a House
+  district is complete once all its counties are (`State.collected_counties`).
 - **New Hampshire:** the results site refuses automated clients (Akamai). The operator
   downloads its Senate and Governor county summaries and its two congressional district
   sheets (by town and city ward) and imports them, unchanged, as one zip. Each sheet's
@@ -220,14 +238,13 @@ but has no public source (`awaiting_certified` in `resources/elections_2026.json
 state leaves the label once a source of its is public). Such a state is added from its
 certified canvass, as a manual source whose first import is the certified file
 ([manual results](manual-results.md#a-state-added-from-its-certified-results)), or from
-any results file it posts. As of November 20, 2026 four states remain:
+any results file it posts. As of November 20, 2026 three states remain (Wisconsin is
+collected county by county, above):
 
 - **Illinois** and **Massachusetts** answer automated requests but list no November 3
   results yet: Illinois's State Board vote totals (`elections.il.gov`) show the primary
   only, and Massachusetts's PD43+ (`electionstats.state.ma.us`, CSV per contest, by city
   and town) only two special elections. Both should be collectable once certified.
-- **Wisconsin** (Cloudflare) refuses automated clients: an operator downloads its
-  files.
 - **Maine** is not covered (below).
 
 ## Not covered

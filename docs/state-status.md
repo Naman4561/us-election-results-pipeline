@@ -69,4 +69,4 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Wyoming | Official | Nov 10 21:37 | Added from its certified results (certified Nov 10). |
 | Maine | Awaiting certified results | — | Municipal reporting with no statewide endpoint. |
 | Illinois, Massachusetts | Awaiting certified results | — | Their official results sites answer automated requests but list no Nov 3 results yet (Illinois's State Board after its canvass; Massachusetts's PD43+ once certified); both should then be collected automatically. |
-| Wisconsin | Awaiting certified results | — | Its results site refuses automated clients (Cloudflare); it needs an operator download. |
+| Wisconsin | Not public yet | — | Collected county by county from each county's own results report (the Elections Commission posts results only once it certifies, about Dec 1): 43 of 72 counties so far, 29 of them canvassed; reports no reader takes are transcribed and signed by the operator. |
