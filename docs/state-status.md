@@ -1,7 +1,7 @@
 # State status
 
 Where each state's 2026 general election results stand. Updated by hand; last updated
-**November 18, 2026, 20:45 UTC**. [States](states.md) describes each source.
+**November 20, 2026, 00:30 UTC**. [States](states.md) describes each source.
 
 | Status | Meaning |
 | --- | --- |
@@ -45,9 +45,9 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Missouri | Unofficial, imported by hand | Nov 19 05:00 | The Secretary of State's All Results page, saved as a PDF. Statewide and congressional district totals only (no county results); no Senate race in 2026. |
 | Montana | Unofficial, counting | Nov 19 18:50 | Public since Nov 19, 3:45 PM EST, collected from its Statewide Export; the site's TEST banner is hidden now and its export answered every request. 726 of 728 precincts; site updated Nov 19, 11:50 AM Mountain. |
 | Nebraska | Unofficial, pending certification | Nov 14 01:00 | All precincts in. Collected every 3 hours, clear of backups. |
-| Nevada | Not public yet | — | Its results app's data files saved by hand (release 90, Nov 13, 23:36 UTC); every county adds up to the statewide totals; Lincoln's District 2 votes are masked by the state. |
-| New Hampshire | Not public yet | — | Its four results spreadsheets imported by hand (its site refuses automated clients); every race by county. |
-| New Jersey | Not public yet | — | Its 21 county clerks' results assembled into one zip (15 Clarity counties fetched; Bergen, Hunterdon and Warren saved by hand); newest county update Nov 19, 1:06 PM EST. |
+| Nevada | Unofficial, imported by hand | Nov 13 23:36 | Public since Nov 19, 7:28 PM EST. Its results app's data files saved by hand (release 90, Nov 13, 23:36 UTC); every county adds up to the statewide totals; Lincoln's District 2 votes are masked by the state. |
+| New Hampshire | Unofficial, imported by hand | Nov 19 21:01 | Public since Nov 19, 7:28 PM EST. Its four results spreadsheets imported by hand (its site refuses automated clients); every race by county. |
+| New Jersey | Unofficial, imported by hand | Nov 19 18:06 | Public since Nov 19, 7:28 PM EST. Its 21 county clerks' results assembled into one zip (15 Clarity counties fetched; Bergen, Hunterdon and Warren saved by hand); newest county update Nov 19, 1:06 PM EST. |
 | New Mexico | Unofficial, pending certification | Nov 12 19:01 | The State Board of Canvass certifies Nov 24. Collected hourly. |
 | New York | Unofficial, imported by hand | Nov 19 05:15 | The State Board of Elections' election night page, saved as a PDF. Fusion party lines are added up per candidate. |
 | North Carolina | Unofficial, counting | Nov 14 00:31 | |
