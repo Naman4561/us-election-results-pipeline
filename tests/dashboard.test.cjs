@@ -276,7 +276,7 @@ test("national/state map navigation and coverage statuses", async (t) => {
   assert.equal(d.querySelector("h1").textContent, "North Carolina");
   click("#national");
   assert.equal(status("NC"), "no_election");
-  assert.equal(status("WI"), "awaiting_certified");
+  assert.equal(status("IL"), "awaiting_certified");
   click('[data-office="senate"]');
   click('path[data-id="MN"]');
   await settle();
