@@ -1,0 +1,17 @@
+{
+ "file": "results.zip",
+ "sha256": "c3c77d4bae0794f26f9642d8d17fe12736d3148ea6bf3ef63fd8379c8fc80571",
+ "packed": "the seven pages the operator saved, unchanged, renamed by race (scratchpad ky_pack.py)",
+ "members": {
+  "KY-SEN.mhtml": "9330eb8f327982dc87211320a61189090701a9114a3716a072e7870cadca44bd",
+  "KY-01.mhtml": "02d36c5802e44f64d327b1545e504357463bf0d49a6e3f5b687e0884a471ad43",
+  "KY-02.mhtml": "428855a5a1b8cef46b3c0adb3c18f52a9aa3b7670317f3b5278fe81bdc6a8b29",
+  "KY-03.mhtml": "5988c048d61370c453090529590f02e64549d39646b9aa800fbc627b343dc50f",
+  "KY-04.mhtml": "706bac5ddad814447bf820ae893db8b57770e8ae9abd0fe76cebb9e25684ef8e",
+  "KY-05.mhtml": "6c9eb60674046668e6074eaf0bd501d019882be7e66bc2ad36a6a073833ec20b",
+  "KY-06.mhtml": "d93883f63b838b4ffb36a866dbfac912c945e44efd361951b12d91b2aca320ad"
+ },
+ "source": "https://vrsws.sos.ky.gov/liveresults/Statewide, each race's County Results view open; saved as single-file web pages (MHTML)",
+ "page": "Last Update 11/20/2026 10:42:18 AM; counties reporting 120 / 120; ALL RESULTS ARE UNOFFICIAL",
+ "downloaded": "2026-11-20, 10:49-10:54 AM Eastern, by the operator in a browser"
+}

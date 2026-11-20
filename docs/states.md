@@ -22,7 +22,7 @@ this page explains them.
 | Idaho | Enhanced Voting | Senate, Governor, House 1–2 (4) | All 44 counties | Total only |
 | Indiana | Election Division results JSON | House 1–9 (9) | All counties of each district | Total only |
 | Kansas | Saved by hand from the results page | Senate, Governor, House 1–4 (6) | Reported counties | Total only |
-| Kentucky | State Board live results | Senate, House 1–6 (7) | All 120 counties | Election Day, absentee |
+| Kentucky | State Board results pages, saved by hand | Senate, House 1–6 (7) | All 120 counties | Total only |
 | Louisiana | Secretary of State live results | Senate, House 1–6 (7) | All 64 parishes | Total only |
 | Maryland | State Board results pages | Governor, House 1–8 (9) | All 24 jurisdictions | Total only |
 | Michigan | Saved by hand from the Secretary of State's county results export | Senate, Governor, House 1–13 (15) | All 83 counties | Total only |
@@ -94,9 +94,12 @@ zero.
 - **Kansas:** the results page is saved by hand ([manual results](manual-results.md)).
   Kansas stopped updating unofficial results after November 6, so the source is final.
   Counties that had not reported are grey on the map, never zero.
-- **Kentucky:** absentee is combined and derived as total minus Election Day; separate
-  early, mail and provisional counts are unavailable. Precincts reporting does not mean
-  precincts complete.
+- **Kentucky:** the live feed (with Election Day and combined absentee) refuses
+  automated clients since election week, and its data files refuse a browser too. The
+  operator saves the Statewide results page with each race's County Results view open
+  (seven single-file pages, MHTML), imported as one zip (`parsers/ky_pages.py`). Each
+  race's counties must add up to the page's statewide totals and every page must be the
+  same update; parties are the feed's own party IDs. The pages give totals only.
 - **Maryland:** methods are published, but provisional is "NR" until the canvass, so they
   are not stored yet. Each contest page has its own refresh time, all recorded.
 - **Mississippi:** collected county by county, and only the Senate. Its statewide figure
@@ -217,7 +220,7 @@ but has no public source (`awaiting_certified` in `resources/elections_2026.json
 state leaves the label once a source of its is public). Such a state is added from its
 certified canvass, as a manual source whose first import is the certified file
 ([manual results](manual-results.md#a-state-added-from-its-certified-results)), or from
-any results file it posts. As of November 19, 2026 five states remain:
+any results file it posts. As of November 20, 2026 four states remain:
 
 - **Illinois** and **Massachusetts** answer automated requests but list no November 3
   results yet: Illinois's State Board vote totals (`elections.il.gov`) show the primary
@@ -225,8 +228,7 @@ any results file it posts. As of November 19, 2026 five states remain:
   and town) only two special elections. Both should be collectable once certified.
 - **Wisconsin** (Cloudflare) refuses automated clients: an operator downloads its
   files.
-- **Kentucky** waits for its certified results (its live feed retired; see above) and
-  **Maine** is not covered (below).
+- **Maine** is not covered (below).
 
 ## Not covered
 

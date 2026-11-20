@@ -36,7 +36,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Indiana | Unofficial, counting | Nov 17 15:18 | Its settings carry a certified flag. |
 | Iowa | Unofficial, pending certification | Nov 17 19:01 | Collected hourly. |
 | Kansas | Official | Nov 9 02:31 | Published as official Nov 17, 16:05 UTC; totals unchanged from the hand import. |
-| Kentucky | Waiting for certification | — | Live feed retired and closed to automated clients; our only snapshot predates poll close. Import certified results from elect.ky.gov when posted. |
+| Kentucky | Not public yet | — | Its results pages saved by hand (the live feed and its data files refuse automated clients): Statewide page with each race's county results, Last Update Nov 20, 10:42 AM EST, 120 of 120 counties reporting; totals only. |
 | Louisiana | Official | Nov 14 11:17 | Certified: its feed marks the Nov 3 results official (`ResultsOfficial`, seen Nov 19, 8:48 AM EST). Published as official Nov 19, 15:34 UTC with `deploy certify`; totals unchanged from Nov 14. Collection paused. House districts 5 and 6 go to a December 12 runoff, marked “Runoff pending” on the dashboard. |
 | Maryland | Unofficial, counting | Nov 18 20:16 | |
 | Michigan | Unofficial, imported by hand | Nov 19 04:40 | The Secretary of State's county results export (MVIC), report updated Nov 18, 7:17 PM EST, 83 of 83 counties. |

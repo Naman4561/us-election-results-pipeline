@@ -34,7 +34,8 @@ class KentuckyTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
-        _, sources = load_config(Path(__file__).resolve().parents[1] / "config/sources.toml")
+        # The live feed as collected until election week (no longer configured).
+        _, sources = load_config(Path(__file__).resolve().parent / "fixtures/kentucky/feed.toml")
         self.source = sources["ky_2026_general"]
         self.settings = CollectorSettings()
         self.store = ArchiveStore(self.root, self.source)
@@ -151,8 +152,8 @@ class KentuckyTests(unittest.TestCase):
         self.assertEqual(len(units), 121)
         self.assertEqual(units[0][:3], (4, 2, "KY"))
         self.assertEqual(units[0][5], "")  # State-level county remains empty text.
-        methods = loaded[("landing", "result_methods")]
-        self.assertEqual(len(methods), 2 * report["output_rows"])
+        # Kentucky is published by total only (its saved pages have no method split).
+        self.assertFalse(loaded.get(("landing", "result_methods")))
 
     def test_state_county_disagreement_blocks_publication(self):
         self.results[0]["TotalVotes"] += 1

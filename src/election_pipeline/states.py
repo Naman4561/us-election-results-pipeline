@@ -112,17 +112,16 @@ STATES = {
         ("total_votes", "election_day", "early_voting", "absentee_by_mail", "provisional"),
         source_page="https://er.ncsbe.gov/",
     ),
+    # Kentucky's live feed closed to automated clients after election week: its results
+    # pages (statewide totals, and each race's county results) are saved by hand and
+    # imported as one zip (parsers/ky_pages.py). They give totals only.
     "KY": State(
         "KY",
         "Kentucky",
         "ky_2026_general",
         tuple(range(1, 7)),
-        ("total_votes", "election_day", "absentee_combined"),
+        ("total_votes",),
         source_page="https://vrsws.sos.ky.gov/liveresults/",
-        method_note=(
-            "Kentucky combines absentee votes. Separate early, mail and provisional counts "
-            "are unavailable. Precinct reporting status is not a percentage of votes counted."
-        ),
     ),
     "MN": State(
         "MN",

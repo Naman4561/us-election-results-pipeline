@@ -1,0 +1,19 @@
+# Kentucky's live feed as collected until election week (parsers/ky.py), kept for its
+# tests: the feed now refuses automated clients and Kentucky's results pages are
+# imported by hand instead (config/sources.toml).
+[collector]
+
+[sources.ky_2026_general]
+state = "KY"
+election_date = "2026-11-03"
+url = "https://vrsws.sos.ky.gov/liveresults/Data/CurrentResultsExcludeLocal"
+format = "bundle"
+min_interval_seconds = 600
+expected_members = ["results.xml", "election.xml", "parties.xml", "units.xml", "contests.xml", "candidates.xml"]
+
+[sources.ky_2026_general.files]
+"election.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/Elections"
+"parties.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/PoliticalParties"
+"units.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/GeopoliticalUnits"
+"contests.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/Contests"
+"candidates.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/Candidates"

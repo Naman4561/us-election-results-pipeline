@@ -246,7 +246,7 @@ class ManualDeploymentTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "disabled"):
             deployment_manual.configure(self.path, self.source.source_id)
         with self.assertRaisesRegex(ValueError, "single-file"):
-            deployment_manual.configure(self.path, "ky_2026_general")
+            deployment_manual.configure(self.path, "mn_2026_general_all")
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_a_public_manual_source_can_be_marked_final_and_nothing_else_changes(self):

@@ -45,20 +45,17 @@ expected_columns = [
     "0",
 ]
 
+# The live results pages (statewide totals, and each race's county results), saved by
+# hand and imported as one zip: the live feed (Data/CurrentResultsExcludeLocal and its
+# files; tests/fixtures/kentucky/feed.toml) refuses automated clients since election week.
 [sources.ky_2026_general]
 state = "KY"
 election_date = "2026-11-03"
-url = "https://vrsws.sos.ky.gov/liveresults/Data/CurrentResultsExcludeLocal"
+url = "https://vrsws.sos.ky.gov/liveresults/Statewide"
 format = "bundle"
+primary_filename = "results.zip"
 min_interval_seconds = 600
-expected_members = ["results.xml", "election.xml", "parties.xml", "units.xml", "contests.xml", "candidates.xml"]
-
-[sources.ky_2026_general.files]
-"election.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/Elections"
-"parties.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/PoliticalParties"
-"units.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/GeopoliticalUnits"
-"contests.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/Contests"
-"candidates.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/Candidates"
+expected_members = ["results.zip"]
 
 [sources.ga_2026_general]
 state = "GA"

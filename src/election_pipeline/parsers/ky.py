@@ -60,6 +60,12 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     from election_pipeline.parsers.results import finish
     from election_pipeline.states import state_adapter
 
+    # The live feed was closed to automated clients after election week; its results
+    # pages, saved by hand, are imported as one zip instead (parsers/ky_pages.py).
+    if source.primary_filename == "results.zip":
+        from election_pipeline.parsers import ky_pages
+
+        return ky_pages.parse(archive_path, source, settings, output, stats, reference)
     if source.format != "bundle" or source.dataset != "election_results":
         raise ValueError("Kentucky election results require a pinned XML bundle")
     with zipfile.ZipFile(archive_path) as archive:
@@ -132,8 +138,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                     total_votes=total,
                     precincts_reporting=None,
                     precincts_total=None,
-                    election_day=day,
-                    absentee_combined=total - day,
                     attributes={"reporting_unit_id": raw["ReportingUnitId"]},
                 )
             )
@@ -180,9 +184,8 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             )
         if {key[0] for key in result_keys} - seen:
             raise ValueError("Candidate rows lack reporting-unit metadata")
+    # Kentucky is published by total only: its saved results pages have no Election Day
+    # split, so the feed's split (Election Day, absentee combined) is checked, not kept.
     finish(
         rows, source, settings, output, stats, reference=reference, reconcile=True, units=reporting
-    )
-    stats["warnings"].append(
-        "Absentee is combined; early/mail/provisional breakdowns are unavailable."
     )
