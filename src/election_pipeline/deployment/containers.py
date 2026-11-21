@@ -115,6 +115,10 @@ def ipv6_network(config):
     return network or None
 
 
+class JobTimeout(RuntimeError):
+    """A job ran past its timeout and its container was removed."""
+
+
 def run_job(image, prod, config, arguments, *, timeout=240, ipv6=False):
     """``ipv6``: also join the IPv6 network, for a source that prefers IPv6."""
     name = "election-job-" + uuid.uuid4().hex
@@ -134,7 +138,7 @@ def run_job(image, prod, config, arguments, *, timeout=240, ipv6=False):
     try:
         return command(args, timeout=timeout, env={**os.environ, **env})
     except subprocess.TimeoutExpired as error:
-        raise RuntimeError(
+        raise JobTimeout(
             f"Job exceeded its timeout; forced removal requested for {name}"
         ) from error
     finally:

@@ -460,6 +460,53 @@ class PublicationDatabaseTests(unittest.TestCase):
         changed = publish(self.root, self.db, self.load(rows), "test", skip_current=True)
         self.assertNotEqual(changed["publication_id"], first["publication_id"])
 
+    def test_a_timed_out_jobs_attempt_is_closed_and_older_ones_are_left_alone(self):
+        from election_pipeline.deployment import control
+
+        release = self.load(self.f.rows)
+        since = datetime.now(timezone.utc)
+
+        def attempt(started):
+            attempt_id = uuid.uuid4()
+            schema = "p_nc_" + attempt_id.hex
+            with connect(self.db) as conn:
+                conn.execute(
+                    "INSERT INTO ops.publication_attempts (attempt_id, release_id, action, "
+                    "started_at, artifacts_path, candidate_schema, transform_sha256, "
+                    "requested_status) VALUES (%s,%s,'publish',%s,'unused',%s,%s,'test')",
+                    (attempt_id, release, started, schema, "0" * 64),
+                )
+                conn.execute(f'CREATE SCHEMA "{schema}_marts"')
+            return attempt_id, schema
+
+        old, old_schema = attempt(datetime(2026, 11, 6, tzinfo=timezone.utc))
+        new, new_schema = attempt(datetime.now(timezone.utc))
+        prod = {
+            "POSTGRES_HOST": self.db["host"],
+            "POSTGRES_PORT": str(self.db["port"]),
+            "POSTGRES_DB": self.db["dbname"],
+            "PIPELINE_DB_USER": self.db["user"],
+            "PIPELINE_DB_PASSWORD": self.db["password"],
+        }
+        self.assertEqual(control.close_interrupted(prod, self.f.source.source_id, since), 1)
+        rows = {
+            r["attempt_id"]: r
+            for r in self.query(
+                "SELECT attempt_id, outcome, finished_at, error_message "
+                "FROM ops.publication_attempts"
+            )
+        }
+        self.assertEqual(rows[new]["outcome"], "failed")
+        self.assertIsNotNone(rows[new]["finished_at"])
+        self.assertEqual(rows[new]["error_message"], control.INTERRUPTED)
+        self.assertEqual(rows[old]["outcome"], "running")  # a past record stays as it was
+        schemas = {r["nspname"] for r in self.query("SELECT nspname FROM pg_namespace")}
+        self.assertNotIn(new_schema + "_marts", schemas)
+        self.assertIn(old_schema + "_marts", schemas)
+        # Nothing left to close; another source's attempts are never touched.
+        self.assertEqual(control.close_interrupted(prod, self.f.source.source_id, since), 0)
+        self.assertEqual(control.close_interrupted(prod, "another_source", since), 0)
+
     def test_publication_failure_idempotency_corrections_and_restore(self):
         first_release = self.load(self.f.rows)
         first = publish(self.root, self.db, first_release, "test")

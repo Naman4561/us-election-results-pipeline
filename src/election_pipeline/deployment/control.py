@@ -16,6 +16,7 @@ import re
 import shutil
 import socket
 import subprocess
+import sys
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -25,7 +26,8 @@ from pathlib import Path
 from election_pipeline.database import connect
 from election_pipeline.deployment import catalog, containers, dashboard
 from election_pipeline.migrations import migrate
-from election_pipeline.publication import attestation, build_tags, dbt_tags
+from election_pipeline.publication import attestation, build_tags, cleanup_candidate, dbt_tags
+from election_pipeline.states import publication_lock
 from election_pipeline.storage import atomic_json, utc_now
 from election_pipeline.workflow import NO_SNAPSHOT
 
@@ -114,6 +116,56 @@ def run_one(image, name, status, prod, config, *, mode=None, extra=()):
     return result
 
 
+INTERRUPTED = "The worker stopped this job at its timeout before the publication finished"
+LOCK_TRIES = 5
+
+
+def close_interrupted(prod, name, since):
+    """Mark the publish attempts a timed-out job left running as failed and drop their
+    candidate schemas. Only attempts this job started (at or after ``since``) are touched,
+    and only under the state's publication lock, so a live publisher is never disturbed."""
+    try:
+        with connect(db_settings(prod, writer=True)) as conn:
+            rows = conn.execute(
+                "SELECT a.attempt_id, a.candidate_schema, s.state FROM ops.publication_attempts a "
+                "JOIN ops.processing_releases r USING (release_id) "
+                "JOIN ops.snapshots f USING (snapshot_id) "
+                "JOIN ops.sources s ON s.source_id = f.source_id "
+                "WHERE f.source_id=%s AND a.action='publish' AND a.outcome='running' "
+                "AND a.started_at >= %s",
+                (name, since),
+            ).fetchall()
+            if not rows:
+                return 0
+            # The removed job's session can take a moment to end and release its lock.
+            for attempt in range(LOCK_TRIES):
+                try:
+                    publication_lock(conn, rows[0]["state"])
+                    break
+                except ValueError:
+                    if attempt == LOCK_TRIES - 1:
+                        raise
+                    time.sleep(2)
+            closed = 0
+            for row in rows:
+                with conn.transaction():
+                    updated = conn.execute(
+                        "UPDATE ops.publication_attempts SET outcome='failed', "
+                        "finished_at=clock_timestamp(), error_message=%s "
+                        "WHERE attempt_id=%s AND outcome='running'",
+                        (INTERRUPTED, row["attempt_id"]),
+                    ).rowcount
+                    if updated and row["candidate_schema"]:
+                        cleanup_candidate(conn, row["candidate_schema"])
+                    closed += updated
+            return closed
+    except Exception as error:
+        # The job has already failed; a cleanup problem only leaves the old record behind.
+        message = redacted(f"Could not close {name}'s interrupted attempt: {error}", prod)
+        print(message, file=sys.stderr, flush=True)
+        return 0
+
+
 def parallel_jobs(config):
     value = config.get("JOB_PARALLEL", "1")
     if not re.fullmatch(r"[1-4]", value):
@@ -198,7 +250,11 @@ def run_enabled(path, prod, config):
                 **config,
                 "JOB_TIMEOUT": str(min(int(config.get("JOB_TIMEOUT", "240")), remaining)),
             }
-            result = run_one(image, name, entry["status"], prod, budget)
+            try:
+                result = run_one(image, name, entry["status"], prod, budget)
+            except containers.JobTimeout:
+                close_interrupted(prod, name, now)
+                raise
             if result.get("outcome") in ("already_current", "succeeded") and result.get(
                 "raw_sha256"
             ):

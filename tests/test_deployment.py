@@ -155,7 +155,7 @@ class DeploymentTests(unittest.TestCase):
                 subprocess.TimeoutExpired("docker", 2),
                 subprocess.CompletedProcess([], 0, "", ""),
             ]
-            with self.assertRaisesRegex(RuntimeError, "timeout"):
+            with self.assertRaisesRegex(containers.JobTimeout, "timeout"):
                 containers.run_job(
                     IMAGE, self.prod, self.config, ["scripts/run_source.py"], timeout=2
                 )
@@ -208,6 +208,26 @@ class DeploymentTests(unittest.TestCase):
         latest = (self.root / "worker-latest.json").read_text()
         self.assertNotIn("writer-secret", latest)
         self.assertEqual(json.loads(latest)["outcome"], "failed")
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_only_a_timed_out_job_has_its_open_attempt_closed(self):
+        def run(image, name, *a, **k):
+            if name == NC:
+                raise containers.JobTimeout("Job exceeded its timeout")
+            raise RuntimeError("another failure")
+
+        with (
+            patch.object(control, "run_one", side_effect=run),
+            patch.object(control, "close_interrupted", return_value=1) as close,
+        ):
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(control.run_enabled(self.path, self.prod, self.config), 1)
+        self.assertEqual([c.args[1] for c in close.call_args_list], [NC])
+        self.assertIsInstance(close.call_args.args[2], datetime)
+        results = json.loads((self.root / "worker-latest.json").read_text())["results"]
+        self.assertEqual(
+            {r["source_id"]: r["outcome"] for r in results}, {NC: "failed", KY: "failed"}
+        )
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_source_held_by_a_backup_is_skipped_not_failed(self):
