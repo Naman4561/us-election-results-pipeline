@@ -194,6 +194,67 @@ class WisconsinTests(unittest.TestCase):
             edited(change_manifest=lambda m: m.update(Atlantis=dict(m["Door"]))), "no county"
         )
 
+    def test_a_county_report_posted_in_parts_is_read_from_its_review(self):
+        # As Vilas posts its Governor and its House races as separate reports.
+        second = b"%PDF-1.4 the county's second report (test)"
+        digest = hashlib.sha256(second).hexdigest()
+        first = json.loads(members()["manifest.json"])["counties"]["Iowa"]["sha256"]
+        parts = [{"file": "Iowa.pdf", "sha256": first}, {"file": "Iowa_2.pdf", "sha256": digest}]
+
+        def split(manifest):
+            for key in ("file", "sha256"):
+                manifest["Iowa"].pop(key)
+            manifest["Iowa"]["parts"] = parts
+
+        def both(review):
+            review["file_sha256"] = [first, digest]
+
+        _, report = self.imported(
+            edited(change_manifest=split, change_review=both, extra={"Iowa_2.pdf": second})
+        )
+        self.assertEqual(report["outcome"], "parsed")
+        rows = self.read(report, "contest_results.csv")
+        governor = {r["choice"]: int(r["total_votes"]) for r in rows if r["contest_id"] == "WI-GOV"}
+        self.assertEqual(governor, STATEWIDE["WI-GOV"])
+
+        # The review must name every part, in order.
+        self.refused(
+            edited(change_manifest=split, extra={"Iowa_2.pdf": second}), "unsigned or for another"
+        )
+        self.refused(
+            edited(
+                change_manifest=split,
+                change_review=lambda r: r.update(file_sha256=[digest, first]),
+                extra={"Iowa_2.pdf": second},
+            ),
+            "unsigned or for another",
+        )
+        # Parts are two or more files, listed in place of one, and only a review reads them.
+        self.refused(
+            edited(change_manifest=lambda m: m["Iowa"].update(parts=parts[:1])), "in parts"
+        )
+        self.refused(
+            edited(
+                change_manifest=lambda m: m["Iowa"].update(parts=parts),
+                extra={"Iowa_2.pdf": second},
+            ),
+            "in parts",
+        )
+
+        def door_in_parts(manifest):
+            door = manifest["Door"]
+            door["parts"] = [{"file": door.pop("file"), "sha256": door.pop("sha256")}] + parts[1:]
+
+        self.refused(
+            edited(change_manifest=door_in_parts, extra={"Iowa_2.pdf": second}), "in parts"
+        )
+        # Every part is in the bundle with its listed SHA-256.
+        self.refused(edited(change_manifest=split, change_review=both), "Iowa_2.pdf")
+        self.refused(
+            edited(change_manifest=split, change_review=both, extra={"Iowa_2.pdf": b"changed"}),
+            "SHA-256",
+        )
+
     def test_files_must_match_the_manifest(self):
         self.refused(edited(change_manifest=lambda m: m["Door"].update(sha256="0" * 64)), "SHA-256")
         self.refused(edited(extra={"notes.txt": b"x"}), "do not match its manifest")

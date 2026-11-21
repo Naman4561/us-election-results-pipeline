@@ -329,9 +329,12 @@ def table_page(raw, label):
     return found
 
 
-def review(document, sha256, label):
-    """{race: lines} from a signed review of a report's counts."""
-    if document.get("file_sha256") != sha256 or not str(document.get("reviewed_by", "")).strip():
+def review(document, sha256s, label):
+    """{race: lines} from a signed review of a report's counts; a report posted in parts
+    names every part's SHA-256, in order."""
+    listed = document.get("file_sha256")
+    listed = [listed] if isinstance(listed, str) else listed
+    if listed != sha256s or not str(document.get("reviewed_by", "")).strip():
         raise ValueError(f"{label}: review is unsigned or for another file")
     found = {}
     for race, counts in document["races"].items():
@@ -378,22 +381,30 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 raise ValueError(f"Wisconsin has no county {county!r}")
             if entry["report"] not in REPORTS or entry["format"] not in FORMATS:
                 raise ValueError(f"{label}: unknown report kind or format")
-            data = bundle.read(entry["file"])
-            if hashlib.sha256(data).hexdigest() != entry["sha256"]:
-                raise ValueError(f"{label}: report differs from its listed SHA-256")
+            # A county that posts its races in separate reports (Vilas) lists them as parts,
+            # which only a review can read.
+            parts = entry.get("parts")
+            if parts is None:
+                parts = [{"file": entry["file"], "sha256": entry["sha256"]}]
+            elif "file" in entry or len(parts) < 2 or entry["format"] != "review":
+                raise ValueError(f"{label}: a report in parts is two or more files and a review")
+            for part in parts:
+                data = bundle.read(part["file"])
+                if hashlib.sha256(data).hexdigest() != part["sha256"]:
+                    raise ValueError(f"{label}: report differs from its listed SHA-256")
+                expected.add(part["file"])
             # The time the report prints, or its PDF's creation time; a page may give none.
             reported = entry["report_time"] and datetime.fromisoformat(entry["report_time"])
             saved = datetime.fromisoformat(entry["saved_at"])
             if saved.tzinfo is None or reported and (reported.tzinfo is None or reported > saved):
                 raise ValueError(f"{label}: report time is missing a timezone or follows saving")
-            expected.add(entry["file"])
             if entry["format"] == "review":
                 name = f"{county}.review.json"
                 expected.add(name)
                 document = json.loads(bundle.read(name))
                 if document.get("county") != county:
                     raise ValueError(f"{label}: review names another county")
-                found = review(document, entry["sha256"], label)
+                found = review(document, [part["sha256"] for part in parts], label)
             elif entry["format"] == "table_page":
                 found = table_page(data, label)
             else:
