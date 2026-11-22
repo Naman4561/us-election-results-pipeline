@@ -328,7 +328,7 @@ test("national/state map navigation and coverage statuses", async (t) => {
   assert.equal(status("TX"), "awaiting_votes");
   click("#national");
   for (const [code, name, counties, districts] of [
-    ["GA", "Georgia", 1, 14],
+    ["GA", "Georgia", 159, 14],
     ["SC", "South Carolina", 46, 7],
     ["KS", "Kansas", 105, 4],
     ["OH", "Ohio", 88, 15],

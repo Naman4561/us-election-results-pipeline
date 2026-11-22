@@ -16,7 +16,7 @@ this page explains them.
 | Connecticut | Secretary of the State's results app data files (collected) | Governor, House 1–5 (6) | No (reported by town; 169 towns) | Total only |
 | Delaware | Department of Elections results JSON | Senate, House at-large (2) | All 3 counties | Total only (methods checked) |
 | Florida | Division of Elections results file | Senate, Governor, 27 House (29) | All 67 counties | Total only |
-| Georgia | Secretary of State results API | Senate, Governor, House 1–14 (16) | No | Total only |
+| Georgia | Enhanced Voting (Secretary of State) | Senate, Governor, House 1–14 (16) | All 159 counties | Total only |
 | Hawaii | Office of Elections `summary.txt` | Governor, House 1–2 (3) | No | Mail, in person |
 | Iowa | Clarity | Senate, Governor, House 1–4 (6) | All 99 counties | Election Day, absentee |
 | Idaho | Enhanced Voting | Senate, Governor, House 1–2 (4) | All 44 counties | Total only |
@@ -86,8 +86,11 @@ zero.
   the sum of the official county rows; the file has no report time, so releases are
   ordered by the file's own timestamps and an older file served again cannot replace
   newer results.
-- **Georgia:** statewide and district totals from one request. Method sums are checked
-  but not stored.
+- **Georgia:** the election's data document and one ballot item per race, each with its
+  county breakdown; every county adds up to the statewide counts. Vote methods are not
+  stored: Georgia leaves them blank in some counties (Ben Hill, Miller, Lumpkin and
+  Glascock in its official results). Its Reports page's Total Votes Excel (County
+  Results sheet) matched these county totals exactly on Nov 21.
 - **Hawaii:** county results are published only as PDFs, and the precinct file does not
   say which county a precinct is in, so county detail is not collected.
 - **Iowa:** a county with no votes for a candidate prints Total 0 with Election Day and

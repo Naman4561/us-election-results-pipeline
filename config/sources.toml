@@ -64,7 +64,8 @@ url = "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026G
 format = "bundle"
 primary_filename = "results.json"
 min_interval_seconds = 600
-expected_members = ["results.json"]
+expected_members = ["results.json", "item-ga-sen.json", "item-ga-gov.json", "item-ga-01.json", "item-ga-02.json", "item-ga-03.json", "item-ga-04.json", "item-ga-05.json", "item-ga-06.json", "item-ga-07.json", "item-ga-08.json", "item-ga-09.json", "item-ga-10.json", "item-ga-11.json", "item-ga-12.json", "item-ga-13.json", "item-ga-14.json"]
+supplemental_members = ["item-ga-sen.json", "item-ga-gov.json", "item-ga-01.json", "item-ga-02.json", "item-ga-03.json", "item-ga-04.json", "item-ga-05.json", "item-ga-06.json", "item-ga-07.json", "item-ga-08.json", "item-ga-09.json", "item-ga-10.json", "item-ga-11.json", "item-ga-12.json", "item-ga-13.json", "item-ga-14.json"]
 
 [sources.ks_2026_general]
 state = "KS"

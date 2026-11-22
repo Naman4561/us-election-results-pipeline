@@ -167,8 +167,8 @@ STATES = {
         tuple(range(1, 15)),
         ("total_votes",),
         governor=True,
-        county_results=False,
         source_page="https://results.sos.ga.gov/results/public/Georgia/elections/11032026GeneralAndSpecialElection",
+        collection_backend="enhanced_voting",
     ),
     "SC": State(
         "SC",

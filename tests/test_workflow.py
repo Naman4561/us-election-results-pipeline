@@ -246,6 +246,32 @@ class WorkflowTests(unittest.TestCase):
         self.assertIn("No archived snapshot", result["error"])
         self.collect.assert_not_called()
 
+    def test_a_bundle_snapshot_without_every_configured_member_is_not_checked(self):
+        # A source that now collects more members (Georgia's ballot items) has no snapshot
+        # of its new format until its next collection.
+        bundle = replace(self.f.source, format="bundle", primary_filename="results.txt")
+        self.assertTrue(workflow.holds_members(self.raw, bundle))
+        grown = replace(
+            bundle,
+            expected_members=("results.txt", "item-x.json"),
+            supplemental_members=("item-x.json",),
+        )
+        self.assertFalse(workflow.holds_members(self.raw, grown))
+
+        store = ArchiveStore(self.f.root, grown)
+        store.write_state({**store.read_state(), "sha256": self.sha, "url": grown.url})
+        result = workflow.run_source(
+            grown,
+            self.f.settings,
+            self.f.root,
+            root=Path(__file__).resolve().parents[1],
+            status="test",
+            check_only=True,
+        )
+        self.assertEqual(result["outcome"], "failed")
+        self.assertEqual(result["error"], workflow.NO_SNAPSHOT)
+        self.collect.assert_not_called()
+
     def test_check_only_falls_back_to_the_published_snapshot_only_for_a_refused_one(self):
         store = ArchiveStore(self.f.root, self.f.source)
         # The state changed its format: the newest archive no longer parses.
