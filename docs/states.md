@@ -168,7 +168,9 @@ zero.
   layouts that recur (Election Summary Report, ES&S Summary Results Report, the canvass
   summary statement, Chippewa's summary, Oneida's results page), each checked against
   the totals it prints; any other report (a scan, a one-off layout) is transcribed into
-  a review for its SHA-256, which the operator checks and signs. Each county must report
+  a review for its SHA-256, which the operator checks and signs. A county that posts its
+  races as separate reports (Vilas) lists them as parts, read only through a signed review
+  that names every part's SHA-256 in order. Each county must report
   the Governor and exactly the House districts the roster places it in (the Census
   county–district relationship file); `resources/wi_2026_contests.json` lists every
   ballot candidate (the Commission's candidate list) and the spellings counties print.
