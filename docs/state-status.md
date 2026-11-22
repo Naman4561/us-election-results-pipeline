@@ -1,7 +1,7 @@
 # State status
 
 Where each state's 2026 general election results stand. Updated by hand; last updated
-**November 22, 2026, 01:45 UTC**. [States](states.md) describes each source.
+**November 22, 2026, 02:55 UTC**. [States](states.md) describes each source.
 
 | Status | Meaning |
 | --- | --- |
@@ -30,7 +30,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Connecticut | Unofficial, counting | Nov 19 19:53 | Public since Nov 19, 3:45 PM EST, collected from its results app (version 55530); results by town (169); fusion party lines added up per candidate. 774 of 774 polling places. The app shows no update time of its own, so the time here is when we first saw these totals. |
 | Delaware | Official | Nov 10 19:30 | Certified; collection paused. |
 | Florida | Unofficial, counting | Nov 17 16:15 | Collection resumed: GoDaddy TLS Root CA - R1 is trusted for Florida's file host only. |
-| Georgia | Unofficial, counting | Nov 18 00:48 | |
+| Georgia | Official | Nov 19 23:02 | Certified: its feed marks the results official (`isOfficialResults`, version of Nov 20, 10:50 AM EST; totals unchanged from Nov 19). Results by county (159) since Nov 21, 9:48 PM EST, from its ballot items; they match the Secretary of State's Total Votes Excel. Published as official Nov 21, 9:50 PM EST with `deploy certify`. Collection paused. |
 | Hawaii | Official | Nov 11 06:38 | Published as official Nov 17, 06:56 UTC; totals unchanged from Nov 11. Collection paused. |
 | Idaho | Official | Nov 11 05:20 | Certified: Idaho's feed marks its results official (`isOfficialResults`, seen Nov 16). Published as official on Nov 16, 21:12 UTC with `deploy certify`; totals unchanged from Nov 11. Collection paused. |
 | Indiana | Unofficial, counting | Nov 17 15:18 | Its settings carry a certified flag. |
