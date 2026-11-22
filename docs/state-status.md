@@ -1,7 +1,7 @@
 # State status
 
 Where each state's 2026 general election results stand. Updated by hand; last updated
-**November 21, 2026, 01:15 UTC**. [States](states.md) describes each source.
+**November 22, 2026, 01:45 UTC**. [States](states.md) describes each source.
 
 | Status | Meaning |
 | --- | --- |
@@ -47,7 +47,7 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Nebraska | Unofficial, pending certification | Nov 14 01:00 | All precincts in. Collected every 3 hours, clear of backups. |
 | Nevada | Unofficial, imported by hand | Nov 13 23:36 | Public since Nov 19, 7:28 PM EST. Its results app's data files saved by hand (release 90, Nov 13, 23:36 UTC); every county adds up to the statewide totals; Lincoln's District 2 votes are masked by the state. |
 | New Hampshire | Unofficial, imported by hand | Nov 19 21:01 | Public since Nov 19, 7:28 PM EST. Its four results spreadsheets imported by hand (its site refuses automated clients); every race by county. |
-| New Jersey | Unofficial, imported by hand | Nov 19 18:06 | Public since Nov 19, 7:28 PM EST. Its 21 county clerks' results assembled into one zip (15 Clarity counties fetched; Bergen, Hunterdon and Warren saved by hand); newest county update Nov 19, 1:06 PM EST. |
+| New Jersey | Unofficial, imported by hand | Nov 20 19:08 | Public since Nov 19, 7:28 PM EST. Its 21 county clerks' results assembled into one zip (15 Clarity counties fetched; Bergen, Hunterdon and Warren saved by hand); rebuilt Nov 21, 8:34 PM EST for Hudson's update of Nov 20, 2:08 PM EST, the newest county update. |
 | New Mexico | Unofficial, pending certification | Nov 12 19:01 | The State Board of Canvass certifies Nov 24. Collected hourly. |
 | New York | Unofficial, imported by hand | Nov 19 05:15 | The State Board of Elections' election night page, saved as a PDF. Fusion party lines are added up per candidate. |
 | North Carolina | Unofficial, counting | Nov 14 00:31 | |
@@ -69,4 +69,4 @@ Where each state's 2026 general election results stand. Updated by hand; last up
 | Wyoming | Official | Nov 10 21:37 | Added from its certified results (certified Nov 10). |
 | Maine | Awaiting certified results | — | Municipal reporting with no statewide endpoint. |
 | Illinois, Massachusetts | Awaiting certified results | — | Their official results sites answer automated requests but list no Nov 3 results yet (Illinois's State Board after its canvass; Massachusetts's PD43+ once certified); both should then be collected automatically. |
-| Wisconsin | Unofficial, partial (69 of 72 counties) | Nov 21 23:44 | Public since Nov 20, 8:14 PM EST; 69 counties since Nov 21, 7:13 PM EST. Collected county by county from each county's own results report (the Elections Commission posts results only once it certifies, about Dec 1): 69 of 72 counties so far, 44 of them canvassed; reports no reader takes are transcribed and signed by the operator. Adams is its election-night report (absentee 0 of 19), the best it has posted. No statewide lead until every county is in; House Districts 1–5 are complete; Sheboygan (District 6), Taylor (District 7) and Outagamie (District 8) are not yet collected. |
+| Wisconsin | Unofficial (72 of 72 counties) | Nov 22 01:31 | Public since Nov 20, 8:14 PM EST; all 72 counties since Nov 21, 8:42 PM EST. Collected county by county from each county's own results report (the Elections Commission posts results only once it certifies, about Dec 1): 44 counties canvassed, 28 unofficial; reports no reader takes are transcribed and signed by the operator. Adams, Sheboygan, Taylor and Outagamie are their election-night reports (Adams absentee 0 of 19), the best each has posted. Every House district is complete. |
