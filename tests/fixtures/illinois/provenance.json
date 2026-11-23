@@ -209,5 +209,10 @@
     "url": "https://www.livevoterturnout.com/ENR/effinghamilenr/2/en/Index_2.html",
     "sha256": "03b46fd26e37d299070b5a86bce74591d7cf47bc2544f0c954a4e7e7a90a37da",
     "saved_at": "2026-11-23T05:12:00+00:00"
+  },
+  "pollresults_stephenson.html": {
+    "url": "https://il-stephenson.pollresults.net/",
+    "sha256": "e0f20fb92960cd95c0dc0a935021aba66c746e328075fe9dd0b979f973b84f10",
+    "saved_at": "2026-11-23T05:11:56+00:00"
   }
 }

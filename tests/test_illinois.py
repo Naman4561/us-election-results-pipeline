@@ -287,5 +287,39 @@ class LiveVoterTurnoutTests(unittest.TestCase):
             il.livevoterturnout_results(changed, self.titles, "Effingham")
 
 
+class PollResultsTests(unittest.TestCase):
+    """Stephenson County's pollresults.net page, captured November 23, 2026."""
+
+    def setUp(self):
+        self.page = (FIXTURE / "pollresults_stephenson.html").read_bytes()
+        self.titles = il.table()["titles"]["Stephenson"]
+
+    def test_the_fixture_is_the_captured_page(self):
+        ledger = json.loads((FIXTURE / "provenance.json").read_text())
+        entry = ledger["pollresults_stephenson.html"]
+        self.assertEqual(hashlib.sha256(self.page).hexdigest(), entry["sha256"])
+
+    def test_races_add_up_and_write_ins_are_the_names_without_a_party(self):
+        found, when = il.pollresults_results(self.page, self.titles, "Stephenson")
+        self.assertEqual(set(found), {"IL-SEN", "IL-GOV", "IL-16", "IL-17"})
+        self.assertEqual(
+            found["IL-SEN"],
+            (
+                [("Don Tracy", 8944), ("Juliana Stratton", 6620), ("Whitfield Harrington Jr", 223)],
+                (36, 36),
+            ),
+        )
+        self.assertIn(("Brad Ahrens (write-in)", 0), found["IL-17"][0])
+        self.assertEqual(when.isoformat(), "2026-11-19T10:27:41-06:00")
+
+    def test_a_changed_count_is_refused(self):
+        changed = self.page.replace(
+            b'"TotalVotesForCandidate":8944', b'"TotalVotesForCandidate":8945', 1
+        )
+        self.assertNotEqual(changed, self.page)
+        with self.assertRaises(ValueError):
+            il.pollresults_results(changed, self.titles, "Stephenson")
+
+
 if __name__ == "__main__":
     unittest.main()

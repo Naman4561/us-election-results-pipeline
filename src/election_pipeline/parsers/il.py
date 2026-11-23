@@ -26,6 +26,10 @@ they are read:
 - ``livevoterturnout``: a county's livevoterturnout.com results page (Effingham). Each
   countywide contest's data array lists four vote methods and a total, which they must
   add up to; the contest's precinct tables must add up to its totals.
+- ``pollresults``: a county's pollresults.net results page, whose election data is
+  embedded in it. Each race's candidates must add up to its votes counted, and its
+  precincts reporting are kept. Ballot candidates are printed with their party; a name
+  without one is a write-in.
 - ``review``: results no reader takes. Their counts are transcribed into
   ``<Authority>.review.json`` for the files' SHA-256s and signed by the operator who
   checked them; where the results print a contest total, the counts must add up to it.
@@ -67,7 +71,7 @@ WRITE_IN = ("write-in", "Write-in")
 MAX_BYTES = 30_000_000
 WRITTEN = re.compile(r"(?i)write[- ]?in")
 REPORTS = ("canvassed", "unofficial")
-FORMATS = ("clarity", "chicago", "platinum", "livevoterturnout", "review")
+FORMATS = ("clarity", "chicago", "platinum", "livevoterturnout", "pollresults", "review")
 # The six city election commissions and the county each lies in; every other authority
 # is its county's own and is named by it.
 CITIES = {
@@ -316,6 +320,52 @@ def livevoterturnout_results(raw, titles, label):
     )
 
 
+def pollresults_results(raw, titles, label):
+    """{race: (lines, precincts)} from a county's pollresults.net results page, and its
+    update time: the page's embedded ``electionData`` for the November 3 general election.
+    Each race's candidates must add up to its ``VotesCount``. A ballot candidate is printed
+    with its party ("Don Tracy (REP)"), which is dropped; a name without one is a write-in."""
+    page = raw.decode("utf-8")
+    marker = "var electionData = "
+    if page.count(marker) != 1:
+        raise ValueError(f"{label}: results page has no election data")
+    data, _ = json.JSONDecoder().raw_decode(page[page.index(marker) + len(marker) :])
+    election = data["Election"]
+    if (
+        election["ElectionDate"] != "2026-11-03T00:00:00"
+        or "GENERAL" not in election["Description"]
+    ):
+        raise ValueError(f"{label}: results page belongs to another election")
+    found = {}
+    for contest in data["Races"]:
+        race = titles.get(" ".join(str(contest["RaceName"]).split()))
+        if race is None:
+            continue
+        stats = contest["Stats"]
+        if race in found or stats["VoteFor"] != 1:
+            raise ValueError(f"{label} {race}: repeated or multi-seat contest")
+        lines = []
+        for candidate in contest["Candidates"]:
+            name = text(candidate["CandidateName"], "candidate")
+            party = re.fullmatch(r"(.+?)\s*\(([A-Z]{2,4})\)", name)
+            name = party[1] if party else f"{name} (write-in)"
+            lines.append((name, count(candidate["TotalVotesForCandidate"])))
+        if sum(v for _, v in lines) != count(stats["VotesCount"]):
+            raise ValueError(f"{label} {race}: candidates do not add up to the votes counted")
+        reporting, total = (
+            count(stats["PrecinctsReportingCount"]),
+            count(stats["PrecinctsTotalCount"]),
+        )
+        if reporting > total or total == 0:
+            raise ValueError(f"{label} {race}: unexpected precincts reporting")
+        found[race] = (lines, (reporting, total))
+    # Its update time is local (Central) time; this election's results are in Standard time.
+    when = datetime.fromisoformat(election["UpdateTime"][:19])
+    if not datetime(2026, 11, 3) <= when <= datetime(2027, 3, 1):
+        raise ValueError(f"{label}: update time is outside this election's window")
+    return found, when.replace(tzinfo=CENTRAL["CST"])
+
+
 def review(document, sha256s, label):
     """{race: (lines, precincts or None)} from a signed review of an authority's counts."""
     listed = document.get("file_sha256")
@@ -391,11 +441,16 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 titles = reviewed["titles"].get(authority) or {}
                 found = platinum_results(list(data.values()), titles, entry["report"], label)
                 reported = entry["report_time"] and datetime.fromisoformat(entry["report_time"])
-            elif entry["format"] == "livevoterturnout":
+            elif entry["format"] in ("livevoterturnout", "pollresults"):
                 if len(data) != 1:
-                    raise ValueError(f"{label}: a livevoterturnout county is one results page")
+                    raise ValueError(f"{label}: a {entry['format']} county is one results page")
                 titles = reviewed["titles"].get(authority) or {}
-                found, reported = livevoterturnout_results(next(iter(data.values())), titles, label)
+                reader = (
+                    livevoterturnout_results
+                    if entry["format"] == "livevoterturnout"
+                    else pollresults_results
+                )
+                found, reported = reader(next(iter(data.values())), titles, label)
             elif entry["format"] == "chicago":
                 if authority != "Chicago" or not set(data) <= set(adapter.races):
                     raise ValueError(f"{label}: Chicago's results are one file per race")
