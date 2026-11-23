@@ -33,6 +33,9 @@ they are read:
 - ``gbs``: a county's GBS results (``results.json`` of its 2026 general election on
   results.gbsvote.com). Each candidate's vote methods must add up to its votes, and
   write-ins are flagged as such; its precincts reporting are kept as printed.
+- ``enhanced_voting``: a county's Enhanced Voting ``data`` document (Williamson). Each
+  race's candidates must add up to its vote total, its reporting units are kept, and
+  results the site does not mark official cannot be declared the county's canvass.
 - ``review``: results no reader takes. Their counts are transcribed into
   ``<Authority>.review.json`` for the files' SHA-256s and signed by the operator who
   checked them; where the results print a contest total, the counts must add up to it.
@@ -81,6 +84,7 @@ FORMATS = (
     "livevoterturnout",
     "pollresults",
     "gbs",
+    "enhanced_voting",
     "review",
 )
 # The six city election commissions and the county each lies in; every other authority
@@ -120,15 +124,20 @@ class Race:
                 self.names[key(spelling)] = (candidate["name"], candidate["party"])
         self.ballot = {name for name, _ in self.names.values()}
         self.party = dict(self.names.values())
+        # Declared write-in candidates, as authorities print them without saying so.
+        self.written = {key(name) for name in entry.get("write_ins", [])}
+        if self.written & set(self.names):
+            raise ValueError(f"{race}: a write-in spelling names a ballot candidate")
 
     def split(self, lines, label):
         """{name: votes} for the ballot candidates and the write-in total from a
         contest's (printed name, votes) lines, each ballot candidate found once."""
         found, write_in = {}, 0
         for printed, votes in lines:
-            candidate = None if WRITTEN.search(printed) else self.names.get(key(printed))
+            written = WRITTEN.search(printed) or key(printed) in self.written
+            candidate = None if written else self.names.get(key(printed))
             if candidate is None:
-                if not WRITTEN.search(printed):
+                if not written:
                     raise ValueError(f"{self.race} {label}: unknown candidate {printed!r}")
                 write_in += votes
                 continue
@@ -419,6 +428,45 @@ def gbs_results(raw, titles, report, label):
     return found, datetime.fromisoformat(election["lastUpdated"])
 
 
+def enhanced_voting_results(raw, titles, report, label):
+    """{race: (lines, precincts)} from a county's Enhanced Voting ``data`` document for the
+    November 3 general election, and its update time. Each race's candidates must add up
+    to its vote total; results the site does not mark official cannot be the county's
+    canvass."""
+    data = unique_json(raw)
+    election = data["election"]
+    if (
+        election["electionDate"] != "2026-11-03"
+        or election["isPrimary"] is not False
+        or election["isProduction"] is not True
+    ):
+        raise ValueError(f"{label}: results belong to another election")
+    if report == "canvassed" and election.get("isOfficialResults") is not True:
+        raise ValueError(f"{label}: results not marked official are not the county's canvass")
+    found = {}
+    for ballot in data["ballotItems"]:
+        names = [x["text"] for x in ballot["name"] if x.get("languageId") == "en"]
+        race = titles.get(" ".join(names[0].split())) if len(names) == 1 else None
+        if race is None:
+            continue
+        if race in found or ballot["parentId"] is not None:
+            raise ValueError(f"{label} {race}: repeated or nested contest")
+        lines = []
+        for option in ballot["summaryResults"]["ballotOptions"]:
+            name = [x["text"] for x in option["name"] if x.get("languageId") == "en"]
+            if len(name) != 1:
+                raise ValueError(f"{label} {race}: candidate without one English name")
+            lines.append((text(name[0], "candidate"), count(option["voteCount"])))
+        if sum(v for _, v in lines) != count(ballot["voteTotal"]):
+            raise ValueError(f"{label} {race}: candidates do not add up to the vote total")
+        status = ballot["reportingStatus"]
+        reporting, total = count(status["reportingUnits"]), count(status["totalUnits"])
+        if reporting > total or total == 0:
+            raise ValueError(f"{label} {race}: unexpected units reporting")
+        found[race] = (lines, (reporting, total))
+    return found, datetime.fromisoformat(election["asOf"][:26].rstrip("Z") + "+00:00")
+
+
 def review(document, sha256s, label):
     """{race: (lines, precincts or None)} from a signed review of an authority's counts."""
     listed = document.get("file_sha256")
@@ -504,6 +552,13 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                     else pollresults_results
                 )
                 found, reported = reader(next(iter(data.values())), titles, label)
+            elif entry["format"] == "enhanced_voting":
+                if len(data) != 1:
+                    raise ValueError(f"{label}: an Enhanced Voting county is one data document")
+                titles = reviewed["titles"].get(authority) or {}
+                found, reported = enhanced_voting_results(
+                    next(iter(data.values())), titles, entry["report"], label
+                )
             elif entry["format"] == "gbs":
                 if len(data) != 1:
                     raise ValueError(f"{label}: a GBS county is one results file")

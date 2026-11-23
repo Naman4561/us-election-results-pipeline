@@ -219,5 +219,10 @@
     "url": "https://cumberland.results.gbsvote.com/results/cumberland/2026-general/current/results.json",
     "sha256": "f63f693cb7cf2bf7a0d7459e452024ceb79839e551f3af13fd65c22f73075c0d",
     "saved_at": "2026-11-23T05:26:09+00:00"
+  },
+  "ev_williamson.json": {
+    "url": "https://app.enhancedvoting.com/results/public/api/elections/williamson-county-il/2026GeneralElection/data",
+    "sha256": "8a628f30e579f5bd5601c8f18b734022e56e7a0c3922a718dbdeec7c721d3570",
+    "saved_at": "2026-11-23T15:48:12+00:00"
   }
 }

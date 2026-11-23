@@ -348,5 +348,57 @@ class GbsTests(unittest.TestCase):
             il.gbs_results(self.raw, self.titles, "canvassed", "Cumberland")
 
 
+class WriteInTests(unittest.TestCase):
+    """Declared write-in candidates printed without saying so (Macoupin's Clarity)."""
+
+    def test_declared_write_ins_join_the_write_in_line_and_others_are_refused(self):
+        race = il.Race("IL-GOV", il.table()["races"]["IL-GOV"])
+        lines = [
+            ("(Darren Bailey (Aaron B. Del Mar", 11763),
+            ("(JB Pritzker (Christian Mitchell", 5289),
+            ("(Collin Corbett (Carolyn Schofield", 562),
+            ("Griselda Romero", 1),
+            ("Patrica L. Tillman", 0),
+            ("Write-In", 15),
+        ]
+        found, write_in = race.split(lines, "Macoupin")
+        self.assertEqual(found["Darren Bailey / Aaron B. Del Mar"], 11763)
+        self.assertEqual(write_in, 16)
+        with self.assertRaises(ValueError):
+            race.split([*lines, ("Somebody Else", 1)], "Macoupin")
+
+
+class EnhancedVotingTests(unittest.TestCase):
+    """Williamson County's Enhanced Voting results, captured November 23, 2026."""
+
+    def setUp(self):
+        self.raw = (FIXTURE / "ev_williamson.json").read_bytes()
+        self.titles = il.table()["titles"]["Williamson"]
+
+    def test_the_fixture_is_the_captured_file(self):
+        ledger = json.loads((FIXTURE / "provenance.json").read_text())["ev_williamson.json"]
+        self.assertEqual(hashlib.sha256(self.raw).hexdigest(), ledger["sha256"])
+
+    def test_races_add_up_to_their_totals(self):
+        found, when = il.enhanced_voting_results(self.raw, self.titles, "canvassed", "Williamson")
+        self.assertEqual(set(found), {"IL-SEN", "IL-GOV", "IL-12"})
+        self.assertEqual(
+            found["IL-12"], ([("Julie Fortier", 8310), ("Mike Bost", 15673)], (56, 56))
+        )
+        self.assertIn(("WRITE-IN", 25), found["IL-GOV"][0])
+        self.assertEqual(when.isoformat(), "2026-11-17T19:53:57.886989+00:00")
+
+    def test_a_changed_count_or_an_unofficial_canvass_is_refused(self):
+        changed = self.raw.replace(b'"voteCount":8264', b'"voteCount":8265', 1)
+        self.assertNotEqual(changed, self.raw)
+        with self.assertRaises(ValueError):
+            il.enhanced_voting_results(changed, self.titles, "canvassed", "Williamson")
+        unofficial = self.raw.replace(b'"isOfficialResults":true', b'"isOfficialResults":false')
+        self.assertNotEqual(unofficial, self.raw)
+        with self.assertRaises(ValueError):
+            il.enhanced_voting_results(unofficial, self.titles, "canvassed", "Williamson")
+        il.enhanced_voting_results(unofficial, self.titles, "unofficial", "Williamson")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -10,10 +10,11 @@
   },
   "IL-GOV": {
    "candidates": [
-    {"name": "JB Pritzker / Christian Mitchell", "party": "DEM", "spellings": ["Pritzker & Mitchell", "Pritzker and Mitchell", "(JB Pritzker"]},
+    {"name": "JB Pritzker / Christian Mitchell", "party": "DEM", "spellings": ["Pritzker & Mitchell", "Pritzker and Mitchell", "(JB Pritzker", "JB Pritzker Christian Mithcell"]},
     {"name": "Darren Bailey / Aaron B. Del Mar", "party": "REP", "spellings": ["Bailey & Del Mar", "Bailey and Del Mar", "(Darren Bailey", "Darren Bailey Arron B. Del Mar"]},
     {"name": "Collin Corbett / Carolyn Schofield", "party": "IND", "spellings": ["Corbett & Schofield", "Corbett and Schofield", "(Collin Corbett"]}
-   ]
+   ],
+   "write_ins": ["Eyde Arndell", "Misty Metroz", "Joseph L. Mosely", "Gary Pierce", "Griselda Romero", "Patrica L. Tillman", "Patricia L. Tillman", "Mike Vick"]
   },
   "IL-01": {"candidates": [{"name": "Jonathan L. Jackson", "party": "DEM"}, {"name": "Christian Maxwell", "party": "REP"}]},
   "IL-02": {"candidates": [{"name": "Donna Miller", "party": "DEM"}, {"name": "Michael Scott Noack", "party": "REP"}]},
@@ -195,6 +196,36 @@
    "UNITED STATES SENATOR": "IL-SEN",
    "GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
    "REPRESENTATIVE IN CONGRESS - FIFTEENTH CONGRESSIONAL DISTRICT": "IL-15"
+  },
+  "Franklin": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS TWELFTH CONGRESSIONAL DISTRICT": "IL-12"
+  },
+  "Marion": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS TWELFTH CONGRESSIONAL DISTRICT": "IL-12"
+  },
+  "Wayne": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS TWELFTH CONGRESSIONAL DISTRICT": "IL-12"
+  },
+  "Randolph": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS TWELFTH CONGRESSIONAL DISTRICT": "IL-12"
+  },
+  "Williamson": {
+   "U.S. SENATOR": "IL-SEN",
+   "GOV and LT.GOV -": "IL-GOV",
+   "12TH REP.IN CONGRESS D12": "IL-12"
+  },
+  "Macoupin": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 13TH DISTRICT REPRESENTATIVE": "IL-13"
   }
  }
 }
