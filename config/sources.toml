@@ -178,6 +178,17 @@ primary_filename = "results.zip"
 min_interval_seconds = 600
 expected_members = ["results.zip"]
 
+# Imported by hand: the official tabulations and the District 2 ranked-choice summary
+# (parsers/me.py); the results site refuses automated clients.
+[sources.me_2026_general]
+state = "ME"
+election_date = "2026-11-03"
+url = "https://www.maine.gov/sos/elections-voting/election-results-data"
+format = "bundle"
+primary_filename = "results.zip"
+min_interval_seconds = 600
+expected_members = ["results.zip"]
+
 # The statewide results page and its Export Data workbook (collectors/alabama).
 [sources.al_2026_general]
 state = "AL"

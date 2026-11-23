@@ -1,0 +1,12 @@
+{
+  "source": "Maine Secretary of State, official tabulations of the November 3, 2026 general election (maine.gov/sos/elections-voting/election-results-data), saved by the operator; the site refuses automated clients.",
+  "downloaded_at": "2026-11-23T20:48:35+00:00",
+  "sha256": "fb2d9297982f5cb0f4ea68408da142be7cb35c0bfa96cbba76e4e04a8dde97c2",
+  "members": {
+    "US Senate - FINAL.xlsx": "d2bdced144e80007dd32ed19ac206469d367b2fbec19cb56cedba3467fe80101",
+    "Governor - FINAL.xlsx": "0fdf9afe68695154394f3cd9e10d8de758f396a3490eae715816b95412347a5d",
+    "Rep to Congress District 1 - FINAL.xlsx": "faf7a1011bdb3bcd64f4ad2f510b3d94be967cf05f54c9324cc4bd1b6dea995a",
+    "Rep to Congress District 2.xlsx": "75081dc2c67b7a9b777e3d6e528df5aec26f8f52f8412ee0533e5d4f6ab00efd",
+    "Nov26 CG2 RCV Summary Report 20261112_0.csv": "5e7f838bf13ce49fdc7796b9beb9202af8f0d69cc4e363764771df363eeb52bb"
+  }
+}

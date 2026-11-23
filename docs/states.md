@@ -34,6 +34,7 @@ this page explains them.
 | Montana | Secretary of State's Statewide Export (collected) | Senate, House 1–2 (3) | All 56 counties | Total only |
 | Nebraska | Secretary of State results CSV | Senate, Governor, House 1–3 (5) | No | Total only |
 | Nevada | Saved by hand: the results app's manifest, overview and contest files, imported as one zip | Governor, House 1–4 (5) | All 17 counties | Total only |
+| Maine | Saved by hand: the Secretary of State's official tabulations and District 2 ranked-choice summary, imported as one zip | Senate, Governor, House 1–2 (4) | All 16 counties; overseas ballots statewide only | Total only |
 | New Hampshire | Saved by hand: the Secretary of State's four results spreadsheets, imported as one zip | Senate, Governor, House 1–2 (4) | All 10 counties (House from its towns) | Total only |
 | New Jersey | Its 21 county clerks' results, assembled into one zip by `scripts/nj_bundle.py` | Senate, House 1–12 (13) | All 21 counties | Total only |
 | New Mexico | ENR export | Senate, Governor, House 1–3 (5) | All 33 counties, small counts masked | Total only |
@@ -205,6 +206,17 @@ zero.
   Statewide votes are the collected counties' sums: the dashboard shows "N of 72
   counties collected" and no statewide lead until every county is in, and a House
   district is complete once all its counties are (`State.collected_counties`).
+- **Maine:** the Secretary of State's results page refuses automated clients (403). The
+  operator saves its official tabulations (Senate, Governor and District 1 by
+  municipality, District 2 by precinct) and RCTab's District 2 ranked-choice summary and
+  imports them, unchanged, as one zip. Every place's votes and blanks must add up to its
+  ballots cast, every county's places to its total row, and the county totals with the
+  military and overseas (UOCAVA) row to the sheet's total; those totals are formulas
+  read from their stored values, so this checks the file is unedited. UOCAVA ballots are
+  in no county, so they count statewide only (`statewide_only_votes`). The House counts
+  are the ballots as marked; the ranked-choice summary must name the same ballots and a
+  winner with a first-round majority (District 2, Nov 3, 2026), and is not stored. No
+  report time is printed: it is declared at import.
 - **New Hampshire:** the results site refuses automated clients (Akamai). The operator
   downloads its Senate and Governor county summaries and its two congressional district
   sheets (by town and city ward) and imports them, unchanged, as one zip. Each sheet's
@@ -268,16 +280,8 @@ but has no public source (`awaiting_certified` in `resources/elections_2026.json
 state leaves the label once a source of its is public). Such a state is added from its
 certified canvass, as a manual source whose first import is the certified file
 ([manual results](manual-results.md#a-state-added-from-its-certified-results)), or from
-any results file it posts. As of November 23, 2026 one state remains (Wisconsin and
-Illinois are collected county by county, and Massachusetts from PD43+, above):
-
-- **Maine** is not covered (below). Illinois's State Board vote totals
-  (`elections.il.gov`) offered the 2026 primary as the newest election on Nov 23; once
-  they list the general, they can replace the collected counties.
-
-## Not covered
-
-- **Maine** reports by municipality on election night, with no statewide endpoint, and
-  its federal races need a first-choice/ranked-choice distinction. Its Secretary of
-  State's results page refused the pipeline (403, Nov 23); its results files would have
-  to be saved by hand.
+any results file it posts. As of November 23, 2026 every state is covered (Wisconsin and
+Illinois are collected county by county, Massachusetts from PD43+, and Maine from its
+official tabulations saved by hand, above). Illinois's State Board vote totals
+(`elections.il.gov`) offered the 2026 primary as the newest election on Nov 23; once they
+list the general, they can replace the collected counties.

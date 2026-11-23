@@ -283,6 +283,18 @@ STATES = {
         governor=True,
         source_page="https://www.sos.nh.gov/2026-general-election-results",
     ),
+    # Maine's results site refuses automated clients: its official tabulations and the
+    # District 2 ranked-choice summary are imported by hand, as one zip (parsers/me.py).
+    "ME": State(
+        "ME",
+        "Maine",
+        "me_2026_general",
+        (1, 2),
+        ("total_votes",),
+        governor=True,
+        source_page="https://www.maine.gov/sos/elections-voting/election-results-data",
+        statewide_only_votes="military and overseas (UOCAVA) ballots, reported in no county",
+    ),
     # Alabama's statewide page and its Export Data workbook (collectors/alabama.py).
     "AL": State(
         "AL",

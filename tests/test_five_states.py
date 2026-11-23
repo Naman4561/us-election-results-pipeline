@@ -168,7 +168,7 @@ class FiveStateTests(unittest.TestCase):
             raw = gzip.decompress((FIXTURES / (name + ".gz")).read_bytes())
             self.assertEqual(hashlib.sha256(raw).hexdigest(), metadata["sha256"])
             self.assertEqual(len(raw), metadata["bytes"])
-        self.assertNotIn("me_2026_general", self.sources)
+        self.assertEqual(self.sources["me_2026_general"].primary_filename, "results.zip")
 
     def test_maps_and_dashboard_match_all_new_state_results(self):
         providers = {}

@@ -64,10 +64,13 @@ class Workbook:
         Most official sheets are a few hundred rows; Alabama's one-sheet export is not.
         Numbers must be integers; with ``decimals`` a decimal number is kept as its text
         (Alabama's statistics sheet dates each county's update as an Excel serial).
-        Formulas are refused; with ``sums`` a ``SUM(...)`` cell gives its stored value
-        (New Hampshire's TOTALS rows), which the caller must check against the rows."""
+        Formulas are refused; with ``sums`` a ``SUM(...)`` of a range or of listed cells, an
+        addition of cells or a ratio of two cells gives its stored value (New Hampshire's
+        TOTALS rows, Maine's county and statewide totals and percent row), which the caller
+        must check against the rows."""
         root = xml(self.archive.read(self.sheets[sheet]))
         rows = []
+        ratios = {}
         previous_row = 0
         for node in root.findall("sheetData/row"):
             number = int(node.get("r"))
@@ -86,11 +89,25 @@ class Workbook:
             for cell in node.findall("c"):
                 match = re.fullmatch(r"([A-Z]{1,3})([1-9]\d*)", cell.get("r", ""))
                 formula = cell.find("f")
+                ratio = False
                 if formula is not None and sums and cell.get("t") in (None, "n"):
                     # A shared formula's later cells name only its group ("si").
                     text = formula.text or ""
-                    if not (
-                        re.fullmatch(r"SUM\([A-Z]{1,3}[0-9]+:[A-Z]{1,3}[0-9]+\)", text)
+                    cell_ref = r"[A-Z]{1,3}[0-9]+"
+                    if text and formula.get("t") == "shared":
+                        ratios[formula.get("si")] = bool(
+                            re.fullmatch(rf"{cell_ref}/{cell_ref}", text)
+                        )
+                    if re.fullmatch(rf"{cell_ref}/{cell_ref}", text) or (
+                        not text and ratios.get(formula.get("si"))
+                    ):
+                        # A ratio's stored value (a share, maybe in exponent form) is
+                        # kept as its text; the caller must not count it.
+                        ratio = True
+                    elif not (
+                        re.fullmatch(rf"SUM\({cell_ref}:{cell_ref}\)", text)
+                        or re.fullmatch(rf"SUM\({cell_ref}(,{cell_ref})*\)", text)
+                        or re.fullmatch(rf"{cell_ref}(\+{cell_ref})+", text)
                         or (not text and formula.get("t") == "shared")
                     ):
                         raise ValueError("Unsupported workbook formula")
@@ -113,7 +130,9 @@ class Workbook:
                 elif kind not in (None, "n"):
                     raise ValueError("Unsupported workbook cell type")
                 elif value is not None:
-                    if decimals and re.fullmatch(r"[0-9]+\.[0-9]+", value):
+                    if ratio and re.fullmatch(r"[0-9]+(\.[0-9]+)?(E-?[0-9]+)?", value):
+                        pass
+                    elif decimals and re.fullmatch(r"[0-9]+\.[0-9]+", value):
                         pass
                     elif not re.fullmatch(r"[0-9]+", value):
                         raise ValueError("Expected an integer workbook number")
