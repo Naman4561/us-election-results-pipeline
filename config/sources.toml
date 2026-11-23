@@ -492,6 +492,28 @@ min_interval_seconds = 600
 expected_members = ["data.json", "item-ri-sen.json", "item-ri-gov.json", "item-ri-01.json", "item-ri-02.json"]
 supplemental_members = ["item-ri-sen.json", "item-ri-gov.json", "item-ri-01.json", "item-ri-02.json"]
 
+# PD43+ election IDs for the 2026 general (its search page, Nov 23, 2026).
+[sources.ma_2026_general]
+state = "MA"
+election_date = "2026-11-03"
+url = "https://electionstats.state.ma.us/elections/download/173531/precincts_include:0/"
+format = "bundle"
+primary_filename = "senate.csv"
+min_interval_seconds = 3600
+expected_members = ["senate.csv", "governor.csv", "house-01.csv", "house-02.csv", "house-03.csv", "house-04.csv", "house-05.csv", "house-06.csv", "house-07.csv", "house-08.csv", "house-09.csv"]
+
+[sources.ma_2026_general.files]
+"governor.csv" = "https://electionstats.state.ma.us/elections/download/173526/precincts_include:0/"
+"house-01.csv" = "https://electionstats.state.ma.us/elections/download/173553/precincts_include:0/"
+"house-02.csv" = "https://electionstats.state.ma.us/elections/download/173571/precincts_include:0/"
+"house-03.csv" = "https://electionstats.state.ma.us/elections/download/173537/precincts_include:0/"
+"house-04.csv" = "https://electionstats.state.ma.us/elections/download/173600/precincts_include:0/"
+"house-05.csv" = "https://electionstats.state.ma.us/elections/download/173582/precincts_include:0/"
+"house-06.csv" = "https://electionstats.state.ma.us/elections/download/173565/precincts_include:0/"
+"house-07.csv" = "https://electionstats.state.ma.us/elections/download/173639/precincts_include:0/"
+"house-08.csv" = "https://electionstats.state.ma.us/elections/download/173528/precincts_include:0/"
+"house-09.csv" = "https://electionstats.state.ma.us/elections/download/173546/precincts_include:0/"
+
 [sources.ut_2026_general]
 state = "UT"
 election_date = "2026-11-03"

@@ -19,7 +19,7 @@ BASE = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/"
 FULL_NAME_STATES = {"VA", "MD"}
 # States whose results are reported by town: their map's local units are Census county
 # subdivisions (Vermont's towns and cities), not counties.
-TOWN_STATES = {"VT", "CT"}
+TOWN_STATES = {"VT", "CT", "MA"}
 # States whose results are reported by state House district (Alaska has no counties):
 # their map's local units are the 2026 lower-house districts.
 HOUSE_DISTRICT_STATES = {"AK"}
@@ -320,6 +320,12 @@ def main():
                 for f in counties
                 if f["attributes"]["BASENAME"] != "County subdivisions not defined"
             ]
+            if code == "MA":
+                # Census names Massachusetts towns with a city form of government
+                # "Agawam Town"; the state and its results call them "Agawam".
+                for f in counties:
+                    a = f["attributes"]
+                    a["BASENAME"] = re.sub(r" Town$", "", a["BASENAME"])
             # A city and a town may share a base name (Barre city, Barre town): those
             # keep their full Census name; every other town keeps its base name.
             shared = Counter(county_key(f["attributes"]["BASENAME"]) for f in counties)

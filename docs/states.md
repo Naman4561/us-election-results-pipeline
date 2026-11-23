@@ -25,6 +25,7 @@ this page explains them.
 | Kentucky | State Board results pages, saved by hand | Senate, House 1–6 (7) | All 120 counties | Total only |
 | Louisiana | Secretary of State live results | Senate, House 1–6 (7) | All 64 parishes | Total only |
 | Maryland | State Board results pages | Governor, House 1–8 (9) | All 24 jurisdictions | Total only |
+| Massachusetts | PD43+ (Secretary of the Commonwealth), one CSV per race | Senate, Governor, House 1–9 (11) | All 351 cities and towns (town map) | Total only |
 | Michigan | Saved by hand from the Secretary of State's county results export | Senate, Governor, House 1–13 (15) | All 83 counties | Total only |
 | Minnesota | Secretary of State media files | Senate, Governor, House 1–8 (10) | All 87 counties | Total only |
 | Mississippi | County election offices | Senate (1) | Covered counties | Total only |
@@ -136,6 +137,14 @@ zero.
   are added up under their major party; write-ins are one line. Towns must add up to
   statewide line by line. The map draws its 169 towns. The app prints no update time of
   its own, so the version number is recorded.
+- **Massachusetts:** PD43+ (`electionstats.state.ma.us`) lists an election once its
+  results are certified; each race's city/town CSV is fetched by its PD43+ election ID
+  (configured in `sources.toml`). Every town's votes, write-ins ("All Others") and
+  blanks must add up to its votes cast, and the towns to the TOTALS row; blanks are not
+  stored. PD43+ abbreviates directions ("N. Adams"), written out as the map writes them;
+  the map drops the Census "Town" suffix of towns with a city government ("Agawam").
+  The CSVs carry no certification flag, so Massachusetts is published unofficial until
+  an operator certifies it with an attestation.
 - **Montana:** the site is South Dakota's platform without its statewide CSV. The
   collector posts the export page's "Statewide Export" button (`collectors/montana.py`);
   each sheet's county rows must add up to its TOTALS row. Every download embeds its own
@@ -243,16 +252,17 @@ but has no public source (`awaiting_certified` in `resources/elections_2026.json
 state leaves the label once a source of its is public). Such a state is added from its
 certified canvass, as a manual source whose first import is the certified file
 ([manual results](manual-results.md#a-state-added-from-its-certified-results)), or from
-any results file it posts. As of November 20, 2026 three states remain (Wisconsin is
-collected county by county, above):
+any results file it posts. As of November 23, 2026 two states remain (Wisconsin is
+collected county by county, and Massachusetts from PD43+, above):
 
-- **Illinois** and **Massachusetts** answer automated requests but list no November 3
-  results yet: Illinois's State Board vote totals (`elections.il.gov`) show the primary
-  only, and Massachusetts's PD43+ (`electionstats.state.ma.us`, CSV per contest, by city
-  and town) only two special elections. Both should be collectable once certified.
+- **Illinois** answers automated requests but lists no November 3 results yet: its
+  State Board vote totals (`elections.il.gov`) offer the 2026 primary as the newest
+  election (checked Nov 23). It should be collectable once certified.
 - **Maine** is not covered (below).
 
 ## Not covered
 
 - **Maine** reports by municipality on election night, with no statewide endpoint, and
-  its federal races need a first-choice/ranked-choice distinction.
+  its federal races need a first-choice/ranked-choice distinction. Its Secretary of
+  State's results page refused the pipeline (403, Nov 23); its results files would have
+  to be saved by hand.

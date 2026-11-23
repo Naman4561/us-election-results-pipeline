@@ -529,6 +529,17 @@ STATES = {
         source_page="https://electionresults.ri.gov/results/public/rhodeisland/elections/2026StatewideGeneralElection",
         collection_backend="enhanced_voting",
     ),
+    # Massachusetts posts results only once certified (PD43+), by city and town.
+    "MA": State(
+        "MA",
+        "Massachusetts",
+        "ma_2026_general",
+        tuple(range(1, 10)),
+        ("total_votes",),
+        governor=True,
+        source_page="https://electionstats.state.ma.us/elections/search/year_from:2026/year_to:2026/stage:General",
+        local_unit="town",
+    ),
     # Wyoming has no election-night source collected here; it is added from the State
     # Canvassing Board's certified results, imported as a manual source.
     "WY": State(
