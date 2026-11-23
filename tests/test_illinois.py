@@ -220,5 +220,48 @@ class ChicagoTests(unittest.TestCase):
                     il.chicago_results(body.replace(old, new, 1).encode(), "IL-08")
 
 
+def platinum_henry():
+    with zipfile.ZipFile(FIXTURE / "platinum_henry.zip") as archive:
+        return [archive.read(f"races{n}.html") for n in (1, 2, 3)]
+
+
+class PlatinumTests(unittest.TestCase):
+    """Henry County's platinumelectionresults race pages, captured November 23, 2026."""
+
+    def setUp(self):
+        self.titles = il.table()["titles"]["Henry"]
+
+    def test_the_fixture_is_the_captured_pages(self):
+        ledger = json.loads((FIXTURE / "provenance.json").read_text())["platinum_henry"]
+        for n, body in enumerate(platinum_henry(), 1):
+            self.assertEqual(hashlib.sha256(body).hexdigest(), ledger[f"races{n}.html"]["sha256"])
+
+    def test_races_read_with_their_methods_adding_up(self):
+        found = il.platinum_results(platinum_henry(), self.titles, "unofficial", "Henry")
+        self.assertEqual(set(found), {"IL-SEN", "IL-GOV", "IL-16", "IL-17"})
+        self.assertEqual(
+            found["IL-SEN"],
+            (
+                [
+                    ("Don Tracy", 11214),
+                    ("Juliana Stratton", 7784),
+                    ("Whitfield Harrington Jr", 333),
+                ],
+                (52, 52),
+            ),
+        )
+        # A ticket's two names, printed on two lines, read as one name.
+        self.assertEqual(found["IL-GOV"][0][1][0], "(JB Pritzker (Christian Mitchell")
+
+    def test_a_changed_count_or_a_canvass_claim_is_refused(self):
+        pages = platinum_henry()
+        changed = [pages[0].replace(b"<td>9,185</td>", b"<td>9,186</td>", 1), *pages[1:]]
+        with self.assertRaises(ValueError):
+            il.platinum_results(changed, self.titles, "unofficial", "Henry")
+        # The pages say "Unofficial Results": they cannot be the county's canvass.
+        with self.assertRaises(ValueError):
+            il.platinum_results(pages, self.titles, "canvassed", "Henry")
+
+
 if __name__ == "__main__":
     unittest.main()

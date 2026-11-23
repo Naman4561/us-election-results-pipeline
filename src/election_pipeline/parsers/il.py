@@ -19,6 +19,10 @@ they are read:
   was requested for). The candidates must add up to the citywide total, and the 50
   wards' totals to each candidate's citywide count. The responses do not name their
   contest, so each race's candidates must be its reviewed ballot.
+- ``platinum``: a county's platinumelectionresults.com race pages (Federal, State and
+  Congressional District) for the November 3 election. Each candidate's vote methods
+  (Election Day, Vote By Mail, Early Voting, Provisional, Other) must add up to its
+  total, which is its count; each contest's precincts reporting are kept.
 - ``review``: results no reader takes. Their counts are transcribed into
   ``<Authority>.review.json`` for the files' SHA-256s and signed by the operator who
   checked them; where the results print a contest total, the counts must add up to it.
@@ -60,7 +64,7 @@ WRITE_IN = ("write-in", "Write-in")
 MAX_BYTES = 30_000_000
 WRITTEN = re.compile(r"(?i)write[- ]?in")
 REPORTS = ("canvassed", "unofficial")
-FORMATS = ("clarity", "chicago", "review")
+FORMATS = ("clarity", "chicago", "platinum", "review")
 # The six city election commissions and the county each lies in; every other authority
 # is its county's own and is named by it.
 CITIES = {
@@ -193,6 +197,67 @@ def chicago_results(raw, race):
     return list(zip(names, votes, strict=True))
 
 
+PLATINUM_METHODS = ["Election Day", "Vote By Mail", "Early Voting", "Provisional", "Other", "Total"]
+
+
+def platinum_results(pages, titles, report, label):
+    """{race: (lines, precincts)} from a county's platinumelectionresults race pages (its
+    Federal, State and Congressional District pages). Each candidate's vote methods must
+    add up to its total, which is its count; a page marked unofficial cannot be the
+    county's canvass."""
+    found = {}
+    for raw in pages:
+        page = raw.decode("utf-8")
+        heading = re.search(r'<h2 id="electionTitle">(.*?)</h2>', page, re.S)
+        heading = " ".join(unescape(heading[1]).split()) if heading else ""
+        match = re.fullmatch(
+            r"GENERAL ELECTION \(11/03/2026\) (Unofficial|Official) Results", heading
+        )
+        if not match:
+            raise ValueError(f"{label}: race page belongs to another election ({heading!r})")
+        if match[1] == "Unofficial" and report == "canvassed":
+            raise ValueError(f"{label}: an unofficial page is not the county's canvass")
+        for card in page.split('<div class="card h-100">')[1:]:
+            title = re.search(r"<h3>(.*?)</h3>", card, re.S)
+            title = " ".join(unescape(re.sub(r"<[^>]+>", " ", title[1])).split()) if title else ""
+            race = titles.get(title)
+            if race is None:
+                continue
+            done = re.search(r"([0-9]+) of ([0-9]+) precincts fully reporting", card)
+            if race in found or not done:
+                raise ValueError(f"{label} {race}: repeated contest or no precincts reporting")
+            reporting, total = int(done[1]), int(done[2])
+            if reporting > total or total == 0:
+                raise ValueError(f"{label} {race}: unexpected precincts reporting")
+            lines = []
+            candidates = re.findall(
+                r'can-line flex-grow-1">(.*?)</div>\s*'
+                r'<div class="p-2[^"]*can-line">\s*([0-9,]+)\s*</div>'
+                r"(.*?)</table>",
+                card,
+                re.S,
+            )
+            for name, votes, detail in candidates:
+                heads = [
+                    " ".join(h.split()) for h in re.findall(r"<th\b[^>]*>(.*?)</th>", detail, re.S)
+                ]
+                cells = [
+                    formatted_count(c.strip()) for c in re.findall(r"<td>(.*?)</td>", detail, re.S)
+                ]
+                votes = formatted_count(votes)
+                if heads != PLATINUM_METHODS or len(cells) != len(heads):
+                    raise ValueError(f"{label} {race}: unexpected vote-method table")
+                if sum(cells[:-1]) != cells[-1] or cells[-1] != votes:
+                    raise ValueError(f"{label} {race}: vote methods do not add up to the count")
+                # A ticket's names are printed on two lines (a <br/> between them).
+                name = " ".join(unescape(re.sub(r"<[^>]+>", " ", name)).split())
+                lines.append((text(name, "candidate"), votes))
+            if not lines:
+                raise ValueError(f"{label} {race}: no candidates read")
+            found[race] = (lines, (reporting, total))
+    return found
+
+
 def review(document, sha256s, label):
     """{race: (lines, precincts or None)} from a signed review of an authority's counts."""
     listed = document.get("file_sha256")
@@ -264,6 +329,10 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 found, reported = clarity_results(
                     data["settings"], data["summary"], entry["site"], titles, settings
                 )
+            elif entry["format"] == "platinum":
+                titles = reviewed["titles"].get(authority) or {}
+                found = platinum_results(list(data.values()), titles, entry["report"], label)
+                reported = entry["report_time"] and datetime.fromisoformat(entry["report_time"])
             elif entry["format"] == "chicago":
                 if authority != "Chicago" or not set(data) <= set(adapter.races):
                     raise ValueError(f"{label}: Chicago's results are one file per race")

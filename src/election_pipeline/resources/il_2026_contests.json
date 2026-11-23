@@ -11,7 +11,7 @@
   "IL-GOV": {
    "candidates": [
     {"name": "JB Pritzker / Christian Mitchell", "party": "DEM", "spellings": ["Pritzker & Mitchell", "Pritzker and Mitchell", "(JB Pritzker"]},
-    {"name": "Darren Bailey / Aaron B. Del Mar", "party": "REP", "spellings": ["Bailey & Del Mar", "Bailey and Del Mar", "(Darren Bailey"]},
+    {"name": "Darren Bailey / Aaron B. Del Mar", "party": "REP", "spellings": ["Bailey & Del Mar", "Bailey and Del Mar", "(Darren Bailey", "Darren Bailey Arron B. Del Mar"]},
     {"name": "Collin Corbett / Carolyn Schofield", "party": "IND", "spellings": ["Corbett & Schofield", "Corbett and Schofield", "(Collin Corbett"]}
    ]
   },
@@ -26,7 +26,7 @@
   "IL-09": {"candidates": [{"name": "Daniel Biss", "party": "DEM"}, {"name": "John Elleson", "party": "REP"}]},
   "IL-10": {"candidates": [{"name": "Brad Schneider", "party": "DEM"}, {"name": "Carl Lambrecht", "party": "REP"}]},
   "IL-11": {"candidates": [{"name": "Bill Foster", "party": "DEM"}, {"name": "Jeff Walter", "party": "REP"}]},
-  "IL-12": {"candidates": []},
+  "IL-12": {"candidates": [{"name": "Mike Bost", "party": "REP"}, {"name": "Julie Fortier", "party": "DEM"}]},
   "IL-13": {"candidates": [{"name": "Nikki Budzinski", "party": "DEM"}, {"name": "Jeff Wilson", "party": "REP"}]},
   "IL-14": {"candidates": [{"name": "Lauren Underwood", "party": "DEM"}, {"name": "James T. \"Jim\" Marter", "party": "REP"}]},
   "IL-15": {"candidates": [{"name": "Mary E. Miller", "party": "REP"}, {"name": "Jennifer Todd", "party": "DEM"}]},
@@ -74,6 +74,29 @@
    "FOR REPRESENTATIVE IN CONGRESS SIXTH CONGRESSIONAL DISTRICT": "IL-06",
    "FOR REPRESENTATIVE IN CONGRESS EIGHTH CONGRESSIONAL DISTRICT": "IL-08",
    "FOR REPRESENTATIVE IN CONGRESS ELEVENTH CONGRESSIONAL DISTRICT": "IL-11"
+  },
+  "Henry": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS SIXTEENTH CONGRESSIONAL DISTRICT": "IL-16",
+   "FOR REPRESENTATIVE IN CONGRESS SEVENTEENTH CONGRESSIONAL DISTRICT": "IL-17"
+  },
+  "Clinton": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS TWELFTH CONGRESSIONAL DISTRICT": "IL-12"
+  },
+  "DeKalb": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS ELEVENTH CONGRESSIONAL DISTRICT": "IL-11",
+   "FOR REPRESENTATIVE IN CONGRESS FOURTEENTH REPRESENTATIVE DISTRICT": "IL-14",
+   "FOR REPRESENTATIVE IN CONGRESS SIXTEENTH REPRESENTATIVE DISTRICT": "IL-16"
+  },
+  "Pike": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS FIFTHTEENTH CONGRESSIONAL DISTRICT": "IL-15"
   },
   "Madison": {
    "U.S. SENATOR": "IL-SEN",

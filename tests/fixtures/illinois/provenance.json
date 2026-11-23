@@ -187,5 +187,22 @@
       "sha256": "f0feb6e2e301803c48f28886852571ef48da334e08510db03a560ecd0ee2d64a",
       "saved_at": "2026-11-23T04:41:16+00:00"
     }
+  },
+  "platinum_henry": {
+    "races1.html": {
+      "url": "https://platinumelectionresults.com/races/76/1",
+      "sha256": "382f2f2a45f022f3efd88df5ead07d5682936b9dc31c715ff7855c0b8d799ac2",
+      "saved_at": "2026-11-23T05:12:48+00:00"
+    },
+    "races2.html": {
+      "url": "https://platinumelectionresults.com/races/76/2",
+      "sha256": "c2ef7e9b2f0d796714aad32fe39103aa5c7ba9787ccf22f64450678b8317f825",
+      "saved_at": "2026-11-23T05:12:50+00:00"
+    },
+    "races3.html": {
+      "url": "https://platinumelectionresults.com/races/76/3",
+      "sha256": "57efc3c2e1d632d80062f7306c15617a896953a936d30dbed586882a9af0b647",
+      "saved_at": "2026-11-23T05:12:51+00:00"
+    }
   }
 }
