@@ -30,6 +30,9 @@ they are read:
   embedded in it. Each race's candidates must add up to its votes counted, and its
   precincts reporting are kept. Ballot candidates are printed with their party; a name
   without one is a write-in.
+- ``gbs``: a county's GBS results (``results.json`` of its 2026 general election on
+  results.gbsvote.com). Each candidate's vote methods must add up to its votes, and
+  write-ins are flagged as such; its precincts reporting are kept as printed.
 - ``review``: results no reader takes. Their counts are transcribed into
   ``<Authority>.review.json`` for the files' SHA-256s and signed by the operator who
   checked them; where the results print a contest total, the counts must add up to it.
@@ -71,7 +74,15 @@ WRITE_IN = ("write-in", "Write-in")
 MAX_BYTES = 30_000_000
 WRITTEN = re.compile(r"(?i)write[- ]?in")
 REPORTS = ("canvassed", "unofficial")
-FORMATS = ("clarity", "chicago", "platinum", "livevoterturnout", "pollresults", "review")
+FORMATS = (
+    "clarity",
+    "chicago",
+    "platinum",
+    "livevoterturnout",
+    "pollresults",
+    "gbs",
+    "review",
+)
 # The six city election commissions and the county each lies in; every other authority
 # is its county's own and is named by it.
 CITIES = {
@@ -366,6 +377,48 @@ def pollresults_results(raw, titles, label):
     return found, when.replace(tzinfo=CENTRAL["CST"])
 
 
+GBS_METHODS = ("voteByMail", "earlyVoting", "electionDay")
+
+
+def gbs_results(raw, titles, report, label):
+    """{race: (lines, precincts)} from a county's GBS results (``results.json`` of its
+    November 3 general election), and its update time. Each candidate's vote methods must
+    add up to its votes; write-ins are named as such. Precincts reporting are kept as GBS
+    prints them (Warren's election-night upload prints none of 28 reporting, so it is
+    shown as partial). An election GBS marks unofficial cannot be the county's canvass."""
+    data = unique_json(raw)
+    election = data["election"]
+    if election["date"] != "2026-11-03" or election["type"] != "general":
+        raise ValueError(f"{label}: results belong to another election")
+    if election["status"] not in ("unofficial", "official"):
+        raise ValueError(f"{label}: unexpected results status {election['status']!r}")
+    if election["status"] == "unofficial" and report == "canvassed":
+        raise ValueError(f"{label}: unofficial results are not the county's canvass")
+    found = {}
+    for contest in data["races"]:
+        race = titles.get(" ".join(str(contest["title"]).split()))
+        if race is None:
+            continue
+        if race in found or contest["voteFor"] != 1:
+            raise ValueError(f"{label} {race}: repeated or multi-seat contest")
+        lines = []
+        for candidate in contest["candidates"]:
+            votes = count(candidate["votes"])
+            if sum(count(candidate[m]) for m in GBS_METHODS) != votes:
+                raise ValueError(f"{label} {race}: vote methods do not add up to the votes")
+            if candidate["isNoCandidate"]:
+                if votes:
+                    raise ValueError(f"{label} {race}: votes for no candidate")
+                continue
+            name = text(candidate["name"], "candidate")
+            lines.append((f"{name} (write-in)" if candidate["isWriteIn"] else name, votes))
+        reporting, total = count(contest["precinctsReporting"]), count(contest["totalPrecincts"])
+        if reporting > total or total == 0:
+            raise ValueError(f"{label} {race}: unexpected precincts reporting")
+        found[race] = (lines, (reporting, total))
+    return found, datetime.fromisoformat(election["lastUpdated"])
+
+
 def review(document, sha256s, label):
     """{race: (lines, precincts or None)} from a signed review of an authority's counts."""
     listed = document.get("file_sha256")
@@ -451,6 +504,13 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                     else pollresults_results
                 )
                 found, reported = reader(next(iter(data.values())), titles, label)
+            elif entry["format"] == "gbs":
+                if len(data) != 1:
+                    raise ValueError(f"{label}: a GBS county is one results file")
+                titles = reviewed["titles"].get(authority) or {}
+                found, reported = gbs_results(
+                    next(iter(data.values())), titles, entry["report"], label
+                )
             elif entry["format"] == "chicago":
                 if authority != "Chicago" or not set(data) <= set(adapter.races):
                     raise ValueError(f"{label}: Chicago's results are one file per race")

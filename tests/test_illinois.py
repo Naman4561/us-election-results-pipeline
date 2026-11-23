@@ -321,5 +321,32 @@ class PollResultsTests(unittest.TestCase):
             il.pollresults_results(changed, self.titles, "Stephenson")
 
 
+class GbsTests(unittest.TestCase):
+    """Cumberland County's GBS results, captured November 23, 2026."""
+
+    def setUp(self):
+        self.raw = (FIXTURE / "gbs_cumberland.json").read_bytes()
+        self.titles = il.table()["titles"]["Cumberland"]
+
+    def test_the_fixture_is_the_captured_file(self):
+        ledger = json.loads((FIXTURE / "provenance.json").read_text())["gbs_cumberland.json"]
+        self.assertEqual(hashlib.sha256(self.raw).hexdigest(), ledger["sha256"])
+
+    def test_races_add_up_by_method_and_write_ins_are_named(self):
+        found, when = il.gbs_results(self.raw, self.titles, "unofficial", "Cumberland")
+        self.assertEqual(set(found), {"IL-SEN", "IL-GOV", "IL-12"})
+        self.assertEqual(found["IL-12"], ([("Mike Bost", 3816), ("Julie Fortier", 909)], (12, 12)))
+        self.assertIn(("GRISELDA ROMERO (write-in)", 1), found["IL-GOV"][0])
+        self.assertEqual(when.isoformat(), "2026-11-04T02:32:22.058002+00:00")
+
+    def test_a_changed_count_or_a_canvass_claim_is_refused(self):
+        changed = self.raw.replace(b'"votes": 3816', b'"votes": 3817', 1)
+        self.assertNotEqual(changed, self.raw)
+        with self.assertRaises(ValueError):
+            il.gbs_results(changed, self.titles, "unofficial", "Cumberland")
+        with self.assertRaises(ValueError):
+            il.gbs_results(self.raw, self.titles, "canvassed", "Cumberland")
+
+
 if __name__ == "__main__":
     unittest.main()

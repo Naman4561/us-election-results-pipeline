@@ -214,5 +214,10 @@
     "url": "https://il-stephenson.pollresults.net/",
     "sha256": "e0f20fb92960cd95c0dc0a935021aba66c746e328075fe9dd0b979f973b84f10",
     "saved_at": "2026-11-23T05:11:56+00:00"
+  },
+  "gbs_cumberland.json": {
+    "url": "https://cumberland.results.gbsvote.com/results/cumberland/2026-general/current/results.json",
+    "sha256": "f63f693cb7cf2bf7a0d7459e452024ceb79839e551f3af13fd65c22f73075c0d",
+    "saved_at": "2026-11-23T05:26:09+00:00"
   }
 }
