@@ -529,6 +529,19 @@ STATES = {
         source_page="https://electionresults.ri.gov/results/public/rhodeisland/elections/2026StatewideGeneralElection",
         collection_backend="enhanced_voting",
     ),
+    # Illinois's State Board posts results only after its December canvass; each election
+    # authority's own results are collected meanwhile, county by county (parsers/il.py).
+    "IL": State(
+        "IL",
+        "Illinois",
+        "il_2026_general",
+        tuple(range(1, 18)),
+        ("total_votes",),
+        governor=True,
+        source_page="https://www.elections.il.gov/ElectionOperations/ElectionAuthorities.aspx",
+        vote_basis="collected_county_reports",
+        collected_counties=True,
+    ),
     # Massachusetts posts results only once certified (PD43+), by city and town.
     "MA": State(
         "MA",

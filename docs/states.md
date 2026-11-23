@@ -20,6 +20,7 @@ this page explains them.
 | Hawaii | Office of Elections `summary.txt` | Governor, House 1–2 (3) | No | Mail, in person |
 | Iowa | Clarity | Senate, Governor, House 1–4 (6) | All 99 counties | Election Day, absentee |
 | Idaho | Enhanced Voting | Senate, Governor, House 1–2 (4) | All 44 counties | Total only |
+| Illinois | Each election authority's own results (Clarity sites, or transcribed by hand) | Senate, Governor, House 1–17 (19) | Collected counties | Total only |
 | Indiana | Election Division results JSON | House 1–9 (9) | All counties of each district | Total only |
 | Kansas | Saved by hand from the results page | Senate, Governor, House 1–4 (6) | Reported counties | Total only |
 | Kentucky | State Board results pages, saved by hand | Senate, House 1–6 (7) | All 120 counties | Total only |
@@ -170,6 +171,21 @@ zero.
   own terms (Clarity totals, ES&S Total Votes Cast or vote methods, Bergen's
   percentages, Salem's precincts); statewide totals are the county sums. Refresh:
   rerun the bundle tool and import again.
+- **Illinois:** the State Board posts results only after its December canvass, so each
+  of the 108 election authorities' own results is collected as Wisconsin's counties are
+  (`parsers/il.py`): the 102 counties' clerks or election commission, and six city
+  election commissions (Bloomington, Chicago, Danville, East St. Louis, Galesburg,
+  Rockford) inside their counties. One zip holds each collected authority's files and a
+  `manifest.json`; a Clarity site's summary and settings are read as they are (each
+  contest's candidates add up to its total, and its precincts reporting are kept), and
+  anything else is transcribed into a signed review. A county is published once every
+  authority in it is collected, as their sum. A count still under way (McLean's clerk, 14
+  of 81 precincts in November 2026) is named in the publication's update text as a
+  partial count. Each authority's own contest titles, and the candidates' spellings, are
+  in the reviewed table `resources/il_2026_contests.json`; a name not in it is refused
+  rather than counted as a write-in. A feasibility survey of all 108 (Nov 23) found
+  Clarity sites, vendor sites (pollresults.net, GBS, platinumelectionresults,
+  livevoterturnout), county PDFs and pages, and eight that refuse the pipeline.
 - **Wisconsin:** the Elections Commission posts results only once it certifies (about
   December 1) and its site refuses automated clients, so each county's own report is
   collected as the counties post them (`parsers/wi.py`): fetched as the pipeline fetches
@@ -252,13 +268,12 @@ but has no public source (`awaiting_certified` in `resources/elections_2026.json
 state leaves the label once a source of its is public). Such a state is added from its
 certified canvass, as a manual source whose first import is the certified file
 ([manual results](manual-results.md#a-state-added-from-its-certified-results)), or from
-any results file it posts. As of November 23, 2026 two states remain (Wisconsin is
-collected county by county, and Massachusetts from PD43+, above):
+any results file it posts. As of November 23, 2026 one state remains (Wisconsin and
+Illinois are collected county by county, and Massachusetts from PD43+, above):
 
-- **Illinois** answers automated requests but lists no November 3 results yet: its
-  State Board vote totals (`elections.il.gov`) offer the 2026 primary as the newest
-  election (checked Nov 23). It should be collectable once certified.
-- **Maine** is not covered (below).
+- **Maine** is not covered (below). Illinois's State Board vote totals
+  (`elections.il.gov`) offered the 2026 primary as the newest election on Nov 23; once
+  they list the general, they can replace the collected counties.
 
 ## Not covered
 

@@ -145,6 +145,17 @@ primary_filename = "results.zip"
 min_interval_seconds = 600
 expected_members = ["results.zip"]
 
+# Illinois's election authorities' own results, assembled into one zip by hand as they
+# come in: the State Board posts results only after its December canvass.
+[sources.il_2026_general]
+state = "IL"
+election_date = "2026-11-03"
+url = "https://www.elections.il.gov/ElectionOperations/ElectionAuthorities.aspx"
+format = "bundle"
+primary_filename = "results.zip"
+min_interval_seconds = 600
+expected_members = ["results.zip"]
+
 # The results app's manifest, overview and contest files, saved by hand and imported as
 # one zip: the results site and its data files refuse automated clients.
 [sources.nv_2026_general]

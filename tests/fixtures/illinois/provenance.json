@@ -1,0 +1,68 @@
+{
+  "results.zip": {
+    "sha256": "c9021c58a3e1a223206bfc1e6d3ca6b8f1b95b19d1cb342369697c37cc626a2e",
+    "bytes": 70253
+  },
+  "members": {
+    "clarity/Bloomington.settings.json": {
+      "url": "https://results.enr.clarityelections.com/IL/Bloomington/127392/387136/json/en/electionsettings.json",
+      "sha256": "8a029243072f7883d9409fe2821c2ebabb4a78790e62011d5e09528a317216df",
+      "saved_at": "2026-11-23T04:18:58+00:00"
+    },
+    "clarity/Bloomington.summary.json": {
+      "url": "https://results.enr.clarityelections.com/IL/Bloomington/127392/387136/json/en/summary.json",
+      "sha256": "c859b30dd5187e05a7f28c897e808e9602611092d72c948427fb05561dbafddb",
+      "saved_at": "2026-11-23T04:18:58+00:00"
+    },
+    "clarity/Lake.settings.json": {
+      "url": "https://results.enr.clarityelections.com/IL/Lake/127289/387162/json/en/electionsettings.json",
+      "sha256": "eb3cb5be061a5fc6e52a9048cb94ef0031b7953047ea1035c63ce031f79fe551",
+      "saved_at": "2026-11-23T04:18:48+00:00"
+    },
+    "clarity/Lake.summary.json": {
+      "url": "https://results.enr.clarityelections.com/IL/Lake/127289/387162/json/en/summary.json",
+      "sha256": "1669a8a32e7fd5969dae244b64bb40d1a9779cee620779861d7a06ad9b54cdaf",
+      "saved_at": "2026-11-23T04:18:48+00:00"
+    },
+    "clarity/McLean.settings.json": {
+      "url": "https://results.enr.clarityelections.com/IL/McLean/127349/387246/json/en/electionsettings.json",
+      "sha256": "d83a31631e1e2b49ac43ed55dc5cf18913df4b5cbe4db21e9f132963bd3276cb",
+      "saved_at": "2026-11-23T04:18:51+00:00"
+    },
+    "clarity/McLean.summary.json": {
+      "url": "https://results.enr.clarityelections.com/IL/McLean/127349/387246/json/en/summary.json",
+      "sha256": "92215960baaa398031acda0925b5740d24f48889d4acc325c50440d95c6561a1",
+      "saved_at": "2026-11-23T04:18:51+00:00"
+    },
+    "clarity/Rockford.settings.json": {
+      "url": "https://results.enr.clarityelections.com/WRC/Rockford/127559/387148/json/en/electionsettings.json",
+      "sha256": "cf2137988ec5e2b7fd59458d0a53655fee9b3874ee64cb3ef0a61c98c3964522",
+      "saved_at": "2026-11-23T04:19:01+00:00"
+    },
+    "clarity/Rockford.summary.json": {
+      "url": "https://results.enr.clarityelections.com/WRC/Rockford/127559/387148/json/en/summary.json",
+      "sha256": "20fae5a6e9784dc91456a86fcb3954179f9574145ec90cb9b153f68df386dad5",
+      "saved_at": "2026-11-23T04:19:01+00:00"
+    },
+    "clarity/Sangamon.settings.json": {
+      "url": "https://results.enr.clarityelections.com/IL/Sangamon/127490/387118/json/en/electionsettings.json",
+      "sha256": "36a499f0ec914ce711f0cf8d0d99375fef5c8ee1a4ec5b3df2b4ad23c15d3c15",
+      "saved_at": "2026-11-23T04:18:55+00:00"
+    },
+    "clarity/Sangamon.summary.json": {
+      "url": "https://results.enr.clarityelections.com/IL/Sangamon/127490/387118/json/en/summary.json",
+      "sha256": "a3f28a54275efd9c3f9906e59e42190c1336cf850ce0c6bf91efb1c5ca199801",
+      "saved_at": "2026-11-23T04:18:55+00:00"
+    },
+    "clarity/Winnebago.settings.json": {
+      "url": "https://results.enr.clarityelections.com/WRC/Winnebago/127560/387152/json/en/electionsettings.json",
+      "sha256": "d8c71960babb7dd50872c2835b53a667ddb8ccffe08ed42935aa83ac77a961dd",
+      "saved_at": "2026-11-23T04:19:05+00:00"
+    },
+    "clarity/Winnebago.summary.json": {
+      "url": "https://results.enr.clarityelections.com/WRC/Winnebago/127560/387152/json/en/summary.json",
+      "sha256": "06d978087e499e71ec110ea17724bba1c16440dbf3e618d75e3917b33df2c5cc",
+      "saved_at": "2026-11-23T04:19:05+00:00"
+    }
+  }
+}
