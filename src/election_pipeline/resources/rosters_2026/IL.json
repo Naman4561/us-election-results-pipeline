@@ -225,7 +225,10 @@
    ]
   },
   "IL-01": {
-   "candidates": [],
+   "candidates": [
+    "Christian Maxwell",
+    "Jonathan L. Jackson"
+   ],
    "counties": [
     "Cook",
     "Kankakee",
@@ -233,7 +236,10 @@
    ]
   },
   "IL-02": {
-   "candidates": [],
+   "candidates": [
+    "Donna Miller",
+    "Michael Scott Noack"
+   ],
    "counties": [
     "Champaign",
     "Cook",
@@ -246,14 +252,22 @@
    ]
   },
   "IL-03": {
-   "candidates": [],
+   "candidates": [
+    "Angel Oakley",
+    "Delia Ramirez"
+   ],
    "counties": [
     "Cook",
     "DuPage"
    ]
   },
   "IL-04": {
-   "candidates": [],
+   "candidates": [
+    "Chris Getty",
+    "Ed Hershey",
+    "Lupe Castillo",
+    "Patty Garcia"
+   ],
    "counties": [
     "Cook",
     "DuPage"
@@ -270,20 +284,29 @@
    ]
   },
   "IL-06": {
-   "candidates": [],
+   "candidates": [
+    "Niki Conforti",
+    "Sean Casten"
+   ],
    "counties": [
     "Cook",
     "DuPage"
    ]
   },
   "IL-07": {
-   "candidates": [],
+   "candidates": [
+    "Chad Koppie",
+    "La Shawn K. Ford"
+   ],
    "counties": [
     "Cook"
    ]
   },
   "IL-08": {
-   "candidates": [],
+   "candidates": [
+    "Jennifer Davis",
+    "Melissa L. Bean"
+   ],
    "counties": [
     "Cook",
     "DuPage",

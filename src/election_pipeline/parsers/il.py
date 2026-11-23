@@ -14,6 +14,11 @@ they are read:
   ``electionsettings.json`` of one published version). Each contest's candidates must
   add up to its total; its precincts reporting are kept, so a count still under way
   (McLean's, in November 2026) is shown as partial.
+- ``chicago``: the Chicago Board of Elections' results, one file per race: what its
+  results page's form returns for the race citywide (each file's ``role`` is the race it
+  was requested for). The candidates must add up to the citywide total, and the 50
+  wards' totals to each candidate's citywide count. The responses do not name their
+  contest, so each race's candidates must be its reviewed ballot.
 - ``review``: results no reader takes. Their counts are transcribed into
   ``<Authority>.review.json`` for the files' SHA-256s and signed by the operator who
   checked them; where the results print a contest total, the counts must add up to it.
@@ -36,19 +41,26 @@ import json
 import re
 import zipfile
 from datetime import datetime, timedelta, timezone
+from html import unescape
 from importlib.resources import files
 
 from election_pipeline.parsers import clarity
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.scope_2026 import ROSTERS
-from election_pipeline.parsers.structured import count, row, text, unique_json
+from election_pipeline.parsers.structured import (
+    count,
+    formatted_count,
+    row,
+    text,
+    unique_json,
+)
 
 WRITE_IN = ("write-in", "Write-in")
 MAX_BYTES = 30_000_000
 WRITTEN = re.compile(r"(?i)write[- ]?in")
 REPORTS = ("canvassed", "unofficial")
-FORMATS = ("clarity", "review")
+FORMATS = ("clarity", "chicago", "review")
 # The six city election commissions and the county each lies in; every other authority
 # is its county's own and is named by it.
 CITIES = {
@@ -135,6 +147,52 @@ def clarity_results(settings_raw, summary_raw, site, titles, settings):
     return found, when
 
 
+def cells(markup):
+    """Each table's rows of cell texts."""
+    tables = []
+    for table in re.findall(r"<table.*?</table>", markup, re.S):
+        rows = []
+        for tr in re.findall(r"<tr.*?</tr>", table, re.S):
+            found = re.findall(r"<t[hd][^>]*>(.*?)</t[hd]>", tr, re.S)
+            rows.append([" ".join(unescape(re.sub(r"<[^>]+>", " ", c)).split()) for c in found])
+        tables.append(rows)
+    return tables
+
+
+def chicago_results(raw, race):
+    """A race's lines from the Chicago Board of Elections' results for it: the response
+    its results page's form returns (Drupal AJAX commands whose dialog holds a citywide
+    table, then one table per ward). The candidates must add up to the citywide total
+    votes, and each candidate's ward totals to its citywide count."""
+    commands = unique_json(raw)
+    if not isinstance(commands, list):
+        raise ValueError(f"Chicago {race}: unexpected results response")
+    markup = "".join(
+        c["data"] for c in commands if isinstance(c, dict) and isinstance(c.get("data"), str)
+    )
+    tables = cells(markup)
+    if not tables or len(tables[0]) != 2 or tables[0][0][:1] != ["Total Votes"]:
+        raise ValueError(f"Chicago {race}: results lack their citywide table")
+    head, city = tables[0]
+    names = head[1::2]
+    if len(head) != 1 + 2 * len(names) or len(city) != len(head) or not names:
+        raise ValueError(f"Chicago {race}: malformed citywide table")
+    total = formatted_count(city[0])
+    votes = [formatted_count(v) for v in city[1::2]]
+    if sum(votes) != total:
+        raise ValueError(f"Chicago {race}: candidates do not add up to the total votes")
+    wards = tables[1:]
+    sums = [0] * len(names)
+    for ward in wards:
+        if not ward or ward[0][2::2] != names or ward[-1][:1] != ["Total"]:
+            raise ValueError(f"Chicago {race}: a ward table lists other candidates")
+        for index, value in enumerate(ward[-1][2::2]):
+            sums[index] += formatted_count(value)
+    if not wards or sums != votes:
+        raise ValueError(f"Chicago {race}: wards do not add up to the citywide counts")
+    return list(zip(names, votes, strict=True))
+
+
 def review(document, sha256s, label):
     """{race: (lines, precincts or None)} from a signed review of an authority's counts."""
     listed = document.get("file_sha256")
@@ -206,6 +264,11 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 found, reported = clarity_results(
                     data["settings"], data["summary"], entry["site"], titles, settings
                 )
+            elif entry["format"] == "chicago":
+                if authority != "Chicago" or not set(data) <= set(adapter.races):
+                    raise ValueError(f"{label}: Chicago's results are one file per race")
+                found = {race: (chicago_results(body, race), None) for race, body in data.items()}
+                reported = entry["report_time"] and datetime.fromisoformat(entry["report_time"])
             else:
                 name = f"{authority}.review.json"
                 expected.add(name)

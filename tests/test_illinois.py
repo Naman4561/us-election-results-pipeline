@@ -15,6 +15,7 @@ import unittest
 import zipfile
 from pathlib import Path
 
+from election_pipeline.parsers import il
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
 from election_pipeline.storage import ArchiveStore
@@ -177,6 +178,46 @@ class IllinoisTests(unittest.TestCase):
             with self.subTest(label):
                 report = self.parse(mutate)
                 self.assertEqual(report["outcome"], "validation_failed", report)
+
+
+def chicago():
+    with zipfile.ZipFile(FIXTURE / "chicago.zip") as archive:
+        return {name.removesuffix(".json"): archive.read(name) for name in archive.namelist()}
+
+
+class ChicagoTests(unittest.TestCase):
+    """The Chicago Board of Elections' 11 race responses, captured November 23, 2026."""
+
+    def test_the_fixture_is_the_captured_responses(self):
+        ledger = json.loads((FIXTURE / "provenance.json").read_text())["chicago"]
+        for race, body in chicago().items():
+            self.assertEqual(hashlib.sha256(body).hexdigest(), ledger[f"{race}.json"]["sha256"])
+
+    def test_citywide_counts_and_their_wards_add_up(self):
+        responses = chicago()
+        self.assertEqual(len(responses), 11)
+        senate = dict(il.chicago_results(responses["IL-SEN"], "IL-SEN"))
+        self.assertEqual(
+            senate,
+            {
+                "Don Tracy": 93434,
+                "Juliana Stratton": 675842,
+                "Whitfield Harrington Jr": 11527,
+                "Chris Gant (Write-in)": 4,
+            },
+        )
+        for race, body in responses.items():
+            with self.subTest(race):
+                self.assertTrue(il.chicago_results(body, race))
+
+    def test_a_changed_count_is_refused(self):
+        body = chicago()["IL-08"].decode()
+        # The dialog's HTML is JSON-escaped: ">472<" is ">472<".
+        for old, new in (("1,271", "1,272"), ("\\u003E472\\u003C", "\\u003E473\\u003C")):
+            with self.subTest(old):
+                self.assertIn(old, body)
+                with self.assertRaises(ValueError):
+                    il.chicago_results(body.replace(old, new, 1).encode(), "IL-08")
 
 
 if __name__ == "__main__":

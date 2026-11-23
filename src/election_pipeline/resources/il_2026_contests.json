@@ -1,5 +1,5 @@
 {
- "provenance": "Illinois's 2026 general election. Counties: the Senate and Governor in all 102; each House district's counties from the Census Bureau's 2020 county to 119th Congressional District relationship file (tab20_cd11920_county20_natl.txt, land parts). Candidates, parties and spellings: as the election authorities' own results print them (Clarity summaries of Lake, McLean, Sangamon, Bloomington, Rockford and Winnebago, captured November 23, 2026); a race no collected authority reports yet lists no candidates. Whitfield Harrington Jr's party is printed ACP, AMC or AME by different authorities and is kept as ACP. Titles: each authority's own title for each selected contest.",
+ "provenance": "Illinois's 2026 general election. Counties: the Senate and Governor in all 102; each House district's counties from the Census Bureau's 2020 county to 119th Congressional District relationship file (tab20_cd11920_county20_natl.txt, land parts). Candidates, parties and spellings: as the election authorities' own results print them (Clarity summaries of Lake, McLean, Sangamon, Bloomington, Rockford and Winnebago, captured November 23, 2026; districts 1-4 and 6-8 from the Cook County Clerk's suburban Summary Report of November 18, 2026, which prints each candidate's party, and Chicago's results); a race no collected authority reports yet lists no candidates. Whitfield Harrington Jr's party is printed ACP, AMC or AME by different authorities and is kept as ACP. Titles: each authority's own title for each selected contest.",
  "races": {
   "IL-SEN": {
    "candidates": [
@@ -15,14 +15,14 @@
     {"name": "Collin Corbett / Carolyn Schofield", "party": "IND", "spellings": ["Corbett & Schofield", "Corbett and Schofield", "(Collin Corbett"]}
    ]
   },
-  "IL-01": {"candidates": []},
-  "IL-02": {"candidates": []},
-  "IL-03": {"candidates": []},
-  "IL-04": {"candidates": []},
+  "IL-01": {"candidates": [{"name": "Jonathan L. Jackson", "party": "DEM"}, {"name": "Christian Maxwell", "party": "REP"}]},
+  "IL-02": {"candidates": [{"name": "Donna Miller", "party": "DEM"}, {"name": "Michael Scott Noack", "party": "REP"}]},
+  "IL-03": {"candidates": [{"name": "Delia Ramirez", "party": "DEM"}, {"name": "Angel Oakley", "party": "REP"}]},
+  "IL-04": {"candidates": [{"name": "Patty Garcia", "party": "DEM"}, {"name": "Lupe Castillo", "party": "REP"}, {"name": "Chris Getty", "party": "IND"}, {"name": "Ed Hershey", "party": "WCP"}]},
   "IL-05": {"candidates": [{"name": "Mike Quigley", "party": "DEM"}, {"name": "Tommy Hanson", "party": "REP"}]},
-  "IL-06": {"candidates": []},
-  "IL-07": {"candidates": []},
-  "IL-08": {"candidates": []},
+  "IL-06": {"candidates": [{"name": "Sean Casten", "party": "DEM"}, {"name": "Niki Conforti", "party": "REP"}]},
+  "IL-07": {"candidates": [{"name": "La Shawn K. Ford", "party": "DEM"}, {"name": "Chad Koppie", "party": "REP"}]},
+  "IL-08": {"candidates": [{"name": "Melissa L. Bean", "party": "DEM"}, {"name": "Jennifer Davis", "party": "REP"}]},
   "IL-09": {"candidates": [{"name": "Daniel Biss", "party": "DEM"}, {"name": "John Elleson", "party": "REP"}]},
   "IL-10": {"candidates": [{"name": "Brad Schneider", "party": "DEM"}, {"name": "Carl Lambrecht", "party": "REP"}]},
   "IL-11": {"candidates": [{"name": "Bill Foster", "party": "DEM"}, {"name": "Jeff Walter", "party": "REP"}]},
