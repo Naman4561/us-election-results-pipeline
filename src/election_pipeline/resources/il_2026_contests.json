@@ -28,7 +28,7 @@
   "IL-11": {"candidates": [{"name": "Bill Foster", "party": "DEM"}, {"name": "Jeff Walter", "party": "REP"}]},
   "IL-12": {"candidates": []},
   "IL-13": {"candidates": [{"name": "Nikki Budzinski", "party": "DEM"}, {"name": "Jeff Wilson", "party": "REP"}]},
-  "IL-14": {"candidates": []},
+  "IL-14": {"candidates": [{"name": "Lauren Underwood", "party": "DEM"}, {"name": "James T. \"Jim\" Marter", "party": "REP"}]},
   "IL-15": {"candidates": [{"name": "Mary E. Miller", "party": "REP"}, {"name": "Jennifer Todd", "party": "DEM"}]},
   "IL-16": {"candidates": [{"name": "Darin LaHood", "party": "REP"}, {"name": "Paul Nolley", "party": "DEM"}]},
   "IL-17": {"candidates": [{"name": "Eric Sorensen", "party": "DEM"}, {"name": "Dillan S. Vancil", "party": "REP"}]}
@@ -65,6 +65,21 @@
    "GOV/LT. GOV": "IL-GOV",
    "16TH REP. IN CONGRESS D16": "IL-16",
    "17TH REP. IN CONGRESS D17": "IL-17"
+  },
+  "DuPage": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS THIRD CONGRESSIONAL DISTRICT": "IL-03",
+   "FOR REPRESENTATIVE IN CONGRESS FOURTH CONGRESSIONAL DISTRICT": "IL-04",
+   "FOR REPRESENTATIVE IN CONGRESS SIXTH CONGRESSIONAL DISTRICT": "IL-06",
+   "FOR REPRESENTATIVE IN CONGRESS EIGHTH CONGRESSIONAL DISTRICT": "IL-08",
+   "FOR REPRESENTATIVE IN CONGRESS ELEVENTH CONGRESSIONAL DISTRICT": "IL-11"
+  },
+  "Madison": {
+   "U.S. SENATOR": "IL-SEN",
+   "GOV. AND LT. GOV": "IL-GOV",
+   "REP. IN CONGRESS D13": "IL-13",
+   "REP. IN CONGRESS D15": "IL-15"
   },
   "Winnebago": {
    "UNITED STATES SENATOR": "IL-SEN",
