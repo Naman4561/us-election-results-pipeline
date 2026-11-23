@@ -7,6 +7,7 @@ Dockerfile text eol=lf
 tests/fixtures/expansion/*.txt -text whitespace=-blank-at-eol
 tests/fixtures/expansion/*.csv -text whitespace=-blank-at-eol
 tests/fixtures/mississippi/*.html -text whitespace=-blank-at-eol
+tests/fixtures/illinois/*.html -text whitespace=-blank-at-eol
 # These resources are pinned by their exact bytes, including line endings.
 src/election_pipeline/resources/alaska-issuers.pem text eol=lf
 src/election_pipeline/resources/florida-root.pem text eol=lf
