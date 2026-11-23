@@ -263,5 +263,29 @@ class PlatinumTests(unittest.TestCase):
             il.platinum_results(pages, self.titles, "canvassed", "Henry")
 
 
+class LiveVoterTurnoutTests(unittest.TestCase):
+    """Effingham County's livevoterturnout.com results page, captured November 23, 2026."""
+
+    def setUp(self):
+        self.page = (FIXTURE / "lvt_effingham.html").read_bytes()
+        self.titles = il.table()["titles"]["Effingham"]
+
+    def test_the_fixture_is_the_captured_page(self):
+        ledger = json.loads((FIXTURE / "provenance.json").read_text())["lvt_effingham.html"]
+        self.assertEqual(hashlib.sha256(self.page).hexdigest(), ledger["sha256"])
+
+    def test_countywide_totals_add_up_by_method_and_by_precinct(self):
+        found, when = il.livevoterturnout_results(self.page, self.titles, "Effingham")
+        self.assertEqual(set(found), {"IL-SEN", "IL-GOV", "IL-12"})
+        self.assertEqual(found["IL-12"][0], [("Julie Fortier", 3054), ("Mike Bost", 12338)])
+        self.assertEqual(when.isoformat(), "2026-11-18T14:42:16-06:00")
+
+    def test_a_changed_total_is_refused(self):
+        changed = self.page.replace(b"1634, 31, 3113]", b"1634, 31, 3114]", 1)
+        self.assertNotEqual(changed, self.page)
+        with self.assertRaises(ValueError):
+            il.livevoterturnout_results(changed, self.titles, "Effingham")
+
+
 if __name__ == "__main__":
     unittest.main()

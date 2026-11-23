@@ -204,5 +204,10 @@
       "sha256": "57efc3c2e1d632d80062f7306c15617a896953a936d30dbed586882a9af0b647",
       "saved_at": "2026-11-23T05:12:51+00:00"
     }
+  },
+  "lvt_effingham.html": {
+    "url": "https://www.livevoterturnout.com/ENR/effinghamilenr/2/en/Index_2.html",
+    "sha256": "03b46fd26e37d299070b5a86bce74591d7cf47bc2544f0c954a4e7e7a90a37da",
+    "saved_at": "2026-11-23T05:12:00+00:00"
   }
 }
