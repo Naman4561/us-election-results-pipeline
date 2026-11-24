@@ -19,7 +19,10 @@ BASE = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/"
 FULL_NAME_STATES = {"VA", "MD"}
 # States whose results are reported by town: their map's local units are Census county
 # subdivisions (Vermont's towns and cities), not counties.
-TOWN_STATES = {"VT"}
+TOWN_STATES = {"VT", "CT", "MA"}
+# States whose results are reported by state House district (Alaska has no counties):
+# their map's local units are the 2026 lower-house districts.
+HOUSE_DISTRICT_STATES = {"AK"}
 STATES = set(
     (
         "AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT "
@@ -290,9 +293,14 @@ def main():
             raise ValueError("Unknown state abbreviation")
         feature = next(f for f in states if codes[f["attributes"]["STATE"]] == code)
         fips = feature["attributes"]["STATE"]
+        service, layer = (
+            ("Legislative", 2)
+            if code in HOUSE_DISTRICT_STATES
+            else ("Places_CouSub_ConCity_SubMCD" if code in TOWN_STATES else "State_County", 1)
+        )
         counties, county_source = query(
-            "Places_CouSub_ConCity_SubMCD" if code in TOWN_STATES else "State_County",
-            1,
+            service,
+            layer,
             f"STATE = '{fips}'",
             "STATE,GEOID,BASENAME,NAME",
             projection={"AK": 3338, "HI": 3759}.get(code, 5070),
@@ -305,12 +313,29 @@ def main():
         # (Fairfax County / Fairfax city), so those states key counties by full name.
         label = "NAME" if code in FULL_NAME_STATES else "BASENAME"
         if code in TOWN_STATES:
+            # Census marks open water (Connecticut's Long Island Sound) as a subdivision
+            # "not defined"; no one votes there.
+            counties = [
+                f
+                for f in counties
+                if f["attributes"]["BASENAME"] != "County subdivisions not defined"
+            ]
+            if code == "MA":
+                # Census names Massachusetts towns with a city form of government
+                # "Agawam Town"; the state and its results call them "Agawam".
+                for f in counties:
+                    a = f["attributes"]
+                    a["BASENAME"] = re.sub(r" Town$", "", a["BASENAME"])
             # A city and a town may share a base name (Barre city, Barre town): those
             # keep their full Census name; every other town keeps its base name.
             shared = Counter(county_key(f["attributes"]["BASENAME"]) for f in counties)
             for f in counties:
                 a = f["attributes"]
                 a["LABEL"] = a["NAME"] if shared[county_key(a["BASENAME"])] > 1 else a["BASENAME"]
+            label = "LABEL"
+        if code in HOUSE_DISTRICT_STATES:
+            for f in counties:
+                f["attributes"]["LABEL"] = f"House District {int(f['attributes']['BASENAME'])}"
             label = "LABEL"
         local_districts = [f for f in districts if f["attributes"]["STATE"] == fips]
         save(

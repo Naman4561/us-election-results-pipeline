@@ -1,0 +1,332 @@
+{
+ "provenance": "Illinois's 2026 general election. Counties: the Senate and Governor in all 102; each House district's counties from the Census Bureau's 2020 county to 119th Congressional District relationship file (tab20_cd11920_county20_natl.txt, land parts). Candidates, parties and spellings: as the election authorities' own results print them (Clarity summaries of Lake, McLean, Sangamon, Bloomington, Rockford and Winnebago, captured November 23, 2026; districts 1-4 and 6-8 from the Cook County Clerk's suburban Summary Report of November 18, 2026, which prints each candidate's party, and Chicago's results); a race no collected authority reports yet lists no candidates. Whitfield Harrington Jr's party is printed ACP, AMC or AME by different authorities and is kept as ACP. Titles: each authority's own title for each selected contest.",
+ "races": {
+  "IL-SEN": {
+   "candidates": [
+    {"name": "Juliana Stratton", "party": "DEM"},
+    {"name": "Don Tracy", "party": "REP"},
+    {"name": "Whitfield Harrington Jr", "party": "ACP"}
+   ]
+  },
+  "IL-GOV": {
+   "candidates": [
+    {"name": "JB Pritzker / Christian Mitchell", "party": "DEM", "spellings": ["Pritzker & Mitchell", "Pritzker and Mitchell", "(JB Pritzker", "JB Pritzker Christian Mithcell"]},
+    {"name": "Darren Bailey / Aaron B. Del Mar", "party": "REP", "spellings": ["Bailey & Del Mar", "Bailey and Del Mar", "(Darren Bailey", "Darren Bailey Arron B. Del Mar"]},
+    {"name": "Collin Corbett / Carolyn Schofield", "party": "IND", "spellings": ["Corbett & Schofield", "Corbett and Schofield", "(Collin Corbett"]}
+   ],
+   "write_ins": ["Eyde Arndell", "Misty Metroz", "Joseph L. Mosely", "Gary Pierce", "Griselda Romero", "Patrica L. Tillman", "Patricia L. Tillman", "Mike Vick"]
+  },
+  "IL-01": {"candidates": [{"name": "Jonathan L. Jackson", "party": "DEM"}, {"name": "Christian Maxwell", "party": "REP"}]},
+  "IL-02": {"candidates": [{"name": "Donna Miller", "party": "DEM"}, {"name": "Michael Scott Noack", "party": "REP"}]},
+  "IL-03": {"candidates": [{"name": "Delia Ramirez", "party": "DEM"}, {"name": "Angel Oakley", "party": "REP"}]},
+  "IL-04": {"candidates": [{"name": "Patty Garcia", "party": "DEM"}, {"name": "Lupe Castillo", "party": "REP"}, {"name": "Chris Getty", "party": "IND"}, {"name": "Ed Hershey", "party": "WCP"}]},
+  "IL-05": {"candidates": [{"name": "Mike Quigley", "party": "DEM"}, {"name": "Tommy Hanson", "party": "REP"}]},
+  "IL-06": {"candidates": [{"name": "Sean Casten", "party": "DEM"}, {"name": "Niki Conforti", "party": "REP"}]},
+  "IL-07": {"candidates": [{"name": "La Shawn K. Ford", "party": "DEM"}, {"name": "Chad Koppie", "party": "REP"}]},
+  "IL-08": {"candidates": [{"name": "Melissa L. Bean", "party": "DEM"}, {"name": "Jennifer Davis", "party": "REP"}]},
+  "IL-09": {"candidates": [{"name": "Daniel Biss", "party": "DEM"}, {"name": "John Elleson", "party": "REP"}]},
+  "IL-10": {"candidates": [{"name": "Brad Schneider", "party": "DEM"}, {"name": "Carl Lambrecht", "party": "REP"}]},
+  "IL-11": {"candidates": [{"name": "Bill Foster", "party": "DEM"}, {"name": "Jeff Walter", "party": "REP"}]},
+  "IL-12": {"candidates": [{"name": "Mike Bost", "party": "REP"}, {"name": "Julie Fortier", "party": "DEM"}]},
+  "IL-13": {"candidates": [{"name": "Nikki Budzinski", "party": "DEM"}, {"name": "Jeff Wilson", "party": "REP"}]},
+  "IL-14": {"candidates": [{"name": "Lauren Underwood", "party": "DEM"}, {"name": "James T. \"Jim\" Marter", "party": "REP"}]},
+  "IL-15": {"candidates": [{"name": "Mary E. Miller", "party": "REP"}, {"name": "Jennifer Todd", "party": "DEM"}]},
+  "IL-16": {"candidates": [{"name": "Darin LaHood", "party": "REP"}, {"name": "Paul Nolley", "party": "DEM"}]},
+  "IL-17": {"candidates": [{"name": "Eric Sorensen", "party": "DEM"}, {"name": "Dillan S. Vancil", "party": "REP"}]}
+ },
+ "titles": {
+  "Lake": {
+   "U. S. Senator": "IL-SEN",
+   "Governor/Lieutenant Governor": "IL-GOV",
+   "Representative in Congress Fifth Congressional District": "IL-05",
+   "Representative in Congress Ninth Congressional District": "IL-09",
+   "Representative in Congress Tenth Congressional District": "IL-10",
+   "Representative in Congress Eleventh Congressional District": "IL-11"
+  },
+  "McLean": {
+   "U.S. SENATOR": "IL-SEN",
+   "GOV. AND LT. GOV": "IL-GOV",
+   "REP. IN CONGRESS D16": "IL-16",
+   "REP. IN CONGRESS D17": "IL-17"
+  },
+  "Sangamon": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "REPRESENTATIVE IN CONGRESSS - 13TH DISTRICT": "IL-13",
+   "REPRESENTATIVE IN CONGRESSS - 15TH DISTRICT": "IL-15"
+  },
+  "Bloomington": {
+   "U.S SENATOR": "IL-SEN",
+   "GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "REP. IN CONGRESS D16": "IL-16",
+   "REP. IN CONGRESS D17": "IL-17"
+  },
+  "Rockford": {
+   "U.S. SENATOR": "IL-SEN",
+   "GOV/LT. GOV": "IL-GOV",
+   "16TH REP. IN CONGRESS D16": "IL-16",
+   "17TH REP. IN CONGRESS D17": "IL-17"
+  },
+  "DuPage": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS THIRD CONGRESSIONAL DISTRICT": "IL-03",
+   "FOR REPRESENTATIVE IN CONGRESS FOURTH CONGRESSIONAL DISTRICT": "IL-04",
+   "FOR REPRESENTATIVE IN CONGRESS SIXTH CONGRESSIONAL DISTRICT": "IL-06",
+   "FOR REPRESENTATIVE IN CONGRESS EIGHTH CONGRESSIONAL DISTRICT": "IL-08",
+   "FOR REPRESENTATIVE IN CONGRESS ELEVENTH CONGRESSIONAL DISTRICT": "IL-11"
+  },
+  "Effingham": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "GOVERNOR & LIEUTENANT GOVERNOR": "IL-GOV",
+   "REPRENSENTATIVE IN CONGRESS - 12TH DISTRICT": "IL-12"
+  },
+  "Henry": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS SIXTEENTH CONGRESSIONAL DISTRICT": "IL-16",
+   "FOR REPRESENTATIVE IN CONGRESS SEVENTEENTH CONGRESSIONAL DISTRICT": "IL-17"
+  },
+  "Clinton": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS TWELFTH CONGRESSIONAL DISTRICT": "IL-12"
+  },
+  "DeKalb": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS ELEVENTH CONGRESSIONAL DISTRICT": "IL-11",
+   "FOR REPRESENTATIVE IN CONGRESS FOURTEENTH REPRESENTATIVE DISTRICT": "IL-14",
+   "FOR REPRESENTATIVE IN CONGRESS SIXTEENTH REPRESENTATIVE DISTRICT": "IL-16"
+  },
+  "Pike": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS FIFTHTEENTH CONGRESSIONAL DISTRICT": "IL-15"
+  },
+  "Madison": {
+   "U.S. SENATOR": "IL-SEN",
+   "GOV. AND LT. GOV": "IL-GOV",
+   "REP. IN CONGRESS D13": "IL-13",
+   "REP. IN CONGRESS D15": "IL-15"
+  },
+  "Winnebago": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "REPRESENTATIVE IN CONGRESS SIXTEENTH CONGRESSIONAL": "IL-16",
+   "REPRESENTATIVE IN CONGRESS SEVENTEENTH CONGRESSIONAL": "IL-17"
+  },
+  "Coles": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 12TH DISTRICT REPRESENTATIVE": "IL-12",
+   "CONGRESSIONAL 15TH DISTRICT REPRESENTATIVE": "IL-15"
+  },
+  "De Witt": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 15TH DISTRICT REPRESENTATIVE": "IL-15"
+  },
+  "Edgar": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 15TH DISTRICT REPRESENTATIVE": "IL-15"
+  },
+  "Livingston": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 2ND DISTRICT REPRESENTATIVE": "IL-02",
+   "CONGRESSIONAL 16TH DISTRICT REPRESENTATIVE": "IL-16"
+  },
+  "Mason": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 15TH DISTRICT REPRESENTATIVE": "IL-15"
+  },
+  "Ogle": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 16TH DISTRICT REPRESENTATIVE": "IL-16"
+  },
+  "Stephenson": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 16TH DISTRICT REPRESENTATIVE": "IL-16",
+   "CONGRESSIONAL 17TH DISTRICT REPRESENTATIVE": "IL-17"
+  },
+  "Vermilion": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 2ND DISTRICT REPRESENTATIVE": "IL-02",
+   "CONGRESSIONAL 15TH DISTRICT REPRESENTATIVE": "IL-15"
+  },
+  "Warren": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "REPRESENTATIVE IN CONGRESS - FIFTEENTH CONGRESSIONAL DISTRICT": "IL-15",
+   "REPRESENTATIVE IN CONGRESS - SEVENTEENTH CONGRESSIONAL DISTRICT": "IL-17"
+  },
+  "Cass": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "REPRESENTATIVE IN CONGRESS - FIFTEENTH CONGRESSIONAL DISTRICT": "IL-15"
+  },
+  "Cumberland": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "REPRESENTATIVE IN CONGRESS - TWELFTH CONGRESSIONAL DISTRICT": "IL-12"
+  },
+  "Macon": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 13TH DISTRICT REPRESENTATIVE": "IL-13",
+   "CONGRESSIONAL 15TH DISTRICT REPRESENTATIVE": "IL-15"
+  },
+  "Moultrie": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 15TH DISTRICT REPRESENTATIVE": "IL-15"
+  },
+  "Fayette": {
+   "U.S. SENATOR": "IL-SEN",
+   "GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "15TH REP. IN CONGRESS": "IL-15"
+  },
+  "Scott": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "REPRESENTATIVE IN CONGRESS - FIFTEENTH CONGRESSIONAL DISTRICT": "IL-15"
+  },
+  "Franklin": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS TWELFTH CONGRESSIONAL DISTRICT": "IL-12"
+  },
+  "Marion": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS TWELFTH CONGRESSIONAL DISTRICT": "IL-12"
+  },
+  "Wayne": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS TWELFTH CONGRESSIONAL DISTRICT": "IL-12"
+  },
+  "Randolph": {
+   "FOR UNITED STATES SENATOR": "IL-SEN",
+   "FOR GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "FOR REPRESENTATIVE IN CONGRESS TWELFTH CONGRESSIONAL DISTRICT": "IL-12"
+  },
+  "Williamson": {
+   "U.S. SENATOR": "IL-SEN",
+   "GOV and LT.GOV -": "IL-GOV",
+   "12TH REP.IN CONGRESS D12": "IL-12"
+  },
+  "Macoupin": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 13TH DISTRICT REPRESENTATIVE": "IL-13"
+  },
+  "Bond": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 15TH DISTRICT REPRESENTATIVE": "IL-15"
+  },
+  "Boone": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 11TH DISTRICT REPRESENTATIVE": "IL-11",
+   "CONGRESSIONAL 16TH DISTRICT REPRESENTATIVE": "IL-16"
+  },
+  "Bureau": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 14TH DISTRICT REPRESENTATIVE": "IL-14",
+   "CONGRESSIONAL 16TH DISTRICT REPRESENTATIVE": "IL-16"
+  },
+  "Carroll": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 17TH DISTRICT REPRESENTATIVE": "IL-17"
+  },
+  "Christian": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 15TH DISTRICT REPRESENTATIVE": "IL-15"
+  },
+  "Clark": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 12TH DISTRICT REPRESENTATIVE": "IL-12"
+  },
+  "Douglas": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 15TH DISTRICT REPRESENTATIVE": "IL-15"
+  },
+  "Hardin": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 12TH DISTRICT REPRESENTATIVE": "IL-12"
+  },
+  "Kankakee": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 1ST DISTRICT REPRESENTATIVE": "IL-01",
+   "CONGRESSIONAL 2ND DISTRICT REPRESENTATIVE": "IL-02"
+  },
+  "Lee": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 16TH DISTRICT REPRESENTATIVE": "IL-16"
+  },
+  "Logan": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 15TH DISTRICT REPRESENTATIVE": "IL-15"
+  },
+  "Mercer": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 15TH DISTRICT REPRESENTATIVE": "IL-15",
+   "CONGRESSIONAL 17TH DISTRICT REPRESENTATIVE": "IL-17"
+  },
+  "Putnam": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 14TH DISTRICT REPRESENTATIVE": "IL-14",
+   "CONGRESSIONAL 16TH DISTRICT REPRESENTATIVE": "IL-16"
+  },
+  "Tazewell": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 16TH DISTRICT REPRESENTATIVE": "IL-16",
+   "CONGRESSIONAL 17TH DISTRICT REPRESENTATIVE": "IL-17"
+  },
+  "Whiteside": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "STATE GOVERNOR AND LT GOVERNOR": "IL-GOV",
+   "CONGRESSIONAL 17TH DISTRICT REPRESENTATIVE": "IL-17"
+  },
+  "Perry": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "REPRESENTATIVE IN CONGRESS - TWELFTH CONGRESSIONAL DISTRICT": "IL-12"
+  },
+  "Greene": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "REPRESENTATIVE IN CONGRESS - FIFTEENTH CONGRESSIONAL DISTRICT": "IL-15"
+  },
+  "Washington": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "REPRESENTATIVE IN CONGRESS - TWELFTH CONGRESSIONAL DISTRICT": "IL-12"
+  },
+  "Morgan": {
+   "UNITED STATES SENATOR": "IL-SEN",
+   "GOVERNOR AND LIEUTENANT GOVERNOR": "IL-GOV",
+   "REPRESENTATIVE IN CONGRESS - FIFTEENTH CONGRESSIONAL DISTRICT": "IL-15"
+  }
+ }
+}

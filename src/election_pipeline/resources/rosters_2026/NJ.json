@@ -1,0 +1,185 @@
+{
+ "state": "NJ",
+ "provenance": "New Jersey ballot candidates and counties from its 21 county clerks' 2026 general election results, assembled Nov 19, 2026 by scripts/nj_bundle.py (bundle SHA-256 739933f5171a04120f2d8713adec3433d17e89ed2b703e4c2c8116dfc00aa71a): 15 Clarity county summaries, Camden's, Hunterdon's, Sussex's and Warren's official summary reports, Salem's results page and Bergen's official results summary. Candidate spellings and parties: resources/nj_2026_contests.json. Write-ins are excluded. Confirmed by the operator before release.",
+ "races": {
+  "NJ-SEN": {
+   "candidates": [
+    "Cory Booker",
+    "Joanne Kuniansky",
+    "Justin Murphy",
+    "Veronica Fernandez"
+   ],
+   "counties": [
+    "Atlantic",
+    "Bergen",
+    "Burlington",
+    "Camden",
+    "Cape May",
+    "Cumberland",
+    "Essex",
+    "Gloucester",
+    "Hudson",
+    "Hunterdon",
+    "Mercer",
+    "Middlesex",
+    "Monmouth",
+    "Morris",
+    "Ocean",
+    "Passaic",
+    "Salem",
+    "Somerset",
+    "Sussex",
+    "Union",
+    "Warren"
+   ]
+  },
+  "NJ-02": {
+   "candidates": [
+    "Jeff Van Drew",
+    "Ramon Mora Jr.",
+    "Zack Mullock"
+   ],
+   "counties": [
+    "Atlantic",
+    "Cape May",
+    "Cumberland",
+    "Gloucester",
+    "Ocean",
+    "Salem"
+   ]
+  },
+  "NJ-05": {
+   "candidates": [
+    "Adam Rueda",
+    "Josh Gottheimer",
+    "Sean Kirrane"
+   ],
+   "counties": [
+    "Bergen",
+    "Passaic",
+    "Sussex"
+   ]
+  },
+  "NJ-09": {
+   "candidates": [
+    "Nelida Pou",
+    "Rosie Pino",
+    "Terrisa Bukovinac"
+   ],
+   "counties": [
+    "Bergen",
+    "Hudson",
+    "Passaic"
+   ]
+  },
+  "NJ-01": {
+   "candidates": [
+    "Damon Galdo",
+    "Donald Norcross"
+   ],
+   "counties": [
+    "Burlington",
+    "Camden",
+    "Gloucester"
+   ]
+  },
+  "NJ-03": {
+   "candidates": [
+    "Herb Conaway",
+    "Michael P. McGuire",
+    "Ryan Michael Kelly",
+    "Steven Welzer"
+   ],
+   "counties": [
+    "Burlington",
+    "Mercer",
+    "Monmouth"
+   ]
+  },
+  "NJ-08": {
+   "candidates": [
+    "Aristotle Eliopoulos",
+    "Craig Honts",
+    "Da'Shone Hughey",
+    "Rob Menendez"
+   ],
+   "counties": [
+    "Essex",
+    "Hudson",
+    "Union"
+   ]
+  },
+  "NJ-10": {
+   "candidates": [
+    "Carmen Bucco",
+    "LaMonica R. McIver"
+   ],
+   "counties": [
+    "Essex",
+    "Hudson",
+    "Union"
+   ]
+  },
+  "NJ-11": {
+   "candidates": [
+    "Alan B. Bond",
+    "Analilia Mejia",
+    "Joe Hathaway"
+   ],
+   "counties": [
+    "Essex",
+    "Morris",
+    "Passaic"
+   ]
+  },
+  "NJ-07": {
+   "candidates": [
+    "Rebecca Bennett",
+    "Seamus Patrick O'Toole",
+    "Thomas H. Kean Jr."
+   ],
+   "counties": [
+    "Hunterdon",
+    "Morris",
+    "Somerset",
+    "Sussex",
+    "Union",
+    "Warren"
+   ]
+  },
+  "NJ-12": {
+   "candidates": [
+    "Adam Hamawy",
+    "Andres Jinete",
+    "Gregg Mele",
+    "Winston Jordan"
+   ],
+   "counties": [
+    "Mercer",
+    "Middlesex",
+    "Somerset",
+    "Union"
+   ]
+  },
+  "NJ-06": {
+   "candidates": [
+    "Frank Pallone Jr.",
+    "Hillary Herzig"
+   ],
+   "counties": [
+    "Middlesex",
+    "Monmouth"
+   ]
+  },
+  "NJ-04": {
+   "candidates": [
+    "Christopher H. Smith",
+    "Rachel Peace"
+   ],
+   "counties": [
+    "Monmouth",
+    "Ocean"
+   ]
+  }
+ }
+}

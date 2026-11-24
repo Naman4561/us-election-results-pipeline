@@ -1,0 +1,228 @@
+{
+  "results.zip": {
+    "sha256": "c9021c58a3e1a223206bfc1e6d3ca6b8f1b95b19d1cb342369697c37cc626a2e",
+    "bytes": 70253
+  },
+  "members": {
+    "clarity/Bloomington.settings.json": {
+      "url": "https://results.enr.clarityelections.com/IL/Bloomington/127392/387136/json/en/electionsettings.json",
+      "sha256": "8a029243072f7883d9409fe2821c2ebabb4a78790e62011d5e09528a317216df",
+      "saved_at": "2026-11-23T04:18:58+00:00"
+    },
+    "clarity/Bloomington.summary.json": {
+      "url": "https://results.enr.clarityelections.com/IL/Bloomington/127392/387136/json/en/summary.json",
+      "sha256": "c859b30dd5187e05a7f28c897e808e9602611092d72c948427fb05561dbafddb",
+      "saved_at": "2026-11-23T04:18:58+00:00"
+    },
+    "clarity/Lake.settings.json": {
+      "url": "https://results.enr.clarityelections.com/IL/Lake/127289/387162/json/en/electionsettings.json",
+      "sha256": "eb3cb5be061a5fc6e52a9048cb94ef0031b7953047ea1035c63ce031f79fe551",
+      "saved_at": "2026-11-23T04:18:48+00:00"
+    },
+    "clarity/Lake.summary.json": {
+      "url": "https://results.enr.clarityelections.com/IL/Lake/127289/387162/json/en/summary.json",
+      "sha256": "1669a8a32e7fd5969dae244b64bb40d1a9779cee620779861d7a06ad9b54cdaf",
+      "saved_at": "2026-11-23T04:18:48+00:00"
+    },
+    "clarity/McLean.settings.json": {
+      "url": "https://results.enr.clarityelections.com/IL/McLean/127349/387246/json/en/electionsettings.json",
+      "sha256": "d83a31631e1e2b49ac43ed55dc5cf18913df4b5cbe4db21e9f132963bd3276cb",
+      "saved_at": "2026-11-23T04:18:51+00:00"
+    },
+    "clarity/McLean.summary.json": {
+      "url": "https://results.enr.clarityelections.com/IL/McLean/127349/387246/json/en/summary.json",
+      "sha256": "92215960baaa398031acda0925b5740d24f48889d4acc325c50440d95c6561a1",
+      "saved_at": "2026-11-23T04:18:51+00:00"
+    },
+    "clarity/Rockford.settings.json": {
+      "url": "https://results.enr.clarityelections.com/WRC/Rockford/127559/387148/json/en/electionsettings.json",
+      "sha256": "cf2137988ec5e2b7fd59458d0a53655fee9b3874ee64cb3ef0a61c98c3964522",
+      "saved_at": "2026-11-23T04:19:01+00:00"
+    },
+    "clarity/Rockford.summary.json": {
+      "url": "https://results.enr.clarityelections.com/WRC/Rockford/127559/387148/json/en/summary.json",
+      "sha256": "20fae5a6e9784dc91456a86fcb3954179f9574145ec90cb9b153f68df386dad5",
+      "saved_at": "2026-11-23T04:19:01+00:00"
+    },
+    "clarity/Sangamon.settings.json": {
+      "url": "https://results.enr.clarityelections.com/IL/Sangamon/127490/387118/json/en/electionsettings.json",
+      "sha256": "36a499f0ec914ce711f0cf8d0d99375fef5c8ee1a4ec5b3df2b4ad23c15d3c15",
+      "saved_at": "2026-11-23T04:18:55+00:00"
+    },
+    "clarity/Sangamon.summary.json": {
+      "url": "https://results.enr.clarityelections.com/IL/Sangamon/127490/387118/json/en/summary.json",
+      "sha256": "a3f28a54275efd9c3f9906e59e42190c1336cf850ce0c6bf91efb1c5ca199801",
+      "saved_at": "2026-11-23T04:18:55+00:00"
+    },
+    "clarity/Winnebago.settings.json": {
+      "url": "https://results.enr.clarityelections.com/WRC/Winnebago/127560/387152/json/en/electionsettings.json",
+      "sha256": "d8c71960babb7dd50872c2835b53a667ddb8ccffe08ed42935aa83ac77a961dd",
+      "saved_at": "2026-11-23T04:19:05+00:00"
+    },
+    "clarity/Winnebago.summary.json": {
+      "url": "https://results.enr.clarityelections.com/WRC/Winnebago/127560/387152/json/en/summary.json",
+      "sha256": "06d978087e499e71ec110ea17724bba1c16440dbf3e618d75e3917b33df2c5cc",
+      "saved_at": "2026-11-23T04:19:05+00:00"
+    }
+  },
+  "chicago": {
+    "IL-SEN.json": {
+      "url": "https://chicagoelections.gov/elections/results/42?ajax_form=1",
+      "form": {
+        "election_id": "42",
+        "contest": "11",
+        "ward": "",
+        "precinct": ""
+      },
+      "sha256": "ebf17ac6d13444e853b527c973ce67263ccadff8a9a79a9c8e52e7a38b0b4273",
+      "saved_at": "2026-11-23T04:40:38+00:00"
+    },
+    "IL-GOV.json": {
+      "url": "https://chicagoelections.gov/elections/results/42?ajax_form=1",
+      "form": {
+        "election_id": "42",
+        "contest": "12",
+        "ward": "",
+        "precinct": ""
+      },
+      "sha256": "e042ad6e41530a91f93798e24ced238d3215ff76632cf8fa32e0f393ab9e27d0",
+      "saved_at": "2026-11-23T04:41:02+00:00"
+    },
+    "IL-01.json": {
+      "url": "https://chicagoelections.gov/elections/results/42?ajax_form=1",
+      "form": {
+        "election_id": "42",
+        "contest": "17",
+        "ward": "",
+        "precinct": ""
+      },
+      "sha256": "7234d0715367f42a351665c52b10063e2c06ff0b1907a12c4efefca4baf1a3f2",
+      "saved_at": "2026-11-23T04:41:04+00:00"
+    },
+    "IL-02.json": {
+      "url": "https://chicagoelections.gov/elections/results/42?ajax_form=1",
+      "form": {
+        "election_id": "42",
+        "contest": "18",
+        "ward": "",
+        "precinct": ""
+      },
+      "sha256": "29fd22e3ac22bb1c6dd704e32befc8ff9f4bfabf7d343d96fcaac259bab99ade",
+      "saved_at": "2026-11-23T04:41:05+00:00"
+    },
+    "IL-03.json": {
+      "url": "https://chicagoelections.gov/elections/results/42?ajax_form=1",
+      "form": {
+        "election_id": "42",
+        "contest": "19",
+        "ward": "",
+        "precinct": ""
+      },
+      "sha256": "9bec8395139ef0fcf78f57a7ac42ee5f8cafd12823a59c81868e3d9604921040",
+      "saved_at": "2026-11-23T04:41:07+00:00"
+    },
+    "IL-04.json": {
+      "url": "https://chicagoelections.gov/elections/results/42?ajax_form=1",
+      "form": {
+        "election_id": "42",
+        "contest": "20",
+        "ward": "",
+        "precinct": ""
+      },
+      "sha256": "7e630ea53e15222b7524322c76d2e292a54c0173fb0c0ac50ea93d3d0dc6ff9a",
+      "saved_at": "2026-11-23T04:41:09+00:00"
+    },
+    "IL-05.json": {
+      "url": "https://chicagoelections.gov/elections/results/42?ajax_form=1",
+      "form": {
+        "election_id": "42",
+        "contest": "21",
+        "ward": "",
+        "precinct": ""
+      },
+      "sha256": "1b95f1c21cadda1a6c185aa59d24e3c39580a158b686918cee5479eeba3902ce",
+      "saved_at": "2026-11-23T04:41:10+00:00"
+    },
+    "IL-06.json": {
+      "url": "https://chicagoelections.gov/elections/results/42?ajax_form=1",
+      "form": {
+        "election_id": "42",
+        "contest": "22",
+        "ward": "",
+        "precinct": ""
+      },
+      "sha256": "cd30439af059a19872bb548f4788bbde51ce8105e821f93fe366a6c01a97dea8",
+      "saved_at": "2026-11-23T04:41:12+00:00"
+    },
+    "IL-07.json": {
+      "url": "https://chicagoelections.gov/elections/results/42?ajax_form=1",
+      "form": {
+        "election_id": "42",
+        "contest": "23",
+        "ward": "",
+        "precinct": ""
+      },
+      "sha256": "7335832287ae45bb9d827a3a02c7ace73b923b725779f8ca13da2b2605ea5a5b",
+      "saved_at": "2026-11-23T04:41:13+00:00"
+    },
+    "IL-08.json": {
+      "url": "https://chicagoelections.gov/elections/results/42?ajax_form=1",
+      "form": {
+        "election_id": "42",
+        "contest": "24",
+        "ward": "",
+        "precinct": ""
+      },
+      "sha256": "6ff511636b96ca4a887390df8324e0f0a7484bf4d74e5bbe7d133cb876d8f60e",
+      "saved_at": "2026-11-23T04:41:15+00:00"
+    },
+    "IL-09.json": {
+      "url": "https://chicagoelections.gov/elections/results/42?ajax_form=1",
+      "form": {
+        "election_id": "42",
+        "contest": "25",
+        "ward": "",
+        "precinct": ""
+      },
+      "sha256": "f0feb6e2e301803c48f28886852571ef48da334e08510db03a560ecd0ee2d64a",
+      "saved_at": "2026-11-23T04:41:16+00:00"
+    }
+  },
+  "platinum_henry": {
+    "races1.html": {
+      "url": "https://platinumelectionresults.com/races/76/1",
+      "sha256": "382f2f2a45f022f3efd88df5ead07d5682936b9dc31c715ff7855c0b8d799ac2",
+      "saved_at": "2026-11-23T05:12:48+00:00"
+    },
+    "races2.html": {
+      "url": "https://platinumelectionresults.com/races/76/2",
+      "sha256": "c2ef7e9b2f0d796714aad32fe39103aa5c7ba9787ccf22f64450678b8317f825",
+      "saved_at": "2026-11-23T05:12:50+00:00"
+    },
+    "races3.html": {
+      "url": "https://platinumelectionresults.com/races/76/3",
+      "sha256": "57efc3c2e1d632d80062f7306c15617a896953a936d30dbed586882a9af0b647",
+      "saved_at": "2026-11-23T05:12:51+00:00"
+    }
+  },
+  "lvt_effingham.html": {
+    "url": "https://www.livevoterturnout.com/ENR/effinghamilenr/2/en/Index_2.html",
+    "sha256": "03b46fd26e37d299070b5a86bce74591d7cf47bc2544f0c954a4e7e7a90a37da",
+    "saved_at": "2026-11-23T05:12:00+00:00"
+  },
+  "pollresults_stephenson.html": {
+    "url": "https://il-stephenson.pollresults.net/",
+    "sha256": "e0f20fb92960cd95c0dc0a935021aba66c746e328075fe9dd0b979f973b84f10",
+    "saved_at": "2026-11-23T05:11:56+00:00"
+  },
+  "gbs_cumberland.json": {
+    "url": "https://cumberland.results.gbsvote.com/results/cumberland/2026-general/current/results.json",
+    "sha256": "f63f693cb7cf2bf7a0d7459e452024ceb79839e551f3af13fd65c22f73075c0d",
+    "saved_at": "2026-11-23T05:26:09+00:00"
+  },
+  "ev_williamson.json": {
+    "url": "https://app.enhancedvoting.com/results/public/api/elections/williamson-county-il/2026GeneralElection/data",
+    "sha256": "8a628f30e579f5bd5601c8f18b734022e56e7a0c3922a718dbdeec7c721d3570",
+    "saved_at": "2026-11-23T15:48:12+00:00"
+  }
+}

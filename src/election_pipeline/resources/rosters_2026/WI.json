@@ -1,0 +1,240 @@
+{
+ "state": "WI",
+ "provenance": "Wisconsin's 2026 general election. Counties: the Governor in all 72; each House district's counties from the Census Bureau's 2020 county to 119th Congressional District relationship file (tab20_cd11920_county20_natl.txt, land parts). Candidates and parties: the Elections Commission's 'All Contests and Candidates' list for the November 3, 2026 general election (xlsx, SHA-256 f26aa3ff...ee213e, saved by the operator Nov 20, 2026, 11:46 AM EST), names as on the ballot, write-ins excluded; other spellings as county reports print them.",
+ "races": {
+  "WI-GOV": {
+   "candidates": [
+    "Tom Tiffany / David Varnam",
+    "David Crowley / Sarah Godlewski"
+   ],
+   "counties": [
+    "Adams",
+    "Ashland",
+    "Barron",
+    "Bayfield",
+    "Brown",
+    "Buffalo",
+    "Burnett",
+    "Calumet",
+    "Chippewa",
+    "Clark",
+    "Columbia",
+    "Crawford",
+    "Dane",
+    "Dodge",
+    "Door",
+    "Douglas",
+    "Dunn",
+    "Eau Claire",
+    "Florence",
+    "Fond du Lac",
+    "Forest",
+    "Grant",
+    "Green",
+    "Green Lake",
+    "Iowa",
+    "Iron",
+    "Jackson",
+    "Jefferson",
+    "Juneau",
+    "Kenosha",
+    "Kewaunee",
+    "La Crosse",
+    "Lafayette",
+    "Langlade",
+    "Lincoln",
+    "Manitowoc",
+    "Marathon",
+    "Marinette",
+    "Marquette",
+    "Menominee",
+    "Milwaukee",
+    "Monroe",
+    "Oconto",
+    "Oneida",
+    "Outagamie",
+    "Ozaukee",
+    "Pepin",
+    "Pierce",
+    "Polk",
+    "Portage",
+    "Price",
+    "Racine",
+    "Richland",
+    "Rock",
+    "Rusk",
+    "Sauk",
+    "Sawyer",
+    "Shawano",
+    "Sheboygan",
+    "St. Croix",
+    "Taylor",
+    "Trempealeau",
+    "Vernon",
+    "Vilas",
+    "Walworth",
+    "Washburn",
+    "Washington",
+    "Waukesha",
+    "Waupaca",
+    "Waushara",
+    "Winnebago",
+    "Wood"
+   ]
+  },
+  "WI-01": {
+   "candidates": [
+    "Bryan Steil",
+    "Mitchell Berman"
+   ],
+   "counties": [
+    "Kenosha",
+    "Milwaukee",
+    "Racine",
+    "Rock",
+    "Walworth"
+   ]
+  },
+  "WI-02": {
+   "candidates": [
+    "Mark Pocan"
+   ],
+   "counties": [
+    "Dane",
+    "Green",
+    "Iowa",
+    "Lafayette",
+    "Rock",
+    "Sauk"
+   ]
+  },
+  "WI-03": {
+   "candidates": [
+    "Derrick Van Orden",
+    "Rebecca Cooke",
+    "Alexander Valiensi Kent",
+    "Rustin Provance"
+   ],
+   "counties": [
+    "Adams",
+    "Buffalo",
+    "Chippewa",
+    "Crawford",
+    "Dunn",
+    "Eau Claire",
+    "Grant",
+    "Jackson",
+    "Juneau",
+    "La Crosse",
+    "Monroe",
+    "Pepin",
+    "Pierce",
+    "Portage",
+    "Richland",
+    "Sauk",
+    "Trempealeau",
+    "Vernon",
+    "Wood"
+   ]
+  },
+  "WI-04": {
+   "candidates": [
+    "Tim Rogers",
+    "Gwen Moore",
+    "Arthur Burks"
+   ],
+   "counties": [
+    "Milwaukee"
+   ]
+  },
+  "WI-05": {
+   "candidates": [
+    "Scott Fitzgerald",
+    "Andrew Beck"
+   ],
+   "counties": [
+    "Dodge",
+    "Jefferson",
+    "Milwaukee",
+    "Walworth",
+    "Washington",
+    "Waukesha"
+   ]
+  },
+  "WI-06": {
+   "candidates": [
+    "Glenn Grothman",
+    "Brad Smith",
+    "Matthew Arndt",
+    "Elizabeth Anne Fitzgibbon",
+    "Mike Thurow"
+   ],
+   "counties": [
+    "Calumet",
+    "Columbia",
+    "Dodge",
+    "Fond du Lac",
+    "Green Lake",
+    "Manitowoc",
+    "Marquette",
+    "Ozaukee",
+    "Sheboygan",
+    "Waushara",
+    "Winnebago"
+   ]
+  },
+  "WI-07": {
+   "candidates": [
+    "Michael Alfonso",
+    "Fred Clark"
+   ],
+   "counties": [
+    "Ashland",
+    "Barron",
+    "Bayfield",
+    "Burnett",
+    "Chippewa",
+    "Clark",
+    "Douglas",
+    "Florence",
+    "Forest",
+    "Iron",
+    "Jackson",
+    "Juneau",
+    "Langlade",
+    "Lincoln",
+    "Marathon",
+    "Monroe",
+    "Oneida",
+    "Polk",
+    "Price",
+    "Rusk",
+    "Sawyer",
+    "St. Croix",
+    "Taylor",
+    "Vilas",
+    "Washburn",
+    "Wood"
+   ]
+  },
+  "WI-08": {
+   "candidates": [
+    "Tony Wied",
+    "Rick Crosson"
+   ],
+   "counties": [
+    "Brown",
+    "Calumet",
+    "Door",
+    "Kewaunee",
+    "Marinette",
+    "Menominee",
+    "Oconto",
+    "Outagamie",
+    "Shawano",
+    "Waupaca",
+    "Winnebago"
+   ]
+  }
+ }
+}

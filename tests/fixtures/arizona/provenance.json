@@ -1,0 +1,9 @@
+{
+ "original_file": "export-110326GeneralElection.json",
+ "original_sha256": "c13d02eaad2fc1cd9c3f3aac21a4490053259f980c132466ce4251afab095384",
+ "original_bytes": 72662376,
+ "source": "https://app.enhancedvoting.com/cdn/results/Arizona/export-110326GeneralElection.json",
+ "last_modified": "Wed, 18 Nov 2026 15:42:09 GMT",
+ "fixture": "the same export with every ballot option's precinctResults removed (not read by the parser), re-serialized",
+ "fixture_sha256": "6e0d4a9634bdefc10fe639d8fbe6ab90ca78aef2ee6cfd4f39dcb17b762e97f3"
+}

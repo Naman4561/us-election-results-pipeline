@@ -1,4 +1,4 @@
-"""Official Enhanced Voting results sites (Virginia, Idaho, Washington).
+"""Official Enhanced Voting results sites (Virginia, Idaho, Washington, Georgia).
 
 The public results API serves one ``data`` document with every contest's statewide
 totals, and one ``ballot-items/<id>`` document per contest with its county (locality)

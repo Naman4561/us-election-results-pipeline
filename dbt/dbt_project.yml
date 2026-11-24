@@ -22,8 +22,8 @@ vars:
   state: ''
   races: []
   methods: []
-  # exact: county totals equal the official ones; masked: privacy-masked county rows
-  # never exceed them; none: the state publishes no county results.
+  # exact: county totals equal the official ones; masked: privacy-masked county rows, or
+  # rows beside statewide-only votes, never exceed them; none: no county results.
   county_reconciliation: none
 # Every state builds the results models; Mississippi adds its county feeds, and North
 # Carolina's absentee demographics are a dataset of their own.

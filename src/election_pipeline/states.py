@@ -28,12 +28,22 @@ class State:
     parser_module: str = ""
     # Shown under a race when the state's vote-method breakdown needs explaining.
     method_note: str = ""
-    # What the state's local results units are: "county", or "town" where a state
-    # reports by town and its map draws towns (Vermont).
+    # What the state's local results units are: "county", "town" where a state reports by
+    # town and its map draws towns (Vermont), or "house_district" (Alaska, which has no
+    # counties).
     local_unit: str = "county"
+    # Votes the state reports statewide but in no local unit (Alaska's overseas federal
+    # absentee ballots), described for the dashboard. Its local units then add up to
+    # less than the statewide total, never more; the parser checks the remainder.
+    statewide_only_votes: str = ""
     # The House races are published only once an operator turns them on (Mississippi's
     # come from certified county recaps); until then a release has the other races only.
     optional_house: bool = False
+    # Results come county by county, from each county's own report, before the state
+    # posts any (Wisconsin): a release has the counties collected so far, and its
+    # statewide votes are theirs alone. A House district is published once one of its
+    # counties is in, and is complete once every county in it is.
+    collected_counties: bool = False
 
     @property
     def slug(self):
@@ -56,12 +66,15 @@ class State:
     @property
     def base_races(self):
         """The races a release must have; the House is left out where it is optional."""
-        if not self.optional_house:
+        if not (self.optional_house or self.collected_counties):
             return self.races
         return {k: v for k, v in self.races.items() if k.endswith(("-SEN", "-GOV"))}
 
     def accepts(self, contests):
-        """A release's contests are every race, or (House optional) every base race."""
+        """A release's contests are every race, or (House optional) every base race, or
+        (collected counties) every base race and the House districts collected so far."""
+        if self.collected_counties:
+            return set(self.base_races) <= set(contests) <= set(self.races)
         return set(contests) in (set(self.races), set(self.base_races))
 
     @property
@@ -94,9 +107,10 @@ STATES = {
         (0,),
         ("total_votes",),
         governor=True,
-        county_results=False,
         source_page="https://www.elections.alaska.gov/election-results/e/?id=26genr",
         vote_basis="first_choice_listed_candidates",
+        local_unit="house_district",
+        statewide_only_votes="overseas federal absentee ballots, reported in no House district",
     ),
     "NC": State(
         "NC",
@@ -106,17 +120,16 @@ STATES = {
         ("total_votes", "election_day", "early_voting", "absentee_by_mail", "provisional"),
         source_page="https://er.ncsbe.gov/",
     ),
+    # Kentucky's live feed closed to automated clients after election week: its results
+    # pages (statewide totals, and each race's county results) are saved by hand and
+    # imported as one zip (parsers/ky_pages.py). They give totals only.
     "KY": State(
         "KY",
         "Kentucky",
         "ky_2026_general",
         tuple(range(1, 7)),
-        ("total_votes", "election_day", "absentee_combined"),
+        ("total_votes",),
         source_page="https://vrsws.sos.ky.gov/liveresults/",
-        method_note=(
-            "Kentucky combines absentee votes. Separate early, mail and provisional counts "
-            "are unavailable. Precinct reporting status is not a percentage of votes counted."
-        ),
     ),
     "MN": State(
         "MN",
@@ -154,8 +167,8 @@ STATES = {
         tuple(range(1, 15)),
         ("total_votes",),
         governor=True,
-        county_results=False,
         source_page="https://results.sos.ga.gov/results/public/Georgia/elections/11032026GeneralAndSpecialElection",
+        collection_backend="enhanced_voting",
     ),
     "SC": State(
         "SC",
@@ -184,6 +197,190 @@ STATES = {
         ("total_votes",),
         governor=True,
         source_page="https://liveresults.ohiosos.gov/",
+    ),
+    # Arizona's Enhanced Voting export is saved and imported by hand (parsers/az.py). No
+    # Senate race in 2026.
+    "AZ": State(
+        "AZ",
+        "Arizona",
+        "az_2026_general",
+        tuple(range(1, 10)),
+        (
+            "total_votes",
+            "early_ballot",
+            "early_ars_16_579",
+            "late_early",
+            "election_day",
+            "provisional",
+        ),
+        senate=False,
+        governor=True,
+        source_page="https://results.arizona.vote/",
+        method_note=(
+            "Arizona reports its count in five groups, shown under its own names. Early "
+            "ballots are Arizona's early ballots, most of them cast by mail, not in-person "
+            "early voting alone."
+        ),
+    ),
+    # Michigan's results site refuses automated clients: its county export is imported by
+    # hand (parsers/mi.py).
+    "MI": State(
+        "MI",
+        "Michigan",
+        "mi_2026_general",
+        tuple(range(1, 14)),
+        ("total_votes",),
+        governor=True,
+        source_page="https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026",
+    ),
+    # New Jersey posts no statewide results before certification: its 21 county clerks'
+    # results are assembled into one zip (scripts/nj_bundle.py, parsers/nj.py). No
+    # Governor race in 2026.
+    "NJ": State(
+        "NJ",
+        "New Jersey",
+        "nj_2026_general",
+        tuple(range(1, 13)),
+        ("total_votes",),
+        source_page="https://nj.gov/state/elections/election-information-results.shtml",
+    ),
+    # Wisconsin's Elections Commission posts no results before certification, and its
+    # site refuses automated clients: each county's own results report is saved and
+    # imported as one zip, as the counties come in (parsers/wi.py). No Senate race in 2026.
+    "WI": State(
+        "WI",
+        "Wisconsin",
+        "wi_2026_general",
+        tuple(range(1, 9)),
+        ("total_votes",),
+        senate=False,
+        governor=True,
+        source_page="https://elections.wi.gov/elections/election-results",
+        vote_basis="collected_county_reports",
+        collected_counties=True,
+    ),
+    # Nevada's results site and data files refuse automated clients: the app's manifest,
+    # overview and contest files are saved by hand and imported as one zip (parsers/nv.py).
+    # No Senate race in 2026.
+    "NV": State(
+        "NV",
+        "Nevada",
+        "nv_2026_general",
+        tuple(range(1, 5)),
+        ("total_votes",),
+        senate=False,
+        governor=True,
+        source_page="https://silverstateelection.nv.gov/",
+    ),
+    # New Hampshire's results site refuses automated clients: its four results
+    # spreadsheets are imported by hand, as one zip (parsers/nh.py).
+    "NH": State(
+        "NH",
+        "New Hampshire",
+        "nh_2026_general",
+        (1, 2),
+        ("total_votes",),
+        governor=True,
+        source_page="https://www.sos.nh.gov/2026-general-election-results",
+    ),
+    # Maine's results site refuses automated clients: its official tabulations and the
+    # District 2 ranked-choice summary are imported by hand, as one zip (parsers/me.py).
+    "ME": State(
+        "ME",
+        "Maine",
+        "me_2026_general",
+        (1, 2),
+        ("total_votes",),
+        governor=True,
+        source_page="https://www.maine.gov/sos/elections-voting/election-results-data",
+        statewide_only_votes="military and overseas (UOCAVA) ballots, reported in no county",
+    ),
+    # Alabama's statewide page and its Export Data workbook (collectors/alabama.py).
+    "AL": State(
+        "AL",
+        "Alabama",
+        "al_2026_general",
+        tuple(range(1, 8)),
+        ("total_votes",),
+        governor=True,
+        source_page=(
+            "https://www2.alabamavotes.gov/electionNight/statewideResultsByContest.aspx"
+            "?ecode=1001305"
+        ),
+        collection_backend="alabama",
+    ),
+    # Connecticut reports by town, not county; candidates can run on several party lines
+    # (parsers/ct.py). No Senate race in 2026.
+    "CT": State(
+        "CT",
+        "Connecticut",
+        "ct_2026_general",
+        tuple(range(1, 6)),
+        ("total_votes",),
+        senate=False,
+        governor=True,
+        source_page="https://ctemspublic.tgstg.net/#/home",
+        collection_backend="connecticut",
+        local_unit="town",
+    ),
+    # Montana's site is South Dakota's platform without its statewide CSV: the Statewide
+    # Export workbook is collected (collectors/montana.py). No Governor race in 2026.
+    "MT": State(
+        "MT",
+        "Montana",
+        "mt_2026_general",
+        (1, 2),
+        ("total_votes",),
+        source_page="https://electionresults.mt.gov/",
+        collection_backend="montana",
+    ),
+    # Pennsylvania's results site and feeds refuse automated clients: its county export is
+    # imported by hand (parsers/pa.py). No Senate race in 2026.
+    "PA": State(
+        "PA",
+        "Pennsylvania",
+        "pa_2026_general",
+        tuple(range(1, 18)),
+        ("total_votes", "election_day", "mail", "provisional"),
+        senate=False,
+        governor=True,
+        source_page="https://www.electionreturns.pa.gov/",
+    ),
+    # Missouri's results site refuses automated clients: its All Results page is saved as a
+    # PDF by hand and gives statewide totals only (parsers/mo.py). No Senate or Governor.
+    "MO": State(
+        "MO",
+        "Missouri",
+        "mo_2026_general",
+        tuple(range(1, 9)),
+        ("total_votes",),
+        senate=False,
+        county_results=False,
+        source_page="https://enr.sos.mo.gov/",
+    ),
+    # New York's State Board election night page is saved as a PDF by hand (parsers/ny.py).
+    # No Senate race in 2026.
+    "NY": State(
+        "NY",
+        "New York",
+        "ny_2026_general",
+        tuple(range(1, 27)),
+        ("total_votes",),
+        senate=False,
+        governor=True,
+        source_page="https://nyenr.elections.ny.gov/",
+    ),
+    # Tennessee's Followed Races dashboard is saved as a PDF by hand and gives statewide
+    # totals only (parsers/tn.py).
+    "TN": State(
+        "TN",
+        "Tennessee",
+        "tn_2026_general",
+        tuple(range(1, 10)),
+        ("total_votes",),
+        governor=True,
+        county_results=False,
+        source_page="https://elections.tn.gov/",
     ),
     "OK": State(
         "OK",
@@ -343,6 +540,30 @@ STATES = {
         county_results=False,
         source_page="https://electionresults.ri.gov/results/public/rhodeisland/elections/2026StatewideGeneralElection",
         collection_backend="enhanced_voting",
+    ),
+    # Illinois's State Board posts results only after its December canvass; each election
+    # authority's own results are collected meanwhile, county by county (parsers/il.py).
+    "IL": State(
+        "IL",
+        "Illinois",
+        "il_2026_general",
+        tuple(range(1, 18)),
+        ("total_votes",),
+        governor=True,
+        source_page="https://www.elections.il.gov/ElectionOperations/ElectionAuthorities.aspx",
+        vote_basis="collected_county_reports",
+        collected_counties=True,
+    ),
+    # Massachusetts posts results only once certified (PD43+), by city and town.
+    "MA": State(
+        "MA",
+        "Massachusetts",
+        "ma_2026_general",
+        tuple(range(1, 10)),
+        ("total_votes",),
+        governor=True,
+        source_page="https://electionstats.state.ma.us/elections/search/year_from:2026/year_to:2026/stage:General",
+        local_unit="town",
     ),
     # Wyoming has no election-night source collected here; it is added from the State
     # Canvassing Board's certified results, imported as a manual source.

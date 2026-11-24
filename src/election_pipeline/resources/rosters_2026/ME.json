@@ -1,0 +1,22 @@
+{
+ "state": "ME",
+ "provenance": "Maine candidates (by name and party) and counties from the Secretary of State's official tabulations of the November 3, 2026 general election, saved by the operator on Nov 23, 2026 (tests/fixtures/maine/provenance.json): US Senate - FINAL.xlsx, Governor - FINAL.xlsx, Rep to Congress District 1 - FINAL.xlsx and Rep to Congress District 2.xlsx. Counties are those with a total row in each tabulation; Kennebec is split between the districts. Write-ins (Others, and District 2's declared write-in Gregory A. Ward) are excluded. Confirmed by the operator before release.",
+ "races": {
+  "ME-SEN": {
+   "candidates": ["Susan M. Collins", "Troy D. Jackson"],
+   "counties": ["Androscoggin", "Aroostook", "Cumberland", "Franklin", "Hancock", "Kennebec", "Knox", "Lincoln", "Oxford", "Penobscot", "Piscataquis", "Sagadahoc", "Somerset", "Waldo", "Washington", "York"]
+  },
+  "ME-GOV": {
+   "candidates": ["Rick Bennett", "Robert B. Charles", "Hannah M. Pingree"],
+   "counties": ["Androscoggin", "Aroostook", "Cumberland", "Franklin", "Hancock", "Kennebec", "Knox", "Lincoln", "Oxford", "Penobscot", "Piscataquis", "Sagadahoc", "Somerset", "Waldo", "Washington", "York"]
+  },
+  "ME-01": {
+   "candidates": ["Chellie Pingree", "Ronald C. Russell"],
+   "counties": ["Cumberland", "Kennebec", "Knox", "Lincoln", "Sagadahoc", "York"]
+  },
+  "ME-02": {
+   "candidates": ["Matthew G. Dunlap", "Paul R. LePage"],
+   "counties": ["Androscoggin", "Aroostook", "Franklin", "Hancock", "Kennebec", "Oxford", "Penobscot", "Piscataquis", "Somerset", "Waldo", "Washington"]
+  }
+ }
+}

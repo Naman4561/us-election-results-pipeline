@@ -45,20 +45,17 @@ expected_columns = [
     "0",
 ]
 
+# The live results pages (statewide totals, and each race's county results), saved by
+# hand and imported as one zip: the live feed (Data/CurrentResultsExcludeLocal and its
+# files; tests/fixtures/kentucky/feed.toml) refuses automated clients since election week.
 [sources.ky_2026_general]
 state = "KY"
 election_date = "2026-11-03"
-url = "https://vrsws.sos.ky.gov/liveresults/Data/CurrentResultsExcludeLocal"
+url = "https://vrsws.sos.ky.gov/liveresults/Statewide"
 format = "bundle"
+primary_filename = "results.zip"
 min_interval_seconds = 600
-expected_members = ["results.xml", "election.xml", "parties.xml", "units.xml", "contests.xml", "candidates.xml"]
-
-[sources.ky_2026_general.files]
-"election.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/Elections"
-"parties.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/PoliticalParties"
-"units.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/GeopoliticalUnits"
-"contests.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/Contests"
-"candidates.xml" = "https://vrsws.sos.ky.gov/liveresults/Data/Candidates"
+expected_members = ["results.zip"]
 
 [sources.ga_2026_general]
 state = "GA"
@@ -67,7 +64,8 @@ url = "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026G
 format = "bundle"
 primary_filename = "results.json"
 min_interval_seconds = 600
-expected_members = ["results.json"]
+expected_members = ["results.json", "item-ga-sen.json", "item-ga-gov.json", "item-ga-01.json", "item-ga-02.json", "item-ga-03.json", "item-ga-04.json", "item-ga-05.json", "item-ga-06.json", "item-ga-07.json", "item-ga-08.json", "item-ga-09.json", "item-ga-10.json", "item-ga-11.json", "item-ga-12.json", "item-ga-13.json", "item-ga-14.json"]
+supplemental_members = ["item-ga-sen.json", "item-ga-gov.json", "item-ga-01.json", "item-ga-02.json", "item-ga-03.json", "item-ga-04.json", "item-ga-05.json", "item-ga-06.json", "item-ga-07.json", "item-ga-08.json", "item-ga-09.json", "item-ga-10.json", "item-ga-11.json", "item-ga-12.json", "item-ga-13.json", "item-ga-14.json"]
 
 [sources.ks_2026_general]
 state = "KS"
@@ -98,6 +96,174 @@ format = "bundle"
 primary_filename = "results.zip"
 min_interval_seconds = 600
 expected_members = ["results.zip"]
+
+# The Secretary of State's Enhanced Voting export (JSON), saved and imported by hand. It
+# holds precinct detail, about 72 MB.
+[sources.az_2026_general]
+state = "AZ"
+election_date = "2026-11-03"
+url = "https://app.enhancedvoting.com/cdn/results/Arizona/export-110326GeneralElection.json"
+format = "bundle"
+primary_filename = "results.json"
+min_interval_seconds = 600
+expected_members = ["results.json"]
+
+[sources.az_2026_general.collector_overrides]
+max_download_bytes = 134217728
+max_uncompressed_bytes = 268435456
+
+# The Secretary of State's county results export (tab-separated text), downloaded by hand:
+# the results site refuses automated clients.
+[sources.mi_2026_general]
+state = "MI"
+election_date = "2026-11-03"
+url = "https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026"
+format = "bundle"
+primary_filename = "results.txt"
+min_interval_seconds = 600
+expected_members = ["results.txt"]
+
+# The 21 county clerks' results, assembled into one zip (scripts/nj_bundle.py): New
+# Jersey posts no statewide results before certification.
+[sources.nj_2026_general]
+state = "NJ"
+election_date = "2026-11-03"
+url = "https://nj.gov/state/elections/election-information-results.shtml"
+format = "bundle"
+primary_filename = "results.zip"
+min_interval_seconds = 600
+expected_members = ["results.zip"]
+
+# Each county's own results report (or a signed review of it), assembled into one zip as
+# the counties come in: the Elections Commission posts results only once certified.
+[sources.wi_2026_general]
+state = "WI"
+election_date = "2026-11-03"
+url = "https://elections.wi.gov/elections/election-results"
+format = "bundle"
+primary_filename = "results.zip"
+min_interval_seconds = 600
+expected_members = ["results.zip"]
+
+# Illinois's election authorities' own results, assembled into one zip by hand as they
+# come in: the State Board posts results only after its December canvass.
+[sources.il_2026_general]
+state = "IL"
+election_date = "2026-11-03"
+url = "https://www.elections.il.gov/ElectionOperations/ElectionAuthorities.aspx"
+format = "bundle"
+primary_filename = "results.zip"
+min_interval_seconds = 600
+expected_members = ["results.zip"]
+
+# The results app's manifest, overview and contest files, saved by hand and imported as
+# one zip: the results site and its data files refuse automated clients.
+[sources.nv_2026_general]
+state = "NV"
+election_date = "2026-11-03"
+url = "https://silverstateelection.nv.gov/data/v2/elections/2a6d1aef-f8eb-424f-9130-ac9bdc2cced5/manifest.json"
+format = "bundle"
+primary_filename = "results.zip"
+min_interval_seconds = 600
+expected_members = ["results.zip"]
+
+# The Secretary of State's four results spreadsheets, downloaded by hand and imported as
+# one zip: the results site refuses automated clients.
+[sources.nh_2026_general]
+state = "NH"
+election_date = "2026-11-03"
+url = "https://www.sos.nh.gov/2026-general-election-results"
+format = "bundle"
+primary_filename = "results.zip"
+min_interval_seconds = 600
+expected_members = ["results.zip"]
+
+# Imported by hand: the official tabulations and the District 2 ranked-choice summary
+# (parsers/me.py); the results site refuses automated clients.
+[sources.me_2026_general]
+state = "ME"
+election_date = "2026-11-03"
+url = "https://www.maine.gov/sos/elections-voting/election-results-data"
+format = "bundle"
+primary_filename = "results.zip"
+min_interval_seconds = 600
+expected_members = ["results.zip"]
+
+# The statewide results page and its Export Data workbook (collectors/alabama).
+[sources.al_2026_general]
+state = "AL"
+election_date = "2026-11-03"
+url = "https://www2.alabamavotes.gov/electionNight/statewideResultsByContest.aspx?ecode=1001305"
+format = "bundle"
+primary_filename = "results.html"
+min_interval_seconds = 600
+expected_members = ["results.html", "export.xlsx"]
+supplemental_members = ["export.xlsx"]
+
+# The official results app's version file and that version's data files
+# (collectors/connecticut).
+[sources.ct_2026_general]
+state = "CT"
+election_date = "2026-11-03"
+url = "https://ctemspublic.tgstg.net/ng-app/data/election/108/Version.json"
+format = "bundle"
+primary_filename = "version.json"
+min_interval_seconds = 600
+expected_members = ["version.json", "lookup.json", "election.json", "state.json", "towns.json", "status.json"]
+supplemental_members = ["lookup.json", "election.json", "state.json", "towns.json", "status.json"]
+
+# The results site's export page and its "Statewide Export" workbook (collectors/montana).
+[sources.mt_2026_general]
+state = "MT"
+election_date = "2026-11-03"
+url = "https://electionresults.mt.gov/ResultsExport.aspx"
+format = "bundle"
+primary_filename = "export.html"
+min_interval_seconds = 600
+expected_members = ["export.html", "statewide.xlsx"]
+supplemental_members = ["statewide.xlsx"]
+
+# The Department of State's county results export, downloaded by hand: the results site
+# and its RSS feeds refuse automated clients.
+[sources.pa_2026_general]
+state = "PA"
+election_date = "2026-11-03"
+url = "https://www.electionreturns.pa.gov/"
+format = "bundle"
+primary_filename = "results.txt"
+min_interval_seconds = 600
+expected_members = ["results.txt"]
+
+# The Secretary of State's All Results page, saved as a PDF by hand: the results site
+# refuses automated clients.
+[sources.mo_2026_general]
+state = "MO"
+election_date = "2026-11-03"
+url = "https://enr.sos.mo.gov/"
+format = "bundle"
+primary_filename = "results.pdf"
+min_interval_seconds = 600
+expected_members = ["results.pdf"]
+
+# The State Board of Elections' election night page, saved as a PDF by hand.
+[sources.ny_2026_general]
+state = "NY"
+election_date = "2026-11-03"
+url = "https://nyenr.elections.ny.gov/"
+format = "bundle"
+primary_filename = "results.pdf"
+min_interval_seconds = 600
+expected_members = ["results.pdf"]
+
+# The Secretary of State's Followed Races dashboard, saved as a PDF by hand.
+[sources.tn_2026_general]
+state = "TN"
+election_date = "2026-11-03"
+url = "https://elections.tn.gov/"
+format = "bundle"
+primary_filename = "results.pdf"
+min_interval_seconds = 600
+expected_members = ["results.pdf"]
 
 # The Election Commission's Clarity site, which kept counting after the election-night
 # workbooks on its fallback page stopped.
@@ -347,6 +513,28 @@ primary_filename = "data.json"
 min_interval_seconds = 600
 expected_members = ["data.json", "item-ri-sen.json", "item-ri-gov.json", "item-ri-01.json", "item-ri-02.json"]
 supplemental_members = ["item-ri-sen.json", "item-ri-gov.json", "item-ri-01.json", "item-ri-02.json"]
+
+# PD43+ election IDs for the 2026 general (its search page, Nov 23, 2026).
+[sources.ma_2026_general]
+state = "MA"
+election_date = "2026-11-03"
+url = "https://electionstats.state.ma.us/elections/download/173531/precincts_include:0/"
+format = "bundle"
+primary_filename = "senate.csv"
+min_interval_seconds = 3600
+expected_members = ["senate.csv", "governor.csv", "house-01.csv", "house-02.csv", "house-03.csv", "house-04.csv", "house-05.csv", "house-06.csv", "house-07.csv", "house-08.csv", "house-09.csv"]
+
+[sources.ma_2026_general.files]
+"governor.csv" = "https://electionstats.state.ma.us/elections/download/173526/precincts_include:0/"
+"house-01.csv" = "https://electionstats.state.ma.us/elections/download/173553/precincts_include:0/"
+"house-02.csv" = "https://electionstats.state.ma.us/elections/download/173571/precincts_include:0/"
+"house-03.csv" = "https://electionstats.state.ma.us/elections/download/173537/precincts_include:0/"
+"house-04.csv" = "https://electionstats.state.ma.us/elections/download/173600/precincts_include:0/"
+"house-05.csv" = "https://electionstats.state.ma.us/elections/download/173582/precincts_include:0/"
+"house-06.csv" = "https://electionstats.state.ma.us/elections/download/173565/precincts_include:0/"
+"house-07.csv" = "https://electionstats.state.ma.us/elections/download/173639/precincts_include:0/"
+"house-08.csv" = "https://electionstats.state.ma.us/elections/download/173528/precincts_include:0/"
+"house-09.csv" = "https://electionstats.state.ma.us/elections/download/173546/precincts_include:0/"
 
 [sources.ut_2026_general]
 state = "UT"

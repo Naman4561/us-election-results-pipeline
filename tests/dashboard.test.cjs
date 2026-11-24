@@ -53,7 +53,9 @@ test("national/state map navigation and coverage statuses", async (t) => {
     d.querySelector(`path[data-id="${id}"]`).dataset.status;
   assert.equal(d.querySelectorAll("path.feature").length, 50);
   assert.equal(status("AZ"), "no_election");
-  assert.equal(status("ME"), "awaiting_certified");
+  // Maine, imported by hand like New Hampshire, is covered like it.
+  assert.notEqual(status("ME"), "awaiting_certified");
+  assert.equal(status("ME"), status("NH"));
   assert.equal(status("MS"), "partial");
   assert(
     d.querySelector('path[data-id="MS"] title').textContent.includes("13/82"),
@@ -176,6 +178,26 @@ test("national/state map navigation and coverage statuses", async (t) => {
   delete payload.states.MS.races["MS-03"];
   click("#refresh");
   await settle();
+  // Louisiana's 5th and 6th go to a December runoff; no other district does.
+  click("#national");
+  click('[data-office="house"]');
+  const tip = (id) =>
+    d.querySelector(`path[data-id="${id}"] title`).textContent;
+  assert(tip("LA-05").includes("Runoff pending · December 12"));
+  assert(!tip("LA-04").includes("Runoff"));
+  assert(d.querySelector("#result-runoff").hidden);
+  click('path[data-id="LA-05"]');
+  await settle();
+  assert.equal(d.querySelector("#result-title").textContent, "LA-05");
+  assert.equal(
+    d.querySelector("#result-runoff").textContent,
+    "Runoff pending · December 12",
+  );
+  assert(!d.querySelector("#result-runoff").hidden);
+  click('path[data-id="LA-04"]');
+  assert(d.querySelector("#result-runoff").hidden);
+  click('[data-office="senate"]');
+  assert(d.querySelector("#result-runoff").hidden);
   click("#national");
   click('[data-office="senate"]');
   assert(
@@ -191,13 +213,34 @@ test("national/state map navigation and coverage statuses", async (t) => {
   click('path[data-id="AK"]');
   await settle();
   assert.equal(d.querySelector("h1").textContent, "Alaska");
-  assert.equal(d.querySelectorAll("path.feature").length, 1);
+  // Alaska has no counties: its map and results are by State House district.
+  assert.equal(d.querySelectorAll("path.feature").length, 40);
+  assert.equal(
+    d.querySelector("#map-title").textContent,
+    "U.S. Senate · House district results",
+  );
+  assert.equal(
+    d.querySelector("#area option").textContent,
+    "Select a House district…",
+  );
   assert(
     d
       .querySelector("#result-content")
       .textContent.includes("CSV-listed candidates"),
   );
   assert(d.querySelector("#result-content").textContent.includes("Round 1"));
+  assert(
+    d
+      .querySelector("#result-content")
+      .textContent.includes("overseas federal absentee ballots"),
+  );
+  click('path[data-id="HOUSEDISTRICT1"]');
+  assert.equal(
+    d.querySelector("#result-subtitle").textContent,
+    "House District 1 · Alaska",
+  );
+  assert(d.querySelector(".candidate-votes"));
+  click("#overview");
   const alaskaCalls = calls;
   click('[data-office="governor"]');
   assert.equal(d.querySelector("h1").textContent, "Alaska");
@@ -235,7 +278,7 @@ test("national/state map navigation and coverage statuses", async (t) => {
   assert.equal(d.querySelector("h1").textContent, "North Carolina");
   click("#national");
   assert.equal(status("NC"), "no_election");
-  assert.equal(status("AZ"), "awaiting_certified");
+  assert.equal(status("ME"), status("NH"));
   click('[data-office="senate"]');
   click('path[data-id="MN"]');
   await settle();
@@ -287,7 +330,7 @@ test("national/state map navigation and coverage statuses", async (t) => {
   assert.equal(status("TX"), "awaiting_votes");
   click("#national");
   for (const [code, name, counties, districts] of [
-    ["GA", "Georgia", 1, 14],
+    ["GA", "Georgia", 159, 14],
     ["SC", "South Carolina", 46, 7],
     ["KS", "Kansas", 105, 4],
     ["OH", "Ohio", 88, 15],

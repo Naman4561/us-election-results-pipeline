@@ -1,5 +1,5 @@
 """Shared reader for official Enhanced Voting results (Virginia, Idaho, Washington, Utah,
-Rhode Island).
+Rhode Island, Georgia).
 
 A bundle holds the election's ``data`` document (statewide totals for every contest) and
 one ``ballot-items/<id>`` document per selected contest (its county breakdown). For each
@@ -41,6 +41,9 @@ class Site:
     methods: dict = field(default_factory=dict)  # English group name -> method column
     # English party name -> code, for a site that names parties without abbreviations.
     parties: dict = field(default_factory=dict)
+    # A site whose vote-method detail is incomplete (blank in some counties): its groups
+    # are not read, and only totals are kept.
+    skip_methods: bool = False
 
 
 def english(values, label="name"):
@@ -115,6 +118,8 @@ def ballot_items(raw, source, site):
 def methods(option, site, label):
     """Method counts for one candidate, or {} where the state publishes none."""
     groups = option.get("groupResults") or []
+    if site.skip_methods:
+        return {}
     if not site.methods:
         if groups:
             raise ValueError(f"{label}: unexpected vote-method detail")

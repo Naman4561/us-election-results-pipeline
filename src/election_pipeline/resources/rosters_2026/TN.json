@@ -1,0 +1,132 @@
+{
+ "state": "TN",
+ "provenance": "Tennessee candidates from the Secretary of State's election night dashboard, Followed Race Results, saved as a PDF by the operator: 'Followed Races Election Night Reporting Dashboard.pdf' (SHA-256 8aa1eb96fe0dd221bdb0dd0498c8510929bdf4987ca414d1111c9e8879bd4bdd), Final Unofficial Results, 95 of 95 counties completed. Confirmed by the operator before release.",
+ "races": {
+  "TN-01": {
+   "candidates": [
+    "Diana Harshbarger",
+    "Kristi Burke",
+    "Joshua Ray Ashburn",
+    "Billy Cody",
+    "Chris Campbell",
+    "Richard G. Baker",
+    "Tyler Brice Mitchell McClain"
+   ],
+   "counties": []
+  },
+  "TN-02": {
+   "candidates": [
+    "Tim Burchett",
+    "Michaela Barnett",
+    "Bruce Fine",
+    "Adam Heimerman"
+   ],
+   "counties": []
+  },
+  "TN-03": {
+   "candidates": [
+    "Chuck Fleischmann",
+    "Anna Golladay",
+    "Dean Arnold",
+    "Rodney Joe King",
+    "Jean Howard-Hill",
+    "Donnie Lynn Ownby",
+    "Edward John Roland"
+   ],
+   "counties": []
+  },
+  "TN-04": {
+   "candidates": [
+    "Victoria Broderick",
+    "Scott DesJarlais",
+    "Jacob Kristopher Anders",
+    "Clay Faircloth"
+   ],
+   "counties": []
+  },
+  "TN-05": {
+   "candidates": [
+    "Charlie Hatcher",
+    "Chaz Molder",
+    "James A. Johnson",
+    "Micheal (Me-Haul) O'Leary"
+   ],
+   "counties": []
+  },
+  "TN-06": {
+   "candidates": [
+    "Johnny Garrett",
+    "Mike Croley",
+    "Christopher B. Monday",
+    "Angus Purdy"
+   ],
+   "counties": []
+  },
+  "TN-07": {
+   "candidates": [
+    "Matt Van Epps",
+    "Darden Copeland",
+    "Andrew J. Koontz",
+    "Lowell Reynolds"
+   ],
+   "counties": []
+  },
+  "TN-08": {
+   "candidates": [
+    "David Kustoff",
+    "Heidi Kuhn",
+    "Pamela Jeanine \"P.\" Moses",
+    "Horace Taylor",
+    "Adam D. Austill",
+    "Wendell \"Wells\" Blankenship",
+    "Antonio Futch",
+    "Henry J. Ward, III"
+   ],
+   "counties": []
+  },
+  "TN-09": {
+   "candidates": [
+    "Brent Taylor",
+    "Justin J. Pearson",
+    "Dennis Clark",
+    "Michelle Davis Head"
+   ],
+   "counties": []
+  },
+  "TN-GOV": {
+   "candidates": [
+    "Marsha Blackburn",
+    "Jerri Green",
+    "David Hatley",
+    "Lauren Pinkston",
+    "Dean Brewer",
+    "Ray Brown",
+    "Wendell Jackson",
+    "Eddie Lee Murphy",
+    "Robert C. Vick",
+    "Misam Abidi",
+    "Charles Van Morgan",
+    "L. Webb Taylor",
+    "Dave Seeman",
+    "Victor L. Scoggin",
+    "Karl Knox Smithson"
+   ],
+   "counties": []
+  },
+  "TN-SEN": {
+   "candidates": [
+    "Bill Hagerty",
+    "Marquita Bradshaw",
+    "Robert Jones",
+    "Tharon Chandler",
+    "Andrew Gerena",
+    "Catherine Barcel \"Barcy\" Whitson",
+    "Jeremy Dean Hearn",
+    "David Sutman, Jr.",
+    "Yoshi D. Matthews",
+    "James William Macon III"
+   ],
+   "counties": []
+  }
+ }
+}

@@ -1,0 +1,302 @@
+{
+ "state": "PA",
+ "provenance": "Pennsylvania candidates (by name, with parties checked for consistency) and counties from the Department of State's county results export, UnOfficial_11192026123252PM.txt (SHA-256 202f1c8fae27df2ad05cae757ab68b58c4c85e5d6ea8db090c6d740aa9ee7eff), downloaded by the operator from electionreturns.pa.gov on Nov 19, 2026 (Governor total matches the site: Shapiro 3,039,717). The export lists no write-ins. Confirmed by the operator before release.",
+ "races": {
+  "PA-GOV": {
+   "candidates": [
+    "JOSH SHAPIRO",
+    "STACY GARRITY",
+    "KEN KRAWCHUK"
+   ],
+   "counties": [
+    "Adams",
+    "Allegheny",
+    "Armstrong",
+    "Beaver",
+    "Bedford",
+    "Berks",
+    "Blair",
+    "Bradford",
+    "Bucks",
+    "Butler",
+    "Cambria",
+    "Cameron",
+    "Carbon",
+    "Centre",
+    "Chester",
+    "Clarion",
+    "Clearfield",
+    "Clinton",
+    "Columbia",
+    "Crawford",
+    "Cumberland",
+    "Dauphin",
+    "Delaware",
+    "Elk",
+    "Erie",
+    "Fayette",
+    "Forest",
+    "Franklin",
+    "Fulton",
+    "Greene",
+    "Huntingdon",
+    "Indiana",
+    "Jefferson",
+    "Juniata",
+    "Lackawanna",
+    "Lancaster",
+    "Lawrence",
+    "Lebanon",
+    "Lehigh",
+    "Luzerne",
+    "Lycoming",
+    "McKean",
+    "Mercer",
+    "Mifflin",
+    "Monroe",
+    "Montgomery",
+    "Montour",
+    "Northampton",
+    "Northumberland",
+    "Perry",
+    "Philadelphia",
+    "Pike",
+    "Potter",
+    "Schuylkill",
+    "Snyder",
+    "Somerset",
+    "Sullivan",
+    "Susquehanna",
+    "Tioga",
+    "Union",
+    "Venango",
+    "Warren",
+    "Washington",
+    "Wayne",
+    "Westmoreland",
+    "Wyoming",
+    "York"
+   ]
+  },
+  "PA-01": {
+   "candidates": [
+    "BOB HARVIE",
+    "BRIAN FITZPATRICK"
+   ],
+   "counties": [
+    "Bucks",
+    "Montgomery"
+   ]
+  },
+  "PA-02": {
+   "candidates": [
+    "BRENDAN F BOYLE",
+    "JESSICA ARRIAGA"
+   ],
+   "counties": [
+    "Philadelphia"
+   ]
+  },
+  "PA-03": {
+   "candidates": [
+    "CHRIS RABB",
+    "DENNIS MAHONEY"
+   ],
+   "counties": [
+    "Philadelphia"
+   ]
+  },
+  "PA-04": {
+   "candidates": [
+    "MADELEINE DEAN",
+    "AURORA STUSKI"
+   ],
+   "counties": [
+    "Berks",
+    "Montgomery"
+   ]
+  },
+  "PA-05": {
+   "candidates": [
+    "MARY GAY SCANLON",
+    "NICK MANGANARO"
+   ],
+   "counties": [
+    "Chester",
+    "Delaware",
+    "Montgomery",
+    "Philadelphia"
+   ]
+  },
+  "PA-06": {
+   "candidates": [
+    "CHRISSY HOULAHAN",
+    "MARTY YOUNG"
+   ],
+   "counties": [
+    "Berks",
+    "Chester"
+   ]
+  },
+  "PA-07": {
+   "candidates": [
+    "BOB BROOKS",
+    "RYAN MACKENZIE"
+   ],
+   "counties": [
+    "Carbon",
+    "Lehigh",
+    "Monroe",
+    "Northampton"
+   ]
+  },
+  "PA-08": {
+   "candidates": [
+    "PAIGE COGNETTI",
+    "ROB BRESNAHAN JR"
+   ],
+   "counties": [
+    "Lackawanna",
+    "Luzerne",
+    "Monroe",
+    "Pike",
+    "Wayne"
+   ]
+  },
+  "PA-09": {
+   "candidates": [
+    "RACHEL WALLACE",
+    "DAN MEUSER"
+   ],
+   "counties": [
+    "Berks",
+    "Bradford",
+    "Columbia",
+    "Lebanon",
+    "Luzerne",
+    "Lycoming",
+    "Montour",
+    "Northumberland",
+    "Schuylkill",
+    "Sullivan",
+    "Susquehanna",
+    "Wyoming"
+   ]
+  },
+  "PA-10": {
+   "candidates": [
+    "JANELLE STELSON",
+    "SCOTT PERRY"
+   ],
+   "counties": [
+    "Cumberland",
+    "Dauphin",
+    "York"
+   ]
+  },
+  "PA-11": {
+   "candidates": [
+    "NANCY MANNION",
+    "LLOYD K SMUCKER"
+   ],
+   "counties": [
+    "Lancaster",
+    "York"
+   ]
+  },
+  "PA-12": {
+   "candidates": [
+    "SUMMER LEE",
+    "JAMES HAYES"
+   ],
+   "counties": [
+    "Allegheny",
+    "Westmoreland"
+   ]
+  },
+  "PA-13": {
+   "candidates": [
+    "BETH FARNHAM",
+    "JOHN JOYCE"
+   ],
+   "counties": [
+    "Adams",
+    "Bedford",
+    "Blair",
+    "Cambria",
+    "Cumberland",
+    "Franklin",
+    "Fulton",
+    "Huntingdon",
+    "Juniata",
+    "Mifflin",
+    "Perry",
+    "Somerset"
+   ]
+  },
+  "PA-14": {
+   "candidates": [
+    "ALAN BRADSTOCK",
+    "GUY RESCHENTHALER"
+   ],
+   "counties": [
+    "Fayette",
+    "Greene",
+    "Indiana",
+    "Somerset",
+    "Washington",
+    "Westmoreland"
+   ]
+  },
+  "PA-15": {
+   "candidates": [
+    "RAY BILGER",
+    "GLENN GT THOMPSON"
+   ],
+   "counties": [
+    "Armstrong",
+    "Cameron",
+    "Centre",
+    "Clarion",
+    "Clearfield",
+    "Clinton",
+    "Elk",
+    "Forest",
+    "Indiana",
+    "Jefferson",
+    "Lycoming",
+    "McKean",
+    "Potter",
+    "Snyder",
+    "Tioga",
+    "Union",
+    "Venango",
+    "Warren"
+   ]
+  },
+  "PA-16": {
+   "candidates": [
+    "JUSTIN WAGNER",
+    "MIKE KELLY"
+   ],
+   "counties": [
+    "Butler",
+    "Crawford",
+    "Erie",
+    "Lawrence",
+    "Mercer",
+    "Venango"
+   ]
+  },
+  "PA-17": {
+   "candidates": [
+    "CHRIS DELUZIO",
+    "TONY GUY"
+   ],
+   "counties": [
+    "Allegheny",
+    "Beaver"
+   ]
+  }
+ }
+}

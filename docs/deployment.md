@@ -61,17 +61,25 @@ the image it started on.
 
    A check that passed is not repeated while nothing it depends on changes. Each
    source's check key (`control.check_keys`) covers the release files its check can
-   run: the image's build inputs, dbt models, migrations, the job scripts, the package
-   modules reachable from them and from the source's own parser and collector, and the
-   reviewed data other than other states'. It also covers the source's configuration
-   and its status. Passes are recorded by key, with the snapshot checked, in
+   run: the image's build inputs, the dbt files its build selects, migrations, the job
+   scripts, the package modules reachable from them and from the source's own parser and
+   collector, `states.py` as far as it concerns the source's state, and the reviewed
+   data other than other states' (a state's `<slug>_*.json` and its roster
+   `rosters_2026/<STATE>.json` are its own). A dbt model counts for the builds its
+   folder's tag selects and a dbt test for its own tags (`publication.dbt_tags`), so
+   Mississippi's county-feed models and tests count for Mississippi alone; a tag no
+   checked source builds counts for every source, since dbt parses the whole project.
+   The tests under `tests/` are not part of any key. It also covers the source's
+   configuration and its status. Passes are recorded by key, with the snapshot checked, in
    `release-checks.json` in the control state directory, kept even when a release fails,
    so a retry checks only what failed. A pass is reused for a newer snapshot only when
    the worker has already published that snapshot under the live release, whose key for
    the source is the same (`worker-idle.json`: same image, status and snapshot), so new
-   results alone do not make a source's check run again. A change to one state's parser or data re-checks
-   that state; a change to shared parsing code, `states.py`, dbt, migrations or
-   dependencies re-checks every source; dashboard and host-side changes re-check none.
+   results alone do not make a source's check run again. A change to one state's parser,
+   roster, data, registry entry or state-tagged dbt files re-checks that state; adding a
+   state changes no other state's key; a change to shared parsing code, the `State` class,
+   shared dbt, migrations or dependencies re-checks every source; dashboard and
+   host-side changes re-check none.
    `deploy.py release --check-all` checks every source regardless.
 
    Once `current` has moved, old artifacts are pruned: release checkouts and images
@@ -134,7 +142,9 @@ and `activate` removes every dashboard but the new active one and the one it rep
 `deploy pause --source` stops collecting a source while its last publication stays
 public, such as a site that is down for days; `deploy resume --source` starts it again.
 The worker records a paused source as `paused`, and the monitor shows a reminder in
-place of its collection checks.
+place of its collection checks. `deploy final --source` marks a paused source's results
+final until the state certifies them (Mississippi, once every county had certified): its
+pause is then no reminder. Certifying it later is unchanged, and resuming clears the mark.
 
 ## Certified results
 

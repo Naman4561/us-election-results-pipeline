@@ -1,0 +1,439 @@
+{
+ "state": "MI",
+ "provenance": "Michigan candidates (by name, with the export's candidate IDs and parties checked for consistency) and counties from the Secretary of State's county results export, 2026STATE_GENERAL_MI_CENR_BY_COUNTY.txt (SHA-256 4cb0e2737583184ea5bb7b130b97f5ca8dbc9dc36de0be604bfa094c1f9ee42a), downloaded by the operator from mvic.sos.state.mi.us (site shows: STATE GENERAL, UNOFFICIAL; Updated 11/18/2026 7:17:44 PM; Counties 83/83). Write-in candidates are excluded. Confirmed by the operator before release.",
+ "races": {
+  "MI-GOV": {
+   "candidates": [
+    "Douglas Campbell",
+    "Anthony Hudson",
+    "Jocelyn Benson",
+    "John James",
+    "Donna Brandenburg"
+   ],
+   "counties": [
+    "Alcona",
+    "Alger",
+    "Allegan",
+    "Alpena",
+    "Antrim",
+    "Arenac",
+    "Baraga",
+    "Barry",
+    "Bay",
+    "Benzie",
+    "Berrien",
+    "Branch",
+    "Calhoun",
+    "Cass",
+    "Charlevoix",
+    "Cheboygan",
+    "Chippewa",
+    "Clare",
+    "Clinton",
+    "Crawford",
+    "Delta",
+    "Dickinson",
+    "Eaton",
+    "Emmet",
+    "Genesee",
+    "Gladwin",
+    "Gogebic",
+    "Grand Traverse",
+    "Gratiot",
+    "Hillsdale",
+    "Houghton",
+    "Huron",
+    "Ingham",
+    "Ionia",
+    "Iosco",
+    "Iron",
+    "Isabella",
+    "Jackson",
+    "Kalamazoo",
+    "Kalkaska",
+    "Kent",
+    "Keweenaw",
+    "Lake",
+    "Lapeer",
+    "Leelanau",
+    "Lenawee",
+    "Livingston",
+    "Luce",
+    "Mackinac",
+    "Macomb",
+    "Manistee",
+    "Marquette",
+    "Mason",
+    "Mecosta",
+    "Menominee",
+    "Midland",
+    "Missaukee",
+    "Monroe",
+    "Montcalm",
+    "Montmorency",
+    "Muskegon",
+    "Newaygo",
+    "Oakland",
+    "Oceana",
+    "Ogemaw",
+    "Ontonagon",
+    "Osceola",
+    "Oscoda",
+    "Otsego",
+    "Ottawa",
+    "Presque Isle",
+    "Roscommon",
+    "Saginaw",
+    "Sanilac",
+    "Schoolcraft",
+    "Shiawassee",
+    "St. Clair",
+    "St. Joseph",
+    "Tuscola",
+    "Van Buren",
+    "Washtenaw",
+    "Wayne",
+    "Wexford"
+   ]
+  },
+  "MI-SEN": {
+   "candidates": [
+    "Douglas P. Marsh",
+    "Lydia Christensen",
+    "Mike Rogers",
+    "Abdul El-Sayed",
+    "Tim Long",
+    "Walter P. Kristy"
+   ],
+   "counties": [
+    "Alcona",
+    "Alger",
+    "Allegan",
+    "Alpena",
+    "Antrim",
+    "Arenac",
+    "Baraga",
+    "Barry",
+    "Bay",
+    "Benzie",
+    "Berrien",
+    "Branch",
+    "Calhoun",
+    "Cass",
+    "Charlevoix",
+    "Cheboygan",
+    "Chippewa",
+    "Clare",
+    "Clinton",
+    "Crawford",
+    "Delta",
+    "Dickinson",
+    "Eaton",
+    "Emmet",
+    "Genesee",
+    "Gladwin",
+    "Gogebic",
+    "Grand Traverse",
+    "Gratiot",
+    "Hillsdale",
+    "Houghton",
+    "Huron",
+    "Ingham",
+    "Ionia",
+    "Iosco",
+    "Iron",
+    "Isabella",
+    "Jackson",
+    "Kalamazoo",
+    "Kalkaska",
+    "Kent",
+    "Keweenaw",
+    "Lake",
+    "Lapeer",
+    "Leelanau",
+    "Lenawee",
+    "Livingston",
+    "Luce",
+    "Mackinac",
+    "Macomb",
+    "Manistee",
+    "Marquette",
+    "Mason",
+    "Mecosta",
+    "Menominee",
+    "Midland",
+    "Missaukee",
+    "Monroe",
+    "Montcalm",
+    "Montmorency",
+    "Muskegon",
+    "Newaygo",
+    "Oakland",
+    "Oceana",
+    "Ogemaw",
+    "Ontonagon",
+    "Osceola",
+    "Oscoda",
+    "Otsego",
+    "Ottawa",
+    "Presque Isle",
+    "Roscommon",
+    "Saginaw",
+    "Sanilac",
+    "Schoolcraft",
+    "Shiawassee",
+    "St. Clair",
+    "St. Joseph",
+    "Tuscola",
+    "Van Buren",
+    "Washtenaw",
+    "Wayne",
+    "Wexford"
+   ]
+  },
+  "MI-01": {
+   "candidates": [
+    "Liz Hakola",
+    "LaVeta Davenport",
+    "Arnett Satterla",
+    "Zebulon Featherly",
+    "Jack Bergman",
+    "Callie Barr",
+    "Doc Kovaly"
+   ],
+   "counties": [
+    "Alcona",
+    "Alger",
+    "Alpena",
+    "Antrim",
+    "Arenac",
+    "Baraga",
+    "Benzie",
+    "Charlevoix",
+    "Cheboygan",
+    "Chippewa",
+    "Crawford",
+    "Delta",
+    "Dickinson",
+    "Emmet",
+    "Gogebic",
+    "Grand Traverse",
+    "Houghton",
+    "Iosco",
+    "Iron",
+    "Kalkaska",
+    "Keweenaw",
+    "Leelanau",
+    "Luce",
+    "Mackinac",
+    "Marquette",
+    "Menominee",
+    "Missaukee",
+    "Montmorency",
+    "Ogemaw",
+    "Ontonagon",
+    "Oscoda",
+    "Otsego",
+    "Presque Isle",
+    "Roscommon",
+    "Schoolcraft",
+    "Wexford"
+   ]
+  },
+  "MI-02": {
+   "candidates": [
+    "Charlotte Magoon",
+    "John Moolenaar",
+    "Ben Ambrose",
+    "Richard Sills"
+   ],
+   "counties": [
+    "Barry",
+    "Clare",
+    "Eaton",
+    "Gladwin",
+    "Gratiot",
+    "Ionia",
+    "Isabella",
+    "Kent",
+    "Lake",
+    "Manistee",
+    "Mason",
+    "Mecosta",
+    "Midland",
+    "Montcalm",
+    "Muskegon",
+    "Newaygo",
+    "Oceana",
+    "Osceola",
+    "Ottawa",
+    "Wexford"
+   ]
+  },
+  "MI-03": {
+   "candidates": [
+    "Hillary Scholten",
+    "Terri DeBoer",
+    "Joe Jock"
+   ],
+   "counties": [
+    "Kent",
+    "Muskegon",
+    "Ottawa"
+   ]
+  },
+  "MI-04": {
+   "candidates": [
+    "Bill Huizenga",
+    "Sean McCann",
+    "Shafina Che Barnett"
+   ],
+   "counties": [
+    "Allegan",
+    "Berrien",
+    "Calhoun",
+    "Kalamazoo",
+    "Ottawa",
+    "Van Buren"
+   ]
+  },
+  "MI-05": {
+   "candidates": [
+    "Jim Bronke",
+    "Tim Walberg",
+    "Christian Vukasovich",
+    "Ronald A Muszynski",
+    "Sharon Marie Renier"
+   ],
+   "counties": [
+    "Berrien",
+    "Branch",
+    "Calhoun",
+    "Cass",
+    "Hillsdale",
+    "Jackson",
+    "Kalamazoo",
+    "Lenawee",
+    "Monroe",
+    "St. Joseph"
+   ]
+  },
+  "MI-06": {
+   "candidates": [
+    "Clyde Shabazz",
+    "Linda Rayburn",
+    "Debbie Dingell",
+    "Heather Smiley",
+    "Timothy A. Teagan",
+    "Mike Mickevicius"
+   ],
+   "counties": [
+    "Monroe",
+    "Oakland",
+    "Washtenaw",
+    "Wayne"
+   ]
+  },
+  "MI-07": {
+   "candidates": [
+    "Shane Dedrick",
+    "William Lawrence",
+    "Tom Barrett"
+   ],
+   "counties": [
+    "Clinton",
+    "Eaton",
+    "Genesee",
+    "Ingham",
+    "Livingston",
+    "Oakland",
+    "Shiawassee"
+   ]
+  },
+  "MI-08": {
+   "candidates": [
+    "Jim Casha",
+    "Kathy Goodwin",
+    "Kristen McDonald Rivet",
+    "Thomas J. Smith",
+    "C. Mia Pettus"
+   ],
+   "counties": [
+    "Bay",
+    "Genesee",
+    "Midland",
+    "Saginaw",
+    "Tuscola"
+   ]
+  },
+  "MI-09": {
+   "candidates": [
+    "Destiny Clayton",
+    "Jim Walkowicz",
+    "Lisa McClain",
+    "Ray Pooley",
+    "Kevin Vayko",
+    "John Vlahos"
+   ],
+   "counties": [
+    "Huron",
+    "Lapeer",
+    "Macomb",
+    "Oakland",
+    "Sanilac",
+    "St. Clair",
+    "Tuscola"
+   ]
+  },
+  "MI-10": {
+   "candidates": [
+    "Andrea L. Kirby",
+    "Michael Bouchard",
+    "Christina Bertrand Hines",
+    "Kwabena Nkromo",
+    "Mike Saliba"
+   ],
+   "counties": [
+    "Macomb",
+    "Oakland"
+   ]
+  },
+  "MI-11": {
+   "candidates": [
+    "Ryan Teasdale",
+    "Ethan Baker",
+    "Jeremy Moss",
+    "Anil Kumar",
+    "Farid Ishac"
+   ],
+   "counties": [
+    "Oakland"
+   ]
+  },
+  "MI-12": {
+   "candidates": [
+    "Gary Walkowicz",
+    "Rashida Tlaib",
+    "James D. Hooper",
+    "Brenda K. Sanders",
+    "Marc Joseph Sosnowski"
+   ],
+   "counties": [
+    "Oakland",
+    "Wayne"
+   ]
+  },
+  "MI-13": {
+   "candidates": [
+    "Simone R. Coleman",
+    "T.P. Nykoriak",
+    "Donavan McKinney",
+    "Raelyn Light",
+    "Chris Dardzinski"
+   ],
+   "counties": [
+    "Wayne"
+   ]
+  }
+ }
+}

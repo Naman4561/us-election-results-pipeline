@@ -1,0 +1,6 @@
+{
+ "file": "results.zip",
+ "sha256": "739933f5171a04120f2d8713adec3433d17e89ed2b703e4c2c8116dfc00aa71a",
+ "built": "2026-11-19 by scripts/nj_bundle.py on the production server (15 Clarity counties, Camden, Sussex and Salem fetched; Bergen, Hunterdon and Warren saved by the operator), members deflated; sources.json inside lists each member's address and SHA-256",
+ "counties": 21
+}

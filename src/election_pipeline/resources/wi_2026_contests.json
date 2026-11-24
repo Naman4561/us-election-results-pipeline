@@ -1,0 +1,145 @@
+{
+ "provenance": "Wisconsin's 2026 general election. Counties: the Governor in all 72; each House district's counties from the Census Bureau's 2020 county to 119th Congressional District relationship file (tab20_cd11920_county20_natl.txt, land parts). Candidates and parties: the Elections Commission's 'All Contests and Candidates' list for the November 3, 2026 general election (xlsx, SHA-256 f26aa3ff...ee213e, saved by the operator Nov 20, 2026, 11:46 AM EST), names as on the ballot, write-ins excluded; other spellings as county reports print them.",
+ "races": {
+  "WI-GOV": {
+   "candidates": [
+    {
+     "name": "Tom Tiffany / David Varnam",
+     "party": "REP",
+     "spellings": [
+      "Tiffany / Varnam",
+      "T. Tiffany & D. Varnam"
+     ]
+    },
+    {
+     "name": "David Crowley / Sarah Godlewski",
+     "party": "DEM",
+     "spellings": [
+      "Crowley / Godlewski",
+      "David Crowley / Sara Godlewski",
+      "D. Crowley & S. Godlewski"
+     ]
+    }
+   ]
+  },
+  "WI-01": {
+   "candidates": [
+    {
+     "name": "Bryan Steil",
+     "party": "REP"
+    },
+    {
+     "name": "Mitchell Berman",
+     "party": "DEM"
+    }
+   ]
+  },
+  "WI-02": {
+   "candidates": [
+    {
+     "name": "Mark Pocan",
+     "party": "DEM"
+    }
+   ]
+  },
+  "WI-03": {
+   "candidates": [
+    {
+     "name": "Derrick Van Orden",
+     "party": "REP"
+    },
+    {
+     "name": "Rebecca Cooke",
+     "party": "DEM"
+    },
+    {
+     "name": "Alexander Valiensi Kent",
+     "party": "IND",
+     "spellings": [
+      "Alex Valiensi Kent"
+     ]
+    },
+    {
+     "name": "Rustin Provance",
+     "party": "IND"
+    }
+   ]
+  },
+  "WI-04": {
+   "candidates": [
+    {
+     "name": "Tim Rogers",
+     "party": "REP"
+    },
+    {
+     "name": "Gwen Moore",
+     "party": "DEM"
+    },
+    {
+     "name": "Arthur Burks",
+     "party": "IND"
+    }
+   ]
+  },
+  "WI-05": {
+   "candidates": [
+    {
+     "name": "Scott Fitzgerald",
+     "party": "REP"
+    },
+    {
+     "name": "Andrew Beck",
+     "party": "DEM"
+    }
+   ]
+  },
+  "WI-06": {
+   "candidates": [
+    {
+     "name": "Glenn Grothman",
+     "party": "REP"
+    },
+    {
+     "name": "Brad Smith",
+     "party": "DEM"
+    },
+    {
+     "name": "Matthew Arndt",
+     "party": "GRN"
+    },
+    {
+     "name": "Elizabeth Anne Fitzgibbon",
+     "party": "IND"
+    },
+    {
+     "name": "Mike Thurow",
+     "party": "IND"
+    }
+   ]
+  },
+  "WI-07": {
+   "candidates": [
+    {
+     "name": "Michael Alfonso",
+     "party": "REP"
+    },
+    {
+     "name": "Fred Clark",
+     "party": "DEM"
+    }
+   ]
+  },
+  "WI-08": {
+   "candidates": [
+    {
+     "name": "Tony Wied",
+     "party": "REP"
+    },
+    {
+     "name": "Rick Crosson",
+     "party": "DEM"
+    }
+   ]
+  }
+ }
+}

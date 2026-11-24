@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import uuid
@@ -36,10 +37,42 @@ ATTESTATION_MODES = ("approved_snapshot", "certified_file")
 DBT_CACHES = ("partial_parse.msgpack", "graph.gpickle")
 
 
-def project_hash(root, state):
-    """What turns a loaded release into a publication of ``state``: dbt, these modules,
-    their packages, and the registry as far as it concerns ``state`` (``own_registry``),
-    so that adding another state does not republish every one."""
+TEST_TAGS = re.compile(r"config\(\s*tags\s*=\s*\[([^\]]*)\]")
+
+
+def dbt_files(root):
+    """The dbt project's files: its project file, models, macros and tests."""
+    paths = [p for p in (root / "dbt").glob("*.yml") if not p.name.startswith(".")]
+    for directory in ("models", "macros", "tests"):
+        paths += [
+            p
+            for p in (root / "dbt" / directory).rglob("*")
+            if p.suffix in (".sql", ".yml", ".yaml")
+        ]
+    return paths
+
+
+def dbt_tags(root, path):
+    """The build tags (``build_tags``) a dbt file belongs to, or None where every build
+    reads it: the project file, macros, top-level sources and untagged tests. A model
+    folder's tag is its name (dbt_project.yml tags each folder so); a test names its own
+    (``config(tags=[...])``)."""
+    parts = path.relative_to(root / "dbt").parts
+    if parts[0] == "models" and len(parts) > 2:
+        return {parts[1]}
+    if parts[0] == "tests":
+        found = TEST_TAGS.search(path.read_text(encoding="utf-8"))
+        if found:
+            return set(re.findall(r"['\"](\w+)['\"]", found[1]))
+    return None
+
+
+def project_hash(root, metadata):
+    """What turns a loaded release into a publication of its state: the dbt files its
+    build selects (``dbt_tags``), these modules, their packages, and the registry as far
+    as it concerns the state (``own_registry``), so that adding or changing another
+    state's models or registry entry does not republish every one."""
+    state, tags = metadata["state"], set(build_tags(metadata))
     paths = [
         root / "pyproject.toml",
         root / "scripts/run_dbt.py",
@@ -47,14 +80,7 @@ def project_hash(root, state):
         Path(__file__).resolve(),
         root / "src/election_pipeline/database.py",
     ]
-    paths += [p for p in (root / "dbt").glob("*.yml") if not p.name.startswith(".")]
-
-    for directory in ("models", "macros", "tests"):
-        paths += [
-            p
-            for p in (root / "dbt" / directory).rglob("*")
-            if p.suffix in (".sql", ".yml", ".yaml")
-        ]
+    paths += [p for p in dbt_files(root) if (found := dbt_tags(root, p)) is None or found & tags]
 
     digest = hashlib.sha256()
 
@@ -212,7 +238,7 @@ def build_variables(metadata):
                 "none"
                 if not state.county_results
                 else "masked"
-                if state.county_privacy_masking
+                if state.county_privacy_masking or state.statewide_only_votes
                 else "exact"
             ),
         )
@@ -757,7 +783,7 @@ def prepare(root, db, release_id, status, *, skip_current=False, attested=None):
             live = current_publication(conn, metadata["source_id"])
             if not live or live["raw_sha256"] != metadata["raw_sha256"]:
                 raise ValueError("Only the currently published snapshot can be approved")
-        code_hash = project_hash(root, metadata["state"])
+        code_hash = project_hash(root, metadata)
         if skip_current:
             current = current_publication(conn, metadata["source_id"])
             if (
@@ -800,7 +826,7 @@ def prepare(root, db, release_id, status, *, skip_current=False, attested=None):
         )
         try:
             results = build_candidate(root, db, metadata, schema, artifacts)
-            if code_hash != project_hash(root, metadata["state"]):
+            if code_hash != project_hash(root, metadata):
                 raise ValueError("Project files changed during the candidate build; retry")
             with conn.transaction():
                 fingerprints = candidate_fingerprints(conn, schema, lock=True)
@@ -842,7 +868,7 @@ def publish_prepared(root, db, candidate_id):
             }
         if attempt["outcome"] != "running" or not attempt["validated_at"]:
             raise ValueError("Candidate has not passed validation")
-        if attempt["transform_sha256"] != project_hash(root.resolve(), metadata["state"]):
+        if attempt["transform_sha256"] != project_hash(root.resolve(), metadata):
             raise ValueError("Project changed after validation; transform again")
         with conn.transaction():
             actual = candidate_fingerprints(conn, attempt["candidate_schema"], lock=True)

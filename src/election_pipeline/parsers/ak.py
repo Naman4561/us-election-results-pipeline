@@ -1,4 +1,9 @@
-"""Alaska's dated first-choice CSV: validate every selected unit before summing."""
+"""Alaska's dated first-choice CSV: validate every selected unit before summing.
+
+Alaska has no counties. Its precincts ("01-600 Ketchikan No. 1") and its district
+absentee, early and questioned rows ("District 1 - Absentee") each belong to one of the
+40 State House districts, which are its local units here. Overseas federal absentee
+ballots ("HD99 Fed Overseas Absentee") belong to none: they count statewide only."""
 
 import csv
 import hashlib
@@ -21,6 +26,13 @@ CSV_URL = "https://www.elections.alaska.gov/enr/26GENR/results/GA_ENR_Precinct_S
 PAGE_URL = "https://www.elections.alaska.gov/election-results/e/?id=26genr"
 SCOPE_SHA256 = "c5e4176549074331cb6e307550dfa4c95c7216ded34be0d125dbe3e0fb6ee873"
 METHODS = ("Election Day", "Absentee", "Early Voting", "Question", "Remote")
+HOUSE_DISTRICTS = 40
+OVERSEAS = 99
+UNIT_DISTRICT = (
+    re.compile(r"(\d\d)-\d{3} \S.*"),
+    re.compile(r"District (\d{1,2}) +- (?:Absentee|Early Voting|Question)"),
+    re.compile(r"HD(99) Fed Overseas Absentee"),
+)
 MEASURES = ("ballots", "votes", "under_votes", "over_votes")
 HEADER = (
     "Precinct_name",
@@ -66,6 +78,20 @@ def scope():
     return json.loads(raw)
 
 
+def district(name):
+    """The House district (1–40, or 99 for overseas ballots) a reporting unit belongs to."""
+    for pattern in UNIT_DISTRICT:
+        if match := pattern.fullmatch(" ".join(name.split())):
+            number = int(match.group(1))
+            if 1 <= number <= HOUSE_DISTRICTS or number == OVERSEAS:
+                return number
+    raise ValueError(f"Alaska reporting unit has no House district: {name}")
+
+
+def district_name(number):
+    return f"House District {number}"
+
+
 def normalized(values):
     # This export has one unnamed, empty trailing column. Other extra fields are errors.
     if len(values) == len(HEADER) + 1 and values[-1] == "":
@@ -85,8 +111,11 @@ def validate_page(raw):
         raise ValueError("Alaska page belongs to another election or is a challenge page")
     if not any(urljoin(PAGE_URL, n.attrs.get("href", "")) == CSV_URL for n in page.root.find("a")):
         raise ValueError("Alaska election page no longer links the configured CSV")
-    if not re.search(r"(?:first|1st)\s+choice.{0,60}Round\s*1", page.root.text, re.I):
-        raise ValueError("Alaska report is not explicitly identified as first-choice Round 1")
+    # The page labelled the summary "first choice results from Round 1" until the Nov 18
+    # tabulation, then dropped the label; the CSV stayed the precinct first-choice export.
+    # A page naming any later round is refused.
+    if re.search(r"\bRound\s*(?:[2-9]|\d{2,})\b|\bfinal\s+round\b", page.root.text, re.I):
+        raise ValueError("Alaska report is not identified as first-choice Round 1")
     # The page also mentions "certified results" of past elections, outside this label.
     return results_status(page.root.text, "Results Status: {}", "Alaska")
 
@@ -99,12 +128,16 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         raise ValueError("Alaska requires all three reviewed statewide contests")
     by_id = {value["source_id"]: key for key, value in profile["races"].items()}
     seen, identities, metadata = set(), set(), {}
-    totals, method_totals, unit_votes, flags = (
+    totals, method_totals, unit_votes, flags, by_district = (
         Counter(),
         defaultdict(Counter),
         defaultdict(Counter),
+        Counter(),
         Counter(),
     )
+    districts = {unit: district(name) for unit, (_, name) in profile["units"].items()}
+    if set(districts.values()) - {OVERSEAS} != set(range(1, HOUSE_DISTRICTS + 1)):
+        raise ValueError("Alaska reporting units do not cover every House district")
     input_rows = 0
     with zipfile.ZipFile(archive_path) as archive:
         official = validate_page(archive.read("election.html"))
@@ -172,6 +205,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 raise ValueError("Alaska ballot metadata differs between candidates in one unit")
             metadata[unit_key] = unit_metadata
             totals[(race, candidate)] += counts["total_votes"]
+            by_district[(race, districts[unit], candidate)] += counts["total_votes"]
 
     required = {
         (race, unit, candidate)
@@ -205,6 +239,21 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         )
         for (race, candidate), votes in sorted(totals.items())
     ]
+    overseas = Counter()
+    for (race, number, candidate), votes in sorted(by_district.items()):
+        if number == OVERSEAS:
+            overseas[race] += votes
+            continue
+        rows.append(
+            row(
+                race,
+                profile["races"][race]["source_id"],
+                candidate,
+                *profile["races"][race]["candidates"][candidate],
+                votes,
+                county=district_name(number),
+            )
+        )
     finish(rows, source, settings, output, stats, reference=reference)
     stats.update(
         input_rows=input_rows,
@@ -220,8 +269,12 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         ballot_totals=dict(ballots),
         ballot_residuals=dict(residuals),
         vote_method_totals={r: dict(values) for r, values in method_totals.items()},
+        local_unit="house_district",
+        statewide_only_votes={r: overseas[r] for r in wanted},
     )
     stats["warnings"] += [
+        "Local units are the 40 State House districts; overseas federal absentee ballots "
+        "count statewide only.",
         "First-choice Round 1 only; later ranked-choice tabulations are not included.",
         "CSV-listed candidates only. Ballot residuals are not assigned to write-ins or parties.",
         "Shares use listed candidate votes. Reporting_flag is not a percent counted.",

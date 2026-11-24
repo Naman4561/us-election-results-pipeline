@@ -1,0 +1,68 @@
+{
+  "senate.csv": {
+    "url": "https://electionstats.state.ma.us/elections/download/173531/precincts_include:0/",
+    "sha256": "48bc8dee667684cdd4f713ad80c8113ac6ccfbb28e4340f5d76350db05b7ff1b",
+    "bytes": 16216,
+    "downloaded_at": "2026-11-23T02:52:18+00:00"
+  },
+  "governor.csv": {
+    "url": "https://electionstats.state.ma.us/elections/download/173526/precincts_include:0/",
+    "sha256": "329d719661fb4cb8c075349dd22fa50fc884ef05e77a3266ce788618105fc594",
+    "bytes": 14971,
+    "downloaded_at": "2026-11-23T02:52:18+00:00"
+  },
+  "house-01.csv": {
+    "url": "https://electionstats.state.ma.us/elections/download/173553/precincts_include:0/",
+    "sha256": "0b10e613f38bbbef9851ac9ec4b2797772f54ea5458646993dc5c8199cfe1770",
+    "bytes": 3132,
+    "downloaded_at": "2026-11-23T02:52:18+00:00"
+  },
+  "house-02.csv": {
+    "url": "https://electionstats.state.ma.us/elections/download/173571/precincts_include:0/",
+    "sha256": "95f1deb33e438ac01187ddab7419676f7d8331af34460521ca15aa72f862cba3",
+    "bytes": 2407,
+    "downloaded_at": "2026-11-23T02:52:18+00:00"
+  },
+  "house-03.csv": {
+    "url": "https://electionstats.state.ma.us/elections/download/173537/precincts_include:0/",
+    "sha256": "d030cb020eb63a86c00f3b7f24d457ebd8efbac29449cefff7f2d44a3dbc2d32",
+    "bytes": 1741,
+    "downloaded_at": "2026-11-23T02:52:18+00:00"
+  },
+  "house-04.csv": {
+    "url": "https://electionstats.state.ma.us/elections/download/173600/precincts_include:0/",
+    "sha256": "aafac6d7cd2c8af1ca77217751aa896aa1202d4a9ba1c863543e61478a26ea4f",
+    "bytes": 1637,
+    "downloaded_at": "2026-11-23T02:52:18+00:00"
+  },
+  "house-05.csv": {
+    "url": "https://electionstats.state.ma.us/elections/download/173582/precincts_include:0/",
+    "sha256": "4a89643fd88c2d47fef56a563e262468647286a6f938859b20f54fc25dc36947",
+    "bytes": 1021,
+    "downloaded_at": "2026-11-23T02:52:18+00:00"
+  },
+  "house-06.csv": {
+    "url": "https://electionstats.state.ma.us/elections/download/173565/precincts_include:0/",
+    "sha256": "63153aec92438adc6b3be9de1f0d66bfec100b1e7facdae12a3ea6a1e4f89300",
+    "bytes": 1793,
+    "downloaded_at": "2026-11-23T02:52:18+00:00"
+  },
+  "house-07.csv": {
+    "url": "https://electionstats.state.ma.us/elections/download/173639/precincts_include:0/",
+    "sha256": "d89135cfd82e9283775b6916d119a0d484fb0bc5e1b5840b785fc9abca2e298d",
+    "bytes": 414,
+    "downloaded_at": "2026-11-23T02:52:18+00:00"
+  },
+  "house-08.csv": {
+    "url": "https://electionstats.state.ma.us/elections/download/173528/precincts_include:0/",
+    "sha256": "22568d66bf56578f668854f843cef908ca92fd5711bccf9e1c7f28253379a7f3",
+    "bytes": 1200,
+    "downloaded_at": "2026-11-23T02:52:18+00:00"
+  },
+  "house-09.csv": {
+    "url": "https://electionstats.state.ma.us/elections/download/173546/precincts_include:0/",
+    "sha256": "b8ab31e44337cfaa2eb2915a31337e6e9919c5152e3328e8e60f68d2cd8d1575",
+    "bytes": 2122,
+    "downloaded_at": "2026-11-23T02:52:18+00:00"
+  }
+}

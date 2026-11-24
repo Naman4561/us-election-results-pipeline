@@ -15,6 +15,10 @@ const methodNames = {
   post_election: "Post-election (late mail)",
   mail: "Mail ballots",
   in_person: "In person",
+  // Arizona's own groups, named as it names them.
+  early_ballot: "Early ballots",
+  early_ars_16_579: "Early (A.R.S. 16-579)",
+  late_early: "Late early",
 };
 const colors = {
   DEM: "#2775c7",
@@ -45,6 +49,18 @@ const descriptions = {
 const number = (n) => n.toLocaleString("en-US");
 const date = (value) =>
   value ? new Date(value).toLocaleString() : "Unavailable";
+// "Runoff pending · December 12" for a race whose November count goes to a runoff.
+const runoffText = (code, race) => {
+  const day = data.states[code]?.races?.[race]?.runoff;
+  if (!day) return "";
+  // The date is a calendar day: read and printed in UTC so no time zone shifts it.
+  const when = new Date(day + "T00:00:00Z").toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+  return `Runoff pending · ${when}`;
+};
 const view = {
   office: "senate",
   scope: "US",
@@ -313,7 +329,8 @@ function drawMap() {
       result.status === "partial"
         ? ` · ${partial.with_results}/${partial.expected} counties with accepted counts`
         : "";
-    const description = `${f.name}: ${descriptions[result.status]}${partialText}${result.staleCounty ? " · stale county source" : ""}${firstChoice ? " · listed candidates, first choice only" : ""}${result.stats?.total ? " · " + number(result.stats.total) + " votes" : ""}`;
+    const runoff = view.office === "house" ? runoffText(code, f.id) : "";
+    const description = `${f.name}: ${descriptions[result.status]}${runoff ? " · " + runoff : ""}${partialText}${result.staleCounty ? " · stale county source" : ""}${firstChoice ? " · listed candidates, first choice only" : ""}${result.stats?.total ? " · " + number(result.stats.total) + " votes" : ""}`;
     const title = document.createElementNS(ns, "title");
     title.textContent = description;
     p.append(title);
@@ -367,6 +384,7 @@ function renderNationalPanel() {
   $("result-scope").textContent = "OUR COVERAGE";
   $("result-title").textContent = offices[view.office];
   $("result-subtitle").textContent = "United States · Reported leads only";
+  $("result-runoff").hidden = true;
   const target = $("result-content");
   target.replaceChildren();
   let count = 0,
@@ -457,11 +475,15 @@ function renderStatePanel() {
   const partial = state.county_collection;
   if (!view.county && partial)
     $("result-scope").textContent = "COLLECTED COUNTY TOTALS";
-  // A town (Vermont) is named alone; a county is named as one.
-  const unit = state.local_unit === "town" ? "" : " County";
+  // A town (Vermont) or House district (Alaska) is named alone; a county is named as one.
+  const unit =
+    state.local_unit === "county" || !state.local_unit ? " County" : "";
   $("result-subtitle").textContent =
     (county || feed ? (county?.name || feed.name) + unit + " · " : "") +
     state.name;
+  const runoff = view.office === "house" ? runoffText(code, race) : "";
+  $("result-runoff").textContent = runoff;
+  $("result-runoff").hidden = !runoff;
   const target = $("result-content");
   target.replaceChildren();
   const result = statusFor(code, race, view.county),
@@ -546,13 +568,27 @@ function renderStatePanel() {
   const total = element("div", undefined, "total");
   const firstChoice = state.vote_basis === "first_choice_listed_candidates";
   const countyBasis = state.vote_basis === "covered_counties_named_candidates";
+  // Wisconsin: each county's own results report, collected county by county.
+  const collected = partial?.basis === "collected_county_reports";
   if (contest?.missing_counties && !view.county)
     target.append(
       element(
         "p",
-        contest.missing_counties.length
-          ? `PARTIAL · Summed from certified county recaps. No certified recap yet for ${contest.missing_counties.join(", ")}.`
-          : "Summed from every county's certified recap.",
+        collected
+          ? contest.missing_counties.length
+            ? `PARTIAL · Summed from the counties' own results reports. Not yet collected: ${contest.missing_counties.join(", ")}.`
+            : "Summed from every county's own results report."
+          : contest.missing_counties.length
+            ? `PARTIAL · Summed from certified county recaps. No certified recap yet for ${contest.missing_counties.join(", ")}.`
+            : "Summed from every county's certified recap.",
+        "empty",
+      ),
+    );
+  else if (collected && !view.county)
+    target.append(
+      element(
+        "p",
+        `${partial.with_results} of ${partial.expected} counties collected, each from its own results report (its canvass where posted, otherwise its election-night results). ${partial.complete ? "Every county is in." : "This is a partial county aggregate, not a statewide total."}`,
         "empty",
       ),
     );
@@ -561,6 +597,14 @@ function renderStatePanel() {
       element(
         "p",
         `${partial.with_results} of ${partial.expected} counties have accepted counts; ${partial.certified || 0} certified county recaps, ${partial.current} sources currently confirmed, ${partial.manual || 0} manual snapshots, ${partial.stale - (partial.manual || 0) - (partial.certified || 0)} stale, ${partial.unavailable} unavailable. This is a partial county aggregate, not a statewide total.`,
+        "empty",
+      ),
+    );
+  if (state.statewide_only_votes && !view.county)
+    target.append(
+      element(
+        "p",
+        `The statewide total includes ${state.statewide_only_votes}, so the House districts add up to less than it.`,
         "empty",
       ),
     );
@@ -580,7 +624,15 @@ function renderStatePanel() {
         "empty",
       ),
     );
-  if (feed) {
+  if (feed && collected)
+    target.append(
+      element(
+        "p",
+        "From the county's own results report, imported by hand. Write-ins are shown as one line.",
+        "empty",
+      ),
+    );
+  if (feed && !collected) {
     target.append(
       element(
         "p",
@@ -786,15 +838,18 @@ function renderMetadata() {
   )
     $("notice").textContent +=
       " Alaska shows first-choice votes for CSV-listed candidates. Later ranked-choice results and unlisted vote categories are not included.";
-  if (
-    (national &&
-      Object.values(data.states).some(
-        (s) => s.county_collection && !s.county_collection.complete,
-      )) ||
-    state?.county_collection
-  )
+  const partialStates = (
+    national
+      ? Object.values(data.states).filter(
+          (s) => s.county_collection && !s.county_collection.complete,
+        )
+      : state?.county_collection
+        ? [state]
+        : []
+  ).map((s) => s.name || s.state);
+  if (partialStates.length)
     $("notice").textContent +=
-      " Mississippi has partial county collection. The national map does not assign it a statewide party lead; select the state to inspect collected counties and source timestamps.";
+      ` ${partialStates.join(" and ")} ${partialStates.length > 1 ? "have" : "has"} partial county collection. The national map does not assign ${partialStates.length > 1 ? "them" : "it"} a statewide party lead; select the state to inspect collected counties.`;
   $("notice").classList.toggle("alert", stale || test);
   $("connection").textContent = stale
     ? "Refresh failed · stale view"
@@ -831,7 +886,7 @@ function renderControls() {
     ? "Collected county totals"
     : "Statewide results";
   $("map-title").textContent =
-    `${offices[view.office]} · ${national ? "National results" : view.office === "house" ? "District results" : aggregate ? "State totals · county detail unavailable" : "County results"}`;
+    `${offices[view.office]} · ${national ? "National results" : view.office === "house" ? "District results" : aggregate ? "State totals · county detail unavailable" : state.local_unit === "house_district" ? "House district results" : "County results"}`;
   $("map-description").textContent = national
     ? "Select a covered state to explore its returns."
     : state.county_collection
@@ -861,7 +916,9 @@ function renderControls() {
           ? "Select a district…"
           : data.states[view.scope]?.local_unit === "town"
             ? "Select a town…"
-            : "Select a county…",
+            : data.states[view.scope]?.local_unit === "house_district"
+              ? "Select a House district…"
+              : "Select a county…",
       "",
     ),
     ...options

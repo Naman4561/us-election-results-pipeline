@@ -23,7 +23,9 @@ def recording():
         _recording.reset(token)
 
 
-def verify_scope(code, race, candidates, counties=None):
+def verify_scope(code, race, candidates, counties=None, *, collected=False):
+    """``collected``: the counties are those collected so far (``State.collected_counties``),
+    so they must be reviewed counties of the race but need not be all of them."""
     observed = _recording.get()
     if observed is not None:
         observed.setdefault(code, {})[race] = {
@@ -34,7 +36,11 @@ def verify_scope(code, race, candidates, counties=None):
     expected = ROSTERS[code][race]
     if len(candidates) != len(set(candidates)) or set(candidates) != set(expected["candidates"]):
         raise ValueError(f"{race}: candidate roster differs from the reviewed election snapshot")
-    if counties is not None and set(counties) != set(expected["counties"]):
+    if counties is not None and (
+        not set(counties) <= set(expected["counties"])
+        if collected
+        else set(counties) != set(expected["counties"])
+    ):
         raise ValueError(
             f"{race}: eligible county coverage differs from the reviewed election snapshot"
         )

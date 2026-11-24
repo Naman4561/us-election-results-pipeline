@@ -1,0 +1,14 @@
+{
+ "file": "bundle.zip",
+ "sha256": "4d30234866145e60991e606c40372da3a2f53d12f89092b8147f926493a3998f",
+ "members": {
+  "version.json": "https://ctemspublic.tgstg.net/ng-app/data/election/108/Version.json",
+  "lookup.json": ".../108/55530/Lookupdata.json",
+  "election.json": ".../108/55530/election_Electiondata.json",
+  "state.json": ".../108/55530/stateVotes_Electiondata.json",
+  "towns.json": ".../108/55530/townVotes_Electiondata.json",
+  "status.json": ".../108/55530/townStatus_Electiondata.json"
+ },
+ "captured": "2026-11-19, about 2:30 PM Eastern, from the production server; Version.json unchanged before and after",
+ "site_status": "every town ( *Unofficial Results ); 774 of 774 polling places"
+}

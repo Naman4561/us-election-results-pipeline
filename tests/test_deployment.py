@@ -30,6 +30,7 @@ REVISION = "b" * 40
 NEW_IMAGE = "sha256:" + "c" * 64
 NEW_REVISION = "d" * 40
 NC, KY, GA, SC = "nc_2026_general_all", "ky_2026_general", "ga_2026_general", "sc_2026_general"
+MS = "ms_2026_general_all"
 
 
 def fixture(root):
@@ -94,12 +95,15 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(catalog.read(self.path), self.value)
         self.assertEqual(catalog.public_states(self.value), {"NC", "KY"})
         for change in (
-            lambda v: v["sources"].update(az_2026_general=dict(v["sources"][GA])),
+            lambda v: v["sources"].update(xx_2026_general=dict(v["sources"][GA])),
             lambda v: v["sources"][GA].update(public=True),
             lambda v: v["sources"][GA].update(acquisition="ftp"),
             # Only a collected source can be paused, and only with a boolean.
             lambda v: v["sources"][GA].update(paused=True),
             lambda v: v["sources"][NC].update(paused="yes"),
+            # Only a paused source can be final, and only with a boolean.
+            lambda v: v["sources"][NC].update(final=True),
+            lambda v: v["sources"][NC].update(paused=True, final="yes"),
             lambda v: v["sources"][NC].update(status="certified"),
             # Ancillary datasets are collected by hand, never by the worker.
             lambda v: v["sources"].update(nc_absentee_early_demographics_2026={**v["sources"][NC]}),
@@ -151,7 +155,7 @@ class DeploymentTests(unittest.TestCase):
                 subprocess.TimeoutExpired("docker", 2),
                 subprocess.CompletedProcess([], 0, "", ""),
             ]
-            with self.assertRaisesRegex(RuntimeError, "timeout"):
+            with self.assertRaisesRegex(containers.JobTimeout, "timeout"):
                 containers.run_job(
                     IMAGE, self.prod, self.config, ["scripts/run_source.py"], timeout=2
                 )
@@ -204,6 +208,26 @@ class DeploymentTests(unittest.TestCase):
         latest = (self.root / "worker-latest.json").read_text()
         self.assertNotIn("writer-secret", latest)
         self.assertEqual(json.loads(latest)["outcome"], "failed")
+
+    @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
+    def test_only_a_timed_out_job_has_its_open_attempt_closed(self):
+        def run(image, name, *a, **k):
+            if name == NC:
+                raise containers.JobTimeout("Job exceeded its timeout")
+            raise RuntimeError("another failure")
+
+        with (
+            patch.object(control, "run_one", side_effect=run),
+            patch.object(control, "close_interrupted", return_value=1) as close,
+        ):
+            with redirect_stdout(io.StringIO()):
+                self.assertEqual(control.run_enabled(self.path, self.prod, self.config), 1)
+        self.assertEqual([c.args[1] for c in close.call_args_list], [NC])
+        self.assertIsInstance(close.call_args.args[2], datetime)
+        results = json.loads((self.root / "worker-latest.json").read_text())["results"]
+        self.assertEqual(
+            {r["source_id"]: r["outcome"] for r in results}, {NC: "failed", KY: "failed"}
+        )
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_source_held_by_a_backup_is_skipped_not_failed(self):
@@ -280,8 +304,14 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual([c.args[1] for c in run.call_args_list], [KY])
         latest = json.loads((self.root / "worker-latest.json").read_text())
         self.assertIn({"source_id": NC, "outcome": "paused"}, latest["results"])
+        # Final only while paused; resuming clears it.
+        self.assertEqual(control.mark_final(self.path, NC)["outcome"], "marked_final")
+        self.assertTrue(catalog.read(self.path)["sources"][NC]["final"])
+        with self.assertRaisesRegex(ValueError, "pause it first"):
+            control.mark_final(self.path, KY)
         control.pause(self.path, NC, False)
         self.assertNotIn("paused", catalog.read(self.path)["sources"][NC])
+        self.assertNotIn("final", catalog.read(self.path)["sources"][NC])
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_certify_pauses_first_publishes_official_and_restores_the_pause_on_refusal(self):
@@ -646,9 +676,10 @@ class DeploymentTests(unittest.TestCase):
 
     def test_a_check_key_changes_only_with_what_that_source_check_runs(self):
         tree = self.release_tree()
+        names = [NC, KY]
 
         def keys():
-            return control.check_keys(tree, self.value, self.prod, [NC, KY])
+            return control.check_keys(tree, self.value, self.prod, names)
 
         def changed(relative, edit=lambda text: text + "\n# changed\n"):
             path = tree / relative
@@ -663,8 +694,14 @@ class DeploymentTests(unittest.TestCase):
         # Another state's parser and data, the dashboard and the host-side tools: neither.
         self.assertEqual(changed(package + "parsers/ms.py"), set())
         self.assertEqual(changed(package + "resources/ms_2026_counties.json", str.rstrip), set())
-        # Every parser imports every roster.
-        self.assertEqual(changed(package + "resources/rosters_2026/OK.json", str.rstrip), {NC, KY})
+        # A roster is read by its own state's parse alone, a new one too.
+        self.assertEqual(changed(package + "resources/rosters_2026/OK.json", str.rstrip), set())
+        before = keys()
+        roster = tree / package / "resources/rosters_2026/KY.json"
+        roster.write_text('{"state": "KY", "races": {}}', encoding="utf-8")
+        after = keys()
+        self.assertEqual({n for n in before if before[n] != after[n]}, {KY})
+        roster.unlink()
         self.assertEqual(changed(package + "dashboard/server.py"), set())
         self.assertEqual(changed(package + "dashboard/static/app.css"), set())
         self.assertEqual(changed(package + "dashboard/static/ms-map.json", str.rstrip), set())
@@ -698,7 +735,10 @@ class DeploymentTests(unittest.TestCase):
         def hashes():
             # Callers pass a resolved root, as the module's own path is (8.3 names differ).
             root = tree.resolve()
-            return publication.project_hash(root, "NC"), publication.project_hash(root, "KY")
+            return tuple(
+                publication.project_hash(root, {"state": code, "dataset": "election_results"})
+                for code in ("NC", "KY", "MS")
+            )
 
         with patch.object(
             publication, "__file__", str(tree.resolve() / package / "publication.py")
@@ -709,10 +749,36 @@ class DeploymentTests(unittest.TestCase):
                 "utf-8",
             )
             after = hashes()
-        self.assertEqual(before[0], after[0])
-        self.assertNotEqual(before[1], after[1])
+            self.assertEqual(before[0], after[0])
+            self.assertNotEqual(before[1], after[1])
+            # Mississippi's own models and tests republish Mississippi alone.
+            for relative in (
+                "tests/ms_county_status.sql",
+                "models/ms/marts/ms_county_feed_status.sql",
+            ):
+                path = tree / "dbt" / relative
+                before = hashes()
+                path.write_text(path.read_text(encoding="utf-8") + "\n", encoding="utf-8")
+                after = hashes()
+                self.assertEqual([b == a for b, a in zip(before, after)], [True, True, False])
         self.assertEqual(changed("dbt/dbt_project.yml"), {NC, KY})
         self.assertEqual(changed("constraints.txt"), {NC, KY})
+        # dbt files tagged for a build no checked source runs count for every source (dbt
+        # parses the whole project); once a source runs that build, for it alone.
+        ms_test = "dbt/tests/ms_county_status.sql"
+        self.assertEqual(changed(ms_test), {NC, KY})
+        settings, sources = load_config(tree / "config/sources.toml")
+        (Path(self.prod["DATA_DIR"]) / "state" / f"{MS}.json").write_text(
+            json.dumps({"sha256": "a" * 64, "url": sources[MS].url}), encoding="utf-8"
+        )
+        self.value["sources"][MS] = {**self.value["sources"][NC]}
+        names.append(MS)
+        self.assertEqual(changed(ms_test), {MS})
+        self.assertEqual(changed("dbt/models/ms/staging/stg_ms_county_feeds.sql"), {MS})
+        self.assertEqual(changed("dbt/tests/county_reconciliation.sql"), {NC, KY, MS})
+        self.assertEqual(changed("dbt/models/results/marts/contest_results.sql"), {NC, KY, MS})
+        self.assertEqual(changed("dbt/tests/demographics_release_completeness.sql"), {NC, KY, MS})
+        names.remove(MS)
         # A new status changes only that source's key; a new snapshot changes none (the
         # release weighs snapshots itself).
         before = keys()
@@ -724,6 +790,30 @@ class DeploymentTests(unittest.TestCase):
         # A source without a snapshot of its configured address gets no key.
         state.write_text(json.dumps({"sha256": "b" * 64, "url": "https://old"}), "utf-8")
         self.assertEqual(set(keys()), {KY})
+
+    def test_dbt_files_carry_the_tags_their_builds_select(self):
+        import yaml
+
+        project = yaml.safe_load((ROOT / "dbt/dbt_project.yml").read_text(encoding="utf-8"))
+        folders = project["models"]["election_analytics"]
+        # publication.dbt_tags names a model by its folder: each folder's tag is its name.
+        for folder in (ROOT / "dbt/models").iterdir():
+            if folder.is_dir():
+                self.assertEqual(folders[folder.name]["+tags"], [folder.name])
+        tags = {
+            p.relative_to(ROOT).as_posix(): publication.dbt_tags(ROOT, p)
+            for p in publication.dbt_files(ROOT)
+        }
+        self.assertEqual(tags["dbt/tests/ms_county_status.sql"], {"ms"})
+        self.assertEqual(tags["dbt/tests/demographics_release_completeness.sql"], {"demographics"})
+        self.assertEqual(tags["dbt/tests/county_reconciliation.sql"], {"results"})
+        self.assertIsNone(tags["dbt/models/sources.yml"])
+        self.assertIsNone(tags["dbt/macros/releases.sql"])
+        self.assertEqual(tags["dbt/models/results/schema.yml"], {"results"})
+        self.assertEqual(
+            publication.build_tags({"dataset": "election_results", "state": "MS"}),
+            ["results", "ms"],
+        )
 
     def test_the_worker_proves_a_snapshot_only_under_the_live_image_and_status(self):
         state = Path(self.prod["DATA_DIR"]) / "state"

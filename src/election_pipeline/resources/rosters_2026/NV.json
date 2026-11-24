@@ -1,0 +1,91 @@
+{
+ "state": "NV",
+ "provenance": "Nevada candidates (ballot labels written first name first, with parties) and counties from the Secretary of State's results app data, saved by the operator on Nov 19, 2026: manifest release sequence 90 (generated 2026-11-13T23:36:19Z, SHA-256 b73a80dbff124b52c3dd563846768a5c0b5e657b32c16b9685ba49fd5b9b6af9), its overview (071af879cc52991877f6f77c5ab94587c62f087c530faae45adb03d8d6e790c1) and the Governor and House 1-4 results files it names (each matching the manifest's SHA-256). Lincoln County's District 2 votes are masked by the state and not counted. 'None of These Candidates' is excluded here. Confirmed by the operator before release.",
+ "races": {
+  "NV-01": {
+   "candidates": [
+    "Carrie Ann Buck",
+    "Afzal \"Bobby\" Khan",
+    "Steven \"Chap\" St John",
+    "Dina Titus"
+   ],
+   "counties": [
+    "Clark"
+   ]
+  },
+  "NV-02": {
+   "candidates": [
+    "Teresa F. Benitez-Thompson",
+    "Lynn Chapman",
+    "David Flippo"
+   ],
+   "counties": [
+    "Carson City",
+    "Churchill",
+    "Douglas",
+    "Elko",
+    "Eureka",
+    "Humboldt",
+    "Lander",
+    "Lyon",
+    "Pershing",
+    "Storey",
+    "Washoe",
+    "White Pine"
+   ]
+  },
+  "NV-03": {
+   "candidates": [
+    "Jon Kamerath",
+    "Susie Lee",
+    "Marty O'Donnell"
+   ],
+   "counties": [
+    "Clark"
+   ]
+  },
+  "NV-04": {
+   "candidates": [
+    "Russell Best",
+    "Steven A. Horsford",
+    "William Johnson",
+    "Cody K. Whipple"
+   ],
+   "counties": [
+    "Churchill",
+    "Clark",
+    "Esmeralda",
+    "Lincoln",
+    "Lyon",
+    "Mineral",
+    "Nye"
+   ]
+  },
+  "NV-GOV": {
+   "candidates": [
+    "Aaron D. Ford",
+    "Danielle Ford",
+    "Joseph Lombardo"
+   ],
+   "counties": [
+    "Carson City",
+    "Churchill",
+    "Clark",
+    "Douglas",
+    "Elko",
+    "Esmeralda",
+    "Eureka",
+    "Humboldt",
+    "Lander",
+    "Lincoln",
+    "Lyon",
+    "Mineral",
+    "Nye",
+    "Pershing",
+    "Storey",
+    "Washoe",
+    "White Pine"
+   ]
+  }
+ }
+}

@@ -1,0 +1,60 @@
+{
+ "provenance": "New Jersey's 2026 general election, reviewed Nov 19, 2026 from each county clerk's own results (Clarity summaries, ES&S summary reports, Bergen's and Salem's results pages): every county's titles for its U.S. Senate and House contests, and every race's ballot candidates with the spellings counties print. New Jersey's minor-party labels are ballot slogans that differ by county; those candidates stand as IND. Confirmed by the operator before release.",
+ "counties": {
+  "atlantic": {"name": "Atlantic", "format": "clarity", "contests": {"United States Senate": "NJ-SEN", "House of Representatives 2nd Cong": "NJ-02"}},
+  "bergen": {"name": "Bergen", "format": "bergen", "contests": {"UNITED STATES SENATOR": "NJ-SEN", "MEMBER OF THE HOUSE OF REPRESENTATIVES 5TH CONGRESSIONAL DISTRICT": "NJ-05", "MEMBER OF THE HOUSE OF REPRESENTATIVES 9TH CONGRESSIONAL DISTRICT": "NJ-09"}},
+  "burlington": {"name": "Burlington", "format": "clarity", "contests": {"US Senate": "NJ-SEN", "Member of Congress - 1st Congressional District": "NJ-01", "Member of Congress - 3rd Congressional District": "NJ-03"}},
+  "camden": {"name": "Camden", "format": "ess", "contests": {"United States Senator": "NJ-SEN", "Member of the House of Representatives 1st Congressional District": "NJ-01"}},
+  "cape_may": {"name": "Cape May", "format": "clarity", "contests": {"Member of the United States Senate": "NJ-SEN", "Member of the House of Representatives": "NJ-02"}},
+  "cumberland": {"name": "Cumberland", "format": "clarity", "contests": {"United States Senator": "NJ-SEN", "United States House of Representatives": "NJ-02"}},
+  "essex": {"name": "Essex", "format": "clarity", "contests": {"United States Senator": "NJ-SEN", "Member of the House of Representatives (8th Congressional District)": "NJ-08", "Member of the House of Representatives (10th Congressional District)": "NJ-10", "Member of the House of Representatives (11th Congressional District)": "NJ-11"}},
+  "gloucester": {"name": "Gloucester", "format": "clarity", "contests": {"US SENATE": "NJ-SEN", "HOUSE OF REPRESENTATIVES - CD 1": "NJ-01", "HOUSE OF REPRESENTATIVES - CD 2": "NJ-02"}},
+  "hudson": {"name": "Hudson", "format": "clarity", "contests": {"United States Senator": "NJ-SEN", "Member of the House of Representatives- 8th Congressional": "NJ-08", "Member of the House of Representatives- 9th Congressional": "NJ-09", "Member of the House of Representatives- 10th Congressional": "NJ-10"}},
+  "hunterdon": {"name": "Hunterdon", "format": "ess", "contests": {"UNITED STATES SENATE": "NJ-SEN", "UNITED STATES HOUSE OF REPRESENTATIVES": "NJ-07"}},
+  "mercer": {"name": "Mercer", "format": "clarity", "contests": {"U.S. Senate": "NJ-SEN", "U.S. House of Representatives - 3rd Congressional District": "NJ-03", "U.S. House of Representatives - 12th Congressional District": "NJ-12"}},
+  "middlesex": {"name": "Middlesex", "format": "clarity", "contests": {"U.S. Senator": "NJ-SEN", "House of Representatives CD6": "NJ-06", "House of Representatives CD12": "NJ-12"}},
+  "monmouth": {"name": "Monmouth", "format": "clarity", "contests": {"US Senate": "NJ-SEN", "US House of Representatives 3rd Congressional District": "NJ-03", "US House of Representatives 4th Congressional District": "NJ-04", "US House of Representatives 6th Congressional District": "NJ-06"}},
+  "morris": {"name": "Morris", "format": "clarity", "contests": {"UNITED STATES SENATE": "NJ-SEN", "HOUSE OF REPRESENTATIVES 7TH CONGRESSIONAL": "NJ-07", "HOUSE OF REPRESENTATIVES 11TH CONGRESSIONAL": "NJ-11"}},
+  "ocean": {"name": "Ocean", "format": "clarity", "contests": {"MEMBER OF THE UNITED STATES SENATE": "NJ-SEN", "HOUSE OF REPRESENTATIVES 2ND CONGRESSIONAL DISTRICT": "NJ-02", "HOUSE OF REPRESENTATIVES 4TH CONGRESSIONAL DISTRICT": "NJ-04"}},
+  "passaic": {"name": "Passaic", "format": "clarity", "contests": {"Member of the United States Senate": "NJ-SEN", "Member of the House of Reps - 5th Cong": "NJ-05", "Member of the House of Reps - 9th Cong": "NJ-09", "Member of the House of Reps - 11th Cong": "NJ-11"}},
+  "salem": {"name": "Salem", "format": "salem", "contests": {"United States Senate": "NJ-SEN", "United States House of Representatives": "NJ-02"}},
+  "somerset": {"name": "Somerset", "format": "clarity", "contests": {"U.S. Senator": "NJ-SEN", "U.S. Representative 7th": "NJ-07", "U.S. Representative 12th": "NJ-12"}},
+  "sussex": {"name": "Sussex", "format": "ess", "contests": {"U.S. Senate": "NJ-SEN", "U.S. House of Representatives 5TH CONG DIST": "NJ-05", "U.S. House of Representatives 7TH CONG DIST": "NJ-07"}},
+  "union": {"name": "Union", "format": "clarity", "contests": {"United States Senator": "NJ-SEN", "Member of House of Representatives 7th Congressional District": "NJ-07", "Member of House of Representatives 8th Congressional District": "NJ-08", "Member of House of Representatives 10th Congressional District": "NJ-10", "Member of House of Representatives 12th Congressional District": "NJ-12"}},
+  "warren": {"name": "Warren", "format": "ess", "contests": {"United States Senate": "NJ-SEN", "Member of the House of Representatives - 7th Congressional District": "NJ-07"}}
+ },
+ "races": {
+  "NJ-SEN": {"candidates": [
+   {"name": "Cory Booker", "party": "DEM"}, {"name": "Justin Murphy", "party": "REP"},
+   {"name": "Veronica Fernandez", "party": "IND"}, {"name": "Joanne Kuniansky", "party": "IND"}]},
+  "NJ-01": {"candidates": [{"name": "Donald Norcross", "party": "DEM"}, {"name": "Damon Galdo", "party": "REP"}]},
+  "NJ-02": {"candidates": [
+   {"name": "Jeff Van Drew", "party": "REP"}, {"name": "Zack Mullock", "party": "DEM"},
+   {"name": "Ramon Mora Jr.", "party": "IND"}]},
+  "NJ-03": {"candidates": [
+   {"name": "Herb Conaway", "party": "DEM", "spellings": ["Herbert Conaway, Jr."]},
+   {"name": "Michael P. McGuire", "party": "REP"}, {"name": "Steven Welzer", "party": "IND"},
+   {"name": "Ryan Michael Kelly", "party": "IND"}]},
+  "NJ-04": {"candidates": [{"name": "Christopher H. Smith", "party": "REP"}, {"name": "Rachel Peace", "party": "DEM"}]},
+  "NJ-05": {"candidates": [
+   {"name": "Josh Gottheimer", "party": "DEM"}, {"name": "Sean Kirrane", "party": "REP"},
+   {"name": "Adam Rueda", "party": "IND"}]},
+  "NJ-06": {"candidates": [{"name": "Frank Pallone Jr.", "party": "DEM"}, {"name": "Hillary Herzig", "party": "REP"}]},
+  "NJ-07": {"candidates": [
+   {"name": "Thomas H. Kean Jr.", "party": "REP"}, {"name": "Rebecca Bennett", "party": "DEM"},
+   {"name": "Seamus Patrick O'Toole", "party": "IND"}]},
+  "NJ-08": {"candidates": [
+   {"name": "Rob Menendez", "party": "DEM"}, {"name": "Craig Honts", "party": "IND"},
+   {"name": "Aristotle Eliopoulos", "party": "IND"}, {"name": "Da'Shone Hughey", "party": "IND"}]},
+  "NJ-09": {"candidates": [
+   {"name": "Nelida Pou", "party": "DEM"}, {"name": "Rosie Pino", "party": "REP"},
+   {"name": "Terrisa Bukovinac", "party": "IND"}]},
+  "NJ-10": {"candidates": [{"name": "LaMonica R. McIver", "party": "DEM"}, {"name": "Carmen Bucco", "party": "REP"}]},
+  "NJ-11": {"candidates": [
+   {"name": "Analilia Mejia", "party": "DEM"}, {"name": "Joe Hathaway", "party": "REP"},
+   {"name": "Alan B. Bond", "party": "IND"}]},
+  "NJ-12": {"candidates": [
+   {"name": "Adam Hamawy", "party": "DEM"}, {"name": "Gregg Mele", "party": "REP"},
+   {"name": "Winston Jordan", "party": "IND"}, {"name": "Andres Jinete", "party": "IND"}]}
+ }
+}

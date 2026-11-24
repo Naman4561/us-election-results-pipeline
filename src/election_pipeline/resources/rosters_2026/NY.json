@@ -1,0 +1,386 @@
+{
+ "state": "NY",
+ "provenance": "New York candidates and counties from the State Board of Elections' unofficial election night results page, saved as a PDF by the operator: 'NYS Board of Elections Unofficial Election Night Results.pdf' (SHA-256 7195c5d7c25a3c787aa943ee8259ff2cf802197ed5518e60313048b551d3883d), updated 11/18/2026 3:50:10 PM. Each candidate is listed once whatever its party lines. Confirmed by the operator before release.",
+ "races": {
+  "NY-01": {
+   "candidates": [
+    "Christopher J. Gallant",
+    "Nicholas J. Lalota"
+   ],
+   "counties": [
+    "Suffolk"
+   ]
+  },
+  "NY-02": {
+   "candidates": [
+    "Patrick Halpin",
+    "Andrew R. Garbarino"
+   ],
+   "counties": [
+    "Nassau",
+    "Suffolk"
+   ]
+  },
+  "NY-03": {
+   "candidates": [
+    "Thomas R. Suozzi",
+    "Michael J. LiPetri Jr"
+   ],
+   "counties": [
+    "Nassau",
+    "Queens",
+    "Suffolk"
+   ]
+  },
+  "NY-04": {
+   "candidates": [
+    "Laura A. Gillen",
+    "Jeanine C. Driscoll",
+    "Blay Tarnoff"
+   ],
+   "counties": [
+    "Nassau"
+   ]
+  },
+  "NY-05": {
+   "candidates": [
+    "Gregory W. Meeks",
+    "George Marsh"
+   ],
+   "counties": [
+    "Queens"
+   ]
+  },
+  "NY-06": {
+   "candidates": [
+    "Grace Meng",
+    "Joseph Chou"
+   ],
+   "counties": [
+    "Queens"
+   ]
+  },
+  "NY-07": {
+   "candidates": [
+    "Claire Valdez",
+    "Melvin Rivera",
+    "Priscilla Ghaznavi"
+   ],
+   "counties": [
+    "Kings",
+    "Queens"
+   ]
+  },
+  "NY-08": {
+   "candidates": [
+    "Hakeem S. Jeffries",
+    "Lewis Mizrahi"
+   ],
+   "counties": [
+    "Kings"
+   ]
+  },
+  "NY-09": {
+   "candidates": [
+    "Yvette D. Clarke",
+    "Joel Azumah"
+   ],
+   "counties": [
+    "Kings"
+   ]
+  },
+  "NY-10": {
+   "candidates": [
+    "Brad Lander",
+    "Jennifer E. Moore"
+   ],
+   "counties": [
+    "Kings",
+    "New York"
+   ]
+  },
+  "NY-11": {
+   "candidates": [
+    "Mike DeCillis",
+    "Nicole Malliotakis"
+   ],
+   "counties": [
+    "Kings",
+    "Richmond"
+   ]
+  },
+  "NY-12": {
+   "candidates": [
+    "Micah C. Lasher",
+    "Caroline Shinkle",
+    "Wilneida Negron",
+    "Karen Ortiz"
+   ],
+   "counties": [
+    "New York"
+   ]
+  },
+  "NY-13": {
+   "candidates": [
+    "Darializa Avila Chevalier",
+    "Jomo M. Williams"
+   ],
+   "counties": [
+    "Bronx",
+    "New York"
+   ]
+  },
+  "NY-14": {
+   "candidates": [
+    "Alexandria Ocasio-Cortez",
+    "Diamant Hysenaj"
+   ],
+   "counties": [
+    "Bronx",
+    "Queens"
+   ]
+  },
+  "NY-15": {
+   "candidates": [
+    "Ritchie Torres",
+    "Stylo Sapaskis",
+    "Gonzalo Duran",
+    "Andre Easton",
+    "Jose Vega"
+   ],
+   "counties": [
+    "Bronx"
+   ]
+  },
+  "NY-16": {
+   "candidates": [
+    "George S. Latimer",
+    "Joseph J. Cinquemani"
+   ],
+   "counties": [
+    "Bronx",
+    "Westchester"
+   ]
+  },
+  "NY-17": {
+   "candidates": [
+    "Cait Conley",
+    "Mike Lawler"
+   ],
+   "counties": [
+    "Dutchess",
+    "Putnam",
+    "Rockland",
+    "Westchester"
+   ]
+  },
+  "NY-18": {
+   "candidates": [
+    "Pat Ryan",
+    "Jackie Mary Auringer"
+   ],
+   "counties": [
+    "Dutchess",
+    "Orange",
+    "Ulster"
+   ]
+  },
+  "NY-19": {
+   "candidates": [
+    "Josh Riley",
+    "Peter K. Oberacker"
+   ],
+   "counties": [
+    "Broome",
+    "Chenango",
+    "Columbia",
+    "Cortland",
+    "Delaware",
+    "Greene",
+    "Otsego",
+    "Rensselaer",
+    "Sullivan",
+    "Tompkins",
+    "Ulster"
+   ]
+  },
+  "NY-20": {
+   "candidates": [
+    "Paul D. Tonko",
+    "Ralph F. Ambrosio"
+   ],
+   "counties": [
+    "Albany",
+    "Montgomery",
+    "Rensselaer",
+    "Saratoga",
+    "Schenectady"
+   ]
+  },
+  "NY-21": {
+   "candidates": [
+    "Blake Gendebien",
+    "Anthony Constantino"
+   ],
+   "counties": [
+    "Clinton",
+    "Essex",
+    "Franklin",
+    "Fulton",
+    "Hamilton",
+    "Herkimer",
+    "Jefferson",
+    "Lewis",
+    "Montgomery",
+    "Oneida",
+    "Saratoga",
+    "Schoharie",
+    "St.Lawrence",
+    "Warren",
+    "Washington"
+   ]
+  },
+  "NY-22": {
+   "candidates": [
+    "John W. Mannion",
+    "Kailee Buller"
+   ],
+   "counties": [
+    "Cayuga",
+    "Cortland",
+    "Madison",
+    "Oneida",
+    "Onondaga"
+   ]
+  },
+  "NY-23": {
+   "candidates": [
+    "Aaron Gies",
+    "Nicholas A. Langworthy"
+   ],
+   "counties": [
+    "Allegany",
+    "Cattaraugus",
+    "Chautauqua",
+    "Chemung",
+    "Erie",
+    "Niagara",
+    "Schuyler",
+    "Steuben",
+    "Tioga"
+   ]
+  },
+  "NY-24": {
+   "candidates": [
+    "Alissa J. Ellman",
+    "Claudia Tenney"
+   ],
+   "counties": [
+    "Cayuga",
+    "Genesee",
+    "Jefferson",
+    "Livingston",
+    "Niagara",
+    "Ontario",
+    "Orleans",
+    "Oswego",
+    "Schuyler",
+    "Seneca",
+    "Steuben",
+    "Wayne",
+    "Wyoming",
+    "Yates"
+   ]
+  },
+  "NY-25": {
+   "candidates": [
+    "Joseph D. Morelle",
+    "Virginia E. McIntyre"
+   ],
+   "counties": [
+    "Monroe",
+    "Ontario"
+   ]
+  },
+  "NY-26": {
+   "candidates": [
+    "Timothy M. Kennedy",
+    "Dennis E. Hannon"
+   ],
+   "counties": [
+    "Erie",
+    "Niagara"
+   ]
+  },
+  "NY-GOV": {
+   "candidates": [
+    "Kathy C. Hochul / Adrienne E. Adams",
+    "Bruce A. Blakeman / Todd Hood"
+   ],
+   "counties": [
+    "Albany",
+    "Allegany",
+    "Bronx",
+    "Broome",
+    "Cattaraugus",
+    "Cayuga",
+    "Chautauqua",
+    "Chemung",
+    "Chenango",
+    "Clinton",
+    "Columbia",
+    "Cortland",
+    "Delaware",
+    "Dutchess",
+    "Erie",
+    "Essex",
+    "Franklin",
+    "Fulton",
+    "Genesee",
+    "Greene",
+    "Hamilton",
+    "Herkimer",
+    "Jefferson",
+    "Kings",
+    "Lewis",
+    "Livingston",
+    "Madison",
+    "Monroe",
+    "Montgomery",
+    "Nassau",
+    "New York",
+    "Niagara",
+    "Oneida",
+    "Onondaga",
+    "Ontario",
+    "Orange",
+    "Orleans",
+    "Oswego",
+    "Otsego",
+    "Putnam",
+    "Queens",
+    "Rensselaer",
+    "Richmond",
+    "Rockland",
+    "Saratoga",
+    "Schenectady",
+    "Schoharie",
+    "Schuyler",
+    "Seneca",
+    "St.Lawrence",
+    "Steuben",
+    "Suffolk",
+    "Sullivan",
+    "Tioga",
+    "Tompkins",
+    "Ulster",
+    "Warren",
+    "Washington",
+    "Wayne",
+    "Westchester",
+    "Wyoming",
+    "Yates"
+   ]
+  }
+ }
+}

@@ -1,0 +1,521 @@
+{
+ "state": "IL",
+ "provenance": "Candidates: resources/il_2026_contests.json (as the authorities print them; a race no collected authority reports yet lists none). Counties: the Senate and Governor in all 102; each House district's counties from the Census Bureau's 2020 county to 119th Congressional District relationship file (tab20_cd11920_county20_natl.txt, SHA-256 1e1b81bc...0c2863fb, land parts), named as the Census county map names them.",
+ "races": {
+  "IL-SEN": {
+   "candidates": [
+    "Don Tracy",
+    "Juliana Stratton",
+    "Whitfield Harrington Jr"
+   ],
+   "counties": [
+    "Adams",
+    "Alexander",
+    "Bond",
+    "Boone",
+    "Brown",
+    "Bureau",
+    "Calhoun",
+    "Carroll",
+    "Cass",
+    "Champaign",
+    "Christian",
+    "Clark",
+    "Clay",
+    "Clinton",
+    "Coles",
+    "Cook",
+    "Crawford",
+    "Cumberland",
+    "De Witt",
+    "DeKalb",
+    "Douglas",
+    "DuPage",
+    "Edgar",
+    "Edwards",
+    "Effingham",
+    "Fayette",
+    "Ford",
+    "Franklin",
+    "Fulton",
+    "Gallatin",
+    "Greene",
+    "Grundy",
+    "Hamilton",
+    "Hancock",
+    "Hardin",
+    "Henderson",
+    "Henry",
+    "Iroquois",
+    "Jackson",
+    "Jasper",
+    "Jefferson",
+    "Jersey",
+    "Jo Daviess",
+    "Johnson",
+    "Kane",
+    "Kankakee",
+    "Kendall",
+    "Knox",
+    "LaSalle",
+    "Lake",
+    "Lawrence",
+    "Lee",
+    "Livingston",
+    "Logan",
+    "Macon",
+    "Macoupin",
+    "Madison",
+    "Marion",
+    "Marshall",
+    "Mason",
+    "Massac",
+    "McDonough",
+    "McHenry",
+    "McLean",
+    "Menard",
+    "Mercer",
+    "Monroe",
+    "Montgomery",
+    "Morgan",
+    "Moultrie",
+    "Ogle",
+    "Peoria",
+    "Perry",
+    "Piatt",
+    "Pike",
+    "Pope",
+    "Pulaski",
+    "Putnam",
+    "Randolph",
+    "Richland",
+    "Rock Island",
+    "Saline",
+    "Sangamon",
+    "Schuyler",
+    "Scott",
+    "Shelby",
+    "St. Clair",
+    "Stark",
+    "Stephenson",
+    "Tazewell",
+    "Union",
+    "Vermilion",
+    "Wabash",
+    "Warren",
+    "Washington",
+    "Wayne",
+    "White",
+    "Whiteside",
+    "Will",
+    "Williamson",
+    "Winnebago",
+    "Woodford"
+   ]
+  },
+  "IL-GOV": {
+   "candidates": [
+    "Collin Corbett / Carolyn Schofield",
+    "Darren Bailey / Aaron B. Del Mar",
+    "JB Pritzker / Christian Mitchell"
+   ],
+   "counties": [
+    "Adams",
+    "Alexander",
+    "Bond",
+    "Boone",
+    "Brown",
+    "Bureau",
+    "Calhoun",
+    "Carroll",
+    "Cass",
+    "Champaign",
+    "Christian",
+    "Clark",
+    "Clay",
+    "Clinton",
+    "Coles",
+    "Cook",
+    "Crawford",
+    "Cumberland",
+    "De Witt",
+    "DeKalb",
+    "Douglas",
+    "DuPage",
+    "Edgar",
+    "Edwards",
+    "Effingham",
+    "Fayette",
+    "Ford",
+    "Franklin",
+    "Fulton",
+    "Gallatin",
+    "Greene",
+    "Grundy",
+    "Hamilton",
+    "Hancock",
+    "Hardin",
+    "Henderson",
+    "Henry",
+    "Iroquois",
+    "Jackson",
+    "Jasper",
+    "Jefferson",
+    "Jersey",
+    "Jo Daviess",
+    "Johnson",
+    "Kane",
+    "Kankakee",
+    "Kendall",
+    "Knox",
+    "LaSalle",
+    "Lake",
+    "Lawrence",
+    "Lee",
+    "Livingston",
+    "Logan",
+    "Macon",
+    "Macoupin",
+    "Madison",
+    "Marion",
+    "Marshall",
+    "Mason",
+    "Massac",
+    "McDonough",
+    "McHenry",
+    "McLean",
+    "Menard",
+    "Mercer",
+    "Monroe",
+    "Montgomery",
+    "Morgan",
+    "Moultrie",
+    "Ogle",
+    "Peoria",
+    "Perry",
+    "Piatt",
+    "Pike",
+    "Pope",
+    "Pulaski",
+    "Putnam",
+    "Randolph",
+    "Richland",
+    "Rock Island",
+    "Saline",
+    "Sangamon",
+    "Schuyler",
+    "Scott",
+    "Shelby",
+    "St. Clair",
+    "Stark",
+    "Stephenson",
+    "Tazewell",
+    "Union",
+    "Vermilion",
+    "Wabash",
+    "Warren",
+    "Washington",
+    "Wayne",
+    "White",
+    "Whiteside",
+    "Will",
+    "Williamson",
+    "Winnebago",
+    "Woodford"
+   ]
+  },
+  "IL-01": {
+   "candidates": [
+    "Christian Maxwell",
+    "Jonathan L. Jackson"
+   ],
+   "counties": [
+    "Cook",
+    "Kankakee",
+    "Will"
+   ]
+  },
+  "IL-02": {
+   "candidates": [
+    "Donna Miller",
+    "Michael Scott Noack"
+   ],
+   "counties": [
+    "Champaign",
+    "Cook",
+    "Ford",
+    "Iroquois",
+    "Kankakee",
+    "Livingston",
+    "Vermilion",
+    "Will"
+   ]
+  },
+  "IL-03": {
+   "candidates": [
+    "Angel Oakley",
+    "Delia Ramirez"
+   ],
+   "counties": [
+    "Cook",
+    "DuPage"
+   ]
+  },
+  "IL-04": {
+   "candidates": [
+    "Chris Getty",
+    "Ed Hershey",
+    "Lupe Castillo",
+    "Patty Garcia"
+   ],
+   "counties": [
+    "Cook",
+    "DuPage"
+   ]
+  },
+  "IL-05": {
+   "candidates": [
+    "Mike Quigley",
+    "Tommy Hanson"
+   ],
+   "counties": [
+    "Cook",
+    "Lake"
+   ]
+  },
+  "IL-06": {
+   "candidates": [
+    "Niki Conforti",
+    "Sean Casten"
+   ],
+   "counties": [
+    "Cook",
+    "DuPage"
+   ]
+  },
+  "IL-07": {
+   "candidates": [
+    "Chad Koppie",
+    "La Shawn K. Ford"
+   ],
+   "counties": [
+    "Cook"
+   ]
+  },
+  "IL-08": {
+   "candidates": [
+    "Jennifer Davis",
+    "Melissa L. Bean"
+   ],
+   "counties": [
+    "Cook",
+    "DuPage",
+    "Kane"
+   ]
+  },
+  "IL-09": {
+   "candidates": [
+    "Daniel Biss",
+    "John Elleson"
+   ],
+   "counties": [
+    "Cook",
+    "Lake",
+    "McHenry"
+   ]
+  },
+  "IL-10": {
+   "candidates": [
+    "Brad Schneider",
+    "Carl Lambrecht"
+   ],
+   "counties": [
+    "Cook",
+    "Lake",
+    "McHenry"
+   ]
+  },
+  "IL-11": {
+   "candidates": [
+    "Bill Foster",
+    "Jeff Walter"
+   ],
+   "counties": [
+    "Boone",
+    "Cook",
+    "DeKalb",
+    "DuPage",
+    "Kane",
+    "Lake",
+    "McHenry",
+    "Will"
+   ]
+  },
+  "IL-12": {
+   "candidates": [
+    "Julie Fortier",
+    "Mike Bost"
+   ],
+   "counties": [
+    "Alexander",
+    "Clark",
+    "Clay",
+    "Clinton",
+    "Coles",
+    "Crawford",
+    "Cumberland",
+    "Edwards",
+    "Effingham",
+    "Franklin",
+    "Gallatin",
+    "Hamilton",
+    "Hardin",
+    "Jackson",
+    "Jasper",
+    "Jefferson",
+    "Johnson",
+    "Lawrence",
+    "Marion",
+    "Massac",
+    "Monroe",
+    "Perry",
+    "Pope",
+    "Pulaski",
+    "Randolph",
+    "Richland",
+    "Saline",
+    "St. Clair",
+    "Union",
+    "Wabash",
+    "Washington",
+    "Wayne",
+    "White",
+    "Williamson"
+   ]
+  },
+  "IL-13": {
+   "candidates": [
+    "Jeff Wilson",
+    "Nikki Budzinski"
+   ],
+   "counties": [
+    "Champaign",
+    "Macon",
+    "Macoupin",
+    "Madison",
+    "Piatt",
+    "Sangamon",
+    "St. Clair"
+   ]
+  },
+  "IL-14": {
+   "candidates": [
+    "James T. \"Jim\" Marter",
+    "Lauren Underwood"
+   ],
+   "counties": [
+    "Bureau",
+    "DeKalb",
+    "Kane",
+    "Kendall",
+    "LaSalle",
+    "Putnam",
+    "Will"
+   ]
+  },
+  "IL-15": {
+   "candidates": [
+    "Jennifer Todd",
+    "Mary E. Miller"
+   ],
+   "counties": [
+    "Adams",
+    "Bond",
+    "Brown",
+    "Calhoun",
+    "Cass",
+    "Champaign",
+    "Christian",
+    "Coles",
+    "De Witt",
+    "Douglas",
+    "Edgar",
+    "Fayette",
+    "Fulton",
+    "Greene",
+    "Hancock",
+    "Henderson",
+    "Jersey",
+    "Logan",
+    "Macon",
+    "Madison",
+    "Mason",
+    "McDonough",
+    "Menard",
+    "Mercer",
+    "Montgomery",
+    "Morgan",
+    "Moultrie",
+    "Piatt",
+    "Pike",
+    "Sangamon",
+    "Schuyler",
+    "Scott",
+    "Shelby",
+    "Vermilion",
+    "Warren"
+   ]
+  },
+  "IL-16": {
+   "candidates": [
+    "Darin LaHood",
+    "Paul Nolley"
+   ],
+   "counties": [
+    "Boone",
+    "Bureau",
+    "DeKalb",
+    "Ford",
+    "Grundy",
+    "Henry",
+    "Jo Daviess",
+    "LaSalle",
+    "Lee",
+    "Livingston",
+    "Marshall",
+    "McHenry",
+    "McLean",
+    "Ogle",
+    "Peoria",
+    "Putnam",
+    "Stark",
+    "Stephenson",
+    "Tazewell",
+    "Winnebago",
+    "Woodford"
+   ]
+  },
+  "IL-17": {
+   "candidates": [
+    "Dillan S. Vancil",
+    "Eric Sorensen"
+   ],
+   "counties": [
+    "Carroll",
+    "Fulton",
+    "Henry",
+    "Knox",
+    "McDonough",
+    "McLean",
+    "Mercer",
+    "Peoria",
+    "Rock Island",
+    "Stephenson",
+    "Tazewell",
+    "Warren",
+    "Whiteside",
+    "Winnebago"
+   ]
+  }
+ }
+}

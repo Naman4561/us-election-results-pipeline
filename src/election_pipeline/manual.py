@@ -25,12 +25,17 @@ def import_file(
     *,
     minimum=None,
     certified=None,
+    declared_generated_at=None,
 ):
     """Validate offline, then commit an immutable archive and an honest acquisition receipt.
 
     ``certified`` names a certified file (``certified-<format>``, see
     ``parsers.certified``): the archive then holds the state's certified results under
     that name instead of the source's own feed file, for any results source.
+
+    ``declared_generated_at``: the report time the state's site showed beside a file that
+    prints none (Michigan's "Updated:"), stated by the operator. It is refused for a
+    file that dates itself, and the receipt records it as declared.
     """
     if source.dataset != "election_results":
         raise ValueError("Manual import accepts election results only")
@@ -51,8 +56,10 @@ def import_file(
         raise ValueError("Supply the original file SHA-256 from the downloading computer")
     path = Path(path)
     with path.open("rb") as handle:
-        raw = handle.read(settings.max_download_bytes + 1)
-    if not raw or len(raw) > settings.max_download_bytes:
+        # The source's own budget (its collector_overrides), as a download would have.
+        budget = source.effective_settings(settings).max_download_bytes
+        raw = handle.read(budget + 1)
+    if not raw or len(raw) > budget:
         raise ValueError("The local file is empty or exceeds the source size budget")
     original_sha = hashlib.sha256(raw).hexdigest()
     if original_sha != expected_sha256.lower():
@@ -86,6 +93,11 @@ def import_file(
         # (Kansas) supply source_generated_at; others cannot be imported manually yet.
         # A certified file is dated by its certification, recorded in the attestation.
         generated = checked.get("source_generated_at") or checked.get("source_update_text")
+        basis = "document" if generated else None
+        if declared_generated_at is not None:
+            if generated or certified is not None:
+                raise ValueError("This file states its own report time; do not declare one")
+            generated, basis = declared_generated_at, "operator_declared"
         generated_at = None
         if certified is None or generated:
             try:
@@ -122,6 +134,7 @@ def import_file(
             "downloaded_at": observed.isoformat(),
             "imported_at": utc_now(),
             "source_generated_at": generated_at.isoformat() if generated_at else None,
+            "source_generated_basis": basis if generated_at else None,
             "certified_file": certified,
             "original_filename": path.name,
             "original_sha256": original_sha,

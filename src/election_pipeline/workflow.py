@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import time
 import uuid
+import zipfile
 from pathlib import Path
 
 from election_pipeline.parsing import parse_source
@@ -17,6 +18,17 @@ from election_pipeline.storage import (
 )
 
 NO_SNAPSHOT = "No archived snapshot to check"
+
+
+def holds_members(archive, source):
+    """Whether a bundle snapshot holds every member the source now collects."""
+    if source.format != "bundle":
+        return True
+    try:
+        with zipfile.ZipFile(archive) as bundle:
+            return set(source.expected_members) <= set(bundle.namelist())
+    except (OSError, zipfile.BadZipFile):
+        return False
 
 
 def refused_by_worker(store, digest):
@@ -144,9 +156,13 @@ def run_source(
 
                 if check_only and not digest:
                     state = store.read_state()
-                    # A snapshot of the address the source used before it moved would
-                    # check the old feed's format, not the configured one.
-                    if state.get("url") != source.url or not store.cached_archive(state):
+                    # A snapshot of the address the source used before it moved, or one
+                    # taken before it collected all its configured members, would check
+                    # the old feed's format, not the configured one.
+                    archive = (
+                        store.cached_archive(state) if state.get("url") == source.url else None
+                    )
+                    if not archive or not holds_members(archive, source):
                         raise ValueError(NO_SNAPSHOT)
                     digest = state["sha256"]
 

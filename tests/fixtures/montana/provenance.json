@@ -1,0 +1,11 @@
+{
+ "file": "bundle.zip",
+ "sha256": "1619e7de0cef859f7f2a331d2bad37babb391d13424b9c66fa14fedd2944b614",
+ "members": {
+  "export.html": "https://electionresults.mt.gov/ResultsExport.aspx (GET)",
+  "statewide.xlsx": "the same page's Statewide Export button (POST of its own form)"
+ },
+ "captured": "2026-11-19, about 1:56 PM Eastern, from the production server",
+ "site_updated": "11/19/2026 11:50:20 AM MT",
+ "site_status": "2026 Unofficial General Election Results; precincts 726 of 728"
+}

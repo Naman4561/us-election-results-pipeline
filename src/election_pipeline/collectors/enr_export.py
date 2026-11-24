@@ -38,9 +38,10 @@ TARGET = re.compile(r"ctl00\$MainContent\$[A-Za-z0-9_$]{1,120}")
 DOWNLOADS = {".xlsx": (WORKBOOK,), ".csv": ("application/text", "text/csv", "application/csv")}
 
 
-def postback(page, page_url, target, choices=None):
-    """Return (action URL, encoded form) for one export button on an official page."""
-    if not TARGET.fullmatch(target):
+def postback(page, page_url, target, choices=None, *, targets=TARGET):
+    """Return (action URL, encoded form) for one export button on an official page.
+    ``targets``: the control names the site uses (Alabama's are not ``ctl00$...``)."""
+    if not targets.fullmatch(target):
         raise ValueError("Unexpected export control name")
     forms = Tree(page).root.find("form")
     if len(forms) != 1:

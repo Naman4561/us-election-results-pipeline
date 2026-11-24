@@ -83,7 +83,8 @@ class AlaskaTests(unittest.TestCase):
         self.assertEqual(report["outcome"], "parsed", report)
         self.assertEqual(report["input_rows"], 20046)
         self.assertEqual(report["selected_rows"], 6272)
-        self.assertEqual(report["output_rows"], 12)
+        # 12 statewide candidate rows, and each of them in all 40 House districts.
+        self.assertEqual(report["output_rows"], 12 + 12 * 40)
         self.assertEqual(
             report["reporting_unit_counts"], {"AK-SEN": 523, "AK-GOV": 522, "AK-AL": 523}
         )
@@ -94,7 +95,7 @@ class AlaskaTests(unittest.TestCase):
         converted = copies(self.source, self.settings, self.store, report["output_dir"], 77)[
             ("landing", "results")
         ]
-        self.assertEqual(len(converted), 12)
+        self.assertEqual(len(converted), 12 + 12 * 40)
         self.assertIn(None, next(r for r in converted if "Sullivan, Daniel J. Jr." in r))
         replay = parse_source(
             self.source, self.settings, self.root, sha256=report["identity"]["raw_sha256"]
@@ -110,14 +111,43 @@ class AlaskaTests(unittest.TestCase):
         self.assertEqual(totals[("AK-GOV", "Kreiss-Tomkins/Johnson")], 103610)
         self.assertEqual(totals[("AK-AL", "Begich, Nick")], 105353)
         geo = json.loads((STATIC / "ak-map.json").read_text())
+        districts = [
+            {**r, "total_votes": int(r["total_votes"])}
+            for r in self.read(report, "county_results.csv")
+        ]
         payload = make_payload(
             geo,
             {"status": "unofficial"},
-            [],
+            districts,
             [{**r, "total_votes": int(r["total_votes"])} for r in self.read(report)],
             state="AK",
         )
-        self.assertFalse(payload["county_detail"])
+        self.assertTrue(payload["county_detail"])
+        self.assertEqual(payload["local_unit"], "house_district")
+        self.assertIn("overseas", payload["statewide_only_votes"])
+        senate = payload["races"]["AK-SEN"]
+        self.assertEqual(len(senate["counties"]), 40)
+        self.assertEqual(senate["counties"]["HOUSEDISTRICT1"]["name"], "House District 1")
+        self.assertNotIn("county_privacy_masked", senate)
+        # The 40 districts plus the overseas ballots are exactly the statewide total.
+        overseas = report["statewide_only_votes"]
+        for race in ("AK-SEN", "AK-GOV", "AK-AL"):
+            in_districts = sum(r["total_votes"] for r in districts if r["contest_id"] == race)
+            statewide = payload["races"][race]["stats"]["total_votes"]["total"]
+            self.assertEqual(in_districts + overseas[race], statewide)
+        self.assertEqual(overseas["AK-GOV"], 0)  # Governor is not on the federal ballot.
+        self.assertGreater(overseas["AK-SEN"], 0)
+        # More in the districts than statewide is refused.
+        inflated = [dict(r) for r in districts]
+        inflated[0]["total_votes"] += overseas[inflated[0]["contest_id"]] + 1
+        with self.assertRaises(ValueError):
+            make_payload(
+                geo,
+                {"status": "unofficial"},
+                inflated,
+                [{**r, "total_votes": int(r["total_votes"])} for r in self.read(report)],
+                state="AK",
+            )
         self.assertEqual(payload["vote_basis"], "first_choice_listed_candidates")
         self.assertEqual(payload["races"]["AK-SEN"]["stats"]["total_votes"]["margin"], 626)
         self.assertEqual(payload["races"]["AK-GOV"]["stats"]["total_votes"]["leader"], "DEM")
@@ -159,6 +189,7 @@ class AlaskaTests(unittest.TestCase):
         for edited in (
             page.replace(b"2026 General Election", b"2024 General Election"),
             page.replace(b"Round 1", b"Round 2"),
+            page.replace(b"from Round 1", b"from the final round"),
             page.replace(b"State_of_Alaska.csv", b"other.csv"),
             b"<html><title>Captcha</title>November 3, 2026</html>",
         ):
@@ -166,6 +197,11 @@ class AlaskaTests(unittest.TestCase):
         # Official pages can link the same file with a relative URL.
         relative = page.replace(b"https://www.elections.alaska.gov/enr/", b"/enr/")
         self.assertEqual(self.parse(page=relative)["outcome"], "parsed")
+        # After its tabulation the page dropped the first-choice label (Nov 18).
+        unlabelled = page.replace(
+            b"<p>The Summary Report only shows first choice results from Round 1.</p>", b""
+        )
+        self.assertEqual(self.parse(page=unlabelled)["outcome"], "parsed")
 
     def test_zero_and_downward_correction_are_valid_without_changing_rosters(self):
         def zero(rows):

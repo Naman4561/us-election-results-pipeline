@@ -1,0 +1,1480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=11" />
+    <title>
+    Election Results
+</title>
+    <link href="/Content/css?v=kIgZQDSdsIOO_csUb11O6ZVJuDmtGA2FnHwIShQ_zRk1" rel="stylesheet"/>
+
+    <script src="/bundles/modernizr?v=Z04dEPc_OlSvlpAo_Pf1TXOljKR2OuPuZRqF-QqM6mc1"></script>
+
+
+    <script src="/bundles/jquery?v=2fpZVzCYowu6_fKHDMHSxaN7aqvOzAj506OSfUojbqY1"></script>
+
+    <script src="/bundles/bootstrap?v=KkFKIoV_TbUYTRFbtgRfTK5sYh2GOZ_00rdEIyCboOo1"></script>
+
+    <script src="/bundles/angular?v=KVKuIpx21vES5E6-tziZbDboqeH4mAPshbAw8IUihG01"></script>
+
+
+    
+    
+
+    <link href="/Content/ie?v=" rel="stylesheet"/>
+
+</head>
+<body ng-app="LibertyElections" ng-controller="ElectionController">
+<nav class="navbar navbar-default navbar-pull">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" id="navbar-toggle" class="navbar-toggle">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        </div>
+        <div class="navbar-collapse collapse" ng-cloak>
+            <button id="mobile-close-navigation" class="mobile-nav-visibility navbar-toggle">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <ul class="nav navbar-nav" ng-cloak>
+                <li id="mobile-nav-header" class="mobile-nav-visibility"><h5>{{electionData.MenuItem | uppercase}}</h5>
+                    <p>MAIN MENU</p></li>
+                <li ng-if="navigation.ClientSiteUrl"><a href="http://{{navigation.ClientSiteUrl}}" class="li-border-bottom">{{navigation.ClientName}}</a></li>
+                <li class="dropdown">
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Change County <span class="caret"></span></a>
+                    <ul class="dropdown-menu border-bottom-mobile">
+                        <li ng-repeat="nav in navigation.NavigationItems" class="no-border">
+                            <a href="{{nav.Url}}" class="li-border-bottom text-align-cetner-mobile">{{nav.Name | titleCase}}</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div id="header" class="container-fluid">
+    <div class="row">
+        <div class="col-xs-2 col-sm-2 col-xl-1 col-xl-offset-1 padding-0" id="county-information-image">
+            <img ng-cloak ng-src="{{electionData.BannerImagePath}}" />
+        </div>
+        <div class="col-xs-8 col-sm-8 col-xl-8" id="county-information" ng-cloak>
+            <h1 class="red bold" id="county-name">{{electionData.MenuItem}}</h1>
+            <h3 class="margin-0 padding-0">{{electionData.OfficeTitle}}</h3>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid" id="main-content">
+    
+
+<!--<p>Version: 1.0.1 RC03 Created on 11/23/2026 05:11:46 by a request from 187.77.217.189 05396a22962248abb664bfb48b62c2ab910f060d352c1b0360d2dc003454789e</p>-->
+
+<div class="row">
+    <div class="col-xs-12 col-sm-4 col-md-3 col-xl-2 col-xl-offset-1" id="race-management" ng-cloak>
+        <div class="row">
+            <div class="col-xs-8 col-sm-10">
+                <h3 class="bold margin-0">Your Races</h3>
+                <h5 class="hidden-xs">Select a race to highlight</h5>
+            </div>
+            <div class="col-xs-4 align-right col-sm-2">
+                <button class="btn btn-primary" id="filter" ng-hide="areFiltering" ng-click="filter()">Filter</button>
+                <button class="btn btn-success" id="saveFilter" ng-show="areFiltering" ng-click="saveFilter()">Save</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12">
+                <p style="" id="last-updated" ng-cloak ng-show="hasBeenUpdated">Page last updated {{lastUpdatedTimeStamp | date:"M/d/y h:mm:ss a"}}</p>
+            </div>
+        </div>
+
+        <div class="row hidden-xs" id="race-managment-play-controls" ng-hide="areFiltering">
+            <div class="col-sm-4">
+                <button type="button" class="btn btn-primary" id="play-pause" aria-label="Left Align" ng-click="playPause()">
+                    <span class="glyphicon glyphicon-align-left" ng-class="playPauseIcon" aria-hidden="true"></span>
+                </button>
+            </div>
+            <div class="col-sm-8" id="slider-container">
+                <p class="blue padding-0 margin-0 bold underline text-center" id="slider-value">
+                    <span id="slide-value">{{sliderValue}}</span> Seconds
+                </p>
+                <input type="range" name="range" ng-model="sliderValue" min="5" max="60" step="5" id="play-speed">
+            </div>
+        </div>
+
+        <div class="row visible-xs" ng-show="areFiltering">
+            <div class="col-xs-12">
+                <hr id="your-races-filter-mobile-hr" />
+            </div>
+        </div>
+
+        <div class="row" ng-show="areFiltering" id="race-management-check-controls">
+            <div class="col-xs-6 padding-right-0">
+                <p class="pointer" ng-click="checkAll()">
+                    <img src="/Assets/select-all.png" class="check-image" />
+                    Check All
+                </p>
+            </div>
+            <div class="col-xs-6 padding-left-0 padding-right-0" id="uncheck-container">
+                <p ng-click="uncheckAll()" class="pointer">
+                    <img src="/Assets/deselect-all.png" class="check-image" />
+                    Uncheck All
+                </p>
+            </div>
+        </div>
+
+        <div class="row visible-xs" ng-hide="areFiltering">
+            <div class="col-xs-12">
+                <hr id="your-races-mobile-hr" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12" id="race-details">
+                <details ng-repeat="race in raceData" ng-show="customRacesFilter(race)" id="race{{race.RaceId}}" open="open">
+                    <summary class="bold pointer">
+                        <input type="checkbox" ng-model="race.Selected" value="{{race}}" class="checkbox" ng-show="areFiltering" />
+
+                        <p ng-click="selectRace(race)" class="red race-name-race-management padding-0 margin-0" title="{{race.RaceName}}">
+                            {{race.RaceName}}
+                        </p>
+
+                        <button ng-click="selectRace(race)" class="right btn btn-primary race-button" ng-hide="areFiltering">
+                            <span class="glyphicon glyphicon-chevron-right race-glyph"></span>
+                        </button>
+                    </summary>
+                    <div class="visible-xs" id="mobile-summary-card-container" ng-hide="areFiltering">
+
+                        <div class="card-container card-accordion-container" id="mobile-card-{{$index}}">
+                            <div class="card card-accordion">
+                                <div class="front">
+                                    <div class="col-xs-12 padding-0">
+                                        <div class="row margin-bottom-10 margin-top-20">
+                                            <div class="col-xs-8">
+                                                <p>Number of Precincts</p>
+                                            </div>
+                                            <div class="col-xs-2">
+                                                <p class="value bold">{{race.Stats.PrecinctsTotalCount}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-xs-8">
+                                                <p class="blue pointer flip-card-mobile" data-id="mobile-card-{{$index}}">Precincts Reporting</p>
+                                            </div>
+                                            <div class="col-xs-2">
+                                                <p class="value">{{race.Stats.PrecinctsReportingCount}}</p>
+                                            </div>
+                                            <div class="col-xs-2">
+                                                <p class="right">{{race.Stats.PrecinctsReportingPercent}}<span ng-hide="race.Stats.PrecinctsReportingPercent == null">%</span></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row margin-top-10">
+                                            <div class="col-xs-10">
+                                                <p>Vote For </p>
+                                            </div>
+                                            <div class="col-xs-2">
+                                                <p class="value right">{{race.Stats.VoteFor}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-xs-10">
+                                                <p>Registered Voters</p>
+                                            </div>
+                                            <div class="col-xs-2">
+                                                <p class="right">{{race.Stats.PrecinctsRegisteredVoterCount}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-xs-10">
+                                                <p>Ballots Cast</p>
+                                            </div>
+                                            <div class="col-xs-2">
+                                                <p class="right">{{race.Stats.BallotsCount}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-xs-10">
+                                                <p>Voter Turnout</p>
+                                            </div>
+                                            <div class="col-xs-2">
+                                                <p class="right">{{race.Stats.TurnoutPercent}}<span ng-hide="race.Stats.TurnoutPercent == null">%</span></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row" style="margin-bottom: 28px;">
+                                            <div class="col-xs-10">
+                                                <p>Total Votes Counted</p>
+                                            </div>
+                                            <div class="col-xs-2">
+                                                <p class="right"> {{race.Stats.VotesCount}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div ng-show="race.HasCandidates">
+                                            <div ng-repeat="candidate in race.Candidates" class="row">
+                                                <div class="col-xs-7">
+                                                    <p class="red truncate">{{candidate.CandidateName}}</p>
+                                                </div>
+                                                <div class="col-xs-3 align-right">
+                                                    <p class="value">{{candidate.TotalVotesForCandidate}}</p>
+                                                </div>
+                                                <div class="col-xs-2">
+                                                    <p class="right">{{candidate.PercentVotesForCandidate}}<span ng-hide="candidate.PercentVotesForCandidate == null">%</span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <p class="margin-top-10">Results updated at {{race.Stats.LastResultsReportedDate | date : "M/d/y h:mm:ss a"}}</p>
+                                        <p ng-if="electionData.Final" class="bold">**Final Results**</p>
+                                        <p class="truncate" style="width: 100%;">{{electionData.Message}}</p>
+                                    </div>
+                                </div>
+
+                                <div class="back">
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <img src="/Assets/card-flip.png" class="pointer flip-card-mobile" data-id="mobile-card-{{$index}}" alt="Back of card" />
+                                            <p style="font-weight: bold">Precincts Reporting</p>
+                                            
+                                            <p ng-repeat="reporting in race.Reporting">
+                                                {{reporting.PrecinctName}}
+                                            </p>
+                                            <hr class="not-reporting-hr" />
+                                            <p style="font-weight: bold">Not Reporting</p>
+                                            <p ng-repeat="reporting in race.NotReporting">
+                                                {{reporting.PrecinctName}}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="clear: both;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+            </div>
+        </div>
+
+        <div class="row hidden-xs">
+            <div class="col-sm-12">
+                <hr id="statistics-hr-divider" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12" id="race-details">
+
+                <summary class="pointer visible-xs" style="height: auto;">
+                    <p class="reporting-font-size race-name-race-management padding-0 margin-0" title="Precincts Reporting">
+                        PRECINCTS REPORTING
+                    </p>
+
+                    <button ng-click="togglePrecinctsReportingSmall()" class="right btn btn-primary race-button" ng-hide="areFiltering">
+                        <span class="glyphicon glyphicon-chevron-right race-glyph"></span>
+                    </button>
+                </summary>
+
+                <div class="visible-xs" id="mobile-summary-card-container" ng-hide="areFiltering">
+                    <div id="precincts-reporting-small" ng-hide="!showPrecinctsReportingSmall">
+                            <div ng-repeat="precinct in electionData.PrecinctsReporting" class="margin-bottom-20 margin-top-20">
+                                <div class="card-container card-accordion-container">
+                                    <div class="card card-accordion">
+                                        <div class="front">
+                                            <div class="col-xs-12 padding-10">
+                                                <div class="row margin-bottom-10 margin-top-20">
+                                                    <div class="col-xs-8">
+                                                        <p>{{precinct.PrecinctName}}</p>
+                                                    </div>
+                                                    <div class="col-xs-2">
+                                                        <p class="value bold"></p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-xs-8">
+                                                        <p>Total Registered Voters</p>
+                                                    </div>
+                                                    <div class="col-xs-2">
+                                                        <p class="value">{{precinct.RegVoters}}</p>
+                                                    </div>
+                                                    <div class="col-xs-2">
+                                                        <p class="right"></p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row margin-top-10">
+                                                    <div class="col-xs-8">
+                                                        <p>Ballots Cast</p>
+                                                    </div>
+                                                    <div class="col-xs-2">
+                                                        <p class="value">{{precinct.BallotsCast}}</p>
+                                                    </div>
+                                                    <div class="col-xs-2">
+                                                        <p class="value right">{{precinct.BallotsCast / precinct.RegVoters * 100 | number:2}}%</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style="clear: both;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-xs-12" id="race-details">
+
+                <summary class="pointer visible-xs" style="height: auto;">
+                    <p class="reporting-font-size race-name-race-management padding-0 margin-0" title="Precincts Reporting">
+                        PRECINCTS NOT REPORTING
+                    </p>
+
+                    <button ng-click="togglePrecinctsNotReportingSmall()" class="right btn btn-primary race-button" ng-hide="areFiltering">
+                        <span class="glyphicon glyphicon-chevron-right race-glyph"></span>
+                    </button>
+                </summary>
+
+                <div class="visible-xs" id="mobile-summary-card-container" ng-hide="areFiltering">
+                    <div id="precincts-not-reporting-small" ng-hide="!showPrecinctsNotReportingSmall">
+
+                            <div ng-repeat="precinct in electionData.PrecinctsNotReporting" class="margin-bottom-20 margin-top-20">
+                                <div class="card-container card-accordion-container">
+                                    <div class="card card-accordion">
+                                        <div class="front">
+                                            <div class="col-xs-12 padding-10">
+                                                <div class="row margin-bottom-10 margin-top-20">
+                                                    <div class="col-xs-8">
+                                                        <p>{{precinct.PrecinctName}}</p>
+                                                    </div>
+                                                    <div class="col-xs-2">
+                                                        <p class="value bold"></p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <div class="col-xs-8">
+                                                        <p>Total Registered Voters</p>
+                                                    </div>
+                                                    <div class="col-xs-2">
+                                                        <p class="value">{{precinct.RegVoters}}</p>
+                                                    </div>
+                                                    <div class="col-xs-2">
+                                                        <p class="right"></p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div style="clear: both;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="statistics">
+            <div class="row">
+                <div class="col-xs-10">
+                    <h3 class="bold">Statistics</h3>
+                </div>
+                <div class="col-xs-2">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-10">
+                    <p>Total Voters: <span class="margin-left-5">{{electionData.ElectionStats[electionData.OverallStatIndex].TotalVoters}}</span><span ng-show="electionData.ElectionStats[electionData.OverallStatIndex].TotalVoters == null">0</span></p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-10">
+                    <p>Ballots Cast: <span class="margin-left-5">{{electionData.ElectionStats[electionData.OverallStatIndex].TotalBallotsCast}}</span><span ng-show="electionData.ElectionStats[electionData.OverallStatIndex].TotalBallotsCast == null">0</span></p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-10">
+                    <p>Turnout: <span class="margin-left-5">{{electionData.ElectionStats[electionData.OverallStatIndex].TotalTurnoutPercent}}<span ng-hide="electionData.ElectionStats[electionData.OverallStatIndex].TotalTurnoutPercent == null">%</span></span><span ng-show="electionData.ElectionStats[electionData.OverallStatIndex].TotalTurnoutPercent == null">0.0%</span></p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xs-12">
+                    <p>Precincts: <span class="margin-left-5">{{electionData.ElectionStats[electionData.OverallStatIndex].TotalPrecincts}}</span><span ng-show="electionData.ElectionStats[electionData.OverallStatIndex].TotalPrecincts == null">0</span></p>
+                </div>
+                <div class="col-xs-12">
+                    <p>Precincts Reporting: <span class="margin-left-5">{{electionData.PrecinctsCounted}}</span><span ng-show="electionData.PrecinctsCounted == null">0</span></p>
+                </div>
+            </div>
+
+            <div ng-repeat="data in electionData.ElectionStats" class="row">
+                <div class="col-xs-12">
+                    <h3 class="bold">{{data.Description}} <span ng-if="data.IsComplete">(Complete)</span></h3>
+                </div>
+
+                <div class="col-xs-12">
+                    <p ng-hide="!data.ShowPrecinctsCounted"><span>{{data.PrecinctsCounted}}</span> of <span class="margin-left-5">{{data.TotalPrecincts}}</span> Precincts</p>
+                </div>
+
+                <div class="col-xs-12">
+                    <p><span>{{data.BallotsCast}}</span> Ballots Cast ({{data.BallotsCastPercent}}%)</p>
+                </div>
+            </div>
+
+            <div class="row" style="padding-right: 15px; padding-left: 15px;" id="election-summary">
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-8 col-md-9 col-xl-8  hidden-xs" id="your-races" ng-cloak>
+        <div class="row" id="your-races-header">
+            <div class="col-sm-12">
+                <h1 class="padding-0 margin-0 bold">{{electionData.Description}} - {{electionData.ElectionDate | date : "M/d/y"}}</h1>
+                <h4>To cycle through your available races, click the Play/Pause button in the sidebar. Interval speed may be set as well.</h4>
+                <hr />
+            </div>
+        </div>
+
+        <div class="row visible-sm visible-md">
+            <div class="col-sm-12 text-center">
+                <div class="row">
+                    <div class="col-sm-5 col-sm-offset-1">
+                        <button class="btn btn-primary back-next bold" ng-click="showPreviousRace()">Back</button>
+                    </div>
+                    <div class="col-sm-5">
+                        <button class="btn btn-primary back-next bold" ng-click="showNextRace()">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+
+                <div class="col-lg-3 visible-lg" id="card-left-bootstrap-container">
+                    <div class="row text-center">
+                        <div class="col-lg-12">
+                            <button class="btn btn-primary back-next bold" ng-click="showPreviousRace()">Back</button>
+                        </div>
+                    </div>
+                    <div class="card-container center" id="card-left-container">
+                        <div class="card" id="card-left">
+                            <div class="front">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <h4 class="bold">{{previousRace.RaceName}}</h4>
+
+                                        <div class="row margin-bottom-10 margin-top-10">
+                                            <div class="col-sm-8">
+                                                <p>Number of Precincts</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="value bold">{{previousRace.Stats.PrecinctsTotalCount}}</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row margin-bottom-10">
+                                            <div class="col-sm-8">
+                                                <p class="">Precincts Reporting</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="value">{{previousRace.Stats.PrecinctsReportingCount}}</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right">{{previousRace.Stats.PrecinctsReportingPercent}}<span ng-hide="previousRace.Stats.PrecinctsReportingPercent == null">%</span></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-sm-10">
+                                                <p>Vote For </p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="value right">{{previousRace.Stats.VoteFor}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-sm-10">
+                                                <p>Registered Voters</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right">{{previousRace.Stats.PrecinctsRegisteredVoterCount}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-sm-10">
+                                                <p>Ballots Cast</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right">{{previousRace.Stats.BallotsCount}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-sm-10">
+                                                <p>Voter Turnout</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right">{{previousRace.Stats.TurnoutPercent}}<span ng-hide="previousRace.Stats.TurnoutPercent == null">%</span></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row" style="margin-bottom: 28px;">
+                                            <div class="col-sm-10">
+                                                <p>Total Votes Counted</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right"> {{previousRace.Stats.VotesCount}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div ng-show="previousRace.HasCandidates">
+                                            <div ng-repeat="candidate in previousRace.Candidates" class="row small-card-candidates">
+                                                <div class="col-sm-7">
+                                                    <p class="truncate">{{candidate.CandidateName}}</p>
+                                                </div>
+                                                <div class="col-sm-3 align-right">
+                                                    <p>{{candidate.TotalVotesForCandidate}}</p>
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <p class="right">{{candidate.PercentVotesForCandidate}}<span ng-hide="candidate.PercentVotesForCandidate == null">%</span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <p class="margin-top-20">Results updated at {{previousRace.Stats.LastResultsReportedDate | date : "M/d/y h:mm:ss a"}}</p>
+                                        <p ng-if="electionData.Final" class="bold">**Final Results**</p>
+                                        <p class="truncate" style="width: 100%;">{{electionData.Message}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="back">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        Back
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    
+                    <div class="card-container center" id="card-main-container">
+                        <div class="card" id="card-main">
+                            <div class="front">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <h4 class="red bold">{{selectedRace.RaceName}}</h4>
+
+                                        <div class="row margin-bottom-20">
+                                            <div class="col-sm-8">
+                                                <p>Number of Precincts</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="value bold">{{selectedRace.Stats.PrecinctsTotalCount}}</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-sm-8">
+                                                <p class="blue flip-link" ng-click="flipCard()">Precincts Reporting</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="value">{{selectedRace.Stats.PrecinctsReportingCount}}</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right">{{selectedRace.Stats.PrecinctsReportingPercent}}<span ng-hide="selectedRace.Stats.TurnoutPercent == null">%</span></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row margin-top-20">
+                                            <div class="col-sm-10">
+                                                <p>Vote For </p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="value right">{{selectedRace.Stats.VoteFor}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-sm-10">
+                                                <p>Registered Voters</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right">{{selectedRace.Stats.PrecinctsRegisteredVoterCount}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-sm-10">
+                                                <p>Ballots Cast</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right">{{selectedRace.Stats.BallotsCount}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-sm-10">
+                                                <p>Voter Turnout</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right">{{selectedRace.Stats.TurnoutPercent}}<span ng-hide="selectedRace.Stats.TurnoutPercent == null">%</span></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row" style="margin-bottom: 48px;">
+                                            <div class="col-sm-10">
+                                                <p>Total Votes Counted</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right"> {{selectedRace.Stats.VotesCount}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div ng-show="selectedRace.HasCandidates">
+                                            <div ng-repeat="candidate in selectedRace.Candidates" class="row">
+                                                <div class="col-sm-7">
+                                                    <span class="red bold truncate">{{candidate.CandidateName}}</span>
+                                                </div>
+                                                <div class="col-sm-3 align-right">
+                                                    <span class="value">{{candidate.TotalVotesForCandidate}}</span>
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <span class="right percent-value">{{candidate.PercentVotesForCandidate}}<span ng-hide="candidate.PercentVotesForCandidate == null">%</span></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <p class="margin-top-20">Results updated at {{selectedRace.Stats.LastResultsReportedDate | date : "M/d/y h:mm:ss a"}}</p>
+                                        <p ng-if="electionData.Final" class="bold">**Final Results**</p>
+                                        <p class="truncate" style="width: 100%;">{{electionData.Message}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="back">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <img src="/Assets/card-flip.png" class="pointer" ng-click="flipCard()" alt="Back of card" />
+                                        <h4 class="bold">{{selectedRace.RaceName}}</h4>
+                                        <p style="font-weight: bold">Precincts Reporting</p>
+
+                                        <p ng-repeat="reporting in selectedRace.Reporting">
+                                            {{reporting.PrecinctName}}
+                                        </p>
+                                        <hr class="not-reporting-hr" />
+                                        <p style="font-weight: bold">Not Reporting</p>
+                                        <p ng-repeat="reporting in selectedRace.NotReporting">
+                                            {{reporting.PrecinctName}}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 visible-lg" id="card-right-bootstrap-container">
+                    <div class="row text-center">
+                        <div class="col-lg-12">
+                            <button class="btn btn-primary back-next bold" ng-click="showNextRace()">Next</button>
+                        </div>
+                    </div>
+                    <div class="card-container center" id="card-right-container">
+                        <div class="card" id="card-right">
+                            <div class="front">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <h4 class="bold">{{nextRace.RaceName}}</h4>
+
+                                        <div class="row margin-bottom-10 margin-top-10">
+                                            <div class="col-sm-8">
+                                                <p>Number of Precincts</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="value bold">{{nextRace.Stats.PrecinctsTotalCount}}</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row margin-bottom-10">
+                                            <div class="col-sm-8">
+                                                <p class="">Precincts Reporting</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="value">{{nextRace.Stats.PrecinctsReportingCount}}</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right">{{nextRace.Stats.PrecinctsReportingPercent}}<span ng-hide="nextRace.Stats.TurnoutPercent == null">%</span></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-sm-10">
+                                                <p>Vote For </p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="value right">{{nextRace.Stats.VoteFor}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-sm-10">
+                                                <p>Registered Voters</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right">{{nextRace.Stats.PrecinctsRegisteredVoterCount}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-sm-10">
+                                                <p>Ballots Cast</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right">{{nextRace.Stats.BallotsCount}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-sm-10">
+                                                <p>Voter Turnout</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right">{{nextRace.Stats.TurnoutPercent}}<span ng-hide="nextRace.Stats.TurnoutPercent == null">%</span></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row" style="margin-bottom: 28px;">
+                                            <div class="col-sm-10">
+                                                <p>Total Votes Counted</p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <p class="right"> {{nextRace.Stats.VotesCount}}</p>
+                                            </div>
+                                        </div>
+
+                                        <div ng-show="nextRace.HasCandidates">
+                                            <div ng-repeat="candidate in nextRace.Candidates" class="row small-card-candidates">
+                                                <div class="col-sm-7">
+                                                    <p class="truncate">{{candidate.CandidateName}}</p>
+                                                </div>
+                                                <div class="col-sm-3 align-right">
+                                                    <p>{{candidate.TotalVotesForCandidate}}</p>
+                                                </div>
+                                                <div class="col-sm-2">
+                                                    <p class="right">{{candidate.PercentVotesForCandidate}}<span ng-hide="candidate.PercentVotesForCandidate == null" >%</span></p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <p class="margin-top-20">Results updated at {{nextRace.Stats.LastResultsReportedDate | date : "M/d/y h:mm:ss a"}}</p>
+                                        <p ng-if="electionData.Final" class="bold">**Final Results**</p>
+                                        <p class="truncate" style="width: 100%;">{{electionData.Message}}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="back">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        Back
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row hidden-xs" id="your-races-divider-header">
+            <div class="tab-row">
+                <div class="tab-border" id="selected-races" onclick="showSelectedRaces()">
+                    <h1 class="tab-title padding-0 margin-0 bold">SELECTED {{electionData.MenuItem | uppercase}} RACES</h1>
+                </div>
+                <div class="tab-border" id="precincts-reporting" onclick="showPrecinctsReporting()">
+                    <h1 class="tab-title padding-0 margin-0 bold">PRECINCTS REPORTING</h1>
+                </div>
+                <div class="tab-border" id="precincts-not-reporting" onclick="showPrecinctsNotReporting()">
+                    <h1 class="tab-title padding-0 margin-0 bold">PRECINCTS NOT REPORTING</h1>
+                </div>
+            </div>
+            <hr id="tab-line" />
+            <div class="row hidden-xs race-long-list-row" id="selected-races-tab-content">
+                <div ng-repeat="race in longListRaces" ng-show="customRacesFilter(race)">
+                    <div class="clearfix" ng-if="$index % 2 == 0" ng-show="customRacesFilter(race)"></div>
+                    <div class="col-md-6 col-sm-12 race-long-list">
+                        <h4 class="red bold">{{race.RaceName}}</h4>
+
+                        <div class="row margin-bottom-20">
+                            <div class="col-sm-8">
+                                <p>Number of Precincts</p>
+                            </div>
+                            <div class="col-sm-2">
+                                <p class="value bold">{{race.Stats.PrecinctsTotalCount}}</p>
+                            </div>
+                            <div class="col-sm-2">
+                                <p></p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <p>Precincts Reporting</p>
+                            </div>
+                            <div class="col-sm-2">
+                                <p class="value">{{race.Stats.PrecinctsReportingCount}}</p>
+                            </div>
+                            <div class="col-sm-2">
+                                <p class="right">{{race.Stats.PrecinctsReportingPercent}}<span ng-hide="race.Stats.TurnoutPercent == null">%</span></p>
+                            </div>
+                        </div>
+
+                        <div class="row margin-top-20">
+                            <div class="col-sm-10">
+                                <p>Vote For </p>
+                            </div>
+                            <div class="col-sm-2">
+                                <p class="value right">{{race.Stats.VoteFor}}</p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-10">
+                                <p>Registered Voters</p>
+                            </div>
+                            <div class="col-sm-2">
+                                <p class="right">{{race.Stats.PrecinctsRegisteredVoterCount}}</p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-10">
+                                <p>Ballots Cast</p>
+                            </div>
+                            <div class="col-sm-2">
+                                <p class="right">{{race.Stats.BallotsCount}}</p>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-10">
+                                <p>Voter Turnout</p>
+                            </div>
+                            <div class="col-sm-2">
+                                <p class="right">{{race.Stats.TurnoutPercent}}<span ng-hide="race.Stats.TurnoutPercent == null">%</span></p>
+                            </div>
+                        </div>
+
+                        <div class="row" style="margin-bottom: 48px;">
+                            <div class="col-sm-10">
+                                <p>Total Votes Counted</p>
+                            </div>
+                            <div class="col-sm-2">
+                                <p class="right"> {{race.Stats.VotesCount}}</p>
+                            </div>
+                        </div>
+
+                        <div ng-show="race.HasCandidates">
+                            <div ng-repeat="candidate in race.Candidates" class="row">
+                                <div class="col-sm-8">
+                                    <span class="red bold truncate">{{candidate.CandidateName}}</span>
+                                </div>
+                                <div class="col-sm-2">
+                                    <span class="value">{{candidate.TotalVotesForCandidate}}</span>
+                                </div>
+                                <div class="col-sm-2">
+                                    <span class="right percent-value">{{candidate.PercentVotesForCandidate}} <span ng-hide="candidate.PercentVotesForCandidate == null">%</span> </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <p class="margin-top-20">Results updated at {{race.Stats.LastResultsReportedDate | date : "M/d/y h:mm:ss a"}}</p>
+                        <p ng-if="electionData.Final" class="bold">**Final Results**</p>
+                        <p class="truncate" style="width: 100%;">{{electionData.Message}}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row hidden-xs race-long-list-row" id="precincts-reporting-tab-content">
+                <div class="clearfix" ng-if="$index % 2 == 0" ng-show="customRacesFilter(race)"></div>
+                <table class="table margin-left-10">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="red">Precinct Name</th>
+                            <th scope="col" class="red">Total Registered Voters</th>
+                            <th scope="col" class="red">Ballots Cast</th>
+                            <th scope="col" class="red">Voter Turnout</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="precinct in electionData.PrecinctsReporting">
+                            <th scope="row">{{precinct.PrecinctName}}</th>
+                            <td>{{precinct.RegVoters}}</td>
+                            <td>{{precinct.BallotsCast}}</td>
+                            <td>{{precinct.BallotsCast / precinct.RegVoters * 100 | number:2}}%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="row hidden-xs race-long-list-row" id="precincts-not-reporting-tab-content">
+                <div class="clearfix" ng-if="$index % 2 == 0" ng-show="customRacesFilter(race)"></div>
+                <table class="table margin-left-10">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="red">Precinct Name</th>
+                            <th scope="col" class="red">Total Registered Voters</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr ng-repeat="precinct in electionData.PrecinctsNotReporting">
+                            <th scope="row">{{precinct.PrecinctName}}</th>
+                            <td>{{precinct.RegVoters}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+</div>
+
+<script>
+    "use strict";
+    var electionData = {"Races":[{"RaceId":110,"RaceName":"UNITED STATES SENATOR","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":1,"Candidates":[{"CandidateName":"Don Tracy (REP)","PercentVotesForCandidate":56.65,"TotalVotesForCandidate":8944,"Winner":null,"SortCandidate":1},{"CandidateName":"Juliana Stratton (DEM)","PercentVotesForCandidate":41.93,"TotalVotesForCandidate":6620,"Winner":null,"SortCandidate":2},{"CandidateName":"Whitfield Harrington Jr (ACP)","PercentVotesForCandidate":1.41,"TotalVotesForCandidate":223,"Winner":null,"SortCandidate":3}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":16000,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":15787,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":120,"RaceName":"STATE GOVERNOR AND LT GOVERNOR","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":2,"Candidates":[{"CandidateName":"(Darren Bailey/(Aaron B. Del Mar (REP)","PercentVotesForCandidate":56.91,"TotalVotesForCandidate":9048,"Winner":null,"SortCandidate":1},{"CandidateName":"(JB Pritzker/(Christian Mitchell (DEM)","PercentVotesForCandidate":38.99,"TotalVotesForCandidate":6199,"Winner":null,"SortCandidate":2},{"CandidateName":"(Collin Corbett/(Carolyn Schofield (IND)","PercentVotesForCandidate":4.10,"TotalVotesForCandidate":652,"Winner":null,"SortCandidate":3},{"CandidateName":"Mike Vick/Gary Pierce","PercentVotesForCandidate":0.00,"TotalVotesForCandidate":0,"Winner":null,"SortCandidate":50},{"CandidateName":"Misty Metroz","PercentVotesForCandidate":0.00,"TotalVotesForCandidate":0,"Winner":null,"SortCandidate":60},{"CandidateName":"Griselda Romero","PercentVotesForCandidate":0.00,"TotalVotesForCandidate":0,"Winner":null,"SortCandidate":70},{"CandidateName":"Rafael Varela","PercentVotesForCandidate":0.00,"TotalVotesForCandidate":0,"Winner":null,"SortCandidate":80},{"CandidateName":"Patricia L. Tillman","PercentVotesForCandidate":0.00,"TotalVotesForCandidate":0,"Winner":null,"SortCandidate":81}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15983,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":15899,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":130,"RaceName":"STATE ATTORNEY GENERAL","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":3,"Candidates":[{"CandidateName":"Robert W. Fioretti (REP)","PercentVotesForCandidate":58.79,"TotalVotesForCandidate":9267,"Winner":null,"SortCandidate":1},{"CandidateName":"Kwame Raoul (DEM)","PercentVotesForCandidate":41.21,"TotalVotesForCandidate":6496,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15983,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":15763,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":140,"RaceName":"STATE SECRETARY OF STATE","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":4,"Candidates":[{"CandidateName":"Diane M. Harris (REP)","PercentVotesForCandidate":55.31,"TotalVotesForCandidate":8743,"Winner":null,"SortCandidate":1},{"CandidateName":"Alexi Giannoulias (DEM)","PercentVotesForCandidate":44.69,"TotalVotesForCandidate":7065,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15983,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":15808,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":150,"RaceName":"STATE COMPTROLLER","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":5,"Candidates":[{"CandidateName":"Bryan Drew (REP)","PercentVotesForCandidate":59.08,"TotalVotesForCandidate":9260,"Winner":null,"SortCandidate":1},{"CandidateName":"Margaret Croke (DEM)","PercentVotesForCandidate":40.92,"TotalVotesForCandidate":6413,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15983,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":15673,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":160,"RaceName":"STATE TREASURER","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":6,"Candidates":[{"CandidateName":"Max Solomon (REP)","PercentVotesForCandidate":57.97,"TotalVotesForCandidate":9056,"Winner":null,"SortCandidate":1},{"CandidateName":"Michael W. Frerichs (DEM)","PercentVotesForCandidate":42.03,"TotalVotesForCandidate":6566,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15983,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":15622,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":210,"RaceName":"CONGRESSIONAL 16TH DISTRICT REPRESENTATIVE","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":7,"Candidates":[{"CandidateName":"Darin LaHood (REP)","PercentVotesForCandidate":71.17,"TotalVotesForCandidate":3385,"Winner":null,"SortCandidate":1},{"CandidateName":"Paul Nolley (DEM)","PercentVotesForCandidate":28.83,"TotalVotesForCandidate":1371,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":4808,"PrecinctsRegisteredVoterCount":7963,"TurnoutPercent":60.4,"VotesCount":4756,"PrecinctsTotalCount":10,"PrecinctsReportingCount":10,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":220,"RaceName":"CONGRESSIONAL 17TH DISTRICT REPRESENTATIVE","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":8,"Candidates":[{"CandidateName":"Dillan S. Vancil (REP)","PercentVotesForCandidate":49.19,"TotalVotesForCandidate":5438,"Winner":null,"SortCandidate":1},{"CandidateName":"Eric Sorensen (DEM)","PercentVotesForCandidate":50.81,"TotalVotesForCandidate":5617,"Winner":null,"SortCandidate":2},{"CandidateName":"Brad Ahrens","PercentVotesForCandidate":0.00,"TotalVotesForCandidate":0,"Winner":null,"SortCandidate":40}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":11192,"PrecinctsRegisteredVoterCount":20397,"TurnoutPercent":54.9,"VotesCount":11055,"PrecinctsTotalCount":27,"PrecinctsReportingCount":27,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":230,"RaceName":"STATE SENATE 45TH DISTRICT","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":9,"Candidates":[{"CandidateName":"Andrew S. Chesney (REP)","PercentVotesForCandidate":59.84,"TotalVotesForCandidate":9456,"Winner":null,"SortCandidate":1},{"CandidateName":"Joseph H. \"Joe\" Berning (DEM)","PercentVotesForCandidate":40.16,"TotalVotesForCandidate":6347,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15983,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":15803,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":240,"RaceName":"STATE REPRESENTATIVE 89TH DISTRICT","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":10,"Candidates":[{"CandidateName":"Tony M. McCombie (REP)","PercentVotesForCandidate":100.00,"TotalVotesForCandidate":3825,"Winner":null,"SortCandidate":1},{"CandidateName":"No Candidate (DEM)","PercentVotesForCandidate":null,"TotalVotesForCandidate":null,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":4571,"PrecinctsRegisteredVoterCount":7451,"TurnoutPercent":61.3,"VotesCount":3825,"PrecinctsTotalCount":13,"PrecinctsReportingCount":13,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":250,"RaceName":"STATE REPRESENTATIVE 90TH DISTRICT","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":11,"Candidates":[{"CandidateName":"John M. Cabello (REP)","PercentVotesForCandidate":100.00,"TotalVotesForCandidate":8015,"Winner":null,"SortCandidate":1},{"CandidateName":"No Candidate (DEM)","PercentVotesForCandidate":null,"TotalVotesForCandidate":null,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":11412,"PrecinctsRegisteredVoterCount":20909,"TurnoutPercent":54.6,"VotesCount":8015,"PrecinctsTotalCount":27,"PrecinctsReportingCount":27,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":170,"RaceName":"COUNTY CLERK AND RECORDER","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":12,"Candidates":[{"CandidateName":"Jazmin L. Wingert (REP)","PercentVotesForCandidate":63.21,"TotalVotesForCandidate":9898,"Winner":null,"SortCandidate":1},{"CandidateName":"Suzanne M. Cook (DEM)","PercentVotesForCandidate":36.79,"TotalVotesForCandidate":5762,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15983,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":15660,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":180,"RaceName":"COUNTY TREASURER","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":13,"Candidates":[{"CandidateName":"Stephanie A. Helms (REP)","PercentVotesForCandidate":100.00,"TotalVotesForCandidate":12086,"Winner":null,"SortCandidate":1},{"CandidateName":"No Candidate (DEM)","PercentVotesForCandidate":null,"TotalVotesForCandidate":null,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15983,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":12086,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":190,"RaceName":"COUNTY SHERIFF","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":14,"Candidates":[{"CandidateName":"Steve Stovall (REP)","PercentVotesForCandidate":100.00,"TotalVotesForCandidate":12196,"Winner":null,"SortCandidate":1},{"CandidateName":"No Candidate (DEM)","PercentVotesForCandidate":null,"TotalVotesForCandidate":null,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15983,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":12196,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":200,"RaceName":"COUNTY CORONER-2-YEAR UNEXPIRED TERM","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":15,"Candidates":[{"CandidateName":"Tom Konieczny (REP)","PercentVotesForCandidate":100.00,"TotalVotesForCandidate":12077,"Winner":null,"SortCandidate":1},{"CandidateName":"No Candidate (DEM)","PercentVotesForCandidate":null,"TotalVotesForCandidate":null,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15983,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":12077,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":260,"RaceName":"ESR SUPERINTENDENT OF SCHOOLS (BOONE-WINNEBAGO)","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":16,"Candidates":[{"CandidateName":"Scott Bloomquist (REP)","PercentVotesForCandidate":100.00,"TotalVotesForCandidate":138,"Winner":null,"SortCandidate":1},{"CandidateName":"No Candidate (DEM)","PercentVotesForCandidate":null,"TotalVotesForCandidate":null,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":175,"PrecinctsRegisteredVoterCount":288,"TurnoutPercent":60.8,"VotesCount":138,"PrecinctsTotalCount":4,"PrecinctsReportingCount":4,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":270,"RaceName":"ESR SUPERINTENDENT OF SCHOOLS (CARROLL-JODAVIESS-STEPHENSON)","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":17,"Candidates":[{"CandidateName":"Christopher Shockey (REP)","PercentVotesForCandidate":100.00,"TotalVotesForCandidate":11702,"Winner":null,"SortCandidate":1},{"CandidateName":"No Candidate (DEM)","PercentVotesForCandidate":null,"TotalVotesForCandidate":null,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15358,"PrecinctsRegisteredVoterCount":27383,"TurnoutPercent":56.1,"VotesCount":11702,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":280,"RaceName":"ESR SUPERINTENDENT OF SCHOOLS (LEE-OGLE-WHITESIDE)","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":18,"Candidates":[{"CandidateName":"Christopher J. Tennyson (REP)","PercentVotesForCandidate":100.00,"TotalVotesForCandidate":371,"Winner":null,"SortCandidate":1},{"CandidateName":"No Candidate (DEM)","PercentVotesForCandidate":null,"TotalVotesForCandidate":null,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":450,"PrecinctsRegisteredVoterCount":689,"TurnoutPercent":65.3,"VotesCount":371,"PrecinctsTotalCount":3,"PrecinctsReportingCount":3,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":290,"RaceName":"COUNTY BOARD B DISTRICT MEMBER","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":19,"Candidates":[{"CandidateName":"No Candidate (REP)","PercentVotesForCandidate":null,"TotalVotesForCandidate":null,"Winner":null,"SortCandidate":1},{"CandidateName":"Samuel L. Newton (DEM)","PercentVotesForCandidate":100.00,"TotalVotesForCandidate":712,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":944,"PrecinctsRegisteredVoterCount":2512,"TurnoutPercent":37.6,"VotesCount":712,"PrecinctsTotalCount":4,"PrecinctsReportingCount":4,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":300,"RaceName":"COUNTY BOARD C DISTRICT MEMBER-4YR FULL TERM","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":20,"Candidates":[{"CandidateName":"Lou Hayes (REP)","PercentVotesForCandidate":42.34,"TotalVotesForCandidate":550,"Winner":null,"SortCandidate":1},{"CandidateName":"Joseph R. Cardoso, Jr. (DEM)","PercentVotesForCandidate":57.66,"TotalVotesForCandidate":749,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":1346,"PrecinctsRegisteredVoterCount":3117,"TurnoutPercent":43.2,"VotesCount":1299,"PrecinctsTotalCount":4,"PrecinctsReportingCount":4,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":410,"RaceName":"COUNTY BOARD DISTRICT C MEMBER-2YR UNEXPIRED TERM","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":21,"Candidates":[{"CandidateName":"Larry Pittsley (REP)","PercentVotesForCandidate":42.30,"TotalVotesForCandidate":547,"Winner":null,"SortCandidate":1},{"CandidateName":"Casey Marie Jacobs Heneghan (DEM)","PercentVotesForCandidate":57.70,"TotalVotesForCandidate":746,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":1346,"PrecinctsRegisteredVoterCount":3117,"TurnoutPercent":43.2,"VotesCount":1293,"PrecinctsTotalCount":4,"PrecinctsReportingCount":4,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":310,"RaceName":"COUNTY BOARD D DISTRICT MEMBER","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":22,"Candidates":[{"CandidateName":"Troy Barr (REP)","PercentVotesForCandidate":51.28,"TotalVotesForCandidate":1246,"Winner":null,"SortCandidate":1},{"CandidateName":"Roxane Rice (DEM)","PercentVotesForCandidate":48.72,"TotalVotesForCandidate":1184,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":2497,"PrecinctsRegisteredVoterCount":4128,"TurnoutPercent":60.5,"VotesCount":2430,"PrecinctsTotalCount":5,"PrecinctsReportingCount":5,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":320,"RaceName":"COUNTY BOARD E DISTRICT MEMBER","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":23,"Candidates":[{"CandidateName":"Joshua Libby (REP)","PercentVotesForCandidate":45.21,"TotalVotesForCandidate":967,"Winner":null,"SortCandidate":1},{"CandidateName":"Adam I. Moderow (DEM)","PercentVotesForCandidate":54.79,"TotalVotesForCandidate":1172,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":2195,"PrecinctsRegisteredVoterCount":3888,"TurnoutPercent":56.5,"VotesCount":2139,"PrecinctsTotalCount":4,"PrecinctsReportingCount":4,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":330,"RaceName":"COUNTY BOARD F DISTRICT MEMBER","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":24,"Candidates":[{"CandidateName":"Clayton Zimmerman (REP)","PercentVotesForCandidate":100.00,"TotalVotesForCandidate":1936,"Winner":null,"SortCandidate":1},{"CandidateName":"No Candidate (DEM)","PercentVotesForCandidate":null,"TotalVotesForCandidate":null,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":2256,"PrecinctsRegisteredVoterCount":3680,"TurnoutPercent":61.3,"VotesCount":1936,"PrecinctsTotalCount":6,"PrecinctsReportingCount":6,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":340,"RaceName":"COUNTY BOARD G DISTRICT MEMBER","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":25,"Candidates":[{"CandidateName":"Jerry Clay (REP)","PercentVotesForCandidate":100.00,"TotalVotesForCandidate":1687,"Winner":null,"SortCandidate":1},{"CandidateName":"No Candidate (DEM)","PercentVotesForCandidate":null,"TotalVotesForCandidate":null,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ONECO","Reporting":true,"Sort":77}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":2180,"PrecinctsRegisteredVoterCount":3652,"TurnoutPercent":59.7,"VotesCount":1687,"PrecinctsTotalCount":5,"PrecinctsReportingCount":5,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":350,"RaceName":"COUNTY BOARD H DISTRICT MEMBER","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":26,"Candidates":[{"CandidateName":"Nicole Baker (REP)","PercentVotesForCandidate":100.00,"TotalVotesForCandidate":1758,"Winner":null,"SortCandidate":1},{"CandidateName":"No Candidate (DEM)","PercentVotesForCandidate":null,"TotalVotesForCandidate":null,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":2191,"PrecinctsRegisteredVoterCount":3593,"TurnoutPercent":61.0,"VotesCount":1758,"PrecinctsTotalCount":4,"PrecinctsReportingCount":4,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":360,"RaceName":"COUNTY BOARD I DISTRICT MEMBER","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":27,"Candidates":[{"CandidateName":"Cynthia J. Lawfer (REP)","PercentVotesForCandidate":67.93,"TotalVotesForCandidate":1557,"Winner":null,"SortCandidate":1},{"CandidateName":"Edward Klein (DEM)","PercentVotesForCandidate":32.07,"TotalVotesForCandidate":735,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":2374,"PrecinctsRegisteredVoterCount":3790,"TurnoutPercent":62.6,"VotesCount":2292,"PrecinctsTotalCount":5,"PrecinctsReportingCount":5,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":370,"RaceName":"CIRCUIT COURT JUDGE 15TH JUDICIAL CIRCUIT STEPHENSON COUNTY(HAUSER)","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":28,"Candidates":[{"CandidateName":"Judd Thruman (REP)","PercentVotesForCandidate":100.00,"TotalVotesForCandidate":11966,"Winner":null,"SortCandidate":1},{"CandidateName":"No Candidate (DEM)","PercentVotesForCandidate":null,"TotalVotesForCandidate":null,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15983,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":11966,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":380,"RaceName":"RETAIN JOHN B. ROE IV","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":29,"Candidates":[{"CandidateName":"Yes","PercentVotesForCandidate":85.10,"TotalVotesForCandidate":11450,"Winner":null,"SortCandidate":1},{"CandidateName":"No","PercentVotesForCandidate":14.90,"TotalVotesForCandidate":2005,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15983,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":13455,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":390,"RaceName":"RETAIN DOUGLAS E. LEE","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":30,"Candidates":[{"CandidateName":"Yes","PercentVotesForCandidate":84.97,"TotalVotesForCandidate":11382,"Winner":null,"SortCandidate":1},{"CandidateName":"No","PercentVotesForCandidate":15.03,"TotalVotesForCandidate":2013,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15983,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":13395,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":400,"RaceName":"RETAIN J. JERRY KANE","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":31,"Candidates":[{"CandidateName":"Yes","PercentVotesForCandidate":85.03,"TotalVotesForCandidate":11443,"Winner":null,"SortCandidate":1},{"CandidateName":"No","PercentVotesForCandidate":14.97,"TotalVotesForCandidate":2014,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"JEFFERSON","Reporting":true,"Sort":1},{"PrecinctName":"LORAN","Reporting":true,"Sort":4},{"PrecinctName":"FLORENCE","Reporting":true,"Sort":7},{"PrecinctName":"SILVER CREEK","Reporting":true,"Sort":12},{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34},{"PrecinctName":"LANCASTER","Reporting":true,"Sort":39},{"PrecinctName":"HARLEM 1","Reporting":true,"Sort":42},{"PrecinctName":"HARLEM 2","Reporting":true,"Sort":46},{"PrecinctName":"ERIN","Reporting":true,"Sort":49},{"PrecinctName":"KENT","Reporting":true,"Sort":52},{"PrecinctName":"WEST POINT 1","Reporting":true,"Sort":55},{"PrecinctName":"WEST POINT 2","Reporting":true,"Sort":60},{"PrecinctName":"WADDAMS","Reporting":true,"Sort":63},{"PrecinctName":"BUCKEYE","Reporting":true,"Sort":66},{"PrecinctName":"DAKOTA","Reporting":true,"Sort":70},{"PrecinctName":"ROCK GROVE","Reporting":true,"Sort":73},{"PrecinctName":"ONECO","Reporting":true,"Sort":77},{"PrecinctName":"WINSLOW","Reporting":true,"Sort":80},{"PrecinctName":"FREEPORT 1","Reporting":true,"Sort":83},{"PrecinctName":"FREEPORT 2","Reporting":true,"Sort":87},{"PrecinctName":"FREEPORT 3","Reporting":true,"Sort":90},{"PrecinctName":"FREEPORT 4","Reporting":true,"Sort":93},{"PrecinctName":"FREEPORT 5","Reporting":true,"Sort":96},{"PrecinctName":"FREEPORT 6","Reporting":true,"Sort":99},{"PrecinctName":"FREEPORT 7","Reporting":true,"Sort":102},{"PrecinctName":"FREEPORT 8","Reporting":true,"Sort":105},{"PrecinctName":"FREEPORT 9","Reporting":true,"Sort":108},{"PrecinctName":"FREEPORT 10","Reporting":true,"Sort":111},{"PrecinctName":"FREEPORT 11","Reporting":true,"Sort":114},{"PrecinctName":"FREEPORT 12","Reporting":true,"Sort":117},{"PrecinctName":"FREEPORT 13","Reporting":true,"Sort":120},{"PrecinctName":"FREEPORT 14","Reporting":true,"Sort":123},{"PrecinctName":"FREEPORT 15","Reporting":true,"Sort":126},{"PrecinctName":"FREEPORT 16","Reporting":true,"Sort":129}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":15983,"PrecinctsRegisteredVoterCount":28360,"TurnoutPercent":56.4,"VotesCount":13457,"PrecinctsTotalCount":36,"PrecinctsReportingCount":36,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}},{"RaceId":420,"RaceName":"PECATONICA FIRE PROTECTION DISTRICT LIMITING RATE INCREASE","ElectionId":1637,"Selected":true,"CandidateId":null,"HasCandidates":true,"CandidateName":null,"TotalVotesForCandidate":null,"PercentVotesForCandidate":null,"CalculatedRank":null,"Winner":null,"SortCandidate":null,"SortContest":32,"Candidates":[{"CandidateName":"Yes","PercentVotesForCandidate":40.88,"TotalVotesForCandidate":65,"Winner":null,"SortCandidate":1},{"CandidateName":"No","PercentVotesForCandidate":59.12,"TotalVotesForCandidate":94,"Winner":null,"SortCandidate":2}],"Reporting":[{"PrecinctName":"RIDOTT","Reporting":true,"Sort":16},{"PrecinctName":"ROCK RUN 1","Reporting":true,"Sort":28},{"PrecinctName":"ROCK RUN 2","Reporting":true,"Sort":34}],"NotReporting":[],"PrecinctsNotReportingFromView":null,"PrecinctsReportingFromView":null,"Stats":{"BallotsCount":165,"PrecinctsRegisteredVoterCount":269,"TurnoutPercent":61.3,"VotesCount":159,"PrecinctsTotalCount":3,"PrecinctsReportingCount":3,"PrecinctsReportingPercent":100.0,"VoteFor":1,"LastResultsReportedDate":"2026-11-19T10:27:41.427"}}],"Election":{"OverallStatIndex":0,"ElectionId":1637,"ElectionDate":"2026-11-03T00:00:00","Description":"GENERAL ELECTION","Abbreviation":null,"Final":false,"UpdateTime":"2026-11-19T10:27:41.427","VoteByMailStartDT":null,"VoteByMailEndDT":null,"ElectionStats":[{"ElectionId":1637,"CounterGroupId":0,"PrecinctCounterGroupId":0,"Description":"POLLING","IsComplete":false,"ShowPrecinctsCounted":true,"PrecinctsCounted":36,"TotalPrecincts":36,"BallotsCast":9453,"BallotsCastPercent":59.1,"TotalVoters":28360,"TotalBallotsCast":16000,"TotalTurnoutPercent":56.4},{"ElectionId":1637,"CounterGroupId":1,"PrecinctCounterGroupId":0,"Description":"EARLY","IsComplete":false,"ShowPrecinctsCounted":false,"PrecinctsCounted":36,"TotalPrecincts":36,"BallotsCast":4021,"BallotsCastPercent":25.1,"TotalVoters":28360,"TotalBallotsCast":16000,"TotalTurnoutPercent":56.4},{"ElectionId":1637,"CounterGroupId":2,"PrecinctCounterGroupId":0,"Description":"VOTE BY MAIL","IsComplete":false,"ShowPrecinctsCounted":false,"PrecinctsCounted":36,"TotalPrecincts":36,"BallotsCast":2487,"BallotsCastPercent":15.5,"TotalVoters":28360,"TotalBallotsCast":16000,"TotalTurnoutPercent":56.4},{"ElectionId":1637,"CounterGroupId":3,"PrecinctCounterGroupId":0,"Description":"LATE VBM AND PROVISIONAL","IsComplete":false,"ShowPrecinctsCounted":false,"PrecinctsCounted":22,"TotalPrecincts":36,"BallotsCast":39,"BallotsCastPercent":0.2,"TotalVoters":28360,"TotalBallotsCast":16000,"TotalTurnoutPercent":56.4}],"PrecinctsCounted":36,"SubDomain":"il-stephenson","MenuItem":"Stephenson County","ClientName":"Stephenson County","ClientSiteURL":null,"Message":"***OFFICIAL***OFFICIAL***OFFICIAL***","BannerImagePath":"/Assets/stephenson.png","Summary":null,"OfficeTitle":"Jazmin Wingert, County Clerk & Recorder","PrecinctsReporting":[{"ElectionId":1637,"PrecinctName":"JEFFERSON","Reporting":1,"Sort":1,"RegVoters":158,"BallotsCast":109},{"ElectionId":1637,"PrecinctName":"LORAN","Reporting":1,"Sort":4,"RegVoters":919,"BallotsCast":577},{"ElectionId":1637,"PrecinctName":"FLORENCE","Reporting":1,"Sort":7,"RegVoters":934,"BallotsCast":585},{"ElectionId":1637,"PrecinctName":"SILVER CREEK","Reporting":1,"Sort":12,"RegVoters":475,"BallotsCast":297},{"ElectionId":1637,"PrecinctName":"RIDOTT","Reporting":1,"Sort":16,"RegVoters":927,"BallotsCast":560},{"ElectionId":1637,"PrecinctName":"ROCK RUN 1","Reporting":1,"Sort":28,"RegVoters":706,"BallotsCast":443},{"ElectionId":1637,"PrecinctName":"ROCK RUN 2","Reporting":1,"Sort":34,"RegVoters":865,"BallotsCast":536},{"ElectionId":1637,"PrecinctName":"LANCASTER","Reporting":1,"Sort":39,"RegVoters":975,"BallotsCast":588},{"ElectionId":1637,"PrecinctName":"HARLEM 1","Reporting":1,"Sort":42,"RegVoters":861,"BallotsCast":546},{"ElectionId":1637,"PrecinctName":"HARLEM 2","Reporting":1,"Sort":46,"RegVoters":792,"BallotsCast":480},{"ElectionId":1637,"PrecinctName":"ERIN","Reporting":1,"Sort":49,"RegVoters":284,"BallotsCast":188},{"ElectionId":1637,"PrecinctName":"KENT","Reporting":1,"Sort":52,"RegVoters":427,"BallotsCast":266},{"ElectionId":1637,"PrecinctName":"WEST POINT 1","Reporting":1,"Sort":55,"RegVoters":1168,"BallotsCast":695},{"ElectionId":1637,"PrecinctName":"WEST POINT 2","Reporting":1,"Sort":60,"RegVoters":1038,"BallotsCast":634},{"ElectionId":1637,"PrecinctName":"WADDAMS","Reporting":1,"Sort":63,"RegVoters":550,"BallotsCast":356},{"ElectionId":1637,"PrecinctName":"BUCKEYE","Reporting":1,"Sort":66,"RegVoters":869,"BallotsCast":536},{"ElectionId":1637,"PrecinctName":"DAKOTA","Reporting":1,"Sort":70,"RegVoters":499,"BallotsCast":290},{"ElectionId":1637,"PrecinctName":"ROCK GROVE","Reporting":1,"Sort":73,"RegVoters":1095,"BallotsCast":652},{"ElectionId":1637,"PrecinctName":"ONECO","Reporting":1,"Sort":77,"RegVoters":834,"BallotsCast":470},{"ElectionId":1637,"PrecinctName":"WINSLOW","Reporting":1,"Sort":80,"RegVoters":339,"BallotsCast":196},{"ElectionId":1637,"PrecinctName":"FREEPORT 1","Reporting":1,"Sort":83,"RegVoters":512,"BallotsCast":168},{"ElectionId":1637,"PrecinctName":"FREEPORT 2","Reporting":1,"Sort":87,"RegVoters":666,"BallotsCast":247},{"ElectionId":1637,"PrecinctName":"FREEPORT 3","Reporting":1,"Sort":90,"RegVoters":622,"BallotsCast":265},{"ElectionId":1637,"PrecinctName":"FREEPORT 4","Reporting":1,"Sort":93,"RegVoters":700,"BallotsCast":227},{"ElectionId":1637,"PrecinctName":"FREEPORT 5","Reporting":1,"Sort":96,"RegVoters":661,"BallotsCast":246},{"ElectionId":1637,"PrecinctName":"FREEPORT 6","Reporting":1,"Sort":99,"RegVoters":712,"BallotsCast":266},{"ElectionId":1637,"PrecinctName":"FREEPORT 7","Reporting":1,"Sort":102,"RegVoters":890,"BallotsCast":451},{"ElectionId":1637,"PrecinctName":"FREEPORT 8","Reporting":1,"Sort":105,"RegVoters":1151,"BallotsCast":704},{"ElectionId":1637,"PrecinctName":"FREEPORT 9","Reporting":1,"Sort":108,"RegVoters":972,"BallotsCast":536},{"ElectionId":1637,"PrecinctName":"FREEPORT 10","Reporting":1,"Sort":111,"RegVoters":866,"BallotsCast":426},{"ElectionId":1637,"PrecinctName":"FREEPORT 11","Reporting":1,"Sort":114,"RegVoters":826,"BallotsCast":365},{"ElectionId":1637,"PrecinctName":"FREEPORT 12","Reporting":1,"Sort":117,"RegVoters":1013,"BallotsCast":603},{"ElectionId":1637,"PrecinctName":"FREEPORT 13","Reporting":1,"Sort":120,"RegVoters":974,"BallotsCast":611},{"ElectionId":1637,"PrecinctName":"FREEPORT 14","Reporting":1,"Sort":123,"RegVoters":1031,"BallotsCast":653},{"ElectionId":1637,"PrecinctName":"FREEPORT 15","Reporting":1,"Sort":126,"RegVoters":849,"BallotsCast":434},{"ElectionId":1637,"PrecinctName":"FREEPORT 16","Reporting":1,"Sort":129,"RegVoters":1200,"BallotsCast":794},{"ElectionId":1637,"PrecinctName":"36 PRECINCTS REPORTING","Reporting":1,"Sort":139,"RegVoters":28360,"BallotsCast":16000}],"PrecinctsNotReporting":[{"ElectionId":1637,"PrecinctName":"0 PRECINCTS NOT REPORTING","Reporting":0,"Sort":10,"RegVoters":0}]}};
+    var navigation = {"NavigationItems":[{"Name":"Bond County","Url":"http://il-bond.pollresults.net"},{"Name":"Boone County","Url":"http://il-boone.pollresults.net"},{"Name":"Bureau County","Url":"http://il-bureau.pollresults.net"},{"Name":"Carroll County","Url":"http://il-carroll.pollresults.net"},{"Name":"Christian County","Url":"http://il-christian.pollresults.net"},{"Name":"Clark County","Url":"http://il-clark.pollresults.net"},{"Name":"Clay County","Url":"http://il-clay.pollresults.net"},{"Name":"Coles County","Url":"http://il-coles.pollresults.net"},{"Name":"Crawford County","Url":"http://il-crawford.pollresults.net"},{"Name":"DeWitt County","Url":"http://il-dewitt.pollresults.net"},{"Name":"Douglas County","Url":"http://il-douglas.pollresults.net"},{"Name":"Edgar County","Url":"http://il-edgar.pollresults.net"},{"Name":"Ford County","Url":"http://il-ford.pollresults.net"},{"Name":"Hardin County","Url":"http://il-hardin.pollresults.net"},{"Name":"Kankakee County","Url":"http://il-kankakee.pollresults.net"},{"Name":"Lee County","Url":"http://il-lee.pollresults.net"},{"Name":"Livingston County","Url":"http://il-livingston.pollresults.net"},{"Name":"Logan County","Url":"http://il-logan.pollresults.net"},{"Name":"Macon County","Url":"http://il-macon.pollresults.net"},{"Name":"Macoupin County","Url":"http://il-macoupin.pollresults.net"},{"Name":"Marshall County","Url":"http://il-marshall.pollresults.net"},{"Name":"Mason County","Url":"http://il-mason.pollresults.net"},{"Name":"Mercer County","Url":"http://il-mercer.pollresults.net"},{"Name":"Montgomery County","Url":"http://il-montgomery.pollresults.net"},{"Name":"Moultrie County","Url":"http://il-moultrie.pollresults.net"},{"Name":"Ogle County","Url":"http://il-ogle.pollresults.net"},{"Name":"Piatt County","Url":"http://il-piatt.pollresults.net"},{"Name":"Putnam County","Url":"http://il-putnam.pollresults.net"},{"Name":"Shelby County","Url":"http://il-shelby.pollresults.net"},{"Name":"Stephenson County","Url":"http://il-stephenson.pollresults.net"},{"Name":"Tazewell County","Url":"http://il-tazewell.pollresults.net"},{"Name":"Vermilion County","Url":"http://il-vermilion.pollresults.net"},{"Name":"Whiteside County","Url":"http://il-whiteside.pollresults.net"}],"ClientName":"Stephenson County","ClientSiteUrl":null};
+    var cacheExpiresDateString = "2026-11-23 05:13:01Z".replace(/ /g,"T");
+
+    var cacheExpiresDate = new Date(new Date(cacheExpiresDateString).toUTCString()).toISOString();
+
+    Storage.prototype.setObj = function(key, obj) {
+        return this.setItem(key, JSON.stringify(obj));
+    }
+    Storage.prototype.getObj = function(key) {
+        return JSON.parse(this.getItem(key));
+    }
+
+    $(document).ready(function() {
+        $("#background").show();
+
+        $(".accordion-toggle").on("click",
+            function() {
+                var iconId = $(this).data("icon");
+                var iconElement = $("#" + iconId);
+
+                if (iconElement.hasClass("glyphicon-chevron-down")) {
+                    iconElement.stop().removeClass("glyphicon-chevron-down");
+                    iconElement.stop().addClass("glyphicon-chevron-up");
+                } else {
+                    iconElement.stop().removeClass("glyphicon-chevron-up");
+                    iconElement.stop().addClass("glyphicon-chevron-down");
+                }
+            });
+
+        $("#navbar-toggle").click(function(event) {
+            $('.navbar-collapse').toggleClass("in");
+            $(this).closest('.navbar').toggleClass("navbar-pull");
+            $("body").toggleClass("overflow-hidden");
+        });
+
+        jQuery(document.body).on("click",
+            ".flip-card-mobile",
+            function(event) {
+                var id = $(this).data("id");
+                var parent = $("#" + id);
+                if ($("#" + id + " .back").is(":visible")) {
+                    $("#" + id + " .back").hide();
+                    $("#" + id + " .front").show();
+                    parent.toggleClass("hover");
+                } else {
+                    $("#" + id + " .back").show();
+                    $("#" + id + " .front").hide();
+                    parent.toggleClass("hover");
+                }
+
+            });
+
+        jQuery(document.body).on("click",
+            "#mobile-close-navigation",
+            function(event) {
+                $(this).closest(".navbar").toggleClass("navbar-pull");
+                $(this).closest(".collapse").toggleClass("in");
+                $("body").toggleClass("overflow-hidden");
+            });
+
+        $(window).on('resize',
+            function() {
+                if (getBootstrapBreakpoint() !== "xs") {
+                    $('.navbar-collapse').removeClass("in");
+                    $('.navbar').addClass("navbar-pull");
+                    $("body").removeClass("overflow-hidden");
+                }
+            });
+
+        jQuery(document.body).on("click",
+            "details",
+            function(event) {
+                //Prevent the browsers default handling as we need to route the attribute management through the Next/Back buttons as well
+                event.preventDefault();
+            });
+
+        jQuery(document.body).on("click",
+            "details .checkbox",
+            function(event) {
+                //Prevent the browsers default handling as we need to route the attribute management through the Next/Back buttons as well
+                event.stopPropagation();
+            });
+
+        showSelectedRaces();
+
+        $("#loading").hide();
+    });
+
+    function getBootstrapBreakpoint() {
+        var w = $(document).innerWidth();
+        return (w < 768) ? "xs" : ((w < 992) ? "sm" : ((w < 1200) ? "md" : "lg"));
+    }
+
+    function manageDetails(raceId) {
+        var detail = $("#race" + raceId);
+
+        var elements = document.getElementsByTagName("details");
+        for (var i = 0; i < elements.length; i++) {
+            var id = elements[i].getAttribute("id");
+            if (id !== "race" + raceId) {
+                elements[i].removeAttribute("Open");
+            } else {
+                elements[i].setAttribute("Open", "open");
+            }
+        }
+    }
+
+    function scrollToCard() {
+        if (getBootstrapBreakpoint() !== "xs") {
+            $("html, body").animate({
+                    scrollTop: 0
+                },
+                300);
+        }
+    }
+
+    /***********************************************
+        SELECTED RACES AND PRECINCT SUMMARY TABS
+    ***********************************************/
+
+    function showSelectedRaces() {
+        document.getElementById('precincts-reporting-tab-content').style.display = 'none';
+        document.getElementById('precincts-not-reporting-tab-content').style.display = 'none';
+        document.getElementById('selected-races-tab-content').style.display = 'block';
+
+        document.getElementById('precincts-reporting').style.color = 'black';
+        document.getElementById('precincts-not-reporting').style.color = 'black';
+        document.getElementById('selected-races').style.color = 'white';
+
+        document.getElementById('precincts-reporting').style.backgroundColor = 'white';
+        document.getElementById('precincts-not-reporting').style.backgroundColor = 'white';
+        document.getElementById('selected-races').style.backgroundColor = '#337ab7';
+    };
+
+    function showPrecinctsReporting() {
+        document.getElementById('selected-races-tab-content').style.display = 'none';
+        document.getElementById('precincts-not-reporting-tab-content').style.display = 'none';
+        document.getElementById('precincts-reporting-tab-content').style.display = 'block';
+
+        document.getElementById('precincts-reporting').style.color = 'white';
+        document.getElementById('precincts-not-reporting').style.color = 'black';
+        document.getElementById('selected-races').style.color = 'black';
+
+        document.getElementById('precincts-reporting').style.backgroundColor = '#337ab7';
+        document.getElementById('precincts-not-reporting').style.backgroundColor = 'white';
+        document.getElementById('selected-races').style.backgroundColor = 'white';
+    };
+
+    function showPrecinctsNotReporting() {
+        document.getElementById('selected-races-tab-content').style.display = 'none';
+        document.getElementById('precincts-reporting-tab-content').style.display = 'none';
+        document.getElementById('precincts-not-reporting-tab-content').style.display = 'block';
+
+        document.getElementById('precincts-reporting').style.color = 'black';
+        document.getElementById('precincts-not-reporting').style.color = 'white';
+        document.getElementById('selected-races').style.color = 'black';
+
+        document.getElementById('precincts-reporting').style.backgroundColor = 'white';
+        document.getElementById('precincts-not-reporting').style.backgroundColor = '#337ab7';
+        document.getElementById('selected-races').style.backgroundColor = 'white';
+    };
+
+    angular.module("LibertyElections", ["ngCookies"]).controller("ElectionController",
+        function ($scope, $interval, $cookies, $http) {
+            $scope.raceData = electionData.Races;
+            $scope.electionData = electionData.Election;
+            $scope.navigation = navigation;
+            $scope.longListRaces = electionData.Election;
+
+            $scope.cacheExpiresDate = cacheExpiresDate;
+            $scope.lastUpdatedTimeStamp = new Date(new Date().toUTCString()).toISOString();
+            $scope.hasBeenUpdated = true;
+
+            filterOnLoad();
+
+            $scope.areFiltering = false;
+
+            setSelectedRaceDefault();
+
+            $scope.showPrecinctsReportingSmall = false;
+            $scope.showPrecinctsNotReportingSmall = false;
+
+            $scope.sliderValue = 15;
+            $scope.intervalProgress = 0;
+            var isPlaying = false;
+            var lastTime, interval, counter;
+            $scope.playPauseIcon = "glyphicon-play";
+
+            $scope.flipCard = function() {
+                //Hack for IOS
+                if ($("#card-main-container .back").is(":visible")) {
+                    $("#card-main-container .back").hide();
+                    $("#card-main-container .front").show();
+                    $("#card-main-container").toggleClass("hover");
+                } else {
+                    $("#card-main-container .back").show();
+                    $("#card-main-container .front").hide();
+                    $("#card-main-container").toggleClass("hover");
+                }
+            }
+
+            var summary = $scope.electionData.Summary ? $scope.electionData.Summary.replace(/(?:\r\n|\r|\n)/g, '<br>') : "";
+
+            $("#election-summary").html(summary);
+
+            /*************************************************
+                              DATA UPDATING
+            *************************************************/
+            async function updateDataSource() {
+                var now = new Date();
+                var utcNow = new Date(now.toUTCString()).toISOString();
+                if (utcNow > $scope.cacheExpiresDate) {
+                    await $http({
+                        url: window.location.href + "Home/ElectionData",
+                        method: "GET"
+                    }).then(function(response) {
+                        var data = response.data;
+                        var races = data.Races;
+                        var election = data.Election;
+                        var newExpirationDate = new Date(new Date(data.ExpirationDate.replace(/ /g,"T")).toUTCString()).toISOString();
+                        $scope.electionData = election;
+                        $scope.hasBeenUpdated = true;
+                        $scope.lastUpdatedTimeStamp = new Date(new Date().toUTCString()).toISOString();
+                        $scope.cacheExpiresDate = newExpirationDate;
+
+                        $scope.raceData = $scope.raceData.map(function (obj) {
+                            if (!obj.Selected) return obj;
+
+                            var newData = races.filter(function (newObj) {
+                                return newObj.RaceId === obj.RaceId;
+                            })[0];
+
+                            if (newData) {
+                                return newData;
+                            }
+                        });
+
+                        $scope.longListRaces = $scope.raceData.filter(function(obj) {
+                            return obj.Selected;
+                        });
+                    });
+                }
+            }
+
+            /*************************************************
+                            FILTER MANAGEMENT
+            *************************************************/
+            $scope.filter = function() {
+                $scope.areFiltering = true;
+            }
+
+            $scope.customRacesFilter = function(race) {
+                if ($scope.areFiltering)
+                    return true;
+                if (race.Selected)
+                    return true;
+                return false;
+            }
+
+            $scope.saveFilter = function() {
+                var results = $scope.raceData.filter(function(obj) {
+                    return obj.Selected;
+                });
+                if (results.length < 3) {
+                    $('#card-left-container').hide();
+                    $('#card-right-container').hide();
+                } else {
+                    $('#card-left-container').show();
+                    $('#card-right-container').show();
+                }
+
+                if (results.length < 2)
+                    $('.back-next').hide();
+                else
+                    $('.back-next').show();
+
+                $scope.areFiltering = false;
+                setSelectedRaceDefault();
+
+                localStorage.setObj($scope.electionData.SubDomain, results);
+
+                updateLongList();
+
+            }
+
+            function updateLongList() {
+                $scope.longListRaces = $scope.raceData.filter(function(obj) {
+                    return obj.Selected;
+                });
+            }
+
+            function filterOnLoad() {
+                var savedRaces = localStorage.getObj($scope.electionData.SubDomain);
+
+                var keepGoing = true;
+                angular.forEach($scope.raceData,
+                    function(value, key) {
+                        keepGoing = true;
+                        angular.forEach(savedRaces,
+                            function(resultValue, resultKey) {
+                                if (keepGoing) {
+                                    if (resultValue.RaceId == value.RaceId) {
+                                        value.Selected = true;
+                                        keepGoing = false;
+                                    } else {
+                                        value.Selected = false;
+                                    }
+                                }
+                            });
+                    });
+
+                updateLongList();
+            }
+
+            $scope.checkAll = function() {
+                angular.forEach($scope.raceData,
+                    function(race) {
+                        race.Selected = true;
+                    });
+            }
+
+            $scope.uncheckAll = function() {
+                angular.forEach($scope.raceData,
+                    function(race) {
+                        race.Selected = false;
+                    });
+            }
+
+            /*************************************************
+                         MANAGE SELECTED RACE
+            *************************************************/
+            $scope.selectRace = function(race) {
+                $scope.selectedRace = race;
+
+                scrollToCard();
+            };
+
+            $scope.selectRaceMobile = function (race) {
+                $scope.selectedRace = race;
+            };
+
+            function setSelectedRaceDefault() {
+                //Force change
+                var results = $scope.raceData.filter(function(obj) {
+                    if (obj.Selected)
+                        return obj;
+                });
+
+                if (results.length > 2)
+                    $scope.selectedRace = results[1 % results.length];
+                else
+                    $scope.selectedRace = results[0 % results.length];
+
+                if (results.length > 1 && getBootstrapBreakpoint() === "xs") {
+                    $scope.selectedRace = undefined;
+                }
+
+                if (results.length < 3) {
+                    $('#card-left-container').hide();
+                    $('#card-right-container').hide();
+                } else {
+                    $('#card-left-container').show();
+                    $('#card-right-container').show();
+                }
+
+                if (results.length < 2)
+                    $('.back-next').hide();
+                else
+                    $('.back-next').show();
+            }
+
+            $scope.togglePrecinctsReportingSmall = function () {
+                $scope.showPrecinctsReportingSmall === false ? $scope.showPrecinctsReportingSmall = true : $scope.showPrecinctsReportingSmall = false;
+            }
+
+            $scope.togglePrecinctsNotReportingSmall = function() {
+                $scope.showPrecinctsNotReportingSmall === false ? $scope.showPrecinctsNotReportingSmall = true : $scope.showPrecinctsNotReportingSmall = false;
+            }
+
+            /*************************************************
+               NEXT/PREVIOUS RACES, PLAY AND PAUSE CONTROLS
+            *************************************************/
+
+            function nextRace() {
+                var results = $scope.raceData.filter(function(obj) {
+                    if (obj.Selected)
+                        return obj;
+                });
+                return results[($.inArray($scope.selectedRace, results) + 1) % results.length];
+            }
+
+            function previousRace() {
+                var results = $scope.raceData.filter(function(obj) {
+                    if (obj.Selected)
+                        return obj;
+                });
+                return results[($.inArray($scope.selectedRace, results) - 1 + results.length) % results.length];
+            }
+
+            $scope.showNextRace = function() {
+                $scope.selectedRace = nextRace();
+            }
+
+            $scope.showPreviousRace = function() {
+                $scope.selectedRace = previousRace();
+            }
+
+            async function checkTimeTick() {
+                var results = $scope.raceData.filter(function(obj) {
+                    if (obj.Selected)
+                        return obj;
+                });
+                if (results.length < 2) {
+                    await updateDataSource();
+                    var updatedResults = $scope.raceData.filter(function (obj) {
+                        if (obj.Selected)
+                            return obj;
+                    });
+
+                    $scope.selectedRace = updatedResults[0 % updatedResults.length];
+                } else {
+                    $scope.selectedRace = nextRace();
+                }
+            }
+
+            function stopTimer() {
+                $interval.cancel(interval);
+            };
+
+            function intervalMilliseconds() {
+                return $scope.sliderValue * 1000;
+            }
+
+            function startTimer() {
+                counter = 0;
+                interval = $interval(checkTimeTick, intervalMilliseconds());
+            };
+
+            function restartTimer() {
+                stopTimer();
+                startTimer();
+            }
+
+            $scope.$watch("selectedRace",
+                async function() {
+                    $scope.nextRace = nextRace();
+                    $scope.previousRace = previousRace();
+
+                    var raceId = $scope.selectedRace === undefined ? undefined : $scope.selectedRace.RaceId;
+
+                    //update data source will do nothing unless timer expires
+                    await updateDataSource();
+                    manageDetails(raceId);
+
+                    if (isPlaying) {
+                        restartTimer();
+                    }
+                });
+
+            $scope.$watch("sliderValue",
+                function() {
+                    if (isPlaying) {
+                        restartTimer();
+                    }
+                });
+
+            $scope.playPause = function() {
+                if (isPlaying) {
+                    $scope.playPauseIcon = "glyphicon-play";
+                    stopTimer();
+                } else {
+                    $scope.playPauseIcon = "glyphicon-pause";
+                    startTimer();
+                }
+
+                isPlaying = !isPlaying;
+            }
+
+            $scope.stop = function() {
+                isPlaying = false;
+                stopTimer();
+            }
+
+        }).filter('titleCase',
+        function() {
+            return function(input) {
+                input = input || '';
+                return input.replace(/\w\S*/g,
+                    function(txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
+            };
+        }).filter('newLine',
+        function() {
+            return function(input) {
+                input = input || '';
+                return input.replace(/(?:\r\n|\r|\n)/g, '<br>');
+            }
+        });
+</script>
+
+</div>
+<footer class="">
+    <p><a href="http://libertysystemsllc.com">&copy; 2008 - 2026 Liberty Systems LLC || Powered by Access Liberty</a> || <a href="http://www.csesoftware.com/" target="_blank">Developed by CSE Software&trade; Inc.</a></p>
+</footer>
+<div id="background" class="hidden-xs col-sm-4 col-md-3 col-xl-3"></div>
+<div id="loading"></div>
+</body>
+</html>
+

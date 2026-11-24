@@ -17,6 +17,9 @@ def main():
     parser.add_argument("--sha256", required=True)
     parser.add_argument("--downloaded-at", required=True)
     parser.add_argument("--minimum-generated-at")
+    parser.add_argument(
+        "--generated-at", help="The report time the site showed, for a file that prints none"
+    )
     parser.add_argument("--status", choices=("test", "unofficial", "official"), required=True)
     parser.add_argument("--publish", action="store_true")
     parser.add_argument("--certified", help="Import the state's certified file under this name")
@@ -36,6 +39,7 @@ def main():
             args.sha256,
             minimum=args.minimum_generated_at,
             certified=args.certified,
+            declared_generated_at=args.generated_at,
         )
         result = run_source(
             source,

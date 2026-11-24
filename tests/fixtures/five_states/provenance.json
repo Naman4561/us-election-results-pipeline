@@ -52,5 +52,107 @@
     "sha256": "df77df4b734fe117272dd7770cfcd71f951d2f4d76310b6cfb53c58ae2e27640",
     "bytes": 77998,
     "downloaded_at": "2026-11-09T20:58:13.084451+00:00"
+  },
+  "ga-official-results.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/data",
+    "sha256": "24091fbe32dea1841de5d8db4d395d29d3df682708b668e8386dcee1503fd746",
+    "bytes": 1302518,
+    "downloaded_at": "2026-11-22T01:59:25+00:00"
+  },
+  "ga-item-ga-sen.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-4042-08df23e5ff36",
+    "sha256": "58bd750b71f9b79160e58b9bab1c917058720d1673806513f461fbb7883d5d24",
+    "bytes": 454555,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-gov.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-0434-08df23e5ff46",
+    "sha256": "49348a760bb24524f9dd2ffbe58d6bf54ee932796bd77e251300e22757c06a19",
+    "bytes": 455509,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-01.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-9ca3-08df23e5ffce",
+    "sha256": "627b695913715d2f170249961c0bfb3ab2c9b53ed397f1ff42a7c20d89576747",
+    "bytes": 45246,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-02.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-624b-08df23e60062",
+    "sha256": "9307abf8ed3b8e169f308a2dba38d6af222c2b97e7f16bc8c6816b72d77755c6",
+    "bytes": 87655,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-03.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-d16d-08df23e60305",
+    "sha256": "41254b5fbfbde45bfce8d7f7c531446e7030ca9b0ac250a3de65512e557a377b",
+    "bytes": 45070,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-04.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-d67f-08df23e681eb",
+    "sha256": "e37e1385a6b0368724be97b451023915a989589978ecaab3cc75ff3e1d829ad2",
+    "bytes": 8154,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-05.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-9a36-08df23e6579b",
+    "sha256": "236efc8b666f8097db44e608cebbb70ac4ef78befd3b3010adc072443c1a29ca",
+    "bytes": 11015,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-06.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-82d8-08df23e6637a",
+    "sha256": "dadb425dab24165556d32f46beb5b9c432e70c8e79298f33cfdd14925df67de2",
+    "bytes": 13815,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-07.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-6c09-08df23e60217",
+    "sha256": "50c2feb6103028062304c6331c5fa8a2f1b66f4073c1ec5b852a192011bc4745",
+    "bytes": 19532,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-08.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-92cd-08df23e604e7",
+    "sha256": "4cfa23616d31a40c0bb39539e05e864d0998bae41348efab0ac04cf70bcf3c46",
+    "bytes": 84971,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-09.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-2d91-08df23e600df",
+    "sha256": "d78e22bcbaf148e7f9c4922099ed2e5d2683d3b83af16b930d542f1d97405a08",
+    "bytes": 36584,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-10.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-4c4a-08df23e600a6",
+    "sha256": "43af1d2625e78544514e7d5a3794d397334fbadda39a933c87e1c27a98d8e04a",
+    "bytes": 59495,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-11.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-41bb-08df23e60017",
+    "sha256": "ff28b77c6b23b8ace4a34f8ebf860867f094b327466acf586e598fff5fa68a7e",
+    "bytes": 16632,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-12.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-b721-08df23e5ff66",
+    "sha256": "35ba4dddd4cf6e206219e0d5749c75817637b4ecac596dbb80f97163df3c0446",
+    "bytes": 70779,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-13.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-6a3d-08df23e6047a",
+    "sha256": "bbce770b86eb13115c5d0a8801660bbe7834fcbf54fea763cfb953d40841074f",
+    "bytes": 19512,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
+  },
+  "ga-item-ga-14.json": {
+    "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/ballot-items/01000000-3a82-a359-997d-08df23e60ffc",
+    "sha256": "c98331a440694041ccf1210a03f5c46410e40e05ef32e2405ef7c0da26369ff1",
+    "bytes": 30877,
+    "downloaded_at": "2026-11-22T02:00:42+00:00"
   }
 }

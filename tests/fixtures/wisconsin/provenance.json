@@ -1,0 +1,52 @@
+{
+ "description": "Six Wisconsin county results reports as posted (one per reader, and Iowa County's canvass with a transcribed review signed for the test only), packed by the operator's assembly script.",
+ "sources": {
+  "Door": {
+   "url": "https://www.co.door.wi.gov/DocumentCenter/View/10048/11-03-2026-Election-Summary-Report",
+   "saved_at": "2026-11-20T18:42:34+00:00",
+   "report": "unofficial",
+   "format": "summary_report"
+  },
+  "Chippewa": {
+   "url": "https://www.chippewacountywi.gov/DocumentCenter/View/5210/Final-2026-General-Election-PDF",
+   "saved_at": "2026-11-20T18:42:33+00:00",
+   "report": "canvassed",
+   "format": "summary_list"
+  },
+  "Oneida": {
+   "url": "https://www.oneidacountywi.gov/november-3-2026-general-election-results/",
+   "saved_at": "2026-11-20T18:42:49+00:00",
+   "report": "unofficial",
+   "format": "table_page"
+  },
+  "Portage": {
+   "url": "https://www.co.portage.wi.gov/DocumentCenter/View/7666/Official-Resutls---Summary-11-3-26",
+   "saved_at": "2026-11-20T19:42:28+00:00",
+   "report": "canvassed",
+   "format": "canvass_statement"
+  },
+  "La Crosse": {
+   "url": "TBD: page the operator saved it from",
+   "saved_at": "2026-11-20T19:42:23+00:00",
+   "report": "canvassed",
+   "format": "ess_summary"
+  },
+  "Iowa": {
+   "url": "https://www.iowacountywi.gov/media/Elections/2026%20General%20BOC%20Certification.pdf",
+   "saved_at": "2026-11-20T18:42:43+00:00",
+   "report": "canvassed",
+   "format": "review"
+  }
+ },
+ "sha256": "bd92185457d7f4247e12611e49a834f9f752afa21868cf97133440f6957bf8d2",
+ "members": {
+  "Chippewa.pdf": "ad039eaafc0f22c31334e391931853371676d28b68a20841413fc98f5e9a3501",
+  "Door.pdf": "4d2da9618dacdec8eaad0011cdfecdb20a78714ba1d59a306b6188227471c356",
+  "Iowa.pdf": "761e01337ffec4f59b2b322cfe55f4f3eca58a68f6e5f34ce20f5d7b31624ffe",
+  "Iowa.review.json": "83c383a0f63f72fba6b0c2ea4b1ebceb5526d91fd3ca2a0054235b7a3ccbe0f8",
+  "La_Crosse.pdf": "51fcda9ad1615837854bfcb60637aaa386b21056c8528ec528cee61ce5342fd5",
+  "Oneida.html": "93853ce66405d1a280fa256053e3a28de37252dded8491fcd7f148a782072c63",
+  "Portage.pdf": "6bed8982b621d69ed7de09a015aecdd420380c7b8c14c8e25583b99f83ba8d52",
+  "manifest.json": "bafa9b6019c5a3a7a614a35805a7e7f0dfb94cf587d038543a1430b68ff640b0"
+ }
+}

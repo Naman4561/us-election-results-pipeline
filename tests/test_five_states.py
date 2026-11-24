@@ -35,7 +35,14 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests/fixtures/five_states"
 CODES = ("GA", "SC", "KS", "OH")
 MEMBERS = {
-    "GA": {"results.json": "ga-results.json"},
+    # The official results of November 20 and their ballot items (county detail).
+    "GA": {
+        "results.json": "ga-official-results.json",
+        **{
+            f"item-ga-{race}.json": f"ga-item-ga-{race}.json"
+            for race in ("sen", "gov", *(f"{n:02}" for n in range(1, 15)))
+        },
+    },
     "SC": {
         "current_ver.txt": "sc-current_ver.txt",
         "summary.json": "sc-summary.json",
@@ -132,7 +139,7 @@ class FiveStateTests(unittest.TestCase):
 
     def test_official_snapshots_parse_verify_reconcile_and_convert(self):
         for code, records, contests in [
-            ("GA", 32, 16),
+            ("GA", 1030, 16),
             ("SC", 687, 9),
             ("KS", 522, 6),
             ("OH", 1475, 17),
@@ -143,9 +150,7 @@ class FiveStateTests(unittest.TestCase):
                 self.assertEqual(report["output_rows"], records)
                 self.assertEqual(report["contest_count"], contests)
                 self.assertFalse(report["all_counts_zero"])
-                self.assertEqual(
-                    report["county_reconciliation"], "not_available" if code == "GA" else "passed"
-                )
+                self.assertEqual(report["county_reconciliation"], "passed")
                 directory = Path(report["output_dir"])
                 converted = copies(self.source, self.settings, self.store, directory, 88)[
                     ("landing", "results")
@@ -163,7 +168,7 @@ class FiveStateTests(unittest.TestCase):
             raw = gzip.decompress((FIXTURES / (name + ".gz")).read_bytes())
             self.assertEqual(hashlib.sha256(raw).hexdigest(), metadata["sha256"])
             self.assertEqual(len(raw), metadata["bytes"])
-        self.assertNotIn("me_2026_general", self.sources)
+        self.assertEqual(self.sources["me_2026_general"].primary_filename, "results.zip")
 
     def test_maps_and_dashboard_match_all_new_state_results(self):
         providers = {}
@@ -185,7 +190,7 @@ class FiveStateTests(unittest.TestCase):
                 state=code,
             )
             self.assertEqual(set(payload["races"]), set(state_adapter(code).races))
-            self.assertEqual(payload["county_detail"], code != "GA")
+            self.assertTrue(payload["county_detail"])
             self.assertGreater(payload["races"][code + "-SEN"]["stats"]["total_votes"]["total"], 0)
             providers[code] = lambda payload=payload: payload
         national = national_payload(providers)
@@ -193,38 +198,59 @@ class FiveStateTests(unittest.TestCase):
         self.assertNotIn("ME", national["states"])
 
     def test_ga_and_sc_report_their_own_official_flags(self):
-        self.assertIs(self.parse("GA")["official_results"], False)
+        self.assertIs(self.parse("GA")["official_results"], True)
 
-        def official(members):
+        def unofficial(members):
             data = json.loads(members["results.json"])
-            data["election"]["isOfficialResults"] = True
+            data["election"]["isOfficialResults"] = False
             members["results.json"] = json.dumps(data).encode()
 
-        self.assertIs(self.parse("GA", official)["official_results"], True)
+        self.assertIs(self.parse("GA", unofficial)["official_results"], False)
         self.assertIs(self.parse("SC")["official_results"], False)
 
-    def test_ga_wrong_election_missing_race_candidate_and_inconsistent_methods_rejected(self):
-        def apply(edit):
+    def test_ga_wrong_election_missing_race_candidate_and_inconsistent_counties_rejected(self):
+        def apply(edit, member="results.json"):
             def mutate(members):
-                data = json.loads(members["results.json"])
+                data = json.loads(members[member])
                 edit(data)
-                members["results.json"] = json.dumps(data).encode()
+                members[member] = json.dumps(data).encode()
 
             return mutate
 
+        def county(d, change):
+            locality = d["breakdownResults"][0]
+            locality["ballotOptions"][0]["voteCount"] += change
+            locality["voteTotal"] += change
+
+        def drop(d):
+            d["breakdownResults"].pop()
+            d["breakdownResultCount"] -= 1
+
+        def repeat(d):
+            d["breakdownResults"].append(d["breakdownResults"][0])
+            d["breakdownResultCount"] += 1
+
         edits = [
-            lambda d: d["election"].update(electionDate="2024-11-05"),
-            lambda d: d["ballotItems"].pop(0),
-            lambda d: d["ballotItems"][0]["summaryResults"]["ballotOptions"].pop(),
-            lambda d: d["ballotItems"][0]["summaryResults"]["ballotOptions"][0].update(
-                voteCount=None
+            (lambda d: d["election"].update(electionDate="2024-11-05"), "results.json"),
+            (lambda d: d["ballotItems"].pop(0), "results.json"),
+            (
+                lambda d: d["ballotItems"][0]["summaryResults"]["ballotOptions"].pop(),
+                "results.json",
             ),
-            lambda d: d["ballotItems"][0]["summaryResults"]["ballotOptions"][0]["groupResults"][
-                0
-            ].update(voteCount=1),
+            (
+                lambda d: d["ballotItems"][0]["summaryResults"]["ballotOptions"][0].update(
+                    voteCount=None
+                ),
+                "results.json",
+            ),
+            # A county that no longer adds up to the statewide count, one that is missing,
+            # and one counted twice.
+            (lambda d: county(d, 1), "item-ga-sen.json"),
+            (drop, "item-ga-sen.json"),
+            (repeat, "item-ga-gov.json"),
         ]
-        for edit in edits:
-            self.assertEqual(self.parse("GA", apply(edit))["outcome"], "validation_failed")
+        for edit, member in edits:
+            self.assertEqual(self.parse("GA", apply(edit, member))["outcome"], "validation_failed")
 
     def test_ga_duplicate_json_keys_and_captcha_rejected(self):
         for raw in [b'{"election":{},"election":{}}', b"<html><title>Captcha</title></html>"]:
@@ -237,20 +263,40 @@ class FiveStateTests(unittest.TestCase):
         for zero in (True, False):
 
             def mutate(members):
+                # Zero every count, or take one vote from each candidate's first county
+                # with votes and from its statewide count.
                 d = json.loads(members["results.json"])
                 for b in d["ballotItems"]:
+                    member = next(
+                        (m for m in members if json.loads(members[m]).get("id") == b["id"]), None
+                    )
+                    item = json.loads(members[member]) if member else None
                     for c in b["summaryResults"]["ballotOptions"]:
+                        if item is None:
+                            if zero:
+                                c["voteCount"] = 0
+                            continue
+                        local = [
+                            (place, o)
+                            for place in item["breakdownResults"]
+                            for o in place["ballotOptions"]
+                            if o["id"] == c["id"]
+                        ]
                         if zero:
                             c["voteCount"] = 0
-                            for g in c["groupResults"]:
-                                g["voteCount"] = 0
-                        elif c["voteCount"] and c["groupResults"]:
-                            g = next(g for g in c["groupResults"] if g["voteCount"])
-                            g["voteCount"] -= 1
+                            for place, o in local:
+                                o["voteCount"] = 0
+                        elif c["voteCount"]:
+                            place, o = next((p, o) for p, o in local if o["voteCount"])
+                            o["voteCount"] -= 1
                             c["voteCount"] -= 1
                     b["voteTotal"] = sum(
                         c["voteCount"] for c in b["summaryResults"]["ballotOptions"]
                     )
+                    if item is not None:
+                        for place in item["breakdownResults"]:
+                            place["voteTotal"] = sum(o["voteCount"] for o in place["ballotOptions"])
+                        members[member] = json.dumps(item).encode()
                 members["results.json"] = json.dumps(d).encode()
 
             report = self.parse("GA", mutate)

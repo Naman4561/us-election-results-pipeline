@@ -1,0 +1,285 @@
+{
+ "state": "AL",
+ "provenance": "Alabama candidates (by the export's candidate number, name and party) and counties from the Secretary of State's statewide results page and its Export Data workbook (sosEnrExport.xlsx), collected on Nov 19, 2026 (bundle SHA-256 1e29c3428a50a663e904deea8bef0b52a03b5a1af393beab4d2aac2645d05ef8; page: Counties Reported 67 of 67, Last Updated 11/04/2026 11:16:06 AM). Write-in votes are excluded. Confirmed by the operator before release.",
+ "races": {
+  "AL-GOV": {
+   "candidates": [
+    "Doug Jones",
+    "Tommy Tuberville"
+   ],
+   "counties": [
+    "Autauga",
+    "Baldwin",
+    "Barbour",
+    "Bibb",
+    "Blount",
+    "Bullock",
+    "Butler",
+    "Calhoun",
+    "Chambers",
+    "Cherokee",
+    "Chilton",
+    "Choctaw",
+    "Clarke",
+    "Clay",
+    "Cleburne",
+    "Coffee",
+    "Colbert",
+    "Conecuh",
+    "Coosa",
+    "Covington",
+    "Crenshaw",
+    "Cullman",
+    "Dale",
+    "Dallas",
+    "DeKalb",
+    "Elmore",
+    "Escambia",
+    "Etowah",
+    "Fayette",
+    "Franklin",
+    "Geneva",
+    "Greene",
+    "Hale",
+    "Henry",
+    "Houston",
+    "Jackson",
+    "Jefferson",
+    "Lamar",
+    "Lauderdale",
+    "Lawrence",
+    "Lee",
+    "Limestone",
+    "Lowndes",
+    "Macon",
+    "Madison",
+    "Marengo",
+    "Marion",
+    "Marshall",
+    "Mobile",
+    "Monroe",
+    "Montgomery",
+    "Morgan",
+    "Perry",
+    "Pickens",
+    "Pike",
+    "Randolph",
+    "Russell",
+    "Shelby",
+    "St. Clair",
+    "Sumter",
+    "Talladega",
+    "Tallapoosa",
+    "Tuscaloosa",
+    "Walker",
+    "Washington",
+    "Wilcox",
+    "Winston"
+   ]
+  },
+  "AL-SEN": {
+   "candidates": [
+    "Everett Wess",
+    "Barry Moore"
+   ],
+   "counties": [
+    "Autauga",
+    "Baldwin",
+    "Barbour",
+    "Bibb",
+    "Blount",
+    "Bullock",
+    "Butler",
+    "Calhoun",
+    "Chambers",
+    "Cherokee",
+    "Chilton",
+    "Choctaw",
+    "Clarke",
+    "Clay",
+    "Cleburne",
+    "Coffee",
+    "Colbert",
+    "Conecuh",
+    "Coosa",
+    "Covington",
+    "Crenshaw",
+    "Cullman",
+    "Dale",
+    "Dallas",
+    "DeKalb",
+    "Elmore",
+    "Escambia",
+    "Etowah",
+    "Fayette",
+    "Franklin",
+    "Geneva",
+    "Greene",
+    "Hale",
+    "Henry",
+    "Houston",
+    "Jackson",
+    "Jefferson",
+    "Lamar",
+    "Lauderdale",
+    "Lawrence",
+    "Lee",
+    "Limestone",
+    "Lowndes",
+    "Macon",
+    "Madison",
+    "Marengo",
+    "Marion",
+    "Marshall",
+    "Mobile",
+    "Monroe",
+    "Montgomery",
+    "Morgan",
+    "Perry",
+    "Pickens",
+    "Pike",
+    "Randolph",
+    "Russell",
+    "Shelby",
+    "St. Clair",
+    "Sumter",
+    "Talladega",
+    "Tallapoosa",
+    "Tuscaloosa",
+    "Walker",
+    "Washington",
+    "Wilcox",
+    "Winston"
+   ]
+  },
+  "AL-06": {
+   "candidates": [
+    "Maurice Mercer",
+    "Gary Palmer"
+   ],
+   "counties": [
+    "Autauga",
+    "Bibb",
+    "Chilton",
+    "Coosa",
+    "Elmore",
+    "Jefferson",
+    "Shelby",
+    "Talladega"
+   ]
+  },
+  "AL-07": {
+   "candidates": [
+    "Terri Sewell",
+    "Ammie Akin"
+   ],
+   "counties": [
+    "Choctaw",
+    "Clarke",
+    "Conecuh",
+    "Dallas",
+    "Greene",
+    "Hale",
+    "Jefferson",
+    "Marengo",
+    "Monroe",
+    "Perry",
+    "Pickens",
+    "Sumter",
+    "Tuscaloosa",
+    "Washington",
+    "Wilcox"
+   ]
+  },
+  "AL-01": {
+   "candidates": [
+    "Clyde Jones",
+    "Jerry Carl"
+   ],
+   "counties": [
+    "Baldwin",
+    "Covington",
+    "Escambia",
+    "Mobile"
+   ]
+  },
+  "AL-02": {
+   "candidates": [
+    "Shomari C. Figures",
+    "Rhett Marques"
+   ],
+   "counties": [
+    "Barbour",
+    "Bullock",
+    "Butler",
+    "Coffee",
+    "Covington",
+    "Crenshaw",
+    "Dale",
+    "Elmore",
+    "Geneva",
+    "Henry",
+    "Houston",
+    "Lowndes",
+    "Macon",
+    "Montgomery",
+    "Pike",
+    "Russell"
+   ]
+  },
+  "AL-04": {
+   "candidates": [
+    "Amanda N. Pusczek",
+    "Robert B. Aderholt"
+   ],
+   "counties": [
+    "Blount",
+    "Colbert",
+    "Cullman",
+    "DeKalb",
+    "Fayette",
+    "Franklin",
+    "Lamar",
+    "Lauderdale",
+    "Marion",
+    "Marshall",
+    "Tuscaloosa",
+    "Walker",
+    "Winston"
+   ]
+  },
+  "AL-03": {
+   "candidates": [
+    "Lee McInnis",
+    "Mike Rogers"
+   ],
+   "counties": [
+    "Calhoun",
+    "Chambers",
+    "Cherokee",
+    "Clay",
+    "Cleburne",
+    "Etowah",
+    "Lee",
+    "Randolph",
+    "St. Clair",
+    "Talladega",
+    "Tallapoosa"
+   ]
+  },
+  "AL-05": {
+   "candidates": [
+    "Andrew Sneed",
+    "Dale W. Strong"
+   ],
+   "counties": [
+    "Jackson",
+    "Lauderdale",
+    "Lawrence",
+    "Limestone",
+    "Madison",
+    "Morgan"
+   ]
+  }
+ }
+}

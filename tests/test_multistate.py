@@ -79,17 +79,68 @@ class MultiStateTests(unittest.TestCase):
             {
                 *("NC", "KY", "MN", "NE", "TX", "GA", "SC", "KS", "OH", "AK", "MS", "SD", "NM"),
                 *("FL", "VA", "ID", "WA", "CO", "IA", "OR", "CA", "MD", "HI", "WV"),
-                *("UT", "IN", "AR", "ND", "LA", "RI", "DE", "VT", "WY", "OK"),
+                *(
+                    "UT",
+                    "IN",
+                    "AR",
+                    "ND",
+                    "LA",
+                    "RI",
+                    "DE",
+                    "VT",
+                    "WY",
+                    "OK",
+                    "MI",
+                    "MO",
+                    "AZ",
+                    "TN",
+                    "NY",
+                    "PA",
+                    "MT",
+                    "AL",
+                    "CT",
+                    "NH",
+                    "NV",
+                    "NJ",
+                    "WI",
+                    "MA",
+                    "IL",
+                    "ME",
+                ),
             },
         )
         # A state is labeled awaiting certified results only while it has no public
         # source; every other state with an election is in one list or the other.
         awaiting = set(payload["calendar"]["awaiting_certified"])
-        self.assertEqual(awaiting & set(payload["states"]), {"KY", "VA", "WY", "OK"})
-        self.assertEqual(len(awaiting | set(payload["states"])), 50)
+        self.assertEqual(
+            awaiting & set(payload["states"]),
+            {
+                "KY",
+                "VA",
+                "WY",
+                "OK",
+                "MI",
+                "MO",
+                "AZ",
+                "TN",
+                "NY",
+                "PA",
+                "MT",
+                "AL",
+                "CT",
+                "NH",
+                "NV",
+                "NJ",
+                "WI",
+                "MA",
+                "IL",
+                "ME",
+            },
+        )
+        self.assertEqual(len(payload["states"]), 50)
         self.assertEqual(len(payload["coverage"]["KY"]), 7)
         self.assertNotIn("early_voting", payload["states"]["KY"]["methods"])
-        self.assertEqual(client.get("/api/states/ME").status_code, 404)
+        self.assertEqual(client.get("/api/states/ZZ").status_code, 404)
         self.assertEqual(client.get("/api/states/KY").status_code, 200)
         cached = client.get("/api/national", headers={"If-None-Match": response.headers["etag"]})
         self.assertEqual(cached.status_code, 304)

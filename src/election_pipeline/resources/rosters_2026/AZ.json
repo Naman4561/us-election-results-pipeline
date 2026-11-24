@@ -1,0 +1,148 @@
+{
+ "state": "AZ",
+ "provenance": "Arizona candidates (by name, with the export's candidate IDs and parties checked for consistency) and counties from the Secretary of State's Enhanced Voting export, export-110326GeneralElection.json (SHA-256 c13d02eaad2fc1cd9c3f3aac21a4490053259f980c132466ce4251afab095384), created 2026-11-18T15:42:07Z, downloaded from app.enhancedvoting.com on November 19, 2026. The generic write-in lines are excluded; named write-in candidates are listed. Confirmed by the operator before release.",
+ "races": {
+  "AZ-01": {
+   "candidates": [
+    "Amish Shah",
+    "Thomas \"Jay\" Feely IV",
+    "Monica Alponte",
+    "Gage Dylan Thunder",
+    "Dev Gupta"
+   ],
+   "counties": [
+    "Maricopa"
+   ]
+  },
+  "AZ-02": {
+   "candidates": [
+    "Eli Crane",
+    "Jonathan Nez",
+    "Curtis Goodwin"
+   ],
+   "counties": [
+    "Apache",
+    "Coconino",
+    "Gila",
+    "Graham",
+    "Maricopa",
+    "Mohave",
+    "Navajo",
+    "Pinal",
+    "Yavapai"
+   ]
+  },
+  "AZ-03": {
+   "candidates": [
+    "Yassamin Ansari",
+    "Alan Aversa",
+    "David Redkey",
+    "Jacob Parkman"
+   ],
+   "counties": [
+    "Maricopa"
+   ]
+  },
+  "AZ-04": {
+   "candidates": [
+    "Greg Stanton",
+    "Zuhdi Jasser",
+    "Tisha Benoit",
+    "Steven Sanders"
+   ],
+   "counties": [
+    "Maricopa"
+   ]
+  },
+  "AZ-05": {
+   "candidates": [
+    "Mark Lamb",
+    "Elizabeth Lee"
+   ],
+   "counties": [
+    "Maricopa",
+    "Pinal"
+   ]
+  },
+  "AZ-06": {
+   "candidates": [
+    "JoAnna Mendoza",
+    "Juan Ciscomani",
+    "Jereme Lance Peters",
+    "Gary Swing",
+    "Michael Dorland"
+   ],
+   "counties": [
+    "Cochise",
+    "Graham",
+    "Greenlee",
+    "Pima",
+    "Pinal"
+   ]
+  },
+  "AZ-07": {
+   "candidates": [
+    "Adelita Grijalva",
+    "Daniel Francis Butierez Sr."
+   ],
+   "counties": [
+    "Cochise",
+    "Maricopa",
+    "Pima",
+    "Pinal",
+    "Santa Cruz",
+    "Yuma"
+   ]
+  },
+  "AZ-08": {
+   "candidates": [
+    "Abraham \"Abe\" Hamadeh",
+    "Bernadette Greene-Placentia"
+   ],
+   "counties": [
+    "Maricopa"
+   ]
+  },
+  "AZ-09": {
+   "candidates": [
+    "Paul Gosar",
+    "Danielle \"Dani\" Sterbinsky",
+    "William Perry",
+    "G. Seville Hatch"
+   ],
+   "counties": [
+    "La Paz",
+    "Maricopa",
+    "Mohave",
+    "Yuma"
+   ]
+  },
+  "AZ-GOV": {
+   "candidates": [
+    "Katie Hobbs / John Giles",
+    "Andy Biggs / Sine Kerr",
+    "Risa Lombardo / Lisa Castillo",
+    "Teri Ann Hourihan / Angela Harrolle Mohan",
+    "Alice Novoa",
+    "Gertritrude Gonzalez"
+   ],
+   "counties": [
+    "Apache",
+    "Cochise",
+    "Coconino",
+    "Gila",
+    "Graham",
+    "Greenlee",
+    "La Paz",
+    "Maricopa",
+    "Mohave",
+    "Navajo",
+    "Pima",
+    "Pinal",
+    "Santa Cruz",
+    "Yavapai",
+    "Yuma"
+   ]
+  }
+ }
+}
