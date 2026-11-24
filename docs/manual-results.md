@@ -4,10 +4,18 @@ Manual acquisition replaces HTTP collection for one source. It keeps the same
 state parser, raw archive contract, database tables, dbt checks, publication gate,
 backup/restore gate and dashboard.
 
-Ohio's official XML, Kansas's results page and Oklahoma's county results export are
-imported this way. The importer accepts a configured single-file result bundle with an
-ISO report timestamp.
-Multi-file sources and adapters without that timestamp contract are rejected.
+Seventeen states are imported this way: Arizona, Illinois, Kansas, Kentucky, Maine,
+Michigan, Missouri, New Hampshire, New Jersey, Nevada, New York, Ohio, Oklahoma,
+Pennsylvania, Tennessee, Wisconsin and Wyoming. Each is a source whose site refuses
+automated clients, closed its feed, or posts results only county by county or as
+documents. Which sources are manual is recorded in the production catalog
+(`acquisition = "manual"`), not in `config/sources.toml`.
+
+The importer takes one file per import, the source's `primary_filename`: a state's own
+export (Ohio's `results.xml`, Michigan's `results.txt`, a PDF) or, for a state whose
+results come in several files, one zip assembled from them (see
+[multi-file imports](#multi-file-imports)). The file must state its report time, or the
+operator declares the time the site showed (`--generated-at`).
 
 ## Provenance and validation
 
@@ -46,6 +54,7 @@ Commands run from the current release (`R`, see [deployment](deployment.md)):
 
 ```bash
 manual() { sudo "$R/.venv/bin/python" "$R/scripts/manual_source.py" "$@"; }
+deploy register --source oh_2026_general             # a state not yet in the catalog
 manual configure --source oh_2026_general            # --max-age-hours 6, --final
 manual import --source oh_2026_general --file INBOX_FILE --sha256 HASH --downloaded-at UTC_TIME
 manual promote --source oh_2026_general
@@ -55,6 +64,45 @@ manual promote --source oh_2026_general
 spot-check candidate and county totals against the same official report. Then make it
 public as any new state: an uploaded backup, `check-restore`, `deploy start-dashboard
 --source oh_2026_general` and `deploy activate` with the restore report.
+
+## Multi-file imports
+
+Where a state's results come in several files, they are imported, unchanged, as one
+`results.zip` whose parser reads every member. Two kinds:
+
+- **Assembled as results come in, with a manifest:** Illinois (by election authority),
+  New Jersey and Wisconsin (by county). The manifest (`manifest.json`, `sources.json`
+  for New Jersey) names each member's address or "saved by the operator", its SHA-256,
+  when it was saved and the report's own time; the parser refuses a member whose hash
+  differs. Nevada's zip holds the results app's own `manifest.json` and the files it
+  names, each checked against the SHA-256 it gives.
+- **A fixed set of the state's files:** Maine's tabulation spreadsheets and ranked-choice
+  summary, New Hampshire's four spreadsheets and Kentucky's seven saved results pages,
+  each under the member name its parser expects.
+
+Oklahoma's zip is not assembled: it is the state's own county results export.
+
+Each import is the previous one with files added or replaced, so the zip is rebuilt
+from the previous import and the new files:
+
+- **Illinois:** `scripts/il_bundle.py pack --base <previous zip> --add <additions.json>`
+  writes a deterministic zip (the same inputs give the same SHA-256), and `check` parses
+  it offline as the pipeline would.
+- **New Jersey:** `scripts/nj_bundle.py` fetches the counties that answer and adds the
+  files saved by hand (`--saved county=path`).
+- **The others** were packed by hand. Their published zips are archived by SHA-256, so
+  each can be replayed, but not rebuilt by a tool in the repository yet (plan step 2.5,
+  one generic pack tool).
+
+A report no reader takes (a scan, a one-off layout) is transcribed into a review file
+for that report's SHA-256 and signed by the operator who checked it against the report:
+`il_bundle.py review` and `sign` write Illinois's; Wisconsin's `<County>.review.json`
+and Mississippi's reviews are written by hand in the same spirit (plan step 2.4, one
+review format and tool). The parser refuses an unsigned review or one for other files.
+
+Every release replays each published manual source's last import under its new image
+before it goes live, so a code change that breaks one of these parsers stops the
+release rather than the next import.
 
 ## A state added from its certified results
 

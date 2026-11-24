@@ -58,9 +58,10 @@ this page explains them.
 | Wisconsin | Each county's own results report, saved or transcribed by hand | Governor, House 1–8 (9) | Collected counties | Total only |
 | Wyoming | Secretary of State certified results (State Canvassing Board) | Senate, Governor, House at-large (3) | All 23 counties | Total only |
 
-A state without a Senate or Governor race in 2026 has none listed. Ohio, Kansas,
-Oklahoma and Mississippi's reviewed counties are imported by hand, and Wyoming is added
-from its certified results alone (no election-night source); every other source is collected
+A state without a Senate or Governor race in 2026 has none listed. Seventeen states'
+files are imported by hand ([manual results](manual-results.md) lists them), as are
+Mississippi's reviewed counties, and Wyoming is added from its certified results alone
+(no election-night source); every other source is collected
 every 15 minutes, or hourly or every three hours once its count stops
 (`config/sources.toml`). [State status](state-status.md) records where each state's
 count stands.

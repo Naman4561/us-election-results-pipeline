@@ -7,6 +7,10 @@ the bytes by hash, and records what happened.
 ## Source platforms
 
 Most states publish through one of a few vendor platforms, so collectors are shared.
+Each state appears once below, by how its results arrive (`State.collection_backend`
+in `states.py`; manual imports are set in the production catalog, see
+[manual results](../manual-results.md)). `tests/test_docs.py` fails when a registered
+state is missing or listed twice.
 
 ```mermaid
 flowchart TB
@@ -17,17 +21,28 @@ flowchart TB
         GF["gated_files.py<br/>files gated on a primary"]
         CF["county_files.py<br/>independent county files"]
     end
+    subgraph Own["A state's own collector"]
+        SO["alabama.py · connecticut.py ·<br/>indiana.py · montana.py · vermont.py"]
+    end
     BU["Bundle / single file<br/>(settings + common.py)"]
+    MAN["Manual import<br/>operator-saved official files"]
 
-    CO & IA & WV & SC --> CL
-    VA & ID & WA --> EV
-    SD & NM & OR --> EN
+    CO & IA & SC & WV --> CL
+    GA & ID & RI & UT & VA & WA --> EV
+    NM & OR & SD --> EN
     CA & MD --> GF
     MS --> CF
-    NC & KY & MN & NE & TX & GA & KS & OH & FL & HI & AK --> BU
+    AL & CT & IN & MT & VT --> SO
+    AK & AR & DE & FL & HI & LA & MA & MN & NC & ND & NE & TX --> BU
+    AZ & IL & KS & KY & ME & MI & MO & NH & NJ & NV & NY & OH & OK & PA & TN & WI & WY --> MAN
 
-    CL & EV & EN & GF & CF & BU --> CLIENT["Bounded HTTP client<br/>timeouts · size and row limits ·<br/>redirect checks · user agent"]
+    CL & EV & EN & GF & CF & SO & BU --> CLIENT["Bounded HTTP client<br/>timeouts · size and row limits ·<br/>redirect checks · user agent"]
+    MAN --> CHECK["Same archive and parse path<br/>reviewed receipt · freshness limit"]
 ```
+
+Parsers share platform readers too: `parsers/clarity.py`, `enhanced_voting.py`,
+`enr_platform.py` and `tally.py` (Arkansas and North Dakota). Illinois and New Jersey
+read county Clarity sites inside their manual imports.
 
 Some states need one-off handling: Texas reads the Civix API (`parsers/tx.py`),
 Alaska pins its issuer certificates (`resources/alaska-issuers.pem`), and Florida's file

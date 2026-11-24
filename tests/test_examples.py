@@ -57,6 +57,16 @@ class ExampleSettingsTests(unittest.TestCase):
         )
         self.assertEqual([n for n, _ in problems("SESSION_SECRET=abc123\n")], [1])
 
+    def test_the_monitor_example_reads_a_route_the_dashboard_serves(self):
+        from urllib.parse import urlsplit
+
+        from election_pipeline.dashboard.server import create_app
+
+        text = (ROOT / "config/monitor.env.example").read_text(encoding="utf-8")
+        url = re.search(r"^DASHBOARD_URL=(\S+)$", text, re.M).group(1)
+        routes = {route.path for route in create_app(demo=True).routes}
+        self.assertIn(urlsplit(url).path, routes)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,4 +1,4 @@
-"""Collect once; use an external scheduler for repeated five-minute runs."""
+"""Collect once; an external scheduler (the worker timer, every 15 minutes) repeats it."""
 
 from __future__ import annotations
 
