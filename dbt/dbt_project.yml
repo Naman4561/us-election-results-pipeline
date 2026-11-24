@@ -25,8 +25,9 @@ vars:
   # exact: county totals equal the official ones; masked: privacy-masked county rows, or
   # rows beside statewide-only votes, never exceed them; none: no county results.
   county_reconciliation: none
-# Every state builds the results models; Mississippi adds its county feeds, and North
-# Carolina's absentee demographics are a dataset of their own.
+# Every state builds the results models; Mississippi adds its county feeds, a state with
+# ranked-choice tabulations its rounds, and North Carolina's absentee demographics are a
+# dataset of their own.
 models:
   election_analytics:
     +materialized: "{{ var('publication_materialization', 'view') }}"
@@ -40,6 +41,13 @@ models:
     ms:
       +tags:
       - ms
+      staging:
+        +schema: staging
+      marts:
+        +schema: marts
+    ranked_choice:
+      +tags:
+      - ranked_choice
       staging:
         +schema: staging
       marts:

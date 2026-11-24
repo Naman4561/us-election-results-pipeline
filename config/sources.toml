@@ -24,10 +24,13 @@ url = "https://www.elections.alaska.gov/enr/26GENR/results/GA_ENR_Precinct_State
 format = "bundle"
 primary_filename = "results.csv"
 min_interval_seconds = 600
-expected_members = ["election.html", "results.csv"]
+expected_members = ["election.html", "results.csv", "rcv-usrep.pdf"]
 
+# The U.S. House race's ranked-choice tabulation (parsers/ak_rcv.py); the Senate and
+# Governor races were won in the first round and have none.
 [sources.ak_2026_general.files]
 "election.html" = "https://www.elections.alaska.gov/election-results/e/?id=26genr"
+"rcv-usrep.pdf" = "https://www.elections.alaska.gov/enr/26GENR/results/RCV-USRep.pdf"
 
 [sources.nc_absentee_early_demographics_2026]
 state = "NC"

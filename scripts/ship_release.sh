@@ -6,6 +6,13 @@
 #   curl -fsSL -o /tmp/ship.sh https://raw.githubusercontent.com/Naman4561/us-election-results-pipeline/REVISION/scripts/ship_release.sh
 #   sudo systemd-run --unit=election-ship-SHORT --collect bash /tmp/ship.sh refs/heads/BRANCH REVISION
 #
+# Name after the revision any source whose collected files this release changes (a new
+# bundle member, a new address): its current snapshot lacks them, so its release check
+# has nothing to replay, and its first collection is validated before it publishes
+# (``deploy.py release --moved-source``):
+#
+#   ... bash /tmp/ship.sh refs/heads/BRANCH REVISION ak_2026_general
+#
 # Follow it with `journalctl -u election-ship-SHORT -f`. Its last line is the outcome
 # ("== result: released" or "== result: not shipped"), which stays in the journal after
 # the unit is collected. This is the only ship procedure; do not ship with copies of it.
@@ -22,8 +29,16 @@ if [[ "$EUID" -ne 0 ]]; then
 fi
 ref="${1:-}"
 revision="${2:-}"
+moved=()
+for source in "${@:3}"; do
+    if [[ ! "$source" =~ ^[a-z]{2}_[a-z0-9_]+$ ]]; then
+        printf 'Not a source ID: %s\n' "$source" >&2
+        exit 1
+    fi
+    moved+=(--moved-source "$source")
+done
 if [[ ! "$ref" =~ ^refs/heads/[A-Za-z0-9_./-]+$ || ! "$revision" =~ ^[0-9a-f]{40}$ ]]; then
-    printf 'Usage: ship_release.sh refs/heads/BRANCH FULL_40_CHARACTER_REVISION\n' >&2
+    printf 'Usage: ship_release.sh refs/heads/BRANCH FULL_40_CHARACTER_REVISION [MOVED_SOURCE...]\n' >&2
     exit 1
 fi
 repository='https://github.com/Naman4561/us-election-results-pipeline'
@@ -124,7 +139,7 @@ while [[ "$(systemctl show -p ActiveState --value election-backup.service)" == a
 done
 printf '== releasing %s\n' "$(now)"
 "$release/.venv/bin/python" "$release/scripts/deploy.py" release --release "$release" \
-    --image "election-pipeline:$revision" | python3 -c '
+    --image "election-pipeline:$revision" "${moved[@]}" | python3 -c '
 import json, sys
 result = json.load(sys.stdin)
 keys = ("outcome", "error", "migrations_applied", "sources_validated", "sources_reused")

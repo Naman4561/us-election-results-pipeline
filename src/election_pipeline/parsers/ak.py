@@ -3,7 +3,14 @@
 Alaska has no counties. Its precincts ("01-600 Ketchikan No. 1") and its district
 absentee, early and questioned rows ("District 1 - Absentee") each belong to one of the
 40 State House districts, which are its local units here. Overseas federal absentee
-ballots ("HD99 Fed Overseas Absentee") belong to none: they count statewide only."""
+ballots ("HD99 Fed Overseas Absentee") belong to none: they count statewide only.
+
+A race no candidate won with a first-round majority is decided by ranked-choice
+tabulation. Its RCV Detailed Report (``parsers/ak_rcv.py``) is collected beside the CSV
+and its rounds are published too (``rcv_rounds.csv``). Its first round counts the same
+ballots as the CSV but reads them differently (a write-in or a single skipped first
+ranking passes to the next ranking), so the two are checked to hold the same ballots,
+not the same first-round votes."""
 
 import csv
 import hashlib
@@ -15,6 +22,7 @@ from collections import Counter, defaultdict
 from importlib.resources import files
 from urllib.parse import urljoin
 
+from election_pipeline.parsers import ak_rcv
 from election_pipeline.parsers.common import integer
 from election_pipeline.parsers.html import Tree
 from election_pipeline.parsers.results import finish
@@ -24,6 +32,30 @@ from election_pipeline.states import state_adapter
 
 CSV_URL = "https://www.elections.alaska.gov/enr/26GENR/results/GA_ENR_Precinct_State_of_Alaska.csv"
 PAGE_URL = "https://www.elections.alaska.gov/election-results/e/?id=26genr"
+RESULTS_URL = "https://www.elections.alaska.gov/enr/26GENR/results/"
+# The races decided by ranked-choice tabulation: each one's bundle member and the report's
+# name on the results site. The Senate and Governor races were won with first-round
+# majorities (Nov 3, 2026).
+RCV = {"AK-AL": ("rcv-usrep.pdf", "RCV-USRep.pdf")}
+RCV_FIELDS = (
+    "source_line",
+    "election_date",
+    "state",
+    "contest_id",
+    "round",
+    "kind",
+    "choice",
+    "votes",
+    "outcome",
+)
+# Each race's tabulation, loaded into landing.rcv_rounds beside the shared results.
+AUXILIARY = {
+    "rcv_rounds.csv": (
+        ("landing", "rcv_rounds"),
+        {"source_line": "int", "round": "int", "votes": "int", "outcome": "optional"},
+        "rcv_round_rows",
+    )
+}
 SCOPE_SHA256 = "c5e4176549074331cb6e307550dfa4c95c7216ded34be0d125dbe3e0fb6ee873"
 METHODS = ("Election Day", "Absentee", "Early Voting", "Question", "Remote")
 HOUSE_DISTRICTS = 40
@@ -64,8 +96,10 @@ def validate_source(source):
         or source.format != "bundle"
         or source.url != CSV_URL
         or source.primary_filename != "results.csv"
-        or source.files != (("election.html", PAGE_URL),)
-        or set(source.expected_members) != {"election.html", "results.csv"}
+        or set(source.files)
+        != {("election.html", PAGE_URL), *((m, RESULTS_URL + n) for m, n in RCV.values())}
+        or set(source.expected_members)
+        != {"election.html", "results.csv", *(m for m, _ in RCV.values())}
         or source.min_interval_seconds < 300
     ):
         raise ValueError("Alaska requires the reviewed election-dated official bundle")
@@ -109,8 +143,11 @@ def validate_page(raw):
         re.fullmatch(r"2026 General Election\s*[–—-]\s*November 3, 2026", h) for h in headings
     ):
         raise ValueError("Alaska page belongs to another election or is a challenge page")
-    if not any(urljoin(PAGE_URL, n.attrs.get("href", "")) == CSV_URL for n in page.root.find("a")):
+    links = {urljoin(PAGE_URL, n.attrs.get("href", "")) for n in page.root.find("a")}
+    if CSV_URL not in links:
         raise ValueError("Alaska election page no longer links the configured CSV")
+    if not {RESULTS_URL + name for _, name in RCV.values()} <= links:
+        raise ValueError("Alaska election page no longer links a race's RCV report")
     # The page labelled the summary "first choice results from Round 1" until the Nov 18
     # tabulation, then dropped the label; the CSV stayed the precinct first-choice export.
     # A page naming any later round is refused.
@@ -141,6 +178,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     input_rows = 0
     with zipfile.ZipFile(archive_path) as archive:
         official = validate_page(archive.read("election.html"))
+        reports = {race: archive.read(member) for race, (member, _) in RCV.items()}
         reader = csv.reader(
             io.StringIO(archive.read(source.primary_filename).decode("utf-8-sig")), strict=True
         )
@@ -255,7 +293,40 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             )
         )
     finish(rows, source, settings, output, stats, reference=reference)
+    tabulations, rounds = {}, []
+    for race, raw in sorted(reports.items()):
+        definition = profile["races"][race]
+        names = sorted(name for name, _ in definition["candidates"].values())
+        report = ak_rcv.read(raw, definition["title"], names, settings)
+        if report["official"] != official:
+            raise ValueError("Alaska RCV report and results page differ on official status")
+        if report["ballots"] != ballots[race]:
+            raise ValueError("Alaska RCV report and CSV do not count the same ballots")
+        rounds += ak_rcv.rows(race, report)
+        final = report["rounds"][-1]["votes"]
+        tabulations[race] = {
+            "rounds": len(report["rounds"]),
+            "elected": report["elected"],
+            "elected_votes": final[report["elected"]],
+            "continuing_ballots": sum(final.values()),
+            "tabulated_at": report["tabulated_at"],
+            "ballots": report["ballots"],
+        }
+    with (output / "rcv_rounds.csv").open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, RCV_FIELDS)
+        writer.writeheader()
+        for line, item in enumerate(rounds, 2):
+            writer.writerow(
+                {
+                    **item,
+                    "source_line": line,
+                    "election_date": source.election_date,
+                    "state": source.state,
+                }
+            )
     stats.update(
+        rcv_round_rows=len(rounds),
+        ranked_choice=tabulations,
         input_rows=input_rows,
         selected_rows=len(seen),
         vote_basis="first_choice_listed_candidates",
@@ -275,7 +346,8 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats["warnings"] += [
         "Local units are the 40 State House districts; overseas federal absentee ballots "
         "count statewide only.",
-        "First-choice Round 1 only; later ranked-choice tabulations are not included.",
+        "Candidate votes are first choices (Round 1 of the CSV); a race decided by "
+        "ranked-choice tabulation also publishes its rounds (rcv_rounds.csv).",
         "CSV-listed candidates only. Ballot residuals are not assigned to write-ins or parties.",
         "Shares use listed candidate votes. Reporting_flag is not a percent counted.",
     ]

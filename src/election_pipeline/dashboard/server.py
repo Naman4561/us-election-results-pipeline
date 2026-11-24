@@ -103,6 +103,52 @@ def within_official(county_rows, contest_rows, method):
     return all(votes <= official[key] for key, votes in counted.items())
 
 
+def ranked_rounds(rows, contest_rows):
+    """A race's ranked-choice tabulation for the dashboard: each round's candidates (votes,
+    share of the continuing ballots, outcome) and non-transferable ballots, and the
+    candidate elected in the last round."""
+    parties = {r["choice"]: r.get("choice_party") for r in contest_rows}
+    numbers = sorted({r["round"] for r in rows})
+    if numbers != list(range(1, len(numbers) + 1)):
+        raise ValueError("Published ranked-choice rounds are not numbered 1 to n")
+    rounds = []
+    for number in numbers:
+        found = [r for r in rows if r["round"] == number]
+        for r in found:
+            if type(r["votes"]) is not int or r["votes"] < 0:
+                raise ValueError("Invalid published ranked-choice count")
+        candidates = [r for r in found if r["kind"] == "candidate"]
+        continuing = sum(r["votes"] for r in candidates)
+        other = {r["kind"]: r["votes"] for r in found if r["kind"] != "candidate"}
+        rounds.append(
+            {
+                "round": number,
+                "continuing": continuing,
+                "exhausted": other.get("exhausted", 0),
+                "blanks": other.get("blanks", 0),
+                "overvotes": other.get("overvotes", 0),
+                "candidates": sorted(
+                    (
+                        {
+                            "name": r["choice"],
+                            "party": parties.get(r["choice"]),
+                            "group": party_group(parties.get(r["choice"]), r["choice"]),
+                            "votes": r["votes"],
+                            "share": r["votes"] / continuing if continuing else None,
+                            "outcome": r["outcome"],
+                        }
+                        for r in candidates
+                    ),
+                    key=lambda c: (-c["votes"], c["name"]),
+                ),
+            }
+        )
+    elected = [c for c in rounds[-1]["candidates"] if c["outcome"] == "elected"]
+    if len(elected) != 1 or {c["name"] for c in rounds[0]["candidates"]} != set(parties):
+        raise ValueError("Published ranked-choice rounds do not elect one of the race's candidates")
+    return {"rounds": rounds, "elected": elected[0]["name"], "final_round": len(rounds)}
+
+
 def certified_file(metadata):
     """Whether a publication is a state's certified file: complete, never a county feed."""
     attestation = (metadata or {}).get("attestation") or {}
@@ -118,6 +164,7 @@ def make_payload(
     state="NC",
     races=None,
     county_feeds=None,
+    rcv_rows=(),
 ):
     adapter = state_adapter(state)
     races_config, methods = races if races is not None else adapter.races, adapter.methods
@@ -186,6 +233,12 @@ def make_payload(
             races[identity]["county_privacy_masked"] = True
         if identity in RUNOFFS:
             races[identity]["runoff"] = RUNOFFS[identity]
+        # A publication made before its state's tabulation was imported has no rounds.
+        tabulated = [r for r in rcv_rows if r["contest_id"] == identity]
+        if tabulated:
+            if identity not in adapter.ranked_choice:
+                raise ValueError("Published ranked-choice rounds for an untabulated race")
+            races[identity]["ranked_choice"] = ranked_rounds(tabulated, totals[identity])
     payload = {
         "state": state,
         "methods": methods,
@@ -442,7 +495,61 @@ def demo_payload(geography, state="NC"):
         state=state,
         races=races_config,
         county_feeds=feeds,
+        rcv_rows=[
+            row
+            for race in state_adapter(state).ranked_choice
+            if race in races_config
+            for row in demo_rounds(race, grouped.values())
+        ],
     )
+
+
+def demo_rounds(race, contests):
+    """A synthetic two-round tabulation of a race's demo totals: the last candidate is
+    eliminated and its ballots split between the other two."""
+    standing = sorted(
+        ((r["choice"], r["total_votes"]) for r in contests if r["contest_id"] == race),
+        key=lambda c: (-c[1], c[0]),
+    )
+    if len(standing) != 3 or standing[0][1] + standing[1][1] == 0:
+        return []
+    (first, a), (second, b), (last, c) = standing
+    rows = [
+        {
+            "contest_id": race,
+            "round": 1,
+            "kind": "candidate",
+            "choice": name,
+            "votes": votes,
+            "outcome": "eliminated" if name == last else "continuing",
+        }
+        for name, votes in standing
+    ]
+    rows += [
+        {
+            "contest_id": race,
+            "round": 2,
+            "kind": "candidate",
+            "choice": first,
+            "votes": a + c - c // 2,
+            "outcome": "elected",
+        },
+        {
+            "contest_id": race,
+            "round": 2,
+            "kind": "candidate",
+            "choice": second,
+            "votes": b + c // 2,
+            "outcome": "defeated",
+        },
+    ]
+    if 2 * (a + c - c // 2) <= a + b + c:
+        return []
+    return rows + [
+        {"contest_id": race, "round": n, "kind": kind, "choice": "", "votes": 0, "outcome": None}
+        for n in (1, 2)
+        for kind in ("blanks", "exhausted", "overvotes")
+    ]
 
 
 def dashboard_settings(env_file):
@@ -589,6 +696,16 @@ class PublishedResults:
                     else []
                 )
                 contests = published_rows(conn, identity, "contest_results", (), methods)
+                rounds = (
+                    conn.execute(
+                        "SELECT contest_id, round, kind, choice, votes, outcome "
+                        "FROM serving.rcv_rounds WHERE publication_id=%s "
+                        "ORDER BY contest_id, round, kind, choice",
+                        (identity,),
+                    ).fetchall()
+                    if self.state.ranked_choice
+                    else ()
+                )
                 payload = make_payload(
                     self.geography,
                     metadata,
@@ -597,6 +714,7 @@ class PublishedResults:
                     state=self.state.code,
                     races=self.races,
                     county_feeds=feeds,
+                    rcv_rows=rounds,
                 )
                 self.cache = {identity: payload}
             self.feed_cache = feeds

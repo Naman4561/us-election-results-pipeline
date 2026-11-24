@@ -247,6 +247,18 @@ test("national/state map navigation and coverage statuses", async (t) => {
   click('[data-office="house"]');
   assert(d.querySelector('path[data-id="AK-AL"]'));
   assert.equal(calls, alaskaCalls, "Alaska tabs use cached results");
+  // Its House race was decided by ranked-choice tabulation: the rounds are shown.
+  click('path[data-id="AK-AL"]');
+  await settle();
+  assert(
+    d
+      .querySelector("#result-content")
+      .textContent.includes("RANKED-CHOICE TABULATION"),
+  );
+  assert.equal(
+    d.querySelectorAll("#result-content table.rounds tbody tr").length,
+    4,
+  );
   click("#national");
   click('[data-office="senate"]');
   click('path[data-id="KY"]');

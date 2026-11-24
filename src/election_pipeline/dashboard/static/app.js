@@ -690,11 +690,27 @@ function renderStatePanel() {
       target.append(link);
     }
   }
+  // A race decided by ranked-choice tabulation (Alaska's House race): its rounds.
+  const ranked = view.county ? null : contest?.ranked_choice;
+  if (ranked) {
+    const final = ranked.rounds[ranked.rounds.length - 1];
+    const winner = final.candidates.find((c) => c.outcome === "elected");
+    target.append(
+      element(
+        "p",
+        `RANKED-CHOICE TABULATION · ${ranked.elected} elected in round ${ranked.final_round} with ${number(winner.votes)} of ${number(final.continuing)} continuing ballots (${(winner.share * 100).toFixed(1)}%); ${number(final.exhausted)} ballots exhausted. The candidate totals below are first choices from the precinct results.`,
+        "ranked-choice",
+      ),
+      roundsTable(ranked),
+    );
+  }
   if (firstChoice)
     target.append(
       element(
         "p",
-        "First-choice votes · Round 1 · CSV-listed candidates. Later ranked-choice tabulations are not included. Percentages use listed candidate votes; unlisted vote categories are excluded.",
+        ranked
+          ? "First-choice votes · Round 1 of the precinct results · CSV-listed candidates. The tabulation's first round differs slightly: it passes a write-in or a single skipped first ranking to the next ranking. Percentages use listed candidate votes; unlisted vote categories are excluded."
+          : "First-choice votes · Round 1 · CSV-listed candidates. Later ranked-choice tabulations are not included. Percentages use listed candidate votes; unlisted vote categories are excluded.",
         "empty",
       ),
     );
@@ -760,6 +776,43 @@ function renderStatePanel() {
         "empty",
       ),
     );
+}
+// Each candidate's votes in every round of a ranked-choice tabulation, and the
+// exhausted ballots; the elected candidate's last count is marked.
+function roundsTable(ranked) {
+  const table = element("table", undefined, "rounds"),
+    head = element("tr"),
+    body = element("tbody");
+  head.append(
+    element("th", "Candidate"),
+    ...ranked.rounds.map((r) => element("th", `Round ${r.round}`)),
+  );
+  for (const first of ranked.rounds[0].candidates) {
+    const row = element("tr");
+    row.append(element("th", first.name));
+    for (const r of ranked.rounds) {
+      const c = r.candidates.find((x) => x.name === first.name);
+      row.append(
+        element(
+          "td",
+          c
+            ? number(c.votes) + (c.outcome === "elected" ? " · elected" : "")
+            : "—",
+        ),
+      );
+    }
+    body.append(row);
+  }
+  const exhausted = element("tr");
+  exhausted.append(
+    element("th", "Exhausted ballots"),
+    ...ranked.rounds.map((r) => element("td", number(r.exhausted))),
+  );
+  body.append(exhausted);
+  const header = element("thead");
+  header.append(head);
+  table.append(header, body);
+  return table;
 }
 function renderMetadata() {
   const national = view.scope === "US",
@@ -837,7 +890,7 @@ function renderMetadata() {
     state?.vote_basis === "first_choice_listed_candidates"
   )
     $("notice").textContent +=
-      " Alaska shows first-choice votes for CSV-listed candidates. Later ranked-choice results and unlisted vote categories are not included.";
+      " Alaska shows first-choice votes for CSV-listed candidates; a race decided by ranked-choice tabulation also shows its rounds. Unlisted vote categories are not included.";
   const partialStates = (
     national
       ? Object.values(data.states).filter(
@@ -892,7 +945,7 @@ function renderControls() {
     : state.county_collection
       ? "County colors show named-candidate leads in collected reports. Patterned counties are outside collection or unavailable; stale sources have dashed borders."
       : state.vote_basis === "first_choice_listed_candidates"
-        ? "Color shows the first-choice leader among CSV-listed candidates. Later ranked-choice results are not included."
+        ? "Color shows the first-choice leader among CSV-listed candidates. A race decided by ranked-choice tabulation lists its rounds with the results."
         : "Color shows the leading candidate’s party, not a race call.";
   const methods = national ? ["total_votes"] : state.methods || ["total_votes"];
   if (!methods.includes(view.method)) view.method = "total_votes";
