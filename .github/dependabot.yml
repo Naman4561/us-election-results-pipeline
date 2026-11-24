@@ -1,8 +1,13 @@
-# Proposes updates for the pinned build base image and CI actions. Python pins live in
-# constraints.txt; regenerate it with the command at its top.
+# Proposes updates for the pinned build base image, the compose images, CI actions and
+# the dashboard checks. Python pins live in constraints.txt (regenerate it with the
+# command at its top); the audit workflow reports a vulnerable one.
 version: 2
 updates:
   - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker-compose
     directory: /
     schedule:
       interval: weekly

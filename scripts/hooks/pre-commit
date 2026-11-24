@@ -1,0 +1,26 @@
+#!/bin/sh
+# Refuse a commit that adds one of this deployment's private values (the server's
+# addresses, the backup bucket, the AWS account ID). The values are never in the
+# repository: list them one per line in ~/.election-private-values (or the file named by
+# ELECTION_PRIVATE_VALUES), readable by you alone. tests/test_public_values.py covers what
+# is general (any public address or real-looking bucket) in CI.
+#
+# Install once per clone:   git config core.hooksPath scripts/hooks
+values="${ELECTION_PRIVATE_VALUES:-$HOME/.election-private-values}"
+[ -f "$values" ] || exit 0
+added=$(git diff --cached --no-color -U0 --diff-filter=ACMR | grep '^+' | grep -v '^+++')
+[ -n "$added" ] || exit 0
+found=0
+while IFS= read -r value || [ -n "$value" ]; do
+    value=$(printf '%s' "$value" | tr -d '\r')
+    case "$value" in '' | '#'*) continue ;; esac
+    if printf '%s\n' "$added" | grep -qF -- "$value"; then
+        found=$((found + 1))
+    fi
+done < "$values"
+if [ "$found" -gt 0 ]; then
+    echo "pre-commit: this commit adds $found private value(s) listed in $values." >&2
+    echo "Remove them (the value is not shown here), then commit again." >&2
+    exit 1
+fi
+exit 0
