@@ -1,0 +1,355 @@
+{
+ "state": "NC",
+ "provenance": "North Carolina candidates (as the State Board's results file prints them, write-in lines included) and counties from the pipeline's archived snapshot 4fcc5999bbafe8f6e3e350632fa9f7f6009e10b00e14df2d4f86d095cc90fc8c, collected Nov 13, 2026 7:31 PM EST and published; proposed by scripts/review_rosters.py. Pending the operator's review against the state's results pages.",
+ "races": {
+  "NC-01": {
+   "candidates": [
+    "Don Davis",
+    "Laurie Buckhout",
+    "Tom Bailey"
+   ],
+   "counties": [
+    "BEAUFORT",
+    "BERTIE",
+    "CAMDEN",
+    "CARTERET",
+    "CHOWAN",
+    "CRAVEN",
+    "CURRITUCK",
+    "DARE",
+    "EDGECOMBE",
+    "GATES",
+    "GRANVILLE",
+    "HALIFAX",
+    "HERTFORD",
+    "HYDE",
+    "MARTIN",
+    "NASH",
+    "NORTHAMPTON",
+    "ONSLOW",
+    "PAMLICO",
+    "PASQUOTANK",
+    "PERQUIMANS",
+    "TYRRELL",
+    "VANCE",
+    "WARREN",
+    "WASHINGTON"
+   ]
+  },
+  "NC-02": {
+   "candidates": [
+    "Brian McGinnis (Write-In)",
+    "Deborah K. Ross",
+    "Eugene F. Douglass",
+    "Matthew Laszacs",
+    "Write-In (Miscellaneous)"
+   ],
+   "counties": [
+    "WAKE"
+   ]
+  },
+  "NC-03": {
+   "candidates": [
+    "Daniel Cavender",
+    "Greg Murphy",
+    "Raymond Smith"
+   ],
+   "counties": [
+    "DUPLIN",
+    "GREENE",
+    "JONES",
+    "LENOIR",
+    "ONSLOW",
+    "PITT",
+    "SAMPSON",
+    "WAYNE",
+    "WILSON"
+   ]
+  },
+  "NC-04": {
+   "candidates": [
+    "Guy Meilleur",
+    "Mahesh (Max) Ganorkar",
+    "Valerie P. Foushee"
+   ],
+   "counties": [
+    "CHATHAM",
+    "DURHAM",
+    "ORANGE",
+    "WAKE"
+   ]
+  },
+  "NC-05": {
+   "candidates": [
+    "Chuck Hubbard",
+    "Robert B. Luffman",
+    "Virginia Foxx"
+   ],
+   "counties": [
+    "ALEXANDER",
+    "ALLEGHANY",
+    "ASHE",
+    "CALDWELL",
+    "GUILFORD",
+    "ROCKINGHAM",
+    "STOKES",
+    "SURRY",
+    "WATAUGA",
+    "WILKES"
+   ]
+  },
+  "NC-06": {
+   "candidates": [
+    "Addison McDowell",
+    "Cyril Jefferson"
+   ],
+   "counties": [
+    "CABARRUS",
+    "DAVIDSON",
+    "DAVIE",
+    "FORSYTH",
+    "GUILFORD",
+    "ROWAN"
+   ]
+  },
+  "NC-07": {
+   "candidates": [
+    "David Rouzer",
+    "Kimberly Hardy",
+    "Maad Abu-Ghazalah"
+   ],
+   "counties": [
+    "BLADEN",
+    "BRUNSWICK",
+    "COLUMBUS",
+    "CUMBERLAND",
+    "NEW HANOVER",
+    "PENDER",
+    "ROBESON",
+    "SAMPSON"
+   ]
+  },
+  "NC-08": {
+   "candidates": [
+    "Bo Whitehead",
+    "Colby Watson",
+    "Mark Harris"
+   ],
+   "counties": [
+    "ANSON",
+    "CABARRUS",
+    "MECKLENBURG",
+    "MONTGOMERY",
+    "RICHMOND",
+    "ROBESON",
+    "SCOTLAND",
+    "STANLY",
+    "UNION"
+   ]
+  },
+  "NC-09": {
+   "candidates": [
+    "Richard Hudson",
+    "Richard N. Ojeda II"
+   ],
+   "counties": [
+    "ALAMANCE",
+    "CHATHAM",
+    "CUMBERLAND",
+    "GUILFORD",
+    "HOKE",
+    "MOORE",
+    "RANDOLPH"
+   ]
+  },
+  "NC-10": {
+   "candidates": [
+    "Ashley Bell",
+    "Pat Harrigan",
+    "Steven Feldman"
+   ],
+   "counties": [
+    "CATAWBA",
+    "FORSYTH",
+    "IREDELL",
+    "LINCOLN",
+    "YADKIN"
+   ]
+  },
+  "NC-11": {
+   "candidates": [
+    "Jamie Ager",
+    "Jennifer Capps Balkcom",
+    "Travis Groo"
+   ],
+   "counties": [
+    "AVERY",
+    "BUNCOMBE",
+    "CHEROKEE",
+    "CLAY",
+    "GRAHAM",
+    "HAYWOOD",
+    "HENDERSON",
+    "JACKSON",
+    "MACON",
+    "MADISON",
+    "MCDOWELL",
+    "MITCHELL",
+    "POLK",
+    "SWAIN",
+    "TRANSYLVANIA",
+    "YANCEY"
+   ]
+  },
+  "NC-12": {
+   "candidates": [
+    "Alma S. Adams",
+    "Jack Codiga"
+   ],
+   "counties": [
+    "MECKLENBURG"
+   ]
+  },
+  "NC-13": {
+   "candidates": [
+    "Brad Knott",
+    "Paul Barringer",
+    "Steven Swinton"
+   ],
+   "counties": [
+    "CASWELL",
+    "FRANKLIN",
+    "GRANVILLE",
+    "HARNETT",
+    "JOHNSTON",
+    "LEE",
+    "PERSON",
+    "WAKE"
+   ]
+  },
+  "NC-14": {
+   "candidates": [
+    "Lakesha Womack",
+    "Tim Moore"
+   ],
+   "counties": [
+    "BURKE",
+    "CLEVELAND",
+    "GASTON",
+    "MECKLENBURG",
+    "POLK",
+    "RUTHERFORD"
+   ]
+  },
+  "NC-SEN": {
+   "candidates": [
+    "Michael Dublin",
+    "Michael Whatley",
+    "Roy Cooper",
+    "Shannon W. Bray"
+   ],
+   "counties": [
+    "ALAMANCE",
+    "ALEXANDER",
+    "ALLEGHANY",
+    "ANSON",
+    "ASHE",
+    "AVERY",
+    "BEAUFORT",
+    "BERTIE",
+    "BLADEN",
+    "BRUNSWICK",
+    "BUNCOMBE",
+    "BURKE",
+    "CABARRUS",
+    "CALDWELL",
+    "CAMDEN",
+    "CARTERET",
+    "CASWELL",
+    "CATAWBA",
+    "CHATHAM",
+    "CHEROKEE",
+    "CHOWAN",
+    "CLAY",
+    "CLEVELAND",
+    "COLUMBUS",
+    "CRAVEN",
+    "CUMBERLAND",
+    "CURRITUCK",
+    "DARE",
+    "DAVIDSON",
+    "DAVIE",
+    "DUPLIN",
+    "DURHAM",
+    "EDGECOMBE",
+    "FORSYTH",
+    "FRANKLIN",
+    "GASTON",
+    "GATES",
+    "GRAHAM",
+    "GRANVILLE",
+    "GREENE",
+    "GUILFORD",
+    "HALIFAX",
+    "HARNETT",
+    "HAYWOOD",
+    "HENDERSON",
+    "HERTFORD",
+    "HOKE",
+    "HYDE",
+    "IREDELL",
+    "JACKSON",
+    "JOHNSTON",
+    "JONES",
+    "LEE",
+    "LENOIR",
+    "LINCOLN",
+    "MACON",
+    "MADISON",
+    "MARTIN",
+    "MCDOWELL",
+    "MECKLENBURG",
+    "MITCHELL",
+    "MONTGOMERY",
+    "MOORE",
+    "NASH",
+    "NEW HANOVER",
+    "NORTHAMPTON",
+    "ONSLOW",
+    "ORANGE",
+    "PAMLICO",
+    "PASQUOTANK",
+    "PENDER",
+    "PERQUIMANS",
+    "PERSON",
+    "PITT",
+    "POLK",
+    "RANDOLPH",
+    "RICHMOND",
+    "ROBESON",
+    "ROCKINGHAM",
+    "ROWAN",
+    "RUTHERFORD",
+    "SAMPSON",
+    "SCOTLAND",
+    "STANLY",
+    "STOKES",
+    "SURRY",
+    "SWAIN",
+    "TRANSYLVANIA",
+    "TYRRELL",
+    "UNION",
+    "VANCE",
+    "WAKE",
+    "WARREN",
+    "WASHINGTON",
+    "WATAUGA",
+    "WAYNE",
+    "WILKES",
+    "WILSON",
+    "YADKIN",
+    "YANCEY"
+   ]
+  }
+ }
+}

@@ -9,6 +9,7 @@ from datetime import datetime
 from pathlib import Path
 
 from election_pipeline.parsers.common import integer, records
+from election_pipeline.parsers.scope import verify_rows
 from election_pipeline.settings import Source
 
 # The official file's contest names for every NC race this pipeline covers.
@@ -226,13 +227,14 @@ def demographic_rows(path: Path, source: Source, limit: int, stats: dict):
     stats["date_basis"] = "configured source; the CSV contains no election-date column"
 
 
-def parse(archive, source, settings, output, stats, reference):
+def parse(archive, source, settings, output, stats, reference=None):
     from election_pipeline.parsers.results import finish, write_groups
 
     if source.state != "NC":
         raise ValueError("No parser registered for this state")
     if source.dataset == "election_results" and source.format == "zip":
         rows = list(result_rows(archive, source, settings.max_csv_rows, stats))
+        verify_rows("NC", rows)
         finish(rows, source, settings, output, stats, reference=reference)
         if stats["nul_party_values_normalized"]:
             stats["warnings"].append(

@@ -44,3 +44,18 @@ def verify_scope(code, race, candidates, counties=None, *, collected=False):
         raise ValueError(
             f"{race}: eligible county coverage differs from the reviewed election snapshot"
         )
+
+
+def verify_rows(code, rows):
+    """Check rows in the shared layout (``parsers.results.FIELDS``) against the state's
+    roster: each race's choices, and the counties it has rows for (none for a state that
+    publishes statewide totals only)."""
+    choices, counties = {}, {}
+    for row in rows:
+        race = row["contest_id"]
+        choices.setdefault(race, set()).add(row["choice"])
+        if row["county"]:
+            counties.setdefault(race, set()).add(row["county"])
+    for race in sorted(choices):
+        found = counties.get(race)
+        verify_scope(code, race, sorted(choices[race]), sorted(found) if found else None)

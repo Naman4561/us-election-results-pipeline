@@ -1,0 +1,306 @@
+{
+ "state": "TX",
+ "provenance": "Texas candidates (as the Secretary of State's results print them, (I) marking incumbents; statewide totals only, so no counties) from the pipeline's archived snapshot 8eac503ad4aa043f842de09b852e09041384f49af4c0d6a52f8a5baaa828873d, collected Nov 9, 2026 2:17 PM EST and published; proposed by scripts/review_rosters.py. Pending the operator's review against the state's results pages.",
+ "races": {
+  "TX-01": {
+   "candidates": [
+    "NATHANIEL MORAN (I)",
+    "YOLANDA R.  PRINCE"
+   ],
+   "counties": []
+  },
+  "TX-02": {
+   "candidates": [
+    "SHAUN FINNIE",
+    "STEVE TOTH"
+   ],
+   "counties": []
+  },
+  "TX-03": {
+   "candidates": [
+    "EVAN HUNT",
+    "KEITH SELF (I)"
+   ],
+   "counties": []
+  },
+  "TX-04": {
+   "candidates": [
+    "JASON PEARCE",
+    "PAT FALLON (I)"
+   ],
+   "counties": []
+  },
+  "TX-05": {
+   "candidates": [
+    "CHELSEY HOCKETT",
+    "LANCE GOODEN (I)"
+   ],
+   "counties": []
+  },
+  "TX-06": {
+   "candidates": [
+    "DANNY MINTON",
+    "JAKE ELLZEY (I)"
+   ],
+   "counties": []
+  },
+  "TX-07": {
+   "candidates": [
+    "ALEXANDER HALE",
+    "ESPOIR NGABO",
+    "LIZZIE PANNILL FLETCHER (I)"
+   ],
+   "counties": []
+  },
+  "TX-08": {
+   "candidates": [
+    "JESSICA HART STEINMANN",
+    "LAURA JONES"
+   ],
+   "counties": []
+  },
+  "TX-09": {
+   "candidates": [
+    "ALEX MEALER",
+    "LETICIA GUTIERREZ"
+   ],
+   "counties": []
+  },
+  "TX-10": {
+   "candidates": [
+    "CAITLIN ROURK",
+    "CHRIS GOBER"
+   ],
+   "counties": []
+  },
+  "TX-11": {
+   "candidates": [
+    "AUGUST PFLUGER (I)",
+    "CLAIRE REYNOLDS"
+   ],
+   "counties": []
+  },
+  "TX-12": {
+   "candidates": [
+    "ANGELA \"HELI\" RODRIGUEZ PRILLIMAN",
+    "CRAIG GOLDMAN (I)"
+   ],
+   "counties": []
+  },
+  "TX-13": {
+   "candidates": [
+    "MARK NAIR",
+    "RONNY JACKSON (I)"
+   ],
+   "counties": []
+  },
+  "TX-14": {
+   "candidates": [
+    "RANDY WEBER (I)",
+    "THURMAN BILL BARTIE"
+   ],
+   "counties": []
+  },
+  "TX-15": {
+   "candidates": [
+    "BOBBY PULIDO",
+    "MONICA DE LA CRUZ (I)"
+   ],
+   "counties": []
+  },
+  "TX-16": {
+   "candidates": [
+    "ADAM BAUMAN",
+    "VERONICA ESCOBAR (I)"
+   ],
+   "counties": []
+  },
+  "TX-17": {
+   "candidates": [
+    "CASEY SHEPARD",
+    "PETE SESSIONS (I)"
+   ],
+   "counties": []
+  },
+  "TX-18": {
+   "candidates": [
+    "CHRISTIAN DASHAUN MENEFEE",
+    "RONALD DWAYNE WHITFIELD"
+   ],
+   "counties": []
+  },
+  "TX-19": {
+   "candidates": [
+    "KYLE RABLE",
+    "TOM SELL"
+   ],
+   "counties": []
+  },
+  "TX-20": {
+   "candidates": [
+    "EDGARDO RAFAEL BAEZ",
+    "JOAQUIN CASTRO (I)"
+   ],
+   "counties": []
+  },
+  "TX-21": {
+   "candidates": [
+    "KRISTIN HOOK",
+    "MARK TEIXEIRA"
+   ],
+   "counties": []
+  },
+  "TX-22": {
+   "candidates": [
+    "MARQUETTE GREENE-SCOTT",
+    "TREVER NEHLS"
+   ],
+   "counties": []
+  },
+  "TX-23": {
+   "candidates": [
+    "BEN MENDOZA",
+    "BRANDON HERRERA",
+    "KATY PADILLA STOUT"
+   ],
+   "counties": []
+  },
+  "TX-24": {
+   "candidates": [
+    "BETH VAN DUYNE (I)",
+    "KEVIN BURGE"
+   ],
+   "counties": []
+  },
+  "TX-25": {
+   "candidates": [
+    "DIONE SIMS",
+    "ROGER WILLIAMS (I)"
+   ],
+   "counties": []
+  },
+  "TX-26": {
+   "candidates": [
+    "BRANDON GILL (I)",
+    "PHIL GRAY",
+    "STEVEN SHOOK"
+   ],
+   "counties": []
+  },
+  "TX-27": {
+   "candidates": [
+    "MICHAEL CLOUD (I)",
+    "TANYA LLOYD",
+    "WAYNE RAASCH"
+   ],
+   "counties": []
+  },
+  "TX-28": {
+   "candidates": [
+    "HENRY CUELLAR (I)",
+    "MARLÓN DURÁN",
+    "TANO E. TIJERINA"
+   ],
+   "counties": []
+  },
+  "TX-29": {
+   "candidates": [
+    "MARTHA FIERRO",
+    "SYLVIA GARCIA (I)"
+   ],
+   "counties": []
+  },
+  "TX-30": {
+   "candidates": [
+    "EVERETT JACKSON",
+    "FREDERICK D. HAYNES III"
+   ],
+   "counties": []
+  },
+  "TX-31": {
+   "candidates": [
+    "GREG STOKER",
+    "JOHN CARTER (I)",
+    "JUSTIN EARLY"
+   ],
+   "counties": []
+  },
+  "TX-32": {
+   "candidates": [
+    "DAN BARRIOS",
+    "JACE YARBROUGH"
+   ],
+   "counties": []
+  },
+  "TX-33": {
+   "candidates": [
+    "COLIN ALLRED",
+    "MICHELLE CRAIG",
+    "PATRICK DAVID GILLESPIE"
+   ],
+   "counties": []
+  },
+  "TX-34": {
+   "candidates": [
+    "CHRIS ROYAL",
+    "EDDIE ESPINOZA",
+    "ERIC FLORES",
+    "VICENTE GONZALEZ (I)"
+   ],
+   "counties": []
+  },
+  "TX-35": {
+   "candidates": [
+    "CARLOS DE LA CRUZ",
+    "JOHNNY C. GARCIA"
+   ],
+   "counties": []
+  },
+  "TX-36": {
+   "candidates": [
+    "BRIAN BABIN (I)",
+    "RHONDA HART"
+   ],
+   "counties": []
+  },
+  "TX-37": {
+   "candidates": [
+    "GREG CASAR",
+    "LAUREN B. PEÑA"
+   ],
+   "counties": []
+  },
+  "TX-38": {
+   "candidates": [
+    "ALEX MCMENEMY",
+    "JON BONCK",
+    "MELISSA MCDONOUGH"
+   ],
+   "counties": []
+  },
+  "TX-GOV": {
+   "candidates": [
+    "EDWARD EARL GILES",
+    "GINA HINOJOSA",
+    "GREG ABBOTT (I)",
+    "JENN MACK",
+    "JINGHPAW MAJOISHINGRA",
+    "MIKE MILLER",
+    "PAT DIXON"
+   ],
+   "counties": []
+  },
+  "TX-SEN": {
+   "candidates": [
+    "AVERY AYERS",
+    "BRADFORD \"BRAD\" HALL",
+    "JADE SIMMONS",
+    "JAMES TALARICO",
+    "KEN PAXTON",
+    "TED BROWN",
+    "ZUL MOHAMED"
+   ],
+   "counties": []
+  }
+ }
+}

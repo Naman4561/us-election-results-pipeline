@@ -7,6 +7,7 @@ import zipfile
 
 from election_pipeline.parsers.common import integer
 from election_pipeline.parsers.results import finish
+from election_pipeline.parsers.scope import verify_rows
 from election_pipeline.parsers.status import results_status
 
 HEADER = (
@@ -81,5 +82,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                     precincts_total=precincts,
                 )
             )
+    verify_rows("NE", rows)
     finish(rows, source, settings, output, stats, reference=reference)
     stats.update(official_results=official)

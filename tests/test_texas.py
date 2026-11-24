@@ -13,6 +13,7 @@ from pathlib import Path
 from loading import copies
 
 from election_pipeline.dashboard.server import STATIC, make_payload
+from election_pipeline.parsers.scope import recording
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
 from election_pipeline.storage import ArchiveStore
@@ -130,6 +131,9 @@ class TexasCivixTests(unittest.TestCase):
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
+        # Derived from a summary, not a full capture: its parse records the roster it
+        # implies rather than checking the reviewed one.
+        self.enterContext(recording())
         self.settings, sources = load_config(ROOT / "config/sources.toml")
         self.source = sources["tx_2026_general_all"]
 

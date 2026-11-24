@@ -8,6 +8,7 @@ from collections import defaultdict
 
 from election_pipeline.parsers.common import integer
 from election_pipeline.parsers.results import finish
+from election_pipeline.parsers.scope import verify_rows
 
 MEDIA_BASE = "https://electionresultsfiles.sos.mn.gov/20261103/"
 MEDIA_FILES = {
@@ -148,6 +149,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 sums[key] += integer(raw[13], "MN candidate votes")
         if denominators != dict(sums):
             raise ValueError("Minnesota candidates do not sum to official office totals")
+    verify_rows("MN", rows)
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
 
 
