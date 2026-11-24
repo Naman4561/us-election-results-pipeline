@@ -8,7 +8,7 @@ this page explains them.
 | State | Source | Races | County results | Vote methods stored |
 | --- | --- | --- | --- | --- |
 | Alabama | Secretary of State's statewide page and its Export Data workbook (collected) | Senate, Governor, House 1–7 (9) | All 67 counties | Total only |
-| Alaska | Division of Elections precinct CSV | Senate, Governor, House at-large (3) | By State House district (40) | Total only (first choice) |
+| Alaska | Division of Elections precinct CSV, and the House race's RCV Detailed Report | Senate, Governor, House at-large (3) | By State House district (40) | Total only (first choice); House rounds statewide |
 | Arkansas | Tally (Secretary of State) | Senate, Governor, House 1–4 (6) | All 75 counties | Total only |
 | Arizona | Saved by hand from the Secretary of State's Enhanced Voting export (JSON) | Governor, House 1–9 (10) | All 15 counties | Early ballots, Early A.R.S. 16-579, Late Early, Election Day, provisional (Arizona's own groups) |
 | California | Secretary of State results API | Governor, House 1–52 (53) | No | Total only |
@@ -73,11 +73,19 @@ the pipeline leaves it out rather than estimate it. A missing count is unknown, 
 zero.
 
 - **Alaska:** totals for the candidates in the first-choice CSV (round 1), statewide and
-  by State House district (Alaska has no counties). Each precinct and each district's
+  by State House district (Alaska has no counties). The U.S. House race went to
+  ranked-choice rounds; its RCV Detailed Report (`RCV-USRep.pdf`, collected with the CSV)
+  is published round by round (`serving.rcv_rounds`) and shown beside the first
+  choices. Every round must hold the same ballots, each round must be the last plus the
+  eliminated candidate's transfers, and the winner must hold a majority of the last
+  round's continuing ballots. The report's first round counts the same ballots as the
+  CSV but reads them differently (it passes a write-in or a single skipped first ranking
+  to the next ranking: 916 more first-round votes on Nov 23, 2026), so the two are
+  checked to hold the same ballots, not the same votes. The Senate and Governor races
+  were won with first-round majorities and have no tabulation. Each precinct and each district's
   absentee, early and questioned row belongs to one district; overseas federal absentee
   ballots belong to none, so the districts add up to the statewide total less those.
-  Ranked-choice rounds are not imported, and precincts are not mapped (about 45% of
-  votes are reported by district only).
+  Precincts are not mapped (about 45% of votes are reported by district only).
 - **California:** statewide and district totals only. County results would take about
   190 more requests per collection, and the results website is behind a JavaScript
   challenge the pipeline does not attempt. The other 52 contest documents are fetched

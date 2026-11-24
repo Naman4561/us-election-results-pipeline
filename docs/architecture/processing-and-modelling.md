@@ -118,11 +118,13 @@ flowchart LR
     end
     m --> tests
     ms["models/ms (tag ms)<br/>county feed status + test"]
+    rc["models/ranked_choice (tag ranked_choice)<br/>rcv_rounds + test: same ballots<br/>every round, one majority winner"]
     demo["models/demographics<br/>NC absentee demographics"]
 ```
 
-Mississippi builds `tag:results tag:ms`; the demographics dataset builds
-`tag:demographics`. Tests run with cautious indirect selection, so a test runs only
+Mississippi builds `tag:results tag:ms`, a state whose parser publishes ranked-choice
+rounds (Alaska, `State.ranked_choice`) adds `tag:ranked_choice`, and the demographics
+dataset builds `tag:demographics`. Tests run with cautious indirect selection, so a test runs only
 when every model it reads was built.
 
 ## Publication rules

@@ -1,4 +1,5 @@
-"""Known answers from the uploaded official CSV, plus fail-closed mutations."""
+"""Known answers from Alaska's official capture (CSV, page and the U.S. House race's RCV
+report), plus fail-closed mutations."""
 
 import csv
 import gzip
@@ -20,13 +21,15 @@ from election_pipeline.database import (
     connect,
     load_parsed,
 )
-from election_pipeline.parsers import ak
+from election_pipeline.parsers import ak, ak_rcv
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
 from election_pipeline.storage import ArchiveStore
 
 ROOT = Path(__file__).resolve().parents[1]
-FIXTURE = ROOT / "tests/fixtures/alaska"
+# The official capture (Nov 24, 2026); the election-night CSV captured Nov 3 is beside it.
+FIXTURE = ROOT / "tests/fixtures/alaska/official"
+ELECTION_NIGHT = ROOT / "tests/fixtures/alaska"
 
 
 class AlaskaTests(unittest.TestCase):
@@ -37,8 +40,8 @@ class AlaskaTests(unittest.TestCase):
         self.settings, sources = load_config(ROOT / "config/sources.toml")
         self.source = sources["ak_2026_general"]
 
-    def parse(self, mutate=None, page=None, reference=None):
-        raw = gzip.decompress((FIXTURE / "results.csv.gz").read_bytes())
+    def parse(self, mutate=None, page=None, reference=None, fixture=FIXTURE):
+        raw = gzip.decompress((fixture / "results.csv.gz").read_bytes())
         if mutate:
             rows = list(csv.DictReader(io.StringIO(raw.decode("utf-8-sig"))))
             mutate(rows)
@@ -51,6 +54,7 @@ class AlaskaTests(unittest.TestCase):
         with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as zipped:
             zipped.writestr("results.csv", raw)
             zipped.writestr("election.html", page or (FIXTURE / "election.html").read_bytes())
+            zipped.writestr("rcv-usrep.pdf", (FIXTURE / "rcv-usrep.pdf").read_bytes())
         digest = hashlib.sha256(archive.read_bytes()).hexdigest()
         self.store = ArchiveStore(self.root, self.source)
         target = self.store.archive_path(digest)
@@ -66,19 +70,31 @@ class AlaskaTests(unittest.TestCase):
 
     def test_official_only_from_the_pages_results_status(self):
         page = (FIXTURE / "election.html").read_bytes()
-        self.assertIs(self.parse()["official_results"], False)
-        status = b'Results Status: <span style="color: #B30000;">Unofficial</span>'
+        self.assertIs(self.parse()["official_results"], True)
+        status = b'Results Status: <span style="color: #B30000;">Official</span>'
         self.assertIn(status, page)
-        official = self.parse(page=page.replace(status, status.replace(b"Unofficial", b"Official")))
-        self.assertIs(official["official_results"], True)
+        unofficial = page.replace(status, status.replace(b"Official", b"Unofficial"))
+        # The page and the tabulation report must agree on whether results are official.
+        refused = self.parse(page=unofficial)
+        self.assertEqual(refused["outcome"], "validation_failed", refused)
+        self.assertIn("official status", refused["error"])
+        read = ak_rcv.read
+        with patch.object(
+            ak.ak_rcv, "read", side_effect=lambda *a: {**read(*a), "official": False}
+        ):
+            self.assertIs(self.parse(page=unofficial)["official_results"], False)
         blank = self.parse(page=page.replace(status, b"Results Status: <span></span>"))
         self.assertEqual(blank["outcome"], "validation_failed", blank)
 
     def test_real_capture_scope_methods_residuals_and_replay(self):
-        ledger = json.loads((FIXTURE / "provenance.json").read_text())
-        raw = gzip.decompress((FIXTURE / "results.csv.gz").read_bytes())
-        self.assertEqual(hashlib.sha256(raw).hexdigest(), ledger["sha256"])
-        self.assertEqual(len(raw), ledger["bytes"])
+        ledger = json.loads((FIXTURE / "provenance.json").read_text())["files"]
+        for name, raw in (
+            ("results.csv", gzip.decompress((FIXTURE / "results.csv.gz").read_bytes())),
+            ("election.html", (FIXTURE / "election.html").read_bytes()),
+            ("rcv-usrep.pdf", (FIXTURE / "rcv-usrep.pdf").read_bytes()),
+        ):
+            self.assertEqual(hashlib.sha256(raw).hexdigest(), ledger[name]["sha256"], name)
+            self.assertEqual(len(raw), ledger[name]["bytes"], name)
         report = self.parse()
         self.assertEqual(report["outcome"], "parsed", report)
         self.assertEqual(report["input_rows"], 20046)
@@ -88,14 +104,16 @@ class AlaskaTests(unittest.TestCase):
         self.assertEqual(
             report["reporting_unit_counts"], {"AK-SEN": 523, "AK-GOV": 522, "AK-AL": 523}
         )
-        self.assertEqual(report["ballot_residuals"], {"AK-SEN": 721, "AK-GOV": 656, "AK-AL": 420})
-        self.assertEqual(report["ballot_totals"]["AK-SEN"], 215335)
-        self.assertEqual(report["vote_method_totals"]["AK-SEN"]["total"], 213180)
+        self.assertEqual(report["ballot_residuals"], {"AK-SEN": 886, "AK-GOV": 828, "AK-AL": 439})
+        self.assertEqual(report["ballot_totals"]["AK-SEN"], 290483)
+        self.assertEqual(report["vote_method_totals"]["AK-SEN"]["total"], 287479)
         self.assertEqual(report["vote_method_reconciliation"], "passed")
-        converted = copies(self.source, self.settings, self.store, report["output_dir"], 77)[
-            ("landing", "results")
-        ]
+        copied = copies(self.source, self.settings, self.store, report["output_dir"], 77)
+        converted = copied[("landing", "results")]
         self.assertEqual(len(converted), 12 + 12 * 40)
+        # Three rounds of four, three and two candidates, each with its three
+        # non-transferable lines.
+        self.assertEqual(len(copied[("landing", "rcv_rounds")]), 4 + 3 + 2 + 3 * 3)
         self.assertIn(None, next(r for r in converted if "Sullivan, Daniel J. Jr." in r))
         replay = parse_source(
             self.source, self.settings, self.root, sha256=report["identity"]["raw_sha256"]
@@ -105,11 +123,11 @@ class AlaskaTests(unittest.TestCase):
     def test_exact_candidate_totals_do_not_merge_sullivans_or_aggregate_parties(self):
         report = self.parse()
         totals = {(r["contest_id"], r["choice"]): int(r["total_votes"]) for r in self.read(report)}
-        self.assertEqual(totals[("AK-SEN", "Peltola, Mary")], 102701)
-        self.assertEqual(totals[("AK-SEN", "Sullivan, Dan S.")], 102075)
-        self.assertEqual(totals[("AK-SEN", "Sullivan, Daniel J. Jr.")], 3583)
-        self.assertEqual(totals[("AK-GOV", "Kreiss-Tomkins/Johnson")], 103610)
-        self.assertEqual(totals[("AK-AL", "Begich, Nick")], 105353)
+        self.assertEqual(totals[("AK-SEN", "Peltola, Mary")], 144583)
+        self.assertEqual(totals[("AK-SEN", "Sullivan, Dan S.")], 132022)
+        self.assertEqual(totals[("AK-SEN", "Sullivan, Daniel J. Jr.")], 4767)
+        self.assertEqual(totals[("AK-GOV", "Kreiss-Tomkins/Johnson")], 145546)
+        self.assertEqual(totals[("AK-AL", "Begich, Nick")], 136402)
         geo = json.loads((STATIC / "ak-map.json").read_text())
         districts = [
             {**r, "total_votes": int(r["total_votes"])}
@@ -149,7 +167,7 @@ class AlaskaTests(unittest.TestCase):
                 state="AK",
             )
         self.assertEqual(payload["vote_basis"], "first_choice_listed_candidates")
-        self.assertEqual(payload["races"]["AK-SEN"]["stats"]["total_votes"]["margin"], 626)
+        self.assertEqual(payload["races"]["AK-SEN"]["stats"]["total_votes"]["margin"], 12561)
         self.assertEqual(payload["races"]["AK-GOV"]["stats"]["total_votes"]["leader"], "DEM")
         self.assertEqual(party_group("DEM/NON", "Kreiss-Tomkins/Johnson"), "DEM")
         self.assertEqual(party_group("", "Sullivan, Daniel J. Jr."), "UNKNOWN")
@@ -191,6 +209,7 @@ class AlaskaTests(unittest.TestCase):
             page.replace(b"Round 1", b"Round 2"),
             page.replace(b"from Round 1", b"from the final round"),
             page.replace(b"State_of_Alaska.csv", b"other.csv"),
+            page.replace(b"RCV-USRep.pdf", b"RCV-Other.pdf"),
             b"<html><title>Captcha</title>November 3, 2026</html>",
         ):
             self.assertEqual(self.parse(page=edited)["outcome"], "validation_failed")
@@ -199,7 +218,8 @@ class AlaskaTests(unittest.TestCase):
         self.assertEqual(self.parse(page=relative)["outcome"], "parsed")
         # After its tabulation the page dropped the first-choice label (Nov 18).
         unlabelled = page.replace(
-            b"<p>The Summary Report only shows first choice results from Round 1.</p>", b""
+            b"<strong>The Summary Report only shows 1st Choice results from Round 1.</strong>",
+            b"",
         )
         self.assertEqual(self.parse(page=unlabelled)["outcome"], "parsed")
 
@@ -211,7 +231,10 @@ class AlaskaTests(unittest.TestCase):
                         for measure in ak.MEASURES:
                             r[prefix + "_" + measure] = "0"
 
-        self.assertTrue(self.parse(zero)["all_counts_zero"])
+        # A zero CSV cannot stand beside a tabulation of its ballots.
+        zeroed = self.parse(zero)
+        self.assertEqual(zeroed["outcome"], "validation_failed", zeroed)
+        self.assertIn("same ballots", zeroed["error"])
 
         def correction(rows):
             rows[1]["total_votes"] = str(int(rows[1]["total_votes"]) - 1)
@@ -219,7 +242,110 @@ class AlaskaTests(unittest.TestCase):
 
         report = self.parse(correction)
         self.assertEqual(report["outcome"], "parsed", report)
-        self.assertEqual(report["ballot_residuals"]["AK-SEN"], 722)
+        self.assertEqual(report["ballot_residuals"]["AK-SEN"], 887)
+
+    def test_the_house_tabulation_is_published_and_checked_against_the_csv(self):
+        report = self.parse()
+        self.assertEqual(
+            report["ranked_choice"],
+            {
+                "AK-AL": {
+                    "rounds": 3,
+                    "elected": "Begich, Nick",
+                    "elected_votes": 140412,
+                    "continuing_ballots": 273456,
+                    "tabulated_at": "11/23/2026 10:04:21 AM",
+                    "ballots": 290483,
+                }
+            },
+        )
+        rounds = self.read(report, "rcv_rounds.csv")
+        final = {
+            r["choice"]: (r["votes"], r["outcome"])
+            for r in rounds
+            if r["round"] == "3" and r["kind"] == "candidate"
+        }
+        self.assertEqual(final["Begich, Nick"], ("140412", "elected"))
+        self.assertEqual(final["Hill, Bill"], ("133044", "defeated"))
+        exhausted = [r["votes"] for r in rounds if r["kind"] == "exhausted"]
+        self.assertEqual(exhausted, ["0", "2522", "13995"])
+        # The election-night CSV counts other ballots than the official tabulation.
+        night = self.parse(fixture=ELECTION_NIGHT)
+        self.assertEqual(night["outcome"], "validation_failed", night)
+        self.assertIn("same ballots", night["error"])
+
+    def test_the_dashboard_shows_the_rounds_of_the_tabulated_race_alone(self):
+        report = self.parse()
+        geo = json.loads((STATIC / "ak-map.json").read_text())
+        contests = [{**r, "total_votes": int(r["total_votes"])} for r in self.read(report)]
+        districts = [
+            {**r, "total_votes": int(r["total_votes"])}
+            for r in self.read(report, "county_results.csv")
+        ]
+        rounds = [
+            {
+                **r,
+                "round": int(r["round"]),
+                "votes": int(r["votes"]),
+                "outcome": r["outcome"] or None,
+            }
+            for r in self.read(report, "rcv_rounds.csv")
+        ]
+
+        def payload(rows):
+            return make_payload(
+                geo, {"status": "official"}, districts, contests, state="AK", rcv_rows=rows
+            )
+
+        house = payload(rounds)["races"]["AK-AL"]["ranked_choice"]
+        self.assertEqual((house["elected"], house["final_round"]), ("Begich, Nick", 3))
+        last = house["rounds"][-1]
+        self.assertEqual(
+            [(c["name"], c["votes"], c["outcome"]) for c in last["candidates"]],
+            [("Begich, Nick", 140412, "elected"), ("Hill, Bill", 133044, "defeated")],
+        )
+        self.assertEqual((last["continuing"], last["exhausted"]), (273456, 13995))
+        self.assertEqual(last["candidates"][0]["party"], "REP")
+        self.assertNotIn("ranked_choice", payload(rounds)["races"]["AK-SEN"])
+        # A publication made before the tabulation was imported has none.
+        self.assertNotIn("ranked_choice", payload([])["races"]["AK-AL"])
+        for rows in (
+            [{**r, "contest_id": "AK-SEN"} for r in rounds],
+            [r for r in rounds if r["round"] != 2],
+            [r for r in rounds if r["outcome"] != "elected"],
+        ):
+            with self.assertRaises(ValueError):
+                payload(rows)
+
+    def test_a_tabulation_that_does_not_add_up_is_refused(self):
+        lines = ak_rcv.lines_of((FIXTURE / "rcv-usrep.pdf").read_bytes(), self.settings)
+
+        def changed(old, new, occurrence=0):
+            edited, seen = list(lines), -1
+            for index, line in enumerate(edited):
+                if line == old:
+                    seen += 1
+                    if seen == occurrence:
+                        edited[index] = new
+                        return edited
+            raise AssertionError(old)
+
+        for edited in (
+            changed("140,412", "140,413"),  # round 3 no longer the transfers' sum
+            changed("2,061", "2,062"),  # a transfer that moves no ballots
+            changed("Official results", "Draft results"),
+            changed("All Positions Filled", "In Progress"),
+            changed("IRV", "STV"),
+            changed("elected", "eliminated"),  # nobody elected in the last round
+            changed("2,782", "2,783", occurrence=1),  # blanks change between rounds
+            changed("47.56%", "47.65%"),
+        ):
+            with (
+                self.subTest(edited=edited[:0]),
+                patch.object(ak.ak_rcv, "lines_of", return_value=edited),
+            ):
+                result = self.parse()
+                self.assertEqual(result["outcome"], "validation_failed", result)
 
     def test_wrong_source_and_scope_resource_fail(self):
         for source in (
@@ -273,13 +399,23 @@ class AlaskaDatabaseTests(unittest.TestCase):
                     ("Sullivan, Daniel J. Jr.",),
                 ).fetchone()["choice_party"]
             )
-            conn.execute("SET ROLE election_dashboard")
-            self.assertTrue(
-                conn.execute(
-                    "SELECT has_table_privilege(current_user, 'serving.contest_results',"
-                    " 'SELECT') AS ok"
-                ).fetchone()["ok"]
+            rounds = conn.execute(
+                "SELECT round, choice, votes FROM serving.rcv_rounds "
+                "WHERE publication_id=%s AND outcome='elected'",
+                (published["publication_id"],),
+            ).fetchall()
+            self.assertEqual(
+                [(r["round"], r["choice"], r["votes"]) for r in rounds],
+                [(3, "Begich, Nick", 140412)],
             )
+            conn.execute("SET ROLE election_dashboard")
+            for table in ("serving.contest_results", "serving.rcv_rounds"):
+                self.assertTrue(
+                    conn.execute(
+                        "SELECT has_table_privilege(current_user, %s, 'SELECT') AS ok", (table,)
+                    ).fetchone()["ok"],
+                    table,
+                )
             self.assertFalse(
                 conn.execute(
                     "SELECT has_schema_privilege(current_user, 'landing', 'USAGE') AS ok"

@@ -1,0 +1,22 @@
+{
+  "election_date": "2026-11-03",
+  "capture_method": "results.csv and election.html: the pipeline's archived snapshot 63888dc3ef551c8fa6219794d9357dd59d1211eb7bb40719bc110af9fb89000c, collected Nov 24, 2026 7:46 AM EST, unchanged (the CSV is stored gzipped). rcv-usrep.pdf (RCV-USRep.pdf on the site): requested once with the pipeline's user agent on the evening of Nov 24, 2026 (EST), unchanged.",
+  "source_update_time": "Page last updated November 23, 2026 at 12:31 pm (Results Status: Official); RCV tabulation 11/23/2026 10:04:21 AM (Official results)",
+  "files": {
+    "results.csv": {
+      "url": "https://www.elections.alaska.gov/enr/26GENR/results/GA_ENR_Precinct_State_of_Alaska.csv",
+      "bytes": 3335767,
+      "sha256": "448d82a6beba47904a1460b250d41b9f560a7e6f358a35f32ffbf9b6607d871b"
+    },
+    "election.html": {
+      "url": "https://www.elections.alaska.gov/election-results/e/?id=26genr",
+      "bytes": 111109,
+      "sha256": "0a090a68cb62ad232c01a1a23d47d218362f77e0a881658384866e146cccfc46"
+    },
+    "rcv-usrep.pdf": {
+      "url": "https://www.elections.alaska.gov/enr/26GENR/results/RCV-USRep.pdf",
+      "bytes": 264034,
+      "sha256": "8ec016b3883ba99f863c5b4cbd8f5f8329c5cfbfd8bdf938ce34f10158d21395"
+    }
+  }
+}

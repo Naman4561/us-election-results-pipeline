@@ -86,6 +86,11 @@ class State:
         """Election results, plus any ancillary dataset the parser stores itself."""
         return ("election_results", *getattr(self.parser, "DATASETS", {}))
 
+    @property
+    def ranked_choice(self):
+        """The races whose ranked-choice rounds the parser publishes (its ``RCV`` table)."""
+        return tuple(sorted(getattr(self.parser, "RCV", {})))
+
 
 STATES = {
     "MS": State(

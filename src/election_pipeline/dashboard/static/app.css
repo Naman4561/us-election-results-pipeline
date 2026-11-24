@@ -508,6 +508,32 @@ h2 {
   line-height: 1.8;
   padding: 14px 0;
 }
+.ranked-choice {
+  font-size: 13px;
+  line-height: 1.7;
+  padding: 14px 0 8px;
+}
+table.rounds {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-bottom: 18px;
+  font-variant-numeric: tabular-nums;
+}
+table.rounds th,
+table.rounds td {
+  border-bottom: 1px solid var(--line);
+  padding: 6px 4px;
+  text-align: right;
+}
+table.rounds th:first-child {
+  text-align: left;
+  font-weight: 500;
+}
+table.rounds thead th {
+  color: var(--muted);
+  font-weight: 500;
+}
 .score {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

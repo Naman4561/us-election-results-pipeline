@@ -211,7 +211,12 @@ def checked_results(path, tags):
 def build_tags(metadata):
     if metadata["dataset"] != "election_results":
         return ["demographics"]
-    return ["results"] + (["ms"] if state_adapter(metadata["state"]).county_feed_status else [])
+    state = state_adapter(metadata["state"])
+    return (
+        ["results"]
+        + (["ms"] if state.county_feed_status else [])
+        + (["ranked_choice"] if state.ranked_choice else [])
+    )
 
 
 def build_variables(metadata):
@@ -619,6 +624,15 @@ def targets(metadata):
                     "county contest_id choice method votes",
                 )
             )
+    if adapter.ranked_choice:
+        copied.append(
+            (
+                "marts",
+                "rcv_rounds",
+                ("serving", "rcv_rounds"),
+                "state contest_id round kind choice votes outcome",
+            )
+        )
     if adapter.county_feed_status:
         copied.append(
             (
