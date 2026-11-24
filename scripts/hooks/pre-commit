@@ -1,26 +1,17 @@
 #!/bin/sh
-# Refuse a commit that adds one of this deployment's private values (the server's
-# addresses, the backup bucket, the AWS account ID). The values are never in the
-# repository: list them one per line in ~/.election-private-values (or the file named by
-# ELECTION_PRIVATE_VALUES), readable by you alone. tests/test_public_values.py covers what
-# is general (any public address or real-looking bucket) in CI.
+# Refuse a commit that adds a public IP address, an S3 bucket, an AWS ARN with an account
+# ID or an access key ID (scripts/check_public_values.py), before it can reach the public
+# repository. CI runs the same check over every file, but only after a push.
 #
 # Install once per clone:   git config core.hooksPath scripts/hooks
-values="${ELECTION_PRIVATE_VALUES:-$HOME/.election-private-values}"
-[ -f "$values" ] || exit 0
-added=$(git diff --cached --no-color -U0 --diff-filter=ACMR | grep '^+' | grep -v '^+++')
-[ -n "$added" ] || exit 0
-found=0
-while IFS= read -r value || [ -n "$value" ]; do
-    value=$(printf '%s' "$value" | tr -d '\r')
-    case "$value" in '' | '#'*) continue ;; esac
-    if printf '%s\n' "$added" | grep -qF -- "$value"; then
-        found=$((found + 1))
+root=$(git rev-parse --show-toplevel)
+for python in "$root/.venv/Scripts/python.exe" "$root/.venv/bin/python" python3 python; do
+    if command -v "$python" >/dev/null 2>&1 && "$python" -c "" >/dev/null 2>&1; then
+        exec "$python" "$root/scripts/check_public_values.py" --staged
     fi
-done < "$values"
-if [ "$found" -gt 0 ]; then
-    echo "pre-commit: this commit adds $found private value(s) listed in $values." >&2
-    echo "Remove them (the value is not shown here), then commit again." >&2
-    exit 1
+done
+if command -v py >/dev/null 2>&1; then
+    exec py -3 "$root/scripts/check_public_values.py" --staged
 fi
-exit 0
+echo "pre-commit: no Python found to run scripts/check_public_values.py; commit refused." >&2
+exit 1
