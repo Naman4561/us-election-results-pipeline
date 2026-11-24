@@ -486,6 +486,37 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(failed, {})
         self.assertEqual(statuses, {NC: ("unofficial", "check-only"), KY: ("test", "check-only")})
 
+    def imported(self, name, digest="e" * 64, enabled=True):
+        """``name`` as a manual source; with a digest, one whose import is published."""
+        entry = self.value["sources"][name]
+        entry.update(acquisition="manual", enabled=enabled, public=enabled)
+        if digest:
+            entry["manual_snapshot"] = {"sha256": digest, "publication_id": "f" * 32}
+        self.save()
+
+    def test_release_checks_each_published_manual_source_by_replaying_its_import(self):
+        self.imported(KY)
+        self.imported(GA, digest=None)  # configured for imports, nothing published yet
+        self.imported(SC, enabled=False)
+        calls = {}
+
+        def run(image, name, status, prod, config, *, mode=None, extra=()):
+            calls[name] = (mode, list(extra))
+            return {"source_id": name, "outcome": "failed" if name == KY else "validated"}
+
+        value = catalog.read(self.path)
+        self.assertEqual(control.collected(value), [NC])
+        self.assertEqual(control.checked(value), [KY, NC])
+        with patch.object(control, "run_one", side_effect=run):
+            failed = control.check_sources("image", value, self.prod, self.config)
+        self.assertEqual(
+            calls,
+            {NC: ("check-only", []), KY: ("check-only", ["--replay-sha256", "e" * 64])},
+        )
+        # A manual source that no longer parses under the new image stops the release.
+        self.assertEqual(failed, {KY: "failed"})
+        self.assertEqual(control.snapshots(self.prod, [KY], value), {KY: "e" * 64})
+
     def idle_source(self, name, checked_minutes_ago=1):
         """A collected source holding snapshot "a…" and a recent run report."""
         settings, sources = load_config(catalog.CONFIG)
@@ -674,6 +705,18 @@ class DeploymentTests(unittest.TestCase):
             )
         return tree
 
+    def test_a_manual_source_is_keyed_by_its_published_import_alone(self):
+        tree = self.release_tree()
+        # An imported source has no collector state: its catalog entry names its snapshot.
+        (Path(self.prod["DATA_DIR"]) / "state" / f"{KY}.json").unlink()
+        self.imported(KY)
+        before = control.check_keys(tree, self.value, self.prod, [NC, KY])
+        self.assertEqual(set(before), {NC, KY})
+        parser = tree / "src/election_pipeline/parsers/ky.py"
+        parser.write_text(parser.read_text(encoding="utf-8") + "\n# changed\n", encoding="utf-8")
+        after = control.check_keys(tree, self.value, self.prod, [NC, KY])
+        self.assertEqual((before[NC] == after[NC], before[KY] == after[KY]), (True, False))
+
     def test_a_check_key_changes_only_with_what_that_source_check_runs(self):
         tree = self.release_tree()
         names = [NC, KY]
@@ -820,7 +863,7 @@ class DeploymentTests(unittest.TestCase):
         state.mkdir(parents=True)
         (state / f"{NC}.json").write_text(json.dumps({"sha256": "a" * 64}), encoding="utf-8")
         (state / f"{KY}.json").write_text(json.dumps({"sha256": None}), encoding="utf-8")
-        current = control.snapshots(self.prod, [NC, KY, "missing"])
+        current = control.snapshots(self.prod, [NC, KY, "missing"], self.value)
         self.assertEqual(current, {NC: "a" * 64})
         ledger = Path(self.config["CONTROL_STATE_DIR"]) / control.IDLE_LEDGER
         self.assertEqual(control.published(self.value, self.config, current), set())
@@ -861,7 +904,7 @@ class DeploymentTests(unittest.TestCase):
                 patch.object(
                     control,
                     "snapshots",
-                    side_effect=lambda prod, names: {n: current[n] for n in names},
+                    side_effect=lambda prod, names, value: {n: current[n] for n in names},
                 ),
                 patch.object(control, "published", side_effect=lambda *a: set(proven)),
                 patch.object(control, "run_one", side_effect=check),
