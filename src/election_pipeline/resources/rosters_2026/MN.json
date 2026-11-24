@@ -1,6 +1,6 @@
 {
  "state": "MN",
- "provenance": "Minnesota candidates (as the Secretary of State's results files print them, write-in line included) and counties from the pipeline's archived snapshot 5d5ea0d305697f866b4e6069d4a32cffd320c1f649b419ac51767b25fbfa0ca7, collected Nov 19, 2026 3:49 PM EST and published; proposed by scripts/review_rosters.py. Pending the operator's review against the state's results pages.",
+ "provenance": "Minnesota candidates (as the Secretary of State's results files print them, write-in line included) and counties from the pipeline's archived snapshot 5d5ea0d305697f866b4e6069d4a32cffd320c1f649b419ac51767b25fbfa0ca7, collected Nov 19, 2026 3:49 PM EST and published; proposed by scripts/review_rosters.py. Confirmed by the operator (Naman) on Nov 24, 2026.",
  "races": {
   "MN-01": {
    "candidates": [

@@ -1,6 +1,6 @@
 {
  "state": "NE",
- "provenance": "Nebraska candidates (as the Secretary of State's results print them; statewide totals only, so no counties) from the pipeline's archived snapshot 7f8cc55f04c04389e324e8eade0ffe79d248e7d776a5f771b1a866ce35e406b1, collected Nov 24, 2026 5:01 PM EST and published; proposed by scripts/review_rosters.py. Pending the operator's review against the state's results pages.",
+ "provenance": "Nebraska candidates (as the Secretary of State's results print them; statewide totals only, so no counties) from the pipeline's archived snapshot 7f8cc55f04c04389e324e8eade0ffe79d248e7d776a5f771b1a866ce35e406b1, collected Nov 24, 2026 5:01 PM EST and published; proposed by scripts/review_rosters.py. Confirmed by the operator (Naman) on Nov 24, 2026.",
  "races": {
   "NE-01": {
    "candidates": [

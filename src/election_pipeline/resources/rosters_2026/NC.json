@@ -1,6 +1,6 @@
 {
  "state": "NC",
- "provenance": "North Carolina candidates (as the State Board's results file prints them, write-in lines included) and counties from the pipeline's archived snapshot 4fcc5999bbafe8f6e3e350632fa9f7f6009e10b00e14df2d4f86d095cc90fc8c, collected Nov 13, 2026 7:31 PM EST and published; proposed by scripts/review_rosters.py. Pending the operator's review against the state's results pages.",
+ "provenance": "North Carolina candidates (as the State Board's results file prints them, write-in lines included) and counties from the pipeline's archived snapshot 4fcc5999bbafe8f6e3e350632fa9f7f6009e10b00e14df2d4f86d095cc90fc8c, collected Nov 13, 2026 7:31 PM EST and published; proposed by scripts/review_rosters.py. Confirmed by the operator (Naman) on Nov 24, 2026.",
  "races": {
   "NC-01": {
    "candidates": [
