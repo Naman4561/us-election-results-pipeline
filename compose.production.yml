@@ -26,7 +26,9 @@ x-database: &database
 
 services:
   db:
-    image: postgres:17
+    # Pinned to what production runs (17.11, Nov 3, 2026), so a rebuild or a restore gets
+    # the same server; Dependabot proposes updates.
+    image: postgres:17.11@sha256:3b0cda93be7c8dba2ed484d19393d93845dc3dafb88973e248ba8e6d99d784e1
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-election_pipeline}
@@ -64,7 +66,7 @@ services:
         condition: service_healthy
 
   caddy:
-    image: caddy:2
+    image: caddy:2.11.7@sha256:36c24ad91a7ff7bc4c87fe22bfa8df3c4b18da0773d73fc12ee2c52b98c0bb7e
     profiles: [public]
     restart: unless-stopped
     environment:
