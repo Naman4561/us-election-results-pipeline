@@ -12,6 +12,7 @@ from pathlib import Path
 
 from election_pipeline.cli import main
 from election_pipeline.parsers.nc import CONTESTS, RESULT_HEADER
+from election_pipeline.parsers.scope import recording
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import CollectorSettings, Source
 from election_pipeline.storage import ArchiveStore, file_hash
@@ -22,6 +23,9 @@ class ParsingTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
+        # A synthetic file makes no real candidate claim: its parse records the roster
+        # it implies rather than checking the reviewed one (test_rosters covers that).
+        self.enterContext(recording())
         self.settings = CollectorSettings()
 
         self.source = Source(

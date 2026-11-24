@@ -1,7 +1,7 @@
 # us-election-results-pipeline
 
 Collection, validation, publication and a public dashboard of official 2026 U.S.
-general-election results: every Senate, Governor and House race of 24 states, taken
+general-election results: every Senate, Governor and House race of all 50 states, taken
 only from each state's own election office.
 
 | Read | For |
@@ -11,7 +11,7 @@ only from each state's own election office.
 | [docs/state-status.md](docs/state-status.md) | Where each state's count stands: counting, pending certification, paused |
 | [docs/adding-a-state.md](docs/adding-a-state.md) | Adding a state: registry entry, parser, config, roster, map |
 | [docs/deployment.md](docs/deployment.md) | Staging and switching releases, adding a state in production, rollback |
-| [docs/manual-results.md](docs/manual-results.md) | Importing an official file saved by hand (Ohio, Kansas) |
+| [docs/manual-results.md](docs/manual-results.md) | Importing official files saved by hand (17 states), including multi-file zips |
 | [docs/mississippi-collection.md](docs/mississippi-collection.md) | Mississippi's county-by-county collection and reviewed imports |
 | [docs/backups.md](docs/backups.md) | Backups to S3, retention and restore checks |
 

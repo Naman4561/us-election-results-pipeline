@@ -19,6 +19,7 @@ from election_pipeline.collect import FetchResponse
 from election_pipeline.dashboard import server
 from election_pipeline.parsers import mn
 from election_pipeline.parsers.nc import RESULT_HEADER
+from election_pipeline.parsers.scope import recording
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
 from election_pipeline.states import state_adapter
@@ -176,7 +177,8 @@ def members(code):
     return {"results.json": encoded(fixture())}
 
 
-def parse_fixture(code, data, root):
+def parse_fixture(code, data, root, *, roster=False):
+    """``roster``: check the state's reviewed roster, which a synthetic file fails."""
     settings, sources = load_config(ROOT / "config/sources.toml")
     source = sources[code.lower() + "_2026_general_all"]
     archive = root / "input.zip"
@@ -187,7 +189,12 @@ def parse_fixture(code, data, root):
     target = ArchiveStore(root, source).archive_path(digest)
     target.parent.mkdir(parents=True, exist_ok=True)
     archive.replace(target)
-    return source, settings, parse_source(source, settings, root, sha256=digest)
+    if roster:
+        return source, settings, parse_source(source, settings, root, sha256=digest)
+    # A synthetic file makes no real candidate claim: its parse records the roster it
+    # implies rather than checking the reviewed one.
+    with recording():
+        return source, settings, parse_source(source, settings, root, sha256=digest)
 
 
 class FullRaceParserTests(unittest.TestCase):
@@ -198,6 +205,13 @@ class FullRaceParserTests(unittest.TestCase):
 
     def parse(self, code, data=None):
         return parse_fixture(code, members(code) if data is None else data, self.root)
+
+    def test_each_reviewed_roster_refuses_a_synthetic_candidate(self):
+        for code in ("TX", "MN", "NC", "NE"):
+            with self.subTest(state=code):
+                _, _, result = parse_fixture(code, members(code), self.root, roster=True)
+                self.assertEqual(result["outcome"], "validation_failed")
+                self.assertIn("candidate roster differs", result["error"])
 
     def test_all_70_races_parse_and_match_existing_map_districts(self):
         for code, count in (("TX", 40), ("MN", 10), ("NC", 15), ("NE", 5)):

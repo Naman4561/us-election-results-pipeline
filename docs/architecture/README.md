@@ -1,6 +1,6 @@
 # Architecture
 
-Official election results move from 24 state election offices to a public dashboard
+Official election results move from 50 state election offices to a public dashboard
 in four steps: **collect** the official files, **parse** them into one shared layout,
 **model and validate** them in PostgreSQL with dbt, then **publish** a frozen
 snapshot that the dashboard reads. Everything runs on one AWS Lightsail host; backups

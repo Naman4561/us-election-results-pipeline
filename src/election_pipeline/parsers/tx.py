@@ -8,6 +8,7 @@ from datetime import datetime
 from urllib.parse import urlsplit
 
 from election_pipeline.parsers.results import finish
+from election_pipeline.parsers.scope import verify_rows
 
 
 def unique_object(pairs):
@@ -150,6 +151,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 raise ValueError(
                     f"Texas candidate votes do not equal the reported total: {identity}"
                 )
+    verify_rows("TX", rows)
     finish(rows, source, settings, output, stats, reference=reference)
     stats.update(
         source_version=version,

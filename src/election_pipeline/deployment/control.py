@@ -1,8 +1,9 @@
 """Host-side control of the one release that runs every state.
 
 A release is staged (scripts/stage_release.sh: checkout, image, tests) and then made
-current with ``release``: migrations apply, every enabled HTTP source must validate a
-publication candidate under the new image, and only then do the catalog and the
+current with ``release``: migrations apply, every enabled HTTP source and every published
+manual source must validate a publication candidate under the new image, and only then do
+the catalog and the
 ``current`` symlink (which the systemd units run from) move. The public dashboard moves
 separately, after a candidate dashboard from the release passes its checks.
 """
@@ -179,6 +180,23 @@ def collected(value):
         for name, entry in value["sources"].items()
         if entry["enabled"] and entry["acquisition"] == "http"
     )
+
+
+def manual(value):
+    """{manual source: the snapshot it publishes}. Nothing polls one, so its release check
+    replays the operator's last published import."""
+    return {
+        name: entry["manual_snapshot"]["sha256"]
+        for name, entry in sorted(value["sources"].items())
+        if entry["enabled"]
+        and entry["acquisition"] == "manual"
+        and entry.get("manual_snapshot", {}).get("sha256")
+    }
+
+
+def checked(value):
+    """Every source a release validates: the collected ones and the published manual ones."""
+    return sorted([*collected(value), *manual(value)])
 
 
 def idle(name, entry, image, prod, ledger, settings, sources, now):
@@ -491,9 +509,12 @@ def check_keys(release_path, value, prod, names):
     for code, state in STATES.items():
         for item in resources.glob(f"{state.slug}_*.json"):
             owners[item] = code
-    keyed = {}
+    keyed, imported = {}, manual(value)
     for name in names:
         source = sources[name]
+        if name in imported:
+            keyed[name] = set(build_tags({"dataset": source.dataset, "state": source.state}))
+            continue
         state = json.loads(
             (Path(prod["DATA_DIR"]) / "state" / f"{name}.json").read_text(encoding="utf-8")
         )
@@ -542,10 +563,14 @@ def check_keys(release_path, value, prod, names):
     return keys
 
 
-def snapshots(prod, names):
+def snapshots(prod, names, value):
     """{source: the snapshot its release check would read}."""
+    imported = manual(value)
     found = {}
     for name in names:
+        if name in imported:
+            found[name] = imported[name]
+            continue
         try:
             state = json.loads(
                 (Path(prod["DATA_DIR"]) / "state" / f"{name}.json").read_text(encoding="utf-8")
@@ -577,11 +602,13 @@ def published(value, config, current):
 
 
 def check_sources(image, value, prod, config, moved=(), names=None):
-    """Run every enabled HTTP source once, check-only, in ``image``; return those that failed.
+    """Run every source ``checked`` names (or ``names``) once, check-only, in ``image``;
+    return those that failed.
 
-    Each run parses the source's latest archived snapshot, loads it and builds dbt, then
-    discards its candidate. Nothing is requested from the state, so a site that is down
-    does not block a release, and the live collector state is left alone.
+    Each run parses the source's latest archived snapshot (for a manual source, its
+    published import), loads it and builds dbt, then discards its candidate. Nothing is
+    requested from the state, so a site that is down does not block a release, and the
+    live collector state is left alone.
 
     A source in ``moved`` now reads a new address, so it has no snapshot to check yet;
     for it alone, having none is not a failure. Its first collection is validated before
@@ -590,6 +617,7 @@ def check_sources(image, value, prod, config, moved=(), names=None):
     unknown = set(moved) - set(collected(value))
     if unknown:
         raise ValueError(f"Not an enabled HTTP source: {sorted(unknown)}")
+    imported = manual(value)
 
     def check(name):
         # A check publishes nothing. An official source's snapshot may be certified by an
@@ -598,6 +626,7 @@ def check_sources(image, value, prod, config, moved=(), names=None):
         # A source the worker is collecting right now is locked; wait for it to finish
         # rather than fail the release.
         deadline = time.monotonic() + int(config.get("CHECK_LOCK_WAIT_SECONDS", "600"))
+        replay = {"extra": ["--replay-sha256", imported[name]]} if name in imported else {}
         while True:
             try:
                 result = run_one(
@@ -607,6 +636,7 @@ def check_sources(image, value, prod, config, moved=(), names=None):
                     prod,
                     config,
                     mode="check-only",
+                    **replay,
                 )
             except Exception as error:
                 result = {"source_id": name, "outcome": "failed", "error": str(error)}
@@ -615,7 +645,7 @@ def check_sources(image, value, prod, config, moved=(), names=None):
             time.sleep(LOCK_RETRY_SECONDS)
 
     with ThreadPoolExecutor(max_workers=parallel_jobs(config)) as pool:
-        checks = dict(pool.map(check, collected(value) if names is None else names))
+        checks = dict(pool.map(check, checked(value) if names is None else names))
     return {
         n: r.get("error") or r["outcome"]
         for n, r in checks.items()
@@ -640,7 +670,7 @@ def no_snapshot(error):
 
 
 def release(path, release_path, image, prod, config, moved=(), check_all=False):
-    """Make a staged release current once it validates every enabled HTTP source.
+    """Make a staged release current once it validates every source ``checked`` names.
 
     A source whose check key (``check_keys``) passed before, under this or an earlier
     release, is not checked again unless ``check_all``, provided its snapshot is the one
@@ -653,11 +683,11 @@ def release(path, release_path, image, prod, config, moved=(), check_all=False):
         return {"outcome": "already_current", "revision": staged["revision"]}
     with connect(db_settings(prod, writer=True)) as conn:
         applied = migrate(conn, root=staged["release_path"])
-    names = collected(value)
+    names = checked(value)
     ledger = Path(config["CONTROL_STATE_DIR"]) / CHECK_LEDGER
     try:
         keys = check_keys(staged["release_path"], value, prod, set(names) - set(moved))
-        current = snapshots(prod, keys)
+        current = snapshots(prod, keys, value)
         proven = published(value, config, current)
         recorded = json.loads(ledger.read_text(encoding="utf-8")) if ledger.exists() else {}
         if recorded.get("schema_version") != 2:
@@ -677,19 +707,19 @@ def release(path, release_path, image, prod, config, moved=(), check_all=False):
     reused = [] if check_all else sorted(n for n in keys if reusable(n))
     if reused and len(reused) == len(names):
         # One source is always checked, a different one each release: it proves the new
-        # image runs end to end, which no key can show (a manual-only state's registry
-        # entry, say, is in no collected source's key).
+        # image runs end to end, which no key can show (a state with no source in the
+        # catalog yet, say, is in no source's key).
         reused.remove(
             min(reused, key=lambda n: hashlib.sha256((staged["revision"] + n).encode()).digest())
         )
-    checked = [n for n in names if n not in reused]
-    failed = check_sources(staged["image_id"], value, prod, config, moved, checked)
+    run = [n for n in names if n not in reused]
+    failed = check_sources(staged["image_id"], value, prod, config, moved, run)
     # A pass holds for its key whether or not this release goes ahead.
     passed = {
         **{n: k for n, k in passed.items() if n not in failed},
         **{
             n: {"key": keys[n], "snapshot": current.get(n)}
-            for n in checked
+            for n in run
             if n in keys and n not in failed
         },
     }
@@ -713,7 +743,7 @@ def release(path, release_path, image, prod, config, moved=(), check_all=False):
         "revision": staged["revision"],
         "previous_revision": value["release"]["revision"],
         "migrations_applied": applied,
-        "sources_validated": checked,
+        "sources_validated": run,
         "sources_reused": reused,
         "note": "Workers use the release from their next cycle; move the dashboard next",
     }

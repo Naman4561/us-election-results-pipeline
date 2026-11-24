@@ -7,7 +7,7 @@ gantt
     title One hour of scheduled work (UTC)
     dateFormat HH:mm
     axisFormat %H:%M
-    section Worker · every 5 min, ≤ 600 s
+    section Worker · every 15 min, ≤ 600 s
     cycle :00:00, 2m
     cycle :00:05, 2m
     cycle :00:10, 2m
