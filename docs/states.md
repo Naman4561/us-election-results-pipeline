@@ -186,7 +186,10 @@ zero.
   in the reviewed table `resources/il_2026_contests.json`; a name not in it is refused
   rather than counted as a write-in. A feasibility survey of all 108 (Nov 23) found
   Clarity sites, vendor sites (pollresults.net, GBS, platinumelectionresults,
-  livevoterturnout), county PDFs and pages, and eight that refuse the pipeline.
+  livevoterturnout), county PDFs and pages, and eight that refuse the pipeline. Each
+  import is built by `scripts/il_bundle.py` from the previous one and an additions file
+  naming the authorities added or replaced; it also writes and signs the reviews and
+  parses a zip offline before the import. Refresh: pack, check, import.
 - **Wisconsin:** the Elections Commission posts results only once it certifies (about
   December 1) and its site refuses automated clients, so each county's own report is
   collected as the counties post them (`parsers/wi.py`): fetched as the pipeline fetches
