@@ -6,6 +6,10 @@
 #   curl -fsSL -o /tmp/ship.sh https://raw.githubusercontent.com/Naman4561/us-election-results-pipeline/REVISION/scripts/ship_release.sh
 #   sudo systemd-run --unit=election-ship-SHORT --collect bash /tmp/ship.sh refs/heads/BRANCH REVISION
 #
+# Follow it with `journalctl -u election-ship-SHORT -f`. Its last line is the outcome
+# ("== result: released" or "== result: not shipped"), which stays in the journal after
+# the unit is collected. This is the only ship procedure; do not ship with copies of it.
+#
 # It gives up without changing anything if CI fails, stays queued (a GitHub outage),
 # or does not finish in time, or if the branch has moved past the approved revision.
 # The worker keeps running throughout: release checks reuse unchanged sources, so a ship
@@ -27,6 +31,15 @@ api='https://api.github.com/repos/Naman4561/us-election-results-pipeline'
 ci_seconds="${SHIP_CI_SECONDS:-21600}"
 queued_seconds="${SHIP_QUEUED_SECONDS:-1800}"
 now() { TZ=America/New_York date '+%H:%M:%S %Z'; }
+outcome() {
+    local status=$?
+    if ((status == 0)); then
+        printf '== result: released %s (exit 0) %s\n' "$revision" "$(now)"
+    else
+        printf '== result: not shipped %s (exit %s) %s\n' "$revision" "$status" "$(now)"
+    fi
+}
+trap outcome EXIT
 
 # GitHub's unauthenticated API allows 60 requests an hour: poll every two minutes.
 started="$(date +%s)"
