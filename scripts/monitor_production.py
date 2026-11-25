@@ -21,6 +21,9 @@ from election_pipeline.storage import atomic_json
 STATE_DIR = Path("/var/lib/election-pipeline-monitor")
 GOOD_RUNS = {"succeeded", "already_current", "not_due", "awaiting_publication"}
 REMINDER = "reminder/"
+# A reminder message lists its kinds in this order (official results to certify first,
+# then overdue manual snapshots), each kind's reminders by name; other kinds follow.
+REMINDER_ORDER = ("official", "manual", "county", "paused")
 
 
 def read_json(path):
@@ -353,6 +356,17 @@ def split(found):
     return alerts, reminders
 
 
+def ordered(reminders):
+    """The reminders grouped by kind (``REMINDER_ORDER``), then by name."""
+
+    def rank(key):
+        kind = key.split("/", 1)[0]
+        order = REMINDER_ORDER.index(kind) if kind in REMINDER_ORDER else len(REMINDER_ORDER)
+        return order, key
+
+    return {key: reminders[key] for key in sorted(reminders, key=rank)}
+
+
 def notify_reminders(config, reminders, previous, now):
     """Send operator reminders when one is new, then every MANUAL_REMINDER_SECONDS while
     any stay open. Clearing a reminder sends nothing."""
@@ -369,7 +383,7 @@ def notify_reminders(config, reminders, previous, now):
         {
             "deployment": config["DEPLOYMENT"],
             "checked_at": now.isoformat(),
-            "reminders": reminders,
+            "reminders": ordered(reminders),
         },
         indent=2,
     )

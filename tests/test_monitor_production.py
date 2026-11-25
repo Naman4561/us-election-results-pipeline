@@ -385,6 +385,30 @@ class MonitorTests(unittest.TestCase):
         self.assertEqual(publish.call_count, 3)
         self.assertTrue(publish.call_args.args[1].startswith("RECOVERED"))
 
+    def test_a_reminder_message_lists_official_results_first_then_manual_snapshots(self):
+        reminders = {
+            "paused/va_2026_general": "Collection is paused by an operator",
+            "manual/oh_2026_general": "Manual snapshot is overdue for an operator update",
+            "official/ri_2026_general": "certify",
+            "county/MS/JACKSON": "Manual county snapshot is over six hours old",
+            "manual/ks_2026_general": "Manual snapshot is overdue for an operator update",
+            "official/nm_2026_general": "certify",
+        }
+        with patch.object(monitor, "publish") as publish:
+            monitor.notify_reminders(self.config, reminders, {}, self.now)
+        sent = json.loads(publish.call_args.args[2])["reminders"]
+        self.assertEqual(
+            list(sent),
+            [
+                "official/nm_2026_general",
+                "official/ri_2026_general",
+                "manual/ks_2026_general",
+                "manual/oh_2026_general",
+                "county/MS/JACKSON",
+                "paused/va_2026_general",
+            ],
+        )
+
     def test_manual_reminders_are_sent_apart_from_alerts_and_repeat_every_six_hours(self):
         reminders = {"manual/oh_2026_general": "Manual snapshot is overdue for an operator update"}
         with patch.object(monitor, "publish") as publish:
