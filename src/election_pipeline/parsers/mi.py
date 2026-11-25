@@ -4,7 +4,9 @@ The results site (mvic.sos.state.mi.us) refuses automated clients, so its export
 downloaded in a browser and imported as a manual source (docs/manual-results.md). The
 export, ``2026STATE_GENERAL_MI_CENR_BY_COUNTY.txt``, is tab-separated: a turnout line, a
 header, a row per county, office and candidate, and a ``RECORDS: N`` line counting them.
-It has no statewide rows; statewide totals are the county sums.
+It has no statewide rows; statewide totals are the county sums. The last line also
+carries the state's label: ``RESULTS: OFFICIAL`` once the Board of State Canvassers has
+certified (Nov 23, 2026), nothing after it before then.
 
 Each office's write-in candidates (``WriteIn`` "Y") are kept as one "Write-in" line per
 county. The export prints no report time: the site shows it ("Updated: ...") beside the
@@ -105,7 +107,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     lines = text.splitlines()
     if len(lines) < 4 or not re.fullmatch(r"TOTAL VOTER TURNOUT: [\d,]+", lines[0]):
         raise ValueError("Michigan export lacks its turnout line")
-    footer = re.fullmatch(r"RECORDS: (\d+)\tRESULTS: ", lines[-1])
+    footer = re.fullmatch(r"RECORDS: (\d+)\tRESULTS: (OFFICIAL)?", lines[-1])
     if not footer:
         raise ValueError("Michigan export lacks its record count")
     body = lines[1:-1]
@@ -170,6 +172,9 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         verify_scope("MI", race, [n for r, n in identities if r == race], counties[race])
     finish(rows, source, settings, output, stats, reference=reference)
     stats.update(
+        # The state's own label: its canvassed export ends "RESULTS: OFFICIAL", the
+        # election-week one "RESULTS: " with nothing after it.
+        official_results=footer[2] == "OFFICIAL",
         total_voter_turnout=int(lines[0].split(": ", 1)[1].replace(",", "")),
         write_in_votes={
             race: sum(v for (r, _), v in write_ins.items() if r == race) for race in wanted
