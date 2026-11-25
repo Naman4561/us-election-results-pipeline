@@ -84,6 +84,8 @@ class MassachusettsTests(unittest.TestCase):
 
     def test_the_fixture_is_the_captured_files(self):
         ledger = json.loads((FIXTURE / "provenance.json").read_text())
+        # The bundle that zips these files is recorded apart (tests/test_fixtures.py).
+        ledger.pop("unrecorded_files")
         data = members()
         self.assertEqual(set(data), set(ledger))
         self.assertEqual(set(data), set(self.source.expected_members))
