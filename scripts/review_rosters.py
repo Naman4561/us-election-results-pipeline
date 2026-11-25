@@ -53,7 +53,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", required=True)
     parser.add_argument("--archive", required=True, type=Path)
-    parser.add_argument("--config", type=Path, default=ROOT / "config/sources.toml")
+    parser.add_argument("--config", type=Path, default=ROOT / "config")
     parser.add_argument("--write", action="store_true", help="Replace the state's roster")
     args = parser.parse_args()
     settings, sources = load_config(args.config)

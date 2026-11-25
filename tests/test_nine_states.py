@@ -65,7 +65,7 @@ class NineStateTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.settings, self.sources = load_config(ROOT / "config/sources.toml")
+        self.settings, self.sources = load_config(ROOT / "config")
 
     def parse(self, code, mutate=None):
         self.source = self.sources[code.lower() + "_2026_general"]

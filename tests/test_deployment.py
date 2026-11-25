@@ -686,7 +686,7 @@ class DeploymentTests(unittest.TestCase):
         """A release checkout of what a source check runs, with NC and KY snapshots."""
         tree = self.root / "release"
         ignore = shutil.ignore_patterns("__pycache__", "target", "logs")
-        for entry in (*control.CHECK_INPUTS, "config/sources.toml"):
+        for entry in (*control.CHECK_INPUTS, "config"):
             source, target = ROOT / entry, tree / entry
             target.parent.mkdir(parents=True, exist_ok=True)
             if source.is_dir():
@@ -696,7 +696,7 @@ class DeploymentTests(unittest.TestCase):
             else:
                 # Run from inside the image, which has no Dockerfile of its own.
                 target.write_text(f"stand-in for {entry}\n", encoding="utf-8")
-        settings, sources = load_config(tree / "config/sources.toml")
+        settings, sources = load_config(tree / "config")
         state = Path(self.prod["DATA_DIR"]) / "state"
         state.mkdir(parents=True)
         for name in (NC, KY):
@@ -751,29 +751,24 @@ class DeploymentTests(unittest.TestCase):
         self.assertEqual(changed(package + "deployment/control.py"), set())
         # Shared parsing, the database models and the image: both.
         self.assertEqual(changed(package + "parsers/results.py"), {NC, KY})
-        # The registry counts as far as it concerns each state; its shared code for all.
-        self.assertEqual(
-            changed(package + "states.py", lambda text: text.replace("liveresults/", "live/")),
-            {KY},
-        )
-        self.assertEqual(
-            changed(
-                package + "states.py",
-                lambda text: text.replace(
-                    '    "KY": State(',
-                    '    "ZZ": State("ZZ", "Z", "zz", (0,), ("total_votes",)),\n    "KY": State(',
-                    1,
-                ),
-            ),
-            set(),
-        )
-        self.assertEqual(changed(package + "states.py"), set())  # a comment
+        # The election definition counts as far as it concerns each state: a state's own file
+        # (or its durable facts) changes its key alone, another state's none. The registry's
+        # code is shared: any change to it, a comment too, is a change for all.
+        definition = "config/elections/2026-general/states/"
+        self.assertEqual(changed(definition + "KY.toml"), {KY})
+        self.assertEqual(changed(definition + "NC.toml"), {NC})
+        self.assertEqual(changed(definition + "OK.toml"), set())
+        self.assertEqual(changed(package + "states.py"), {NC, KY})
         self.assertEqual(
             changed(package + "states.py", lambda text: text + "\n\ndef helper():\n    return 1\n"),
             {NC, KY},
         )
-        # So does what makes a publication: a state added elsewhere republishes no other.
-        registry = tree / package / "states.py"
+        self.assertEqual(
+            changed("config/states.toml", lambda text: text.replace('"Kentucky"', '"Kentucky!"')),
+            {KY},
+        )
+        # So does what makes a publication: another state's definition republishes no other.
+        registry = tree / definition / "KY.toml"
 
         def hashes():
             # Callers pass a resolved root, as the module's own path is (8.3 names differ).
@@ -787,13 +782,11 @@ class DeploymentTests(unittest.TestCase):
             publication, "__file__", str(tree.resolve() / package / "publication.py")
         ):
             before = hashes()
-            registry.write_text(
-                registry.read_text(encoding="utf-8").replace("ky.gov/live/", "ky.gov/results/"),
-                "utf-8",
-            )
+            registry.write_text(registry.read_text(encoding="utf-8") + "\n# changed\n", "utf-8")
             after = hashes()
             self.assertEqual(before[0], after[0])
             self.assertNotEqual(before[1], after[1])
+            self.assertEqual(before[2], after[2])
             # Mississippi's own models and tests republish Mississippi alone.
             for relative in (
                 "tests/ms_county_status.sql",
@@ -810,7 +803,7 @@ class DeploymentTests(unittest.TestCase):
         # parses the whole project); once a source runs that build, for it alone.
         ms_test = "dbt/tests/ms_county_status.sql"
         self.assertEqual(changed(ms_test), {NC, KY})
-        settings, sources = load_config(tree / "config/sources.toml")
+        settings, sources = load_config(tree / "config")
         (Path(self.prod["DATA_DIR"]) / "state" / f"{MS}.json").write_text(
             json.dumps({"sha256": "a" * 64, "url": sources[MS].url}), encoding="utf-8"
         )
@@ -1294,7 +1287,7 @@ class DeploymentTests(unittest.TestCase):
     # Backups --------------------------------------------------------------------------
 
     def test_backup_records_the_catalog_and_both_releases(self):
-        config = ROOT / "config/sources.toml"
+        config = ROOT / "config"
         self.value["previous_release"] = self.staged()
         conn = MagicMock()
         conn.__enter__.return_value = conn

@@ -55,7 +55,7 @@ class MonitorTests(unittest.TestCase):
             "BACKUP_DIR": str(self.root / "backups"),
             "CATALOG_FILE": str(self.root / "catalog.json"),
         }
-        _, configured = load_config(ROOT / "config/sources.toml")
+        _, configured = load_config(ROOT / "config")
         self.sources = {name: configured[name] for name in (NC, MN, MS)}
         self.catalog = {
             "version": 2,

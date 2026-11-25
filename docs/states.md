@@ -2,7 +2,7 @@
 
 Thirty-four states, every 2026 U.S. Senate, Governor and House race each one holds,
 taken only from the state's own election office. The registry
-(`src/election_pipeline/states.py`) and `config/sources.toml` are the source of truth;
+(built from `config/elections/`, the election definition) and each state's file there are the source of truth;
 this page explains them.
 
 | State | Source | Races | County results | Vote methods stored |
@@ -63,7 +63,7 @@ files are imported by hand ([manual results](manual-results.md) lists them), as 
 Mississippi's reviewed counties, and Wyoming is added from its certified results alone
 (no election-night source); every other source is collected
 every 15 minutes, or hourly or every three hours once its count stops
-(`config/sources.toml`). [State status](state-status.md) records where each state's
+(`min_interval_seconds` in each state's definition file). [State status](state-status.md) records where each state's
 count stands.
 
 ## What each source does not give
@@ -157,7 +157,7 @@ zero.
   its own, so the version number is recorded.
 - **Massachusetts:** PD43+ (`electionstats.state.ma.us`) lists an election once its
   results are certified; each race's city/town CSV is fetched by its PD43+ election ID
-  (configured in `sources.toml`). Every town's votes, write-ins ("All Others") and
+  (configured in its definition file). Every town's votes, write-ins ("All Others") and
   blanks must add up to its votes cast, and the towns to the TOTALS row; blanks are not
   stored. PD43+ abbreviates directions ("N. Adams"), written out as the map writes them;
   the map drops the Census "Town" suffix of towns with a city government ("Agawam").

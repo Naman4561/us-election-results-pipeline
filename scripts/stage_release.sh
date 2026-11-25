@@ -117,7 +117,7 @@ from election_pipeline.settings import load_config
 names = [m.name for m in pkgutil.walk_packages(election_pipeline.__path__, "election_pipeline.") if not m.name.endswith("__main__")]
 for name in names:
     importlib.import_module(name)
-print(len(names), "modules and", len(load_config(Path("config/sources.toml"))[1]), "sources load")
+print(len(names), "modules and", len(load_config(Path("config"))[1]), "sources load")
 '
 for tests in test_oklahoma.py test_dashboard.py; do
     "${isolated[@]}" python -m unittest discover -s tests -p "$tests"

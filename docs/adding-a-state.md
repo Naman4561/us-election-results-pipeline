@@ -9,15 +9,19 @@ read it, and who is on the ballot.
 
 ## Steps
 
-1. **Register it** in `src/election_pipeline/states.py`: name, source ID, House seats
-   (`(0,)` for at-large), vote methods, and the flags that apply (`senate`, `governor`,
-   `county_results`, `county_privacy_masking`, `collection_backend`, `method_note`).
-   A code that is a Python keyword (`in`, `or`) needs `parser_module`. A vote method not
-   in `landing.result_methods`' check needs a migration that adds it.
-2. **Describe the source** in `config/sources.toml` under `sources.<source_id>`: URL,
-   format, expected bundle members, and `min_interval_seconds = 600` (every 15 minutes;
-   see the note in that file). A manual source is described the same way; its URL is
-   the page an operator saves files from, and nothing polls it.
+1. **Register it:** the state's durable facts (name, local unit, and `parser_module` for a
+   code that is a Python keyword, `in` or `or`) go in `config/states.toml`; everything
+   about this election goes in its definition file `config/elections/<id>/states/<CODE>.toml`:
+   `[races]` (House seats, `[0]` for at-large), vote `methods`, the flags that apply
+   (`county_results`, `county_privacy_masking`, `collection_backend`, `method_note`) and
+   `[acquisition]`. The registry checks each entry as it is built (the first method is
+   `total_votes`, House seats sorted and unique, flags that cannot go together). A vote
+   method not in `landing.result_methods`' check needs a migration that adds it.
+2. **Describe the source** in the same file's `[source]`: URL, format, expected bundle
+   members, and `min_interval_seconds = 600` (every 15 minutes; the worker's cycle). A
+   manual source says `mode = "manual"` under `[acquisition]` (with `max_age_seconds`, and
+   `final` once its issuer posts nothing more); its URL is the page an operator saves
+   files from, and nothing polls it.
 3. **Write the parser** `src/election_pipeline/parsers/<code>.py`. Its `parse` reads the
    official format, reusing a platform reader where the state uses one (`clarity`,
    `enhanced_voting`, `enr_platform`, `tally`, `workbook`, `structured`, `html`), checks

@@ -27,7 +27,7 @@ OWN_SCOPE = {
 class RegistryTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.settings, cls.sources = load_config(ROOT / "config/sources.toml")
+        cls.settings, cls.sources = load_config(ROOT / "config")
 
     def test_each_state_has_a_source_parser_roster_and_map(self):
         for code, state in STATES.items():

@@ -485,7 +485,7 @@ class CollectionTests(unittest.TestCase):
 class ConfigurationAndCheckTests(unittest.TestCase):
     def test_real_configuration_loads(self) -> None:
         root = Path(__file__).resolve().parents[1]
-        settings, sources = load_config(root / "config" / "sources.toml")
+        settings, sources = load_config(root / "config")
         self.assertEqual(
             sources["nc_2026_general_all"].expected_members, ("results_pct_20261103.txt",)
         )
@@ -541,7 +541,7 @@ class ConfigurationAndCheckTests(unittest.TestCase):
 
     def test_cli_list_and_unknown_source(self) -> None:
         root = Path(__file__).resolve().parents[1]
-        config = str(root / "config" / "sources.toml")
+        config = str(root / "config")
         with patch("sys.stdout", new_callable=io.StringIO) as output:
             self.assertEqual(main(["list-sources", "--config", config]), 0)
             listed = [json.loads(line)["source_id"] for line in output.getvalue().splitlines()]

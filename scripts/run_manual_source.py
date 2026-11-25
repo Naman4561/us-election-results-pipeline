@@ -26,7 +26,7 @@ def main():
     parser.add_argument("--attestation", type=json.loads, help="Operator certification (JSON)")
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
-    settings, sources = load_config(root / "config/sources.toml")
+    settings, sources = load_config(root / "config")
     source = sources[args.source]
     try:
         args.file.resolve(strict=True).relative_to((root / "data/inbox").resolve())

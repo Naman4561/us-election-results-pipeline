@@ -236,6 +236,21 @@ class Source:
 
 
 def load_config(path: Path) -> tuple[CollectorSettings, dict[str, Source]]:
+    """The collector's limits and every source, from the election definition.
+
+    ``path`` is the config folder (the election named by ``elections/current``) or one
+    election's folder (``config/elections/2026-general``), or a single TOML file in the
+    older ``[collector]`` / ``[sources.<id>]`` form, which tests use for small configs.
+    """
+    path = Path(path)
+    if path.is_dir():
+        from election_pipeline import elections
+
+        if (path / "elections/current").is_file():
+            found = elections.load(config=path)
+        else:
+            found = elections.load(path.name, path.parent, config=path.parent.parent)
+        return found.settings, dict(found.sources)
     with path.open("rb") as handle:
         config = tomllib.load(handle)
     if set(config) - {"collector", "sources"}:

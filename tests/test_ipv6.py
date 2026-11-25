@@ -74,7 +74,7 @@ class IPv6FirstTests(unittest.TestCase):
             replace(source, prefer_ipv6="yes")
 
     def test_virginia_alone_prefers_ipv6(self):
-        _, sources = load_config(ROOT / "config/sources.toml")
+        _, sources = load_config(ROOT / "config")
         self.assertEqual({n for n, s in sources.items() if s.prefer_ipv6}, {"va_2026_general"})
 
 

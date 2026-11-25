@@ -243,7 +243,7 @@ class RecoveryTests(unittest.TestCase):
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CONFIG = ROOT / "config/sources.toml"
+CONFIG = ROOT / "config"
 
 
 class Result:

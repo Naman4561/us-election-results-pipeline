@@ -143,7 +143,7 @@ sudo systemctl daemon-reload && sudo systemctl enable --now election-reproduce.t
 
 ## Adding a state in production
 
-The state's source is in the release's `sources.toml` and starts disabled and private.
+The state's definition (`config/elections/<id>/states/<CODE>.toml`) is in the release and its source starts disabled and private.
 Its first publication is checked before it becomes public. One command does all of it:
 
 ```bash

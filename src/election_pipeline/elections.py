@@ -8,8 +8,9 @@
     datasets/<name>.toml    a source that is not a state's results (NC's absentee file)
 
 What is true of a state in every election (its name, its parser, the kind of place it reports
-by) is ``DURABLE``. ``load`` joins the two into the ``State`` and ``Source`` objects the rest
-of the code uses, so a new election is a new folder of data.
+by) is ``config/states.toml``; ``config/elections/current`` names the election in force.
+``load`` joins them into the ``State`` and ``Source`` objects the rest of the code uses, so a
+new election is a new folder of data and a new line in ``current``.
 
 ``describe`` writes a loaded election as plain data, in a fixed order; the golden snapshot
 in ``tests/fixtures/registry/`` is its output for 2026, taken from the code that predates
@@ -18,6 +19,7 @@ the definition.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import tomllib
 from dataclasses import asdict, dataclass, fields
@@ -25,65 +27,12 @@ from datetime import date
 from pathlib import Path
 
 from election_pipeline.settings import CollectorSettings, Source
-from election_pipeline.states import State
+from election_pipeline.state_model import State
 
-ROOT = Path(__file__).resolve().parents[2] / "config/elections"
+CONFIG = Path(__file__).resolve().parents[2] / "config"
+ROOT = CONFIG / "elections"
 ACQUISITIONS = ("http", "manual")
-# Durable per state: (name, parser module under election_pipeline.parsers, local unit).
-# An empty parser module means the state's lowercase code; local_unit is "county", "town"
-# (a state that reports and is drawn by town) or "house_district".
-DURABLE = {
-    "AK": ("Alaska", "", "house_district"),
-    "AL": ("Alabama", "", "county"),
-    "AR": ("Arkansas", "", "county"),
-    "AZ": ("Arizona", "", "county"),
-    "CA": ("California", "", "county"),
-    "CO": ("Colorado", "", "county"),
-    "CT": ("Connecticut", "", "town"),
-    "DE": ("Delaware", "", "county"),
-    "FL": ("Florida", "", "county"),
-    "GA": ("Georgia", "", "county"),
-    "HI": ("Hawaii", "", "county"),
-    "IA": ("Iowa", "", "county"),
-    "ID": ("Idaho", "", "county"),
-    "IL": ("Illinois", "", "county"),
-    "IN": ("Indiana", "indiana", "county"),
-    "KS": ("Kansas", "", "county"),
-    "KY": ("Kentucky", "", "county"),
-    "LA": ("Louisiana", "", "county"),
-    "MA": ("Massachusetts", "", "town"),
-    "MD": ("Maryland", "", "county"),
-    "ME": ("Maine", "", "county"),
-    "MI": ("Michigan", "", "county"),
-    "MN": ("Minnesota", "", "county"),
-    "MO": ("Missouri", "", "county"),
-    "MS": ("Mississippi", "", "county"),
-    "MT": ("Montana", "", "county"),
-    "NC": ("North Carolina", "", "county"),
-    "ND": ("North Dakota", "", "county"),
-    "NE": ("Nebraska", "", "county"),
-    "NH": ("New Hampshire", "", "county"),
-    "NJ": ("New Jersey", "", "county"),
-    "NM": ("New Mexico", "", "county"),
-    "NV": ("Nevada", "", "county"),
-    "NY": ("New York", "", "county"),
-    "OH": ("Ohio", "", "county"),
-    "OK": ("Oklahoma", "", "county"),
-    "OR": ("Oregon", "oregon", "county"),
-    "PA": ("Pennsylvania", "", "county"),
-    "RI": ("Rhode Island", "", "county"),
-    "SC": ("South Carolina", "", "county"),
-    "SD": ("South Dakota", "", "county"),
-    "TN": ("Tennessee", "", "county"),
-    "TX": ("Texas", "", "county"),
-    "UT": ("Utah", "", "county"),
-    "VA": ("Virginia", "", "county"),
-    "VT": ("Vermont", "", "town"),
-    "WA": ("Washington", "", "county"),
-    "WI": ("Wisconsin", "", "county"),
-    "WV": ("West Virginia", "", "county"),
-    "WY": ("Wyoming", "", "county"),
-}
+DURABLE_KEYS = {"name", "local_unit", "parser_module"}
 # A state file's keys that are fields of State (the rest are races, the source and how it is
 # acquired). Durable fields are not allowed in a definition.
 STATE_KEYS = {
@@ -132,6 +81,39 @@ def read(path):
         return tomllib.load(handle)
 
 
+def current(config=None):
+    """The id of the election in force, from ``elections/current`` in the config folder."""
+    return (Path(config or CONFIG) / "elections/current").read_text(encoding="utf-8").strip()
+
+
+def folder(config=None):
+    """The folder of the election in force."""
+    return Path(config or CONFIG) / "elections" / current(config)
+
+
+def durable(config=None):
+    """{code: its durable facts}: what is true of a state in every election."""
+    found = read(Path(config or CONFIG) / "states.toml")
+    for code, entry in found.items():
+        unknown = set(entry) - DURABLE_KEYS
+        if unknown or not {"name", "local_unit"} <= set(entry):
+            raise ValueError(
+                f"states.toml {code}: a name, a local unit and nothing but {sorted(DURABLE_KEYS)}"
+            )
+    return found
+
+
+def fingerprint(code, election=None, config=None):
+    """Everything the definition says about state ``code``: its durable facts and its file in
+    the election, which is what a check or publication of that state depends on beyond code.
+    Changing another state's does not change it."""
+    config = Path(config or CONFIG)
+    path = Path(election or folder(config)) / "states" / f"{code}.toml"
+    text = path.read_bytes().replace(b"\r\n", b"\n")
+    facts = json.dumps(durable(config)[code], sort_keys=True).encode()
+    return hashlib.sha256(text + b"\0" + facts).hexdigest()
+
+
 def source_of(raw, state, election_date, where):
     """The ``Source`` a definition's ``[source]`` table describes."""
     table = dict(raw)
@@ -158,9 +140,13 @@ def acquisition_of(raw):
     return Acquisition(**raw)
 
 
-def load(election="2026-general", root=None):
-    """The election folder ``root/election``, as the objects the rest of the code uses."""
-    folder = Path(root or ROOT) / election
+def load(election=None, root=None, config=None):
+    """The election ``root/election`` (default: the one in force), as the objects the rest of
+    the code uses. ``config`` is the folder holding ``states.toml``."""
+    config = Path(config or CONFIG)
+    election = election or current(config)
+    folder = Path(root or config / "elections") / election
+    facts = durable(config)
     head = read(folder / "election.toml")
     if set(head) - {"id", "date", "collector"}:
         raise ValueError("election.toml holds id, date and collector only")
@@ -172,7 +158,7 @@ def load(election="2026-general", root=None):
     for path in sorted((folder / "states").glob("*.toml")):
         raw = read(path)
         code = raw.pop("code", None)
-        if code != path.stem or code not in DURABLE:
+        if code != path.stem or code not in facts:
             raise ValueError(f"{path.name}: the file's code must be a known state's, {path.stem}")
         races, table = raw.pop("races", {}), raw.pop("source", {})
         mode = raw.pop("acquisition", {})
@@ -182,18 +168,17 @@ def load(election="2026-general", root=None):
         if unknown:
             raise ValueError(f"{path.name}: unknown state settings {sorted(unknown)}")
         source = source_of(table, code, when, path.name)
-        name, module, unit = DURABLE[code]
         states[code] = State(
-            code,
-            name,
-            source.source_id,
-            tuple(races.get("house", ())),
-            tuple(raw["methods"]),
+            code=code,
+            name=facts[code]["name"],
+            source_id=source.source_id,
+            house=tuple(races.get("house", ())),
+            methods=tuple(raw["methods"]),
             senate=races.get("senate", True),
             governor=races.get("governor", False),
             source_page=table.get("page", ""),
-            parser_module=module,
-            local_unit=unit,
+            parser_module=facts[code].get("parser_module", ""),
+            local_unit=facts[code]["local_unit"],
             **{k: v for k, v in raw.items() if k in STATE_KEYS},
         )
         sources[source.source_id] = source

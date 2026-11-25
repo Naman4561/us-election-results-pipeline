@@ -19,8 +19,9 @@ from pathlib import Path
 from psycopg import sql
 from psycopg.types.json import Jsonb
 
+from election_pipeline import elections
 from election_pipeline.database import connect
-from election_pipeline.states import own_registry, publication_lock, state_adapter
+from election_pipeline.states import publication_lock, state_adapter
 
 FLORIDA_SOURCE = "fl_2026_general"
 IOWA_SOURCE = "ia_2026_general"
@@ -72,9 +73,9 @@ def dbt_tags(root, path):
 
 def project_hash(root, metadata):
     """What turns a loaded release into a publication of its state: the dbt files its
-    build selects (``dbt_tags``), these modules, their packages, and the registry as far
-    as it concerns the state (``own_registry``), so that adding or changing another
-    state's models or registry entry does not republish every one."""
+    build selects (``dbt_tags``), these modules, their packages, and the state's own part
+    of the election definition (``elections.fingerprint``), so that adding or changing
+    another state's models or definition does not republish every one."""
     state, tags = metadata["state"], set(build_tags(metadata))
     paths = [
         root / "pyproject.toml",
@@ -93,8 +94,8 @@ def project_hash(root, metadata):
     for path in sorted(set(paths)):
         digest.update(path.relative_to(root).as_posix().encode() + b"\0")
         digest.update(path.read_bytes() + b"\0")
-    registry = root / "src/election_pipeline/states.py"
-    digest.update(b"states.py\0" + own_registry(registry, state).encode() + b"\0")
+    digest.update(b"definition\0" + elections.fingerprint(state, config=root / "config").encode())
+    digest.update(b"\0")
 
     return digest.hexdigest()
 

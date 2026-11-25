@@ -179,7 +179,7 @@ def members(code):
 
 def parse_fixture(code, data, root, *, roster=False):
     """``roster``: check the state's reviewed roster, which a synthetic file fails."""
-    settings, sources = load_config(ROOT / "config/sources.toml")
+    settings, sources = load_config(ROOT / "config")
     source = sources[code.lower() + "_2026_general_all"]
     archive = root / "input.zip"
     with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as zipped:
@@ -367,7 +367,7 @@ class FullRaceParserTests(unittest.TestCase):
         self.assertIn("received HTML", result["error"])
 
     def test_mn_election_paths_and_official_host_are_required(self):
-        _, sources = load_config(ROOT / "config/sources.toml")
+        _, sources = load_config(ROOT / "config")
         source = sources["mn_2026_general_all"]
         for bad in (
             replace(source, election_date="2024-11-05"),
@@ -386,7 +386,7 @@ class FullRaceParserTests(unittest.TestCase):
                 mn.validate_source(bad)
 
     def test_mn_collector_fetches_exactly_its_seven_data_files(self):
-        settings, sources = load_config(ROOT / "config/sources.toml")
+        settings, sources = load_config(ROOT / "config")
         source = sources["mn_2026_general_all"]
         data = members("MN")
         by_url = {

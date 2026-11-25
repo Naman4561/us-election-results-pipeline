@@ -86,7 +86,7 @@ def main():
     checker.add_argument("--source", required=True)
     checker.add_argument("zip", type=Path)
     args = parser.parse_args()
-    settings, sources = load_config(ROOT / "config/sources.toml")
+    settings, sources = load_config(ROOT / "config")
     source = sources[args.source]
     try:
         if args.action == "pack":

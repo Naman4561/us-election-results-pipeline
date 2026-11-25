@@ -2,7 +2,7 @@
 
 One release (an immutable Git checkout and the image built from it) runs every source.
 Each source records only how it is deployed; its definition and races come from the
-release's own ``config/sources.toml`` and ``election_pipeline.states``::
+release's own election definition (``config/elections/``) and ``election_pipeline.states``::
 
     {
       "version": 2,
@@ -37,18 +37,18 @@ from election_pipeline.states import STATES
 
 IMAGE = re.compile(r"sha256:[0-9a-f]{64}")
 REVISION = re.compile(r"[0-9a-f]{40}")
-CONFIG = Path(__file__).resolve().parents[3] / "config/sources.toml"
+CONFIG = Path(__file__).resolve().parents[3] / "config"
 
 
 def configured():
-    # The dashboard validates the catalog on every request; parse each version of the
-    # configuration once.
-    stat = CONFIG.stat()
-    return dict(parsed(CONFIG, stat.st_mtime_ns, stat.st_size))
+    # The dashboard validates the catalog on every request; parse the configuration once.
+    # A release's configuration never changes under a running process: a new definition
+    # is a new release.
+    return dict(parsed(CONFIG))
 
 
 @functools.lru_cache(maxsize=4)
-def parsed(path, modified, size):
+def parsed(path):
     return load_config(path)[1]
 
 

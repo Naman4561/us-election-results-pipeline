@@ -40,7 +40,7 @@ class ManualTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.settings, sources = load_config(ROOT / "config/sources.toml")
+        self.settings, sources = load_config(ROOT / "config")
         self.source = sources["oh_2026_general"]
         self.raw = gzip.decompress(
             (ROOT / "tests/fixtures/five_states/oh-results.xml.gz").read_bytes()
@@ -145,7 +145,7 @@ class ManualTests(unittest.TestCase):
             self.acquire(downloaded_at="2026-11-03T23:00:00+00:00")
 
     def test_kansas_page_imports_with_its_central_time_as_the_generation_time(self):
-        self.source = load_config(ROOT / "config/sources.toml")[1]["ks_2026_general"]
+        self.source = load_config(ROOT / "config")[1]["ks_2026_general"]
         raw = gzip.decompress((ROOT / "tests/fixtures/five_states/ks.html.gz").read_bytes())
         receipt = self.acquire(raw)
         # The page says 11/03/2026 8:41 PM, printed in CST.
@@ -203,7 +203,7 @@ class ManualDeploymentTests(unittest.TestCase):
         self.root = Path(temporary.name)
         self.path = self.root / "catalog.json"
         self.value = fixture(self.root)
-        self.settings, sources = load_config(ROOT / "config/sources.toml")
+        self.settings, sources = load_config(ROOT / "config")
         self.source = sources["oh_2026_general"]
         self.image = self.value["release"]["image_id"]
         self.revision = self.value["release"]["revision"]

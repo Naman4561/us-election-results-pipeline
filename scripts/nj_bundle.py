@@ -71,7 +71,7 @@ def main():
         help="Add or replace a Clarity county, e.g. passaic=Passaic/127401",
     )
     args = parser.parse_args()
-    settings, sources = load_config(ROOT / "config/sources.toml")
+    settings, sources = load_config(ROOT / "config")
     source = sources["nj_2026_general"]
     settings = source.effective_settings(settings)
     elections = dict(ELECTIONS)

@@ -29,7 +29,7 @@ from election_pipeline.states import STATES, state_adapter
 from election_pipeline.storage import ArchiveStore
 
 ROOT = Path(__file__).resolve().parents[1]
-SETTINGS, SOURCES = load_config(ROOT / "config/sources.toml")
+SETTINGS, SOURCES = load_config(ROOT / "config")
 # The SHA-256 of every file each fixture parses to, from before the parsers read the election
 # definition (tests/fixtures/registry/provenance.json). Mississippi's county feed status
 # records the time of collection and is left out, as the nightly reproduction leaves it out.

@@ -45,7 +45,7 @@ class MapSourceTests(unittest.TestCase):
         self.assertEqual(builder.HOUSE_DISTRICT_STATES, {"AK"})
 
     def test_requests_go_out_under_the_pipelines_own_user_agent(self):
-        settings, _ = load_config(ROOT / "config/sources.toml")
+        settings, _ = load_config(ROOT / "config")
         self.assertEqual(builder.USER_AGENT, settings.user_agent)
         seen = []
 

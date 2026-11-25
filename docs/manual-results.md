@@ -9,7 +9,7 @@ Michigan, Missouri, New Hampshire, New Jersey, Nevada, New York, Ohio, Oklahoma,
 Pennsylvania, Tennessee, Wisconsin and Wyoming. Each is a source whose site refuses
 automated clients, closed its feed, or posts results only county by county or as
 documents. Which sources are manual is recorded in the production catalog
-(`acquisition = "manual"`), not in `config/sources.toml`.
+(`acquisition = "manual"`); the election definition (`config/elections/<id>/states/<CODE>.toml`) declares it too, with the manual source's freshness limit and final flag, so the repository says how each source is acquired.
 
 The importer takes one file per import, the source's `primary_filename`: a state's own
 export (Ohio's `results.xml`, Michigan's `results.txt`, a PDF) or, for a state whose

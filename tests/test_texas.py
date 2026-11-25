@@ -134,7 +134,7 @@ class TexasCivixTests(unittest.TestCase):
         # Derived from a summary, not a full capture: its parse records the roster it
         # implies rather than checking the reviewed one.
         self.enterContext(recording())
-        self.settings, sources = load_config(ROOT / "config/sources.toml")
+        self.settings, sources = load_config(ROOT / "config")
         self.source = sources["tx_2026_general_all"]
 
     def parse(self, mutate=None, raw=None):

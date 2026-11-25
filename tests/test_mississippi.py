@@ -58,7 +58,7 @@ class MississippiTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.settings, sources = load_config(ROOT / "config/sources.toml")
+        self.settings, sources = load_config(ROOT / "config")
         self.source = sources["ms_2026_general_all"]
         self.policy = ms.policy()
         self.counties = {c["key"]: c for c in self.policy["counties"]}
@@ -637,7 +637,7 @@ class RecapTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.settings, sources = load_config(ROOT / "config/sources.toml")
+        self.settings, sources = load_config(ROOT / "config")
         self.source = sources["ms_2026_general_all"]
         self.counties = [c["name"] for c in ms.policy()["counties"]]
         self.rows = [

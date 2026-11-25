@@ -90,7 +90,7 @@ class FloridaTLSTests(unittest.TestCase):
     def test_only_the_florida_file_host_trusts_the_root(self):
         from election_pipeline.settings import load_config
 
-        _, sources = load_config(ROOT / "config/sources.toml")
+        _, sources = load_config(ROOT / "config")
         self.assertEqual(sources["fl_2026_general"].url, FLORIDA)
         for url in (
             "https://floridados.gov/",

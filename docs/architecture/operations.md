@@ -19,7 +19,7 @@ gantt
 
 | Timer | Runs | Does |
 | --- | --- | --- |
-| `election-worker.timer` | every 15 minutes, at :30 s | `deploy.py run`: every enabled HTTP source in the release image, least recently run first, within `CYCLE_SECONDS` (600); `JOB_PARALLEL` jobs at once. A source is due every 15 minutes, or hourly or at listed hours once its count stops (`config/sources.toml`) |
+| `election-worker.timer` | every 15 minutes, at :30 s | `deploy.py run`: every enabled HTTP source in the release image, least recently run first, within `CYCLE_SECONDS` (600); `JOB_PARALLEL` jobs at once. A source is due every 15 minutes, or hourly or at listed hours once its count stops (`min_interval_seconds` in the state's definition file) |
 | `election-monitor.timer` | every minute | Freshness, failures, release, timers, backup age, disk, dashboard; SNS alerts and CloudWatch heartbeat |
 | `election-backup.timer` | every 6 hours | Full backup to S3, local prune, S3 retention tags |
 | `election-reproduce.timer` | nightly, 07:40 UTC | `deploy.py reproduce`: every live publication re-created from its raw snapshot under the current release (a fresh parse, a dbt rebuild) and compared row for row; a difference alerts through the monitor and changes nothing. A source that reproduced is reused while its publication and check key are unchanged |
@@ -32,7 +32,7 @@ moves; see [deployment](../deployment.md).
 ```mermaid
 flowchart LR
     subgraph dev["On the laptop"]
-        A["State entry · states.py"] --> B["Source · sources.toml"]
+        A["State definition · config/elections/&lt;id&gt;/states/XX.toml"] --> B["Source · the same file"]
         B --> C["Parser + roster<br/>parsers/xx.py · rosters_2026/XX.json"]
         C --> E["Map + fixtures + tests<br/>fetch_boundaries.py"]
         E --> F["Push branch · CI"]
@@ -51,7 +51,7 @@ flowchart LR
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Configured: in the release's sources.toml, disabled
+    [*] --> Configured: in the release's election definition, disabled
     Configured --> Validated: prepare (collect, parse, load, dbt, no publish)
     Validated --> Promoted: promote (first publication, private)
     Promoted --> Public: activate with a restore report

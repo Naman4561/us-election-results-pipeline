@@ -36,7 +36,7 @@ class ComparisonTests(unittest.TestCase):
 
     def test_a_scratch_store_holds_the_county_reports_a_bundle_keeps_outside_itself(self):
         # Mississippi's bundle names each county report by SHA-256 in the member store.
-        settings, sources = load_config(ROOT / "config/sources.toml")
+        settings, sources = load_config(ROOT / "config")
         source = sources["ms_2026_general_all"]
         with tempfile.TemporaryDirectory() as first, tempfile.TemporaryDirectory() as second:
             sha = SNAPSHOTS[source.source_id](Path(first), source, settings)

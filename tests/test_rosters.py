@@ -74,7 +74,7 @@ class RosterTests(unittest.TestCase):
             verify_scope("HI", "HI-GOV", ["x", "y"], None)
 
     def test_review_script_finds_no_change_for_the_reviewed_captures(self):
-        settings, sources = load_config(ROOT / "config/sources.toml")
+        settings, sources = load_config(ROOT / "config")
         for code in ("VA", "CO", "IA", "OR", "CA", "MD", "HI"):
             source = sources[code.lower() + "_2026_general"]
             archive = ROOT / f"tests/fixtures/nine_states/{code.lower()}.zip"

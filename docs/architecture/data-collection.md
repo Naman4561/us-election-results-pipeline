@@ -1,6 +1,6 @@
 # Data collection
 
-Each registered source in `config/sources.toml` names one official URL (or a bundle of
+Each registered source in the election definition (`config/elections/<id>/states/<CODE>.toml`) names one official URL (or a bundle of
 URLs) for one state. A collection run downloads it through one bounded client, stores
 the bytes by hash, and records what happened.
 
