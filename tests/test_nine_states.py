@@ -43,7 +43,6 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests/fixtures/nine_states"
 LEDGER = json.loads((FIXTURES / "provenance.json").read_text())
 CODES = ("VA", "ID", "WA", "CO", "IA", "OR", "CA", "MD", "HI")
-MIGRATIONS = dict(zip(CODES, range(14, 23)))
 HOSTS = {
     "VA": "enr.elections.virginia.gov",
     "ID": "results.voteidaho.gov",

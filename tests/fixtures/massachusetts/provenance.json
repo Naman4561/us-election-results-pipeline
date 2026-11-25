@@ -64,5 +64,13 @@
     "sha256": "b8ab31e44337cfaa2eb2915a31337e6e9919c5152e3328e8e60f68d2cd8d1575",
     "bytes": 2122,
     "downloaded_at": "2026-11-23T02:52:18+00:00"
+  },
+  "unrecorded_files": {
+    "bundle.zip": {
+      "sha256": "9bb307d3f23dc07293e9c5c981795a16e35b036bfad49e561a8f1c3c58972a02",
+      "bytes": 24309,
+      "origin": "the recorded files above, zipped as the collector stores them",
+      "recorded_on": "2026-11-24"
+    }
   }
 }

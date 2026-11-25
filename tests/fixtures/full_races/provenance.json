@@ -1,0 +1,41 @@
+{
+  "description": "Official feed captures of November 3, 2026, taken with the pipeline's user agent; Minnesota and Nebraska counts were all zero. Minnesota files are unmodified semicolon text from https://electionresults.sos.mn.gov/Select/MediaFiles/Index?ersElectionId=201; the Nebraska CSV is unmodified from https://electionresults.nebraska.gov/resultsCSV.aspx?map=CTY&text=All&type=SW. The tests add synthetic counts and candidates in memory (README.md).",
+  "files": {
+    "mn-counties.txt": {
+      "sha256": "55e1e7b5397443e137914d0dc100d207bbe88b8203d3689f181b623e89e4d04e",
+      "bytes": 1232,
+      "origin": "capture; stored by git with LF line endings (the hash and size are of that form)",
+      "line_endings": "stored by git with LF line endings (the hash and size are of that form)"
+    },
+    "mn-house-county.txt": {
+      "sha256": "0d7f15aecbe196b65fba0a2863bbb3ea30537eebf861d1ea4e6cf4b4a9af2bb7",
+      "bytes": 24399,
+      "origin": "capture; stored by git with LF line endings (the hash and size are of that form)",
+      "line_endings": "stored by git with LF line endings (the hash and size are of that form)"
+    },
+    "mn-house.txt": {
+      "sha256": "f0c295f67b6ce4cf8cbe17ecfa6fa319ecd8a5206586aa406e074b7ac175dd94",
+      "bytes": 2001,
+      "origin": "capture; stored by git with LF line endings (the hash and size are of that form)",
+      "line_endings": "stored by git with LF line endings (the hash and size are of that form)"
+    },
+    "mn-senate-county.txt": {
+      "sha256": "03d6da06c37b3c91ce1a8c41478ae7007c2afab37fa10ac3813ad38ee6153ace",
+      "bytes": 28218,
+      "origin": "capture; stored by git with LF line endings (the hash and size are of that form)",
+      "line_endings": "stored by git with LF line endings (the hash and size are of that form)"
+    },
+    "mn-senate.txt": {
+      "sha256": "d11920ba824a5fa59840a5c903ce633c23fa9f7509237690cca441c5796f115c",
+      "bytes": 324,
+      "origin": "capture; stored by git with LF line endings (the hash and size are of that form)",
+      "line_endings": "stored by git with LF line endings (the hash and size are of that form)"
+    },
+    "ne.csv": {
+      "sha256": "97b7f14a03409ea737c7b842e9a20cac7fafa3d35d98605f7e4b7454b511c20b",
+      "bytes": 2453,
+      "origin": "capture; stored by git with LF line endings (the hash and size are of that form)",
+      "line_endings": "stored by git with LF line endings (the hash and size are of that form)"
+    }
+  }
+}

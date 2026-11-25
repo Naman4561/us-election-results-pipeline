@@ -1,0 +1,11 @@
+{
+  "description": "Not captured data: the configuration Kentucky's closed live feed used (moved here from config/sources.toml when Kentucky switched to its saved results pages), read by tests/test_kentucky.py.",
+  "synthetic": true,
+  "files": {
+    "feed.toml": {
+      "sha256": "9aa10fd01d6f2f1f6361105eff682e1eee68be7c67ec75710f0b1ec113e4d0be",
+      "bytes": 934,
+      "origin": "configuration, written by hand"
+    }
+  }
+}

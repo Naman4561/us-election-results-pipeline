@@ -224,5 +224,19 @@
     "url": "https://app.enhancedvoting.com/results/public/api/elections/williamson-county-il/2026GeneralElection/data",
     "sha256": "8a628f30e579f5bd5601c8f18b734022e56e7a0c3922a718dbdeec7c721d3570",
     "saved_at": "2026-11-23T15:48:12+00:00"
+  },
+  "unrecorded_files": {
+    "chicago.zip": {
+      "sha256": "2f874815a66c4737f0e8176512303fd154699d73e5b7b47175f8bcb3f3bdf4e5",
+      "bytes": 146896,
+      "origin": "Chicago Board of Election Commissioners' race results files, as saved for the Illinois import, packed for the tests",
+      "recorded_on": "2026-11-24"
+    },
+    "platinum_henry.zip": {
+      "sha256": "3aca4718b3ff5cdb5066a2ffb93db5c50f60fe8d9a2eb651fc5c30145d9545f1",
+      "bytes": 62748,
+      "origin": "Henry County's three race pages from its results site, as saved for the Illinois import, packed for the tests",
+      "recorded_on": "2026-11-24"
+    }
   }
 }

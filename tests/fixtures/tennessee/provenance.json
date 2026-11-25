@@ -1,0 +1,10 @@
+{
+  "description": "Tennessee's Followed Races dashboard, saved as a PDF by the operator (\"Final Unofficial Results, 95 of 95 Counties Completed\"), from https://elections.tn.gov/ (see tests/test_tennessee.py).",
+  "files": {
+    "followed_races.pdf": {
+      "sha256": "8aa1eb96fe0dd221bdb0dd0498c8510929bdf4987ca414d1111c9e8879bd4bdd",
+      "bytes": 363206,
+      "origin": "the saved page, unchanged"
+    }
+  }
+}

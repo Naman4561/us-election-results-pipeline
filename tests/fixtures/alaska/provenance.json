@@ -4,5 +4,15 @@
   "sha256": "8f70acd9d671c46d3ee414bbe554ce51eae5f4826bc90e9bc553cd19c96f9c08",
   "capture_method": "Downloaded by user on Lightsail with TLS verification, then uploaded unchanged.",
   "source_update_time": null,
-  "election_date": "2026-11-03"
+  "election_date": "2026-11-03",
+  "unrecorded_files": {
+    "election.html": {
+      "sha256": "adaa68dcbc7d7dc7ddcf74bfcbfed0b41061a44d5857f3f65f6bb042cd8b0104",
+      "bytes": 460,
+      "origin": "Synthetic, not a capture: a minimal identity page (its title says so) with the labels the parser checks, written for the tests that pair it with the election-night CSV",
+      "synthetic": true,
+      "recorded_on": "2026-11-24",
+      "line_endings": "stored by git with LF line endings (the hash and size are of that form)"
+    }
+  }
 }
