@@ -2,8 +2,9 @@
 # dashboard switch rewrites all three upstreams together.
 {$SITE_DOMAIN} {
     encode zstd gzip
-    # Viewers reach the site over HTTPS at the CDN, which passes this header on.
-    header >Strict-Transport-Security "max-age=86400"
+    # Viewers reach the site over HTTPS at the CDN, which passes this header on. One year,
+    # raised the evening of Nov 24, 2026 after max-age=86400 caused no trouble.
+    header >Strict-Transport-Security "max-age=31536000"
 
     @unsupported not method GET HEAD
     @assets path /*.js /*.css /*-map.json
