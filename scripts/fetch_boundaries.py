@@ -5,8 +5,8 @@ request always describes the same boundaries: ``tigerWMS_ACS2026`` (January 1, 2
 vintage: states, counties, county subdivisions, the 120th Congress, 2026 lower-house
 districts) and ``tigerWMS_ACS2025`` for Missouri's 119th-Congress districts (its 2025 map
 is the one in force). Every response is kept by SHA-256 in the archive directory
-(``data/map-sources`` by default) with an index of the URL each came from, and each map
-records the URL and SHA-256 behind it. ``--offline`` rebuilds from the archive alone, with
+(``map-sources`` in the repository by default) with an index of the URL each came from,
+and each map records the URL and SHA-256 behind it. ``--offline`` rebuilds from the archive alone, with
 no request, and produces the same files. ``--output DIR`` writes the maps elsewhere than
 the dashboard's static folder, to compare before replacing (``compare_maps.py``).
 """
@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 STATIC = ROOT / "src/election_pipeline/dashboard/static"
 BASE = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/"
 USER_AGENT = "US-Election-Results-Pipeline/0.1"
-ARCHIVE = ROOT / "data/map-sources"
+ARCHIVE = ROOT / "map-sources"
 VINTAGE = "tigerWMS_ACS2026"
 MISSOURI_VINTAGE = "tigerWMS_ACS2025"
 # Layers of those services (see the service's MapServer?f=json).
