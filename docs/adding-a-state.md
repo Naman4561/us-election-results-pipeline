@@ -33,7 +33,7 @@ read it, and who is on the ballot.
 5. **Draw the map:** `python scripts/fetch_boundaries.py --states XX` writes
    `dashboard/static/xx-map.json` from the pinned Census vintage (`tigerWMS_ACS2026`), the
    kind of place taken from the state's `local_unit`. Every response it downloads is kept
-   by SHA-256 under `data/map-sources`, and `--offline` rebuilds the same file from that
+   by SHA-256 under `map-sources/` (committed), and `--offline` rebuilds the same file from that
    archive alone. To see what a rebuild would change before it replaces a map, write it
    elsewhere (`--output DIR`) and run `python scripts/compare_maps.py DIR`.
 6. **Add fixtures and tests:** captured official files with a `provenance.json`
