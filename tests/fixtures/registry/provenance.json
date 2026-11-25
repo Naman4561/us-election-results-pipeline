@@ -4,5 +4,13 @@
  "bytes": 91671,
  "made": "written for the tests: every State and Source field of the 2026 general election, the collector's limits and how each source is acquired, dumped by election_pipeline.elections.describe",
  "from": "states.STATES and config/sources.toml at af2ee88 (before the election definition existed); acquisition from production's catalog on 2026-11-25 (17 manual sources, with their final flags and 21600 s freshness limits)",
- "purpose": "the golden record the definition in config/elections/2026-general must reproduce exactly (tests/test_elections.py)"
+ "purpose": "the golden record the definition in config/elections/2026-general must reproduce exactly (tests/test_elections.py)",
+ "parse_outputs": {
+  "file": "parse_outputs_2026.json",
+  "sha256": "4630703e59a5ce811e1260e522d886afc3209ef864bd439c5293e5fed86788f2",
+  "bytes": 14861,
+  "made": "written for the tests: the SHA-256 of every output file each of the 50 results sources' fixtures parses to (151 files), taken with the code of 987d27a, before the registry and parsers read the election definition",
+  "excluded": "ms_2026_general_all county_feeds.csv, which records the time of collection and differs between runs (the nightly reproduction leaves it out too)",
+  "purpose": "the parsers, and everything the definition feeds them, must keep producing these bytes (tests/test_every_source.py)"
+ }
 }

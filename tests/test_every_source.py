@@ -30,6 +30,13 @@ from election_pipeline.storage import ArchiveStore
 
 ROOT = Path(__file__).resolve().parents[1]
 SETTINGS, SOURCES = load_config(ROOT / "config/sources.toml")
+# The SHA-256 of every file each fixture parses to, from before the parsers read the election
+# definition (tests/fixtures/registry/provenance.json). Mississippi's county feed status
+# records the time of collection and is left out, as the nightly reproduction leaves it out.
+GOLDEN_OUTPUTS = json.loads(
+    (ROOT / "tests/fixtures/registry/parse_outputs_2026.json").read_text(encoding="utf-8")
+)
+TIMED = {("ms_2026_general_all", "county_feeds.csv")}
 # Rows and contests each fixture parses to. Where a batch test asserted them before the
 # registry existed (GA, SC, KS, OH and the nine Enhanced Voting, Clarity and state-site
 # captures), these are its figures.
@@ -181,6 +188,14 @@ class EverySourceTests(unittest.TestCase):
                 self.assertEqual(report["outcome"], "parsed", report)
                 self.assertEqual(
                     (report["output_rows"], report["contest_count"]), PARSED[source_id]
+                )
+                self.assertEqual(
+                    {
+                        name: digest
+                        for name, digest in report["output_sha256"].items()
+                        if (source_id, name) not in TIMED
+                    },
+                    GOLDEN_OUTPUTS[source_id],
                 )
                 self.assertFalse(report["all_counts_zero"])
                 self.assertIn(report["county_reconciliation"], RECONCILED)

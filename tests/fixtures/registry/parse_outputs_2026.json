@@ -1,0 +1,253 @@
+{
+ "ak_2026_general": {
+  "contest_results.csv": "06e5b27ae88e53ed176e507880a58ca340a3f245bdea354f91cf0ab4dd0eb6c8",
+  "county_results.csv": "f96ff162a9a97f70869a3e435c7115d4d8405319d7fdee67035e8b81a319a661",
+  "rcv_rounds.csv": "4dc0c5a691583e8a21903264be6515971f3310e8459fe69c2ade53e60b9319c1",
+  "results.csv": "edd52f121adc70cc429603b7e2dc61850a9a2881c620bde0dc644280108f7eb0"
+ },
+ "al_2026_general": {
+  "contest_results.csv": "fe6fa0e15b321bd6555a579bcf07dc250181dc2f09aeb448ab0cc47404cc715f",
+  "county_results.csv": "f7fdf0c3241fd097005be7b13b353083f46324032d3d7731c8939aaf6ca27a49",
+  "results.csv": "795e4696338853633a8deac821f218b5d55ed2810603507570527742ff0fcbda"
+ },
+ "ar_2026_general": {
+  "contest_results.csv": "942070eb715541463f7978ff1e9723aa07cf934f1089ba4aef4b7fa8b55f2a1c",
+  "county_results.csv": "28ba52ddcb316699ef299b4e8c2b552353dd3191c4aba0c7f34deda9a1b72656",
+  "results.csv": "2745011aac4af7868b25d04430436ccc3e73a9691a8959fa5e670d0938d4e837"
+ },
+ "az_2026_general": {
+  "contest_results.csv": "0ca2e5ce515ba0915e6c558e4d6eb2da1252ea0f45a575b99fdd875d9d774c87",
+  "county_results.csv": "82eccd8974832ecd292685df6921b5903646bc7376afb05681f08008a167294c",
+  "results.csv": "b4b56c5627da32a900debdd3b45aeb3c979ca377daa7e517822f853804629594"
+ },
+ "ca_2026_general": {
+  "contest_results.csv": "4443f58710d5c0eb1adb8c371e90a58e7a0b420720c82bf0648d9becdcaf6323",
+  "county_results.csv": "5592f233e8265ee1002101ec8f1fdbf5cfd4ab83fe3726507665f14bd8ca3c31",
+  "results.csv": "bee930d21962936991e65ce3f67e8b5d13371a9252c87d0a36deba957494bf42"
+ },
+ "co_2026_general": {
+  "contest_results.csv": "2fceed02e7cb078f5fde450bc71123ffcaafb1bd0e37bcd4ac12138bedf60e70",
+  "county_results.csv": "dd07d16c711223015ec9725c928b6e6a7544fd560b79fd8251e76074277afe8e",
+  "results.csv": "b457487aab8ed9bf5e06705a27d821d52ae1dc52a52a9a8214a9785fee7d114a"
+ },
+ "ct_2026_general": {
+  "contest_results.csv": "5b5c9772ddf05d8bceb24f57de195f100edad8c82f70b9598e3b24860526c961",
+  "county_results.csv": "fe54964f4080f99e8307706ef5650a7c0eb9a158d80093d98d5050a307434a62",
+  "results.csv": "4f290e7a80711c02ed246aa3ddb204c63e659050685a2037fb973c1099cf26be"
+ },
+ "de_2026_general": {
+  "contest_results.csv": "cdf543ff2ec205051413b0bbd478696563e83ecb005ac2aa6468b42645dcc39c",
+  "county_results.csv": "425b283955c4954bd290bbde7a0b936fbb64dbb6e3f47a49bbef1c3d22240b47",
+  "results.csv": "6a3715e8a062a53270373e51fa532e06617100fb1e9e90ae4208b2ca0e320686"
+ },
+ "fl_2026_general": {
+  "contest_results.csv": "9a728d65039ace61e51af32ad074f7350067d0a1c227cdeed6b4925ebe00129b",
+  "county_results.csv": "31520419a0d4837b1f74a6cd523b05f3ed3ac7c3f35bf89270b2682541edea85",
+  "results.csv": "f5c4694fe99dbac6a81b9d30625db0cb77e267361e0e8791c0dd3c9ff1e3718d"
+ },
+ "ga_2026_general": {
+  "contest_results.csv": "f6cf8bbc412016fb475357c5e8cebe7593ddc49a4edcc6db9e65cff16f60fef7",
+  "county_results.csv": "33073e9c9b8eba9695756cdcc822204a09c252015fa4e95acf16d83f93e2c74c",
+  "results.csv": "3972ec4296d40bd6899ca8141677d04d8f689431a1b5d2f7b328568730306a8c"
+ },
+ "hi_2026_general": {
+  "contest_results.csv": "eb0564eb186c35bb303f9e06a15108d2d6d568b1918bb7fc4f2a444e5c245703",
+  "county_results.csv": "a9134cd2213d15ec98907ce0a0ff646280645fa18793a20e4ea754cd22516f47",
+  "results.csv": "52db6f0d160f8f13adeecf1e5d93e32e19c2d1dcc730c84592b3c2b432b09d3f"
+ },
+ "ia_2026_general": {
+  "contest_results.csv": "217cf5a58bfa7d266a5e6ffa14124f42c578591cec57063bde15bbed4f4d0478",
+  "county_results.csv": "153266579b431debb571b847aa4072bc894945b93476671071397388077d3547",
+  "results.csv": "9ce4cc905a0942a3ce24ba5da6f8043ef1ce042c969a28a26ef57a21bed0ccc0"
+ },
+ "id_2026_general": {
+  "contest_results.csv": "cf2902af697c101b4449cd97ab3b9452d5a10eb112354d138644918ea6ae1a87",
+  "county_results.csv": "1de1a8ab875e15983ae559391b49b77ca93f265ac71ec6926579d382816ea081",
+  "results.csv": "9db7b3b2d933c13b8da78e36be54554826d20ee5e0bbd8c209f6f330b84fafa8"
+ },
+ "il_2026_general": {
+  "contest_results.csv": "4756d7207c76c36d287b532516f84393171b113e746c10854d791c2d415de10a",
+  "county_results.csv": "18b5b39bdfcf15e3e956dd6cb8857aa4e665a8a0f776c13f5592a48c2e537728",
+  "results.csv": "5bb4e3402fc5a3ff90aab6b7b79c4c3486bd9c0e24097302178c3bffad7a7347"
+ },
+ "in_2026_general": {
+  "contest_results.csv": "cd7603cdd36a47e240993e608a23802b373c3feed1f56440a670fb1b104a67b0",
+  "county_results.csv": "07249780aefd1cccd29055024c0f79d8f9f59170a1b7449c8d197dcf1ef7a154",
+  "results.csv": "deb40aea080addcf9febaa69274a97656c3376501e36aef207d597da887408a2"
+ },
+ "ks_2026_general": {
+  "contest_results.csv": "58964323bacf12ff91143fca02b4745cdfb94c4a240a95b30545d79b7afcbb17",
+  "county_results.csv": "61a247510e73992af57f0a7056b2fd4ee6e6a08979990f2d0d97744d969ad8b4",
+  "results.csv": "466d544c126175ad52b2a8b5ff54467fe6e582d7599a82c753c562cd0735ad29"
+ },
+ "ky_2026_general": {
+  "contest_results.csv": "19e93d11483609efcb0b093fd99d2e7b1045f4d0dfb7d71b40d9df55445a69a5",
+  "county_results.csv": "0f59db243301fc5921dd73f4c40549b643bcc5ffc6b9638f36cd23873a64e787",
+  "results.csv": "95b18b9bbc8ecc7eedd1b6345187e1bb30fa2c4eca168b728645324e8b836f04"
+ },
+ "la_2026_general": {
+  "contest_results.csv": "c108e5cac4b04a72754940b29e3d7f8c8b8bfc3535624d2d3804efcb238457df",
+  "county_results.csv": "9b57cb9dbe0cedfc885b7dbb3a61cfbf49aa6b676912b75933ce9f1660136c63",
+  "results.csv": "897553c4e25b0360cca6af173df42d51175ee4e36ae2b360acac6c64a62a1cb3"
+ },
+ "ma_2026_general": {
+  "contest_results.csv": "561b523b5ea3142bf5c7359fc8c9aba1c736fc85c11c9efddf2d213432a72d5e",
+  "county_results.csv": "49be2921b9e294645c587c544cd07392e62fca3ab8e13318f69651239ed657a1",
+  "results.csv": "25b0b521fb0eead32eea4be98d3cf011c7b68a679eff819421851ae8e125261d"
+ },
+ "md_2026_general": {
+  "contest_results.csv": "c5918317496517460cf19e15e4bcb3fdb88979e1a29801eb7033d4d9770dc7ec",
+  "county_results.csv": "68d0a1c08ef9f9a93e3e42bdc5ced829251548a8fcfd5832b8eb99c1bd774430",
+  "results.csv": "d14c585b364c902ed2fd9c6bd9b79e6f7292b53e6d5801a1068f4c99d1b76593"
+ },
+ "me_2026_general": {
+  "contest_results.csv": "c96586f8830159d7ff515ece85232d84c074ce62c74e9a028dcbd7b9cbb39777",
+  "county_results.csv": "173ec175cd4f201e012f5c28ce9e861a7e462bd60807a6af275cf7dab25e8b72",
+  "results.csv": "3bffd006dd0f496c9ebf00a26435234214a9330f8bb42e89efb7b4d868d578c9"
+ },
+ "mi_2026_general": {
+  "contest_results.csv": "705d2862b8533983051ab5b102d1d08aa3a0b6876bb42f841bee404d66d01ad7",
+  "county_results.csv": "3a6f5f6c3b7ccfa328361bf41b35bedea784177e4f23e4d3e85251bc7439cda7",
+  "results.csv": "dcd03d143342ae015f21fbca3ab4f2f32793b9529f125311d6af5119b6d69152"
+ },
+ "mn_2026_general_all": {
+  "contest_results.csv": "bef193c143744b1cff3c44c2a5c057138b28924bb55b63ffe399df299c137c67",
+  "county_results.csv": "9c33c1667855bafb947e53b43eba4e7c261227acd4976fa5b26cc9cbec7c845b",
+  "results.csv": "2da64496955bc42cac56798f341df1c66e500efd142f94b62c03e838c6966f86"
+ },
+ "mo_2026_general": {
+  "contest_results.csv": "fdc4cd7d66bc17c9d9862f4a867dc5bbff88f9307ce3a9c0a24d2ef198a83310",
+  "county_results.csv": "5592f233e8265ee1002101ec8f1fdbf5cfd4ab83fe3726507665f14bd8ca3c31",
+  "results.csv": "2fc7f7cc0746a38bc3bc7c47c5c6db40fc25b7f411bb20db9fca5d5741d5febf"
+ },
+ "ms_2026_general_all": {
+  "contest_results.csv": "94797220d1b237728f95b7b0073f0b974c17c9f5eed207727da2152669b410b5",
+  "county_results.csv": "905069aa0cc236441e0aec4831bc080d0bb06b765d4b04d3fb123169a837ba0d",
+  "results.csv": "804c390867ed97ff3ad04a165bb61c7964d46c5a2231e4fd97d77463ff0d7361"
+ },
+ "mt_2026_general": {
+  "contest_results.csv": "a15911e666a68da21446dadcbbcab2c39fd1a811a8be0c30ca0961b1108a157d",
+  "county_results.csv": "e70451c294867050687f08e67aca9a15affac1f8b2c83cf4c16b026a6888ac51",
+  "results.csv": "5be471c6e2be4d51ccea0311b756e2e74cd6363bf9c49deb867dc505bb5444ac"
+ },
+ "nc_2026_general_all": {
+  "contest_results.csv": "f11bae05aa84ca142810c82a99a0052b5c5212d7894b647c682a7cac64216888",
+  "county_results.csv": "d0b017601f730972ba377350cc4de0db7b376f8c16bc21964bd7e4b85030ebee",
+  "results.csv": "82df1a67bfe0724adee25cefd7a54003e293e989ca2aa86aeb75653993dc26c3"
+ },
+ "nd_2026_general": {
+  "contest_results.csv": "ac620e7d9f6cb7791b579fdd9982a5a848e092b5c77d0dc423edbdd03bca5b8e",
+  "county_results.csv": "e0c3da19a9aebcff28d6a0d9e6d89c37a710908867a7970cecb09536bd201897",
+  "results.csv": "176cdb3f5ac464445a90632b97c9787d997f105f62ad5b8b8ccec6c47d9b1971"
+ },
+ "ne_2026_general_all": {
+  "contest_results.csv": "061dab9d589942c9ac0310fd19da0095d4360dbe64f0aaee962666de51b156f9",
+  "county_results.csv": "5592f233e8265ee1002101ec8f1fdbf5cfd4ab83fe3726507665f14bd8ca3c31",
+  "results.csv": "8cebd4b0204fda1908b4a84afebf607867c680115e8e6a03d3c7c8f0efe2d423"
+ },
+ "nh_2026_general": {
+  "contest_results.csv": "95d3c223463664121d10e8ae29ee994d2310413784e28d0bbd4d5f49160d892c",
+  "county_results.csv": "9f70002bde20b6a263208e0234ec34eee16f1ba74e2f59da2c8cadf8d2c00d6a",
+  "results.csv": "aa3e6d836249fde8ac2914c74721e8a90ad77382f305c66e9aeca99ca5b0e52d"
+ },
+ "nj_2026_general": {
+  "contest_results.csv": "b7b4efe30fc2bc54431cae5e3c62cd16aab0f3aa69b42b8aea3b34110b3c2f99",
+  "county_results.csv": "c7051d8d61ffa6a6a0ee8883c31b97b8efe646a0377e61cf6d9b32ae7fb661af",
+  "results.csv": "5ae1deb44533bb399f06165ed1ab22eef934bcdd2be973560dfabfc80c3245b1"
+ },
+ "nm_2026_general": {
+  "contest_results.csv": "b4745a4c91205f7053772e8a9091967b6994cfc0c2d8a4bc29e8fb2138c1c1e2",
+  "county_results.csv": "19173b2c518a8f9522030a3ac761c71c72050f9135a50eea77689a5ee23af438",
+  "results.csv": "53fa41540fc95baccea1d57a37cb5d47f4c9d90460fd7171463ade5a0b35f58d"
+ },
+ "nv_2026_general": {
+  "contest_results.csv": "7393202b0b2a8cc3ec37ce9ea9f262bbf8816d44a28e7c22717c506f467f06bf",
+  "county_results.csv": "775a40a7b03e6d27ebc99946f29060bc2464bc5ee64509f08b423b9103850655",
+  "results.csv": "bb1505a5592367471998c54a8eb71311d191ac8be9c9a5f9c28d1732c7003c46"
+ },
+ "ny_2026_general": {
+  "contest_results.csv": "726a9ffaa17642f0b360194fc22a20e49c2f9c87c16be9d08168a4d526adfe44",
+  "county_results.csv": "66d4f8cf24633ff242580b247f0aa3d2a9c357ade4e34c6cdbbc530b456c6ed4",
+  "results.csv": "efaf31e0c4c59cff0fec78c83053abcb87b66d13e74cdcf963fda9362b1d4878"
+ },
+ "oh_2026_general": {
+  "contest_results.csv": "9b334982d7af167764f9847db28b16845db30b241e39cebdec9f6fa4f96ff9a4",
+  "county_results.csv": "dc925f1f6bc60d0e92bd832a1f6dfaebc2d195e0157cbe82bce8242413a959e2",
+  "results.csv": "65a7c848fe226f0bf91448acccb6a037db8f45c01c66ba81c9deeb0d2aa59a67"
+ },
+ "ok_2026_general": {
+  "contest_results.csv": "129fda81ed1a5682ea601bd06d178a4f33a96b8ec2fc8b5c255e097f17a88913",
+  "county_results.csv": "4088f5bbd46cf862c689da4f8fd0a4353171bc06dbe0e9d4ba8f6a8f82eee549",
+  "results.csv": "63c25964762d5d6e0c4c93afdf2caf35c5dc1926b37137a020d103c575808d2d"
+ },
+ "or_2026_general": {
+  "contest_results.csv": "25de6d493d3ae840da2c2dd3e69c332bee9fe9655cae75cb294eaaecf868f5d5",
+  "county_results.csv": "4d3c1587bab42cc64e9d06de55419cc073c84509d3e5f611ab70cd343e195218",
+  "results.csv": "7d6a55657fe10955bafb483024cc03a4c01e58d9a06f47a5ea653bc822b0fb87"
+ },
+ "pa_2026_general": {
+  "contest_results.csv": "0ded825533f0a74dd9e13f5d2e9b55ca7aee3fd4e176ac70dc4dd72ba68c18a5",
+  "county_results.csv": "c7e73b4af1ace2474e254fdedaea1a346c5b4480f42b6e89b59f110b56f86b11",
+  "results.csv": "17f144acba670e82610977175c7735a5b7a417618005086d9a3e28ebfab37888"
+ },
+ "ri_2026_general": {
+  "contest_results.csv": "8c49fa1a86ee5a981c14988f85901bd561363007dc71f1283c9f0b9f5454a251",
+  "county_results.csv": "1e0ac700868dc12483c2951f83a8b9f442549bc87ef3ace43310b7799290d0d4",
+  "results.csv": "5b798fbe54278e14aea6174d79cc4873af4723be039673bda350e7e63e73466e"
+ },
+ "sc_2026_general": {
+  "contest_results.csv": "4e9de742df93efeca4af061be3f0c31f2d754abbc00eb91bf29743d23e90645c",
+  "county_results.csv": "f75b783b61187c54e356b567e30ccce60fc3596ee5eb43a7afb1d2c1ab5f8154",
+  "results.csv": "10b8d81e08c1d53ffd9f9289c4c1f3bf0c8ff68030bbeeeb223244c4602f820a"
+ },
+ "sd_2026_general": {
+  "contest_results.csv": "176d0cb3519d731a9b033807ecbb6abf552fd338170b234339dd122beb731aff",
+  "county_results.csv": "fe7fd0518b0953b544c7f8ac552129d9c8c156711be9a76221cc9a1052d29c2e",
+  "results.csv": "31cb857ccb698f91d98c607465cd7bc5d28f230b75b328145721318b703dd57f"
+ },
+ "tn_2026_general": {
+  "contest_results.csv": "5a9e3b306f9825885d16f2d99cd68e90a401b8febf6108d34c5f68ad83124de4",
+  "county_results.csv": "5592f233e8265ee1002101ec8f1fdbf5cfd4ab83fe3726507665f14bd8ca3c31",
+  "results.csv": "14fcebe5fe990a2fe97a98eed7e45d4b3850f7a22309126bad8df4a697ee4b7f"
+ },
+ "tx_2026_general_all": {
+  "contest_results.csv": "10d62e16bdffa83ea728963838f5001599472af3a158003191414340058e4345",
+  "county_results.csv": "5592f233e8265ee1002101ec8f1fdbf5cfd4ab83fe3726507665f14bd8ca3c31",
+  "results.csv": "1fe9bb61a4807a4ec4f5c312d930ee8f274d6cc64289f7126dd1ae7c2f41ad65"
+ },
+ "ut_2026_general": {
+  "contest_results.csv": "db5ff4d1036b68ce64b32b9a340f17573c0161dc0e1ec34768f7adc0f2e58585",
+  "county_results.csv": "0f20c53f13ece4c0bc347c95397f7270911ba089eee3673581b30eefb15df5f9",
+  "results.csv": "5f7250dd1415e0c68a88cabc03dc7173c19c80c34a200e72adca867ed5945d19"
+ },
+ "va_2026_general": {
+  "contest_results.csv": "5c8af4c437bec09531ac6fa3cf525ebb3e59302b67a9b667dde2161df652e483",
+  "county_results.csv": "07e0f436256518585b84cbaa4e269c4c54e5b9755651c25dee88f033a83cd211",
+  "results.csv": "2a6f3767e6cbd1791f72b876b24fd4a1debdaaab4059a0499c5dec79f6afd8d3"
+ },
+ "vt_2026_general": {
+  "contest_results.csv": "f3139fc6b515c31640a626aaf350faca34fd62d0e825cb4e280b6473de163db2",
+  "county_results.csv": "a4a2c749715ca8befce2e30215d707856aa524d24ba5575c42f6be594607a717",
+  "results.csv": "4b0861313b7f0ed2df70f66fbca3d4ffff17f8d594356946b9ea790cb46b6ea1"
+ },
+ "wa_2026_general": {
+  "contest_results.csv": "2376b357c5535c2e932ef9c1a4944b7a54af8059eb5f8c67a3e2f23eb05ef17a",
+  "county_results.csv": "fb65d4ba4c43a5b1e663da256fc4d861e001b526f53b0f16825db513a9b837f0",
+  "results.csv": "6a1209f4ff425a5e0e5e8425f0fbaffacdcf90abdaacfc9e5dbfc545a2e28fd5"
+ },
+ "wi_2026_general": {
+  "contest_results.csv": "dba8767c57ea3fd7c7b0a34022d9dcaf8e8e35bfb9b94662ab0c9ad70d8d3352",
+  "county_results.csv": "bf799bcf086b735fa6e84e79fc5bf1bd47985db37e17df6d507e6d2e63ec3511",
+  "results.csv": "ecd8ce3450947227a6af9b20b2461fe0f3d7b3334f7d51ef496854ec9069a4ad"
+ },
+ "wv_2026_general": {
+  "contest_results.csv": "ad7653b407eb2ff74388110a466e0b31d3cb90277f58950d9111d18feb816dd8",
+  "county_results.csv": "ffc08a6b5583175c4fdae46a16088308081c7959b39b754d6ce852075aceef48",
+  "results.csv": "f999ad8e6fabc590385db19a389143bea7dbfb98fa99aaf09b26b5d7d7dc32a1"
+ },
+ "wy_2026_general": {
+  "contest_results.csv": "d04d1ab4f95489948aa725bdfe28627e53fe0847fdfc51e469b79e437c2926a2",
+  "county_results.csv": "1672dea9d1feeb774902382845f0dfb4fc4fcab40006dcf34809de46b67ad2bf",
+  "results.csv": "1bb89c93e2c40271f45647f6a19a27fb42f9bdc3d76df851f1190d6c3502417b"
+ }
+}
