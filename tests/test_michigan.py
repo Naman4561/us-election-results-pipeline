@@ -25,6 +25,9 @@ ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "tests/fixtures/michigan"
 DOWNLOADED = "2026-11-19T00:30:00+00:00"
 UPDATED = "2026-11-18T19:17:44-05:00"
+# The export after the Board of State Canvassers certified (the site's "Updated:" time).
+CANVASSED = "2026-11-23T11:15:22-05:00"
+CANVASSED_AT = "2026-11-25T17:00:00+00:00"
 EXPECTED = {
     "MI-SEN": {
         "Abdul El-Sayed": 2521693,
@@ -56,7 +59,7 @@ class MichiganTests(unittest.TestCase):
         self.source = sources["mi_2026_general"]
         self.raw = gzip.decompress((FIXTURE / "county_results.txt.gz").read_bytes())
 
-    def imported(self, raw, declared=UPDATED):
+    def imported(self, raw, declared=UPDATED, downloaded=DOWNLOADED):
         path = self.root / "inbox" / "2026STATE_GENERAL_MI_CENR_BY_COUNTY.txt"
         path.parent.mkdir(exist_ok=True)
         path.write_bytes(raw)
@@ -65,7 +68,7 @@ class MichiganTests(unittest.TestCase):
             self.settings,
             self.root,
             path,
-            DOWNLOADED,
+            downloaded,
             hashlib.sha256(raw).hexdigest(),
             declared_generated_at=declared,
         )
@@ -112,6 +115,34 @@ class MichiganTests(unittest.TestCase):
         keys = {f["id"] for f in geo["counties"]}
         self.assertEqual({mi.re.sub(r"[^A-Z0-9]", "", c.upper()) for c in mi.COUNTIES}, keys)
         self.assertEqual(len(geo["districts"]), 13)
+
+    def test_the_canvassed_export_is_labeled_official_by_its_last_line(self):
+        ledger = json.loads((FIXTURE / "provenance.json").read_text())["official_export"]
+        official = gzip.decompress((FIXTURE / ledger["fixture"]).read_bytes())
+        self.assertEqual(hashlib.sha256(official).hexdigest(), ledger["sha256"])
+        self.assertEqual(len(official), ledger["bytes"])
+        self.assertTrue(official.endswith(b"\tRESULTS: OFFICIAL\r\n"))
+        # The election-week export carries no label and stays unofficial.
+        self.assertIs(self.imported(self.raw)[1]["official_results"], False)
+        receipt, report = self.imported(official, declared=CANVASSED, downloaded=CANVASSED_AT)
+        self.assertEqual(report["outcome"], "parsed", report)
+        self.assertIs(report["official_results"], True)
+        statewide = {}
+        for found in self.read(report, "contest_results.csv"):
+            statewide.setdefault(found["contest_id"], {})[found["choice"]] = int(
+                found["total_votes"]
+            )
+        # The canvass moved the Senate, Governor and 12th District by a few hundred votes.
+        self.assertEqual(statewide["MI-SEN"]["Abdul El-Sayed"], 2521908)
+        self.assertEqual(statewide["MI-SEN"]["Mike Rogers"], 2180444)
+        self.assertEqual(statewide["MI-GOV"]["Jocelyn Benson"], 2615251)
+        self.assertEqual(statewide["MI-GOV"]["John James"], 2094566)
+        self.assertEqual(statewide["MI-12"]["Rashida Tlaib"], 247682)
+        self.assertEqual(statewide["MI-07"], EXPECTED["MI-07"])
+        # Any other label is a wording not yet checked: refused.
+        other = official.replace(b"RESULTS: OFFICIAL", b"RESULTS: CERTIFIED")
+        with self.assertRaisesRegex(ValueError, "rejected"):
+            self.imported(other, declared=CANVASSED, downloaded=CANVASSED_AT)
 
     def test_the_report_time_must_be_declared_and_only_where_the_file_has_none(self):
         with self.assertRaisesRegex(ValueError, "ISO report generation timestamp"):
