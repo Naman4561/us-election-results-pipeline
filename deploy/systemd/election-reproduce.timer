@@ -1,0 +1,12 @@
+[Unit]
+Description=Re-create every live publication from its raw snapshot nightly
+
+[Timer]
+# 2:40 AM EST: after the 06:08 UTC backup, at the quietest hour.
+OnCalendar=*-*-* 07:40:00 UTC
+Persistent=true
+RandomizedDelaySec=60
+Unit=election-reproduce.service
+
+[Install]
+WantedBy=timers.target

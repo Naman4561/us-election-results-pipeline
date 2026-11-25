@@ -22,6 +22,7 @@ gantt
 | `election-worker.timer` | every 15 minutes, at :30 s | `deploy.py run`: every enabled HTTP source in the release image, least recently run first, within `CYCLE_SECONDS` (600); `JOB_PARALLEL` jobs at once. A source is due every 15 minutes, or hourly or at listed hours once its count stops (`config/sources.toml`) |
 | `election-monitor.timer` | every minute | Freshness, failures, release, timers, backup age, disk, dashboard; SNS alerts and CloudWatch heartbeat |
 | `election-backup.timer` | every 6 hours | Full backup to S3, local prune, S3 retention tags |
+| `election-reproduce.timer` | nightly, 07:40 UTC | `deploy.py reproduce`: every live publication re-created from its raw snapshot under the current release (a fresh parse, a dbt rebuild) and compared row for row; a difference alerts through the monitor and changes nothing. A source that reproduced is reused while its publication and check key are unchanged |
 
 All three run from `/opt/election-releases/current`, the symlink `deploy.py release`
 moves; see [deployment](../deployment.md).

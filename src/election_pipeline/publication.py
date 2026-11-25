@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
+import csv
 import hashlib
+import io
 import json
 import os
 import re
 import subprocess
 import sys
 import uuid
+from collections import Counter
 from email.utils import parsedate_to_datetime
 from importlib.metadata import version
 from pathlib import Path
@@ -130,7 +133,8 @@ def release_metadata(conn, release_id):
     row = conn.execute(
         """
         SELECT r.release_id, r.snapshot_id, r.loaded_at, r.expected_rows,
-               r.loaded_rows, r.parser_report, s.source_id, s.state, s.election_date,
+               r.loaded_rows, r.parser_report, r.report_path, s.source_id, s.state,
+               s.election_date,
                s.dataset, s.source_url, f.raw_sha256,
                (SELECT min(a.finished_at) FROM ops.fetch_attempts a
                 WHERE a.snapshot_id = r.snapshot_id
@@ -648,6 +652,59 @@ def targets(metadata):
     return copied
 
 
+# The parser's own totals (parsers.results.finish) beside the dbt marts that derive them.
+CROSS_CHECKS = (
+    ("contest_results.csv", "contest_results", ("contest_id", "choice", "choice_party")),
+    ("county_results.csv", "county_results", ("county", "contest_id", "choice", "choice_party")),
+)
+
+
+def parser_totals(metadata, name, columns):
+    """The parser's own totals in one of its output files, verified against the hash the
+    release recorded: {(key..., total_votes)} as text, a missing count as ""."""
+    report = metadata.get("parser_report") or {}
+    path = Path(metadata.get("report_path") or "").parent / name
+    expected = (report.get("output_sha256") or {}).get(name)
+    try:
+        raw = path.read_bytes()
+    except OSError as error:
+        raise ValueError(f"The parser's {name} for this release is unavailable") from error
+    if hashlib.sha256(raw).hexdigest() != expected:
+        raise ValueError(f"The parser's {name} is not the one this release recorded")
+    reader = csv.DictReader(io.StringIO(raw.decode("utf-8")))
+    return Counter(tuple(row[c] for c in (*columns, "total_votes")) for row in reader)
+
+
+def cross_check(conn, schema, metadata):
+    """Refuse a candidate whose dbt contest and county totals differ from the parser's.
+
+    The rules that derive county totals from precincts and statewide totals from
+    counties are written twice, in finish() and in the dbt marts; this keeps the two
+    from drifting apart unnoticed. Party and counts compare as text (a missing value is
+    "", as the parser writes it)."""
+    if metadata["dataset"] != "election_results":
+        return {}
+    checked = {}
+    for name, model, columns in CROSS_CHECKS:
+        statement = sql.SQL("SELECT {}, total_votes FROM {} WHERE release_id = %s").format(
+            sql.SQL(", ").join(map(sql.Identifier, columns)),
+            sql.Identifier(schema + "_marts", model),
+        )
+        built = Counter(
+            tuple("" if row[c] is None else str(row[c]) for c in (*columns, "total_votes"))
+            for row in conn.execute(statement, (metadata["release_id"],))
+        )
+        parsed = parser_totals(metadata, name, columns)
+        if built != parsed:
+            raise ValueError(
+                f"dbt {model} differ from the parser's {name}: "
+                f"{sum((parsed - built).values())} parser rows missing, "
+                f"{sum((built - parsed).values())} dbt rows extra"
+            )
+        checked[model] = sum(built.values())
+    return checked
+
+
 def cleanup_candidate(conn, schema):
     for layer in ("marts", "staging"):
         conn.execute(
@@ -842,6 +899,8 @@ def prepare(root, db, release_id, status, *, skip_current=False, attested=None):
             results = build_candidate(root, db, metadata, schema, artifacts)
             if code_hash != project_hash(root, metadata):
                 raise ValueError("Project files changed during the candidate build; retry")
+            # dbt's totals must equal the parser's own before the candidate can publish.
+            cross_check(conn, schema, metadata)
             with conn.transaction():
                 fingerprints = candidate_fingerprints(conn, schema, lock=True)
                 conn.execute(

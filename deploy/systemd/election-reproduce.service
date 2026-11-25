@@ -1,0 +1,18 @@
+[Unit]
+Description=Re-create every live publication from its raw snapshot and compare
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+OnFailure=election-monitor.service
+
+[Service]
+Type=oneshot
+User=root
+WorkingDirectory=/opt/election-releases/current
+UMask=0077
+# Behind the worker and backups: a reproduction only reports, so it can wait for CPU.
+Nice=19
+ExecStart=/opt/election-releases/current/.venv/bin/python scripts/deploy.py reproduce
+# Sources that reproduced under unchanged code are reused; a full run after a release
+# that changes shared code takes about as long as that release's checks (~45 minutes).
+TimeoutStartSec=150min
