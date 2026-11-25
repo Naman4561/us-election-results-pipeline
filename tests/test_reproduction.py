@@ -1,18 +1,23 @@
 """A live publication re-created from its raw snapshot: exact, or reported as different."""
 
 import json
+import shutil
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 from loading import migrated, requires_database
+from snapshots import SNAPSHOTS
 from test_alaska import AlaskaTests
 
 from election_pipeline import publication
 from election_pipeline.database import connect, load_parsed
 from election_pipeline.deployment import catalog, control
-from election_pipeline.reproduction import compared, reproduce
+from election_pipeline.parsing import parse_source
+from election_pipeline.reproduction import compared, referenced_members, reproduce, scratch_copy
+from election_pipeline.settings import load_config
+from election_pipeline.storage import ArchiveStore
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -28,6 +33,29 @@ class ComparisonTests(unittest.TestCase):
         self.assertEqual(found["published_only_sample"], [["AK-AL", "Begich, Nick", "1"]])
         # A duplicated row is a difference too.
         self.assertEqual(compared(same, same + same)["rebuilt_only"], 1)
+
+    def test_a_scratch_store_holds_the_county_reports_a_bundle_keeps_outside_itself(self):
+        # Mississippi's bundle names each county report by SHA-256 in the member store.
+        settings, sources = load_config(ROOT / "config/sources.toml")
+        source = sources["ms_2026_general_all"]
+        with tempfile.TemporaryDirectory() as first, tempfile.TemporaryDirectory() as second:
+            sha = SNAPSHOTS[source.source_id](Path(first), source, settings)
+            raw = ArchiveStore(Path(first), source).archive_path(sha)
+            kept = {p.stem for p in (raw.parent / "members").glob("*.bin")}
+            self.assertGreater(len(kept), 0)
+            self.assertLessEqual(kept, referenced_members(raw))
+            scratch = ArchiveStore(Path(second), source)
+            scratch_copy(raw, scratch, sha)
+            again = parse_source(source, settings, Path(second), sha256=sha)
+            self.assertEqual(again["outcome"], "parsed", again)
+            original = parse_source(source, settings, Path(first), sha256=sha)
+            self.assertEqual(again["output_sha256"], original["output_sha256"])
+            # Without them, the parse is refused (the failure the first nightly run found).
+            for path in (scratch.archive_path(sha).parent / "members").glob("*.bin"):
+                path.unlink()
+            shutil.rmtree(Path(second) / "parsed")
+            refused = parse_source(source, settings, Path(second), sha256=sha)
+            self.assertIn("missing from the member store", refused["error"])
 
 
 @requires_database
@@ -130,6 +158,7 @@ class HostTests(unittest.TestCase):
             }
         }
         self.live = {"ak_2026_general": ("p1", "a" * 64), "nc_2026_general_all": ("p2", "b" * 64)}
+        self.configured = set(self.live)
         self.jobs = []
 
     def run_reproduce(self, outcomes, names=None, keys=None, check_all=False):
@@ -143,6 +172,7 @@ class HostTests(unittest.TestCase):
         with (
             patch.object(catalog, "read", return_value=self.value),
             patch.object(control, "live_results", return_value=dict(self.live)),
+            patch.object(control, "configured_sources", return_value=set(self.configured)),
             patch.object(control, "check_keys", return_value=dict(keys or {})),
             patch.object(control.containers, "run_job", side_effect=job),
         ):
@@ -178,6 +208,20 @@ class HostTests(unittest.TestCase):
         # Without keys nothing is reused.
         self.run_reproduce(both)
         self.assertEqual(len(self.jobs), 2)
+
+    def test_a_source_the_release_no_longer_configures_is_listed_not_run(self):
+        # North Carolina's old source, which nc_2026_general_all replaced, still has a
+        # current publication in serving.
+        self.live["nc_2026_general"] = ("p0", "f" * 64)
+        summary = self.run_reproduce(
+            {"ak_2026_general": "reproduced", "nc_2026_general_all": "reproduced"}
+        )
+        self.assertEqual(sorted(self.jobs), ["ak_2026_general", "nc_2026_general_all"])
+        self.assertEqual(summary["outcome"], "reproduced")
+        self.assertEqual(summary["not_configured"], ["nc_2026_general"])
+        self.assertNotIn("nc_2026_general", summary["sources"])
+        with self.assertRaisesRegex(ValueError, "No live results publication"):
+            self.run_reproduce({}, names=["nc_2026_general"])
 
     def test_a_failed_job_is_reported_and_a_partial_run_keeps_latest(self):
         summary = self.run_reproduce(

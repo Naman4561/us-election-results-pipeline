@@ -5,9 +5,9 @@ official file it came from. This checks it for one live publication, without wri
 anything it keeps:
 
 1. The raw snapshot is parsed again, from scratch, in a scratch archive store (a parse
-   is otherwise reused when its inputs are unchanged, which would prove nothing). Its
-   output files must have the SHA-256s the publication's release recorded when it was
-   loaded.
+   is otherwise reused when its inputs are unchanged, which would prove nothing), with
+   the county reports it keeps by SHA-256 in the member store beside it. Its output
+   files must have the SHA-256s the publication's release recorded when it was loaded.
 2. The release is built again with the current dbt project into a private candidate
    schema, and every table the publication froze (``publication.targets``) is compared
    with the candidate, row for row. The candidate is then dropped.
@@ -20,9 +20,11 @@ health, which a live publication refreshes in place.
 
 from __future__ import annotations
 
+import re
 import shutil
 import tempfile
 import uuid
+import zipfile
 from collections import Counter
 from pathlib import Path
 
@@ -37,11 +39,39 @@ from election_pipeline.publication import (
     release_metadata,
     targets,
 )
-from election_pipeline.storage import ArchiveStore, utc_now
+from election_pipeline.storage import ArchiveStore, member_path, utc_now
 
 # Refreshed in place on a live publication (publication.refresh_county_feeds).
 NOT_FROZEN = {("ms", "county_feed_status")}
 SAMPLE = 5
+DIGEST = re.compile(rb"\b[0-9a-f]{64}\b")
+
+
+def referenced_members(raw):
+    """SHA-256s a bundle's members name: those of the reports it keeps outside itself."""
+    try:
+        with zipfile.ZipFile(raw) as archive:
+            return {
+                found.decode()
+                for name in archive.namelist()
+                if name.endswith(".json")
+                for found in DIGEST.findall(archive.read(name))
+            }
+    except zipfile.BadZipFile:
+        return set()
+
+
+def scratch_copy(raw, scratch, sha256):
+    """The snapshot ``raw`` and the member reports it names, in the store ``scratch``."""
+    target = scratch.archive_path(sha256)
+    target.parent.mkdir(parents=True)
+    shutil.copyfile(raw, target)
+    for digest in referenced_members(raw):
+        kept = member_path(raw.parent, digest)
+        if kept.is_file() and not kept.is_symlink():
+            copy = member_path(target.parent, digest)
+            copy.parent.mkdir(exist_ok=True)
+            shutil.copyfile(kept, copy)
 
 
 def rows(conn, relation, columns, key, value):
@@ -99,9 +129,7 @@ def reproduce(root, source, settings, data_dir, db, publication_id):
     raw = ArchiveStore(data_dir, source).archive_path(publication["raw_sha256"])
     with tempfile.TemporaryDirectory(prefix="reproduce-") as directory:
         scratch = ArchiveStore(Path(directory), source)
-        target = scratch.archive_path(publication["raw_sha256"])
-        target.parent.mkdir(parents=True)
-        shutil.copyfile(raw, target)
+        scratch_copy(raw, scratch, publication["raw_sha256"])
         parsed = parse_source(source, settings, Path(directory), sha256=publication["raw_sha256"])
         report["parser_code_sha256"] = (parsed.get("identity") or {}).get("code_sha256")
         if parsed.get("outcome") != "parsed":
