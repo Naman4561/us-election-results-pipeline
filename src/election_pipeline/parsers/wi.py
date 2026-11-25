@@ -444,6 +444,8 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             f"{len(results) - canvassed} unofficial); newest county report {max(times).isoformat()}"
         ),
         official_results=False,
+        # County reports, some canvassed: no statewide marker; certification is attested.
+        official_status="not_stated",
         contest_total_reconciliation="passed",
         county_reports={
             county: {k: manifest[county][k] for k in ("report", "format", "url", "report_time")}

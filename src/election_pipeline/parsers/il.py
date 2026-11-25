@@ -647,6 +647,8 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             f"newest results {newest.isoformat()}"
         ),
         official_results=False,
+        # County reports, some canvassed: no statewide marker; certification is attested.
+        official_status="not_stated",
         contest_total_reconciliation="passed",
         counties_waiting=waiting,
         authority_reports={

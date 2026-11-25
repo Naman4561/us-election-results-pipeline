@@ -10,6 +10,7 @@ its format: the refusals of an edited capture, and the figures it reports.
 
 import contextlib
 import csv
+import dataclasses
 import json
 import shutil
 import tempfile
@@ -19,7 +20,7 @@ from pathlib import Path
 from loading import copies, migrated, requires_database
 from snapshots import SNAPSHOTS, SYNTHETIC
 
-from election_pipeline import publication
+from election_pipeline import parse_report, publication
 from election_pipeline.dashboard.server import STATIC, make_payload, national_payload
 from election_pipeline.database import connect, load_parsed
 from election_pipeline.parsers.scope import recording
@@ -37,6 +38,12 @@ GOLDEN_OUTPUTS = json.loads(
     (ROOT / "tests/fixtures/registry/parse_outputs_2026.json").read_text(encoding="utf-8")
 )
 TIMED = {("ms_2026_general_all", "county_feeds.csv")}
+# What each fixture's report reads as (official status, report time and its basis,
+# reconciliations): the list of sources whose time has no known zone, or none, is what the
+# rule "newer means a later report time" must decide about (plan step 3.7).
+GOLDEN_READINGS = json.loads(
+    (ROOT / "tests/fixtures/registry/readings_2026.json").read_text(encoding="utf-8")
+)
 # Rows and contests each fixture parses to. Where a batch test asserted them before the
 # registry existed (GA, SC, KS, OH and the nine Enhanced Voting, Clarity and state-site
 # captures), these are its figures.
@@ -118,6 +125,13 @@ SOME_COUNTIES = {
     "wi_2026_general",
     *SYNTHETIC,
 }
+CONSISTENT_MODES = {
+    ("none", "not_available"),
+    ("exact", "passed"),
+    ("exact", "not_available"),
+    ("masked", "not_available"),
+    ("masked", "passed_except_privacy_masked_counties"),
+}
 RECONCILED = {"passed", "passed_except_privacy_masked_counties", "not_available"}
 
 
@@ -196,6 +210,15 @@ class EverySourceTests(unittest.TestCase):
                         if (source_id, name) not in TIMED
                     },
                     GOLDEN_OUTPUTS[source_id],
+                )
+                self.assertEqual(
+                    dataclasses.asdict(parse_report.read(report)), GOLDEN_READINGS[source_id]
+                )
+                # One setting, two checks: dbt's mode (from the registry) and the parser's
+                # outcome must agree. Where a state's statewide totals are the sum of its
+                # counties (six exact states), the parser has nothing to compare and says so.
+                self.assertIn(
+                    (adapter.county_mode, report["county_reconciliation"]), CONSISTENT_MODES
                 )
                 self.assertFalse(report["all_counts_zero"])
                 self.assertIn(report["county_reconciliation"], RECONCILED)

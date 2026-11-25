@@ -35,12 +35,15 @@ def read_json(path):
 
 def official_available(data, name):
     """Whether the latest run parsed a snapshot its state marks as official."""
+    from election_pipeline import parse_report
+
     try:
         run = read_json(data / "runs" / name / "latest.json")
     except (OSError, ValueError):
         return False
     return any(
-        s.get("stage") == "parse" and (s.get("result") or {}).get("official_results") is True
+        s.get("stage") == "parse"
+        and parse_report.read(s.get("result") or {}).official == parse_report.OFFICIAL
         for s in run.get("stages", [])
     )
 

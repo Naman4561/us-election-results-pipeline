@@ -81,6 +81,18 @@ class State:
             refuse("county feed status belongs to the county_files collection backend")
 
     @property
+    def county_mode(self):
+        """How dbt reconciles the state's county rows with its statewide totals: ``none`` (no
+        county results), ``masked`` (county rows may add up to less than the total, never
+        more: privacy masking or votes in no local unit) or ``exact``. The parser's own
+        ``county_reconciliation`` outcome must be consistent with it (tests/test_every_source)."""
+        if not self.county_results:
+            return "none"
+        if self.county_privacy_masking or self.statewide_only_votes:
+            return "masked"
+        return "exact"
+
+    @property
     def slug(self):
         """Lowercase code naming the state's parser module and map file."""
         return self.code.lower()

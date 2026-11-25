@@ -19,7 +19,7 @@ from pathlib import Path
 from psycopg import sql
 from psycopg.types.json import Jsonb
 
-from election_pipeline import elections
+from election_pipeline import elections, parse_report
 from election_pipeline.database import connect
 from election_pipeline.states import publication_lock, state_adapter
 
@@ -244,13 +244,7 @@ def build_variables(metadata):
         variables.update(
             races=contests,
             methods=list(state.methods[1:]),
-            county_reconciliation=(
-                "none"
-                if not state.county_results
-                else "masked"
-                if state.county_privacy_masking or state.statewide_only_votes
-                else "exact"
-            ),
+            county_reconciliation=state.county_mode,
         )
     return variables
 
@@ -845,7 +839,7 @@ def prepare(root, db, release_id, status, *, skip_current=False, attested=None):
         if (
             status == "official"
             and attested is None
-            and (metadata["parser_report"] or {}).get("official_results") is not True
+            and parse_report.read(metadata["parser_report"] or {}).official != parse_report.OFFICIAL
         ):
             raise ValueError("The state's source does not mark this snapshot as official")
         publication_lock(conn, metadata["state"])

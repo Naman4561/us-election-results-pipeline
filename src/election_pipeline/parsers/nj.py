@@ -334,5 +334,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         source_generated_at=max(times).isoformat(),
         source_update_text=f"newest county update {max(times).isoformat()}",
         official_results=False,
+        # County reports: no statewide marker; certification is attested.
+        official_status="not_stated",
         contest_total_reconciliation="passed",
     )

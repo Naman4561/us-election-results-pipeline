@@ -12,5 +12,12 @@
   "made": "written for the tests: the SHA-256 of every output file each of the 50 results sources' fixtures parses to (151 files), taken with the code of 987d27a, before the registry and parsers read the election definition",
   "excluded": "ms_2026_general_all county_feeds.csv, which records the time of collection and differs between runs (the nightly reproduction leaves it out too)",
   "purpose": "the parsers, and everything the definition feeds them, must keep producing these bytes (tests/test_every_source.py)"
+ },
+ "readings": {
+  "file": "readings_2026.json",
+  "sha256": "d6dab6064c634f60b1e0cd6c55e76c0d896c0c4687f463bcf2c97ca0f11d65b2",
+  "bytes": 16135,
+  "made": "written for the tests: election_pipeline.parse_report.read of each of the 50 results sources' fixtures (official status, report time with its basis, reconciliations), taken with the code of 7450e0c plus parse_report",
+  "purpose": "pins what each parser reports (tests/test_every_source.py); its basis none, no_zone and version entries are the sources step 3.7's release-order rule must decide about"
  }
 }

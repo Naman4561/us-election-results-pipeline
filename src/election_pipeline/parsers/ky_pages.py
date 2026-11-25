@@ -163,5 +163,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         source_update_text=f"Last Update: {update}; counties reporting {reporting}",
         source_generated_at=generated.isoformat(),
         official_results=False,
+        # Saved results pages carry no official marker; certification is attested.
+        official_status="not_stated",
         contest_total_reconciliation="passed",
     )
