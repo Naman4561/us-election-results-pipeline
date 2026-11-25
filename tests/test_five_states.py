@@ -24,7 +24,6 @@ from election_pipeline.storage import ArchiveStore
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "tests/fixtures/five_states"
-CODES = ("GA", "SC", "KS", "OH")
 MEMBERS = {
     # The official results of November 20 and their ballot items (county detail).
     "GA": {

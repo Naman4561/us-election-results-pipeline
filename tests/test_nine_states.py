@@ -25,7 +25,6 @@ from election_pipeline import bundles
 from election_pipeline.collect import FetchFailure, FetchResponse
 from election_pipeline.collectors import clarity as clarity_collector
 from election_pipeline.collectors import enhanced_voting, enr_export
-from election_pipeline.dashboard.server import STATIC, make_payload
 from election_pipeline.parsers import clarity, ia, md
 from election_pipeline.parsers import oregon as OREGON
 from election_pipeline.parsing import parse_source
@@ -61,10 +60,6 @@ def edit_json(data, name, change):
     data[name] = json.dumps(value).encode()
 
 
-def english(values):
-    return next(v["text"] for v in values if v.get("languageId") == "en")
-
-
 class NineStateTests(unittest.TestCase):
     def setUp(self):
         temporary = tempfile.TemporaryDirectory()
@@ -96,16 +91,6 @@ class NineStateTests(unittest.TestCase):
             for field in methods:
                 row[field] = int(row[field]) if row[field] else None
         return rows
-
-    def payload(self, code, report):
-        geography = json.loads((STATIC / (code.lower() + "-map.json")).read_text())
-        return make_payload(
-            geography,
-            {"status": "unofficial"},
-            self.read(report, "county_results.csv"),
-            self.read(report, "contest_results.csv"),
-            state=code,
-        )
 
     def failed(self, code, mutate, message=None):
         report = self.parse(code, mutate)
