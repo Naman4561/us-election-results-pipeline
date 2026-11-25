@@ -33,6 +33,8 @@ MEMBERS = {
     "2026-ge-congressional-district-2.xlsx": ("NH-02", "Congressional District 2"),
 }
 TITLE = "State of New Hampshire - General Election"
+# The import zip's layout, for scripts/pack_import.py (election_pipeline.packing).
+PACK = {"members": tuple(MEMBERS)}
 DATE = "November 03, 2026"
 PARTIES = {"d": "DEM", "r": "REP", "l": "LIB", "c": "CON", "i": "IND", "g": "GRN"}
 COUNTIES = (

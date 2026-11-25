@@ -31,6 +31,9 @@ HOUSE = re.compile(r"Representative In Congress, District ([1-4])")
 NONE_OF_THESE = ("none-of-these", "None of These Candidates")
 MAX_BYTES = 5_000_000
 MAX_MEMBERS = 20
+# The import zip's layout, for scripts/pack_import.py (election_pipeline.packing): the
+# results app's files, which the parser checks against the app's own manifest.json.
+PACK = {"members": None}
 
 
 def race_name(name):

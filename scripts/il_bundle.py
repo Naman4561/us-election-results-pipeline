@@ -68,12 +68,6 @@ def saved_time(paths):
     return datetime.fromtimestamp(newest, timezone.utc).isoformat(timespec="seconds")
 
 
-def owned(authority, entry):
-    """The members an authority's manifest entry holds."""
-    names = [part["file"] for part in entry["files"]]
-    return names + ([f"{authority}.review.json"] if entry["format"] == "review" else [])
-
-
 def entry_for(authority, item, folder):
     """({member: bytes}, manifest entry) for one authority of an additions file."""
     slug = authority.replace(" ", "_").replace(".", "")
@@ -128,12 +122,13 @@ def entry_for(authority, item, folder):
             suffix = Path(name).suffix.lower()
             add(f"{slug}_{index}{suffix}" if len(files) > 1 else f"{slug}{suffix}", name)
         _, body = read(item["review"])
+        from election_pipeline import reviews
+
         review = json.loads(body)
-        listed = review.get("file_sha256")
-        listed = [listed] if isinstance(listed, str) else listed
-        if review.get("authority") != authority or listed != [p["sha256"] for p in parts]:
+        listed = reviews.files(review)
+        if reviews.place(review) != authority or listed != [p["sha256"] for p in parts]:
             raise SystemExit(f"{authority}: the review is for another authority or file")
-        if not str(review.get("reviewed_by", "")).strip():
+        if not reviews.signer(review):
             raise SystemExit(f"{authority}: the review is not signed")
         members[f"{authority}.review.json"] = body
         entry.update(url=item["url"])
@@ -147,79 +142,56 @@ def entry_for(authority, item, folder):
     return members, entry
 
 
-def write_zip(path, members):
-    with zipfile.ZipFile(path, "w") as archive:
-        for name, body in sorted(members.items()):
-            info = zipfile.ZipInfo(name, (1980, 1, 1, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
-            # Fixed, as on the computer that packed the first imports, so a zip is the
-            # same whichever system packs it.
-            info.create_system = 0
-            archive.writestr(info, body)
-
-
 def pack(args):
-    members, manifest = {}, {}
-    if args.base:
-        with zipfile.ZipFile(args.base) as archive:
-            members = {name: archive.read(name) for name in archive.namelist()}
-        manifest = json.loads(members.pop("manifest.json"))["authorities"]
-    additions = {}
-    if args.add:
-        additions = json.loads(args.add.read_text(encoding="utf-8"))
-    for authority in [*args.remove, *additions]:
-        if authority in manifest:
-            for name in owned(authority, manifest.pop(authority)):
-                members.pop(name)
-        elif authority in args.remove:
-            raise SystemExit(f"{authority} is not in the base import")
+    from election_pipeline import packing
+    from election_pipeline.parsers.il import PACK
+
+    base = packing.read_zip(args.base.read_bytes()) if args.base else {}
+    additions = json.loads(args.add.read_text(encoding="utf-8")) if args.add else {}
+    files, entries = {}, {}
     for authority, item in sorted(additions.items()):
-        files, entry = entry_for(authority, item, args.add.parent)
-        if set(files) & set(members):
-            raise SystemExit(f"{authority}: its files' names are another authority's")
-        members.update(files)
-        manifest[authority] = entry
-    members["manifest.json"] = json.dumps(
-        {"authorities": manifest}, indent=1, sort_keys=True
-    ).encode()
-    write_zip(args.out, members)
+        members, entry = entry_for(authority, item, args.add.parent)
+        files.update(members)
+        entries[authority] = entry
+    try:
+        members = packing.pack(PACK, base, remove=args.remove, files=files, entries=entries)
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
+    manifest = json.loads(members["manifest.json"])["authorities"]
+    packing.write_zip(args.out, members)
     digest = sha256(args.out.read_bytes())
     print(len(manifest), "authorities", len(members), "members", digest)
 
 
 def review(args):
+    """An unsigned review of an authority's report, through the one review tool."""
+    from election_pipeline import reviews
+
     spec = json.loads(args.spec.read_text(encoding="utf-8"))
-    for race, lines in spec["races"].items():
-        total = sum(lines.values())
-        printed = (spec.get("totals") or {}).get(race)
-        if printed is not None and printed != total:
-            raise SystemExit(f"{race}: lines add up to {total}, the report prints {printed}")
-        for line, percent in (spec.get("percentages") or {}).get(race, {}).items():
-            if abs(round(100 * lines[line] / total, 2) - percent) > 0.011:
-                raise SystemExit(f"{race} {line}: {lines[line]} of {total} is not {percent}%")
-    document = {k: spec[k] for k in ("authority", "report", "transcribed_by", "races")}
-    digests = [sha256(path.read_bytes()) for path in args.files]
-    document.update(
-        reviewed_by="",
-        file_sha256=digests[0] if len(digests) == 1 else digests,
-        totals=spec.get("totals") or {},
-        precincts=spec.get("precincts") or {},
-    )
+    spec = {**spec, "state": "IL", "place": spec.get("place", spec.get("authority"))}
+    try:
+        document = reviews.transcription(spec, [sha256(p.read_bytes()) for p in args.files])
+    except ValueError as error:
+        raise SystemExit(str(error)) from error
     args.out.mkdir(parents=True, exist_ok=True)
-    path = args.out / f"{spec['authority']}.review.json"
-    if path.exists() and json.loads(path.read_text(encoding="utf-8")).get("reviewed_by"):
+    path = args.out / f"{document['place']}.review.json"
+    if path.exists() and reviews.signer(json.loads(path.read_text(encoding="utf-8"))):
         raise SystemExit(f"{path.name} is signed; write a new review under another folder")
     path.write_text(json.dumps(document, indent=1, ensure_ascii=False), encoding="utf-8")
     print("wrote", path.name, {race: sum(lines.values()) for race, lines in spec["races"].items()})
 
 
 def sign(args):
+    from election_pipeline import reviews
+
     for authority in args.authorities:
         path = args.folder / f"{authority}.review.json"
-        document = json.loads(path.read_text(encoding="utf-8"))
-        if document.get("reviewed_by"):
-            raise SystemExit(f"{authority} is already signed by {document['reviewed_by']}")
-        document["reviewed_by"], document["reviewed_on"] = args.signer, args.date
+        try:
+            document = reviews.signed(
+                json.loads(path.read_text(encoding="utf-8")), args.signer, args.date
+            )
+        except ValueError as error:
+            raise SystemExit(str(error)) from error
         path.write_text(json.dumps(document, indent=1, ensure_ascii=False), encoding="utf-8")
         print("signed", path.name)
 

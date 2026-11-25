@@ -40,6 +40,8 @@ MEMBERS = {
     "Rep to Congress District 2.xlsx": ("ME-02", "Final", "Total"),
 }
 RCV_SUMMARY = "Nov26 CG2 RCV Summary Report 20261112_0.csv"
+# The import zip's layout, for scripts/pack_import.py (election_pipeline.packing).
+PACK = {"members": (*MEMBERS, RCV_SUMMARY)}
 COUNTIES = {
     "AND": "Androscoggin", "ARO": "Aroostook", "CUM": "Cumberland", "FRA": "Franklin",
     "HAN": "Hancock", "KEN": "Kennebec", "KNO": "Knox", "LIN": "Lincoln", "OXF": "Oxford",

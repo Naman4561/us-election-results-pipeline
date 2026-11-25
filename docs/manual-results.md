@@ -83,22 +83,37 @@ Where a state's results come in several files, they are imported, unchanged, as 
 Oklahoma's zip is not assembled: it is the state's own county results export.
 
 Each import is the previous one with files added or replaced, so the zip is rebuilt
-from the previous import and the new files:
+from the previous import and an additions file by one tool, `scripts/pack_import.py`,
+which every multi-file state uses. Its parser declares the zip's layout (`PACK`): a
+manifest of places and their files (Illinois, Wisconsin), a listing of members (New
+Jersey) or a fixed set of the state's files (Maine, New Hampshire, Kentucky, Nevada).
+The tool fills in every listed file's SHA-256 from its bytes, refuses a file nothing
+names or a named file that is missing, and writes a deterministic zip: the same inputs
+give the same SHA-256.
 
-- **Illinois:** `scripts/il_bundle.py pack --base <previous zip> --add <additions.json>`
-  writes a deterministic zip (the same inputs give the same SHA-256), and `check` parses
-  it offline as the pipeline would.
-- **New Jersey:** `scripts/nj_bundle.py` fetches the counties that answer and adds the
-  files saved by hand (`--saved county=path`).
-- **The others** were packed by hand. Their published zips are archived by SHA-256, so
-  each can be replayed, but not rebuilt by a tool in the repository yet (plan step 2.5,
-  one generic pack tool).
+```bash
+python scripts/pack_import.py pack --source wi_2026_general --base wi_results_12.zip \
+    --add round13/additions.json --out wi_results_13.zip
+python scripts/pack_import.py check --source wi_2026_general wi_results_13.zip
+```
 
-A report no reader takes (a scan, a one-off layout) is transcribed into a review file
-for that report's SHA-256 and signed by the operator who checked it against the report:
-`il_bundle.py review` and `sign` write Illinois's; Wisconsin's `<County>.review.json`
-and Mississippi's reviews are written by hand in the same spirit (plan step 2.4, one
-review format and tool). The parser refuses an unsigned review or one for other files.
+An additions file names what changes: `{"remove": [...], "members": {member: path},
+"entries": {place: entry}}` (see `election_pipeline/packing.py`). Illinois's entries
+come from its format-specific additions (`scripts/il_bundle.py pack`, which packs
+through the same module), and New Jersey's files from `scripts/nj_bundle.py`, which
+fetches the counties that answer through the pipeline's own client (its limits,
+redirect checks and TLS rules) and adds the files saved by hand. Illinois's and
+Wisconsin's published imports re-pack byte for byte; the others' earlier zips were
+packed before this tool and stay archived by SHA-256, replayable as they are.
+
+A report no reader takes (a scan, a one-off layout) is transcribed into a review, bound
+to the report's SHA-256 and signed by the operator who checked it against the report,
+with one tool for every state that takes reviews (`scripts/review.py write`, `sign`,
+`check`; the format is in `election_pipeline/reviews.py`). Illinois and Wisconsin read
+it through one validator, which refuses an unsigned review, one for other files, or
+counts that do not add up to the totals the report prints. Reviews written before the
+format (`reviewed_by`) stay readable. Mississippi's county reviews and the certified
+CSV keep their own contracts (`parsers/county_reports.py`, `parsers/certified.py`).
 
 Every release replays each published manual source's last import under its new image
 before it goes live, so a code change that breaks one of these parsers stops the

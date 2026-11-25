@@ -39,6 +39,8 @@ from election_pipeline.parsers.structured import count, row, unique_json
 WRITE_IN = ("write-in", "Write-in")
 EASTERN = timezone(timedelta(hours=-5))
 MAX_BYTES = 30_000_000
+# The import zip's layout, for scripts/pack_import.py (election_pipeline.packing).
+PACK = {"listing": "sources.json"}
 MAX_PAGES = 400
 # Leading or trailing party marks counties print beside a name.
 MARKS = re.compile(
