@@ -127,7 +127,11 @@ zero.
 - **Nebraska:** the official CSV has no county detail for these races.
 - **New Mexico:** small county counts are printed as `*` for voter privacy. They are never
   reconstructed; a county sum may then fall short of the official total, never exceed it,
-  and the map says "hidden for voter privacy".
+  and the map says "hidden for voter privacy". The State Canvassing Board certified on
+  Nov 24, 2026 and the results pages turned "Official Results", but the County Level
+  exports kept their "2026 Unofficial General Election Results" title. Once the pages are
+  official either title is accepted, the counties must still equal the official
+  statewide CSVs, and the parse report records the titles printed (`workbook_titles`).
 - **North Carolina:** county totals are derived from precincts. A NUL party marker on
   write-in rows is stored as no party; no party is inferred. North Carolina's absentee
   demographics are a separate dataset in their own tables.

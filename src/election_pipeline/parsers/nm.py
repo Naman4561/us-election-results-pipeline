@@ -143,7 +143,17 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     if len(statuses) != 1:
         raise ValueError("New Mexico results pages disagree on whether results are official")
     official = statuses.pop()
-    title = (TITLE.format("Official" if official else "Unofficial"),)
+    # The State Canvassing Board certified on Nov 24, 2026 and the pages turned "Official
+    # Results", but the County Level exports kept their "Unofficial" title. Once the pages
+    # are official an export may carry either; its counts must still equal the official
+    # statewide CSVs (county_sheet), and the report records the titles printed. Pages that
+    # are not official accept only the unofficial title.
+    title = (
+        (TITLE.format("Official"), TITLE.format("Unofficial"))
+        if official
+        else (TITLE.format("Unofficial"),)
+    )
+    printed = sorted({book.rows(sheet)[0][0] for book in books.values() for sheet in book.sheets})
     output_rows, hidden_counties, method_status = [], {}, {}
     for race, csv_rows in sorted(found.items()):
         race_id = csv_rows[0]["RaceID"]
@@ -223,4 +233,5 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         ),
         privacy_masked_counties=hidden_counties,
         vote_method_status=method_status,
+        workbook_titles=printed,
     )
