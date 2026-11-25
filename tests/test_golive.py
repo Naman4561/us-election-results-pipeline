@@ -11,7 +11,8 @@ from unittest.mock import patch
 
 from election_pipeline.deployment import catalog, control, golive, manual
 
-NAME = "ut_2026_general"
+NAME = "ut_2026_general"  # acquired over http
+MANUAL = "oh_2026_general"  # declared manual
 PUBLICATION = "pub-ut"
 CANDIDATE = {"id": "c" * 32, "url": "http://127.0.0.1:8001", "sources": [NAME]}
 
@@ -36,6 +37,7 @@ class GoLiveTests(unittest.TestCase):
             },
             "sources": {},
         }
+        self.name = NAME  # the source under test; a manual one for the manual path
         self.calls, self.clock = [], 0.0
         self.fail = set()
         self.check_runs = True  # the backup's follow-on check runs and verifies
@@ -47,7 +49,7 @@ class GoLiveTests(unittest.TestCase):
         return copy.deepcopy(self.value)
 
     def source(self):
-        return self.value["sources"][NAME]
+        return self.value["sources"][self.name]
 
     def called(self, name, **changes):
         def fake(*args, **kwargs):
@@ -71,7 +73,7 @@ class GoLiveTests(unittest.TestCase):
                     "writer_permissions_verified": True,
                     "reader_permissions_verified": True,
                     "finished_at": finished.isoformat(),
-                    "current_publications": {NAME: PUBLICATION},
+                    "current_publications": {self.name: PUBLICATION},
                     "database_inventory": {"serving.contest_results": {"rows": 5}},
                 }
             ),
@@ -119,7 +121,7 @@ class GoLiveTests(unittest.TestCase):
             return dict(CANDIDATE)
 
         def activate(path, candidate, report, config):
-            self.assertTrue(report["current_publications"][NAME])
+            self.assertTrue(report["current_publications"][self.name])
             return fakes["activate"]()
 
         def prepare(path, name, prod, config):
@@ -144,7 +146,7 @@ class GoLiveTests(unittest.TestCase):
         ):
             return golive.go_live(
                 self.root / "catalog.json",
-                NAME,
+                self.name,
                 {"POSTGRES_PASSWORD": "secret"},
                 self.config,
                 run=self.command,
@@ -154,7 +156,7 @@ class GoLiveTests(unittest.TestCase):
             )
 
     def journal(self):
-        return json.loads((self.root / f"golive-{NAME}.json").read_text(encoding="utf-8"))
+        return json.loads((self.root / f"golive-{self.name}.json").read_text(encoding="utf-8"))
 
     def test_an_http_source_runs_every_step_in_order_and_is_journaled(self):
         result = self.go()
@@ -237,6 +239,7 @@ class GoLiveTests(unittest.TestCase):
         self.assertNotIn("start_dashboard", self.calls)
 
     def test_a_manual_source_is_configured_and_imported_from_the_operators_file(self):
+        self.name = MANUAL  # declared manual in the election definition
         acquire = {"file": self.root / "inbox/f.txt", "sha256": "1" * 64, "downloaded_at": "t"}
 
         def configure(path, name, **options):
@@ -256,8 +259,15 @@ class GoLiveTests(unittest.TestCase):
         self.assertEqual(self.calls[:4], ["register", "configure", "import", "promote"], self.calls)
         self.assertNotIn("prepare", self.calls)
 
+    def test_a_file_for_a_source_the_definition_acquires_over_http_is_refused(self):
+        acquire = {"file": self.root / "inbox/f.txt", "sha256": "1" * 64, "downloaded_at": "t"}
+        with self.assertRaisesRegex(ValueError, "acquires ut_2026_general over http"):
+            self.go(acquire=acquire)
+        self.assertEqual(self.calls, [])
+
     def test_a_manual_source_without_its_file_is_refused_before_it_is_imported(self):
-        self.value["sources"][NAME] = {
+        self.name = MANUAL
+        self.value["sources"][self.name] = {
             "acquisition": "manual",
             "enabled": False,
             "public": False,
@@ -289,7 +299,7 @@ class GoLiveTests(unittest.TestCase):
             with self.assertRaises(ValueError) as caught:
                 golive.go_live(
                     self.root / "catalog.json",
-                    NAME,
+                    self.name,
                     {"POSTGRES_PASSWORD": "secret"},
                     self.config,
                     run=self.command,

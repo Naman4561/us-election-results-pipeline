@@ -126,9 +126,15 @@ def assess(prod, config, now):
                 issues["deployment/handoff"] = "Dashboard handoff requires recovery"
         except (ValueError, OSError, TypeError, KeyError):
             issues["deployment/handoff"] = "Dashboard handoff journal is invalid"
+    declared = registry.acquisition()
     for name in names:
         source = configured[name]
         entry = catalog["sources"][name]
+        if name in declared and declared[name].mode != entry["acquisition"]:
+            issues[f"acquisition/{name}"] = (
+                f"The catalog acquires it by {entry['acquisition']}; the election definition "
+                f"says {declared[name].mode}"
+            )
         if entry["acquisition"] == "manual":
             try:
                 receipt = entry["manual_snapshot"]

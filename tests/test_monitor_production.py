@@ -120,6 +120,16 @@ class MonitorTests(unittest.TestCase):
     def test_two_states_with_unchanged_votes_and_recent_checks_are_healthy(self):
         self.assertEqual(self.assess(), {})
 
+    def test_a_catalog_that_disagrees_with_the_election_definition_is_reported(self):
+        # The definition says North Carolina is polled; a catalog calling it manual is drift.
+        self.catalog["sources"][NC]["acquisition"] = "manual"
+        issues = self.assess()
+        self.assertEqual(
+            issues[f"acquisition/{NC}"],
+            "The catalog acquires it by manual; the election definition says http",
+        )
+        self.assertNotIn(f"acquisition/{MN}", issues)
+
     def test_county_source_failures_alert_without_alerting_uncollected_counties(self):
         self.catalog["sources"][NC].update(enabled=False, public=False)
         self.publish(MS)

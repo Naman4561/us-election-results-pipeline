@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import tomllib
 from dataclasses import asdict, dataclass, fields
 from datetime import date
@@ -32,6 +33,11 @@ from election_pipeline.state_model import State
 CONFIG = Path(__file__).resolve().parents[2] / "config"
 ROOT = CONFIG / "elections"
 ACQUISITIONS = ("http", "manual")
+# The kinds of TLS exception a host may be given (election_pipeline.tls applies them):
+# an issuer bundle completing a server's incomplete chain, one extra trusted root, or the
+# forward-secret CBC suites an old server needs. Verification stays on in all three.
+TLS_KINDS = ("issuer_bundle", "trusted_root", "legacy_cbc")
+HOST = re.compile(r"[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+")
 DURABLE_KEYS = {"name", "local_unit", "parser_module"}
 # A state file's keys that are fields of State (the rest are races, the source and how it is
 # acquired). Durable fields are not allowed in a definition.
@@ -67,6 +73,39 @@ class Acquisition:
 
 
 @dataclass(frozen=True)
+class TlsException:
+    """Hosts that need more than the platform's default TLS, and why. ``certificate`` is a
+    packaged file under ``resources/`` and ``sha256`` the hash its bytes must have;
+    ``suites`` are the OpenSSL names of the ciphers added back (forward-secret ones only)."""
+
+    kind: str
+    hosts: tuple[str, ...]
+    reason: str
+    certificate: str = ""
+    sha256: str = ""
+    suites: tuple[str, ...] = ()
+
+    def __post_init__(self):
+        if self.kind not in TLS_KINDS:
+            raise ValueError(f"A TLS exception is one of {TLS_KINDS}, not {self.kind!r}")
+        if not self.hosts or not all(HOST.fullmatch(h) for h in self.hosts):
+            raise ValueError(f"TLS exception {self.kind}: name its exact hosts, in lower case")
+        if not self.reason.strip():
+            raise ValueError(f"TLS exception {self.kind}: say why")
+        certified = self.kind in ("issuer_bundle", "trusted_root")
+        if certified != bool(self.certificate) or certified != bool(self.sha256):
+            raise ValueError(
+                f"TLS exception {self.kind}: a certificate and its SHA-256, or neither"
+            )
+        if self.sha256 and not re.fullmatch(r"[0-9a-f]{64}", self.sha256):
+            raise ValueError(f"TLS exception {self.kind}: the SHA-256 is 64 hexadecimal digits")
+        if (self.kind == "legacy_cbc") != bool(self.suites):
+            raise ValueError(f"TLS exception {self.kind}: only legacy_cbc names cipher suites")
+        if not all(s.startswith("ECDHE-") for s in self.suites):
+            raise ValueError(f"TLS exception {self.kind}: only forward-secret (ECDHE) suites")
+
+
+@dataclass(frozen=True)
 class Election:
     id: str
     date: str
@@ -74,6 +113,7 @@ class Election:
     states: dict[str, State]
     sources: dict[str, Source]
     acquisition: dict[str, Acquisition]
+    tls: tuple[TlsException, ...] = ()
 
 
 def read(path):
@@ -104,14 +144,18 @@ def durable(config=None):
 
 
 def fingerprint(code, election=None, config=None):
-    """Everything the definition says about state ``code``: its durable facts and its file in
-    the election, which is what a check or publication of that state depends on beyond code.
-    Changing another state's does not change it."""
+    """Everything the definition says about state ``code``: its durable facts, its file in the
+    election, and the election's own file (collector limits, TLS exceptions, which apply to
+    every source), which is what a check or publication of that state depends on beyond
+    code. Changing another state's file does not change it."""
     config = Path(config or CONFIG)
-    path = Path(election or folder(config)) / "states" / f"{code}.toml"
-    text = path.read_bytes().replace(b"\r\n", b"\n")
-    facts = json.dumps(durable(config)[code], sort_keys=True).encode()
-    return hashlib.sha256(text + b"\0" + facts).hexdigest()
+    where = Path(election or folder(config))
+    parts = [
+        (where / "states" / f"{code}.toml").read_bytes().replace(b"\r\n", b"\n"),
+        json.dumps(durable(config)[code], sort_keys=True).encode(),
+        (where / "election.toml").read_bytes().replace(b"\r\n", b"\n"),
+    ]
+    return hashlib.sha256(b"\0".join(parts)).hexdigest()
 
 
 def source_of(raw, state, election_date, where):
@@ -148,8 +192,8 @@ def load(election=None, root=None, config=None):
     folder = Path(root or config / "elections") / election
     facts = durable(config)
     head = read(folder / "election.toml")
-    if set(head) - {"id", "date", "collector"}:
-        raise ValueError("election.toml holds id, date and collector only")
+    if set(head) - {"id", "date", "collector", "tls"}:
+        raise ValueError("election.toml holds id, date, collector and tls only")
     if head["id"] != election:
         raise ValueError(f"{folder.name}/election.toml says it is {head['id']!r}")
     when = head["date"].isoformat() if isinstance(head["date"], date) else head["date"]
@@ -188,7 +232,20 @@ def load(election=None, root=None, config=None):
         source = source_of(raw["source"], raw["state"], when, path.name)
         sources[source.source_id] = source
         acquisition[source.source_id] = acquisition_of(raw.get("acquisition"))
-    return Election(head["id"], when, settings, states, sources, acquisition)
+    tls = tuple(
+        TlsException(
+            **{
+                **item,
+                "hosts": tuple(item.get("hosts", ())),
+                "suites": tuple(item.get("suites", ())),
+            }
+        )
+        for item in head.get("tls", [])
+    )
+    named = [host for item in tls for host in item.hosts]
+    if len(named) != len(set(named)):
+        raise ValueError("A host is named in one TLS exception only")
+    return Election(head["id"], when, settings, states, sources, acquisition, tls)
 
 
 def plain(value):

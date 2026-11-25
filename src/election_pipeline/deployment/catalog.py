@@ -32,6 +32,7 @@ import tempfile
 from contextlib import contextmanager
 from pathlib import Path
 
+from election_pipeline import elections
 from election_pipeline.settings import load_config
 from election_pipeline.states import STATES
 
@@ -50,6 +51,17 @@ def configured():
 @functools.lru_cache(maxsize=4)
 def parsed(path):
     return load_config(path)[1]
+
+
+def acquisition():
+    """{source: how the election definition says it is acquired} (``elections.Acquisition``).
+    The catalog records what a deployment does; this is what the repository says it should."""
+    return dict(declared(CONFIG))
+
+
+@functools.lru_cache(maxsize=4)
+def declared(config):
+    return elections.load(config=config).acquisition
 
 
 def validate_release(release):

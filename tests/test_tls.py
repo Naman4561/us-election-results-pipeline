@@ -13,20 +13,95 @@ from pathlib import Path
 from unittest.mock import patch
 from urllib.error import HTTPError
 
+from election_pipeline import elections, tls
 from election_pipeline.collect import FetchFailure, fetch_file
 from election_pipeline.settings import CollectorSettings, Source
-from election_pipeline.tls import (
-    FLORIDA_ROOT_SHA256,
-    ISSUERS_SHA256,
-    LEGACY_CBC_SUITES,
-    context_for_url,
-)
+from election_pipeline.tls import context_for_url
 
 ROOT = Path(__file__).resolve().parents[1]
 URL = "https://www.elections.alaska.gov/enr/26GENR/results/GA_ENR_Precinct_State_of_Alaska.csv"
 FLORIDA = "https://flelectionfiles.floridados.gov/enightfilespublic/20261103_ElecResultsFL.txt"
 # GoDaddy TLS Root CA - R1, as GoDaddy's repository lists its thumbprint.
 FLORIDA_ROOT_DER_SHA256 = "25cf3da8e9b97addbf92543c2b82527c8a4e2cff2062a6483040d4b64ace719f"
+# What the election definition declares, as reviewed: a change to a declaration is a change
+# to a trust decision, so it must change this test too.
+ISSUERS_SHA256 = "d843cd9900279123e130f0c9ac443451f5a9963254c7f199d61df0e8628f0aa0"
+FLORIDA_ROOT_SHA256 = "471c59d5851cb2be394bce8fc814301233cdd7a92e513d8a3360dfe52965cc62"
+LEGACY_CBC_SUITES = ("ECDHE-RSA-AES256-SHA", "ECDHE-RSA-AES128-SHA")
+
+
+def tampered(host):
+    """The declarations with ``host``'s certificate hash wrong, as a swapped file would be."""
+    from dataclasses import replace
+
+    return {h: replace(i, sha256="0" * 64) if h == host else i for h, i in tls.declared().items()}
+
+
+class DeclarationTests(unittest.TestCase):
+    def test_the_election_declares_exactly_the_reviewed_exceptions(self):
+        found = {(i.kind, i.hosts, i.certificate, i.sha256, i.suites) for i in elections.load().tls}
+        self.assertEqual(
+            found,
+            {
+                (
+                    "issuer_bundle",
+                    ("elections.alaska.gov", "www.elections.alaska.gov"),
+                    "alaska-issuers.pem",
+                    ISSUERS_SHA256,
+                    (),
+                ),
+                ("legacy_cbc", ("www.co.hinds.ms.us",), "", "", LEGACY_CBC_SUITES),
+                (
+                    "trusted_root",
+                    ("flelectionfiles.floridados.gov",),
+                    "florida-root.pem",
+                    FLORIDA_ROOT_SHA256,
+                    (),
+                ),
+            },
+        )
+        for item in elections.load().tls:
+            self.assertGreater(len(item.reason), 40)
+
+    def test_a_declaration_is_checked_as_it_loads(self):
+        import shutil as copying
+        import tempfile as temporary_files
+
+        from election_pipeline.elections import TlsException
+
+        base = {"kind": "trusted_root", "hosts": ("a.example.gov",), "reason": "because it is so"}
+        good = {**base, "certificate": "x.pem", "sha256": "a" * 64}
+        self.assertEqual(TlsException(**good).hosts, ("a.example.gov",))
+        for changes, message in (
+            ({"kind": "wildcard"}, "is one of"),
+            ({"hosts": ()}, "exact hosts"),
+            ({"hosts": ("*.example.gov",)}, "exact hosts"),
+            ({"hosts": ("A.example.gov",)}, "lower case"),
+            ({"reason": " "}, "say why"),
+            ({"sha256": ""}, "a certificate and its SHA-256"),
+            ({"sha256": "xyz"}, "64 hexadecimal"),
+            ({"suites": ("ECDHE-RSA-AES256-SHA",)}, "only legacy_cbc"),
+        ):
+            with self.subTest(changes), self.assertRaisesRegex(ValueError, message):
+                TlsException(**{**good, **changes})
+        legacy = {"kind": "legacy_cbc", "hosts": ("old.example.gov",), "reason": "old server"}
+        with self.assertRaisesRegex(ValueError, "only legacy_cbc"):
+            TlsException(**legacy)
+        with self.assertRaisesRegex(ValueError, "forward-secret"):
+            TlsException(**legacy, suites=("AES256-SHA",))
+        # A host in two declarations is refused when the election loads.
+        with temporary_files.TemporaryDirectory() as directory:
+            config = Path(directory) / "config"
+            copying.copytree(elections.CONFIG, config)
+            head = config / "elections/2026-general/election.toml"
+            head.write_text(
+                head.read_text(encoding="utf-8")
+                + '\n[[tls]]\nkind = "legacy_cbc"\nhosts = ["www.co.hinds.ms.us"]\n'
+                + 'suites = ["ECDHE-RSA-AES128-SHA"]\nreason = "a second declaration"\n',
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "one TLS exception only"):
+                elections.load(config=config)
 
 
 class AlaskaTLSTests(unittest.TestCase):
@@ -52,7 +127,7 @@ class AlaskaTLSTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             source = Source("ak_probe", "AK", "2026-11-03", URL)
             with (
-                patch("election_pipeline.tls.ISSUERS_SHA256", "0" * 64),
+                patch.object(tls, "declared", return_value=tampered("www.elections.alaska.gov")),
                 patch("election_pipeline.collect.open_url") as request,
                 self.assertRaisesRegex(FetchFailure, "integrity") as failure,
             ):
@@ -106,7 +181,9 @@ class FloridaTLSTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             source = Source("fl_probe", "FL", "2026-11-03", FLORIDA)
             with (
-                patch("election_pipeline.tls.FLORIDA_ROOT_SHA256", "0" * 64),
+                patch.object(
+                    tls, "declared", return_value=tampered("flelectionfiles.floridados.gov")
+                ),
                 patch("election_pipeline.collect.open_url") as request,
                 self.assertRaisesRegex(FetchFailure, "integrity") as failure,
             ):

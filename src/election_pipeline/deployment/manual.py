@@ -7,13 +7,28 @@ from pathlib import Path
 from election_pipeline.deployment import catalog, containers, control
 
 
-def configure(path, name, max_age_seconds=21600, final=False):
-    """Switch a disabled, private results source to manual imports."""
-    if not 900 <= max_age_seconds <= 604800:
-        raise ValueError("Manual freshness limit must be between 15 minutes and seven days")
+def configure(path, name, max_age_seconds=None, final=None):
+    """Switch a disabled, private results source to manual imports.
+
+    The election definition says which sources are manual, with each one's freshness limit
+    and final flag; a source it acquires over HTTP is refused, and ``max_age_seconds`` and
+    ``final`` override its values only when given.
+    """
     source = catalog.configured()[name]
     if source.dataset != "election_results" or source.format != "bundle" or source.files:
         raise ValueError("Manual mode requires a single-file election-results bundle")
+    declared = catalog.acquisition().get(name)
+    if declared is None or declared.mode != "manual":
+        raise ValueError(
+            f"The election definition does not declare {name} manual (it says "
+            f"{declared.mode if declared else 'nothing'}): declare it there first"
+        )
+    if max_age_seconds is None:
+        max_age_seconds = declared.max_age_seconds or 21600
+    if final is None:
+        final = declared.final
+    if not 900 <= max_age_seconds <= 604800:
+        raise ValueError("Manual freshness limit must be between 15 minutes and seven days")
 
     def change(value):
         entry = value["sources"][name]

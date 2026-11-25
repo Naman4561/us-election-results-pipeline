@@ -1,10 +1,12 @@
 # The election definition
 
-Status: **step 3.1 of the plan (R-008), built and not yet read by anything**: the definition
-and its loader (`election_pipeline.elections`) exist and are tested against a golden record of
-today's registry; no production code reads them until step 3.2. This page says what is
-per-election today, where it lives, what the definition holds, and how each step proves it
-changed nothing.
+Status: **steps 3.1 and 3.2 of the plan (R-008), built on the Phase 3 branch, not yet
+released.** The definition and its loader (`election_pipeline.elections`) are tested against
+a golden record of today's registry. The registry (`STATES`), `load_config` and every source
+now read it; `config/sources.toml` is gone. TLS exceptions and each source's acquisition are
+declared in it. Still to move are the rosters and the reviewed per-state tables (under
+`resources/` for now). This page says what is per-election, where it lives, what the
+definition holds, and how each step proves it changed nothing.
 
 ## Why
 
@@ -53,7 +55,7 @@ may stop masking.
 
 ```
 config/elections/2026-general/
-  election.toml          # id, date, every collector limit the election ran with
+  election.toml          # id, date, every collector limit, the TLS exceptions ([[tls]])
   states/CT.toml         # one file per state: races, methods, reporting policy, source,
                          # how the source is acquired
   datasets/<name>.toml   # a source that is not a state's results (NC's absentee file)
@@ -95,7 +97,21 @@ expected_members = ["version.json", "lookup.json"]
 min_interval_seconds = 600
 ```
 
-A source's election date is the election's. The production catalog keeps what is runtime state
+A source's election date is the election's.
+
+`election.toml` also declares each host that needs more than the platform's default TLS
+(R-017): its exact hosts, what is added (`issuer_bundle`, `trusted_root` or `legacy_cbc`), the
+packaged certificate and the SHA-256 its bytes must have, and why. The loader refuses a host
+named twice, a certificate without its hash, or a non-forward-secret cipher suite;
+`election_pipeline.tls` applies them with the same checks as before, and `tests/test_tls.py`
+pins the reviewed set, so changing a trust decision means changing a test. The election file
+and a state's own file are part of that state's release check key and publication hash
+(`elections.fingerprint`): edit one and only the affected sources are re-checked.
+
+Acquisition is read, not only recorded: `manual configure` takes a manual source's freshness
+limit and final flag from its declaration and refuses a source the definition acquires over
+HTTP; `deploy go-live` follows it; and the monitor reports `acquisition/<source>` if the
+production catalog ever disagrees with it. The production catalog keeps what is runtime state
 (enabled, public, status, publication ids); the definition holds what the repository must know
 to reproduce it, including how each source arrives. County units stay a
 `collection_backend` of an http source, as Mississippi's are today.

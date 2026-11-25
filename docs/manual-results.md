@@ -55,7 +55,7 @@ Commands run from the current release (`R`, see [deployment](deployment.md)):
 ```bash
 manual() { sudo "$R/.venv/bin/python" "$R/scripts/manual_source.py" "$@"; }
 deploy register --source oh_2026_general             # a state not yet in the catalog
-manual configure --source oh_2026_general            # --max-age-hours 6, --final
+manual configure --source oh_2026_general   # the definition's freshness limit and final flag; --max-age-hours, --final override
 manual import --source oh_2026_general --file INBOX_FILE --sha256 HASH --downloaded-at UTC_TIME
 manual promote --source oh_2026_general
 ```
@@ -131,7 +131,7 @@ and its first import is the state's certified file, named for the reader that ch
 
 ```bash
 deploy register --source wy_2026_general
-manual configure --source wy_2026_general --final
+manual configure --source wy_2026_general
 manual import --source wy_2026_general --file INBOX_FILE --sha256 HASH --downloaded-at UTC_TIME     --certified-name certified-results.zip     --evidence-url https://sos.wyo.gov/Elections/Docs/2026/2026GeneralResults.aspx     --certified-on 2026-11-10 --attested-by "NAME"
 manual promote --source wy_2026_general
 ```

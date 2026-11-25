@@ -767,6 +767,8 @@ class DeploymentTests(unittest.TestCase):
             changed("config/states.toml", lambda text: text.replace('"Kentucky"', '"Kentucky!"')),
             {KY},
         )
+        # The election's own file (collector limits, TLS exceptions) applies to every source.
+        self.assertEqual(changed("config/elections/2026-general/election.toml"), {NC, KY})
         # So does what makes a publication: another state's definition republishes no other.
         registry = tree / definition / "KY.toml"
 

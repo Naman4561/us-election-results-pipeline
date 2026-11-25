@@ -121,10 +121,15 @@ class FingerprintTests(unittest.TestCase):
             )
             again = {code: fingerprint(code, config=config) for code in before}
             self.assertEqual({c for c in before if after[c] != again[c]}, {"KY"})
+            # The election's own file (collector limits, TLS exceptions) applies to every state.
+            head = config / "elections/2026-general/election.toml"
+            head.write_text(head.read_text(encoding="utf-8") + "# edited\n", encoding="utf-8")
+            every = {code: fingerprint(code, config=config) for code in before}
+            self.assertTrue(all(every[c] != again[c] for c in before))
             # Line endings (a Windows checkout) do not change it.
             unix = path.read_bytes().replace(b"\r\n", b"\n")
             path.write_bytes(unix.replace(b"\n", b"\r\n"))
-            self.assertEqual(fingerprint("KY", config=config), again["KY"])
+            self.assertEqual(fingerprint("KY", config=config), every["KY"])
 
     def test_durable_facts_are_checked_as_they_load(self):
         with tempfile.TemporaryDirectory() as directory:
