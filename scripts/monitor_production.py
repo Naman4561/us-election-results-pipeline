@@ -282,7 +282,34 @@ def assess(prod, config, now):
         except OSError:
             issues[f"disk/{path}"] = "Cannot inspect disk space"
 
+    issues.update(reproduction_issues(config, now))
     return issues
+
+
+def reproduction_issues(config, now):
+    """Alerts from the nightly reproduction (``deploy.py reproduce``): a live publication
+    that no longer re-creates from its raw snapshot, or a run that is missing or late.
+    Nothing is checked until its timer is enabled."""
+    if not systemd("is-enabled", "election-reproduce.timer"):
+        return {}
+    path = Path(config.get("CONTROL_STATE_DIR", "/var/lib/election-pipeline-deployment"))
+    try:
+        report = read_json(path / "reproduction" / "latest.json")
+        late = age_seconds(report["finished_at"], now) > int(
+            config.get("MAX_REPRODUCTION_AGE_SECONDS", "108000")
+        )
+        sources = report["sources"]
+    except (OSError, ValueError, TypeError, KeyError):
+        return {"reproduction": "Reproduction report is missing or invalid"}
+    found = {"reproduction": "Reproduction run is overdue"} if late else {}
+    for name, result in sorted(sources.items()):
+        if result.get("outcome") != "reproduced":
+            what = result.get("error") or ", ".join(sorted(result.get("differences") or {}))
+            found[f"reproduction/{name}"] = (
+                f"Live publication does not re-create from its raw snapshot "
+                f"({result.get('outcome')}: {what})"[:500]
+            )
+    return found
 
 
 def aws(config, *arguments):

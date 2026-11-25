@@ -205,6 +205,31 @@ class MonitorTests(unittest.TestCase):
         self.catalog["sources"][NC]["final"] = True
         self.assertEqual(self.assess(), {})
 
+    def test_a_publication_that_does_not_reproduce_or_a_late_run_alerts(self):
+        config = {**self.config, "CONTROL_STATE_DIR": str(self.root)}
+        report = self.root / "reproduction" / "latest.json"
+
+        def issues(enabled=True):
+            with patch.object(monitor, "systemd", return_value=enabled):
+                return monitor.reproduction_issues(config, self.now)
+
+        # Not checked until its timer is enabled; then a missing report alerts.
+        self.assertEqual(issues(enabled=False), {})
+        self.assertIn("reproduction", issues())
+        sources = {
+            NC: {"outcome": "reproduced"},
+            MN: {"outcome": "differs", "differences": {"tables": {}, "parsed_files": []}},
+            MS: {"outcome": "failed", "error": "dbt build failed"},
+        }
+        atomic_json(report, {"finished_at": self.recent, "sources": sources})
+        found = issues()
+        self.assertEqual(set(found), {f"reproduction/{MN}", f"reproduction/{MS}"})
+        self.assertIn("parsed_files, tables", found[f"reproduction/{MN}"])
+        self.assertIn("dbt build failed", found[f"reproduction/{MS}"])
+        late = (self.now - timedelta(hours=31)).isoformat()
+        atomic_json(report, {"finished_at": late, "sources": {NC: {"outcome": "reproduced"}}})
+        self.assertEqual(issues(), {"reproduction": "Reproduction run is overdue"})
+
     def test_an_official_feed_is_a_reminder_until_certified_and_then_needs_none(self):
         atomic_json(
             self.root / "data/runs" / NC / "latest.json",

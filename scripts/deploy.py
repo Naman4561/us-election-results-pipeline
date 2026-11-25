@@ -34,6 +34,15 @@ def main():
         help="Check every source, even one whose check passed before with the same inputs",
     )
     sub.add_parser("rollback-release")
+    reproduce = sub.add_parser(
+        "reproduce", help="Re-create live publications from their raw snapshots and compare"
+    )
+    reproduce.add_argument(
+        "--source", action="append", help="Only this source (repeatable); not recorded as latest"
+    )
+    reproduce.add_argument(
+        "--check-all", action="store_true", help="Run every source, even one that reproduced"
+    )
     for name in (
         "register",
         "prepare",
@@ -122,6 +131,8 @@ def main():
             )
         elif action == "rollback-release":
             result = control.rollback_release(path, config)
+        elif action == "reproduce":
+            result = control.reproduce(path, prod, config, args.source, args.check_all)
         elif action in ("prepare", "promote"):
             result = getattr(control, action)(path, args.source, prod, config)
         elif action == "register":

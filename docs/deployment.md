@@ -102,6 +102,41 @@ the image it started on.
 `deploy rollback-release` returns the worker to the previous release. Migrations stay
 applied; a release never depends on a migration being absent.
 
+## Reproducing publications
+
+Every published result must be re-creatable from the official file it came from. The
+nightly `election-reproduce.timer` checks it for every live publication, and the same
+command runs on demand:
+
+```bash
+deploy reproduce                         # every live publication; records latest.json
+deploy reproduce --source xx_2026_general  # one source; recorded by time only
+deploy reproduce --check-all             # also those that reproduced under unchanged code
+```
+
+Each source runs as a job in the current release image: its raw snapshot is parsed
+again from scratch (the output files must have the hashes the publication's release
+recorded), and the release is built again with the current dbt project into a private
+schema whose tables are compared with the publication's, row for row, then dropped.
+Nothing is published or loaded. Reports are in
+`/var/lib/election-pipeline-deployment/reproduction/` (`latest.json` and the last 30
+runs). A source that differs or fails is an alert (`reproduction/<source>`), and a
+missing or day-old report is one too; the live publication is never changed. A
+difference names the files, tables and sample rows involved and the code hashes, so it
+tells a code change that altered results apart from a snapshot that no longer parses.
+
+Before a candidate can publish at all, its dbt contest and county totals must equal
+the parser's own `contest_results.csv` and `county_results.csv`
+(`publication.cross_check`): the summing rules are written in both, and this keeps
+them from drifting apart.
+
+The timer is installed once, like the others:
+
+```bash
+sudo install -m 0644 "$R/deploy/systemd/election-reproduce."{service,timer} /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now election-reproduce.timer
+```
+
 ## Adding a state in production
 
 The state's source is in the release's `sources.toml` and starts disabled and private.

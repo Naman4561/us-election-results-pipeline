@@ -757,6 +757,118 @@ def release(path, release_path, image, prod, config, moved=(), check_all=False):
     return result
 
 
+REPRODUCTION_DIR = "reproduction"
+# Dated reproduction reports kept beside latest.json.
+KEEP_REPRODUCTIONS = 30
+
+
+def live_results(prod):
+    """{source: (publication_id, raw_sha256)} for every live results publication."""
+    with connect(db_settings(prod)) as conn:
+        return {
+            r["source_id"]: (str(r["publication_id"]), r["raw_sha256"])
+            for r in conn.execute(
+                "SELECT c.source_id, c.publication_id, p.raw_sha256 "
+                "FROM serving.current_publications c "
+                "JOIN serving.publications p USING (publication_id) "
+                "WHERE p.dataset = 'election_results'"
+            )
+        }
+
+
+def reproduce(path, prod, config, names=None, check_all=False):
+    """Re-create every live publication (or those of ``names``) from its raw snapshot
+    under the current release, one job at a time (``scripts/run_reproduction.py``).
+
+    A source that reproduced before is not run again while its publication and its check
+    key (``check_keys``: the code, configuration and status its check runs) are unchanged,
+    unless ``check_all``. A full run is recorded as ``reproduction/latest.json``, which the
+    monitor reads; every run is also kept by its time. A source that does not reproduce
+    is reported, never changed: the live publication stays as it is.
+    """
+    value = catalog.read(path)
+    release = value["release"]
+    live = live_results(prod)
+    chosen = sorted(live if names is None else names)
+    unknown = set(chosen) - set(live)
+    if unknown:
+        raise ValueError(f"No live results publication: {sorted(unknown)}")
+    directory = Path(config["CONTROL_STATE_DIR"]) / REPRODUCTION_DIR
+    try:
+        previous = json.loads((directory / "latest.json").read_text(encoding="utf-8"))["sources"]
+    except (OSError, ValueError, KeyError):
+        previous = {}
+    try:
+        keys = check_keys(release["release_path"], value, prod, chosen)
+    except Exception:
+        keys = {}  # every source runs
+    started, results = utc_now(), {}
+    for name in chosen:
+        publication_id = live[name][0]
+        before = previous.get(name) or {}
+        if (
+            not check_all
+            and before.get("outcome") == "reproduced"
+            and before.get("publication_id") == publication_id
+            and keys.get(name)
+            and before.get("key") == keys[name]
+        ):
+            results[name] = {**before, "reused": True}
+            continue
+        try:
+            output = containers.run_job(
+                release["image_id"],
+                prod,
+                config,
+                [
+                    "scripts/run_reproduction.py",
+                    "--source",
+                    name,
+                    "--publication-id",
+                    publication_id,
+                ],
+                timeout=int(config.get("REPRODUCE_TIMEOUT", "1800")),
+            )
+            report = [json.loads(line) for line in output.splitlines() if line.startswith("{")][-1]
+            if report.get("source_id") != name:
+                raise ValueError("The reproduction job reported another source")
+        except Exception as error:
+            report = {
+                "source_id": name,
+                "publication_id": publication_id,
+                "outcome": "failed",
+                "error": redacted(str(error), prod)[-2000:],
+            }
+        results[name] = {
+            **report,
+            "publication_id": publication_id,
+            "key": keys.get(name),
+            "reused": False,
+        }
+    outcomes = {r["outcome"] for r in results.values()}
+    summary = {
+        "schema_version": 1,
+        "revision": release["revision"],
+        "image_id": release["image_id"],
+        "started_at": started,
+        "finished_at": utc_now(),
+        "complete": names is None,
+        "outcome": "reproduced" if outcomes <= {"reproduced"} else "differs",
+        "counts": {o: sum(r["outcome"] == o for r in results.values()) for o in sorted(outcomes)},
+        "sources": results,
+    }
+    directory.mkdir(parents=True, exist_ok=True)
+    # Named by start time (sorting by name sorts by time), unique within a second.
+    stamp = re.sub(r"\D", "", started)[:17] + "-" + uuid.uuid4().hex[:8]
+    atomic_json(directory / f"reproduction-{stamp}.json", summary)
+    # A run of some sources records them, but only a full run replaces the nightly record.
+    if names is None:
+        atomic_json(directory / "latest.json", summary)
+    for old in sorted(directory.glob("reproduction-*.json"))[:-KEEP_REPRODUCTIONS]:
+        old.unlink(missing_ok=True)
+    return summary
+
+
 def rollback_release(path, config):
     """Return workers to the previous release. Migrations are additive and stay applied."""
 
