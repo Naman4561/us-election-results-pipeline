@@ -41,14 +41,13 @@ import re
 import zipfile
 from datetime import datetime
 from html import unescape
-from importlib.resources import files
 
 from pypdf import PdfReader
 
-from election_pipeline import reviews
+from election_pipeline import elections, reviews
 from election_pipeline.parsers.results import finish
+from election_pipeline.parsers.rosters import ROSTERS
 from election_pipeline.parsers.scope import verify_scope
-from election_pipeline.parsers.scope_2026 import ROSTERS
 from election_pipeline.parsers.structured import count, row
 
 WRITE_IN = ("write-in", "Write-in")
@@ -74,7 +73,7 @@ FORMATS = (
 
 
 def table():
-    raw = files("election_pipeline").joinpath("resources/wi_2026_contests.json").read_text("utf-8")
+    raw = elections.table("wi-contests.json").decode("utf-8")
     return json.loads(raw)
 
 

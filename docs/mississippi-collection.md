@@ -23,7 +23,7 @@ response. Polling continues; failed polls keep the manual snapshot (and record
 
 The first ten captures remain in `tests/fixtures/mississippi/reports.zip`.
 The three additions and their original-byte fingerprints are in `expansion.zip`.
-The canonical policy is `src/election_pipeline/resources/ms_2026_counties.json`.
+The canonical policy is `config/elections/2026-general/tables/ms-counties.json`.
 The source/contact inventory lists all 82 counties in
 `docs/source-research/ms-2026-county-sources.json`.
 
@@ -152,7 +152,7 @@ precinct columns, and leaves write-ins null when the recap prints none.
 A certified review may also carry `"house"`: the TOTAL of each congressional district the
 recap lists, `{"MS-03": {"Michael Guest": n, "Michael A. Chiaradio": n, "Erik Kiehle": n}}`.
 Each district's candidates, and the district covering most of each county, are in
-`resources/ms_2026_house.json`; a split county's recap lists both of its districts.
+`tables/ms-house.json` in the election definition; a split county's recap lists both of its districts.
 
 The districts are published only once turned on, after the recaps are in:
 

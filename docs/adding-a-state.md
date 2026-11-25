@@ -29,7 +29,7 @@ read it, and who is on the ballot.
    races and methods and derives the totals the source does not print. Pass
    `reconcile=True` when the source prints statewide and county rows that must agree
    exactly.
-4. **Record the roster** in `src/election_pipeline/resources/rosters_2026/<CODE>.json`:
+4. **Record the roster** in `config/elections/<id>/rosters/<CODE>.json`:
    the candidates and counties of every race. The parser checks it with
    `parsers.scope.verify_rows` (or `verify_scope` per race; the platform readers already
    do). `scripts/review_rosters.py` prints what a captured snapshot implies; a person

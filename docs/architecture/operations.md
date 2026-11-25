@@ -33,7 +33,7 @@ moves; see [deployment](../deployment.md).
 flowchart LR
     subgraph dev["On the laptop"]
         A["State definition · config/elections/&lt;id&gt;/states/XX.toml"] --> B["Source · the same file"]
-        B --> C["Parser + roster<br/>parsers/xx.py · rosters_2026/XX.json"]
+        B --> C["Parser + roster<br/>parsers/xx.py · rosters/XX.json"]
         C --> E["Map + fixtures + tests<br/>fetch_boundaries.py"]
         E --> F["Push branch · CI"]
     end

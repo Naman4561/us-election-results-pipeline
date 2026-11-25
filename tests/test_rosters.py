@@ -9,12 +9,12 @@ from pathlib import Path
 
 from election_pipeline import pipeline
 from election_pipeline.deployment.containers import package_hash
+from election_pipeline.parsers.rosters import ROSTERS, Rosters
 from election_pipeline.parsers.scope import recording, verify_scope
-from election_pipeline.parsers.scope_2026 import ROSTERS, Rosters
 from election_pipeline.settings import load_config
 
 ROOT = Path(__file__).resolve().parents[1]
-FOLDER = ROOT / "src/election_pipeline/resources/rosters_2026"
+FOLDER = ROOT / "config/elections/2026-general/rosters"
 spec = importlib.util.spec_from_file_location("review", ROOT / "scripts/review_rosters.py")
 review = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(review)
@@ -60,11 +60,20 @@ class RosterTests(unittest.TestCase):
                 package,
                 ignore=shutil.ignore_patterns("__pycache__"),
             )
-            self.assertEqual(pipeline.collector_code_hash(package), before)
-            path = package / "resources/rosters_2026/HI.json"
-            path.write_bytes(path.read_bytes() + b" ")
-            self.assertNotEqual(pipeline.collector_code_hash(package), before)
-            self.assertEqual(package_hash(release), pipeline.collector_code_hash(package))
+            shutil.copytree(ROOT / "config", release / "config")
+            config = release / "config"
+            self.assertEqual(pipeline.collector_code_hash(package, config), before)
+            # A roster, or a reviewed table, is part of the code a parse depends on.
+            for relative in ("rosters/HI.json", "tables/il-contests.json"):
+                path = config / "elections/2026-general" / relative
+                original = path.read_bytes()
+                path.write_bytes(original + b" ")
+                self.assertNotEqual(pipeline.collector_code_hash(package, config), before)
+                self.assertEqual(
+                    package_hash(release), pipeline.collector_code_hash(package, config)
+                )
+                path.write_bytes(original)
+            self.assertEqual(package_hash(release), before)
 
     def test_recording_observes_without_checking_and_does_not_leak(self):
         with recording() as observed:

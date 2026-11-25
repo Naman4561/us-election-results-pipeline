@@ -46,7 +46,9 @@ read county Clarity sites inside their manual imports.
 
 Some states need one-off handling: Texas reads the Civix API (`parsers/tx.py`),
 Alaska pins its issuer certificates (`resources/alaska-issuers.pem`), and Florida's file
-host alone also trusts one reviewed root the image lacks (`resources/florida-root.pem`).
+host alone also trusts one reviewed root the image lacks (`resources/florida-root.pem`);
+each exception, with the exact hosts, the certificate's SHA-256 and the reason, is declared
+in the election definition (`[[tls]]` in `config/elections/<id>/election.toml`).
 
 ## One collection run
 

@@ -4,9 +4,10 @@ Status: **steps 3.1 and 3.2 of the plan (R-008), built on the Phase 3 branch, no
 released.** The definition and its loader (`election_pipeline.elections`) are tested against
 a golden record of today's registry. The registry (`STATES`), `load_config` and every source
 now read it; `config/sources.toml` is gone. TLS exceptions and each source's acquisition are
-declared in it. Still to move are the rosters and the reviewed per-state tables (under
-`resources/` for now). This page says what is per-election, where it lives, what the
-definition holds, and how each step proves it changed nothing.
+declared in it. The rosters and the reviewed per-state tables sit beside it
+(`rosters/`, `tables/`), where the parse code hash and each state's release key include
+them. This page says what is per-election, where it lives, what the definition holds, and
+how each step proves it changed nothing.
 
 ## Why
 
@@ -26,9 +27,9 @@ both.
 | `states.py` `State` | 17 fields per state (below) | 50 states |
 | `config/sources.toml` | url, election date, format, expected members, intervals, limits | 51 sources (50 results, 1 NC demographics) |
 | production catalog only | `acquisition` http / manual, `manual_final`, max age | 33 http, 17 manual (AZ IL KS KY ME MI MO NH NJ NV NY OH OK PA TN WI WY) |
-| `resources/rosters_2026/` | reviewed candidates and counties | 48 states; AK and MS keep their own scope files |
+| `config/elections/2026-general/rosters/` (were `resources/rosters_2026/`) | reviewed candidates and counties | 48 states; AK and MS keep their own scope files |
 | `resources/*_2026_*.json` | IL, NJ, WI contests; NH towns; MS counties and House; AK scope | 6 files |
-| `resources/elections_2026.json` | which states elect a Senator or Governor, certification sources | 1 file, read by the dashboard |
+| `tables/election-facts.json` (was `resources/elections_2026.json`) | which states elect a Senator or Governor, certification sources | 1 file, read by the dashboard |
 | 42 parsers | `source.election_date != "2026-11-03"` refusals | 42 |
 | shared readers | Clarity's 2026-11-03..12-31 window, "2026 General", "11/3/2026"; ENR's `/2026` regex; Enhanced Voting and Tally date checks | 5 modules |
 | collectors | SC's upload-path regex and Indiana's version code | 2 |
@@ -59,12 +60,14 @@ config/elections/2026-general/
   states/CT.toml         # one file per state: races, methods, reporting policy, source,
                          # how the source is acquired
   datasets/<name>.toml   # a source that is not a state's results (NC's absentee file)
+  rosters/CT.json       # the reviewed candidates and counties of every race
+  tables/il-contests.json  # reviewed per-state tables: IL, NJ, WI contests, NH towns,
+                         # MS counties and House, AK scope, the dashboard's election facts
 ```
 
-It is under `config/` because the image already copies that folder, beside
-`sources.toml`, which the definition replaces in step 3.2. Rosters, county tables and the
-reviewed per-state tables move beside it in the steps that need them (3.2, 3.5); they are
-still under `resources/` now.
+It is under `config/` because the image already copies that folder. `sources.toml` is gone;
+the rosters and tables that were under `resources/` are here, so a new election is a new
+folder and nothing in `src/` names a year. County FIPS tables (step 3.5) will join them.
 
 `states.py` keeps only what is true of a state in every election, as `elections.DURABLE`: its
 name, its parser module and the kind of place it reports by. A state's file may not set

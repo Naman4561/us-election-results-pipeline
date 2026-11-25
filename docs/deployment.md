@@ -65,7 +65,7 @@ the image it started on.
    scripts, the package modules reachable from them and from the source's own parser and
    collector, `states.py` as far as it concerns the source's state, and the reviewed
    data other than other states' (a state's `<slug>_*.json` and its roster
-   `rosters_2026/<STATE>.json` are its own). A dbt model counts for the builds its
+   `rosters/<STATE>.json` and its tables in the election definition are its own). A dbt model counts for the builds its
    folder's tag selects and a dbt test for its own tags (`publication.dbt_tags`), so
    Mississippi's county-feed models and tests count for Mississippi alone; a tag no
    checked source builds counts for every source, since dbt parses the whole project.

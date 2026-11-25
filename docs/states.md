@@ -181,7 +181,7 @@ zero.
   every member's address and SHA-256): 15 Clarity counties' summaries (fetched as the
   pipeline fetches any page), Camden's, Hunterdon's, Sussex's and Warren's ES&S summary
   reports, Salem's results page and Bergen's printed summary (Bergen, Hunterdon and
-  Warren saved by hand). `resources/nj_2026_contests.json` maps each county's contest
+  Warren saved by hand). `tables/nj-contests.json` maps each county's contest
   titles to races and lists every ballot candidate with its spellings; minor-party
   labels are ballot slogans and stand as IND. Every ballot candidate must be found in
   every county of its race; any other line is a write-in. Each county is checked on its
@@ -199,7 +199,7 @@ zero.
   authority in it is collected, as their sum. A count still under way (McLean's clerk, 14
   of 81 precincts in November 2026) is named in the publication's update text as a
   partial count. Each authority's own contest titles, and the candidates' spellings, are
-  in the reviewed table `resources/il_2026_contests.json`; a name not in it is refused
+  in the reviewed table `tables/il-contests.json`; a name not in it is refused
   rather than counted as a write-in. A feasibility survey of all 108 (Nov 23) found
   Clarity sites, vendor sites (pollresults.net, GBS, platinumelectionresults,
   livevoterturnout), county PDFs and pages, and eight that refuse the pipeline. Each
@@ -220,7 +220,7 @@ zero.
   races as separate reports (Vilas) lists them as parts, read only through a signed review
   that names every part's SHA-256 in order. Each county must report
   the Governor and exactly the House districts the roster places it in (the Census
-  county–district relationship file); `resources/wi_2026_contests.json` lists every
+  county–district relationship file); `tables/wi-contests.json` lists every
   ballot candidate (the Commission's candidate list) and the spellings counties print.
   Statewide votes are the collected counties' sums: the dashboard shows "N of 72
   counties collected" and no statewide lead until every county is in, and a House
@@ -242,7 +242,7 @@ zero.
   rows must add up to its TOTALS row, but those are Excel `SUM` formulas over the same
   rows (read from their stored values), so this checks the file is unedited rather than
   checking it against a second source. House towns are added up into their counties
-  (`resources/nh_2026_towns.json`, from Census; a ward counts for its city). No report
+  (`tables/nh-towns.json`, from Census; a ward counts for its city). No report
   time is printed: it is declared at import.
 - **Pennsylvania:** the county results export (`UnOfficial_<time>.txt`, comma-separated) is
   saved by hand: the results site and its RSS feeds refuse automated clients, and the
@@ -295,7 +295,7 @@ New Castle County is Wilmington plus the rest of the county; both parts are chec
 ## Awaiting certified results
 
 The map labels a state "Awaiting certified results" while it holds elections this year
-but has no public source (`awaiting_certified` in `resources/elections_2026.json`; a
+but has no public source (`awaiting_certified` in `tables/election-facts.json`; a
 state leaves the label once a source of its is public). Such a state is added from its
 certified canvass, as a manual source whose first import is the certified file
 ([manual results](manual-results.md#a-state-added-from-its-certified-results)), or from

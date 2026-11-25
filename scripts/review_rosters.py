@@ -1,7 +1,7 @@
 """Show the candidate and county roster a captured official snapshot implies.
 
 Parses one archived bundle with roster checks switched to recording, then prints, per
-race, what differs from the reviewed roster in ``resources/rosters_2026/<STATE>.json``.
+race, what differs from the reviewed roster in ``config/elections/<id>/rosters/<STATE>.json``.
 With ``--write`` it replaces that state's races with the observed ones (keeping the
 provenance note, which should then be updated by hand to name the capture). Nothing is
 fetched; review every change against the state's own results pages before committing.
@@ -15,13 +15,14 @@ import sys
 import tempfile
 from pathlib import Path
 
+from election_pipeline import elections
+from election_pipeline.parsers.rosters import ROSTERS
 from election_pipeline.parsers.scope import recording
-from election_pipeline.parsers.scope_2026 import ROSTERS
 from election_pipeline.settings import load_config
 from election_pipeline.states import parser_for
 
 ROOT = Path(__file__).resolve().parents[1]
-FOLDER = ROOT / "src/election_pipeline/resources/rosters_2026"
+FOLDER = elections.rosters_folder(ROOT / "config")
 
 
 def observe(source, settings, archive):

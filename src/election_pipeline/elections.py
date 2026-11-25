@@ -143,17 +143,36 @@ def durable(config=None):
     return found
 
 
+def table(name, config=None):
+    """The bytes of a reviewed table of the election in force (``tables/<name>``)."""
+    return (folder(config) / "tables" / name).read_bytes()
+
+
+def rosters_folder(config=None):
+    return folder(config) / "rosters"
+
+
 def fingerprint(code, election=None, config=None):
     """Everything the definition says about state ``code``: its durable facts, its file in the
-    election, and the election's own file (collector limits, TLS exceptions, which apply to
-    every source), which is what a check or publication of that state depends on beyond
-    code. Changing another state's file does not change it."""
+    election, its reviewed roster and tables (``rosters/<CODE>.json``, ``tables/<slug>-*.json``)
+    and the election's own file (collector limits, TLS exceptions, which apply to every
+    source), which is what a check or publication of that state depends on beyond code.
+    Changing another state's files does not change it."""
     config = Path(config or CONFIG)
     where = Path(election or folder(config))
     parts = [
         (where / "states" / f"{code}.toml").read_bytes().replace(b"\r\n", b"\n"),
         json.dumps(durable(config)[code], sort_keys=True).encode(),
         (where / "election.toml").read_bytes().replace(b"\r\n", b"\n"),
+    ]
+    reviewed = [
+        where / "rosters" / f"{code}.json",
+        *sorted(where.glob(f"tables/{code.lower()}-*.json")),
+    ]
+    parts += [
+        item.name.encode() + b"\0" + item.read_bytes().replace(b"\r\n", b"\n")
+        for item in reviewed
+        if item.is_file()
     ]
     return hashlib.sha256(b"\0".join(parts)).hexdigest()
 

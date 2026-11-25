@@ -230,14 +230,11 @@ class MississippiTests(unittest.TestCase):
         )
 
     def test_windows_policy_line_endings_are_canonical_but_changed_counts_are_rejected(self):
-        raw = (ROOT / "src/election_pipeline/resources/ms_2026_counties.json").read_bytes()
-        resource = MagicMock()
-        resource.joinpath.return_value.read_bytes.return_value = raw.replace(
-            b"\r\n", b"\n"
-        ).replace(b"\n", b"\r\n")
-        with patch.object(ms, "files", return_value=resource):
+        raw = (ROOT / "config/elections/2026-general/tables/ms-counties.json").read_bytes()
+        windows = raw.replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
+        with patch.object(ms.elections, "table", return_value=windows):
             self.assertEqual(ms.policy(), self.policy)
-            resource.joinpath.return_value.read_bytes.return_value = raw.replace(b"28103", b"28104")
+        with patch.object(ms.elections, "table", return_value=raw.replace(b"28103", b"28104")):
             with self.assertRaisesRegex(ValueError, "fingerprint changed"):
                 ms.policy()
 

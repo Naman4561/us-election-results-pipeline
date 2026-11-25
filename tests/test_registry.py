@@ -7,20 +7,20 @@ covered without copying them. Cohort tests keep what is specific to their captur
 import unittest
 from pathlib import Path
 
-from election_pipeline.parsers.scope_2026 import ROSTERS
+from election_pipeline.parsers.rosters import ROSTERS
 from election_pipeline.settings import load_config
 from election_pipeline.states import STATES
 
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = ROOT / "src/election_pipeline/dashboard/static"
-RESOURCES = ROOT / "src/election_pipeline/resources"
+TABLES = ROOT / "config/elections/2026-general/tables"
 # States whose parser checks a reviewed scope of its own instead of a roster file, and
 # the file it checks.
 OWN_SCOPE = {
     # Each race's candidates by ballot ID and party, and its reporting units.
-    "AK": "ak_2026_scope.json",
+    "AK": "ak-scope.json",
     # Each district's candidates and parties, and each county's contract.
-    "MS": "ms_2026_house.json",
+    "MS": "ms-house.json",
 }
 
 
@@ -38,7 +38,7 @@ class RegistryTests(unittest.TestCase):
                 # A new candidate, a missing county or a renamed choice must stop a parse.
                 if code in OWN_SCOPE:
                     self.assertNotIn(code, ROSTERS)
-                    self.assertTrue((RESOURCES / OWN_SCOPE[code]).is_file())
+                    self.assertTrue((TABLES / OWN_SCOPE[code]).is_file())
                 else:
                     self.assertEqual(set(state.races), set(ROSTERS[code]))
 

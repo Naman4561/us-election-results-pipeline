@@ -1,26 +1,28 @@
-"""Reviewed official candidate/county rosters for the 2026 general election.
+"""Reviewed official candidate/county rosters for the election in force.
 
-Each state's roster is a reviewed data file, ``resources/rosters_2026/<STATE>.json``,
+Each state's roster is a reviewed data file, ``config/elections/<id>/rosters/<STATE>.json``,
 recording which official capture it was taken from. The files are part of the parser
 code hash (``pipeline.collector_code_hash``), so changing a roster forces a reparse.
 ``scripts/review_rosters.py`` prints the roster a captured snapshot implies, for review.
 
 A state's file is read the first time that state's roster is asked for, so a parse reads
 its own state's roster alone: another state's roster can neither change nor break it,
-and a release check keys each roster file to its own state (``deployment.control``).
+and a release check keys each roster file to its own state (``elections.fingerprint``).
 """
 
 import json
 import re
 from collections.abc import Mapping
-from importlib.resources import files
+from pathlib import Path
+
+from election_pipeline import elections
 
 
 class Rosters(Mapping):
     """{state: {race: roster}}, each state's file loaded on first use."""
 
     def __init__(self, folder=None):
-        self._folder = folder or files("election_pipeline").joinpath("resources/rosters_2026")
+        self._folder = Path(folder) if folder else elections.rosters_folder()
         self._loaded = {}
 
     def __getitem__(self, code):

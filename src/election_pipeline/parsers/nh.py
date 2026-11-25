@@ -19,8 +19,8 @@ import io
 import json
 import re
 import zipfile
-from importlib.resources import files
 
+from election_pipeline import elections
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row
@@ -46,7 +46,7 @@ MAX_BYTES = 5_000_000
 
 
 def towns():
-    raw = files("election_pipeline").joinpath("resources/nh_2026_towns.json").read_text("utf-8")
+    raw = elections.table("nh-towns.json").decode("utf-8")
     table = json.loads(raw)["towns"]
     if set(table.values()) != set(COUNTIES):
         raise ValueError("New Hampshire town table names an unknown county")

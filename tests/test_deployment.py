@@ -732,15 +732,17 @@ class DeploymentTests(unittest.TestCase):
             return {name for name in before if before[name] != after[name]}
 
         package = "src/election_pipeline/"
+        election = "config/elections/2026-general/"
+        tables, rosters = election + "tables/", election + "rosters/"
         self.assertEqual(changed(package + "parsers/ky.py"), {KY})
         self.assertEqual(changed(package + "parsers/nc.py"), {NC})
         # Another state's parser and data, the dashboard and the host-side tools: neither.
         self.assertEqual(changed(package + "parsers/ms.py"), set())
-        self.assertEqual(changed(package + "resources/ms_2026_counties.json", str.rstrip), set())
+        self.assertEqual(changed(tables + "ms-counties.json", str.rstrip), set())
         # A roster is read by its own state's parse alone, a new one too.
-        self.assertEqual(changed(package + "resources/rosters_2026/OK.json", str.rstrip), set())
+        self.assertEqual(changed(rosters + "OK.json", str.rstrip), set())
         before = keys()
-        roster = tree / package / "resources/rosters_2026/KY.json"
+        roster = tree / rosters / "KY.json"
         roster.write_text('{"state": "KY", "races": {}}', encoding="utf-8")
         after = keys()
         self.assertEqual({n for n in before if before[n] != after[n]}, {KY})
