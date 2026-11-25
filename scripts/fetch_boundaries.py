@@ -6,9 +6,10 @@ vintage: states, counties, county subdivisions, the 120th Congress, 2026 lower-h
 districts) and ``tigerWMS_ACS2025`` for Missouri's 119th-Congress districts (its 2025 map
 is the one in force). Every response is kept by SHA-256 in the archive directory
 (``map-sources`` in the repository by default) with an index of the URL each came from,
-and each map records the URL and SHA-256 behind it. ``--offline`` rebuilds from the archive alone, with
-no request, and produces the same files. ``--output DIR`` writes the maps elsewhere than
-the dashboard's static folder, to compare before replacing (``compare_maps.py``).
+and each map records the URL and SHA-256 behind it. ``--offline`` rebuilds from the
+archive alone, with no request, and produces the same files. ``--output DIR`` writes the
+maps elsewhere than the dashboard's static folder, to compare before replacing
+(``compare_maps.py``).
 """
 
 import argparse
