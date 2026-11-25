@@ -68,6 +68,8 @@ const view = {
   county: null,
   method: "total_votes",
 };
+// The selected round tab of each ranked-choice race (see roundTabs).
+const roundTab = {};
 let data,
   details = {},
   geometry = {},
@@ -690,43 +692,63 @@ function renderStatePanel() {
       target.append(link);
     }
   }
-  // A race decided by ranked-choice tabulation (Alaska's House race): its rounds.
+  // A race decided by ranked-choice tabulation (Alaska's House race): tabs switch the
+  // candidates between each round of the tabulation and the precinct first choices.
   const ranked = view.county ? null : contest?.ranked_choice;
-  if (ranked) {
-    const final = ranked.rounds[ranked.rounds.length - 1];
-    const winner = final.candidates.find((c) => c.outcome === "elected");
+  const tab = ranked ? roundTab[race] || ranked.final_round : null;
+  const shown = ranked && tab !== "first" ? ranked.rounds[tab - 1] : null;
+  if (ranked) target.append(roundTabs(race, ranked, tab));
+  if (shown) {
+    const out = shown.candidates
+      .filter((c) => c.outcome === "eliminated")
+      .map((c) => c.name)
+      .join(", ");
     target.append(
       element(
         "p",
-        `RANKED-CHOICE TABULATION · ${ranked.elected} elected in round ${ranked.final_round} with ${number(winner.votes)} of ${number(final.continuing)} continuing ballots (${(winner.share * 100).toFixed(1)}%); ${number(final.exhausted)} ballots exhausted. The candidate totals below are first choices from the precinct results.`,
+        shown.round === ranked.final_round
+          ? `RANKED-CHOICE TABULATION · ${ranked.elected} elected in the final round. Shares are of the round's continuing ballots.`
+          : `RANKED-CHOICE TABULATION · Round ${shown.round} of ${ranked.final_round}. ${out} eliminated after this round; their ballots pass to the next ranking.`,
         "ranked-choice",
       ),
-      roundsTable(ranked),
     );
   }
-  if (firstChoice)
+  if (firstChoice && !shown)
     target.append(
       element(
         "p",
         ranked
-          ? "First-choice votes · Round 1 of the precinct results · CSV-listed candidates. The tabulation's first round differs slightly: it passes a write-in or a single skipped first ranking to the next ranking. Percentages use listed candidate votes; unlisted vote categories are excluded."
+          ? "First-choice votes · precinct results · CSV-listed candidates. The tabulation's first round differs slightly: it passes a write-in or a single skipped first ranking to the next ranking. Percentages use listed candidate votes; unlisted vote categories are excluded."
           : "First-choice votes · Round 1 · CSV-listed candidates. Later ranked-choice tabulations are not included. Percentages use listed candidate votes; unlisted vote categories are excluded.",
         "empty",
       ),
     );
+  const leader = shown ? shown.candidates[0] : null;
   total.append(
     element(
       "span",
-      firstChoice
-        ? "Listed first-choice candidate votes"
-        : countyBasis
-          ? "Named candidate votes · collected counties"
-          : methodNames[view.method] + " · candidate votes",
+      shown
+        ? `Continuing ballots · round ${shown.round}`
+        : firstChoice
+          ? "Listed first-choice candidate votes"
+          : countyBasis
+            ? "Named candidate votes · collected counties"
+            : methodNames[view.method] + " · candidate votes",
     ),
-    element("strong", stats?.total == null ? "—" : number(stats.total)),
+    element(
+      "strong",
+      shown
+        ? number(shown.continuing)
+        : stats?.total == null
+          ? "—"
+          : number(stats.total),
+    ),
   );
-  const leadText =
-    result.status === "awaiting_votes"
+  const leadText = shown
+    ? leader.outcome === "elected"
+      ? `${leader.name} elected with ${(leader.share * 100).toFixed(1)}% of continuing ballots`
+      : `${leader.name} leads round ${shown.round} with ${(leader.share * 100).toFixed(1)}%`
+    : result.status === "awaiting_votes"
       ? "Awaiting reported votes"
       : result.status === "tie"
         ? "The leading candidates are tied"
@@ -735,7 +757,7 @@ function renderStatePanel() {
           : `${stats.candidates[0].name} leads${firstChoice ? " among listed candidates in first-choice votes" : countyBasis && !view.county ? " within the collected counties" : ""}${stats.margin !== null ? " by " + number(stats.margin) + " votes" : ""}`;
   total.append(element("p", leadText));
   target.append(total);
-  for (const candidate of stats?.candidates || []) {
+  for (const candidate of shown ? shown.candidates : stats?.candidates || []) {
     const box = element("div", undefined, "candidate"),
       head = element("div", undefined, "candidate-head"),
       name = element("div", candidate.name, "candidate-name"),
@@ -745,7 +767,14 @@ function renderStatePanel() {
         "candidate-votes",
       );
     name.append(
-      element("div", candidate.party || "Party unavailable", "party"),
+      element(
+        "div",
+        (candidate.party || "Party unavailable") +
+          (candidate.outcome && candidate.outcome !== "continuing"
+            ? " · " + candidate.outcome
+            : ""),
+        "party",
+      ),
     );
     votes.append(
       element(
@@ -762,8 +791,18 @@ function renderStatePanel() {
     fill.style.background = colors[candidate.group];
     bar.append(fill);
     box.append(head, bar);
+    if (candidate.outcome && candidate.outcome !== "continuing")
+      box.dataset.outcome = candidate.outcome;
     target.append(box);
   }
+  if (shown)
+    target.append(
+      element(
+        "p",
+        `Not continuing in round ${shown.round}: ${number(shown.exhausted)} exhausted ballots, ${number(shown.blanks)} blank, ${number(shown.overvotes)} overvoted.`,
+        "empty",
+      ),
+    );
   if (state.method_note)
     target.append(element("p", state.method_note, "empty"));
   if (state.county_detail === false)
@@ -777,42 +816,31 @@ function renderStatePanel() {
       ),
     );
 }
-// Each candidate's votes in every round of a ranked-choice tabulation, and the
-// exhausted ballots; the elected candidate's last count is marked.
-function roundsTable(ranked) {
-  const table = element("table", undefined, "rounds"),
-    head = element("tr"),
-    body = element("tbody");
-  head.append(
-    element("th", "Candidate"),
-    ...ranked.rounds.map((r) => element("th", `Round ${r.round}`)),
-  );
-  for (const first of ranked.rounds[0].candidates) {
-    const row = element("tr");
-    row.append(element("th", first.name));
-    for (const r of ranked.rounds) {
-      const c = r.candidates.find((x) => x.name === first.name);
-      row.append(
-        element(
-          "td",
-          c
-            ? number(c.votes) + (c.outcome === "elected" ? " · elected" : "")
-            : "—",
-        ),
-      );
-    }
-    body.append(row);
+// The round tabs of a ranked-choice race: each round of the tabulation, then the
+// precinct first choices. The choice is kept per race while the page is open.
+function roundTabs(race, ranked, tab) {
+  const tabs = element("div", undefined, "tabs round-tabs");
+  tabs.setAttribute("role", "tablist");
+  tabs.setAttribute("aria-label", "Ranked-choice rounds");
+  for (const value of [...ranked.rounds.map((r) => r.round), "first"]) {
+    const button = element(
+      "button",
+      value === "first"
+        ? "First choices"
+        : value === ranked.final_round
+          ? `Round ${value} · final`
+          : `Round ${value}`,
+    );
+    button.setAttribute("role", "tab");
+    button.setAttribute("aria-selected", String(value === tab));
+    button.dataset.round = String(value);
+    button.addEventListener("click", () => {
+      roundTab[race] = value;
+      renderStatePanel();
+    });
+    tabs.append(button);
   }
-  const exhausted = element("tr");
-  exhausted.append(
-    element("th", "Exhausted ballots"),
-    ...ranked.rounds.map((r) => element("td", number(r.exhausted))),
-  );
-  body.append(exhausted);
-  const header = element("thead");
-  header.append(head);
-  table.append(header, body);
-  return table;
+  return tabs;
 }
 function renderMetadata() {
   const national = view.scope === "US",

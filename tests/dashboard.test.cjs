@@ -247,18 +247,26 @@ test("national/state map navigation and coverage statuses", async (t) => {
   click('[data-office="house"]');
   assert(d.querySelector('path[data-id="AK-AL"]'));
   assert.equal(calls, alaskaCalls, "Alaska tabs use cached results");
-  // Its House race was decided by ranked-choice tabulation: the rounds are shown.
+  // Its House race was decided by ranked-choice tabulation: tabs switch between its
+  // rounds and the first choices, opening on the final round.
   click('path[data-id="AK-AL"]');
   await settle();
-  assert(
-    d
-      .querySelector("#result-content")
-      .textContent.includes("RANKED-CHOICE TABULATION"),
-  );
-  assert.equal(
-    d.querySelectorAll("#result-content table.rounds tbody tr").length,
-    4,
-  );
+  const roundTabs = () =>
+    [...d.querySelectorAll(".round-tabs button")].map((b) => b.textContent);
+  const shown = () => d.querySelector("#result-content").textContent;
+  assert.deepEqual(roundTabs(), [
+    "Round 1",
+    "Round 2 · final",
+    "First choices",
+  ]);
+  assert(shown().includes("elected in the final round"));
+  assert.equal(d.querySelectorAll("#result-content .candidate").length, 2);
+  click('.round-tabs button[data-round="1"]');
+  assert(shown().includes("Round 1 of 2"));
+  assert.equal(d.querySelectorAll("#result-content .candidate").length, 3);
+  click('.round-tabs button[data-round="first"]');
+  assert(shown().includes("CSV-listed candidates"));
+  assert(!shown().includes("RANKED-CHOICE TABULATION"));
   click("#national");
   click('[data-office="senate"]');
   click('path[data-id="KY"]');
