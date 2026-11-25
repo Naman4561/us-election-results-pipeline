@@ -1,8 +1,9 @@
 """Assemble New Jersey's county results into one zip for a manual import.
 
 New Jersey publishes no statewide results before certification: each of its 21 county
-clerks posts its own. This operator tool downloads, as the pipeline requests any page
-(its own user agent; nothing solved or retried around a refusal), what answers: each
+clerks posts its own. This operator tool downloads, through the pipeline's own client
+(collect.fetch_file: its user agent, size and time limits, redirect checks and per-host
+TLS; nothing solved or retried around a refusal), what answers: each
 Clarity county's current ``summary.json`` and ``electionsettings.json``, and the
 results files of the counties listed in ``FILES``. It adds, unchanged, the files the
 operator saved by hand from sites that refuse automated clients (``--saved
@@ -18,12 +19,14 @@ import argparse
 import gzip
 import hashlib
 import json
+import tempfile
 import time
-import urllib.request
-import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
 
+from election_pipeline import packing
+from election_pipeline.collect import fetch_file
+from election_pipeline.parsers.nj import PACK
 from election_pipeline.settings import load_config
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -45,12 +48,14 @@ FILES = {
 SAVED = {"bergen": "bergen.pdf", "hunterdon": "hunterdon.pdf", "warren": "warren.pdf"}
 
 
-def get(url, agent):
-    request = urllib.request.Request(url, headers={"User-Agent": agent})
-    with urllib.request.urlopen(request, timeout=120) as response:
+def get(url, source, settings):
+    """One file, fetched as the collector fetches its sources (collect.fetch_file)."""
+    with tempfile.TemporaryDirectory() as directory:
+        target = Path(directory) / "body"
+        response = fetch_file(source, settings, target, {}, url=url)
         if response.status != 200:
             raise ValueError(f"{url}: HTTP {response.status}")
-        body = response.read()
+        body = target.read_bytes()
     return gzip.decompress(body) if body[:2] == b"\x1f\x8b" else body
 
 
@@ -66,7 +71,9 @@ def main():
         help="Add or replace a Clarity county, e.g. passaic=Passaic/127401",
     )
     args = parser.parse_args()
-    settings, _ = load_config(ROOT / "config/sources.toml")
+    settings, sources = load_config(ROOT / "config/sources.toml")
+    source = sources["nj_2026_general"]
+    settings = source.effective_settings(settings)
     elections = dict(ELECTIONS)
     for item in args.election:
         county, path = item.split("=", 1)
@@ -74,36 +81,32 @@ def main():
     saved = dict(item.split("=", 1) for item in args.saved)
     if set(saved) != set(SAVED):
         raise SystemExit(f"Saved files are needed for: {', '.join(sorted(SAVED))}")
-    members, sources = {}, {}
+    members, listing = {}, {}
 
     def add(name, body, origin):
         members[name] = body
-        sources[name] = {
+        listing[name] = {
             "source": origin,
             "sha256": hashlib.sha256(body).hexdigest(),
             "taken_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         }
 
     for county, path in sorted(elections.items()):
-        version = get(CLARITY + path + "/current_ver.txt", settings.user_agent).decode().strip()
+        version = get(CLARITY + path + "/current_ver.txt", source, settings).decode().strip()
         if not version.isdigit():
             raise SystemExit(f"{county}: unexpected Clarity version {version!r}")
         base = f"{CLARITY}{path}/{version}/json/en/"
         for kind, name in (("settings", "electionsettings.json"), ("summary", "summary.json")):
-            add(f"clarity/{county}.{kind}.json", get(base + name, settings.user_agent), base + name)
+            add(f"clarity/{county}.{kind}.json", get(base + name, source, settings), base + name)
             time.sleep(1)
     for name, url in FILES.items():
-        add(name, get(url, settings.user_agent), url)
+        add(name, get(url, source, settings), url)
         time.sleep(1)
     for county, path in saved.items():
         add(SAVED[county], Path(path).read_bytes(), "saved by the operator in a browser")
-    listing = json.dumps(sources, indent=1, sort_keys=True).encode()
-    with zipfile.ZipFile(args.out, "w") as archive:
-        for name, body in [*sorted(members.items()), ("sources.json", listing)]:
-            # A ZipInfo is stored uncompressed unless told otherwise.
-            info = zipfile.ZipInfo(name, (1980, 1, 1, 0, 0, 0))
-            info.compress_type = zipfile.ZIP_DEFLATED
-            archive.writestr(info, body)
+    members["sources.json"] = packing.document(listing)
+    packing.check(PACK, members)
+    packing.write_zip(args.out, members)
     print(
         json.dumps(
             {"members": len(members), "sha256": hashlib.sha256(args.out.read_bytes()).hexdigest()}

@@ -56,6 +56,12 @@ def contest_key(name):
     return f"KY-{int(match[1]):02}" if match else None
 
 
+# The saved pages' import zip, for scripts/pack_import.py (election_pipeline.packing).
+PACK = {
+    "members": tuple(f"{race}.mhtml" for race in ("KY-SEN", *(f"KY-0{n}" for n in range(1, 7))))
+}
+
+
 def parse(archive_path, source, settings, output, stats, reference=None):
     from election_pipeline.parsers.results import finish
     from election_pipeline.states import state_adapter

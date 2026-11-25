@@ -175,7 +175,8 @@ class IllinoisBundleTests(unittest.TestCase):
         out = self.pack({"Adams": entry}, name="signed.zip")
         packed = members(out)
         self.assertEqual(packed["Adams.pdf"], b"%PDF-1.7 Adams County canvass")
-        self.assertEqual(json.loads(packed["Adams.review.json"])["reviewed_by"], "Naman")
+        signed = json.loads(packed["Adams.review.json"])
+        self.assertEqual((signed["schema"], signed["signed_by"]), ("election-review/1", "Naman"))
         (self.inbox / "adams.pdf").write_bytes(b"%PDF-1.7 another file")
         with self.assertRaises(SystemExit):
             self.pack({"Adams": entry}, name="other.zip")

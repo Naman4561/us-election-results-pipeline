@@ -45,6 +45,7 @@ from importlib.resources import files
 
 from pypdf import PdfReader
 
+from election_pipeline import reviews
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.scope_2026 import ROSTERS
@@ -52,6 +53,8 @@ from election_pipeline.parsers.structured import count, row
 
 WRITE_IN = ("write-in", "Write-in")
 MAX_BYTES = 30_000_000
+# The import zip's layout, for scripts/pack_import.py (election_pipeline.packing).
+PACK = {"manifest": "manifest.json", "section": "counties", "review": "{key}.review.json"}
 MAX_PAGES = 100
 COUNT = r"[0-9]{1,3}(?:,[0-9]{3})*|[0-9]+"
 GOVERNOR = re.compile(r"(?i)^governor\b")
@@ -332,18 +335,7 @@ def table_page(raw, label):
 def review(document, sha256s, label):
     """{race: lines} from a signed review of a report's counts; a report posted in parts
     names every part's SHA-256, in order."""
-    listed = document.get("file_sha256")
-    listed = [listed] if isinstance(listed, str) else listed
-    if listed != sha256s or not str(document.get("reviewed_by", "")).strip():
-        raise ValueError(f"{label}: review is unsigned or for another file")
-    found = {}
-    for race, counts in document["races"].items():
-        lines = [(name, count(votes)) for name, votes in counts.items()]
-        printed = (document.get("totals") or {}).get(race)
-        if printed is not None and sum(v for _, v in lines) != printed:
-            raise ValueError(f"{label} {race}: reviewed counts do not add up to the report")
-        found[race] = lines
-    return found
+    return {race: lines for race, (lines, _) in reviews.read(document, sha256s, label).items()}
 
 
 READERS = {
@@ -402,7 +394,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 name = f"{county}.review.json"
                 expected.add(name)
                 document = json.loads(bundle.read(name))
-                if document.get("county") != county:
+                if reviews.place(document) != county:
                     raise ValueError(f"{label}: review names another county")
                 found = review(document, [part["sha256"] for part in parts], label)
             elif entry["format"] == "table_page":

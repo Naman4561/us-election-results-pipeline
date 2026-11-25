@@ -61,6 +61,7 @@ from datetime import datetime, timedelta, timezone
 from html import unescape
 from importlib.resources import files
 
+from election_pipeline import reviews
 from election_pipeline.parsers import clarity
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
@@ -77,6 +78,8 @@ WRITE_IN = ("write-in", "Write-in")
 MAX_BYTES = 30_000_000
 WRITTEN = re.compile(r"(?i)write[- ]?in")
 REPORTS = ("canvassed", "unofficial")
+# The import zip's layout, for scripts/pack_import.py (election_pipeline.packing).
+PACK = {"manifest": "manifest.json", "section": "authorities", "review": "{key}.review.json"}
 FORMATS = (
     "clarity",
     "chicago",
@@ -469,24 +472,7 @@ def enhanced_voting_results(raw, titles, report, label):
 
 def review(document, sha256s, label):
     """{race: (lines, precincts or None)} from a signed review of an authority's counts."""
-    listed = document.get("file_sha256")
-    listed = [listed] if isinstance(listed, str) else listed
-    if listed != sha256s or not str(document.get("reviewed_by", "")).strip():
-        raise ValueError(f"{label}: review is unsigned or for another file")
-    found = {}
-    for race, counts in document["races"].items():
-        lines = [(name, count(votes)) for name, votes in counts.items()]
-        printed = (document.get("totals") or {}).get(race)
-        if printed is not None and sum(v for _, v in lines) != printed:
-            raise ValueError(f"{label} {race}: reviewed counts do not add up to the report")
-        precincts = (document.get("precincts") or {}).get(race)
-        if precincts is not None:
-            reporting, total = (count(n) for n in precincts)
-            if reporting > total or total == 0:
-                raise ValueError(f"{label} {race}: unexpected precincts reporting")
-            precincts = (reporting, total)
-        found[race] = (lines, precincts)
-    return found
+    return reviews.read(document, sha256s, label)
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
@@ -575,7 +561,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 name = f"{authority}.review.json"
                 expected.add(name)
                 document = json.loads(bundle.read(name))
-                if document.get("authority") != authority:
+                if reviews.place(document) != authority:
                     raise ValueError(f"{label}: review names another authority")
                 found = review(document, [part["sha256"] for part in parts], label)
                 reported = entry["report_time"] and datetime.fromisoformat(entry["report_time"])
