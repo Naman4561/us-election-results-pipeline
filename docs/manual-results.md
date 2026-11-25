@@ -60,10 +60,13 @@ manual import --source oh_2026_general --file INBOX_FILE --sha256 HASH --downloa
 manual promote --source oh_2026_general
 ```
 
-`import` prepares a private candidate in the release image. Before promoting it,
-spot-check candidate and county totals against the same official report. Then make it
-public as any new state: an uploaded backup, `check-restore`, `deploy start-dashboard
---source oh_2026_general` and `deploy activate` with the restore report.
+`import` prepares a private candidate in the release image. Then make it public as any
+new state: an uploaded backup, `check-restore`, `deploy start-dashboard --source
+oh_2026_general` and `deploy activate` with the restore report. `deploy go-live
+--manual-file INBOX_FILE --sha256 HASH --downloaded-at UTC_TIME` does all of it, from
+`register` through `activate` (see [deployment](deployment.md#adding-a-state-in-production));
+to spot-check the candidate's and counties' totals against the same official report
+before the public switch, add `--stop-before-activation` and run it again to activate.
 
 ## Multi-file imports
 

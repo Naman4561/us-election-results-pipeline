@@ -8,7 +8,7 @@ from pathlib import Path
 
 from dotenv import dotenv_values
 
-from election_pipeline.deployment import catalog, control, dashboard
+from election_pipeline.deployment import catalog, control, dashboard, golive
 
 
 def main():
@@ -93,6 +93,29 @@ def main():
         metavar="COUNTY",
         help="A county without a certified recap yet; its district is shown as partial",
     )
+    live = sub.add_parser(
+        "go-live",
+        help="Take a source from registration to public, gate by gate; run it again to resume",
+    )
+    live.add_argument("--source", required=True)
+    live.add_argument(
+        "--stop-before-activation",
+        action="store_true",
+        help="Leave a checked private dashboard to look at; run again without it to activate",
+    )
+    live.add_argument(
+        "--manual-file",
+        type=Path,
+        help="A manual source's first file, under the data inbox (switches it to manual imports)",
+    )
+    live.add_argument("--sha256", help="The file's SHA-256 where it was downloaded")
+    live.add_argument("--downloaded-at", help="When it was downloaded (UTC, ISO 8601)")
+    live.add_argument("--generated-at", help="The report time the state's site showed")
+    live.add_argument("--final", action="store_true", help="Its issuer posts nothing more")
+    live.add_argument("--certified-name", help="Import the state's certified file under this name")
+    live.add_argument("--evidence-url", help="The state's certification notice or file")
+    live.add_argument("--certified-on", help="The state's certification date (YYYY-MM-DD)")
+    live.add_argument("--attested-by", help="Who checked and attests, as they sign")
     start = sub.add_parser("start-dashboard", help="A private candidate from the release")
     start.add_argument("--source", action="append", default=[], help="Also make public")
     activate = sub.add_parser("activate")
@@ -178,6 +201,33 @@ def main():
             result = control.county_final(path, args.county)
         elif action == "ms-house":
             result = control.ms_house(path, args.enable, args.allow_missing, prod, config)
+        elif action == "go-live":
+            acquire = None
+            if args.manual_file:
+                acquire = {
+                    "file": args.manual_file,
+                    "sha256": args.sha256,
+                    "downloaded_at": args.downloaded_at,
+                    "generated_at": args.generated_at,
+                    "certified": args.certified_name,
+                    "attested": {
+                        "evidence_url": args.evidence_url,
+                        "certified_on": args.certified_on,
+                        "attested_by": args.attested_by,
+                        "attested_at": datetime.now(timezone.utc).isoformat(),
+                    }
+                    if args.certified_name
+                    else None,
+                }
+            result = golive.go_live(
+                path,
+                args.source,
+                prod,
+                config,
+                acquire=acquire,
+                final=args.final,
+                stop_before_activation=args.stop_before_activation,
+            )
         elif action == "start-dashboard":
             result = control.start_dashboard(path, args.source, prod, config)
         elif action == "activate":

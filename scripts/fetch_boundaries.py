@@ -1,4 +1,15 @@
-"""Build national/state SVG geometry from official Census data; never fetch vote counts."""
+"""Build national/state SVG geometry from official Census data; never fetch vote counts.
+
+The geometry comes from two dated TIGERweb services, not the "current" ones, so the same
+request always describes the same boundaries: ``tigerWMS_ACS2026`` (January 1, 2026
+vintage: states, counties, county subdivisions, the 120th Congress, 2026 lower-house
+districts) and ``tigerWMS_ACS2025`` for Missouri's 119th-Congress districts (its 2025 map
+is the one in force). Every response is kept by SHA-256 in the archive directory
+(``data/map-sources`` by default) with an index of the URL each came from, and each map
+records the URL and SHA-256 behind it. ``--offline`` rebuilds from the archive alone, with
+no request, and produces the same files. ``--output DIR`` writes the maps elsewhere than
+the dashboard's static folder, to compare before replacing (``compare_maps.py``).
+"""
 
 import argparse
 import hashlib
@@ -16,19 +27,63 @@ from election_pipeline.states import STATES as REGISTERED
 ROOT = Path(__file__).resolve().parents[1]
 STATIC = ROOT / "src/election_pipeline/dashboard/static"
 BASE = "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/"
+USER_AGENT = "US-Election-Results-Pipeline/0.1"
+ARCHIVE = ROOT / "data/map-sources"
+VINTAGE = "tigerWMS_ACS2026"
+MISSOURI_VINTAGE = "tigerWMS_ACS2025"
+# Layers of those services (see the service's MapServer?f=json).
+STATE_LAYER, COUNTY_LAYER, SUBDIVISION_LAYER, CONGRESS_LAYER, LOWER_LAYER = 80, 82, 22, 54, 58
 FULL_NAME_STATES = {"VA", "MD"}
-# States whose results are reported by town: their map's local units are Census county
-# subdivisions (Vermont's towns and cities), not counties.
-TOWN_STATES = {"VT", "CT", "MA"}
-# States whose results are reported by state House district (Alaska has no counties):
-# their map's local units are the 2026 lower-house districts.
-HOUSE_DISTRICT_STATES = {"AK"}
+# The kind of place each state's results are reported by is in its registry entry
+# (``State.local_unit``): towns are Census county subdivisions (Vermont's towns and
+# cities), not counties; Alaska, which has no counties, is drawn by 2026 House district.
+TOWN_STATES = {code for code, state in REGISTERED.items() if state.local_unit == "town"}
+HOUSE_DISTRICT_STATES = {
+    code for code, state in REGISTERED.items() if state.local_unit == "house_district"
+}
 STATES = set(
     (
         "AL AK AZ AR CA CO CT DE FL GA HI ID IL IN IA KS KY LA ME MD MA MI MN MS MO MT "
         "NE NV NH NJ NM NY NC ND OH OK OR PA RI SC SD TN TX UT VT VA WA WV WI WY"
     ).split()
 )
+
+
+class Archive:
+    """Every response by SHA-256, and the URL each came from (``index.json``)."""
+
+    def __init__(self, directory, offline=False):
+        self.directory, self.offline = Path(directory), offline
+        try:
+            self.index = json.loads((self.directory / "index.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            self.index = {}
+
+    def fetch(self, url):
+        if self.offline:
+            digest = self.index.get(url)
+            if digest is None:
+                raise ValueError(f"Not in the archive (rebuild without --offline): {url}")
+            data = (self.directory / f"{digest}.json").read_bytes()
+            if hashlib.sha256(data).hexdigest() != digest:
+                raise ValueError(f"Archived response {digest} is corrupt")
+            return data
+        request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        with urllib.request.urlopen(request, timeout=90) as response:
+            data = response.read(50 * 1024 * 1024 + 1)
+        if len(data) > 50 * 1024 * 1024:
+            raise ValueError("Geography download exceeds budget")
+        digest = hashlib.sha256(data).hexdigest()
+        self.directory.mkdir(parents=True, exist_ok=True)
+        (self.directory / f"{digest}.json").write_bytes(data)
+        self.index[url] = digest
+        (self.directory / "index.json").write_text(
+            json.dumps(self.index, indent=1, sort_keys=True), encoding="utf-8"
+        )
+        return data
+
+
+ARCHIVED = Archive(ARCHIVE)
 
 
 def query(service, layer, where, fields, projection=5070, offset=500):
@@ -42,13 +97,7 @@ def query(service, layer, where, fields, projection=5070, offset=500):
         "f": "json",
     }
     url = f"{BASE}{service}/MapServer/{layer}/query?{urllib.parse.urlencode(params)}"
-    request = urllib.request.Request(
-        url, headers={"User-Agent": "US-Election-Results-Pipeline/maps"}
-    )
-    with urllib.request.urlopen(request, timeout=90) as response:
-        data = response.read(50 * 1024 * 1024 + 1)
-    if len(data) > 50 * 1024 * 1024:
-        raise ValueError("Geography download exceeds budget")
+    data = ARCHIVED.fetch(url)
     payload = json.loads(data)
     if payload.get("error") or payload.get("exceededTransferLimit") or not payload.get("features"):
         raise ValueError(f"Incomplete geography response: {payload.get('error')}")
@@ -201,30 +250,40 @@ def county_key(name):
     return re.sub(r"[^A-Z0-9]", "", plain.upper())
 
 
+OUTPUT = STATIC
+
+
 def save(name, value):
     version = hashlib.sha256(json.dumps(value, sort_keys=True).encode()).hexdigest()[:16]
     value["version"] = version
-    STATIC.mkdir(parents=True, exist_ok=True)
-    (STATIC / name).write_text(json.dumps(value, separators=(",", ":")), encoding="utf-8")
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+    (OUTPUT / name).write_text(json.dumps(value, separators=(",", ":")), encoding="utf-8")
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--states", nargs="+", default=sorted(REGISTERED))
+    parser.add_argument("--output", type=Path, default=STATIC, help="Where to write the maps")
+    parser.add_argument("--archive", type=Path, default=ARCHIVE, help="Where responses are kept")
+    parser.add_argument(
+        "--offline", action="store_true", help="Build from the archive alone; request nothing"
+    )
     args = parser.parse_args()
+    global ARCHIVED, OUTPUT
+    ARCHIVED, OUTPUT = Archive(args.archive, args.offline), args.output
     sources = {}
-    states, sources["states"] = query("State_County", 0, "1=1", "STATE,STUSAB,NAME", offset=1500)
+    states, sources["states"] = query(VINTAGE, STATE_LAYER, "1=1", "STATE,STUSAB,NAME", offset=1500)
     states = [f for f in states if f["attributes"]["STUSAB"] in STATES]
     codes = {f["attributes"]["STATE"]: f["attributes"]["STUSAB"] for f in states}
     ids = ",".join("'" + fips + "'" for fips in sorted(codes))
     districts, sources["districts"] = query(
-        "Legislative",
-        0,
+        VINTAGE,
+        CONGRESS_LAYER,
         f"STATE IN ({ids}) AND STATE <> '29' AND CD120 NOT IN ('ZZ','98')",
         "STATE,CD120,NAME",
     )
     mo, sources["missouri_override"] = query(
-        "Legislative", 4, "STATE = '29' AND CD119 <> 'ZZ'", "STATE,CD119,NAME"
+        MISSOURI_VINTAGE, CONGRESS_LAYER, "STATE = '29' AND CD119 <> 'ZZ'", "STATE,CD119,NAME"
     )
     for feature in mo:
         feature["attributes"]["CD120"] = feature["attributes"].pop("CD119")
@@ -236,13 +295,13 @@ def main():
     # Regional projections keep Alaska and Hawaii legible without wrapping the dateline.
     for fips, projection in (("02", 3338), ("15", 3759)):
         regional, sources[fips + "_state"] = query(
-            "State_County", 0, f"STATE = '{fips}'", "STATE,STUSAB,NAME", projection, 1500
+            VINTAGE, STATE_LAYER, f"STATE = '{fips}'", "STATE,STUSAB,NAME", projection, 1500
         )
         if fips == "15":
             regional = [hawaiian_main_islands(f) for f in regional]
         states = [f for f in states if f["attributes"]["STATE"] != fips] + regional
         regional, sources[fips + "_districts"] = query(
-            "Legislative", 0, f"STATE = '{fips}'", "STATE,CD120,NAME", projection
+            VINTAGE, CONGRESS_LAYER, f"STATE = '{fips}'", "STATE,CD120,NAME", projection
         )
         if fips == "15":
             regional = [hawaiian_main_islands(f) for f in regional]
@@ -293,13 +352,15 @@ def main():
             raise ValueError("Unknown state abbreviation")
         feature = next(f for f in states if codes[f["attributes"]["STATE"]] == code)
         fips = feature["attributes"]["STATE"]
-        service, layer = (
-            ("Legislative", 2)
+        layer = (
+            LOWER_LAYER
             if code in HOUSE_DISTRICT_STATES
-            else ("Places_CouSub_ConCity_SubMCD" if code in TOWN_STATES else "State_County", 1)
+            else SUBDIVISION_LAYER
+            if code in TOWN_STATES
+            else COUNTY_LAYER
         )
         counties, county_source = query(
-            service,
+            VINTAGE,
             layer,
             f"STATE = '{fips}'",
             "STATE,GEOID,BASENAME,NAME",

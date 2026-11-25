@@ -31,7 +31,11 @@ read it, and who is on the ballot.
    do). `scripts/review_rosters.py` prints what a captured snapshot implies; a person
    reviews it before it is committed.
 5. **Draw the map:** `python scripts/fetch_boundaries.py --states XX` writes
-   `dashboard/static/xx-map.json`.
+   `dashboard/static/xx-map.json` from the pinned Census vintage (`tigerWMS_ACS2026`), the
+   kind of place taken from the state's `local_unit`. Every response it downloads is kept
+   by SHA-256 under `data/map-sources`, and `--offline` rebuilds the same file from that
+   archive alone. To see what a rebuild would change before it replaces a map, write it
+   elsewhere (`--output DIR`) and run `python scripts/compare_maps.py DIR`.
 6. **Add fixtures and tests:** captured official files with a `provenance.json`
    (`tests/test_fixtures.py` checks every file's SHA-256 against it), an entry in
    `tests/snapshots.py` that stores them as the collector or `deploy import` would, and

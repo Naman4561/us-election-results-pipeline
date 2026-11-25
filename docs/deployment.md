@@ -144,7 +144,27 @@ sudo systemctl daemon-reload && sudo systemctl enable --now election-reproduce.t
 ## Adding a state in production
 
 The state's source is in the release's `sources.toml` and starts disabled and private.
-Its first publication is checked before it becomes public.
+Its first publication is checked before it becomes public. One command does all of it:
+
+```bash
+deploy go-live --source xx_2026_general        # an HTTP source: register through activate
+deploy go-live --source xx_2026_general --manual-file INBOX_FILE --sha256 HASH \
+    --downloaded-at UTC_TIME [--generated-at TIME] [--final]   # a manual source's first file
+deploy go-live --source xx_2026_general --stop-before-activation   # stop at a checked candidate
+```
+
+It runs the steps below in order and stops at the first that fails: nothing is
+skipped, and the gates are code. A backup that holds the publication is started, and the
+restore check it triggers is waited for (or run, if none starts within 90 seconds); the
+private dashboard must serve every race the catalog expects; `activate` then applies its
+own gates (a restore check that verified *this* publication from the last 24 hours, the
+candidate serving that publication, the public site passing its check or the switch
+undone). It activates straight through; `--stop-before-activation` leaves the checked
+candidate for you to look at and a second run (a fresh candidate is checked) activates it.
+Each step looks at the catalog and skips what is done, so after a failure you fix the
+cause and run the same command again; a restore check that already verified the
+publication is not repeated. `golive-<source>.json` in the control state directory records
+each step's outcome and time. The steps it runs, which remain available one by one:
 
 ```bash
 deploy register --source xx_2026_general       # a state new since cutover: add it, disabled
