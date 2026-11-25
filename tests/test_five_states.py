@@ -14,21 +14,12 @@ import zipfile
 from dataclasses import replace
 from pathlib import Path
 
-from loading import copies, migrated, requires_database
-
-from election_pipeline import publication
 from election_pipeline.collectors.clarity import version_base
 from election_pipeline.collectors.sc import latest_report
-from election_pipeline.dashboard.server import STATIC, make_payload, national_payload
-from election_pipeline.database import (
-    connect,
-    load_parsed,
-)
 from election_pipeline.parsers.html import Tree
 from election_pipeline.parsers.structured import xml
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
-from election_pipeline.states import state_adapter
 from election_pipeline.storage import ArchiveStore
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -137,66 +128,6 @@ class FiveStateTests(unittest.TestCase):
             row["total_votes"] = int(row["total_votes"]) if row["total_votes"] else None
         return rows
 
-    def test_official_snapshots_parse_verify_reconcile_and_convert(self):
-        for code, records, contests in [
-            ("GA", 1030, 16),
-            ("SC", 687, 9),
-            ("KS", 522, 6),
-            ("OH", 1475, 17),
-        ]:
-            with self.subTest(code=code):
-                report = self.parse(code)
-                self.assertEqual(report["outcome"], "parsed", report)
-                self.assertEqual(report["output_rows"], records)
-                self.assertEqual(report["contest_count"], contests)
-                self.assertFalse(report["all_counts_zero"])
-                self.assertEqual(report["county_reconciliation"], "passed")
-                directory = Path(report["output_dir"])
-                converted = copies(self.source, self.settings, self.store, directory, 88)[
-                    ("landing", "results")
-                ]
-                self.assertEqual(len(converted), records)
-                self.assertEqual(converted[0][:2], (88, 2))
-                replay = parse_source(
-                    self.source, self.settings, self.root, sha256=report["identity"]["raw_sha256"]
-                )
-                self.assertEqual(replay["outcome"], "already_parsed")
-
-    def test_fixture_provenance_and_scope_match_configured_races(self):
-        ledger = json.loads((FIXTURES / "provenance.json").read_text())
-        for name, metadata in ledger.items():
-            raw = gzip.decompress((FIXTURES / (name + ".gz")).read_bytes())
-            self.assertEqual(hashlib.sha256(raw).hexdigest(), metadata["sha256"])
-            self.assertEqual(len(raw), metadata["bytes"])
-        self.assertEqual(self.sources["me_2026_general"].primary_filename, "results.zip")
-
-    def test_maps_and_dashboard_match_all_new_state_results(self):
-        providers = {}
-        for code, counties, districts in [
-            ("GA", 159, 14),
-            ("SC", 46, 7),
-            ("KS", 105, 4),
-            ("OH", 88, 15),
-        ]:
-            geography = json.loads((STATIC / (code.lower() + "-map.json")).read_text())
-            self.assertEqual(len(geography["counties"]), counties)
-            self.assertEqual(len(geography["districts"]), districts)
-            report = self.parse(code)
-            payload = make_payload(
-                geography,
-                {"status": "unofficial"},
-                self.read(report, "county_results.csv"),
-                self.read(report, "contest_results.csv"),
-                state=code,
-            )
-            self.assertEqual(set(payload["races"]), set(state_adapter(code).races))
-            self.assertTrue(payload["county_detail"])
-            self.assertGreater(payload["races"][code + "-SEN"]["stats"]["total_votes"]["total"], 0)
-            providers[code] = lambda payload=payload: payload
-        national = national_payload(providers)
-        self.assertEqual(set(national["states"]), set(CODES))
-        self.assertNotIn("ME", national["states"])
-
     def test_ga_and_sc_report_their_own_official_flags(self):
         self.assertIs(self.parse("GA")["official_results"], True)
 
@@ -259,49 +190,21 @@ class FiveStateTests(unittest.TestCase):
                 "validation_failed",
             )
 
-    def test_ga_zero_and_downward_correction_are_valid(self):
-        for zero in (True, False):
+    def test_ga_explicit_zero_snapshot_is_valid(self):
+        def zero(value):
+            if isinstance(value, dict):
+                return {
+                    k: 0 if k in ("voteCount", "voteTotal") else zero(v) for k, v in value.items()
+                }
+            return [zero(v) for v in value] if isinstance(value, list) else value
 
-            def mutate(members):
-                # Zero every count, or take one vote from each candidate's first county
-                # with votes and from its statewide count.
-                d = json.loads(members["results.json"])
-                for b in d["ballotItems"]:
-                    member = next(
-                        (m for m in members if json.loads(members[m]).get("id") == b["id"]), None
-                    )
-                    item = json.loads(members[member]) if member else None
-                    for c in b["summaryResults"]["ballotOptions"]:
-                        if item is None:
-                            if zero:
-                                c["voteCount"] = 0
-                            continue
-                        local = [
-                            (place, o)
-                            for place in item["breakdownResults"]
-                            for o in place["ballotOptions"]
-                            if o["id"] == c["id"]
-                        ]
-                        if zero:
-                            c["voteCount"] = 0
-                            for place, o in local:
-                                o["voteCount"] = 0
-                        elif c["voteCount"]:
-                            place, o = next((p, o) for p, o in local if o["voteCount"])
-                            o["voteCount"] -= 1
-                            c["voteCount"] -= 1
-                    b["voteTotal"] = sum(
-                        c["voteCount"] for c in b["summaryResults"]["ballotOptions"]
-                    )
-                    if item is not None:
-                        for place in item["breakdownResults"]:
-                            place["voteTotal"] = sum(o["voteCount"] for o in place["ballotOptions"])
-                        members[member] = json.dumps(item).encode()
-                members["results.json"] = json.dumps(d).encode()
+        def mutate(members):
+            for name, body in members.items():
+                members[name] = json.dumps(zero(json.loads(body))).encode()
 
-            report = self.parse("GA", mutate)
-            self.assertEqual(report["outcome"], "parsed", report)
-            self.assertEqual(report["all_counts_zero"], zero)
+        report = self.parse("GA", mutate)
+        self.assertEqual(report["outcome"], "parsed", report)
+        self.assertTrue(report["all_counts_zero"])
 
     def test_ks_missing_unreported_county_and_altered_votes_rejected(self):
         def missing(members):
@@ -326,22 +229,9 @@ class FiveStateTests(unittest.TestCase):
                 "validation_failed",
             )
 
-    def test_ks_unreported_counties_remain_absent_and_downward_correction_allowed(self):
-        original = self.parse("KS")
-        rows = self.read(original, "county_results.csv")
+    def test_ks_unreported_counties_remain_absent(self):
+        rows = self.read(self.parse("KS"), "county_results.csv")
         self.assertNotIn("BARBER", {r["county"] for r in rows if r["contest_id"] == "KS-SEN"})
-
-        def mutate(m):
-            raw = m["results.html"].decode()
-            raw = raw.replace("383,781", "383,780").replace("665,532", "665,531")
-            raw = raw.replace(
-                "D-Adam Hamilton</td><td style='text-align:right'>535</td>",
-                "D-Adam Hamilton</td><td style='text-align:right'>534</td>",
-            )
-            m["results.html"] = raw.encode()
-
-        corrected = self.parse("KS", mutate)
-        self.assertEqual(corrected["outcome"], "parsed", corrected)
 
     def test_ks_explicit_numeric_zero_snapshot_is_valid(self):
         def zero(members):
@@ -409,26 +299,17 @@ class FiveStateTests(unittest.TestCase):
                 "validation_failed",
             )
 
-    def test_oh_zero_and_downward_correction_are_valid(self):
-        for zero in (True, False):
+    def test_oh_explicit_zero_snapshot_is_valid(self):
+        def mutate(m):
+            root = xml(m["results.xml"])
+            for contest in root.findall("Election/ContestCollection/Contest"):
+                for v in contest.findall("BallotSelection/VoteCountsCollection/VoteCounts"):
+                    v.set("Count", "0")
+            m["results.xml"] = ET.tostring(root)
 
-            def mutate(m):
-                root = xml(m["results.xml"])
-                for c in root.findall("Election/ContestCollection/Contest"):
-                    for s in c.findall("BallotSelection"):
-                        values = s.findall("VoteCountsCollection/VoteCounts")
-                        if zero:
-                            for v in values:
-                                v.set("Count", "0")
-                        elif values and int(values[0].get("Count")) > 0:
-                            county = next(v for v in values[1:] if int(v.get("Count")) > 0)
-                            county.set("Count", str(int(county.get("Count")) - 1))
-                            values[0].set("Count", str(int(values[0].get("Count")) - 1))
-                m["results.xml"] = ET.tostring(root)
-
-            report = self.parse("OH", mutate)
-            self.assertEqual(report["outcome"], "parsed", report)
-            self.assertEqual(report["all_counts_zero"], zero)
+        report = self.parse("OH", mutate)
+        self.assertEqual(report["outcome"], "parsed", report)
+        self.assertTrue(report["all_counts_zero"])
 
     def test_sc_latest_explicit_link_selected_and_other_hosts_rejected(self):
         src = self.sources["sc_2026_general"]
@@ -501,6 +382,8 @@ class FiveStateTests(unittest.TestCase):
         report = self.parse("SC_WORKBOOK")
         self.assertEqual(report["outcome"], "parsed", report)
         self.assertEqual((report["output_rows"], report["contest_count"]), (687, 9))
+        self.assertEqual(report["county_reconciliation"], "passed")
+        self.assertEqual(report["vote_method_reconciliation"], "passed")
 
     def test_sc_method_mismatch_missing_county_and_formula_rejected(self):
         def apply(edit):
@@ -527,27 +410,6 @@ class FiveStateTests(unittest.TestCase):
         for edit in [formula, vote, missing]:
             self.assertEqual(self.parse("SC_WORKBOOK", apply(edit))["outcome"], "validation_failed")
 
-    def test_sc_downward_correction_and_county_method_totals_remain_valid(self):
-        def edit(root):
-            last = max(int(r.get("r")) for r in root.findall("sheetData/row"))
-            for c in root.findall("sheetData/row/c"):
-                if c.get("r") in {f"{col}{r}" for col in ("C", "I", "AL") for r in (4, last)}:
-                    v = c.find("v")
-                    v.text = str(int(v.text) - 1)
-
-        report = self.parse(
-            "SC_WORKBOOK",
-            lambda m: m.update(
-                {
-                    "results.xlsx": edit_xml_member(
-                        m["results.xlsx"], "xl/worksheets/sheet3.xml", edit
-                    )
-                }
-            ),
-        )
-        self.assertEqual(report["outcome"], "parsed", report)
-        self.assertEqual(report["vote_method_reconciliation"], "passed")
-
     def test_sc_explicit_numeric_zero_snapshot_is_valid(self):
         def zero(root):
             for cell in root.findall("sheetData/row/c"):
@@ -565,42 +427,3 @@ class FiveStateTests(unittest.TestCase):
         report = self.parse("SC_WORKBOOK", mutate)
         self.assertEqual(report["outcome"], "parsed", report)
         self.assertTrue(report["all_counts_zero"])
-
-
-@requires_database
-class FiveStateDatabaseTests(unittest.TestCase):
-    def test_four_states_load_validate_publish_replay_and_enforce_reader_permissions(self):
-        db = migrated()
-        for code in CODES:
-            f = FiveStateTests()
-            f.setUp()
-            self.addCleanup(f.doCleanups)
-            report = f.parse(code)
-            loaded = load_parsed(f.source, f.settings, f.root, Path(report["output_dir"]), db)
-            self.assertEqual(loaded["outcome"], "succeeded", loaded)
-            candidate = publication.prepare(ROOT, db, loaded["release_id"], "test")
-            self.assertEqual(candidate["outcome"], "validated", candidate)
-            self.assertEqual(
-                publication.publish_prepared(ROOT, db, candidate["candidate_id"])["outcome"],
-                "published",
-            )
-            self.assertEqual(
-                publication.publish(ROOT, db, loaded["release_id"], "test", skip_current=True)[
-                    "outcome"
-                ],
-                "already_current",
-            )
-            with connect(db) as conn:
-                conn.execute("SET ROLE election_dashboard")
-                # The dashboard reads published results, never parsed rows.
-                self.assertTrue(
-                    conn.execute(
-                        "SELECT has_table_privilege(current_user, 'serving.contest_results',"
-                        " 'SELECT') AS ok"
-                    ).fetchone()["ok"]
-                )
-                self.assertFalse(
-                    conn.execute(
-                        "SELECT has_schema_privilege(current_user, 'landing', 'USAGE') AS ok"
-                    ).fetchone()["ok"]
-                )

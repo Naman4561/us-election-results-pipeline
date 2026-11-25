@@ -776,6 +776,13 @@ def live_results(prod):
         }
 
 
+def configured_sources(release_path):
+    """The source names a release's configuration defines."""
+    from election_pipeline.settings import load_config
+
+    return set(load_config(Path(release_path) / "config/sources.toml")[1])
+
+
 def reproduce(path, prod, config, names=None, check_all=False):
     """Re-create every live publication (or those of ``names``) from its raw snapshot
     under the current release, one job at a time (``scripts/run_reproduction.py``).
@@ -789,6 +796,12 @@ def reproduce(path, prod, config, names=None, check_all=False):
     value = catalog.read(path)
     release = value["release"]
     live = live_results(prod)
+    # A source the release no longer configures (one an `_all` source replaced) keeps its
+    # last publication in serving but has nothing to re-create it with: it is listed,
+    # not run.
+    configured = configured_sources(release["release_path"])
+    retired = sorted(set(live) - configured)
+    live = {name: entry for name, entry in live.items() if name in configured}
     chosen = sorted(live if names is None else names)
     unknown = set(chosen) - set(live)
     if unknown:
@@ -856,6 +869,7 @@ def reproduce(path, prod, config, names=None, check_all=False):
         "outcome": "reproduced" if outcomes <= {"reproduced"} else "differs",
         "counts": {o: sum(r["outcome"] == o for r in results.values()) for o in sorted(outcomes)},
         "sources": results,
+        "not_configured": retired,
     }
     directory.mkdir(parents=True, exist_ok=True)
     # Named by start time (sorting by name sorts by time), unique within a second.

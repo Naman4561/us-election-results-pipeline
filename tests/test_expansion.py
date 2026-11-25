@@ -15,7 +15,7 @@ from pathlib import Path
 
 from election_pipeline.collectors import indiana as indiana_collector
 from election_pipeline.collectors import vermont as vermont_collector
-from election_pipeline.dashboard.server import STATIC, make_payload
+from election_pipeline.dashboard.server import STATIC
 from election_pipeline.parsers import vt
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
@@ -96,31 +96,12 @@ class ExpansionTests(unittest.TestCase):
             self.assertIn(message, json.dumps(report))
         return report
 
-    def test_fixture_provenance_and_configuration_match(self):
+    def test_fixture_hosts_and_configuration_match(self):
         self.assertEqual(set(LEDGER), set(SOURCES))
+        # Each file's SHA-256 is checked in tests/test_fixtures.py.
         for code, entry in LEDGER.items():
-            raw = (FIXTURES / f"{code.lower()}.zip").read_bytes()
-            self.assertEqual(hashlib.sha256(raw).hexdigest(), entry["archive_sha256"], code)
             for component in entry["components"]:
                 self.assertEqual(component["url"].split("/")[2], HOSTS[code], code)
-
-    def test_every_state_parses_and_draws_on_its_map(self):
-        for code in SOURCES:
-            with self.subTest(code=code):
-                report = self.parse(code)
-                self.assertEqual(report["outcome"], "parsed", report)
-                geography = json.loads((STATIC / f"{code.lower()}-map.json").read_text())
-                payload = make_payload(
-                    geography,
-                    {"status": "unofficial"},
-                    self.read(report, "county_results.csv"),
-                    self.read(report, "contest_results.csv"),
-                    state=code,
-                )
-                self.assertEqual(set(payload["races"]), set(state_adapter(code).races))
-                self.assertLessEqual(
-                    {d["id"] for d in geography["districts"]}, set(payload["races"])
-                )
 
     # Utah ------------------------------------------------------------------------------
 

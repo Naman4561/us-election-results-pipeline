@@ -115,8 +115,9 @@ deploy reproduce --check-all             # also those that reproduced under unch
 ```
 
 Each source runs as a job in the current release image: its raw snapshot is parsed
-again from scratch (the output files must have the hashes the publication's release
-recorded), and the release is built again with the current dbt project into a private
+again from scratch, with the county reports it keeps by SHA-256 in the member store
+(the output files must have the hashes the publication's release recorded), and the
+release is built again with the current dbt project into a private
 schema whose tables are compared with the publication's, row for row, then dropped.
 Nothing is published or loaded. Reports are in
 `/var/lib/election-pipeline-deployment/reproduction/` (`latest.json` and the last 30
@@ -124,6 +125,9 @@ runs). A source that differs or fails is an alert (`reproduction/<source>`), and
 missing or day-old report is one too; the live publication is never changed. A
 difference names the files, tables and sample rows involved and the code hashes, so it
 tells a code change that altered results apart from a snapshot that no longer parses.
+A source the release no longer configures (such as `nc_2026_general`, which
+`nc_2026_general_all` replaced) keeps its last publication in `serving` but is not
+re-created; the report lists it under `not_configured`.
 
 Before a candidate can publish at all, its dbt contest and county totals must equal
 the parser's own `contest_results.csv` and `county_results.csv`

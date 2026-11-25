@@ -21,17 +21,11 @@ import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
-from loading import copies, migrated, requires_database
-
-from election_pipeline import bundles, publication
+from election_pipeline import bundles
 from election_pipeline.collect import FetchFailure, FetchResponse
 from election_pipeline.collectors import clarity as clarity_collector
 from election_pipeline.collectors import enhanced_voting, enr_export
-from election_pipeline.dashboard.server import STATIC, make_payload, national_payload
-from election_pipeline.database import (
-    connect,
-    load_parsed,
-)
+from election_pipeline.dashboard.server import STATIC, make_payload
 from election_pipeline.parsers import clarity, ia, md
 from election_pipeline.parsers import oregon as OREGON
 from election_pipeline.parsing import parse_source
@@ -122,101 +116,21 @@ class NineStateTests(unittest.TestCase):
 
     # Shared contract -------------------------------------------------------------------
 
-    def test_fixture_provenance_and_configuration_match(self):
+    def test_fixture_hosts_and_configuration_match(self):
         self.assertEqual(set(LEDGER), set(CODES))
         for code in CODES:
+            # Each file's SHA-256 is checked in tests/test_fixtures.py.
             entry = LEDGER[code]
-            raw = (FIXTURES / f"{code.lower()}.zip").read_bytes()
-            self.assertEqual(hashlib.sha256(raw).hexdigest(), entry["archive_sha256"], code)
             data = members(code)
             source = self.sources[code.lower() + "_2026_general"]
             self.assertEqual(set(data), set(source.expected_members), code)
             for component in entry["components"]:
                 self.assertEqual(component["url"].split("/")[2], HOSTS[code], code)
-                if component["name"] in data:
-                    body = data[component["name"]]
-                    self.assertEqual(hashlib.sha256(body).hexdigest(), component["sha256"])
         # No race is invented for offices these states do not elect in 2026.
         for code, race in (("WA", "WA-SEN"), ("WA", "WA-GOV"), ("VA", "VA-GOV"), ("CA", "CA-SEN")):
             self.assertNotIn(race, state_adapter(code).races)
         for code in ("MD", "HI"):
             self.assertNotIn(code + "-SEN", state_adapter(code).races)
-
-    def test_official_snapshots_parse_verify_reconcile_convert_and_replay(self):
-        expected = {
-            "VA": (1010, 12, {"VA-SEN": 133, "VA-11": 2}),
-            "ID": (710, 4, {"ID-SEN": 44, "ID-GOV": 44, "ID-01": 19}),
-            "WA": (180, 10, {"WA-03": 7, "WA-07": 1}),
-            "CO": (1201, 10, {"CO-SEN": 64, "CO-GOV": 64, "CO-05": 1}),
-            "IA": (1076, 6, {"IA-SEN": 99, "IA-GOV": 99, "IA-04": 36}),
-            "OR": (510, 8, {"OR-SEN": 36, "OR-GOV": 36, "OR-02": 22}),
-            "CA": (106, 53, {}),
-            "MD": (282, 9, {"MD-GOV": 24, "MD-01": 11}),
-            "HI": (8, 3, {}),
-        }
-        for code, (records, contests, counties) in expected.items():
-            with self.subTest(code=code):
-                report = self.parse(code)
-                self.assertEqual(report["outcome"], "parsed", report)
-                self.assertEqual(report["output_rows"], records)
-                self.assertEqual(report["contest_count"], contests)
-                self.assertFalse(report["all_counts_zero"])
-                self.assertEqual(
-                    report["county_reconciliation"],
-                    "passed" if state_adapter(code).county_results else "not_available",
-                )
-                for race, number in counties.items():
-                    self.assertEqual(report["county_counts"][race], number)
-                directory = Path(report["output_dir"])
-                converted = copies(self.source, self.settings, self.store, directory, 88)[
-                    ("landing", "results")
-                ]
-                self.assertEqual(len(converted), records)
-                self.assertEqual(converted[0][:2], (88, 2))
-                replay = parse_source(
-                    self.source, self.settings, self.root, sha256=report["identity"]["raw_sha256"]
-                )
-                self.assertEqual(replay["outcome"], "already_parsed")
-
-    def test_maps_and_dashboard_match_all_new_state_results(self):
-        providers = {}
-        shapes = {
-            "VA": (133, 11),
-            "ID": (44, 2),
-            "WA": (39, 10),
-            "CO": (64, 8),
-            "IA": (99, 4),
-            "OR": (36, 6),
-            "CA": (58, 52),
-            "MD": (24, 8),
-            "HI": (5, 2),
-        }
-        for code, (counties, districts) in shapes.items():
-            with self.subTest(code=code):
-                geography = json.loads((STATIC / (code.lower() + "-map.json")).read_text())
-                self.assertEqual(len(geography["counties"]), counties)
-                self.assertEqual(len(geography["districts"]), districts)
-                self.assertEqual(
-                    len({c["id"] for c in geography["counties"]}), counties, "unique county keys"
-                )
-                payload = self.payload(code, self.parse(code))
-                adapter = state_adapter(code)
-                self.assertEqual(set(payload["races"]), set(adapter.races))
-                self.assertEqual(payload["county_detail"], adapter.county_results)
-                self.assertEqual(payload["methods"], adapter.methods)
-                for race in payload["races"].values():
-                    stats = race["stats"]
-                    self.assertGreater(stats["total_votes"]["total"], 0)
-                    if len(adapter.methods) > 1:
-                        self.assertEqual(
-                            sum(stats[m]["total"] for m in adapter.methods[1:]),
-                            stats["total_votes"]["total"],
-                        )
-                for race in (code + "-SEN", code + "-GOV"):
-                    if race in payload["races"] and adapter.county_results:
-                        self.assertEqual(len(payload["races"][race]["counties"]), counties)
-                providers[code] = lambda payload=payload: payload
-        self.assertEqual(set(national_payload(providers)["states"]), set(CODES))
 
     def test_vote_method_contract_matches_each_state(self):
         report = self.parse("VA")
@@ -735,49 +649,6 @@ class NineStateTests(unittest.TestCase):
             )
 
         self.failed("HI", split, "Vote methods do not add up")
-
-
-@requires_database
-class NineStateDatabaseTests(unittest.TestCase):
-    def test_nine_states_load_validate_publish_and_enforce_reader_permissions(self):
-        db = migrated()
-        for code in CODES:
-            with self.subTest(code=code):
-                f = NineStateTests()
-                f.setUp()
-                self.addCleanup(f.doCleanups)
-                report = f.parse(code)
-                loaded = load_parsed(f.source, f.settings, f.root, Path(report["output_dir"]), db)
-                self.assertEqual(loaded["outcome"], "succeeded", loaded)
-                candidate = publication.prepare(ROOT, db, loaded["release_id"], "test")
-                self.assertEqual(candidate["outcome"], "validated", candidate)
-                self.assertEqual(
-                    publication.publish_prepared(ROOT, db, candidate["candidate_id"])["outcome"],
-                    "published",
-                )
-                with connect(db) as conn:
-                    conn.execute("SET ROLE election_dashboard")
-                    current = (
-                        "WHERE publication_id=(SELECT publication_id FROM "
-                        "serving.current_publications WHERE source_id=%s)"
-                    )
-                    contest = conn.execute(
-                        "SELECT count(*) AS n, sum(total_votes) AS total, "
-                        "(SELECT coalesce(sum(votes), 0) FROM serving.contest_method_results "
-                        + current
-                        + ") AS methods FROM serving.contest_results "
-                        + current,
-                        (f.source.source_id, f.source.source_id),
-                    ).fetchone()
-                    self.assertGreater(contest["n"], 0)
-                    if state_adapter(code).methods[1:]:
-                        self.assertEqual(contest["total"], contest["methods"])
-                    if state_adapter(code).county_results:
-                        county = conn.execute(
-                            "SELECT count(*) AS n FROM serving.county_results " + current,
-                            (f.source.source_id,),
-                        ).fetchone()["n"]
-                        self.assertGreater(county, 0)
 
 
 if __name__ == "__main__":

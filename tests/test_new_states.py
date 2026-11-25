@@ -23,16 +23,10 @@ from types import SimpleNamespace
 from unittest.mock import patch
 from urllib.parse import parse_qs
 
-from loading import copies, migrated, requires_database
-
-from election_pipeline import bundles, publication
+from election_pipeline import bundles
 from election_pipeline.collect import FetchFailure, FetchResponse, fetch_file
 from election_pipeline.collectors import enr_export
-from election_pipeline.dashboard.server import STATIC, make_payload, national_payload
-from election_pipeline.database import (
-    connect,
-    load_parsed,
-)
+from election_pipeline.dashboard.server import STATIC, make_payload
 from election_pipeline.parsers.enr_platform import export_target
 from election_pipeline.parsers.workbook import Workbook
 from election_pipeline.parsing import parse_source
@@ -171,62 +165,19 @@ class NewStateTests(unittest.TestCase):
 
     # Shared contract -------------------------------------------------------------------
 
-    def test_fixture_provenance_and_configuration_match(self):
+    def test_fixture_hosts_and_configuration_match(self):
         hosts = {
             "SD": "electionresults.sd.gov",
             "NM": "electionresults.sos.nm.gov",
             "FL": "flelectionfiles.floridados.gov",
         }
+        # Each file's SHA-256 is checked in tests/test_fixtures.py.
         for name, entry in LEDGER.items():
-            raw = gzip.decompress((FIXTURES / (name + ".gz")).read_bytes())
-            self.assertEqual(hashlib.sha256(raw).hexdigest(), entry["sha256"], name)
-            self.assertEqual(len(raw), entry["bytes"], name)
             self.assertEqual(entry["url"].split("/")[2], hosts[name[:2].upper()], name)
         for code in CODES:
             source = self.sources[code.lower() + "_2026_general"]
             self.assertEqual(set(members(code)), set(source.expected_members))
         self.assertNotIn("FL-10", state_adapter("FL").races)
-
-    def test_official_snapshots_parse_verify_reconcile_convert_and_replay(self):
-        for code, records, contests, counties in [
-            ("SD", 402, 3, {"SD-SEN": 66, "SD-GOV": 66, "SD-AL": 66}),
-            ("NM", 226, 5, {"NM-SEN": 33, "NM-GOV": 33, "NM-02": 14}),
-            ("FL", 1248, 29, {"FL-SEN": 67, "FL-GOV": 67, "FL-02": 16}),
-        ]:
-            with self.subTest(code=code):
-                report = self.parse(code)
-                self.assertEqual(report["outcome"], "parsed", report)
-                self.assertEqual(report["output_rows"], records)
-                self.assertEqual(report["contest_count"], contests)
-                self.assertFalse(report["all_counts_zero"])
-                for race, number in counties.items():
-                    self.assertEqual(report["county_counts"][race], number)
-                directory = Path(report["output_dir"])
-                converted = copies(self.source, self.settings, self.store, directory, 88)[
-                    ("landing", "results")
-                ]
-                self.assertEqual(len(converted), records)
-                self.assertEqual(converted[0][:2], (88, 2))
-                replay = parse_source(
-                    self.source, self.settings, self.root, sha256=report["identity"]["raw_sha256"]
-                )
-                self.assertEqual(replay["outcome"], "already_parsed")
-
-    def test_maps_and_dashboard_match_all_new_state_results(self):
-        providers = {}
-        for code, counties, districts in [("SD", 66, 1), ("NM", 33, 3), ("FL", 67, 28)]:
-            geography = json.loads((STATIC / (code.lower() + "-map.json")).read_text())
-            self.assertEqual(len(geography["counties"]), counties)
-            self.assertEqual(len(geography["districts"]), districts)
-            payload = self.payload(code, self.parse(code))
-            self.assertEqual(set(payload["races"]), set(state_adapter(code).races))
-            self.assertTrue(payload["county_detail"])
-            for race in (code + "-SEN", code + "-GOV"):
-                self.assertGreater(payload["races"][race]["stats"]["total_votes"]["total"], 0)
-                self.assertEqual(len(payload["races"][race]["counties"]), counties)
-                self.assertNotIn("county_privacy_masked", payload["races"][race])
-            providers[code] = lambda payload=payload: payload
-        self.assertEqual(set(national_payload(providers)["states"]), set(CODES))
 
     # South Dakota -----------------------------------------------------------------------
 
@@ -329,27 +280,6 @@ class NewStateTests(unittest.TestCase):
                     self.parse(code, certified)["workbook_titles"],
                     ["2026 Official General Election Results"],
                 )
-
-    def test_sd_consistent_downward_correction_is_valid(self):
-        sheet = self.sd_senate()
-        raw = members("SD")["statewide.xlsx"]
-        row, columns, values = locate(raw, sheet, "Aurora")
-        total_row, _, totals = locate(raw, sheet, "TOTALS")
-        column = columns["Mike Rounds"]
-        index = ord(column) - ord("A")
-
-        def mutate(m):
-            m["statewide.xlsx"] = set_cells(
-                m["statewide.xlsx"],
-                sheet,
-                {f"{column}{row}": values[index] - 1, f"{column}{total_row}": totals[index] - 1},
-            )
-            m["results.csv"] = m["results.csv"].replace(
-                f",{totals[index]},".encode(), f",{totals[index] - 1},".encode()
-            )
-
-        report = self.parse("SD", mutate)
-        self.assertEqual(report["outcome"], "parsed", report)
 
     # New Mexico -------------------------------------------------------------------------
 
@@ -512,15 +442,6 @@ class NewStateTests(unittest.TestCase):
         )
         self.failed("FL", edit(lambda c: c.__setitem__(senate[0], c[senate[0]] + b"\textra")))
 
-    def test_fl_downward_correction_is_valid(self):
-        def mutate(m):
-            m["results.txt"] = m["results.txt"].replace(
-                b"\tMoody\tAshley\t\t34791", b"\tMoody\tAshley\t\t34790", 1
-            )
-
-        report = self.parse("FL", mutate)
-        self.assertEqual(report["outcome"], "parsed", report)
-
 
 class Handler(BaseHTTPRequestHandler):
     seen = []
@@ -681,47 +602,6 @@ class EnrCollectorTests(unittest.TestCase):
                 "https://electionresults.sd.gov/ResultsExport.aspx",
                 "ctl00$MainContent$x');alert(1)//",
             )
-
-
-@requires_database
-class NewStateDatabaseTests(unittest.TestCase):
-    def test_three_states_load_validate_publish_and_enforce_reader_permissions(self):
-        db = migrated()
-        for code in CODES:
-            f = NewStateTests()
-            f.setUp()
-            self.addCleanup(f.doCleanups)
-            report = f.parse(code)
-            loaded = load_parsed(f.source, f.settings, f.root, Path(report["output_dir"]), db)
-            self.assertEqual(loaded["outcome"], "succeeded", loaded)
-            candidate = publication.prepare(ROOT, db, loaded["release_id"], "test")
-            self.assertEqual(candidate["outcome"], "validated", candidate)
-            self.assertEqual(
-                publication.publish_prepared(ROOT, db, candidate["candidate_id"])["outcome"],
-                "published",
-            )
-            with connect(db) as conn:
-                conn.execute("SET ROLE election_dashboard")
-                # The dashboard reads published results, never parsed rows.
-                self.assertTrue(
-                    conn.execute(
-                        "SELECT has_table_privilege(current_user, 'serving.contest_results',"
-                        " 'SELECT') AS ok"
-                    ).fetchone()["ok"]
-                )
-                self.assertFalse(
-                    conn.execute(
-                        "SELECT has_schema_privilege(current_user, 'landing', 'USAGE') AS ok"
-                    ).fetchone()["ok"]
-                )
-                conn.execute("RESET ROLE")
-                county = conn.execute(
-                    "SELECT count(*) AS n FROM serving.county_results "
-                    "WHERE publication_id=(SELECT publication_id FROM serving.current_publications "
-                    "WHERE source_id=%s)",
-                    (f.source.source_id,),
-                ).fetchone()["n"]
-                self.assertGreater(county, 0)
 
 
 if __name__ == "__main__":

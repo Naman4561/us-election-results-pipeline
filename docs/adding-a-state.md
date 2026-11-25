@@ -32,9 +32,12 @@ read it, and who is on the ballot.
    reviews it before it is committed.
 5. **Draw the map:** `python scripts/fetch_boundaries.py --states XX` writes
    `dashboard/static/xx-map.json`.
-6. **Add fixtures and tests** for what is specific to the source: captured official
-   files with provenance, its rejections (a missing county, a changed candidate, methods
-   that do not add up) and its county reconciliation. Run the dashboard's checks too
+6. **Add fixtures and tests:** captured official files with a `provenance.json`
+   (`tests/test_fixtures.py` checks every file's SHA-256 against it), an entry in
+   `tests/snapshots.py` that stores them as the collector or `deploy import` would, and
+   the figures they parse to in `PARSED` (`tests/test_every_source.py`). The source's own
+   test file keeps what is specific to its format: its rejections (a missing county, a
+   changed candidate, methods that do not add up) and the figures it reports. Run the dashboard's checks too
    (`npm test`, `tests/dashboard.test.cjs`): they count the map's states and pin how
    some states are shown, and CI runs them on every release.
 7. **Document it:** its row in [states.md](states.md) (source, races, county detail,
@@ -55,7 +58,12 @@ without copying tests. It fails when a state lacks a source, parser, map or a ro
 matching its races (Alaska and Mississippi, which check a reviewed scope file of their
 own, are named there instead), when its parser does not check the roster, when a
 configured source belongs to no state, or when the races do not match the offices the
-entry declares.
+entry declares. `tests/test_every_source.py` runs every source's snapshot through the
+same checks: it parses, verifies, converts and replays; it parses the same beside an
+earlier snapshot with higher counts (a downward correction is just another snapshot);
+it draws on its map and dashboard; and (with the test database) it loads, validates and
+publishes, and the dashboard reads it back. It fails when a configured state has no
+snapshot.
 
 At run time the parser stops with `validation_failed` on an unexpected race, candidate
 or county, or on methods that do not add up, and dbt's data tests stop publication on an
