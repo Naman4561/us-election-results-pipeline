@@ -1,0 +1,10 @@
+{
+  "description": "New York State Board of Elections' election night results page, saved as a PDF by the operator (updated 11/18/2026 3:50:10 PM), from https://nyenr.elections.ny.gov/ (see tests/test_new_york.py).",
+  "files": {
+    "election_night.pdf": {
+      "sha256": "7195c5d7c25a3c787aa943ee8259ff2cf802197ed5518e60313048b551d3883d",
+      "bytes": 711895,
+      "origin": "the saved page, unchanged"
+    }
+  }
+}

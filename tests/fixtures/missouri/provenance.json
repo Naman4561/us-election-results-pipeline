@@ -1,0 +1,10 @@
+{
+  "description": "Missouri's All Results page, saved as a PDF by the operator on November 18, 2026 (\"Unofficial Results as of 11/18/2026 10:53:42 PM\"), from https://enr.sos.mo.gov/ (see tests/test_missouri.py).",
+  "files": {
+    "all_results.pdf": {
+      "sha256": "bfa9c5dfe080cd5e4433c76fb39133edb77c635b33551c7579807856e564e1b7",
+      "bytes": 505766,
+      "origin": "the saved page, unchanged"
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "description": "Mississippi county captures and operator reviews used by tests/test_mississippi.py, from the November 2026 county collection. The original URLs were not recorded with these files; each review names its report's URL and SHA-256.",
+  "files": {
+    "reports.zip": {
+      "sha256": "f54c9ee693f59ced4899a987e9ffe5f7e661a7013aee6b1bbf3541cdc3c270e9",
+      "bytes": 648052,
+      "origin": "county report captures, packed for the tests"
+    },
+    "expansion.zip": {
+      "sha256": "8e5892d5b3327cbbb42654c2bf7b36231e788771245d33b0775382a5bce7944b",
+      "bytes": 6502720,
+      "origin": "further county captures, packed for the tests"
+    },
+    "rankin-2026-11-10.html": {
+      "sha256": "586f3aeb296597322d620d869b06e4fef20678164436451554dfde0963089091",
+      "bytes": 120705,
+      "origin": "Rankin County's results page as captured Nov 10, 2026"
+    },
+    "rankin-2026-11-10.json": {
+      "sha256": "04cf24974616afb395f482ea9df98407464080355d388e8441a1b266722f920f",
+      "bytes": 413,
+      "origin": "the operator's review of that page",
+      "line_endings": "stored by git with LF line endings (the hash and size are of that form)"
+    },
+    "madison-2026-11-11.pdf": {
+      "sha256": "9f73741f3d1e9aef2cf42bdb5bea52ae7530f8d75beccf838a3125420b1ad76c",
+      "bytes": 44208,
+      "origin": "Madison County's report as captured Nov 11, 2026"
+    },
+    "madison-2026-11-11.json": {
+      "sha256": "2771fea2777aafb74ed5462275fb43e01acda77a5f2cad886d881f15122c921c",
+      "bytes": 469,
+      "origin": "the operator's review of that report",
+      "line_endings": "stored by git with LF line endings (the hash and size are of that form)"
+    }
+  }
+}
