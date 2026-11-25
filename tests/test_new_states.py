@@ -306,8 +306,29 @@ class NewStateTests(unittest.TestCase):
                     for name in [n for n in m if n.endswith(".html")]:
                         m[name] = m[name].replace(b"Unofficial Results", b"Certified Results")
 
-                self.failed(code, pages_only)
+                def workbooks_only(m):
+                    certified(m)
+                    for name in [n for n in m if n.endswith(".html")]:
+                        m[name] = m[name].replace(b"Official Results", b"Unofficial Results")
+
                 self.failed(code, unlabeled)
+                self.failed(code, workbooks_only)
+                if code == "SD":
+                    self.failed(code, pages_only)
+                    continue
+                # New Mexico certified (Nov 24, 2026) with its pages official while its
+                # County Level exports kept the unofficial title: that is official, the
+                # counts still reconciled with the official CSVs, and the title recorded.
+                report = self.parse(code, pages_only)
+                self.assertEqual(report["outcome"], "parsed", report)
+                self.assertIs(report["official_results"], True)
+                self.assertEqual(
+                    report["workbook_titles"], ["2026 Unofficial General Election Results"]
+                )
+                self.assertEqual(
+                    self.parse(code, certified)["workbook_titles"],
+                    ["2026 Official General Election Results"],
+                )
 
     def test_sd_consistent_downward_correction_is_valid(self):
         sheet = self.sd_senate()
