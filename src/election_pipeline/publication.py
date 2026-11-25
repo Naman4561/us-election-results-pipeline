@@ -630,7 +630,7 @@ def targets(metadata):
                 "marts",
                 "rcv_rounds",
                 ("serving", "rcv_rounds"),
-                "state contest_id round kind choice votes outcome",
+                "state county contest_id round kind choice votes outcome",
             )
         )
     if adapter.county_feed_status:

@@ -103,11 +103,9 @@ def within_official(county_rows, contest_rows, method):
     return all(votes <= official[key] for key, votes in counted.items())
 
 
-def ranked_rounds(rows, contest_rows):
-    """A race's ranked-choice tabulation for the dashboard: each round's candidates (votes,
-    share of the continuing ballots, outcome) and non-transferable ballots, and the
-    candidate elected in the last round."""
-    parties = {r["choice"]: r.get("choice_party") for r in contest_rows}
+def round_list(rows, parties):
+    """Each round of one place's tabulation: its candidates (votes, share of the
+    continuing ballots, outcome) and its non-transferable ballots."""
     numbers = sorted({r["round"] for r in rows})
     if numbers != list(range(1, len(numbers) + 1)):
         raise ValueError("Published ranked-choice rounds are not numbered 1 to n")
@@ -120,6 +118,21 @@ def ranked_rounds(rows, contest_rows):
         candidates = [r for r in found if r["kind"] == "candidate"]
         continuing = sum(r["votes"] for r in candidates)
         other = {r["kind"]: r["votes"] for r in found if r["kind"] != "candidate"}
+        ranked = sorted(
+            (
+                {
+                    "name": r["choice"],
+                    "party": parties.get(r["choice"]),
+                    "group": party_group(parties.get(r["choice"]), r["choice"]),
+                    "votes": r["votes"],
+                    "share": r["votes"] / continuing if continuing else None,
+                    "outcome": r["outcome"],
+                }
+                for r in candidates
+            ),
+            key=lambda c: (-c["votes"], c["name"]),
+        )
+        tie = len(ranked) > 1 and ranked[0]["votes"] == ranked[1]["votes"]
         rounds.append(
             {
                 "round": number,
@@ -127,26 +140,42 @@ def ranked_rounds(rows, contest_rows):
                 "exhausted": other.get("exhausted", 0),
                 "blanks": other.get("blanks", 0),
                 "overvotes": other.get("overvotes", 0),
-                "candidates": sorted(
-                    (
-                        {
-                            "name": r["choice"],
-                            "party": parties.get(r["choice"]),
-                            "group": party_group(parties.get(r["choice"]), r["choice"]),
-                            "votes": r["votes"],
-                            "share": r["votes"] / continuing if continuing else None,
-                            "outcome": r["outcome"],
-                        }
-                        for r in candidates
-                    ),
-                    key=lambda c: (-c["votes"], c["name"]),
-                ),
+                "candidates": ranked,
+                # As summarize() reports first choices, so the map can color by round.
+                "status": "unreported" if not continuing else "tie" if tie else "leading",
+                "leader": ranked[0]["group"] if continuing and not tie else None,
             }
         )
+    return rounds
+
+
+def ranked_rounds(rows, contest_rows, geography):
+    """A race's ranked-choice tabulation for the dashboard: its statewide rounds (the
+    race's result), the candidate elected in the last one, and, where the state's report
+    breaks the rounds out by place, each county's (or local unit's) rounds by map key."""
+    parties = {r["choice"]: r.get("choice_party") for r in contest_rows}
+    names = {f["id"] for f in geography["counties"]}
+    statewide = [r for r in rows if not r.get("county")]
+    if not statewide:
+        raise ValueError("Published ranked-choice rounds lack their statewide rounds")
+    rounds = round_list(statewide, parties)
     elected = [c for c in rounds[-1]["candidates"] if c["outcome"] == "elected"]
     if len(elected) != 1 or {c["name"] for c in rounds[0]["candidates"]} != set(parties):
         raise ValueError("Published ranked-choice rounds do not elect one of the race's candidates")
-    return {"rounds": rounds, "elected": elected[0]["name"], "final_round": len(rounds)}
+    places = defaultdict(list)
+    for row in rows:
+        if row.get("county"):
+            key = county_key(row["county"])
+            if key not in names:
+                raise ValueError("Published ranked-choice rounds do not match the geography")
+            places[key].append(row)
+    counties = {key: round_list(found, parties) for key, found in places.items()}
+    if any(len(found) != len(rounds) for found in counties.values()):
+        raise ValueError("A place's ranked-choice rounds differ from the statewide rounds")
+    result = {"rounds": rounds, "elected": elected[0]["name"], "final_round": len(rounds)}
+    if counties:
+        result["counties"] = counties
+    return result
 
 
 def certified_file(metadata):
@@ -238,7 +267,7 @@ def make_payload(
         if tabulated:
             if identity not in adapter.ranked_choice:
                 raise ValueError("Published ranked-choice rounds for an untabulated race")
-            races[identity]["ranked_choice"] = ranked_rounds(tabulated, totals[identity])
+            races[identity]["ranked_choice"] = ranked_rounds(tabulated, totals[identity], geography)
     payload = {
         "state": state,
         "methods": methods,
@@ -698,7 +727,7 @@ class PublishedResults:
                 contests = published_rows(conn, identity, "contest_results", (), methods)
                 rounds = (
                     conn.execute(
-                        "SELECT contest_id, round, kind, choice, votes, outcome "
+                        "SELECT county, contest_id, round, kind, choice, votes, outcome "
                         "FROM serving.rcv_rounds WHERE publication_id=%s "
                         "ORDER BY contest_id, round, kind, choice",
                         (identity,),
@@ -727,7 +756,11 @@ class PublishedResults:
 def summary(state):
     """Keep county feed status for monitoring; load county vote rows on demand."""
     races = {
-        race: {k: v for k, v in contest.items() if k != "counties"}
+        race: {
+            k: {n: x for n, x in v.items() if n != "counties"} if k == "ranked_choice" else v
+            for k, v in contest.items()
+            if k != "counties"
+        }
         for race, contest in (state.get("races") or {}).items()
     }
     return {**state, "races": races}

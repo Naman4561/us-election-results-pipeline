@@ -75,8 +75,11 @@ zero.
 - **Alaska:** totals for the candidates in the first-choice CSV (round 1), statewide and
   by State House district (Alaska has no counties). The U.S. House race went to
   ranked-choice rounds; its RCV Detailed Report (`RCV-USRep.pdf`, collected with the CSV)
-  is published round by round (`serving.rcv_rounds`) and shown beside the first
-  choices. Every round must hold the same ballots, each round must be the last plus the
+  is published round by round (`serving.rcv_rounds`). The dashboard's round tabs switch
+  the results and the map between each round (the final one first) and the first
+  choices; a place is colored by its round where the report breaks rounds out by place
+  (a `county` per row), and by its first choices otherwise (Alaska's report is
+  statewide only). Every round must hold the same ballots, each round must be the last plus the
   eliminated candidate's transfers, and the winner must hold a majority of the last
   round's continuing ballots. The report's first round counts the same ballots as the
   CSV but reads them differently (it passes a write-in or a single skipped first ranking

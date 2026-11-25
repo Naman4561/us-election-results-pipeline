@@ -41,6 +41,7 @@ RCV_FIELDS = (
     "source_line",
     "election_date",
     "state",
+    "county",
     "contest_id",
     "round",
     "kind",
@@ -322,6 +323,8 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                     "source_line": line,
                     "election_date": source.election_date,
                     "state": source.state,
+                    # Alaska reports its rounds statewide only.
+                    "county": "",
                 }
             )
     stats.update(
