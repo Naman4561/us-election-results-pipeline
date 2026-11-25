@@ -1,0 +1,20 @@
+code = "OK"
+methods = ["total_votes", "election_day", "early_voting", "absentee_by_mail"]
+
+[races]
+governor = true
+house = [1, 2, 3, 4, 5]
+
+[acquisition]
+mode = "manual"
+final = true
+max_age_seconds = 172800
+
+[source]
+id = "ok_2026_general"
+page = "https://results.okelections.gov/"
+url = "https://results.okelections.gov/"
+format = "bundle"
+primary_filename = "results.zip"
+expected_members = ["results.zip"]
+min_interval_seconds = 600

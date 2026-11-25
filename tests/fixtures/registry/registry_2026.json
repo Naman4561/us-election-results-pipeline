@@ -1,0 +1,3980 @@
+{
+ "id": "2026-general",
+ "date": "2026-11-03",
+ "collector": {
+  "timeout_seconds": 30,
+  "max_download_seconds": 120,
+  "max_attempts": 3,
+  "backoff_seconds": 2,
+  "max_retry_wait_seconds": 30,
+  "max_download_bytes": 52428800,
+  "max_uncompressed_bytes": 268435456,
+  "max_zip_members": 20,
+  "max_csv_rows": 2000000,
+  "user_agent": "US-Election-Results-Pipeline/0.1"
+ },
+ "states": {
+  "AK": {
+   "code": "AK",
+   "name": "Alaska",
+   "source_id": "ak_2026_general",
+   "house": [
+    0
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://www.elections.alaska.gov/election-results/e/?id=26genr",
+   "vote_basis": "first_choice_listed_candidates",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "house_district",
+   "statewide_only_votes": "overseas federal absentee ballots, reported in no House district",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "AL": {
+   "code": "AL",
+   "name": "Alabama",
+   "source_id": "al_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://www2.alabamavotes.gov/electionNight/statewideResultsByContest.aspx?ecode=1001305",
+   "vote_basis": "reported_votes",
+   "collection_backend": "alabama",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "AR": {
+   "code": "AR",
+   "name": "Arkansas",
+   "source_id": "ar_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://arkansas.tally-enr.com/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "AZ": {
+   "code": "AZ",
+   "name": "Arizona",
+   "source_id": "az_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "methods": [
+    "total_votes",
+    "early_ballot",
+    "early_ars_16_579",
+    "late_early",
+    "election_day",
+    "provisional"
+   ],
+   "senate": false,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://results.arizona.vote/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "Arizona reports its count in five groups, shown under its own names. Early ballots are Arizona's early ballots, most of them cast by mail, not in-person early voting alone.",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "CA": {
+   "code": "CA",
+   "name": "California",
+   "source_id": "ca_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": false,
+   "governor": true,
+   "county_results": false,
+   "source_page": "https://electionresults.sos.ca.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "gated_files",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "CO": {
+   "code": "CO",
+   "name": "Colorado",
+   "source_id": "co_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://results.enr.clarityelections.com/CO/127407/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "clarity",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "CT": {
+   "code": "CT",
+   "name": "Connecticut",
+   "source_id": "ct_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": false,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://ctemspublic.tgstg.net/#/home",
+   "vote_basis": "reported_votes",
+   "collection_backend": "connecticut",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "town",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "DE": {
+   "code": "DE",
+   "name": "Delaware",
+   "source_id": "de_2026_general",
+   "house": [
+    0
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": false,
+   "county_results": true,
+   "source_page": "https://elections.delaware.gov/results/enr/GE2026.html",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "FL": {
+   "code": "FL",
+   "name": "Florida",
+   "source_id": "fl_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://floridaelectionwatch.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "GA": {
+   "code": "GA",
+   "name": "Georgia",
+   "source_id": "ga_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://results.sos.ga.gov/results/public/Georgia/elections/11032026GeneralAndSpecialElection",
+   "vote_basis": "reported_votes",
+   "collection_backend": "enhanced_voting",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "HI": {
+   "code": "HI",
+   "name": "Hawaii",
+   "source_id": "hi_2026_general",
+   "house": [
+    1,
+    2
+   ],
+   "methods": [
+    "total_votes",
+    "mail",
+    "in_person"
+   ],
+   "senate": false,
+   "governor": true,
+   "county_results": false,
+   "source_page": "https://elections.hawaii.gov/election-results/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "IA": {
+   "code": "IA",
+   "name": "Iowa",
+   "source_id": "ia_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "methods": [
+    "total_votes",
+    "election_day",
+    "absentee_combined"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://results.enr.clarityelections.com/IA/127077/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "clarity",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "ID": {
+   "code": "ID",
+   "name": "Idaho",
+   "source_id": "id_2026_general",
+   "house": [
+    1,
+    2
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://results.voteidaho.gov/results/public/id/elections/nov2026",
+   "vote_basis": "reported_votes",
+   "collection_backend": "enhanced_voting",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "IL": {
+   "code": "IL",
+   "name": "Illinois",
+   "source_id": "il_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://www.elections.il.gov/ElectionOperations/ElectionAuthorities.aspx",
+   "vote_basis": "collected_county_reports",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": true
+  },
+  "IN": {
+   "code": "IN",
+   "name": "Indiana",
+   "source_id": "in_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": false,
+   "governor": false,
+   "county_results": true,
+   "source_page": "https://enr.indianavoters.in.gov/site/index.html",
+   "vote_basis": "reported_votes",
+   "collection_backend": "indiana",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "indiana",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "KS": {
+   "code": "KS",
+   "name": "Kansas",
+   "source_id": "ks_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://ent.sos.ks.gov/kssos_ent.html",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "KY": {
+   "code": "KY",
+   "name": "Kentucky",
+   "source_id": "ky_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": false,
+   "county_results": true,
+   "source_page": "https://vrsws.sos.ky.gov/liveresults/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "LA": {
+   "code": "LA",
+   "name": "Louisiana",
+   "source_id": "la_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": false,
+   "county_results": true,
+   "source_page": "https://voterportal.sos.la.gov/graphical",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "Louisiana's U.S. House races are open to every candidate; one without a majority goes to a December runoff between the top two. These are the November 3 results.",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "MA": {
+   "code": "MA",
+   "name": "Massachusetts",
+   "source_id": "ma_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://electionstats.state.ma.us/elections/search/year_from:2026/year_to:2026/stage:General",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "town",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "MD": {
+   "code": "MD",
+   "name": "Maryland",
+   "source_id": "md_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": false,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://elections.maryland.gov/elections/2026/general_results/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "gated_files",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "ME": {
+   "code": "ME",
+   "name": "Maine",
+   "source_id": "me_2026_general",
+   "house": [
+    1,
+    2
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://www.maine.gov/sos/elections-voting/election-results-data",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "military and overseas (UOCAVA) ballots, reported in no county",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "MI": {
+   "code": "MI",
+   "name": "Michigan",
+   "source_id": "mi_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "MN": {
+   "code": "MN",
+   "name": "Minnesota",
+   "source_id": "mn_2026_general_all",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://electionresults.sos.mn.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "MO": {
+   "code": "MO",
+   "name": "Missouri",
+   "source_id": "mo_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": false,
+   "governor": false,
+   "county_results": false,
+   "source_page": "https://enr.sos.mo.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "MS": {
+   "code": "MS",
+   "name": "Mississippi",
+   "source_id": "ms_2026_general_all",
+   "house": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": false,
+   "county_results": true,
+   "source_page": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+   "vote_basis": "covered_counties_named_candidates",
+   "collection_backend": "county_files",
+   "county_feed_status": true,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": true,
+   "collected_counties": false
+  },
+  "MT": {
+   "code": "MT",
+   "name": "Montana",
+   "source_id": "mt_2026_general",
+   "house": [
+    1,
+    2
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": false,
+   "county_results": true,
+   "source_page": "https://electionresults.mt.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "montana",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "NC": {
+   "code": "NC",
+   "name": "North Carolina",
+   "source_id": "nc_2026_general_all",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14
+   ],
+   "methods": [
+    "total_votes",
+    "election_day",
+    "early_voting",
+    "absentee_by_mail",
+    "provisional"
+   ],
+   "senate": true,
+   "governor": false,
+   "county_results": true,
+   "source_page": "https://er.ncsbe.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "ND": {
+   "code": "ND",
+   "name": "North Dakota",
+   "source_id": "nd_2026_general",
+   "house": [
+    0
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": false,
+   "governor": false,
+   "county_results": true,
+   "source_page": "https://resultsnd.sos.nd.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "NE": {
+   "code": "NE",
+   "name": "Nebraska",
+   "source_id": "ne_2026_general_all",
+   "house": [
+    1,
+    2,
+    3
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": false,
+   "source_page": "https://electionresults.nebraska.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "NH": {
+   "code": "NH",
+   "name": "New Hampshire",
+   "source_id": "nh_2026_general",
+   "house": [
+    1,
+    2
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://www.sos.nh.gov/2026-general-election-results",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "NJ": {
+   "code": "NJ",
+   "name": "New Jersey",
+   "source_id": "nj_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": false,
+   "county_results": true,
+   "source_page": "https://nj.gov/state/elections/election-information-results.shtml",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "NM": {
+   "code": "NM",
+   "name": "New Mexico",
+   "source_id": "nm_2026_general",
+   "house": [
+    1,
+    2,
+    3
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://electionresults.sos.nm.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "enr_export",
+   "county_feed_status": false,
+   "county_privacy_masking": true,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "NV": {
+   "code": "NV",
+   "name": "Nevada",
+   "source_id": "nv_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": false,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://silverstateelection.nv.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "NY": {
+   "code": "NY",
+   "name": "New York",
+   "source_id": "ny_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": false,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://nyenr.elections.ny.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "OH": {
+   "code": "OH",
+   "name": "Ohio",
+   "source_id": "oh_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://liveresults.ohiosos.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "OK": {
+   "code": "OK",
+   "name": "Oklahoma",
+   "source_id": "ok_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5
+   ],
+   "methods": [
+    "total_votes",
+    "election_day",
+    "early_voting",
+    "absentee_by_mail"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://results.okelections.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "OR": {
+   "code": "OR",
+   "name": "Oregon",
+   "source_id": "or_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://results.oregonvotes.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "enr_export",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "oregon",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "PA": {
+   "code": "PA",
+   "name": "Pennsylvania",
+   "source_id": "pa_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+   ],
+   "methods": [
+    "total_votes",
+    "election_day",
+    "mail",
+    "provisional"
+   ],
+   "senate": false,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://www.electionreturns.pa.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "RI": {
+   "code": "RI",
+   "name": "Rhode Island",
+   "source_id": "ri_2026_general",
+   "house": [
+    1,
+    2
+   ],
+   "methods": [
+    "total_votes",
+    "election_day",
+    "early_voting",
+    "absentee_by_mail"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": false,
+   "source_page": "https://electionresults.ri.gov/results/public/rhodeisland/elections/2026StatewideGeneralElection",
+   "vote_basis": "reported_votes",
+   "collection_backend": "enhanced_voting",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "SC": {
+   "code": "SC",
+   "name": "South Carolina",
+   "source_id": "sc_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://www.enr-scvotes.org/SC/127300/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "clarity",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "SD": {
+   "code": "SD",
+   "name": "South Dakota",
+   "source_id": "sd_2026_general",
+   "house": [
+    0
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://electionresults.sd.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "enr_export",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "TN": {
+   "code": "TN",
+   "name": "Tennessee",
+   "source_id": "tn_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": false,
+   "source_page": "https://elections.tn.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "TX": {
+   "code": "TX",
+   "name": "Texas",
+   "source_id": "tx_2026_general_all",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": false,
+   "source_page": "https://goelect.txelections.civixapps.com/ivis-enr-ui/races",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "UT": {
+   "code": "UT",
+   "name": "Utah",
+   "source_id": "ut_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": false,
+   "governor": false,
+   "county_results": true,
+   "source_page": "https://electionresults.utah.gov/results/public/utah/elections/General11032026",
+   "vote_basis": "reported_votes",
+   "collection_backend": "enhanced_voting",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "VA": {
+   "code": "VA",
+   "name": "Virginia",
+   "source_id": "va_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+   ],
+   "methods": [
+    "total_votes",
+    "early_voting",
+    "election_day",
+    "absentee_by_mail",
+    "provisional",
+    "post_election"
+   ],
+   "senate": true,
+   "governor": false,
+   "county_results": true,
+   "source_page": "https://enr.elections.virginia.gov/results/public/virginia/elections/2026-November-General",
+   "vote_basis": "reported_votes",
+   "collection_backend": "enhanced_voting",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "VT": {
+   "code": "VT",
+   "name": "Vermont",
+   "source_id": "vt_2026_general",
+   "house": [
+    0
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": false,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://electionresults.vermont.gov/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "vermont",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "town",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "WA": {
+   "code": "WA",
+   "name": "Washington",
+   "source_id": "wa_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": false,
+   "governor": false,
+   "county_results": true,
+   "source_page": "https://results.votewa.gov/results/public/washington/elections/20261103",
+   "vote_basis": "reported_votes",
+   "collection_backend": "enhanced_voting",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "WI": {
+   "code": "WI",
+   "name": "Wisconsin",
+   "source_id": "wi_2026_general",
+   "house": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": false,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://elections.wi.gov/elections/election-results",
+   "vote_basis": "collected_county_reports",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": true
+  },
+  "WV": {
+   "code": "WV",
+   "name": "West Virginia",
+   "source_id": "wv_2026_general",
+   "house": [
+    1,
+    2
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": false,
+   "county_results": true,
+   "source_page": "https://results.enr.clarityelections.com/WV/127496/",
+   "vote_basis": "reported_votes",
+   "collection_backend": "clarity",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  },
+  "WY": {
+   "code": "WY",
+   "name": "Wyoming",
+   "source_id": "wy_2026_general",
+   "house": [
+    0
+   ],
+   "methods": [
+    "total_votes"
+   ],
+   "senate": true,
+   "governor": true,
+   "county_results": true,
+   "source_page": "https://sos.wyo.gov/Elections/Docs/2026/2026GeneralResults.aspx",
+   "vote_basis": "reported_votes",
+   "collection_backend": "",
+   "county_feed_status": false,
+   "county_privacy_masking": false,
+   "parser_module": "",
+   "method_note": "",
+   "local_unit": "county",
+   "statewide_only_votes": "",
+   "optional_house": false,
+   "collected_counties": false
+  }
+ },
+ "sources": {
+  "ak_2026_general": {
+   "source_id": "ak_2026_general",
+   "state": "AK",
+   "election_date": "2026-11-03",
+   "url": "https://www.elections.alaska.gov/enr/26GENR/results/GA_ENR_Precinct_State_of_Alaska.csv",
+   "format": "bundle",
+   "expected_members": [
+    "election.html",
+    "results.csv",
+    "rcv-usrep.pdf"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [
+    [
+     "election.html",
+     "https://www.elections.alaska.gov/election-results/e/?id=26genr"
+    ],
+    [
+     "rcv-usrep.pdf",
+     "https://www.elections.alaska.gov/enr/26GENR/results/RCV-USRep.pdf"
+    ]
+   ],
+   "primary_filename": "results.csv",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "al_2026_general": {
+   "source_id": "al_2026_general",
+   "state": "AL",
+   "election_date": "2026-11-03",
+   "url": "https://www2.alabamavotes.gov/electionNight/statewideResultsByContest.aspx?ecode=1001305",
+   "format": "bundle",
+   "expected_members": [
+    "results.html",
+    "export.xlsx"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.html",
+   "supplemental_members": [
+    "export.xlsx"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "ar_2026_general": {
+   "source_id": "ar_2026_general",
+   "state": "AR",
+   "election_date": "2026-11-03",
+   "url": "https://enr-results-api.totalresults.com/Contest/GetContestResults?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd&contestType=Federal",
+   "format": "bundle",
+   "expected_members": [
+    "results-federal.json",
+    "results-statewide.json",
+    "info.json",
+    "contests.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [
+    [
+     "contests.json",
+     "https://enr-results-api.totalresults.com/Contest/GetContestSearchList?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd"
+    ],
+    [
+     "info.json",
+     "https://enr-results-api.totalresults.com/Election/GetElectionInfo?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd"
+    ],
+    [
+     "results-statewide.json",
+     "https://enr-results-api.totalresults.com/Contest/GetContestResults?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd&contestType=Statewide"
+    ]
+   ],
+   "primary_filename": "results-federal.json",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "az_2026_general": {
+   "source_id": "az_2026_general",
+   "state": "AZ",
+   "election_date": "2026-11-03",
+   "url": "https://app.enhancedvoting.com/cdn/results/Arizona/export-110326GeneralElection.json",
+   "format": "bundle",
+   "expected_members": [
+    "results.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.json",
+   "supplemental_members": [],
+   "collector_overrides": [
+    [
+     "max_download_bytes",
+     134217728
+    ],
+    [
+     "max_uncompressed_bytes",
+     268435456
+    ]
+   ],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "ca_2026_general": {
+   "source_id": "ca_2026_general",
+   "state": "CA",
+   "election_date": "2026-11-03",
+   "url": "https://api.sos.ca.gov/returns/governor",
+   "format": "bundle",
+   "expected_members": [
+    "governor.json",
+    "us-rep-01.json",
+    "us-rep-02.json",
+    "us-rep-03.json",
+    "us-rep-04.json",
+    "us-rep-05.json",
+    "us-rep-06.json",
+    "us-rep-07.json",
+    "us-rep-08.json",
+    "us-rep-09.json",
+    "us-rep-10.json",
+    "us-rep-11.json",
+    "us-rep-12.json",
+    "us-rep-13.json",
+    "us-rep-14.json",
+    "us-rep-15.json",
+    "us-rep-16.json",
+    "us-rep-17.json",
+    "us-rep-18.json",
+    "us-rep-19.json",
+    "us-rep-20.json",
+    "us-rep-21.json",
+    "us-rep-22.json",
+    "us-rep-23.json",
+    "us-rep-24.json",
+    "us-rep-25.json",
+    "us-rep-26.json",
+    "us-rep-27.json",
+    "us-rep-28.json",
+    "us-rep-29.json",
+    "us-rep-30.json",
+    "us-rep-31.json",
+    "us-rep-32.json",
+    "us-rep-33.json",
+    "us-rep-34.json",
+    "us-rep-35.json",
+    "us-rep-36.json",
+    "us-rep-37.json",
+    "us-rep-38.json",
+    "us-rep-39.json",
+    "us-rep-40.json",
+    "us-rep-41.json",
+    "us-rep-42.json",
+    "us-rep-43.json",
+    "us-rep-44.json",
+    "us-rep-45.json",
+    "us-rep-46.json",
+    "us-rep-47.json",
+    "us-rep-48.json",
+    "us-rep-49.json",
+    "us-rep-50.json",
+    "us-rep-51.json",
+    "us-rep-52.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [
+    [
+     "us-rep-01.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/1"
+    ],
+    [
+     "us-rep-02.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/2"
+    ],
+    [
+     "us-rep-03.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/3"
+    ],
+    [
+     "us-rep-04.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/4"
+    ],
+    [
+     "us-rep-05.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/5"
+    ],
+    [
+     "us-rep-06.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/6"
+    ],
+    [
+     "us-rep-07.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/7"
+    ],
+    [
+     "us-rep-08.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/8"
+    ],
+    [
+     "us-rep-09.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/9"
+    ],
+    [
+     "us-rep-10.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/10"
+    ],
+    [
+     "us-rep-11.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/11"
+    ],
+    [
+     "us-rep-12.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/12"
+    ],
+    [
+     "us-rep-13.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/13"
+    ],
+    [
+     "us-rep-14.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/14"
+    ],
+    [
+     "us-rep-15.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/15"
+    ],
+    [
+     "us-rep-16.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/16"
+    ],
+    [
+     "us-rep-17.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/17"
+    ],
+    [
+     "us-rep-18.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/18"
+    ],
+    [
+     "us-rep-19.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/19"
+    ],
+    [
+     "us-rep-20.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/20"
+    ],
+    [
+     "us-rep-21.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/21"
+    ],
+    [
+     "us-rep-22.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/22"
+    ],
+    [
+     "us-rep-23.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/23"
+    ],
+    [
+     "us-rep-24.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/24"
+    ],
+    [
+     "us-rep-25.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/25"
+    ],
+    [
+     "us-rep-26.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/26"
+    ],
+    [
+     "us-rep-27.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/27"
+    ],
+    [
+     "us-rep-28.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/28"
+    ],
+    [
+     "us-rep-29.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/29"
+    ],
+    [
+     "us-rep-30.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/30"
+    ],
+    [
+     "us-rep-31.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/31"
+    ],
+    [
+     "us-rep-32.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/32"
+    ],
+    [
+     "us-rep-33.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/33"
+    ],
+    [
+     "us-rep-34.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/34"
+    ],
+    [
+     "us-rep-35.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/35"
+    ],
+    [
+     "us-rep-36.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/36"
+    ],
+    [
+     "us-rep-37.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/37"
+    ],
+    [
+     "us-rep-38.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/38"
+    ],
+    [
+     "us-rep-39.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/39"
+    ],
+    [
+     "us-rep-40.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/40"
+    ],
+    [
+     "us-rep-41.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/41"
+    ],
+    [
+     "us-rep-42.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/42"
+    ],
+    [
+     "us-rep-43.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/43"
+    ],
+    [
+     "us-rep-44.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/44"
+    ],
+    [
+     "us-rep-45.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/45"
+    ],
+    [
+     "us-rep-46.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/46"
+    ],
+    [
+     "us-rep-47.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/47"
+    ],
+    [
+     "us-rep-48.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/48"
+    ],
+    [
+     "us-rep-49.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/49"
+    ],
+    [
+     "us-rep-50.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/50"
+    ],
+    [
+     "us-rep-51.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/51"
+    ],
+    [
+     "us-rep-52.json",
+     "https://api.sos.ca.gov/returns/us-rep/district/52"
+    ]
+   ],
+   "primary_filename": "governor.json",
+   "supplemental_members": [],
+   "collector_overrides": [
+    [
+     "max_zip_members",
+     64
+    ]
+   ],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "co_2026_general": {
+   "source_id": "co_2026_general",
+   "state": "CO",
+   "election_date": "2026-11-03",
+   "url": "https://results.enr.clarityelections.com/CO/127407/current_ver.txt",
+   "format": "bundle",
+   "expected_members": [
+    "current_ver.txt",
+    "detail.zip",
+    "settings.json",
+    "summary.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "current_ver.txt",
+   "supplemental_members": [
+    "detail.zip",
+    "settings.json",
+    "summary.json"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "ct_2026_general": {
+   "source_id": "ct_2026_general",
+   "state": "CT",
+   "election_date": "2026-11-03",
+   "url": "https://ctemspublic.tgstg.net/ng-app/data/election/108/Version.json",
+   "format": "bundle",
+   "expected_members": [
+    "version.json",
+    "lookup.json",
+    "election.json",
+    "state.json",
+    "towns.json",
+    "status.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "version.json",
+   "supplemental_members": [
+    "lookup.json",
+    "election.json",
+    "state.json",
+    "towns.json",
+    "status.json"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "de_2026_general": {
+   "source_id": "de_2026_general",
+   "state": "DE",
+   "election_date": "2026-11-03",
+   "url": "https://elections.delaware.gov/results/enr/Election_StatewideResults_ID_GE2026.json",
+   "format": "bundle",
+   "expected_members": [
+    "statewide.json",
+    "counties.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [
+    [
+     "counties.json",
+     "https://elections.delaware.gov/results/enr/Election_ByCountyWithWilmington_ID_GE2026.json"
+    ]
+   ],
+   "primary_filename": "statewide.json",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "fl_2026_general": {
+   "source_id": "fl_2026_general",
+   "state": "FL",
+   "election_date": "2026-11-03",
+   "url": "https://flelectionfiles.floridados.gov/enightfilespublic/20261103_ElecResultsFL.txt",
+   "format": "bundle",
+   "expected_members": [
+    "results.txt"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.txt",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "ga_2026_general": {
+   "source_id": "ga_2026_general",
+   "state": "GA",
+   "election_date": "2026-11-03",
+   "url": "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/data",
+   "format": "bundle",
+   "expected_members": [
+    "results.json",
+    "item-ga-sen.json",
+    "item-ga-gov.json",
+    "item-ga-01.json",
+    "item-ga-02.json",
+    "item-ga-03.json",
+    "item-ga-04.json",
+    "item-ga-05.json",
+    "item-ga-06.json",
+    "item-ga-07.json",
+    "item-ga-08.json",
+    "item-ga-09.json",
+    "item-ga-10.json",
+    "item-ga-11.json",
+    "item-ga-12.json",
+    "item-ga-13.json",
+    "item-ga-14.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.json",
+   "supplemental_members": [
+    "item-ga-sen.json",
+    "item-ga-gov.json",
+    "item-ga-01.json",
+    "item-ga-02.json",
+    "item-ga-03.json",
+    "item-ga-04.json",
+    "item-ga-05.json",
+    "item-ga-06.json",
+    "item-ga-07.json",
+    "item-ga-08.json",
+    "item-ga-09.json",
+    "item-ga-10.json",
+    "item-ga-11.json",
+    "item-ga-12.json",
+    "item-ga-13.json",
+    "item-ga-14.json"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "hi_2026_general": {
+   "source_id": "hi_2026_general",
+   "state": "HI",
+   "election_date": "2026-11-03",
+   "url": "https://elections.hawaii.gov/wp-content/results/2026%20General/summary.txt",
+   "format": "bundle",
+   "expected_members": [
+    "summary.txt"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 3540,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "summary.txt",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "ia_2026_general": {
+   "source_id": "ia_2026_general",
+   "state": "IA",
+   "election_date": "2026-11-03",
+   "url": "https://results.enr.clarityelections.com/IA/127077/current_ver.txt",
+   "format": "bundle",
+   "expected_members": [
+    "current_ver.txt",
+    "detail.zip",
+    "settings.json",
+    "summary.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 3540,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "current_ver.txt",
+   "supplemental_members": [
+    "detail.zip",
+    "settings.json",
+    "summary.json"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "id_2026_general": {
+   "source_id": "id_2026_general",
+   "state": "ID",
+   "election_date": "2026-11-03",
+   "url": "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/data",
+   "format": "bundle",
+   "expected_members": [
+    "data.json",
+    "item-id-sen.json",
+    "item-id-gov.json",
+    "item-id-01.json",
+    "item-id-02.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "data.json",
+   "supplemental_members": [
+    "item-id-sen.json",
+    "item-id-gov.json",
+    "item-id-01.json",
+    "item-id-02.json"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "il_2026_general": {
+   "source_id": "il_2026_general",
+   "state": "IL",
+   "election_date": "2026-11-03",
+   "url": "https://www.elections.il.gov/ElectionOperations/ElectionAuthorities.aspx",
+   "format": "bundle",
+   "expected_members": [
+    "results.zip"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.zip",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "in_2026_general": {
+   "source_id": "in_2026_general",
+   "state": "IN",
+   "election_date": "2026-11-03",
+   "url": "https://enr.indianavoters.in.gov/site/data/settings.json",
+   "format": "bundle",
+   "expected_members": [
+    "settings.json",
+    "house.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "settings.json",
+   "supplemental_members": [
+    "house.json"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "ks_2026_general": {
+   "source_id": "ks_2026_general",
+   "state": "KS",
+   "election_date": "2026-11-03",
+   "url": "https://ent.sos.ks.gov/kssos_ent.html",
+   "format": "bundle",
+   "expected_members": [
+    "results.html"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.html",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "ky_2026_general": {
+   "source_id": "ky_2026_general",
+   "state": "KY",
+   "election_date": "2026-11-03",
+   "url": "https://vrsws.sos.ky.gov/liveresults/Statewide",
+   "format": "bundle",
+   "expected_members": [
+    "results.zip"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.zip",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "la_2026_general": {
+   "source_id": "la_2026_general",
+   "state": "LA",
+   "election_date": "2026-11-03",
+   "url": "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/Votes_Multiparish.htm",
+   "format": "bundle",
+   "expected_members": [
+    "votes.json",
+    "dates.json",
+    "races.json",
+    "parish-la-sen.json",
+    "parish-la-01.json",
+    "parish-la-02.json",
+    "parish-la-03.json",
+    "parish-la-04.json",
+    "parish-la-05.json",
+    "parish-la-06.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [
+    [
+     "dates.json",
+     "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=ElectionDates.htm"
+    ],
+    [
+     "parish-la-01.json",
+     "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70195.htm"
+    ],
+    [
+     "parish-la-02.json",
+     "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70196.htm"
+    ],
+    [
+     "parish-la-03.json",
+     "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70197.htm"
+    ],
+    [
+     "parish-la-04.json",
+     "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70198.htm"
+    ],
+    [
+     "parish-la-05.json",
+     "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70199.htm"
+    ],
+    [
+     "parish-la-06.json",
+     "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_70200.htm"
+    ],
+    [
+     "parish-la-sen.json",
+     "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/VotesRaceByParish/Votes_67997.htm"
+    ],
+    [
+     "races.json",
+     "https://voterportal.sos.la.gov/ElectionResults/ElectionResults/Data?blob=20261103/RacesCandidates_Multiparish.htm"
+    ]
+   ],
+   "primary_filename": "votes.json",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "ma_2026_general": {
+   "source_id": "ma_2026_general",
+   "state": "MA",
+   "election_date": "2026-11-03",
+   "url": "https://electionstats.state.ma.us/elections/download/173531/precincts_include:0/",
+   "format": "bundle",
+   "expected_members": [
+    "senate.csv",
+    "governor.csv",
+    "house-01.csv",
+    "house-02.csv",
+    "house-03.csv",
+    "house-04.csv",
+    "house-05.csv",
+    "house-06.csv",
+    "house-07.csv",
+    "house-08.csv",
+    "house-09.csv"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 3600,
+   "allow_missing": false,
+   "files": [
+    [
+     "governor.csv",
+     "https://electionstats.state.ma.us/elections/download/173526/precincts_include:0/"
+    ],
+    [
+     "house-01.csv",
+     "https://electionstats.state.ma.us/elections/download/173553/precincts_include:0/"
+    ],
+    [
+     "house-02.csv",
+     "https://electionstats.state.ma.us/elections/download/173571/precincts_include:0/"
+    ],
+    [
+     "house-03.csv",
+     "https://electionstats.state.ma.us/elections/download/173537/precincts_include:0/"
+    ],
+    [
+     "house-04.csv",
+     "https://electionstats.state.ma.us/elections/download/173600/precincts_include:0/"
+    ],
+    [
+     "house-05.csv",
+     "https://electionstats.state.ma.us/elections/download/173582/precincts_include:0/"
+    ],
+    [
+     "house-06.csv",
+     "https://electionstats.state.ma.us/elections/download/173565/precincts_include:0/"
+    ],
+    [
+     "house-07.csv",
+     "https://electionstats.state.ma.us/elections/download/173639/precincts_include:0/"
+    ],
+    [
+     "house-08.csv",
+     "https://electionstats.state.ma.us/elections/download/173528/precincts_include:0/"
+    ],
+    [
+     "house-09.csv",
+     "https://electionstats.state.ma.us/elections/download/173546/precincts_include:0/"
+    ]
+   ],
+   "primary_filename": "senate.csv",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "md_2026_general": {
+   "source_id": "md_2026_general",
+   "state": "MD",
+   "election_date": "2026-11-03",
+   "url": "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_1_1.html",
+   "format": "bundle",
+   "expected_members": [
+    "governor.html",
+    "house-01.html",
+    "house-02.html",
+    "house-03.html",
+    "house-04.html",
+    "house-05.html",
+    "house-06.html",
+    "house-07.html",
+    "house-08.html"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [
+    [
+     "house-01.html",
+     "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_1_District%201.html"
+    ],
+    [
+     "house-02.html",
+     "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_2_District%202.html"
+    ],
+    [
+     "house-03.html",
+     "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_3_District%203.html"
+    ],
+    [
+     "house-04.html",
+     "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_4_District%204.html"
+    ],
+    [
+     "house-05.html",
+     "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_5_District%205.html"
+    ],
+    [
+     "house-06.html",
+     "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_6_District%206.html"
+    ],
+    [
+     "house-07.html",
+     "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_7_District%207.html"
+    ],
+    [
+     "house-08.html",
+     "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_8_District%208.html"
+    ]
+   ],
+   "primary_filename": "governor.html",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "me_2026_general": {
+   "source_id": "me_2026_general",
+   "state": "ME",
+   "election_date": "2026-11-03",
+   "url": "https://www.maine.gov/sos/elections-voting/election-results-data",
+   "format": "bundle",
+   "expected_members": [
+    "results.zip"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.zip",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "mi_2026_general": {
+   "source_id": "mi_2026_general",
+   "state": "MI",
+   "election_date": "2026-11-03",
+   "url": "https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026",
+   "format": "bundle",
+   "expected_members": [
+    "results.txt"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.txt",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "mn_2026_general_all": {
+   "source_id": "mn_2026_general_all",
+   "state": "MN",
+   "election_date": "2026-11-03",
+   "url": "https://electionresultsfiles.sos.mn.gov/20261103/ussenatecty.txt",
+   "format": "bundle",
+   "expected_members": [
+    "senate-county.txt",
+    "senate.txt",
+    "house-county.txt",
+    "house.txt",
+    "counties.txt",
+    "governor.txt",
+    "governor-precinct.txt"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [
+    [
+     "counties.txt",
+     "https://electionresultsfiles.sos.mn.gov/20261103/Cntytbl.txt"
+    ],
+    [
+     "governor-precinct.txt",
+     "https://electionresultsfiles.sos.mn.gov/20261103/governorpct.txt"
+    ],
+    [
+     "governor.txt",
+     "https://electionresultsfiles.sos.mn.gov/20261103/Governor.txt"
+    ],
+    [
+     "house-county.txt",
+     "https://electionresultsfiles.sos.mn.gov/20261103/USHouseCty.txt"
+    ],
+    [
+     "house.txt",
+     "https://electionresultsfiles.sos.mn.gov/20261103/USHouse.txt"
+    ],
+    [
+     "senate.txt",
+     "https://electionresultsfiles.sos.mn.gov/20261103/ussenate.txt"
+    ]
+   ],
+   "primary_filename": "senate-county.txt",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "mo_2026_general": {
+   "source_id": "mo_2026_general",
+   "state": "MO",
+   "election_date": "2026-11-03",
+   "url": "https://enr.sos.mo.gov/",
+   "format": "bundle",
+   "expected_members": [
+    "results.pdf"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.pdf",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "ms_2026_general_all": {
+   "source_id": "ms_2026_general_all",
+   "state": "MS",
+   "election_date": "2026-11-03",
+   "url": "https://www.sos.ms.gov/MSCountyElectionInfo/",
+   "format": "bundle",
+   "expected_members": [
+    "county-status.json",
+    "adams.report",
+    "alcorn.report",
+    "amite.report",
+    "attala.report",
+    "benton.report",
+    "bolivar.report",
+    "calhoun.report",
+    "carroll.report",
+    "chickasaw.report",
+    "choctaw.report",
+    "claiborne.report",
+    "clarke.report",
+    "clay.report",
+    "coahoma.report",
+    "copiah.report",
+    "covington.report",
+    "desoto.pdf",
+    "forrest.report",
+    "franklin.report",
+    "george.report",
+    "greene.report",
+    "grenada.report",
+    "hancock.pdf",
+    "harrison.report",
+    "hinds.pdf",
+    "holmes.report",
+    "humphreys.report",
+    "issaquena.report",
+    "itawamba.report",
+    "jackson.report",
+    "jasper.report",
+    "jefferson.report",
+    "jeffersondavis.report",
+    "jones.report",
+    "kemper.report",
+    "lafayette.pdf",
+    "lamar.pdf",
+    "lauderdale.pdf",
+    "lawrence.report",
+    "leake.report",
+    "lee.report",
+    "leflore.report",
+    "lincoln.report",
+    "lowndes.report",
+    "madison.pdf",
+    "marion.report",
+    "marshall.report",
+    "monroe.pdf",
+    "montgomery.report",
+    "neshoba.html",
+    "newton.report",
+    "noxubee.report",
+    "oktibbeha.report",
+    "panola.report",
+    "pearlriver.report",
+    "perry.report",
+    "pike.pdf",
+    "pontotoc.report",
+    "prentiss.report",
+    "quitman.report",
+    "rankin.html",
+    "scott.report",
+    "sharkey.report",
+    "simpson.report",
+    "smith.report",
+    "stone.report",
+    "sunflower.html",
+    "tallahatchie.report",
+    "tate.report",
+    "tippah.report",
+    "tishomingo.report",
+    "tunica.report",
+    "union.report",
+    "walthall.report",
+    "warren.pdf",
+    "washington.report",
+    "wayne.report",
+    "webster.report",
+    "wilkinson.report",
+    "winston.report",
+    "yalobusha.report",
+    "yazoo.report"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [
+    [
+     "desoto.pdf",
+     "https://www.desotocountyms.gov/DocumentCenter/View/11878/Results-Summary"
+    ],
+    [
+     "hancock.pdf",
+     "https://www.hancockcounty.ms.gov/DocumentCenter/View/1224/Unofficial-Results"
+    ],
+    [
+     "hinds.pdf",
+     "https://www.co.hinds.ms.us/pgs/results/Unofficial%20Summary%20Report.pdf"
+    ],
+    [
+     "lafayette.pdf",
+     "https://lafayettems.com/wp-content/uploads/2026/11/2026-GENERAL-ELECTION-UNOFFICIAL-RESULTS-AFFIDAVITS-NOT-COUNTED.pdf"
+    ],
+    [
+     "lamar.pdf",
+     "https://lamarcountyms.gov/ms/wp-content/uploads/2026/11/Election_Summary_Results3.pdf"
+    ],
+    [
+     "lauderdale.pdf",
+     "https://www.lauderdalecounty.org/wp-content/uploads/2026/11/2026-election-with-absentee.pdf"
+    ],
+    [
+     "madison.pdf",
+     "https://www.madison-co.com/elections/election_results.pdf"
+    ],
+    [
+     "monroe.pdf",
+     "https://www.monroems.com/circuitclerk/results/CUMMULATIVE_RESULTS_ALL_PRECINCTS.pdf"
+    ],
+    [
+     "neshoba.html",
+     "https://neshobacounty.net/news/general-election-results-from-november-3-2026/"
+    ],
+    [
+     "pike.pdf",
+     "https://www.pikecountyelectionresults.org/2026_general/DW.pdf"
+    ],
+    [
+     "rankin.html",
+     "https://www2.rankincounty.org/results/index.html"
+    ],
+    [
+     "sunflower.html",
+     "https://www.sunflowercircuitclerk.com/hart/ALL_PRECINCTS.html"
+    ],
+    [
+     "warren.pdf",
+     "https://warrencountyms.gov/wp-content/uploads/2026/11/General-Unofficial-November-3-Election-Results.pdf"
+    ]
+   ],
+   "primary_filename": "county-status.json",
+   "supplemental_members": [
+    "adams.report",
+    "alcorn.report",
+    "amite.report",
+    "attala.report",
+    "benton.report",
+    "bolivar.report",
+    "calhoun.report",
+    "carroll.report",
+    "chickasaw.report",
+    "choctaw.report",
+    "claiborne.report",
+    "clarke.report",
+    "clay.report",
+    "coahoma.report",
+    "copiah.report",
+    "covington.report",
+    "forrest.report",
+    "franklin.report",
+    "george.report",
+    "greene.report",
+    "grenada.report",
+    "harrison.report",
+    "holmes.report",
+    "humphreys.report",
+    "issaquena.report",
+    "itawamba.report",
+    "jackson.report",
+    "jasper.report",
+    "jefferson.report",
+    "jeffersondavis.report",
+    "jones.report",
+    "kemper.report",
+    "lawrence.report",
+    "leake.report",
+    "lee.report",
+    "leflore.report",
+    "lincoln.report",
+    "lowndes.report",
+    "marion.report",
+    "marshall.report",
+    "montgomery.report",
+    "newton.report",
+    "noxubee.report",
+    "oktibbeha.report",
+    "panola.report",
+    "pearlriver.report",
+    "perry.report",
+    "pontotoc.report",
+    "prentiss.report",
+    "quitman.report",
+    "scott.report",
+    "sharkey.report",
+    "simpson.report",
+    "smith.report",
+    "stone.report",
+    "tallahatchie.report",
+    "tate.report",
+    "tippah.report",
+    "tishomingo.report",
+    "tunica.report",
+    "union.report",
+    "walthall.report",
+    "washington.report",
+    "wayne.report",
+    "webster.report",
+    "wilkinson.report",
+    "winston.report",
+    "yalobusha.report",
+    "yazoo.report"
+   ],
+   "collector_overrides": [
+    [
+     "max_download_bytes",
+     134217728
+    ],
+    [
+     "max_uncompressed_bytes",
+     134217728
+    ],
+    [
+     "max_zip_members",
+     100
+    ]
+   ],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "mt_2026_general": {
+   "source_id": "mt_2026_general",
+   "state": "MT",
+   "election_date": "2026-11-03",
+   "url": "https://electionresults.mt.gov/ResultsExport.aspx",
+   "format": "bundle",
+   "expected_members": [
+    "export.html",
+    "statewide.xlsx"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "export.html",
+   "supplemental_members": [
+    "statewide.xlsx"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "nc_2026_general_all": {
+   "source_id": "nc_2026_general_all",
+   "state": "NC",
+   "election_date": "2026-11-03",
+   "url": "https://s3.amazonaws.com/dl.ncsbe.gov/ENRS/2026_11_03/results_pct_20261103.zip",
+   "format": "zip",
+   "expected_members": [
+    "results_pct_20261103.txt"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.xml",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "nc_absentee_early_demographics_2026": {
+   "source_id": "nc_absentee_early_demographics_2026",
+   "state": "NC",
+   "election_date": "2026-11-03",
+   "url": "https://s3.amazonaws.com/dl.ncsbe.gov/ENRS/2026_11_03/absentee_counts_county_20261103.csv",
+   "format": "csv",
+   "expected_members": [],
+   "expected_columns": [
+    "county_name",
+    "abs_request_type",
+    "party_cd",
+    "gender",
+    "race",
+    "ethnicity",
+    "0"
+   ],
+   "dataset": "absentee_early_demographics",
+   "min_interval_seconds": 0,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.xml",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "nd_2026_general": {
+   "source_id": "nd_2026_general",
+   "state": "ND",
+   "election_date": "2026-11-03",
+   "url": "https://api.resultsnd.sos.nd.gov/Contest/GetContestResults?cId=north-dakota&electionID=348&contestType=SW",
+   "format": "bundle",
+   "expected_members": [
+    "results-sw.json",
+    "info.json",
+    "contests.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [
+    [
+     "contests.json",
+     "https://api.resultsnd.sos.nd.gov/Contest/GetContestSearchList?cId=north-dakota&electionID=348"
+    ],
+    [
+     "info.json",
+     "https://api.resultsnd.sos.nd.gov/Election/GetElectionInfo?cId=north-dakota&electionID=348"
+    ]
+   ],
+   "primary_filename": "results-sw.json",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "ne_2026_general_all": {
+   "source_id": "ne_2026_general_all",
+   "state": "NE",
+   "election_date": "2026-11-03",
+   "url": "https://electionresults.nebraska.gov/resultsCSV.aspx?text=All&type=All&map=CTY",
+   "format": "bundle",
+   "expected_members": [
+    "results.csv",
+    "election.html"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [
+    [
+     "election.html",
+     "https://electionresults.nebraska.gov/ResultsMedia.aspx"
+    ]
+   ],
+   "primary_filename": "results.csv",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [
+    1,
+    4,
+    7,
+    10,
+    13,
+    16,
+    19,
+    22
+   ],
+   "prefer_ipv6": false
+  },
+  "nh_2026_general": {
+   "source_id": "nh_2026_general",
+   "state": "NH",
+   "election_date": "2026-11-03",
+   "url": "https://www.sos.nh.gov/2026-general-election-results",
+   "format": "bundle",
+   "expected_members": [
+    "results.zip"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.zip",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "nj_2026_general": {
+   "source_id": "nj_2026_general",
+   "state": "NJ",
+   "election_date": "2026-11-03",
+   "url": "https://nj.gov/state/elections/election-information-results.shtml",
+   "format": "bundle",
+   "expected_members": [
+    "results.zip"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.zip",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "nm_2026_general": {
+   "source_id": "nm_2026_general",
+   "state": "NM",
+   "election_date": "2026-11-03",
+   "url": "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=FED&map=CTY",
+   "format": "bundle",
+   "expected_members": [
+    "fed.csv",
+    "sw.csv",
+    "fed.html",
+    "sw.html",
+    "county-nm-01.xlsx",
+    "county-nm-02.xlsx",
+    "county-nm-03.xlsx",
+    "county-nm-gov.xlsx",
+    "county-nm-sen.xlsx"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 3540,
+   "allow_missing": false,
+   "files": [
+    [
+     "fed.html",
+     "https://electionresults.sos.nm.gov/resultsSW.aspx?type=FED&map=CTY"
+    ],
+    [
+     "sw.csv",
+     "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=SW&map=CTY"
+    ],
+    [
+     "sw.html",
+     "https://electionresults.sos.nm.gov/resultsSW.aspx?type=SW&map=CTY"
+    ]
+   ],
+   "primary_filename": "fed.csv",
+   "supplemental_members": [
+    "county-nm-01.xlsx",
+    "county-nm-02.xlsx",
+    "county-nm-03.xlsx",
+    "county-nm-gov.xlsx",
+    "county-nm-sen.xlsx"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "nv_2026_general": {
+   "source_id": "nv_2026_general",
+   "state": "NV",
+   "election_date": "2026-11-03",
+   "url": "https://silverstateelection.nv.gov/data/v2/elections/2a6d1aef-f8eb-424f-9130-ac9bdc2cced5/manifest.json",
+   "format": "bundle",
+   "expected_members": [
+    "results.zip"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.zip",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "ny_2026_general": {
+   "source_id": "ny_2026_general",
+   "state": "NY",
+   "election_date": "2026-11-03",
+   "url": "https://nyenr.elections.ny.gov/",
+   "format": "bundle",
+   "expected_members": [
+    "results.pdf"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.pdf",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "oh_2026_general": {
+   "source_id": "oh_2026_general",
+   "state": "OH",
+   "election_date": "2026-11-03",
+   "url": "https://liveresults.ohiosos.gov/Api/v1/download?filename=VSSC1622XmlFileBlob",
+   "format": "bundle",
+   "expected_members": [
+    "results.xml"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.xml",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "ok_2026_general": {
+   "source_id": "ok_2026_general",
+   "state": "OK",
+   "election_date": "2026-11-03",
+   "url": "https://results.okelections.gov/",
+   "format": "bundle",
+   "expected_members": [
+    "results.zip"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.zip",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "or_2026_general": {
+   "source_id": "or_2026_general",
+   "state": "OR",
+   "election_date": "2026-11-03",
+   "url": "https://results.oregonvotes.gov/ResultsExport.aspx",
+   "format": "bundle",
+   "expected_members": [
+    "export.html",
+    "statewide.csv",
+    "governor.csv",
+    "county-baker.csv",
+    "county-benton.csv",
+    "county-clackamas.csv",
+    "county-clatsop.csv",
+    "county-columbia.csv",
+    "county-coos.csv",
+    "county-crook.csv",
+    "county-curry.csv",
+    "county-deschutes.csv",
+    "county-douglas.csv",
+    "county-gilliam.csv",
+    "county-grant.csv",
+    "county-harney.csv",
+    "county-hood-river.csv",
+    "county-jackson.csv",
+    "county-jefferson.csv",
+    "county-josephine.csv",
+    "county-klamath.csv",
+    "county-lake.csv",
+    "county-lane.csv",
+    "county-lincoln.csv",
+    "county-linn.csv",
+    "county-malheur.csv",
+    "county-marion.csv",
+    "county-morrow.csv",
+    "county-multnomah.csv",
+    "county-polk.csv",
+    "county-sherman.csv",
+    "county-tillamook.csv",
+    "county-umatilla.csv",
+    "county-union.csv",
+    "county-wallowa.csv",
+    "county-wasco.csv",
+    "county-washington.csv",
+    "county-wheeler.csv",
+    "county-yamhill.csv"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "export.html",
+   "supplemental_members": [
+    "statewide.csv",
+    "governor.csv",
+    "county-baker.csv",
+    "county-benton.csv",
+    "county-clackamas.csv",
+    "county-clatsop.csv",
+    "county-columbia.csv",
+    "county-coos.csv",
+    "county-crook.csv",
+    "county-curry.csv",
+    "county-deschutes.csv",
+    "county-douglas.csv",
+    "county-gilliam.csv",
+    "county-grant.csv",
+    "county-harney.csv",
+    "county-hood-river.csv",
+    "county-jackson.csv",
+    "county-jefferson.csv",
+    "county-josephine.csv",
+    "county-klamath.csv",
+    "county-lake.csv",
+    "county-lane.csv",
+    "county-lincoln.csv",
+    "county-linn.csv",
+    "county-malheur.csv",
+    "county-marion.csv",
+    "county-morrow.csv",
+    "county-multnomah.csv",
+    "county-polk.csv",
+    "county-sherman.csv",
+    "county-tillamook.csv",
+    "county-umatilla.csv",
+    "county-union.csv",
+    "county-wallowa.csv",
+    "county-wasco.csv",
+    "county-washington.csv",
+    "county-wheeler.csv",
+    "county-yamhill.csv"
+   ],
+   "collector_overrides": [
+    [
+     "max_zip_members",
+     64
+    ]
+   ],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "pa_2026_general": {
+   "source_id": "pa_2026_general",
+   "state": "PA",
+   "election_date": "2026-11-03",
+   "url": "https://www.electionreturns.pa.gov/",
+   "format": "bundle",
+   "expected_members": [
+    "results.txt"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.txt",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "ri_2026_general": {
+   "source_id": "ri_2026_general",
+   "state": "RI",
+   "election_date": "2026-11-03",
+   "url": "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/data",
+   "format": "bundle",
+   "expected_members": [
+    "data.json",
+    "item-ri-sen.json",
+    "item-ri-gov.json",
+    "item-ri-01.json",
+    "item-ri-02.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "data.json",
+   "supplemental_members": [
+    "item-ri-sen.json",
+    "item-ri-gov.json",
+    "item-ri-01.json",
+    "item-ri-02.json"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "sc_2026_general": {
+   "source_id": "sc_2026_general",
+   "state": "SC",
+   "election_date": "2026-11-03",
+   "url": "https://www.enr-scvotes.org/SC/127300/current_ver.txt",
+   "format": "bundle",
+   "expected_members": [
+    "current_ver.txt",
+    "detail.zip",
+    "settings.json",
+    "summary.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "current_ver.txt",
+   "supplemental_members": [
+    "detail.zip",
+    "settings.json",
+    "summary.json"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "sd_2026_general": {
+   "source_id": "sd_2026_general",
+   "state": "SD",
+   "election_date": "2026-11-03",
+   "url": "https://electionresults.sd.gov/resultsCSV.aspx?text=All&type=SWR&map=CTY",
+   "format": "bundle",
+   "expected_members": [
+    "results.csv",
+    "export.html",
+    "statewide.xlsx"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [
+    [
+     "export.html",
+     "https://electionresults.sd.gov/ResultsExport.aspx"
+    ]
+   ],
+   "primary_filename": "results.csv",
+   "supplemental_members": [
+    "statewide.xlsx"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [
+    1,
+    4,
+    7,
+    10,
+    13,
+    16,
+    19,
+    22
+   ],
+   "prefer_ipv6": false
+  },
+  "tn_2026_general": {
+   "source_id": "tn_2026_general",
+   "state": "TN",
+   "election_date": "2026-11-03",
+   "url": "https://elections.tn.gov/",
+   "format": "bundle",
+   "expected_members": [
+    "results.pdf"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.pdf",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "tx_2026_general_all": {
+   "source_id": "tx_2026_general_all",
+   "state": "TX",
+   "election_date": "2026-11-03",
+   "url": "https://goelect.txelections.civixapps.com/api-ivis-system/api/s3/enr/election/53815",
+   "format": "bundle",
+   "expected_members": [
+    "results.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.json",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [
+    1,
+    4,
+    7,
+    10,
+    13,
+    16,
+    19,
+    22
+   ],
+   "prefer_ipv6": false
+  },
+  "ut_2026_general": {
+   "source_id": "ut_2026_general",
+   "state": "UT",
+   "election_date": "2026-11-03",
+   "url": "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/data",
+   "format": "bundle",
+   "expected_members": [
+    "data.json",
+    "item-ut-01.json",
+    "item-ut-02.json",
+    "item-ut-03.json",
+    "item-ut-04.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "data.json",
+   "supplemental_members": [
+    "item-ut-01.json",
+    "item-ut-02.json",
+    "item-ut-03.json",
+    "item-ut-04.json"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "va_2026_general": {
+   "source_id": "va_2026_general",
+   "state": "VA",
+   "election_date": "2026-11-03",
+   "url": "https://enr.elections.virginia.gov/results/public/api/elections/virginia/2026-November-General/data",
+   "format": "bundle",
+   "expected_members": [
+    "data.json",
+    "item-va-sen.json",
+    "item-va-01.json",
+    "item-va-02.json",
+    "item-va-03.json",
+    "item-va-04.json",
+    "item-va-05.json",
+    "item-va-06.json",
+    "item-va-07.json",
+    "item-va-08.json",
+    "item-va-09.json",
+    "item-va-10.json",
+    "item-va-11.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "data.json",
+   "supplemental_members": [
+    "item-va-sen.json",
+    "item-va-01.json",
+    "item-va-02.json",
+    "item-va-03.json",
+    "item-va-04.json",
+    "item-va-05.json",
+    "item-va-06.json",
+    "item-va-07.json",
+    "item-va-08.json",
+    "item-va-09.json",
+    "item-va-10.json",
+    "item-va-11.json"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": true
+  },
+  "vt_2026_general": {
+   "source_id": "vt_2026_general",
+   "state": "VT",
+   "election_date": "2026-11-03",
+   "url": "https://static.electionresults.vermont.gov/elections/68d61e96-1d28-4210-8c1d-8e90512ae105.json",
+   "format": "bundle",
+   "expected_members": [
+    "index.json",
+    "federal.json",
+    "statewide.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "index.json",
+   "supplemental_members": [
+    "federal.json",
+    "statewide.json"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "wa_2026_general": {
+   "source_id": "wa_2026_general",
+   "state": "WA",
+   "election_date": "2026-11-03",
+   "url": "https://results.votewa.gov/results/public/api/elections/washington/20261103/data",
+   "format": "bundle",
+   "expected_members": [
+    "data.json",
+    "item-wa-01.json",
+    "item-wa-02.json",
+    "item-wa-03.json",
+    "item-wa-04.json",
+    "item-wa-05.json",
+    "item-wa-06.json",
+    "item-wa-07.json",
+    "item-wa-08.json",
+    "item-wa-09.json",
+    "item-wa-10.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "data.json",
+   "supplemental_members": [
+    "item-wa-01.json",
+    "item-wa-02.json",
+    "item-wa-03.json",
+    "item-wa-04.json",
+    "item-wa-05.json",
+    "item-wa-06.json",
+    "item-wa-07.json",
+    "item-wa-08.json",
+    "item-wa-09.json",
+    "item-wa-10.json"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "wi_2026_general": {
+   "source_id": "wi_2026_general",
+   "state": "WI",
+   "election_date": "2026-11-03",
+   "url": "https://elections.wi.gov/elections/election-results",
+   "format": "bundle",
+   "expected_members": [
+    "results.zip"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.zip",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "wv_2026_general": {
+   "source_id": "wv_2026_general",
+   "state": "WV",
+   "election_date": "2026-11-03",
+   "url": "https://results.enr.clarityelections.com/WV/127496/current_ver.txt",
+   "format": "bundle",
+   "expected_members": [
+    "current_ver.txt",
+    "detail.zip",
+    "settings.json",
+    "summary.json"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 600,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "current_ver.txt",
+   "supplemental_members": [
+    "detail.zip",
+    "settings.json",
+    "summary.json"
+   ],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  },
+  "wy_2026_general": {
+   "source_id": "wy_2026_general",
+   "state": "WY",
+   "election_date": "2026-11-03",
+   "url": "https://sos.wyo.gov/Elections/Docs/2026/Results/General/2026_Wyoming_General_Results.zip",
+   "format": "bundle",
+   "expected_members": [
+    "results.zip"
+   ],
+   "expected_columns": [],
+   "dataset": "election_results",
+   "min_interval_seconds": 3540,
+   "allow_missing": false,
+   "files": [],
+   "primary_filename": "results.zip",
+   "supplemental_members": [],
+   "collector_overrides": [],
+   "collect_hours_utc": [],
+   "prefer_ipv6": false
+  }
+ },
+ "acquisition": {
+  "ak_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "al_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "ar_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "az_2026_general": {
+   "mode": "manual",
+   "final": false,
+   "max_age_seconds": 21600
+  },
+  "ca_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "co_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "ct_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "de_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "fl_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "ga_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "hi_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "ia_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "id_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "il_2026_general": {
+   "mode": "manual",
+   "final": false,
+   "max_age_seconds": 21600
+  },
+  "in_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "ks_2026_general": {
+   "mode": "manual",
+   "final": true,
+   "max_age_seconds": 21600
+  },
+  "ky_2026_general": {
+   "mode": "manual",
+   "final": false,
+   "max_age_seconds": 21600
+  },
+  "la_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "ma_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "md_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "me_2026_general": {
+   "mode": "manual",
+   "final": true,
+   "max_age_seconds": 21600
+  },
+  "mi_2026_general": {
+   "mode": "manual",
+   "final": true,
+   "max_age_seconds": 21600
+  },
+  "mn_2026_general_all": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "mo_2026_general": {
+   "mode": "manual",
+   "final": false,
+   "max_age_seconds": 21600
+  },
+  "ms_2026_general_all": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "mt_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "nc_2026_general_all": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "nc_absentee_early_demographics_2026": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "nd_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "ne_2026_general_all": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "nh_2026_general": {
+   "mode": "manual",
+   "final": false,
+   "max_age_seconds": 21600
+  },
+  "nj_2026_general": {
+   "mode": "manual",
+   "final": false,
+   "max_age_seconds": 21600
+  },
+  "nm_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "nv_2026_general": {
+   "mode": "manual",
+   "final": false,
+   "max_age_seconds": 21600
+  },
+  "ny_2026_general": {
+   "mode": "manual",
+   "final": false,
+   "max_age_seconds": 21600
+  },
+  "oh_2026_general": {
+   "mode": "manual",
+   "final": true,
+   "max_age_seconds": 21600
+  },
+  "ok_2026_general": {
+   "mode": "manual",
+   "final": true,
+   "max_age_seconds": 172800
+  },
+  "or_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "pa_2026_general": {
+   "mode": "manual",
+   "final": false,
+   "max_age_seconds": 21600
+  },
+  "ri_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "sc_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "sd_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "tn_2026_general": {
+   "mode": "manual",
+   "final": false,
+   "max_age_seconds": 21600
+  },
+  "tx_2026_general_all": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "ut_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "va_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "vt_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "wa_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "wi_2026_general": {
+   "mode": "manual",
+   "final": false,
+   "max_age_seconds": 21600
+  },
+  "wv_2026_general": {
+   "mode": "http",
+   "final": false,
+   "max_age_seconds": null
+  },
+  "wy_2026_general": {
+   "mode": "manual",
+   "final": true,
+   "max_age_seconds": 21600
+  }
+ }
+}

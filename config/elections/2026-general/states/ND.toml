@@ -1,0 +1,22 @@
+code = "ND"
+methods = ["total_votes"]
+
+[races]
+senate = false
+house = [0]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "nd_2026_general"
+page = "https://resultsnd.sos.nd.gov/"
+url = "https://api.resultsnd.sos.nd.gov/Contest/GetContestResults?cId=north-dakota&electionID=348&contestType=SW"
+format = "bundle"
+primary_filename = "results-sw.json"
+expected_members = ["results-sw.json", "info.json", "contests.json"]
+min_interval_seconds = 600
+
+[source.files]
+"contests.json" = "https://api.resultsnd.sos.nd.gov/Contest/GetContestSearchList?cId=north-dakota&electionID=348"
+"info.json" = "https://api.resultsnd.sos.nd.gov/Election/GetElectionInfo?cId=north-dakota&electionID=348"

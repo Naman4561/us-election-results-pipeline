@@ -1,0 +1,17 @@
+code = "NC"
+methods = ["total_votes", "election_day", "early_voting", "absentee_by_mail", "provisional"]
+
+[races]
+house = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "nc_2026_general_all"
+page = "https://er.ncsbe.gov/"
+url = "https://s3.amazonaws.com/dl.ncsbe.gov/ENRS/2026_11_03/results_pct_20261103.zip"
+format = "zip"
+primary_filename = "results.xml"
+expected_members = ["results_pct_20261103.txt"]
+min_interval_seconds = 600

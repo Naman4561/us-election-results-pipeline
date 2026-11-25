@@ -1,0 +1,20 @@
+code = "OH"
+methods = ["total_votes"]
+
+[races]
+governor = true
+house = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+
+[acquisition]
+mode = "manual"
+final = true
+max_age_seconds = 21600
+
+[source]
+id = "oh_2026_general"
+page = "https://liveresults.ohiosos.gov/"
+url = "https://liveresults.ohiosos.gov/Api/v1/download?filename=VSSC1622XmlFileBlob"
+format = "bundle"
+primary_filename = "results.xml"
+expected_members = ["results.xml"]
+min_interval_seconds = 600

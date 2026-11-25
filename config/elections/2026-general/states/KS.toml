@@ -1,0 +1,20 @@
+code = "KS"
+methods = ["total_votes"]
+
+[races]
+governor = true
+house = [1, 2, 3, 4]
+
+[acquisition]
+mode = "manual"
+final = true
+max_age_seconds = 21600
+
+[source]
+id = "ks_2026_general"
+page = "https://ent.sos.ks.gov/kssos_ent.html"
+url = "https://ent.sos.ks.gov/kssos_ent.html"
+format = "bundle"
+primary_filename = "results.html"
+expected_members = ["results.html"]
+min_interval_seconds = 600

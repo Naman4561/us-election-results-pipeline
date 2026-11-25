@@ -1,0 +1,19 @@
+code = "WV"
+methods = ["total_votes"]
+collection_backend = "clarity"
+
+[races]
+house = [1, 2]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "wv_2026_general"
+page = "https://results.enr.clarityelections.com/WV/127496/"
+url = "https://results.enr.clarityelections.com/WV/127496/current_ver.txt"
+format = "bundle"
+primary_filename = "current_ver.txt"
+expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
+supplemental_members = ["detail.zip", "settings.json", "summary.json"]
+min_interval_seconds = 600

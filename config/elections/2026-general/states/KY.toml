@@ -1,0 +1,19 @@
+code = "KY"
+methods = ["total_votes"]
+
+[races]
+house = [1, 2, 3, 4, 5, 6]
+
+[acquisition]
+mode = "manual"
+final = false
+max_age_seconds = 21600
+
+[source]
+id = "ky_2026_general"
+page = "https://vrsws.sos.ky.gov/liveresults/"
+url = "https://vrsws.sos.ky.gov/liveresults/Statewide"
+format = "bundle"
+primary_filename = "results.zip"
+expected_members = ["results.zip"]
+min_interval_seconds = 600

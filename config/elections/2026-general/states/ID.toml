@@ -1,0 +1,20 @@
+code = "ID"
+methods = ["total_votes"]
+collection_backend = "enhanced_voting"
+
+[races]
+governor = true
+house = [1, 2]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "id_2026_general"
+page = "https://results.voteidaho.gov/results/public/id/elections/nov2026"
+url = "https://results.voteidaho.gov/results/public/api/elections/id/nov2026/data"
+format = "bundle"
+primary_filename = "data.json"
+expected_members = ["data.json", "item-id-sen.json", "item-id-gov.json", "item-id-01.json", "item-id-02.json"]
+supplemental_members = ["item-id-sen.json", "item-id-gov.json", "item-id-01.json", "item-id-02.json"]
+min_interval_seconds = 600

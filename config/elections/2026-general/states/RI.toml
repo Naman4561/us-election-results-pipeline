@@ -1,0 +1,21 @@
+code = "RI"
+methods = ["total_votes", "election_day", "early_voting", "absentee_by_mail"]
+collection_backend = "enhanced_voting"
+county_results = false
+
+[races]
+governor = true
+house = [1, 2]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "ri_2026_general"
+page = "https://electionresults.ri.gov/results/public/rhodeisland/elections/2026StatewideGeneralElection"
+url = "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/data"
+format = "bundle"
+primary_filename = "data.json"
+expected_members = ["data.json", "item-ri-sen.json", "item-ri-gov.json", "item-ri-01.json", "item-ri-02.json"]
+supplemental_members = ["item-ri-sen.json", "item-ri-gov.json", "item-ri-01.json", "item-ri-02.json"]
+min_interval_seconds = 600

@@ -1,0 +1,23 @@
+code = "WI"
+methods = ["total_votes"]
+collected_counties = true
+vote_basis = "collected_county_reports"
+
+[races]
+senate = false
+governor = true
+house = [1, 2, 3, 4, 5, 6, 7, 8]
+
+[acquisition]
+mode = "manual"
+final = false
+max_age_seconds = 21600
+
+[source]
+id = "wi_2026_general"
+page = "https://elections.wi.gov/elections/election-results"
+url = "https://elections.wi.gov/elections/election-results"
+format = "bundle"
+primary_filename = "results.zip"
+expected_members = ["results.zip"]
+min_interval_seconds = 600

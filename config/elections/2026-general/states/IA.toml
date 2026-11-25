@@ -1,0 +1,20 @@
+code = "IA"
+methods = ["total_votes", "election_day", "absentee_combined"]
+collection_backend = "clarity"
+
+[races]
+governor = true
+house = [1, 2, 3, 4]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "ia_2026_general"
+page = "https://results.enr.clarityelections.com/IA/127077/"
+url = "https://results.enr.clarityelections.com/IA/127077/current_ver.txt"
+format = "bundle"
+primary_filename = "current_ver.txt"
+expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
+supplemental_members = ["detail.zip", "settings.json", "summary.json"]
+min_interval_seconds = 3540

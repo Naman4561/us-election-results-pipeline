@@ -1,0 +1,8 @@
+{
+ "file": "registry_2026.json",
+ "sha256": "682a446fdb6d646dd00ee9b5904e2ba94c56aa47f45387c6b8655ba985d41738",
+ "bytes": 91671,
+ "made": "written for the tests: every State and Source field of the 2026 general election, the collector's limits and how each source is acquired, dumped by election_pipeline.elections.describe",
+ "from": "states.STATES and config/sources.toml at af2ee88 (before the election definition existed); acquisition from production's catalog on 2026-11-25 (17 manual sources, with their final flags and 21600 s freshness limits)",
+ "purpose": "the golden record the definition in config/elections/2026-general must reproduce exactly (tests/test_elections.py)"
+}

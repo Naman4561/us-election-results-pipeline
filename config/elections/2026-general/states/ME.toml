@@ -1,0 +1,21 @@
+code = "ME"
+methods = ["total_votes"]
+statewide_only_votes = "military and overseas (UOCAVA) ballots, reported in no county"
+
+[races]
+governor = true
+house = [1, 2]
+
+[acquisition]
+mode = "manual"
+final = true
+max_age_seconds = 21600
+
+[source]
+id = "me_2026_general"
+page = "https://www.maine.gov/sos/elections-voting/election-results-data"
+url = "https://www.maine.gov/sos/elections-voting/election-results-data"
+format = "bundle"
+primary_filename = "results.zip"
+expected_members = ["results.zip"]
+min_interval_seconds = 600

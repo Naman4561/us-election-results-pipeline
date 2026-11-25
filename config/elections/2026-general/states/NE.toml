@@ -1,0 +1,23 @@
+code = "NE"
+methods = ["total_votes"]
+county_results = false
+
+[races]
+governor = true
+house = [1, 2, 3]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "ne_2026_general_all"
+page = "https://electionresults.nebraska.gov/"
+url = "https://electionresults.nebraska.gov/resultsCSV.aspx?text=All&type=All&map=CTY"
+format = "bundle"
+primary_filename = "results.csv"
+expected_members = ["results.csv", "election.html"]
+collect_hours_utc = [1, 4, 7, 10, 13, 16, 19, 22]
+min_interval_seconds = 600
+
+[source.files]
+"election.html" = "https://electionresults.nebraska.gov/ResultsMedia.aspx"

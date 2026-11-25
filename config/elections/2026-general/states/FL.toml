@@ -1,0 +1,46 @@
+code = "FL"
+methods = ["total_votes"]
+
+[races]
+governor = true
+house = [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "fl_2026_general"
+page = "https://floridaelectionwatch.gov/"
+url = "https://flelectionfiles.floridados.gov/enightfilespublic/20261103_ElecResultsFL.txt"
+format = "bundle"
+primary_filename = "results.txt"
+expected_members = ["results.txt"]
+min_interval_seconds = 600

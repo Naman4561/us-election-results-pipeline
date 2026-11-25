@@ -1,0 +1,20 @@
+code = "DE"
+methods = ["total_votes"]
+
+[races]
+house = [0]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "de_2026_general"
+page = "https://elections.delaware.gov/results/enr/GE2026.html"
+url = "https://elections.delaware.gov/results/enr/Election_StatewideResults_ID_GE2026.json"
+format = "bundle"
+primary_filename = "statewide.json"
+expected_members = ["statewide.json", "counties.json"]
+min_interval_seconds = 600
+
+[source.files]
+"counties.json" = "https://elections.delaware.gov/results/enr/Election_ByCountyWithWilmington_ID_GE2026.json"

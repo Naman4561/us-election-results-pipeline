@@ -1,0 +1,26 @@
+code = "AZ"
+methods = ["total_votes", "early_ballot", "early_ars_16_579", "late_early", "election_day", "provisional"]
+method_note = "Arizona reports its count in five groups, shown under its own names. Early ballots are Arizona's early ballots, most of them cast by mail, not in-person early voting alone."
+
+[races]
+senate = false
+governor = true
+house = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[acquisition]
+mode = "manual"
+final = false
+max_age_seconds = 21600
+
+[source]
+id = "az_2026_general"
+page = "https://results.arizona.vote/"
+url = "https://app.enhancedvoting.com/cdn/results/Arizona/export-110326GeneralElection.json"
+format = "bundle"
+primary_filename = "results.json"
+expected_members = ["results.json"]
+min_interval_seconds = 600
+
+[source.collector_overrides]
+max_download_bytes = 134217728
+max_uncompressed_bytes = 268435456

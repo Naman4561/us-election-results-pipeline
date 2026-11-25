@@ -1,0 +1,21 @@
+code = "CT"
+methods = ["total_votes"]
+collection_backend = "connecticut"
+
+[races]
+senate = false
+governor = true
+house = [1, 2, 3, 4, 5]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "ct_2026_general"
+page = "https://ctemspublic.tgstg.net/#/home"
+url = "https://ctemspublic.tgstg.net/ng-app/data/election/108/Version.json"
+format = "bundle"
+primary_filename = "version.json"
+expected_members = ["version.json", "lookup.json", "election.json", "state.json", "towns.json", "status.json"]
+supplemental_members = ["lookup.json", "election.json", "state.json", "towns.json", "status.json"]
+min_interval_seconds = 600

@@ -1,0 +1,43 @@
+code = "WA"
+methods = ["total_votes"]
+collection_backend = "enhanced_voting"
+
+[races]
+senate = false
+house = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "wa_2026_general"
+page = "https://results.votewa.gov/results/public/washington/elections/20261103"
+url = "https://results.votewa.gov/results/public/api/elections/washington/20261103/data"
+format = "bundle"
+primary_filename = "data.json"
+expected_members = [
+  "data.json",
+  "item-wa-01.json",
+  "item-wa-02.json",
+  "item-wa-03.json",
+  "item-wa-04.json",
+  "item-wa-05.json",
+  "item-wa-06.json",
+  "item-wa-07.json",
+  "item-wa-08.json",
+  "item-wa-09.json",
+  "item-wa-10.json",
+]
+supplemental_members = [
+  "item-wa-01.json",
+  "item-wa-02.json",
+  "item-wa-03.json",
+  "item-wa-04.json",
+  "item-wa-05.json",
+  "item-wa-06.json",
+  "item-wa-07.json",
+  "item-wa-08.json",
+  "item-wa-09.json",
+  "item-wa-10.json",
+]
+min_interval_seconds = 600

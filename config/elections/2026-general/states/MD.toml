@@ -1,0 +1,40 @@
+code = "MD"
+methods = ["total_votes"]
+collection_backend = "gated_files"
+
+[races]
+senate = false
+governor = true
+house = [1, 2, 3, 4, 5, 6, 7, 8]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "md_2026_general"
+page = "https://elections.maryland.gov/elections/2026/general_results/"
+url = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_1_1.html"
+format = "bundle"
+primary_filename = "governor.html"
+expected_members = [
+  "governor.html",
+  "house-01.html",
+  "house-02.html",
+  "house-03.html",
+  "house-04.html",
+  "house-05.html",
+  "house-06.html",
+  "house-07.html",
+  "house-08.html",
+]
+min_interval_seconds = 600
+
+[source.files]
+"house-01.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_1_District%201.html"
+"house-02.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_2_District%202.html"
+"house-03.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_3_District%203.html"
+"house-04.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_4_District%204.html"
+"house-05.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_5_District%205.html"
+"house-06.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_6_District%206.html"
+"house-07.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_7_District%207.html"
+"house-08.html" = "https://elections.maryland.gov/elections/2026/general_results/gen_detail_results_2026_4_8_District%208.html"

@@ -1,0 +1,34 @@
+code = "MN"
+methods = ["total_votes"]
+
+[races]
+governor = true
+house = [1, 2, 3, 4, 5, 6, 7, 8]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "mn_2026_general_all"
+page = "https://electionresults.sos.mn.gov/"
+url = "https://electionresultsfiles.sos.mn.gov/20261103/ussenatecty.txt"
+format = "bundle"
+primary_filename = "senate-county.txt"
+expected_members = [
+  "senate-county.txt",
+  "senate.txt",
+  "house-county.txt",
+  "house.txt",
+  "counties.txt",
+  "governor.txt",
+  "governor-precinct.txt",
+]
+min_interval_seconds = 600
+
+[source.files]
+"counties.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/Cntytbl.txt"
+"governor-precinct.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/governorpct.txt"
+"governor.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/Governor.txt"
+"house-county.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/USHouseCty.txt"
+"house.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/USHouse.txt"
+"senate.txt" = "https://electionresultsfiles.sos.mn.gov/20261103/ussenate.txt"

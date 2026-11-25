@@ -1,0 +1,20 @@
+code = "UT"
+methods = ["total_votes"]
+collection_backend = "enhanced_voting"
+
+[races]
+senate = false
+house = [1, 2, 3, 4]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "ut_2026_general"
+page = "https://electionresults.utah.gov/results/public/utah/elections/General11032026"
+url = "https://electionresults.utah.gov/results/public/api/elections/utah/General11032026/data"
+format = "bundle"
+primary_filename = "data.json"
+expected_members = ["data.json", "item-ut-01.json", "item-ut-02.json", "item-ut-03.json", "item-ut-04.json"]
+supplemental_members = ["item-ut-01.json", "item-ut-02.json", "item-ut-03.json", "item-ut-04.json"]
+min_interval_seconds = 600

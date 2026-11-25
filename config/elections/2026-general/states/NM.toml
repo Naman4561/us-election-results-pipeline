@@ -1,0 +1,42 @@
+code = "NM"
+methods = ["total_votes"]
+collection_backend = "enr_export"
+county_privacy_masking = true
+
+[races]
+governor = true
+house = [1, 2, 3]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "nm_2026_general"
+page = "https://electionresults.sos.nm.gov/"
+url = "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=FED&map=CTY"
+format = "bundle"
+primary_filename = "fed.csv"
+expected_members = [
+  "fed.csv",
+  "sw.csv",
+  "fed.html",
+  "sw.html",
+  "county-nm-01.xlsx",
+  "county-nm-02.xlsx",
+  "county-nm-03.xlsx",
+  "county-nm-gov.xlsx",
+  "county-nm-sen.xlsx",
+]
+supplemental_members = [
+  "county-nm-01.xlsx",
+  "county-nm-02.xlsx",
+  "county-nm-03.xlsx",
+  "county-nm-gov.xlsx",
+  "county-nm-sen.xlsx",
+]
+min_interval_seconds = 3540
+
+[source.files]
+"fed.html" = "https://electionresults.sos.nm.gov/resultsSW.aspx?type=FED&map=CTY"
+"sw.csv" = "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=SW&map=CTY"
+"sw.html" = "https://electionresults.sos.nm.gov/resultsSW.aspx?type=SW&map=CTY"

@@ -1,0 +1,20 @@
+code = "NH"
+methods = ["total_votes"]
+
+[races]
+governor = true
+house = [1, 2]
+
+[acquisition]
+mode = "manual"
+final = false
+max_age_seconds = 21600
+
+[source]
+id = "nh_2026_general"
+page = "https://www.sos.nh.gov/2026-general-election-results"
+url = "https://www.sos.nh.gov/2026-general-election-results"
+format = "bundle"
+primary_filename = "results.zip"
+expected_members = ["results.zip"]
+min_interval_seconds = 600

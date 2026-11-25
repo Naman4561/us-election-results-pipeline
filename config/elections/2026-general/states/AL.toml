@@ -1,0 +1,20 @@
+code = "AL"
+methods = ["total_votes"]
+collection_backend = "alabama"
+
+[races]
+governor = true
+house = [1, 2, 3, 4, 5, 6, 7]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "al_2026_general"
+page = "https://www2.alabamavotes.gov/electionNight/statewideResultsByContest.aspx?ecode=1001305"
+url = "https://www2.alabamavotes.gov/electionNight/statewideResultsByContest.aspx?ecode=1001305"
+format = "bundle"
+primary_filename = "results.html"
+expected_members = ["results.html", "export.xlsx"]
+supplemental_members = ["export.xlsx"]
+min_interval_seconds = 600

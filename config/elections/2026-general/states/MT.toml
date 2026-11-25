@@ -1,0 +1,19 @@
+code = "MT"
+methods = ["total_votes"]
+collection_backend = "montana"
+
+[races]
+house = [1, 2]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "mt_2026_general"
+page = "https://electionresults.mt.gov/"
+url = "https://electionresults.mt.gov/ResultsExport.aspx"
+format = "bundle"
+primary_filename = "export.html"
+expected_members = ["export.html", "statewide.xlsx"]
+supplemental_members = ["statewide.xlsx"]
+min_interval_seconds = 600

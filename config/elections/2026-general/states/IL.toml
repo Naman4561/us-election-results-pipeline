@@ -1,0 +1,22 @@
+code = "IL"
+methods = ["total_votes"]
+collected_counties = true
+vote_basis = "collected_county_reports"
+
+[races]
+governor = true
+house = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+
+[acquisition]
+mode = "manual"
+final = false
+max_age_seconds = 21600
+
+[source]
+id = "il_2026_general"
+page = "https://www.elections.il.gov/ElectionOperations/ElectionAuthorities.aspx"
+url = "https://www.elections.il.gov/ElectionOperations/ElectionAuthorities.aspx"
+format = "bundle"
+primary_filename = "results.zip"
+expected_members = ["results.zip"]
+min_interval_seconds = 600

@@ -1,0 +1,20 @@
+code = "CO"
+methods = ["total_votes"]
+collection_backend = "clarity"
+
+[races]
+governor = true
+house = [1, 2, 3, 4, 5, 6, 7, 8]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "co_2026_general"
+page = "https://results.enr.clarityelections.com/CO/127407/"
+url = "https://results.enr.clarityelections.com/CO/127407/current_ver.txt"
+format = "bundle"
+primary_filename = "current_ver.txt"
+expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
+supplemental_members = ["detail.zip", "settings.json", "summary.json"]
+min_interval_seconds = 600
