@@ -267,6 +267,13 @@ test("national/state map navigation and coverage statuses", async (t) => {
   click('.round-tabs button[data-round="first"]');
   assert(shown().includes("CSV-listed candidates"));
   assert(!shown().includes("RANKED-CHOICE TABULATION"));
+  // The map follows the selected round too.
+  const atLarge = () =>
+    d.querySelector('path[data-id="AK-AL"] title').textContent;
+  assert(!atLarge().includes("ranked-choice round"));
+  click('.round-tabs button[data-round="2"]');
+  assert(atLarge().includes("ranked-choice round 2"));
+  assert(d.querySelector("#map-description").textContent.includes("round 2"));
   click("#national");
   click('[data-office="senate"]');
   click('path[data-id="KY"]');

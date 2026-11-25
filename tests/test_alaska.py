@@ -316,6 +316,20 @@ class AlaskaTests(unittest.TestCase):
         ):
             with self.assertRaises(ValueError):
                 payload(rows)
+        # Alaska reports its rounds statewide only. A state that breaks them out by place
+        # gets each place's rounds by map key, for the map to follow.
+        self.assertNotIn("counties", house)
+        placed = rounds + [{**r, "county": "House District 1"} for r in rounds]
+        by_place = payload(placed)["races"]["AK-AL"]["ranked_choice"]["counties"]
+        self.assertEqual(list(by_place), ["HOUSEDISTRICT1"])
+        self.assertEqual(by_place["HOUSEDISTRICT1"][-1]["leader"], "REP")
+        for rows in (
+            rounds + [{**r, "county": "House District 99"} for r in rounds],
+            rounds + [{**r, "county": "House District 1"} for r in rounds if r["round"] < 3],
+            [{**r, "county": "House District 1"} for r in rounds],
+        ):
+            with self.assertRaises(ValueError):
+                payload(rows)
 
     def test_a_tabulation_that_does_not_add_up_is_refused(self):
         lines = ak_rcv.lines_of((FIXTURE / "rcv-usrep.pdf").read_bytes(), self.settings)

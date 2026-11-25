@@ -132,6 +132,26 @@ function isElection(code) {
     data.calendar[view.office + "_states"].includes(code)
   );
 }
+// The round a ranked-choice race is shown at (its selected tab, the final round until
+// one is chosen), or null for first choices and every other race.
+function selectedRound(contest, race) {
+  const ranked = contest?.ranked_choice;
+  if (!ranked) return null;
+  const tab = roundTab[race] || ranked.final_round;
+  return tab === "first" ? null : tab;
+}
+// One round of a tabulation in the shape of a race's first-choice stats.
+function roundStats(round) {
+  const [first, second] = round.candidates;
+  return {
+    total: round.continuing,
+    status: round.status,
+    candidates: round.candidates,
+    leader: round.leader,
+    margin: second ? first.votes - second.votes : null,
+    round: round.round,
+  };
+}
 function statusFor(code, race, county = null) {
   if (!isElection(code)) return { status: "no_election" };
   if (!(data.coverage[code] || []).includes(race))
@@ -153,9 +173,19 @@ function statusFor(code, race, county = null) {
     return { status: "not_covered" };
   if (feed?.collection_status === "unavailable")
     return { status: "unavailable" };
-  const stats = county
-    ? contest?.counties?.[county]?.stats[view.method]
-    : contest?.stats[view.scope === "US" ? "total_votes" : view.method];
+  // A ranked-choice race is shown at its selected round wherever the state reports the
+  // rounds for that place; a place without them shows its first choices.
+  const round = selectedRound(contest, race);
+  const rounds = round
+    ? county
+      ? contest.ranked_choice.counties?.[county]
+      : contest.ranked_choice.rounds
+    : null;
+  const stats = rounds
+    ? roundStats(rounds[round - 1])
+    : county
+      ? contest?.counties?.[county]?.stats[view.method]
+      : contest?.stats[view.scope === "US" ? "total_votes" : view.method];
   // A House district from certified county recaps is partial while a county is missing.
   const incomplete = contest?.missing_counties
     ? contest.missing_counties.length > 0
@@ -332,7 +362,7 @@ function drawMap() {
         ? ` · ${partial.with_results}/${partial.expected} counties with accepted counts`
         : "";
     const runoff = view.office === "house" ? runoffText(code, f.id) : "";
-    const description = `${f.name}: ${descriptions[result.status]}${runoff ? " · " + runoff : ""}${partialText}${result.staleCounty ? " · stale county source" : ""}${firstChoice ? " · listed candidates, first choice only" : ""}${result.stats?.total ? " · " + number(result.stats.total) + " votes" : ""}`;
+    const description = `${f.name}: ${descriptions[result.status]}${runoff ? " · " + runoff : ""}${partialText}${result.staleCounty ? " · stale county source" : ""}${result.stats?.round ? " · ranked-choice round " + result.stats.round : firstChoice ? " · listed candidates, first choice only" : ""}${result.stats?.total ? " · " + number(result.stats.total) + " votes" : ""}`;
     const title = document.createElementNS(ns, "title");
     title.textContent = description;
     p.append(title);
@@ -693,22 +723,30 @@ function renderStatePanel() {
     }
   }
   // A race decided by ranked-choice tabulation (Alaska's House race): tabs switch the
-  // candidates between each round of the tabulation and the precinct first choices.
-  const ranked = view.county ? null : contest?.ranked_choice;
-  const tab = ranked ? roundTab[race] || ranked.final_round : null;
-  const shown = ranked && tab !== "first" ? ranked.rounds[tab - 1] : null;
-  if (ranked) target.append(roundTabs(race, ranked, tab));
+  // candidates, and the map, between each round of the tabulation and the precinct
+  // first choices. A county or district has tabs where the state reports its rounds.
+  const ranked = contest?.ranked_choice;
+  const placeRounds = !ranked
+    ? null
+    : view.county
+      ? ranked.counties?.[view.county]
+      : ranked.rounds;
+  const tab = placeRounds ? roundTab[race] || ranked.final_round : null;
+  const shown = placeRounds && tab !== "first" ? placeRounds[tab - 1] : null;
+  if (placeRounds) target.append(roundTabs(race, ranked, tab));
   if (shown) {
-    const out = shown.candidates
+    const out = ranked.rounds[shown.round - 1].candidates
       .filter((c) => c.outcome === "eliminated")
       .map((c) => c.name)
       .join(", ");
+    const note =
+      shown.round === ranked.final_round
+        ? `${ranked.elected} elected in the final round.`
+        : `Round ${shown.round} of ${ranked.final_round}. ${out} eliminated after this round; their ballots pass to the next ranking.`;
     target.append(
       element(
         "p",
-        shown.round === ranked.final_round
-          ? `RANKED-CHOICE TABULATION · ${ranked.elected} elected in the final round. Shares are of the round's continuing ballots.`
-          : `RANKED-CHOICE TABULATION · Round ${shown.round} of ${ranked.final_round}. ${out} eliminated after this round; their ballots pass to the next ranking.`,
+        `RANKED-CHOICE TABULATION · ${note} Shares are of the round's continuing ballots${view.county ? " here" : ""}.`,
         "ranked-choice",
       ),
     );
@@ -836,7 +874,7 @@ function roundTabs(race, ranked, tab) {
     button.dataset.round = String(value);
     button.addEventListener("click", () => {
       roundTab[race] = value;
-      renderStatePanel();
+      render();
     });
     tabs.append(button);
   }
@@ -975,6 +1013,17 @@ function renderControls() {
       : state.vote_basis === "first_choice_listed_candidates"
         ? "Color shows the first-choice leader among CSV-listed candidates. A race decided by ranked-choice tabulation lists its rounds with the results."
         : "Color shows the leading candidate’s party, not a race call.";
+  // A ranked-choice race at a selected round: the map follows the round where the
+  // state reports it for each place shown.
+  const shownRace = national ? null : raceFor(view.scope);
+  const round = national
+    ? null
+    : selectedRound(state.races?.[shownRace], shownRace);
+  if (round)
+    $("map-description").textContent =
+      view.office !== "house" && !state.races[shownRace].ranked_choice.counties
+        ? `Colors show first choices: ${state.name} reports this race’s ranked-choice rounds statewide only.`
+        : `Color shows each place’s leader in ranked-choice round ${round}.`;
   const methods = national ? ["total_votes"] : state.methods || ["total_votes"];
   if (!methods.includes(view.method)) view.method = "total_votes";
   $("method").replaceChildren(
