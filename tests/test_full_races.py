@@ -449,55 +449,41 @@ class FullRaceParserTests(unittest.TestCase):
 
 @requires_database
 class FullRaceDatabaseTests(unittest.TestCase):
-    def test_loads_publish_into_shared_tables_the_dashboard_may_read(self):
+    """Every source's load and publish is in tests/test_every_source.py; this keeps North
+    Carolina's party-less write-in, which must publish with its vote methods."""
+
+    def test_a_partyless_write_in_publishes_with_its_vote_methods(self):
         from election_pipeline.database import connect, load_parsed
 
         db = migrated()
-        for code, count in (("TX", 40), ("MN", 10), ("NC", 15), ("NE", 5)):
-            with self.subTest(code), tempfile.TemporaryDirectory() as directory:
-                root = Path(directory)
-                source, settings, parsed = parse_fixture(code, members(code), root)
-                self.assertEqual(parsed["outcome"], "parsed", parsed)
-                loaded = load_parsed(source, settings, root, Path(parsed["output_dir"]), db)
-                self.assertEqual(loaded["outcome"], "succeeded", loaded)
-                checked = publication.prepare(ROOT, db, loaded["release_id"], "unofficial")
-                published = publication.publish_prepared(ROOT, db, checked["candidate_id"])
-                self.assertEqual(published["outcome"], "published", published)
-                with connect(db) as conn:
-                    conn.execute("SET ROLE election_dashboard")
-                    rows = conn.execute(
-                        "SELECT * FROM serving.contest_results WHERE publication_id=%s",
-                        (published["publication_id"],),
-                    ).fetchall()
-                    self.assertEqual(len({row["contest_id"] for row in rows}), count)
-                    self.assertEqual({row["state"] for row in rows}, {code})
-                    if code == "NC":
-                        write_ins = [
-                            row for row in rows if row["choice"] == "Write-In (Miscellaneous)"
-                        ]
-                        self.assertEqual(len(write_ins), 1)
-                        self.assertIsNone(write_ins[0]["choice_party"])
-                        self.assertEqual(write_ins[0]["total_votes"], 10)
-                        methods = conn.execute(
-                            "SELECT method, votes FROM serving.contest_method_results "
-                            "WHERE publication_id=%s AND choice=%s",
-                            (published["publication_id"], "Write-In (Miscellaneous)"),
-                        ).fetchall()
-                        self.assertEqual(
-                            {m["method"]: m["votes"] for m in methods},
-                            {
-                                "election_day": 1,
-                                "early_voting": 2,
-                                "absentee_by_mail": 3,
-                                "provisional": 4,
-                            },
-                        )
-                    # The dashboard reads published results only, never parsed rows.
-                    self.assertFalse(
-                        conn.execute(
-                            "SELECT has_schema_privilege(current_user, 'landing', 'USAGE') AS ok"
-                        ).fetchone()["ok"]
-                    )
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source, settings, parsed = parse_fixture("NC", members("NC"), root)
+            self.assertEqual(parsed["outcome"], "parsed", parsed)
+            loaded = load_parsed(source, settings, root, Path(parsed["output_dir"]), db)
+            self.assertEqual(loaded["outcome"], "succeeded", loaded)
+            checked = publication.prepare(ROOT, db, loaded["release_id"], "unofficial")
+            published = publication.publish_prepared(ROOT, db, checked["candidate_id"])
+            self.assertEqual(published["outcome"], "published", published)
+        with connect(db) as conn:
+            conn.execute("SET ROLE election_dashboard")
+            key = (published["publication_id"], "Write-In (Miscellaneous)")
+            write_ins = conn.execute(
+                "SELECT * FROM serving.contest_results WHERE publication_id=%s AND choice=%s",
+                key,
+            ).fetchall()
+            self.assertEqual(len(write_ins), 1)
+            self.assertIsNone(write_ins[0]["choice_party"])
+            self.assertEqual(write_ins[0]["total_votes"], 10)
+            methods = conn.execute(
+                "SELECT method, votes FROM serving.contest_method_results "
+                "WHERE publication_id=%s AND choice=%s",
+                key,
+            ).fetchall()
+            self.assertEqual(
+                {m["method"]: m["votes"] for m in methods},
+                {"election_day": 1, "early_voting": 2, "absentee_by_mail": 3, "provisional": 4},
+            )
 
 
 if __name__ == "__main__":
