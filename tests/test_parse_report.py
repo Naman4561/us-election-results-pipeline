@@ -1,6 +1,7 @@
 """A parse report read as typed facts: official status, report time, reconciliation."""
 
 import unittest
+from pathlib import Path
 
 from election_pipeline.parse_report import (
     BASES,
@@ -9,6 +10,7 @@ from election_pipeline.parse_report import (
     RECONCILIATION_OUTCOMES,
     UNOFFICIAL,
     Reading,
+    fields,
     read,
     stated_time,
 )
@@ -39,6 +41,30 @@ class OfficialStatusTests(unittest.TestCase):
         ):
             with self.subTest(report), self.assertRaisesRegex(ValueError, "Inconsistent"):
                 read(report)
+
+
+class DeclarationTests(unittest.TestCase):
+    def test_a_parser_declares_its_sources_status_through_one_function(self):
+        self.assertEqual(fields(True), {"official_results": True, "official_status": OFFICIAL})
+        self.assertEqual(fields(False), {"official_results": False, "official_status": UNOFFICIAL})
+        # A source with no marker is not stated, and the flag consumers read is False.
+        self.assertEqual(
+            fields(NOT_STATED), {"official_results": False, "official_status": NOT_STATED}
+        )
+        for status in (OFFICIAL, UNOFFICIAL, NOT_STATED):
+            self.assertEqual(read(fields(status)).official, status)
+        for odd in ("true", 1, None, "certified"):
+            with self.subTest(odd), self.assertRaisesRegex(ValueError, "must be one of"):
+                fields(odd)
+
+    def test_no_parser_writes_the_status_flag_by_hand(self):
+        folder = Path(__file__).resolve().parents[1] / "src/election_pipeline/parsers"
+        writers = [
+            path.name
+            for path in sorted(folder.glob("*.py"))
+            if "official_results=" in path.read_text(encoding="utf-8")
+        ]
+        self.assertEqual(writers, [])
 
 
 class ReportTimeTests(unittest.TestCase):

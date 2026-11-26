@@ -18,6 +18,7 @@ from datetime import datetime, timedelta, timezone
 
 from pypdf import PdfReader
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import row
@@ -128,6 +129,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats.update(
         source_update_text=stamp[0],
         source_generated_at=generated.isoformat(),
-        official_results=status == "Official Results",
+        **parse_report.fields(status == "Official Results"),
         contest_total_reconciliation="passed",
     )

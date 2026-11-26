@@ -75,6 +75,22 @@ class Reading:
             raise ValueError(f"Unknown reconciliation outcomes {sorted(unknown)}")
 
 
+def fields(official):
+    """The keys a parser records for whether its source says its results are official.
+
+    ``official`` is ``OFFICIAL``, ``UNOFFICIAL`` or ``NOT_STATED``, or a bool for a source
+    that has a marker (True: official; False: it says unofficial). A source with no marker
+    at all says ``NOT_STATED``; it is never ``UNOFFICIAL`` by default. The older
+    ``official_results`` flag is written too, True only for ``OFFICIAL``, because stored
+    reports and several consumers read it.
+    """
+    if isinstance(official, bool):
+        official = OFFICIAL if official else UNOFFICIAL
+    if official not in OFFICIAL_STATUSES:
+        raise ValueError(f"Official status must be one of {OFFICIAL_STATUSES}")
+    return {"official_results": official == OFFICIAL, "official_status": official}
+
+
 def stated_time(text):
     """``text`` as ISO 8601 with its offset when it names its zone, else None."""
     if not isinstance(text, str):

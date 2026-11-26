@@ -22,6 +22,7 @@ and its position in the official list (e.g. ``1000-2``); the reviewed roster pin
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.parsers import clarity
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
@@ -173,6 +174,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=updated,
-        official_results=final,
+        **parse_report.fields(final),
         contest_total_reconciliation="passed",
     )

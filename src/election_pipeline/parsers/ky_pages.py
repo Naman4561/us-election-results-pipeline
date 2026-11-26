@@ -20,6 +20,7 @@ import zipfile
 from datetime import datetime, timedelta, timezone
 from html import unescape
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.ky import contest_key
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
@@ -162,8 +163,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats.update(
         source_update_text=f"Last Update: {update}; counties reporting {reporting}",
         source_generated_at=generated.isoformat(),
-        official_results=False,
         # Saved results pages carry no official marker; certification is attested.
-        official_status="not_stated",
+        **parse_report.fields(parse_report.NOT_STATED),
         contest_total_reconciliation="passed",
     )

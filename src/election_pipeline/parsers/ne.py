@@ -5,6 +5,7 @@ import io
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.common import integer
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_rows
@@ -84,4 +85,4 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             )
     verify_rows("NE", rows)
     finish(rows, source, settings, output, stats, reference=reference)
-    stats.update(official_results=official)
+    stats.update(**parse_report.fields(official))

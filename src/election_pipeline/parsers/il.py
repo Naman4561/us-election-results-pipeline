@@ -60,7 +60,7 @@ import zipfile
 from datetime import datetime, timedelta, timezone
 from html import unescape
 
-from election_pipeline import elections, reviews
+from election_pipeline import elections, parse_report, reviews
 from election_pipeline.parsers import clarity
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.rosters import ROSTERS
@@ -646,9 +646,8 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             f"{canvassed} canvassed); partial counts: {', '.join(sorted(partial)) or 'none'}; "
             f"newest results {newest.isoformat()}"
         ),
-        official_results=False,
         # County reports, some canvassed: no statewide marker; certification is attested.
-        official_status="not_stated",
+        **parse_report.fields(parse_report.NOT_STATED),
         contest_total_reconciliation="passed",
         counties_waiting=waiting,
         authority_reports={

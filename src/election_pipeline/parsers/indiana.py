@@ -19,6 +19,7 @@ publication each name must keep one ID in every county.
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row, text, unique_json
@@ -148,6 +149,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=updated,
-        official_results=certified,
+        **parse_report.fields(certified),
         contest_total_reconciliation="passed",
     )

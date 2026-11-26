@@ -13,6 +13,7 @@ statewide votes, and those to the page's contest total. Write-in votes are one
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.enr_platform import page_text
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
@@ -167,7 +168,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=updated[0] + " CT",
-        official_results=False,
+        **parse_report.fields(False),
         counties_reported="{} of {}".format(*reported[0]),
         contest_total_reconciliation="passed",
     )

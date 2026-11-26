@@ -7,6 +7,7 @@ import zipfile
 from datetime import datetime
 from urllib.parse import urlsplit
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_rows
 
@@ -157,6 +158,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         source_version=version,
         source_update_text=updated,
         source_update_timezone="not specified by source; no timezone inferred",
-        official_results=official_canvass(envelope),
+        **parse_report.fields(official_canvass(envelope)),
         contest_total_reconciliation="passed",
     )

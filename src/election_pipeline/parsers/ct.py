@@ -16,6 +16,7 @@ the state's own, so the version number is recorded instead.
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row, unique_json
@@ -162,7 +163,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=f"version {number}",
-        official_results=official == {True},
+        **parse_report.fields(official == {True}),
         contest_total_reconciliation="passed",
         party_line_reconciliation="passed",
     )

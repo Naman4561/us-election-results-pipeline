@@ -18,6 +18,7 @@ import io
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import row
@@ -174,7 +175,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats.update(
         # The state's own label: its canvassed export ends "RESULTS: OFFICIAL", the
         # election-week one "RESULTS: " with nothing after it.
-        official_results=footer[2] == "OFFICIAL",
+        **parse_report.fields(footer[2] == "OFFICIAL"),
         total_voter_turnout=int(lines[0].split(": ", 1)[1].replace(",", "")),
         write_in_votes={
             race: sum(v for (r, _), v in write_ins.items() if r == race) for race in wanted

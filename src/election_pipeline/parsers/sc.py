@@ -10,6 +10,7 @@ election-night workbook and its fallback index page instead, and still parse.
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.collectors.sc import latest_report
 from election_pipeline.parsers import clarity
 from election_pipeline.parsers.results import finish
@@ -155,7 +156,7 @@ def parse_clarity(archive_path, source, settings, output, stats, reference):
     stats.update(
         source_update_text=updated,
         source_timestamp=text(root.findtext("Timestamp"), "timestamp"),
-        official_results=final,
+        **parse_report.fields(final),
         contest_total_reconciliation="passed",
         vote_method_reconciliation="passed",
     )

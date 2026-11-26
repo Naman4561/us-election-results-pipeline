@@ -30,7 +30,7 @@ from datetime import datetime, timedelta, timezone
 
 from pypdf import PdfReader
 
-from election_pipeline import elections
+from election_pipeline import elections, parse_report
 from election_pipeline.parsers import clarity
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
@@ -333,8 +333,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats.update(
         source_generated_at=max(times).isoformat(),
         source_update_text=f"newest county update {max(times).isoformat()}",
-        official_results=False,
         # County reports: no statewide marker; certification is attested.
-        official_status="not_stated",
+        **parse_report.fields(parse_report.NOT_STATED),
         contest_total_reconciliation="passed",
     )

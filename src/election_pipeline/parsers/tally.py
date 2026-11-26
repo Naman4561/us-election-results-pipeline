@@ -20,6 +20,7 @@ import re
 import zipfile
 from dataclasses import dataclass
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row, text, unique_json
@@ -184,7 +185,7 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
     stats.update(
         source_version=published,
         source_update_text=text(info.get("lastUpdated"), "update time"),
-        official_results=official,
+        **parse_report.fields(official),
         contest_total_reconciliation="passed",
         vote_methods="reported_not_stored",
     )

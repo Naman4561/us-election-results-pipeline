@@ -11,6 +11,7 @@ import re
 import zipfile
 from datetime import datetime
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.enr_platform import (
     county_sheet,
     export_target,
@@ -127,6 +128,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     finish(output_rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=updated,
-        official_results=official,
+        **parse_report.fields(official),
         contest_total_reconciliation="passed",
     )

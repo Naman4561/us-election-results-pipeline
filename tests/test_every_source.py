@@ -220,6 +220,12 @@ class EverySourceTests(unittest.TestCase):
                 self.assertIn(
                     (adapter.county_mode, report["county_reconciliation"]), CONSISTENT_MODES
                 )
+                # Every report states its source's official status; none is left to a default
+                # that reads as "not official".
+                self.assertIn(report["official_status"], parse_report.OFFICIAL_STATUSES)
+                self.assertEqual(
+                    report["official_results"], report["official_status"] == parse_report.OFFICIAL
+                )
                 self.assertFalse(report["all_counts_zero"])
                 self.assertIn(report["county_reconciliation"], RECONCILED)
                 contests = set(report["contests"])

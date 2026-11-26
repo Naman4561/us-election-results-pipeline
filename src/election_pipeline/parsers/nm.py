@@ -12,6 +12,7 @@ must reconcile with the totals, but this totals-only contract does not store the
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.enr_platform import (
     county_sheet,
     export_target,
@@ -226,7 +227,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     )
     stats.update(
         source_update_text=updates.pop(),
-        official_results=official,
+        **parse_report.fields(official),
         contest_total_reconciliation="passed",
         county_reconciliation=(
             "passed_except_privacy_masked_counties" if hidden_counties else "passed"
