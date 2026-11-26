@@ -35,30 +35,21 @@ HEADER = (
     "CandidateEarlyVotes"
 ).split(",")
 CHANGE_MEMBERS = ("fed.csv", "sw.csv")
-TITLE = "2026 {} General Election Results"
-LABEL = "{} Results GENERAL 2026 November 3, 2026"
-STATE_LINE = "State of New Mexico"
 METHODS = ("Absentee", "Early", "ElectionDay")
 
 
-def contest(values):
+def contest(values, site):
+    """The race a CSV row is for: its race name, then its district where it has one."""
     name, area = " ".join(values["RaceName"].split()), values["AreaNum"]
-    if name == "United States Senator" and not area:
-        return "NM-SEN"
-    if name == "Governor and Lieutenant Governor" and not area:
-        return "NM-GOV"
-    match = re.fullmatch(r"DISTRICT ([1-3])", area)
-    if name == "United States Representative" and match:
-        return f"NM-0{match[1]}"
-    return None
+    return site.race(f"{name} {area}".strip())
 
 
-def races(members, wanted):
+def races(members, site, wanted):
     """Statewide CSV rows for the selected races, keyed by contest."""
     found = {}
     for member in CHANGE_MEMBERS:
         for line, values in read_csv(members[member], HEADER, "New Mexico"):
-            race = contest(values)
+            race = contest(values, site)
             if race not in wanted:
                 continue
             if values["VoteFor"] != "1":
@@ -83,10 +74,11 @@ def page_for(race):
 
 
 def exports(paths, source):
+    from election_pipeline.platforms import enr
     from election_pipeline.states import state_adapter
 
-    wanted = state_adapter("NM").races
-    found = races({m: paths[m].read_bytes() for m in CHANGE_MEMBERS}, wanted)
+    wanted = state_adapter(source.state).races
+    found = races({m: paths[m].read_bytes() for m in CHANGE_MEMBERS}, enr(source), wanted)
     plan = []
     for race in sorted(found):
         page = paths[page_for(race)].read_text(encoding="utf-8", errors="replace")
@@ -102,14 +94,14 @@ def sheet_name(race, csv_name, area):
     return csv_name, csv_name
 
 
-def methods_state(book, prefix_name, header_name, totals_by_county, title):
+def methods_state(book, prefix_name, header_name, totals_by_county, title, state_line):
     """'not_reported' while every method cell is ``*``; otherwise they must reconcile."""
     reported = False
     method_cells = []
     for method in METHODS:
         sheet = find_sheet(book, method, prefix_name)
         names, counties, totals = sheet_rows(
-            book, sheet, header_name, title=title, state_line=STATE_LINE, unreported=True
+            book, sheet, header_name, title=title, state_line=state_line, unreported=True
         )
         if set(counties) != set(totals_by_county):
             raise ValueError(f"{header_name}: {method} sheet covers different counties")
@@ -128,18 +120,18 @@ def methods_state(book, prefix_name, header_name, totals_by_county, title):
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
+    from election_pipeline.platforms import enr
     from election_pipeline.states import state_adapter
 
-    if source.format != "bundle" or source.election_date != "2026-11-03" or source.state != "NM":
+    site = enr(source)
+    if source.format != "bundle":
         raise ValueError("Unsupported New Mexico source/election")
-    wanted = state_adapter("NM").races
+    wanted = state_adapter(source.state).races
     with zipfile.ZipFile(archive_path) as archive:
         pages = [archive.read(p).decode("utf-8", errors="replace") for p in ("fed.html", "sw.html")]
-        updates = {
-            statewide_update(page, "New Mexico", "GENERAL 2026 November 3, 2026") for page in pages
-        }
-        statuses = {results_status(page_text(page), LABEL, "New Mexico") for page in pages}
-        found = races({m: archive.read(m) for m in CHANGE_MEMBERS}, wanted)
+        updates = {statewide_update(page, site, source) for page in pages}
+        statuses = {results_status(page_text(page), site.status_label, site.name) for page in pages}
+        found = races({m: archive.read(m) for m in CHANGE_MEMBERS}, site, wanted)
         books = {race: Workbook(archive.read(member(race)), settings) for race in found}
     if len(statuses) != 1:
         raise ValueError("New Mexico results pages disagree on whether results are official")
@@ -150,9 +142,9 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     # statewide CSVs (county_sheet), and the report records the titles printed. Pages that
     # are not official accept only the unofficial title.
     title = (
-        (TITLE.format("Official"), TITLE.format("Unofficial"))
+        (site.workbook_title.format("Official"), site.workbook_title.format("Unofficial"))
         if official
-        else (TITLE.format("Unofficial"),)
+        else (site.workbook_title.format("Unofficial"),)
     )
     printed = sorted({book.rows(sheet)[0][0] for book in books.values() for sheet in book.sheets})
     output_rows, hidden_counties, method_status = [], {}, {}
@@ -199,15 +191,17 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             header_name,
             {name: votes for name, (_, _, votes) in candidates.items()},
             title=title,
-            state_line=STATE_LINE,
+            state_line=site.state_line,
             masked=True,
         )
         totals_by_county = {
             **{c: {name_key(n): v for n, v in votes.items()} for c, votes in counties.items()},
             **{county: {} for county in hidden},
         }
-        method_status[race] = methods_state(book, prefix_name, header_name, totals_by_county, title)
-        verify_scope("NM", race, [c[0] for c in candidates.values()], [*counties, *hidden])
+        method_status[race] = methods_state(
+            book, prefix_name, header_name, totals_by_county, title, site.state_line
+        )
+        verify_scope(source.state, race, [c[0] for c in candidates.values()], [*counties, *hidden])
         if hidden:
             hidden_counties[race] = hidden
         for county, votes in counties.items():

@@ -35,38 +35,18 @@ HEADER = (
     "PrecinctsReporting"
 ).split(",")
 CHANGE_MEMBERS = ("export.html",)
-# The page's header box; its write-in disclaimer says "Unofficial" whatever the status.
-LABEL = "{} General Election November 3, 2026"
 CSV_OPTION = {"ctl00$MainContent$rblTypes": "1"}
 STATEWIDE = {"statewide.csv": "Statewide Export", "governor.csv": "Governor Export"}
-COUNTIES = (
-    *"Baker Benton Clackamas Clatsop Columbia Coos Crook Curry Deschutes Douglas".split(),
-    *"Gilliam Grant Harney".split(),
-    "Hood River",
-    *"Jackson Jefferson Josephine Klamath Lake Lane Lincoln Linn Malheur Marion".split(),
-    *"Morrow Multnomah Polk Sherman Tillamook Umatilla Union Wallowa Wasco".split(),
-    *"Washington Wheeler Yamhill".split(),
-)
-PARTIES = {"Democrat": "DEM", "Republican": "REP", "Libertarian": "LIB", "Pacific Green": "GRN"}
-ORDINAL = {1: "1st", 2: "2nd", 3: "3rd", 4: "4th", 5: "5th", 6: "6th"}
 
 
 def member(county):
     return "county-" + county.lower().replace(" ", "-") + ".csv"
 
 
-def contest(name):
-    if name == "US Senator":
-        return "OR-SEN"
-    if name == "Governor":
-        return "OR-GOV"
-    match = re.fullmatch(r"US Representative, ([1-6])(st|nd|rd|th) District", name)
-    if match and ORDINAL[int(match[1])] == match[1] + match[2]:
-        return f"OR-0{match[1]}"
-    return None
-
-
 def exports(paths, source):
+    from election_pipeline.platforms import enr
+
+    counties = enr(source).counties
     page = paths["export.html"].read_text(encoding="utf-8", errors="replace")
     plan = [
         (name, "export.html", export_target(page, link_text=label), CSV_OPTION)
@@ -74,7 +54,7 @@ def exports(paths, source):
     ]
     plan += [
         (member(county), "export.html", export_target(page, link_text=county), CSV_OPTION)
-        for county in COUNTIES
+        for county in counties
     ]
     return plan
 
@@ -98,16 +78,16 @@ def records(raw, label):
         yield values
 
 
-def party(nominating):
-    first = nominating.split(",")[0].strip()
-    return PARTIES.get(first, first.upper())
+def party_of(nominating):
+    """The first party a candidate is nominated by."""
+    return nominating.split(",")[0].strip()
 
 
-def selected(raw, label, wanted):
+def selected(raw, label, site, wanted):
     """{race: (contest ID, {candidate ID: (name, nominating parties, votes)})}."""
     found = {}
     for values in records(raw, label):
-        race = contest(values["ContestName"])
+        race = site.race(values["ContestName"])
         if race not in wanted:
             continue
         if values["VoteFor"] != "1":
@@ -122,50 +102,60 @@ def selected(raw, label, wanted):
     return found
 
 
-def update_text(page):
+def update_text(page, site, source):
     """The page's update time, and whether it labels the results official."""
     body = page_text(page)
     if (
-        "Secretary of State, Oregon" not in body
-        or "General Election November 3, 2026" not in body
+        site.page_identity not in body
+        or site.page_election not in body
         or "Statewide and County Exports" not in body
     ):
         raise ValueError("Oregon export page belongs to another election")
+    year = source.election_date[:4]
     found = set(
         re.findall(
-            r"Results last updated: ([0-9]{1,2}/[0-9]{1,2}/2026 \| [0-9]{1,2}:[0-9]{2} [AP]M PT)",
+            rf"Results last updated: ([0-9]{{1,2}}/[0-9]{{1,2}}/{year} \| "
+            r"[0-9]{1,2}:[0-9]{2} [AP]M PT)",
             body,
         )
     )
     if len(found) != 1:
         raise ValueError("Oregon export page lacks one update time")
     links = {" ".join(a.text.split()) for a in Tree(page).root.find("a")}
-    if not set(COUNTIES) <= links:
+    if not set(site.counties) <= links:
         raise ValueError("Oregon export page lacks a county export")
-    return found.pop(), results_status(body, LABEL, "Oregon")
+    return found.pop(), results_status(body, site.status_label, site.name)
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
+    from election_pipeline.platforms import enr
     from election_pipeline.states import state_adapter
 
-    if source.format != "bundle" or source.election_date != "2026-11-03" or source.state != "OR":
+    site = enr(source)
+    if source.format != "bundle":
         raise ValueError("Unsupported Oregon source/election")
-    wanted = state_adapter("OR").races
+    wanted = state_adapter(source.state).races
     with zipfile.ZipFile(archive_path) as archive:
-        updated, final = update_text(archive.read("export.html").decode("utf-8", errors="replace"))
+        updated, final = update_text(
+            archive.read("export.html").decode("utf-8", errors="replace"), site, source
+        )
         official = {}
         for name in STATEWIDE:
-            for race, value in selected(archive.read(name), name, wanted).items():
+            for race, value in selected(archive.read(name), name, site, wanted).items():
                 if race in official:
                     raise ValueError(f"{race}: appears in more than one Oregon statewide file")
                 official[race] = value
-        counties = {c: selected(archive.read(member(c)), member(c), wanted) for c in COUNTIES}
+        counties = {
+            c: selected(archive.read(member(c)), member(c), site, wanted) for c in site.counties
+        }
     if set(official) != set(wanted):
         raise ValueError("Oregon statewide exports lack a selected contest")
     rows = []
     for race, (identity, candidates) in official.items():
         for candidate, (name, nominating, votes) in candidates.items():
-            rows.append(row(race, identity, candidate, name, party(nominating), votes))
+            rows.append(
+                row(race, identity, candidate, name, site.party(party_of(nominating)), votes)
+            )
         places = []
         for county, found in counties.items():
             if race not in found:
@@ -178,9 +168,17 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                 if candidates.get(candidate, (None, None))[:2] != (name, nominating):
                     raise ValueError(f"{race} {county}: candidate differs from statewide file")
                 rows.append(
-                    row(race, identity, candidate, name, party(nominating), votes, county=county)
+                    row(
+                        race,
+                        identity,
+                        candidate,
+                        name,
+                        site.party(party_of(nominating)),
+                        votes,
+                        county=county,
+                    )
                 )
-        verify_scope("OR", race, list(candidates), places)
+        verify_scope(source.state, race, list(candidates), places)
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=updated,

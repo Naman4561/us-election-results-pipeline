@@ -40,3 +40,17 @@ min_interval_seconds = 3540
 "fed.html" = "https://electionresults.sos.nm.gov/resultsSW.aspx?type=FED&map=CTY"
 "sw.csv" = "https://electionresults.sos.nm.gov/resultsCSV.aspx?text=All&type=SW&map=CTY"
 "sw.html" = "https://electionresults.sos.nm.gov/resultsSW.aspx?type=SW&map=CTY"
+
+[platform]
+reader = "enr"
+state_line = "State of New Mexico"
+workbook_title = "2026 {} General Election Results"
+status_label = "{} Results GENERAL 2026 November 3, 2026"
+page_election = "GENERAL 2026 November 3, 2026"
+
+[platform.titles]                  # the contest title as the site writes it
+"United States Senator" = "NM-SEN"
+"Governor and Lieutenant Governor" = "NM-GOV"
+"United States Representative DISTRICT 1" = "NM-01"
+"United States Representative DISTRICT 2" = "NM-02"
+"United States Representative DISTRICT 3" = "NM-03"

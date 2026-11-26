@@ -207,3 +207,85 @@ def clarity(source):
         titles=titles,
         workbook_titles=names(extra, "workbook_titles", code) if extra else {},
     )
+
+
+@dataclass(frozen=True)
+class Enr:
+    """The ASP.NET election-night platform (SD, NM, MT, OR) and Alabama's page and workbook.
+    Each state's file uses the settings its site prints; the rest are empty."""
+
+    state: str
+    name: str
+    state_line: str  # the workbook's "State of ..." line
+    workbook_title: str  # the workbook's title, with {} for Official / Unofficial
+    status_label: str  # the page's results label, with {} for Official / Unofficial
+    page_election: str  # the text of the election on its page
+    page_identity: (
+        str  # the state office the page names, where it is not "<name> Secretary of State"
+    )
+    election_code: str  # the election's code in an export (Alabama)
+    titles: dict  # contest title as the site writes it -> race
+    parties: dict  # party name -> code, for a site whose exports give names
+    party_codes: tuple  # the party codes an export may carry (Alabama)
+    counties: tuple  # the counties a site's exports name, in its spelling
+    county_count: int  # how many counties an export must cover (Alabama)
+    unlisted_party: str  # "refuse" a party not in ``parties``, or "uppercase" its name
+
+    def race(self, title):
+        return self.titles.get(title)
+
+    def party(self, name):
+        if name in self.parties:
+            return self.parties[name]
+        if self.unlisted_party == "uppercase":
+            return name.upper()
+        raise ValueError(f"{self.name} party {name!r} is not in the reviewed party list")
+
+
+def enr(source):
+    """The ENR reader's settings for ``source``'s state."""
+    code = source.state
+    raw = table(
+        code,
+        "enr",
+        ("titles",),
+        (
+            "state_line",
+            "workbook_title",
+            "status_label",
+            "page_election",
+            "page_identity",
+            "election_code",
+            "party_names",
+            "party_codes",
+            "counties",
+            "county_count",
+            "unlisted_party",
+        ),
+    )
+    titles = names(raw["titles"], "titles", code)
+    wanted = state_adapter(code).races
+    if set(titles.values()) != set(wanted) or len(set(titles.values())) != len(titles):
+        raise ValueError(f"{code}: [platform] titles must name each of its races once")
+    unlisted = raw.get("unlisted_party", "refuse")
+    if unlisted not in ("refuse", "uppercase"):
+        raise ValueError(f"{code}: unlisted_party must be refuse or uppercase")
+    named = elections.parties().get("enr", {}).get(code) if raw.get("party_names") else None
+    if raw.get("party_names"):
+        named = names(named, f"enr.{code} parties", code)
+    return Enr(
+        state=code,
+        name=state_adapter(code).name,
+        state_line=raw.get("state_line", ""),
+        workbook_title=raw.get("workbook_title", ""),
+        status_label=raw.get("status_label", ""),
+        page_election=raw.get("page_election", ""),
+        page_identity=raw.get("page_identity", ""),
+        election_code=raw.get("election_code", ""),
+        titles=titles,
+        parties=named or {},
+        party_codes=tuple(raw.get("party_codes", ())),
+        counties=tuple(raw.get("counties", ())),
+        county_count=raw.get("county_count", 0),
+        unlisted_party=unlisted,
+    )

@@ -26,10 +26,29 @@ class PlatformTests(unittest.TestCase):
             "tally": platforms.tally,
             "enhanced_voting": platforms.enhanced_voting,
             "clarity": platforms.clarity,
+            "enr": platforms.enr,
         }
         self.assertEqual(
             sorted(ELECTION.platforms),
-            ["AR", "CO", "GA", "IA", "ID", "ND", "RI", "SC", "UT", "VA", "WA", "WV"],
+            [
+                "AL",
+                "AR",
+                "CO",
+                "GA",
+                "IA",
+                "ID",
+                "MT",
+                "ND",
+                "NM",
+                "OR",
+                "RI",
+                "SC",
+                "SD",
+                "UT",
+                "VA",
+                "WA",
+                "WV",
+            ],
         )
         for code, raw in ELECTION.platforms.items():
             with self.subTest(code):
@@ -96,6 +115,25 @@ class PlatformTests(unittest.TestCase):
 
         with edited("CO", nameless), self.assertRaisesRegex(ValueError, "election's name"):
             platforms.clarity(self.source("CO"))
+
+    def test_enr_parties_are_refused_or_uppercased_as_the_definition_says(self):
+        montana = platforms.enr(self.source("MT"))
+        self.assertEqual(montana.party("Democrat"), "DEM")
+        with self.assertRaisesRegex(ValueError, "not in the reviewed party list"):
+            montana.party("Whig")
+        oregon = platforms.enr(self.source("OR"))
+        self.assertEqual(oregon.party("Pacific Green"), "GRN")
+        self.assertEqual(oregon.party("Progressive"), "PROGRESSIVE")
+
+    def test_enr_titles_and_counties_come_from_the_definition(self):
+        self.assertEqual(
+            platforms.enr(self.source("NM")).race("United States Representative DISTRICT 2"),
+            "NM-02",
+        )
+        self.assertIsNone(platforms.enr(self.source("NM")).race("United States Senator DISTRICT 1"))
+        self.assertEqual(len(platforms.enr(self.source("MT")).counties), 56)
+        self.assertEqual(len(platforms.enr(self.source("OR")).counties), 36)
+        self.assertEqual(platforms.enr(self.source("AL")).county_count, 67)
 
     def test_only_a_reviewed_party_is_read(self):
         found = platforms.tally(self.source("ND"))

@@ -525,7 +525,9 @@ class NineStateTests(unittest.TestCase):
     def test_or_exports_choose_the_pages_own_csv_option(self):
         page = members("OR")["export.html"].decode("utf-8", errors="replace")
         (self.root / "export.html").write_text(page, encoding="utf-8")
-        plan = OREGON.exports({"export.html": self.root / "export.html"}, None)
+        plan = OREGON.exports(
+            {"export.html": self.root / "export.html"}, self.sources["or_2026_general"]
+        )
         self.assertEqual(len(plan), 38)
         self.assertTrue(all(entry[3] == OREGON.CSV_OPTION for entry in plan))
         url = "https://results.oregonvotes.gov/ResultsExport.aspx"

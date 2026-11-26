@@ -100,3 +100,59 @@ min_interval_seconds = 600
 
 [source.collector_overrides]
 max_zip_members = 64
+
+[platform]
+reader = "enr"
+status_label = "{} General Election November 3, 2026"
+page_election = "General Election November 3, 2026"
+page_identity = "Secretary of State, Oregon"
+party_names = true
+unlisted_party = "uppercase"
+counties = [
+  "Baker",
+  "Benton",
+  "Clackamas",
+  "Clatsop",
+  "Columbia",
+  "Coos",
+  "Crook",
+  "Curry",
+  "Deschutes",
+  "Douglas",
+  "Gilliam",
+  "Grant",
+  "Harney",
+  "Hood River",
+  "Jackson",
+  "Jefferson",
+  "Josephine",
+  "Klamath",
+  "Lake",
+  "Lane",
+  "Lincoln",
+  "Linn",
+  "Malheur",
+  "Marion",
+  "Morrow",
+  "Multnomah",
+  "Polk",
+  "Sherman",
+  "Tillamook",
+  "Umatilla",
+  "Union",
+  "Wallowa",
+  "Wasco",
+  "Washington",
+  "Wheeler",
+  "Yamhill",
+]
+
+[platform.titles]                  # the contest title as the site writes it
+"US Senator" = "OR-SEN"
+"Governor" = "OR-GOV"
+"US Representative, 1st District" = "OR-01"
+"US Representative, 2nd District" = "OR-02"
+"US Representative, 3rd District" = "OR-03"
+"US Representative, 4th District" = "OR-04"
+"US Representative, 5th District" = "OR-05"
+"US Representative, 6th District" = "OR-06"

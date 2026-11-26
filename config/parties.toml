@@ -29,3 +29,16 @@
 "Forward" = "FWD"
 "Independent American" = "IAP"
 "Unaffiliated" = "UNA"
+
+[enr.MT]                             # Montana's export prints each party's name
+"Republican" = "REP"
+"Democrat" = "DEM"
+"Libertarian" = "LIB"
+"Green" = "GRN"
+"Independent" = "IND"
+
+[enr.OR]                             # Oregon's nominating-party names
+"Democrat" = "DEM"
+"Republican" = "REP"
+"Libertarian" = "LIB"
+"Pacific Green" = "GRN"
