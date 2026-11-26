@@ -153,7 +153,8 @@ def parties(config=None):
 
 def parties_for(code, election=None, config=None):
     """The party names state ``code`` can read, and nothing else in ``parties.toml``: its
-    platform reader's table (for ENR, its own section) and its own ``[states.XX]`` table.
+    platform reader's table (for ENR, its own section), its own ``[states.XX]`` table and the
+    shared one-letter ``[letters]``.
     A change to another state's names does not change it."""
     config = Path(config or CONFIG)
     where = Path(election or folder(config))
@@ -165,6 +166,8 @@ def parties_for(code, election=None, config=None):
     elif reader:
         found[reader] = names.get(reader)
     found["states"] = names.get("states", {}).get(code)
+    # The one-letter codes are read through a helper every parser may use.
+    found["letters"] = names.get("letters")
     return {k: v for k, v in found.items() if v}
 
 

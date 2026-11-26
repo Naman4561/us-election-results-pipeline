@@ -3,6 +3,9 @@
 import json
 import re
 import xml.etree.ElementTree as ET
+from functools import lru_cache
+
+from election_pipeline import elections
 
 
 def text(value, label="text"):
@@ -66,5 +69,11 @@ def row(
     )
 
 
+@lru_cache
+def letters():
+    """One-letter party codes, from the reviewed party table."""
+    return elections.parties()["letters"]
+
+
 def party(value):
-    return {"R": "REP", "D": "DEM", "L": "LIB", "G": "GRN"}.get(value.upper(), value.upper())
+    return letters().get(value.upper(), value.upper())

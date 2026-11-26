@@ -44,10 +44,9 @@ def county_key(name):
 
 def party_group(party, choice):
     value = (party or "").strip().upper()
-    if value in ("DEM", "D", "DEMOCRATIC", "DEMOCRAT", "DFL", "DEM/NON"):
-        return "DEM"
-    if value in ("REP", "R", "REPUBLICAN"):
-        return "REP"
+    for group, spellings in elections.parties()["groups"].items():
+        if value in spellings:
+            return group
     if value or "WRITE" in choice.upper():
         return "OTHER"
     return "UNKNOWN"

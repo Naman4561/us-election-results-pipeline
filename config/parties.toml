@@ -180,3 +180,13 @@
 "D" = "DEM"
 "L" = "LIB"
 "C" = "CON"
+
+[letters]                            # structured.party: a one-letter code to the stored code;
+"R" = "REP"                          # any other value is stored as its upper-case self
+"D" = "DEM"
+"L" = "LIB"
+"G" = "GRN"
+
+[groups]                             # the dashboard's two named parties: every stored code or
+DEM = ["DEM", "D", "DEMOCRATIC", "DEMOCRAT", "DFL", "DEM/NON"]   # spelling that counts as each
+REP = ["REP", "R", "REPUBLICAN"]     # anything else is OTHER, and no party at all UNKNOWN
