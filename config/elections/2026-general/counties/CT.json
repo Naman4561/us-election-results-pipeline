@@ -1,0 +1,1359 @@
+{
+ "counties": [
+  {
+   "fips": "0911001080",
+   "key": "ANDOVER",
+   "name": "Andover",
+   "spellings": [
+    "Andover"
+   ]
+  },
+  {
+   "fips": "0911002060",
+   "key": "AVON",
+   "name": "Avon",
+   "spellings": [
+    "Avon"
+   ]
+  },
+  {
+   "fips": "0911004300",
+   "key": "BERLIN",
+   "name": "Berlin",
+   "spellings": [
+    "Berlin"
+   ]
+  },
+  {
+   "fips": "0911005910",
+   "key": "BLOOMFIELD",
+   "name": "Bloomfield",
+   "spellings": [
+    "Bloomfield"
+   ]
+  },
+  {
+   "fips": "0911006260",
+   "key": "BOLTON",
+   "name": "Bolton",
+   "spellings": [
+    "Bolton"
+   ]
+  },
+  {
+   "fips": "0911012270",
+   "key": "CANTON",
+   "name": "Canton",
+   "spellings": [
+    "Canton"
+   ]
+  },
+  {
+   "fips": "0911016400",
+   "key": "COLUMBIA",
+   "name": "Columbia",
+   "spellings": [
+    "Columbia"
+   ]
+  },
+  {
+   "fips": "0911017800",
+   "key": "COVENTRY",
+   "name": "Coventry",
+   "spellings": [
+    "Coventry"
+   ]
+  },
+  {
+   "fips": "0911022070",
+   "key": "EASTGRANBY",
+   "name": "East Granby",
+   "spellings": [
+    "East Granby"
+   ]
+  },
+  {
+   "fips": "0911022630",
+   "key": "EASTHARTFORD",
+   "name": "East Hartford",
+   "spellings": [
+    "East Hartford"
+   ]
+  },
+  {
+   "fips": "0911024800",
+   "key": "EASTWINDSOR",
+   "name": "East Windsor",
+   "spellings": [
+    "East Windsor"
+   ]
+  },
+  {
+   "fips": "0911025360",
+   "key": "ELLINGTON",
+   "name": "Ellington",
+   "spellings": [
+    "Ellington"
+   ]
+  },
+  {
+   "fips": "0911025990",
+   "key": "ENFIELD",
+   "name": "Enfield",
+   "spellings": [
+    "Enfield"
+   ]
+  },
+  {
+   "fips": "0911027600",
+   "key": "FARMINGTON",
+   "name": "Farmington",
+   "spellings": [
+    "Farmington"
+   ]
+  },
+  {
+   "fips": "0911031240",
+   "key": "GLASTONBURY",
+   "name": "Glastonbury",
+   "spellings": [
+    "Glastonbury"
+   ]
+  },
+  {
+   "fips": "0911032640",
+   "key": "GRANBY",
+   "name": "Granby",
+   "spellings": [
+    "Granby"
+   ]
+  },
+  {
+   "fips": "0911037070",
+   "key": "HARTFORD",
+   "name": "Hartford",
+   "spellings": [
+    "Hartford"
+   ]
+  },
+  {
+   "fips": "0911037910",
+   "key": "HEBRON",
+   "name": "Hebron",
+   "spellings": [
+    "Hebron"
+   ]
+  },
+  {
+   "fips": "0911044700",
+   "key": "MANCHESTER",
+   "name": "Manchester",
+   "spellings": [
+    "Manchester"
+   ]
+  },
+  {
+   "fips": "0911044910",
+   "key": "MANSFIELD",
+   "name": "Mansfield",
+   "spellings": [
+    "Mansfield"
+   ]
+  },
+  {
+   "fips": "0911045820",
+   "key": "MARLBOROUGH",
+   "name": "Marlborough",
+   "spellings": [
+    "Marlborough"
+   ]
+  },
+  {
+   "fips": "0911050440",
+   "key": "NEWBRITAIN",
+   "name": "New Britain",
+   "spellings": [
+    "New Britain"
+   ]
+  },
+  {
+   "fips": "0911052140",
+   "key": "NEWINGTON",
+   "name": "Newington",
+   "spellings": [
+    "Newington"
+   ]
+  },
+  {
+   "fips": "0911060120",
+   "key": "PLAINVILLE",
+   "name": "Plainville",
+   "spellings": [
+    "Plainville"
+   ]
+  },
+  {
+   "fips": "0911065370",
+   "key": "ROCKYHILL",
+   "name": "Rocky Hill",
+   "spellings": [
+    "Rocky Hill"
+   ]
+  },
+  {
+   "fips": "0911068940",
+   "key": "SIMSBURY",
+   "name": "Simsbury",
+   "spellings": [
+    "Simsbury"
+   ]
+  },
+  {
+   "fips": "0911069220",
+   "key": "SOMERS",
+   "name": "Somers",
+   "spellings": [
+    "Somers"
+   ]
+  },
+  {
+   "fips": "0911070550",
+   "key": "SOUTHINGTON",
+   "name": "Southington",
+   "spellings": [
+    "Southington"
+   ]
+  },
+  {
+   "fips": "0911071390",
+   "key": "SOUTHWINDSOR",
+   "name": "South Windsor",
+   "spellings": [
+    "South Windsor"
+   ]
+  },
+  {
+   "fips": "0911072090",
+   "key": "STAFFORD",
+   "name": "Stafford",
+   "spellings": [
+    "Stafford"
+   ]
+  },
+  {
+   "fips": "0911074540",
+   "key": "SUFFIELD",
+   "name": "Suffield",
+   "spellings": [
+    "Suffield"
+   ]
+  },
+  {
+   "fips": "0911076290",
+   "key": "TOLLAND",
+   "name": "Tolland",
+   "spellings": [
+    "Tolland"
+   ]
+  },
+  {
+   "fips": "0911078250",
+   "key": "VERNON",
+   "name": "Vernon",
+   "spellings": [
+    "Vernon"
+   ]
+  },
+  {
+   "fips": "0911082590",
+   "key": "WESTHARTFORD",
+   "name": "West Hartford",
+   "spellings": [
+    "West Hartford"
+   ]
+  },
+  {
+   "fips": "0911084900",
+   "key": "WETHERSFIELD",
+   "name": "Wethersfield",
+   "spellings": [
+    "Wethersfield"
+   ]
+  },
+  {
+   "fips": "0911085950",
+   "key": "WILLINGTON",
+   "name": "Willington",
+   "spellings": [
+    "Willington"
+   ]
+  },
+  {
+   "fips": "0911087000",
+   "key": "WINDSOR",
+   "name": "Windsor",
+   "spellings": [
+    "Windsor"
+   ]
+  },
+  {
+   "fips": "0911087070",
+   "key": "WINDSORLOCKS",
+   "name": "Windsor Locks",
+   "spellings": [
+    "Windsor Locks"
+   ]
+  },
+  {
+   "fips": "0912008070",
+   "key": "BRIDGEPORT",
+   "name": "Bridgeport",
+   "spellings": [
+    "Bridgeport"
+   ]
+  },
+  {
+   "fips": "0912023890",
+   "key": "EASTON",
+   "name": "Easton",
+   "spellings": [
+    "Easton"
+   ]
+  },
+  {
+   "fips": "0912026620",
+   "key": "FAIRFIELD",
+   "name": "Fairfield",
+   "spellings": [
+    "Fairfield"
+   ]
+  },
+  {
+   "fips": "0912048620",
+   "key": "MONROE",
+   "name": "Monroe",
+   "spellings": [
+    "Monroe"
+   ]
+  },
+  {
+   "fips": "0912074190",
+   "key": "STRATFORD",
+   "name": "Stratford",
+   "spellings": [
+    "Stratford"
+   ]
+  },
+  {
+   "fips": "0912077200",
+   "key": "TRUMBULL",
+   "name": "Trumbull",
+   "spellings": [
+    "Trumbull"
+   ]
+  },
+  {
+   "fips": "0913014300",
+   "key": "CHESTER",
+   "name": "Chester",
+   "spellings": [
+    "Chester"
+   ]
+  },
+  {
+   "fips": "0913015350",
+   "key": "CLINTON",
+   "name": "Clinton",
+   "spellings": [
+    "Clinton"
+   ]
+  },
+  {
+   "fips": "0913018080",
+   "key": "CROMWELL",
+   "name": "Cromwell",
+   "spellings": [
+    "Cromwell"
+   ]
+  },
+  {
+   "fips": "0913019130",
+   "key": "DEEPRIVER",
+   "name": "Deep River",
+   "spellings": [
+    "Deep River"
+   ]
+  },
+  {
+   "fips": "0913020810",
+   "key": "DURHAM",
+   "name": "Durham",
+   "spellings": [
+    "Durham"
+   ]
+  },
+  {
+   "fips": "0913022280",
+   "key": "EASTHADDAM",
+   "name": "East Haddam",
+   "spellings": [
+    "East Haddam"
+   ]
+  },
+  {
+   "fips": "0913022490",
+   "key": "EASTHAMPTON",
+   "name": "East Hampton",
+   "spellings": [
+    "East Hampton"
+   ]
+  },
+  {
+   "fips": "0913026270",
+   "key": "ESSEX",
+   "name": "Essex",
+   "spellings": [
+    "Essex"
+   ]
+  },
+  {
+   "fips": "0913035230",
+   "key": "HADDAM",
+   "name": "Haddam",
+   "spellings": [
+    "Haddam"
+   ]
+  },
+  {
+   "fips": "0913040710",
+   "key": "KILLINGWORTH",
+   "name": "Killingworth",
+   "spellings": [
+    "Killingworth"
+   ]
+  },
+  {
+   "fips": "0913044210",
+   "key": "LYME",
+   "name": "Lyme",
+   "spellings": [
+    "Lyme"
+   ]
+  },
+  {
+   "fips": "0913047080",
+   "key": "MIDDLEFIELD",
+   "name": "Middlefield",
+   "spellings": [
+    "Middlefield"
+   ]
+  },
+  {
+   "fips": "0913047360",
+   "key": "MIDDLETOWN",
+   "name": "Middletown",
+   "spellings": [
+    "Middletown"
+   ]
+  },
+  {
+   "fips": "0913057040",
+   "key": "OLDLYME",
+   "name": "Old Lyme",
+   "spellings": [
+    "Old Lyme"
+   ]
+  },
+  {
+   "fips": "0913057320",
+   "key": "OLDSAYBROOK",
+   "name": "Old Saybrook",
+   "spellings": [
+    "Old Saybrook"
+   ]
+  },
+  {
+   "fips": "0913061800",
+   "key": "PORTLAND",
+   "name": "Portland",
+   "spellings": [
+    "Portland"
+   ]
+  },
+  {
+   "fips": "0913081680",
+   "key": "WESTBROOK",
+   "name": "Westbrook",
+   "spellings": [
+    "Westbrook"
+   ]
+  },
+  {
+   "fips": "0914001220",
+   "key": "ANSONIA",
+   "name": "Ansonia",
+   "spellings": [
+    "Ansonia"
+   ]
+  },
+  {
+   "fips": "0914003250",
+   "key": "BEACONFALLS",
+   "name": "Beacon Falls",
+   "spellings": [
+    "Beacon Falls"
+   ]
+  },
+  {
+   "fips": "0914004930",
+   "key": "BETHLEHEM",
+   "name": "Bethlehem",
+   "spellings": [
+    "Bethlehem"
+   ]
+  },
+  {
+   "fips": "0914008490",
+   "key": "BRISTOL",
+   "name": "Bristol",
+   "spellings": [
+    "Bristol"
+   ]
+  },
+  {
+   "fips": "0914014160",
+   "key": "CHESHIRE",
+   "name": "Cheshire",
+   "spellings": [
+    "Cheshire"
+   ]
+  },
+  {
+   "fips": "0914019550",
+   "key": "DERBY",
+   "name": "Derby",
+   "spellings": [
+    "Derby"
+   ]
+  },
+  {
+   "fips": "0914046940",
+   "key": "MIDDLEBURY",
+   "name": "Middlebury",
+   "spellings": [
+    "Middlebury"
+   ]
+  },
+  {
+   "fips": "0914049950",
+   "key": "NAUGATUCK",
+   "name": "Naugatuck",
+   "spellings": [
+    "Naugatuck"
+   ]
+  },
+  {
+   "fips": "0914058300",
+   "key": "OXFORD",
+   "name": "Oxford",
+   "spellings": [
+    "Oxford"
+   ]
+  },
+  {
+   "fips": "0914060750",
+   "key": "PLYMOUTH",
+   "name": "Plymouth",
+   "spellings": [
+    "Plymouth"
+   ]
+  },
+  {
+   "fips": "0914062290",
+   "key": "PROSPECT",
+   "name": "Prospect",
+   "spellings": [
+    "Prospect"
+   ]
+  },
+  {
+   "fips": "0914067610",
+   "key": "SEYMOUR",
+   "name": "Seymour",
+   "spellings": [
+    "Seymour"
+   ]
+  },
+  {
+   "fips": "0914068170",
+   "key": "SHELTON",
+   "name": "Shelton",
+   "spellings": [
+    "Shelton"
+   ]
+  },
+  {
+   "fips": "0914069640",
+   "key": "SOUTHBURY",
+   "name": "Southbury",
+   "spellings": [
+    "Southbury"
+   ]
+  },
+  {
+   "fips": "0914075730",
+   "key": "THOMASTON",
+   "name": "Thomaston",
+   "spellings": [
+    "Thomaston"
+   ]
+  },
+  {
+   "fips": "0914080070",
+   "key": "WATERBURY",
+   "name": "Waterbury",
+   "spellings": [
+    "Waterbury"
+   ]
+  },
+  {
+   "fips": "0914080490",
+   "key": "WATERTOWN",
+   "name": "Watertown",
+   "spellings": [
+    "Watertown"
+   ]
+  },
+  {
+   "fips": "0914087560",
+   "key": "WOLCOTT",
+   "name": "Wolcott",
+   "spellings": [
+    "Wolcott"
+   ]
+  },
+  {
+   "fips": "0914087910",
+   "key": "WOODBURY",
+   "name": "Woodbury",
+   "spellings": [
+    "Woodbury"
+   ]
+  },
+  {
+   "fips": "0915001430",
+   "key": "ASHFORD",
+   "name": "Ashford",
+   "spellings": [
+    "Ashford"
+   ]
+  },
+  {
+   "fips": "0915009190",
+   "key": "BROOKLYN",
+   "name": "Brooklyn",
+   "spellings": [
+    "Brooklyn"
+   ]
+  },
+  {
+   "fips": "0915012130",
+   "key": "CANTERBURY",
+   "name": "Canterbury",
+   "spellings": [
+    "Canterbury"
+   ]
+  },
+  {
+   "fips": "0915013810",
+   "key": "CHAPLIN",
+   "name": "Chaplin",
+   "spellings": [
+    "Chaplin"
+   ]
+  },
+  {
+   "fips": "0915021860",
+   "key": "EASTFORD",
+   "name": "Eastford",
+   "spellings": [
+    "Eastford"
+   ]
+  },
+  {
+   "fips": "0915036000",
+   "key": "HAMPTON",
+   "name": "Hampton",
+   "spellings": [
+    "Hampton"
+   ]
+  },
+  {
+   "fips": "0915040500",
+   "key": "KILLINGLY",
+   "name": "Killingly",
+   "spellings": [
+    "Killingly"
+   ]
+  },
+  {
+   "fips": "0915059980",
+   "key": "PLAINFIELD",
+   "name": "Plainfield",
+   "spellings": [
+    "Plainfield"
+   ]
+  },
+  {
+   "fips": "0915061030",
+   "key": "POMFRET",
+   "name": "Pomfret",
+   "spellings": [
+    "Pomfret"
+   ]
+  },
+  {
+   "fips": "0915062710",
+   "key": "PUTNAM",
+   "name": "Putnam",
+   "spellings": [
+    "Putnam"
+   ]
+  },
+  {
+   "fips": "0915067400",
+   "key": "SCOTLAND",
+   "name": "Scotland",
+   "spellings": [
+    "Scotland"
+   ]
+  },
+  {
+   "fips": "0915073420",
+   "key": "STERLING",
+   "name": "Sterling",
+   "spellings": [
+    "Sterling"
+   ]
+  },
+  {
+   "fips": "0915075870",
+   "key": "THOMPSON",
+   "name": "Thompson",
+   "spellings": [
+    "Thompson"
+   ]
+  },
+  {
+   "fips": "0915077830",
+   "key": "UNION",
+   "name": "Union",
+   "spellings": [
+    "Union"
+   ]
+  },
+  {
+   "fips": "0915078600",
+   "key": "VOLUNTOWN",
+   "name": "Voluntown",
+   "spellings": [
+    "Voluntown"
+   ]
+  },
+  {
+   "fips": "0915088190",
+   "key": "WOODSTOCK",
+   "name": "Woodstock",
+   "spellings": [
+    "Woodstock"
+   ]
+  },
+  {
+   "fips": "0916002760",
+   "key": "BARKHAMSTED",
+   "name": "Barkhamsted",
+   "spellings": [
+    "Barkhamsted"
+   ]
+  },
+  {
+   "fips": "0916010100",
+   "key": "BURLINGTON",
+   "name": "Burlington",
+   "spellings": [
+    "Burlington"
+   ]
+  },
+  {
+   "fips": "0916010940",
+   "key": "CANAAN",
+   "name": "Canaan",
+   "spellings": [
+    "Canaan"
+   ]
+  },
+  {
+   "fips": "0916016050",
+   "key": "COLEBROOK",
+   "name": "Colebrook",
+   "spellings": [
+    "Colebrook"
+   ]
+  },
+  {
+   "fips": "0916017240",
+   "key": "CORNWALL",
+   "name": "Cornwall",
+   "spellings": [
+    "Cornwall"
+   ]
+  },
+  {
+   "fips": "0916032290",
+   "key": "GOSHEN",
+   "name": "Goshen",
+   "spellings": [
+    "Goshen"
+   ]
+  },
+  {
+   "fips": "0916037140",
+   "key": "HARTLAND",
+   "name": "Hartland",
+   "spellings": [
+    "Hartland"
+   ]
+  },
+  {
+   "fips": "0916037280",
+   "key": "HARWINTON",
+   "name": "Harwinton",
+   "spellings": [
+    "Harwinton"
+   ]
+  },
+  {
+   "fips": "0916040290",
+   "key": "KENT",
+   "name": "Kent",
+   "spellings": [
+    "Kent"
+   ]
+  },
+  {
+   "fips": "0916043370",
+   "key": "LITCHFIELD",
+   "name": "Litchfield",
+   "spellings": [
+    "Litchfield"
+   ]
+  },
+  {
+   "fips": "0916049460",
+   "key": "MORRIS",
+   "name": "Morris",
+   "spellings": [
+    "Morris"
+   ]
+  },
+  {
+   "fips": "0916051350",
+   "key": "NEWHARTFORD",
+   "name": "New Hartford",
+   "spellings": [
+    "New Hartford"
+   ]
+  },
+  {
+   "fips": "0916053470",
+   "key": "NORFOLK",
+   "name": "Norfolk",
+   "spellings": [
+    "Norfolk"
+   ]
+  },
+  {
+   "fips": "0916054030",
+   "key": "NORTHCANAAN",
+   "name": "North Canaan",
+   "spellings": [
+    "North Canaan"
+   ]
+  },
+  {
+   "fips": "0916065930",
+   "key": "ROXBURY",
+   "name": "Roxbury",
+   "spellings": [
+    "Roxbury"
+   ]
+  },
+  {
+   "fips": "0916066420",
+   "key": "SALISBURY",
+   "name": "Salisbury",
+   "spellings": [
+    "Salisbury"
+   ]
+  },
+  {
+   "fips": "0916067960",
+   "key": "SHARON",
+   "name": "Sharon",
+   "spellings": [
+    "Sharon"
+   ]
+  },
+  {
+   "fips": "0916076570",
+   "key": "TORRINGTON",
+   "name": "Torrington",
+   "spellings": [
+    "Torrington"
+   ]
+  },
+  {
+   "fips": "0916079510",
+   "key": "WARREN",
+   "name": "Warren",
+   "spellings": [
+    "Warren"
+   ]
+  },
+  {
+   "fips": "0916079720",
+   "key": "WASHINGTON",
+   "name": "Washington",
+   "spellings": [
+    "Washington"
+   ]
+  },
+  {
+   "fips": "0916086440",
+   "key": "WINCHESTER",
+   "name": "Winchester",
+   "spellings": [
+    "Winchester"
+   ]
+  },
+  {
+   "fips": "0917004580",
+   "key": "BETHANY",
+   "name": "Bethany",
+   "spellings": [
+    "Bethany"
+   ]
+  },
+  {
+   "fips": "0917007310",
+   "key": "BRANFORD",
+   "name": "Branford",
+   "spellings": [
+    "Branford"
+   ]
+  },
+  {
+   "fips": "0917022910",
+   "key": "EASTHAVEN",
+   "name": "East Haven",
+   "spellings": [
+    "East Haven"
+   ]
+  },
+  {
+   "fips": "0917034950",
+   "key": "GUILFORD",
+   "name": "Guilford",
+   "spellings": [
+    "Guilford"
+   ]
+  },
+  {
+   "fips": "0917035650",
+   "key": "HAMDEN",
+   "name": "Hamden",
+   "spellings": [
+    "Hamden"
+   ]
+  },
+  {
+   "fips": "0917044560",
+   "key": "MADISON",
+   "name": "Madison",
+   "spellings": [
+    "Madison"
+   ]
+  },
+  {
+   "fips": "0917046520",
+   "key": "MERIDEN",
+   "name": "Meriden",
+   "spellings": [
+    "Meriden"
+   ]
+  },
+  {
+   "fips": "0917047535",
+   "key": "MILFORD",
+   "name": "Milford",
+   "spellings": [
+    "Milford"
+   ]
+  },
+  {
+   "fips": "0917052070",
+   "key": "NEWHAVEN",
+   "name": "New Haven",
+   "spellings": [
+    "New Haven"
+   ]
+  },
+  {
+   "fips": "0917053890",
+   "key": "NORTHBRANFORD",
+   "name": "North Branford",
+   "spellings": [
+    "North Branford"
+   ]
+  },
+  {
+   "fips": "0917054870",
+   "key": "NORTHHAVEN",
+   "name": "North Haven",
+   "spellings": [
+    "North Haven"
+   ]
+  },
+  {
+   "fips": "0917057600",
+   "key": "ORANGE",
+   "name": "Orange",
+   "spellings": [
+    "Orange"
+   ]
+  },
+  {
+   "fips": "0917078740",
+   "key": "WALLINGFORD",
+   "name": "Wallingford",
+   "spellings": [
+    "Wallingford"
+   ]
+  },
+  {
+   "fips": "0917082870",
+   "key": "WESTHAVEN",
+   "name": "West Haven",
+   "spellings": [
+    "West Haven"
+   ]
+  },
+  {
+   "fips": "0917087700",
+   "key": "WOODBRIDGE",
+   "name": "Woodbridge",
+   "spellings": [
+    "Woodbridge"
+   ]
+  },
+  {
+   "fips": "0918006820",
+   "key": "BOZRAH",
+   "name": "Bozrah",
+   "spellings": [
+    "Bozrah"
+   ]
+  },
+  {
+   "fips": "0918015910",
+   "key": "COLCHESTER",
+   "name": "Colchester",
+   "spellings": [
+    "Colchester"
+   ]
+  },
+  {
+   "fips": "0918023400",
+   "key": "EASTLYME",
+   "name": "East Lyme",
+   "spellings": [
+    "East Lyme"
+   ]
+  },
+  {
+   "fips": "0918029910",
+   "key": "FRANKLIN",
+   "name": "Franklin",
+   "spellings": [
+    "Franklin"
+   ]
+  },
+  {
+   "fips": "0918033900",
+   "key": "GRISWOLD",
+   "name": "Griswold",
+   "spellings": [
+    "Griswold"
+   ]
+  },
+  {
+   "fips": "0918034250",
+   "key": "GROTON",
+   "name": "Groton",
+   "spellings": [
+    "Groton"
+   ]
+  },
+  {
+   "fips": "0918042390",
+   "key": "LEBANON",
+   "name": "Lebanon",
+   "spellings": [
+    "Lebanon"
+   ]
+  },
+  {
+   "fips": "0918042600",
+   "key": "LEDYARD",
+   "name": "Ledyard",
+   "spellings": [
+    "Ledyard"
+   ]
+  },
+  {
+   "fips": "0918043230",
+   "key": "LISBON",
+   "name": "Lisbon",
+   "spellings": [
+    "Lisbon"
+   ]
+  },
+  {
+   "fips": "0918048900",
+   "key": "MONTVILLE",
+   "name": "Montville",
+   "spellings": [
+    "Montville"
+   ]
+  },
+  {
+   "fips": "0918052350",
+   "key": "NEWLONDON",
+   "name": "New London",
+   "spellings": [
+    "New London"
+   ]
+  },
+  {
+   "fips": "0918055500",
+   "key": "NORTHSTONINGTON",
+   "name": "North Stonington",
+   "spellings": [
+    "North Stonington"
+   ]
+  },
+  {
+   "fips": "0918056270",
+   "key": "NORWICH",
+   "name": "Norwich",
+   "spellings": [
+    "Norwich"
+   ]
+  },
+  {
+   "fips": "0918062150",
+   "key": "PRESTON",
+   "name": "Preston",
+   "spellings": [
+    "Preston"
+   ]
+  },
+  {
+   "fips": "0918066210",
+   "key": "SALEM",
+   "name": "Salem",
+   "spellings": [
+    "Salem"
+   ]
+  },
+  {
+   "fips": "0918071670",
+   "key": "SPRAGUE",
+   "name": "Sprague",
+   "spellings": [
+    "Sprague"
+   ]
+  },
+  {
+   "fips": "0918073770",
+   "key": "STONINGTON",
+   "name": "Stonington",
+   "spellings": [
+    "Stonington"
+   ]
+  },
+  {
+   "fips": "0918080280",
+   "key": "WATERFORD",
+   "name": "Waterford",
+   "spellings": [
+    "Waterford"
+   ]
+  },
+  {
+   "fips": "0918086790",
+   "key": "WINDHAM",
+   "name": "Windham",
+   "spellings": [
+    "Windham"
+   ]
+  },
+  {
+   "fips": "0919004720",
+   "key": "BETHEL",
+   "name": "Bethel",
+   "spellings": [
+    "Bethel"
+   ]
+  },
+  {
+   "fips": "0919008210",
+   "key": "BRIDGEWATER",
+   "name": "Bridgewater",
+   "spellings": [
+    "Bridgewater"
+   ]
+  },
+  {
+   "fips": "0919008980",
+   "key": "BROOKFIELD",
+   "name": "Brookfield",
+   "spellings": [
+    "Brookfield"
+   ]
+  },
+  {
+   "fips": "0919018500",
+   "key": "DANBURY",
+   "name": "Danbury",
+   "spellings": [
+    "Danbury"
+   ]
+  },
+  {
+   "fips": "0919018850",
+   "key": "DARIEN",
+   "name": "Darien",
+   "spellings": [
+    "Darien"
+   ]
+  },
+  {
+   "fips": "0919033620",
+   "key": "GREENWICH",
+   "name": "Greenwich",
+   "spellings": [
+    "Greenwich"
+   ]
+  },
+  {
+   "fips": "0919050580",
+   "key": "NEWCANAAN",
+   "name": "New Canaan",
+   "spellings": [
+    "New Canaan"
+   ]
+  },
+  {
+   "fips": "0919050860",
+   "key": "NEWFAIRFIELD",
+   "name": "New Fairfield",
+   "spellings": [
+    "New Fairfield"
+   ]
+  },
+  {
+   "fips": "0919052630",
+   "key": "NEWMILFORD",
+   "name": "New Milford",
+   "spellings": [
+    "New Milford"
+   ]
+  },
+  {
+   "fips": "0919052980",
+   "key": "NEWTOWN",
+   "name": "Newtown",
+   "spellings": [
+    "Newtown"
+   ]
+  },
+  {
+   "fips": "0919056060",
+   "key": "NORWALK",
+   "name": "Norwalk",
+   "spellings": [
+    "Norwalk"
+   ]
+  },
+  {
+   "fips": "0919063480",
+   "key": "REDDING",
+   "name": "Redding",
+   "spellings": [
+    "Redding"
+   ]
+  },
+  {
+   "fips": "0919063970",
+   "key": "RIDGEFIELD",
+   "name": "Ridgefield",
+   "spellings": [
+    "Ridgefield"
+   ]
+  },
+  {
+   "fips": "0919068310",
+   "key": "SHERMAN",
+   "name": "Sherman",
+   "spellings": [
+    "Sherman"
+   ]
+  },
+  {
+   "fips": "0919073070",
+   "key": "STAMFORD",
+   "name": "Stamford",
+   "spellings": [
+    "Stamford"
+   ]
+  },
+  {
+   "fips": "0919083430",
+   "key": "WESTON",
+   "name": "Weston",
+   "spellings": [
+    "Weston"
+   ]
+  },
+  {
+   "fips": "0919083500",
+   "key": "WESTPORT",
+   "name": "Westport",
+   "spellings": [
+    "Westport"
+   ]
+  },
+  {
+   "fips": "0919086370",
+   "key": "WILTON",
+   "name": "Wilton",
+   "spellings": [
+    "Wilton"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/ct-map.json, built from map-sources/); spellings from rosters/CT.json",
+ "state": "CT",
+ "unit": "town"
+}

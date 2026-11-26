@@ -1,0 +1,543 @@
+{
+ "counties": [
+  {
+   "fips": "42001",
+   "key": "ADAMS",
+   "name": "Adams",
+   "spellings": [
+    "Adams"
+   ]
+  },
+  {
+   "fips": "42003",
+   "key": "ALLEGHENY",
+   "name": "Allegheny",
+   "spellings": [
+    "Allegheny"
+   ]
+  },
+  {
+   "fips": "42005",
+   "key": "ARMSTRONG",
+   "name": "Armstrong",
+   "spellings": [
+    "Armstrong"
+   ]
+  },
+  {
+   "fips": "42007",
+   "key": "BEAVER",
+   "name": "Beaver",
+   "spellings": [
+    "Beaver"
+   ]
+  },
+  {
+   "fips": "42009",
+   "key": "BEDFORD",
+   "name": "Bedford",
+   "spellings": [
+    "Bedford"
+   ]
+  },
+  {
+   "fips": "42011",
+   "key": "BERKS",
+   "name": "Berks",
+   "spellings": [
+    "Berks"
+   ]
+  },
+  {
+   "fips": "42013",
+   "key": "BLAIR",
+   "name": "Blair",
+   "spellings": [
+    "Blair"
+   ]
+  },
+  {
+   "fips": "42015",
+   "key": "BRADFORD",
+   "name": "Bradford",
+   "spellings": [
+    "Bradford"
+   ]
+  },
+  {
+   "fips": "42017",
+   "key": "BUCKS",
+   "name": "Bucks",
+   "spellings": [
+    "Bucks"
+   ]
+  },
+  {
+   "fips": "42019",
+   "key": "BUTLER",
+   "name": "Butler",
+   "spellings": [
+    "Butler"
+   ]
+  },
+  {
+   "fips": "42021",
+   "key": "CAMBRIA",
+   "name": "Cambria",
+   "spellings": [
+    "Cambria"
+   ]
+  },
+  {
+   "fips": "42023",
+   "key": "CAMERON",
+   "name": "Cameron",
+   "spellings": [
+    "Cameron"
+   ]
+  },
+  {
+   "fips": "42025",
+   "key": "CARBON",
+   "name": "Carbon",
+   "spellings": [
+    "Carbon"
+   ]
+  },
+  {
+   "fips": "42027",
+   "key": "CENTRE",
+   "name": "Centre",
+   "spellings": [
+    "Centre"
+   ]
+  },
+  {
+   "fips": "42029",
+   "key": "CHESTER",
+   "name": "Chester",
+   "spellings": [
+    "Chester"
+   ]
+  },
+  {
+   "fips": "42031",
+   "key": "CLARION",
+   "name": "Clarion",
+   "spellings": [
+    "Clarion"
+   ]
+  },
+  {
+   "fips": "42033",
+   "key": "CLEARFIELD",
+   "name": "Clearfield",
+   "spellings": [
+    "Clearfield"
+   ]
+  },
+  {
+   "fips": "42035",
+   "key": "CLINTON",
+   "name": "Clinton",
+   "spellings": [
+    "Clinton"
+   ]
+  },
+  {
+   "fips": "42037",
+   "key": "COLUMBIA",
+   "name": "Columbia",
+   "spellings": [
+    "Columbia"
+   ]
+  },
+  {
+   "fips": "42039",
+   "key": "CRAWFORD",
+   "name": "Crawford",
+   "spellings": [
+    "Crawford"
+   ]
+  },
+  {
+   "fips": "42041",
+   "key": "CUMBERLAND",
+   "name": "Cumberland",
+   "spellings": [
+    "Cumberland"
+   ]
+  },
+  {
+   "fips": "42043",
+   "key": "DAUPHIN",
+   "name": "Dauphin",
+   "spellings": [
+    "Dauphin"
+   ]
+  },
+  {
+   "fips": "42045",
+   "key": "DELAWARE",
+   "name": "Delaware",
+   "spellings": [
+    "Delaware"
+   ]
+  },
+  {
+   "fips": "42047",
+   "key": "ELK",
+   "name": "Elk",
+   "spellings": [
+    "Elk"
+   ]
+  },
+  {
+   "fips": "42049",
+   "key": "ERIE",
+   "name": "Erie",
+   "spellings": [
+    "Erie"
+   ]
+  },
+  {
+   "fips": "42051",
+   "key": "FAYETTE",
+   "name": "Fayette",
+   "spellings": [
+    "Fayette"
+   ]
+  },
+  {
+   "fips": "42053",
+   "key": "FOREST",
+   "name": "Forest",
+   "spellings": [
+    "Forest"
+   ]
+  },
+  {
+   "fips": "42055",
+   "key": "FRANKLIN",
+   "name": "Franklin",
+   "spellings": [
+    "Franklin"
+   ]
+  },
+  {
+   "fips": "42057",
+   "key": "FULTON",
+   "name": "Fulton",
+   "spellings": [
+    "Fulton"
+   ]
+  },
+  {
+   "fips": "42059",
+   "key": "GREENE",
+   "name": "Greene",
+   "spellings": [
+    "Greene"
+   ]
+  },
+  {
+   "fips": "42061",
+   "key": "HUNTINGDON",
+   "name": "Huntingdon",
+   "spellings": [
+    "Huntingdon"
+   ]
+  },
+  {
+   "fips": "42063",
+   "key": "INDIANA",
+   "name": "Indiana",
+   "spellings": [
+    "Indiana"
+   ]
+  },
+  {
+   "fips": "42065",
+   "key": "JEFFERSON",
+   "name": "Jefferson",
+   "spellings": [
+    "Jefferson"
+   ]
+  },
+  {
+   "fips": "42067",
+   "key": "JUNIATA",
+   "name": "Juniata",
+   "spellings": [
+    "Juniata"
+   ]
+  },
+  {
+   "fips": "42069",
+   "key": "LACKAWANNA",
+   "name": "Lackawanna",
+   "spellings": [
+    "Lackawanna"
+   ]
+  },
+  {
+   "fips": "42071",
+   "key": "LANCASTER",
+   "name": "Lancaster",
+   "spellings": [
+    "Lancaster"
+   ]
+  },
+  {
+   "fips": "42073",
+   "key": "LAWRENCE",
+   "name": "Lawrence",
+   "spellings": [
+    "Lawrence"
+   ]
+  },
+  {
+   "fips": "42075",
+   "key": "LEBANON",
+   "name": "Lebanon",
+   "spellings": [
+    "Lebanon"
+   ]
+  },
+  {
+   "fips": "42077",
+   "key": "LEHIGH",
+   "name": "Lehigh",
+   "spellings": [
+    "Lehigh"
+   ]
+  },
+  {
+   "fips": "42079",
+   "key": "LUZERNE",
+   "name": "Luzerne",
+   "spellings": [
+    "Luzerne"
+   ]
+  },
+  {
+   "fips": "42081",
+   "key": "LYCOMING",
+   "name": "Lycoming",
+   "spellings": [
+    "Lycoming"
+   ]
+  },
+  {
+   "fips": "42083",
+   "key": "MCKEAN",
+   "name": "McKean",
+   "spellings": [
+    "McKean"
+   ]
+  },
+  {
+   "fips": "42085",
+   "key": "MERCER",
+   "name": "Mercer",
+   "spellings": [
+    "Mercer"
+   ]
+  },
+  {
+   "fips": "42087",
+   "key": "MIFFLIN",
+   "name": "Mifflin",
+   "spellings": [
+    "Mifflin"
+   ]
+  },
+  {
+   "fips": "42089",
+   "key": "MONROE",
+   "name": "Monroe",
+   "spellings": [
+    "Monroe"
+   ]
+  },
+  {
+   "fips": "42091",
+   "key": "MONTGOMERY",
+   "name": "Montgomery",
+   "spellings": [
+    "Montgomery"
+   ]
+  },
+  {
+   "fips": "42093",
+   "key": "MONTOUR",
+   "name": "Montour",
+   "spellings": [
+    "Montour"
+   ]
+  },
+  {
+   "fips": "42095",
+   "key": "NORTHAMPTON",
+   "name": "Northampton",
+   "spellings": [
+    "Northampton"
+   ]
+  },
+  {
+   "fips": "42097",
+   "key": "NORTHUMBERLAND",
+   "name": "Northumberland",
+   "spellings": [
+    "Northumberland"
+   ]
+  },
+  {
+   "fips": "42099",
+   "key": "PERRY",
+   "name": "Perry",
+   "spellings": [
+    "Perry"
+   ]
+  },
+  {
+   "fips": "42101",
+   "key": "PHILADELPHIA",
+   "name": "Philadelphia",
+   "spellings": [
+    "Philadelphia"
+   ]
+  },
+  {
+   "fips": "42103",
+   "key": "PIKE",
+   "name": "Pike",
+   "spellings": [
+    "Pike"
+   ]
+  },
+  {
+   "fips": "42105",
+   "key": "POTTER",
+   "name": "Potter",
+   "spellings": [
+    "Potter"
+   ]
+  },
+  {
+   "fips": "42107",
+   "key": "SCHUYLKILL",
+   "name": "Schuylkill",
+   "spellings": [
+    "Schuylkill"
+   ]
+  },
+  {
+   "fips": "42109",
+   "key": "SNYDER",
+   "name": "Snyder",
+   "spellings": [
+    "Snyder"
+   ]
+  },
+  {
+   "fips": "42111",
+   "key": "SOMERSET",
+   "name": "Somerset",
+   "spellings": [
+    "Somerset"
+   ]
+  },
+  {
+   "fips": "42113",
+   "key": "SULLIVAN",
+   "name": "Sullivan",
+   "spellings": [
+    "Sullivan"
+   ]
+  },
+  {
+   "fips": "42115",
+   "key": "SUSQUEHANNA",
+   "name": "Susquehanna",
+   "spellings": [
+    "Susquehanna"
+   ]
+  },
+  {
+   "fips": "42117",
+   "key": "TIOGA",
+   "name": "Tioga",
+   "spellings": [
+    "Tioga"
+   ]
+  },
+  {
+   "fips": "42119",
+   "key": "UNION",
+   "name": "Union",
+   "spellings": [
+    "Union"
+   ]
+  },
+  {
+   "fips": "42121",
+   "key": "VENANGO",
+   "name": "Venango",
+   "spellings": [
+    "Venango"
+   ]
+  },
+  {
+   "fips": "42123",
+   "key": "WARREN",
+   "name": "Warren",
+   "spellings": [
+    "Warren"
+   ]
+  },
+  {
+   "fips": "42125",
+   "key": "WASHINGTON",
+   "name": "Washington",
+   "spellings": [
+    "Washington"
+   ]
+  },
+  {
+   "fips": "42127",
+   "key": "WAYNE",
+   "name": "Wayne",
+   "spellings": [
+    "Wayne"
+   ]
+  },
+  {
+   "fips": "42129",
+   "key": "WESTMORELAND",
+   "name": "Westmoreland",
+   "spellings": [
+    "Westmoreland"
+   ]
+  },
+  {
+   "fips": "42131",
+   "key": "WYOMING",
+   "name": "Wyoming",
+   "spellings": [
+    "Wyoming"
+   ]
+  },
+  {
+   "fips": "42133",
+   "key": "YORK",
+   "name": "York",
+   "spellings": [
+    "York"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/pa-map.json, built from map-sources/); spellings from rosters/PA.json",
+ "state": "PA",
+ "unit": "county"
+}

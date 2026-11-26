@@ -547,7 +547,7 @@ class PublicationDatabaseTests(unittest.TestCase):
             conn.execute(
                 "INSERT INTO landing.results SELECT %s, source_line, state, unit_type, county,"
                 " precinct, contest_id, source_contest_id, source_candidate_id, choice,"
-                " choice_party, 9, precincts_reporting, precincts_total, attributes"
+                " choice_party, 9, precincts_reporting, precincts_total, attributes, county_fips"
                 " FROM landing.results WHERE release_id=%s AND source_line=2",
                 (second_release, first_release),
             )

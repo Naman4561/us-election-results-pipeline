@@ -21,16 +21,17 @@ unit_tests:
   given:
   - input: ref('stg_county_rows')
     rows:
-    - {release_id: 1, state: XX, county: A, contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 2}
-    - {release_id: 1, state: XX, county: A, contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 3}
-    - {release_id: 1, state: XX, county: B, contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 1}
-    - {release_id: 1, state: XX, county: B, contest_id: XX-01, choice: P, choice_party: DEM, total_votes: null}
-    - {release_id: 2, state: XX, county: A, contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 7}
+    - {release_id: 1, state: XX, county: A, county_fips: '99001', contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 2}
+    - {release_id: 1, state: XX, county: A, county_fips: '99001', contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 3}
+    - {release_id: 1, state: XX, county: B, county_fips: '99003', contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 1}
+    - {release_id: 1, state: XX, county: B, county_fips: '99003', contest_id: XX-01, choice: P, choice_party: DEM, total_votes: null}
+    - {release_id: 2, state: XX, county: A, county_fips: '99001', contest_id: XX-01, choice: P, choice_party: DEM, total_votes: 7}
   expect:
+    # The county's FIPS rides along with its totals, one row per county whatever its precincts.
     rows:
-    - {release_id: 1, county: A, total_votes: 5}
-    - {release_id: 1, county: B, total_votes: null}
-    - {release_id: 2, county: A, total_votes: 7}
+    - {release_id: 1, county: A, county_fips: '99001', total_votes: 5}
+    - {release_id: 1, county: B, county_fips: '99003', total_votes: null}
+    - {release_id: 2, county: A, county_fips: '99001', total_votes: 7}
 
 - name: contest_totals_use_official_rows_or_else_the_county_sum
   model: contest_results

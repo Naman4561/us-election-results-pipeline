@@ -16,7 +16,7 @@ import csv
 import json
 from collections import defaultdict
 
-from election_pipeline import parse_report
+from election_pipeline import counties, parse_report
 
 FIELDS = (
     "source_line",
@@ -24,6 +24,7 @@ FIELDS = (
     "state",
     "unit_type",
     "county",
+    "county_fips",
     "precinct",
     "contest_id",
     "source_contest_id",
@@ -102,11 +103,17 @@ def finish(
         raise ValueError("Unsupported contest set for this state")
     keys, names, reported, county, precinct = set(), set(), {}, {}, {}
     coverage = defaultdict(set)
+    places, fips_of = None, {}
     if not rows or len(rows) > settings.max_csv_rows:
         raise ValueError("Missing/excessive results")
     for index, row in enumerate(rows, 2):
         row.update(source_line=index, state=source.state, election_date=source.election_date)
         row.setdefault("precinct", "")
+        if row["county"] and row["county"] not in fips_of:
+            # Every county, town or district a row names must be in the state's table.
+            places = places or counties.table(source.state)
+            fips_of[row["county"]] = places.resolve(row["county"])
+        row["county_fips"] = fips_of.get(row["county"], "")
         row["attributes"] = json.dumps(row.get("attributes") or {}, sort_keys=True)
         if not row["choice"] or not row["source_candidate_id"]:
             raise ValueError("Missing candidate identity")
@@ -164,8 +171,11 @@ def finish(
     measures = (*methods, "total_votes")
     write_groups(
         output / "county_results.csv",
-        {(source.election_date, source.state, *k): v for k, v in county.items()},
-        ("election_date", "state", "county", "contest_id", "choice", "choice_party"),
+        {
+            (source.election_date, source.state, k[0], fips_of[k[0]], *k[1:]): v
+            for k, v in county.items()
+        },
+        ("election_date", "state", "county", "county_fips", "contest_id", "choice", "choice_party"),
         measures,
     )
     official = {(source.election_date, source.state, *k): v for k, v in statewide.items()}

@@ -1,0 +1,127 @@
+{
+ "counties": [
+  {
+   "fips": "04001",
+   "key": "APACHE",
+   "name": "Apache",
+   "spellings": [
+    "Apache"
+   ]
+  },
+  {
+   "fips": "04003",
+   "key": "COCHISE",
+   "name": "Cochise",
+   "spellings": [
+    "Cochise"
+   ]
+  },
+  {
+   "fips": "04005",
+   "key": "COCONINO",
+   "name": "Coconino",
+   "spellings": [
+    "Coconino"
+   ]
+  },
+  {
+   "fips": "04007",
+   "key": "GILA",
+   "name": "Gila",
+   "spellings": [
+    "Gila"
+   ]
+  },
+  {
+   "fips": "04009",
+   "key": "GRAHAM",
+   "name": "Graham",
+   "spellings": [
+    "Graham"
+   ]
+  },
+  {
+   "fips": "04011",
+   "key": "GREENLEE",
+   "name": "Greenlee",
+   "spellings": [
+    "Greenlee"
+   ]
+  },
+  {
+   "fips": "04012",
+   "key": "LAPAZ",
+   "name": "La Paz",
+   "spellings": [
+    "La Paz"
+   ]
+  },
+  {
+   "fips": "04013",
+   "key": "MARICOPA",
+   "name": "Maricopa",
+   "spellings": [
+    "Maricopa"
+   ]
+  },
+  {
+   "fips": "04015",
+   "key": "MOHAVE",
+   "name": "Mohave",
+   "spellings": [
+    "Mohave"
+   ]
+  },
+  {
+   "fips": "04017",
+   "key": "NAVAJO",
+   "name": "Navajo",
+   "spellings": [
+    "Navajo"
+   ]
+  },
+  {
+   "fips": "04019",
+   "key": "PIMA",
+   "name": "Pima",
+   "spellings": [
+    "Pima"
+   ]
+  },
+  {
+   "fips": "04021",
+   "key": "PINAL",
+   "name": "Pinal",
+   "spellings": [
+    "Pinal"
+   ]
+  },
+  {
+   "fips": "04023",
+   "key": "SANTACRUZ",
+   "name": "Santa Cruz",
+   "spellings": [
+    "Santa Cruz"
+   ]
+  },
+  {
+   "fips": "04025",
+   "key": "YAVAPAI",
+   "name": "Yavapai",
+   "spellings": [
+    "Yavapai"
+   ]
+  },
+  {
+   "fips": "04027",
+   "key": "YUMA",
+   "name": "Yuma",
+   "spellings": [
+    "Yuma"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/az-map.json, built from map-sources/); spellings from rosters/AZ.json",
+ "state": "AZ",
+ "unit": "county"
+}

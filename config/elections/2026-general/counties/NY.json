@@ -1,0 +1,504 @@
+{
+ "counties": [
+  {
+   "fips": "36001",
+   "key": "ALBANY",
+   "name": "Albany",
+   "spellings": [
+    "Albany"
+   ]
+  },
+  {
+   "fips": "36003",
+   "key": "ALLEGANY",
+   "name": "Allegany",
+   "spellings": [
+    "Allegany"
+   ]
+  },
+  {
+   "fips": "36005",
+   "key": "BRONX",
+   "name": "Bronx",
+   "spellings": [
+    "Bronx"
+   ]
+  },
+  {
+   "fips": "36007",
+   "key": "BROOME",
+   "name": "Broome",
+   "spellings": [
+    "Broome"
+   ]
+  },
+  {
+   "fips": "36009",
+   "key": "CATTARAUGUS",
+   "name": "Cattaraugus",
+   "spellings": [
+    "Cattaraugus"
+   ]
+  },
+  {
+   "fips": "36011",
+   "key": "CAYUGA",
+   "name": "Cayuga",
+   "spellings": [
+    "Cayuga"
+   ]
+  },
+  {
+   "fips": "36013",
+   "key": "CHAUTAUQUA",
+   "name": "Chautauqua",
+   "spellings": [
+    "Chautauqua"
+   ]
+  },
+  {
+   "fips": "36015",
+   "key": "CHEMUNG",
+   "name": "Chemung",
+   "spellings": [
+    "Chemung"
+   ]
+  },
+  {
+   "fips": "36017",
+   "key": "CHENANGO",
+   "name": "Chenango",
+   "spellings": [
+    "Chenango"
+   ]
+  },
+  {
+   "fips": "36019",
+   "key": "CLINTON",
+   "name": "Clinton",
+   "spellings": [
+    "Clinton"
+   ]
+  },
+  {
+   "fips": "36021",
+   "key": "COLUMBIA",
+   "name": "Columbia",
+   "spellings": [
+    "Columbia"
+   ]
+  },
+  {
+   "fips": "36023",
+   "key": "CORTLAND",
+   "name": "Cortland",
+   "spellings": [
+    "Cortland"
+   ]
+  },
+  {
+   "fips": "36025",
+   "key": "DELAWARE",
+   "name": "Delaware",
+   "spellings": [
+    "Delaware"
+   ]
+  },
+  {
+   "fips": "36027",
+   "key": "DUTCHESS",
+   "name": "Dutchess",
+   "spellings": [
+    "Dutchess"
+   ]
+  },
+  {
+   "fips": "36029",
+   "key": "ERIE",
+   "name": "Erie",
+   "spellings": [
+    "Erie"
+   ]
+  },
+  {
+   "fips": "36031",
+   "key": "ESSEX",
+   "name": "Essex",
+   "spellings": [
+    "Essex"
+   ]
+  },
+  {
+   "fips": "36033",
+   "key": "FRANKLIN",
+   "name": "Franklin",
+   "spellings": [
+    "Franklin"
+   ]
+  },
+  {
+   "fips": "36035",
+   "key": "FULTON",
+   "name": "Fulton",
+   "spellings": [
+    "Fulton"
+   ]
+  },
+  {
+   "fips": "36037",
+   "key": "GENESEE",
+   "name": "Genesee",
+   "spellings": [
+    "Genesee"
+   ]
+  },
+  {
+   "fips": "36039",
+   "key": "GREENE",
+   "name": "Greene",
+   "spellings": [
+    "Greene"
+   ]
+  },
+  {
+   "fips": "36041",
+   "key": "HAMILTON",
+   "name": "Hamilton",
+   "spellings": [
+    "Hamilton"
+   ]
+  },
+  {
+   "fips": "36043",
+   "key": "HERKIMER",
+   "name": "Herkimer",
+   "spellings": [
+    "Herkimer"
+   ]
+  },
+  {
+   "fips": "36045",
+   "key": "JEFFERSON",
+   "name": "Jefferson",
+   "spellings": [
+    "Jefferson"
+   ]
+  },
+  {
+   "fips": "36047",
+   "key": "KINGS",
+   "name": "Kings",
+   "spellings": [
+    "Kings"
+   ]
+  },
+  {
+   "fips": "36049",
+   "key": "LEWIS",
+   "name": "Lewis",
+   "spellings": [
+    "Lewis"
+   ]
+  },
+  {
+   "fips": "36051",
+   "key": "LIVINGSTON",
+   "name": "Livingston",
+   "spellings": [
+    "Livingston"
+   ]
+  },
+  {
+   "fips": "36053",
+   "key": "MADISON",
+   "name": "Madison",
+   "spellings": [
+    "Madison"
+   ]
+  },
+  {
+   "fips": "36055",
+   "key": "MONROE",
+   "name": "Monroe",
+   "spellings": [
+    "Monroe"
+   ]
+  },
+  {
+   "fips": "36057",
+   "key": "MONTGOMERY",
+   "name": "Montgomery",
+   "spellings": [
+    "Montgomery"
+   ]
+  },
+  {
+   "fips": "36059",
+   "key": "NASSAU",
+   "name": "Nassau",
+   "spellings": [
+    "Nassau"
+   ]
+  },
+  {
+   "fips": "36061",
+   "key": "NEWYORK",
+   "name": "New York",
+   "spellings": [
+    "New York"
+   ]
+  },
+  {
+   "fips": "36063",
+   "key": "NIAGARA",
+   "name": "Niagara",
+   "spellings": [
+    "Niagara"
+   ]
+  },
+  {
+   "fips": "36065",
+   "key": "ONEIDA",
+   "name": "Oneida",
+   "spellings": [
+    "Oneida"
+   ]
+  },
+  {
+   "fips": "36067",
+   "key": "ONONDAGA",
+   "name": "Onondaga",
+   "spellings": [
+    "Onondaga"
+   ]
+  },
+  {
+   "fips": "36069",
+   "key": "ONTARIO",
+   "name": "Ontario",
+   "spellings": [
+    "Ontario"
+   ]
+  },
+  {
+   "fips": "36071",
+   "key": "ORANGE",
+   "name": "Orange",
+   "spellings": [
+    "Orange"
+   ]
+  },
+  {
+   "fips": "36073",
+   "key": "ORLEANS",
+   "name": "Orleans",
+   "spellings": [
+    "Orleans"
+   ]
+  },
+  {
+   "fips": "36075",
+   "key": "OSWEGO",
+   "name": "Oswego",
+   "spellings": [
+    "Oswego"
+   ]
+  },
+  {
+   "fips": "36077",
+   "key": "OTSEGO",
+   "name": "Otsego",
+   "spellings": [
+    "Otsego"
+   ]
+  },
+  {
+   "fips": "36079",
+   "key": "PUTNAM",
+   "name": "Putnam",
+   "spellings": [
+    "Putnam"
+   ]
+  },
+  {
+   "fips": "36081",
+   "key": "QUEENS",
+   "name": "Queens",
+   "spellings": [
+    "Queens"
+   ]
+  },
+  {
+   "fips": "36083",
+   "key": "RENSSELAER",
+   "name": "Rensselaer",
+   "spellings": [
+    "Rensselaer"
+   ]
+  },
+  {
+   "fips": "36085",
+   "key": "RICHMOND",
+   "name": "Richmond",
+   "spellings": [
+    "Richmond"
+   ]
+  },
+  {
+   "fips": "36087",
+   "key": "ROCKLAND",
+   "name": "Rockland",
+   "spellings": [
+    "Rockland"
+   ]
+  },
+  {
+   "fips": "36089",
+   "key": "STLAWRENCE",
+   "name": "St. Lawrence",
+   "spellings": [
+    "St. Lawrence",
+    "St.Lawrence"
+   ]
+  },
+  {
+   "fips": "36091",
+   "key": "SARATOGA",
+   "name": "Saratoga",
+   "spellings": [
+    "Saratoga"
+   ]
+  },
+  {
+   "fips": "36093",
+   "key": "SCHENECTADY",
+   "name": "Schenectady",
+   "spellings": [
+    "Schenectady"
+   ]
+  },
+  {
+   "fips": "36095",
+   "key": "SCHOHARIE",
+   "name": "Schoharie",
+   "spellings": [
+    "Schoharie"
+   ]
+  },
+  {
+   "fips": "36097",
+   "key": "SCHUYLER",
+   "name": "Schuyler",
+   "spellings": [
+    "Schuyler"
+   ]
+  },
+  {
+   "fips": "36099",
+   "key": "SENECA",
+   "name": "Seneca",
+   "spellings": [
+    "Seneca"
+   ]
+  },
+  {
+   "fips": "36101",
+   "key": "STEUBEN",
+   "name": "Steuben",
+   "spellings": [
+    "Steuben"
+   ]
+  },
+  {
+   "fips": "36103",
+   "key": "SUFFOLK",
+   "name": "Suffolk",
+   "spellings": [
+    "Suffolk"
+   ]
+  },
+  {
+   "fips": "36105",
+   "key": "SULLIVAN",
+   "name": "Sullivan",
+   "spellings": [
+    "Sullivan"
+   ]
+  },
+  {
+   "fips": "36107",
+   "key": "TIOGA",
+   "name": "Tioga",
+   "spellings": [
+    "Tioga"
+   ]
+  },
+  {
+   "fips": "36109",
+   "key": "TOMPKINS",
+   "name": "Tompkins",
+   "spellings": [
+    "Tompkins"
+   ]
+  },
+  {
+   "fips": "36111",
+   "key": "ULSTER",
+   "name": "Ulster",
+   "spellings": [
+    "Ulster"
+   ]
+  },
+  {
+   "fips": "36113",
+   "key": "WARREN",
+   "name": "Warren",
+   "spellings": [
+    "Warren"
+   ]
+  },
+  {
+   "fips": "36115",
+   "key": "WASHINGTON",
+   "name": "Washington",
+   "spellings": [
+    "Washington"
+   ]
+  },
+  {
+   "fips": "36117",
+   "key": "WAYNE",
+   "name": "Wayne",
+   "spellings": [
+    "Wayne"
+   ]
+  },
+  {
+   "fips": "36119",
+   "key": "WESTCHESTER",
+   "name": "Westchester",
+   "spellings": [
+    "Westchester"
+   ]
+  },
+  {
+   "fips": "36121",
+   "key": "WYOMING",
+   "name": "Wyoming",
+   "spellings": [
+    "Wyoming"
+   ]
+  },
+  {
+   "fips": "36123",
+   "key": "YATES",
+   "name": "Yates",
+   "spellings": [
+    "Yates"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/ny-map.json, built from map-sources/); spellings from rosters/NY.json",
+ "state": "NY",
+ "unit": "county"
+}

@@ -1,0 +1,671 @@
+{
+ "counties": [
+  {
+   "fips": "26001",
+   "key": "ALCONA",
+   "name": "Alcona",
+   "spellings": [
+    "Alcona"
+   ]
+  },
+  {
+   "fips": "26003",
+   "key": "ALGER",
+   "name": "Alger",
+   "spellings": [
+    "Alger"
+   ]
+  },
+  {
+   "fips": "26005",
+   "key": "ALLEGAN",
+   "name": "Allegan",
+   "spellings": [
+    "Allegan"
+   ]
+  },
+  {
+   "fips": "26007",
+   "key": "ALPENA",
+   "name": "Alpena",
+   "spellings": [
+    "Alpena"
+   ]
+  },
+  {
+   "fips": "26009",
+   "key": "ANTRIM",
+   "name": "Antrim",
+   "spellings": [
+    "Antrim"
+   ]
+  },
+  {
+   "fips": "26011",
+   "key": "ARENAC",
+   "name": "Arenac",
+   "spellings": [
+    "Arenac"
+   ]
+  },
+  {
+   "fips": "26013",
+   "key": "BARAGA",
+   "name": "Baraga",
+   "spellings": [
+    "Baraga"
+   ]
+  },
+  {
+   "fips": "26015",
+   "key": "BARRY",
+   "name": "Barry",
+   "spellings": [
+    "Barry"
+   ]
+  },
+  {
+   "fips": "26017",
+   "key": "BAY",
+   "name": "Bay",
+   "spellings": [
+    "Bay"
+   ]
+  },
+  {
+   "fips": "26019",
+   "key": "BENZIE",
+   "name": "Benzie",
+   "spellings": [
+    "Benzie"
+   ]
+  },
+  {
+   "fips": "26021",
+   "key": "BERRIEN",
+   "name": "Berrien",
+   "spellings": [
+    "Berrien"
+   ]
+  },
+  {
+   "fips": "26023",
+   "key": "BRANCH",
+   "name": "Branch",
+   "spellings": [
+    "Branch"
+   ]
+  },
+  {
+   "fips": "26025",
+   "key": "CALHOUN",
+   "name": "Calhoun",
+   "spellings": [
+    "Calhoun"
+   ]
+  },
+  {
+   "fips": "26027",
+   "key": "CASS",
+   "name": "Cass",
+   "spellings": [
+    "Cass"
+   ]
+  },
+  {
+   "fips": "26029",
+   "key": "CHARLEVOIX",
+   "name": "Charlevoix",
+   "spellings": [
+    "Charlevoix"
+   ]
+  },
+  {
+   "fips": "26031",
+   "key": "CHEBOYGAN",
+   "name": "Cheboygan",
+   "spellings": [
+    "Cheboygan"
+   ]
+  },
+  {
+   "fips": "26033",
+   "key": "CHIPPEWA",
+   "name": "Chippewa",
+   "spellings": [
+    "Chippewa"
+   ]
+  },
+  {
+   "fips": "26035",
+   "key": "CLARE",
+   "name": "Clare",
+   "spellings": [
+    "Clare"
+   ]
+  },
+  {
+   "fips": "26037",
+   "key": "CLINTON",
+   "name": "Clinton",
+   "spellings": [
+    "Clinton"
+   ]
+  },
+  {
+   "fips": "26039",
+   "key": "CRAWFORD",
+   "name": "Crawford",
+   "spellings": [
+    "Crawford"
+   ]
+  },
+  {
+   "fips": "26041",
+   "key": "DELTA",
+   "name": "Delta",
+   "spellings": [
+    "Delta"
+   ]
+  },
+  {
+   "fips": "26043",
+   "key": "DICKINSON",
+   "name": "Dickinson",
+   "spellings": [
+    "Dickinson"
+   ]
+  },
+  {
+   "fips": "26045",
+   "key": "EATON",
+   "name": "Eaton",
+   "spellings": [
+    "Eaton"
+   ]
+  },
+  {
+   "fips": "26047",
+   "key": "EMMET",
+   "name": "Emmet",
+   "spellings": [
+    "Emmet"
+   ]
+  },
+  {
+   "fips": "26049",
+   "key": "GENESEE",
+   "name": "Genesee",
+   "spellings": [
+    "Genesee"
+   ]
+  },
+  {
+   "fips": "26051",
+   "key": "GLADWIN",
+   "name": "Gladwin",
+   "spellings": [
+    "Gladwin"
+   ]
+  },
+  {
+   "fips": "26053",
+   "key": "GOGEBIC",
+   "name": "Gogebic",
+   "spellings": [
+    "Gogebic"
+   ]
+  },
+  {
+   "fips": "26055",
+   "key": "GRANDTRAVERSE",
+   "name": "Grand Traverse",
+   "spellings": [
+    "Grand Traverse"
+   ]
+  },
+  {
+   "fips": "26057",
+   "key": "GRATIOT",
+   "name": "Gratiot",
+   "spellings": [
+    "Gratiot"
+   ]
+  },
+  {
+   "fips": "26059",
+   "key": "HILLSDALE",
+   "name": "Hillsdale",
+   "spellings": [
+    "Hillsdale"
+   ]
+  },
+  {
+   "fips": "26061",
+   "key": "HOUGHTON",
+   "name": "Houghton",
+   "spellings": [
+    "Houghton"
+   ]
+  },
+  {
+   "fips": "26063",
+   "key": "HURON",
+   "name": "Huron",
+   "spellings": [
+    "Huron"
+   ]
+  },
+  {
+   "fips": "26065",
+   "key": "INGHAM",
+   "name": "Ingham",
+   "spellings": [
+    "Ingham"
+   ]
+  },
+  {
+   "fips": "26067",
+   "key": "IONIA",
+   "name": "Ionia",
+   "spellings": [
+    "Ionia"
+   ]
+  },
+  {
+   "fips": "26069",
+   "key": "IOSCO",
+   "name": "Iosco",
+   "spellings": [
+    "Iosco"
+   ]
+  },
+  {
+   "fips": "26071",
+   "key": "IRON",
+   "name": "Iron",
+   "spellings": [
+    "Iron"
+   ]
+  },
+  {
+   "fips": "26073",
+   "key": "ISABELLA",
+   "name": "Isabella",
+   "spellings": [
+    "Isabella"
+   ]
+  },
+  {
+   "fips": "26075",
+   "key": "JACKSON",
+   "name": "Jackson",
+   "spellings": [
+    "Jackson"
+   ]
+  },
+  {
+   "fips": "26077",
+   "key": "KALAMAZOO",
+   "name": "Kalamazoo",
+   "spellings": [
+    "Kalamazoo"
+   ]
+  },
+  {
+   "fips": "26079",
+   "key": "KALKASKA",
+   "name": "Kalkaska",
+   "spellings": [
+    "Kalkaska"
+   ]
+  },
+  {
+   "fips": "26081",
+   "key": "KENT",
+   "name": "Kent",
+   "spellings": [
+    "Kent"
+   ]
+  },
+  {
+   "fips": "26083",
+   "key": "KEWEENAW",
+   "name": "Keweenaw",
+   "spellings": [
+    "Keweenaw"
+   ]
+  },
+  {
+   "fips": "26085",
+   "key": "LAKE",
+   "name": "Lake",
+   "spellings": [
+    "Lake"
+   ]
+  },
+  {
+   "fips": "26087",
+   "key": "LAPEER",
+   "name": "Lapeer",
+   "spellings": [
+    "Lapeer"
+   ]
+  },
+  {
+   "fips": "26089",
+   "key": "LEELANAU",
+   "name": "Leelanau",
+   "spellings": [
+    "Leelanau"
+   ]
+  },
+  {
+   "fips": "26091",
+   "key": "LENAWEE",
+   "name": "Lenawee",
+   "spellings": [
+    "Lenawee"
+   ]
+  },
+  {
+   "fips": "26093",
+   "key": "LIVINGSTON",
+   "name": "Livingston",
+   "spellings": [
+    "Livingston"
+   ]
+  },
+  {
+   "fips": "26095",
+   "key": "LUCE",
+   "name": "Luce",
+   "spellings": [
+    "Luce"
+   ]
+  },
+  {
+   "fips": "26097",
+   "key": "MACKINAC",
+   "name": "Mackinac",
+   "spellings": [
+    "Mackinac"
+   ]
+  },
+  {
+   "fips": "26099",
+   "key": "MACOMB",
+   "name": "Macomb",
+   "spellings": [
+    "Macomb"
+   ]
+  },
+  {
+   "fips": "26101",
+   "key": "MANISTEE",
+   "name": "Manistee",
+   "spellings": [
+    "Manistee"
+   ]
+  },
+  {
+   "fips": "26103",
+   "key": "MARQUETTE",
+   "name": "Marquette",
+   "spellings": [
+    "Marquette"
+   ]
+  },
+  {
+   "fips": "26105",
+   "key": "MASON",
+   "name": "Mason",
+   "spellings": [
+    "Mason"
+   ]
+  },
+  {
+   "fips": "26107",
+   "key": "MECOSTA",
+   "name": "Mecosta",
+   "spellings": [
+    "Mecosta"
+   ]
+  },
+  {
+   "fips": "26109",
+   "key": "MENOMINEE",
+   "name": "Menominee",
+   "spellings": [
+    "Menominee"
+   ]
+  },
+  {
+   "fips": "26111",
+   "key": "MIDLAND",
+   "name": "Midland",
+   "spellings": [
+    "Midland"
+   ]
+  },
+  {
+   "fips": "26113",
+   "key": "MISSAUKEE",
+   "name": "Missaukee",
+   "spellings": [
+    "Missaukee"
+   ]
+  },
+  {
+   "fips": "26115",
+   "key": "MONROE",
+   "name": "Monroe",
+   "spellings": [
+    "Monroe"
+   ]
+  },
+  {
+   "fips": "26117",
+   "key": "MONTCALM",
+   "name": "Montcalm",
+   "spellings": [
+    "Montcalm"
+   ]
+  },
+  {
+   "fips": "26119",
+   "key": "MONTMORENCY",
+   "name": "Montmorency",
+   "spellings": [
+    "Montmorency"
+   ]
+  },
+  {
+   "fips": "26121",
+   "key": "MUSKEGON",
+   "name": "Muskegon",
+   "spellings": [
+    "Muskegon"
+   ]
+  },
+  {
+   "fips": "26123",
+   "key": "NEWAYGO",
+   "name": "Newaygo",
+   "spellings": [
+    "Newaygo"
+   ]
+  },
+  {
+   "fips": "26125",
+   "key": "OAKLAND",
+   "name": "Oakland",
+   "spellings": [
+    "Oakland"
+   ]
+  },
+  {
+   "fips": "26127",
+   "key": "OCEANA",
+   "name": "Oceana",
+   "spellings": [
+    "Oceana"
+   ]
+  },
+  {
+   "fips": "26129",
+   "key": "OGEMAW",
+   "name": "Ogemaw",
+   "spellings": [
+    "Ogemaw"
+   ]
+  },
+  {
+   "fips": "26131",
+   "key": "ONTONAGON",
+   "name": "Ontonagon",
+   "spellings": [
+    "Ontonagon"
+   ]
+  },
+  {
+   "fips": "26133",
+   "key": "OSCEOLA",
+   "name": "Osceola",
+   "spellings": [
+    "Osceola"
+   ]
+  },
+  {
+   "fips": "26135",
+   "key": "OSCODA",
+   "name": "Oscoda",
+   "spellings": [
+    "Oscoda"
+   ]
+  },
+  {
+   "fips": "26137",
+   "key": "OTSEGO",
+   "name": "Otsego",
+   "spellings": [
+    "Otsego"
+   ]
+  },
+  {
+   "fips": "26139",
+   "key": "OTTAWA",
+   "name": "Ottawa",
+   "spellings": [
+    "Ottawa"
+   ]
+  },
+  {
+   "fips": "26141",
+   "key": "PRESQUEISLE",
+   "name": "Presque Isle",
+   "spellings": [
+    "Presque Isle"
+   ]
+  },
+  {
+   "fips": "26143",
+   "key": "ROSCOMMON",
+   "name": "Roscommon",
+   "spellings": [
+    "Roscommon"
+   ]
+  },
+  {
+   "fips": "26145",
+   "key": "SAGINAW",
+   "name": "Saginaw",
+   "spellings": [
+    "Saginaw"
+   ]
+  },
+  {
+   "fips": "26147",
+   "key": "STCLAIR",
+   "name": "St. Clair",
+   "spellings": [
+    "St. Clair"
+   ]
+  },
+  {
+   "fips": "26149",
+   "key": "STJOSEPH",
+   "name": "St. Joseph",
+   "spellings": [
+    "St. Joseph"
+   ]
+  },
+  {
+   "fips": "26151",
+   "key": "SANILAC",
+   "name": "Sanilac",
+   "spellings": [
+    "Sanilac"
+   ]
+  },
+  {
+   "fips": "26153",
+   "key": "SCHOOLCRAFT",
+   "name": "Schoolcraft",
+   "spellings": [
+    "Schoolcraft"
+   ]
+  },
+  {
+   "fips": "26155",
+   "key": "SHIAWASSEE",
+   "name": "Shiawassee",
+   "spellings": [
+    "Shiawassee"
+   ]
+  },
+  {
+   "fips": "26157",
+   "key": "TUSCOLA",
+   "name": "Tuscola",
+   "spellings": [
+    "Tuscola"
+   ]
+  },
+  {
+   "fips": "26159",
+   "key": "VANBUREN",
+   "name": "Van Buren",
+   "spellings": [
+    "Van Buren"
+   ]
+  },
+  {
+   "fips": "26161",
+   "key": "WASHTENAW",
+   "name": "Washtenaw",
+   "spellings": [
+    "Washtenaw"
+   ]
+  },
+  {
+   "fips": "26163",
+   "key": "WAYNE",
+   "name": "Wayne",
+   "spellings": [
+    "Wayne"
+   ]
+  },
+  {
+   "fips": "26165",
+   "key": "WEXFORD",
+   "name": "Wexford",
+   "spellings": [
+    "Wexford"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/mi-map.json, built from map-sources/); spellings from rosters/MI.json",
+ "state": "MI",
+ "unit": "county"
+}

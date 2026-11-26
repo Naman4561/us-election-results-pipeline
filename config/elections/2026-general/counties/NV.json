@@ -1,0 +1,143 @@
+{
+ "counties": [
+  {
+   "fips": "32001",
+   "key": "CHURCHILL",
+   "name": "Churchill",
+   "spellings": [
+    "Churchill"
+   ]
+  },
+  {
+   "fips": "32003",
+   "key": "CLARK",
+   "name": "Clark",
+   "spellings": [
+    "Clark"
+   ]
+  },
+  {
+   "fips": "32005",
+   "key": "DOUGLAS",
+   "name": "Douglas",
+   "spellings": [
+    "Douglas"
+   ]
+  },
+  {
+   "fips": "32007",
+   "key": "ELKO",
+   "name": "Elko",
+   "spellings": [
+    "Elko"
+   ]
+  },
+  {
+   "fips": "32009",
+   "key": "ESMERALDA",
+   "name": "Esmeralda",
+   "spellings": [
+    "Esmeralda"
+   ]
+  },
+  {
+   "fips": "32011",
+   "key": "EUREKA",
+   "name": "Eureka",
+   "spellings": [
+    "Eureka"
+   ]
+  },
+  {
+   "fips": "32013",
+   "key": "HUMBOLDT",
+   "name": "Humboldt",
+   "spellings": [
+    "Humboldt"
+   ]
+  },
+  {
+   "fips": "32015",
+   "key": "LANDER",
+   "name": "Lander",
+   "spellings": [
+    "Lander"
+   ]
+  },
+  {
+   "fips": "32017",
+   "key": "LINCOLN",
+   "name": "Lincoln",
+   "spellings": [
+    "Lincoln"
+   ]
+  },
+  {
+   "fips": "32019",
+   "key": "LYON",
+   "name": "Lyon",
+   "spellings": [
+    "Lyon"
+   ]
+  },
+  {
+   "fips": "32021",
+   "key": "MINERAL",
+   "name": "Mineral",
+   "spellings": [
+    "Mineral"
+   ]
+  },
+  {
+   "fips": "32023",
+   "key": "NYE",
+   "name": "Nye",
+   "spellings": [
+    "Nye"
+   ]
+  },
+  {
+   "fips": "32027",
+   "key": "PERSHING",
+   "name": "Pershing",
+   "spellings": [
+    "Pershing"
+   ]
+  },
+  {
+   "fips": "32029",
+   "key": "STOREY",
+   "name": "Storey",
+   "spellings": [
+    "Storey"
+   ]
+  },
+  {
+   "fips": "32031",
+   "key": "WASHOE",
+   "name": "Washoe",
+   "spellings": [
+    "Washoe"
+   ]
+  },
+  {
+   "fips": "32033",
+   "key": "WHITEPINE",
+   "name": "White Pine",
+   "spellings": [
+    "White Pine"
+   ]
+  },
+  {
+   "fips": "32510",
+   "key": "CARSONCITY",
+   "name": "Carson City",
+   "spellings": [
+    "Carson City"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/nv-map.json, built from map-sources/); spellings from rosters/NV.json",
+ "state": "NV",
+ "unit": "county"
+}

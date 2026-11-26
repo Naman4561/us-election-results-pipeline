@@ -1,0 +1,455 @@
+{
+ "counties": [
+  {
+   "fips": "30001",
+   "key": "BEAVERHEAD",
+   "name": "Beaverhead",
+   "spellings": [
+    "Beaverhead"
+   ]
+  },
+  {
+   "fips": "30003",
+   "key": "BIGHORN",
+   "name": "Big Horn",
+   "spellings": [
+    "Big Horn"
+   ]
+  },
+  {
+   "fips": "30005",
+   "key": "BLAINE",
+   "name": "Blaine",
+   "spellings": [
+    "Blaine"
+   ]
+  },
+  {
+   "fips": "30007",
+   "key": "BROADWATER",
+   "name": "Broadwater",
+   "spellings": [
+    "Broadwater"
+   ]
+  },
+  {
+   "fips": "30009",
+   "key": "CARBON",
+   "name": "Carbon",
+   "spellings": [
+    "Carbon"
+   ]
+  },
+  {
+   "fips": "30011",
+   "key": "CARTER",
+   "name": "Carter",
+   "spellings": [
+    "Carter"
+   ]
+  },
+  {
+   "fips": "30013",
+   "key": "CASCADE",
+   "name": "Cascade",
+   "spellings": [
+    "Cascade"
+   ]
+  },
+  {
+   "fips": "30015",
+   "key": "CHOUTEAU",
+   "name": "Chouteau",
+   "spellings": [
+    "Chouteau"
+   ]
+  },
+  {
+   "fips": "30017",
+   "key": "CUSTER",
+   "name": "Custer",
+   "spellings": [
+    "Custer"
+   ]
+  },
+  {
+   "fips": "30019",
+   "key": "DANIELS",
+   "name": "Daniels",
+   "spellings": [
+    "Daniels"
+   ]
+  },
+  {
+   "fips": "30021",
+   "key": "DAWSON",
+   "name": "Dawson",
+   "spellings": [
+    "Dawson"
+   ]
+  },
+  {
+   "fips": "30023",
+   "key": "DEERLODGE",
+   "name": "Deer Lodge",
+   "spellings": [
+    "Deer Lodge"
+   ]
+  },
+  {
+   "fips": "30025",
+   "key": "FALLON",
+   "name": "Fallon",
+   "spellings": [
+    "Fallon"
+   ]
+  },
+  {
+   "fips": "30027",
+   "key": "FERGUS",
+   "name": "Fergus",
+   "spellings": [
+    "Fergus"
+   ]
+  },
+  {
+   "fips": "30029",
+   "key": "FLATHEAD",
+   "name": "Flathead",
+   "spellings": [
+    "Flathead"
+   ]
+  },
+  {
+   "fips": "30031",
+   "key": "GALLATIN",
+   "name": "Gallatin",
+   "spellings": [
+    "Gallatin"
+   ]
+  },
+  {
+   "fips": "30033",
+   "key": "GARFIELD",
+   "name": "Garfield",
+   "spellings": [
+    "Garfield"
+   ]
+  },
+  {
+   "fips": "30035",
+   "key": "GLACIER",
+   "name": "Glacier",
+   "spellings": [
+    "Glacier"
+   ]
+  },
+  {
+   "fips": "30037",
+   "key": "GOLDENVALLEY",
+   "name": "Golden Valley",
+   "spellings": [
+    "Golden Valley"
+   ]
+  },
+  {
+   "fips": "30039",
+   "key": "GRANITE",
+   "name": "Granite",
+   "spellings": [
+    "Granite"
+   ]
+  },
+  {
+   "fips": "30041",
+   "key": "HILL",
+   "name": "Hill",
+   "spellings": [
+    "Hill"
+   ]
+  },
+  {
+   "fips": "30043",
+   "key": "JEFFERSON",
+   "name": "Jefferson",
+   "spellings": [
+    "Jefferson"
+   ]
+  },
+  {
+   "fips": "30045",
+   "key": "JUDITHBASIN",
+   "name": "Judith Basin",
+   "spellings": [
+    "Judith Basin"
+   ]
+  },
+  {
+   "fips": "30047",
+   "key": "LAKE",
+   "name": "Lake",
+   "spellings": [
+    "Lake"
+   ]
+  },
+  {
+   "fips": "30049",
+   "key": "LEWISANDCLARK",
+   "name": "Lewis and Clark",
+   "spellings": [
+    "Lewis and Clark"
+   ]
+  },
+  {
+   "fips": "30051",
+   "key": "LIBERTY",
+   "name": "Liberty",
+   "spellings": [
+    "Liberty"
+   ]
+  },
+  {
+   "fips": "30053",
+   "key": "LINCOLN",
+   "name": "Lincoln",
+   "spellings": [
+    "Lincoln"
+   ]
+  },
+  {
+   "fips": "30055",
+   "key": "MCCONE",
+   "name": "McCone",
+   "spellings": [
+    "McCone"
+   ]
+  },
+  {
+   "fips": "30057",
+   "key": "MADISON",
+   "name": "Madison",
+   "spellings": [
+    "Madison"
+   ]
+  },
+  {
+   "fips": "30059",
+   "key": "MEAGHER",
+   "name": "Meagher",
+   "spellings": [
+    "Meagher"
+   ]
+  },
+  {
+   "fips": "30061",
+   "key": "MINERAL",
+   "name": "Mineral",
+   "spellings": [
+    "Mineral"
+   ]
+  },
+  {
+   "fips": "30063",
+   "key": "MISSOULA",
+   "name": "Missoula",
+   "spellings": [
+    "Missoula"
+   ]
+  },
+  {
+   "fips": "30065",
+   "key": "MUSSELSHELL",
+   "name": "Musselshell",
+   "spellings": [
+    "Musselshell"
+   ]
+  },
+  {
+   "fips": "30067",
+   "key": "PARK",
+   "name": "Park",
+   "spellings": [
+    "Park"
+   ]
+  },
+  {
+   "fips": "30069",
+   "key": "PETROLEUM",
+   "name": "Petroleum",
+   "spellings": [
+    "Petroleum"
+   ]
+  },
+  {
+   "fips": "30071",
+   "key": "PHILLIPS",
+   "name": "Phillips",
+   "spellings": [
+    "Phillips"
+   ]
+  },
+  {
+   "fips": "30073",
+   "key": "PONDERA",
+   "name": "Pondera",
+   "spellings": [
+    "Pondera"
+   ]
+  },
+  {
+   "fips": "30075",
+   "key": "POWDERRIVER",
+   "name": "Powder River",
+   "spellings": [
+    "Powder River"
+   ]
+  },
+  {
+   "fips": "30077",
+   "key": "POWELL",
+   "name": "Powell",
+   "spellings": [
+    "Powell"
+   ]
+  },
+  {
+   "fips": "30079",
+   "key": "PRAIRIE",
+   "name": "Prairie",
+   "spellings": [
+    "Prairie"
+   ]
+  },
+  {
+   "fips": "30081",
+   "key": "RAVALLI",
+   "name": "Ravalli",
+   "spellings": [
+    "Ravalli"
+   ]
+  },
+  {
+   "fips": "30083",
+   "key": "RICHLAND",
+   "name": "Richland",
+   "spellings": [
+    "Richland"
+   ]
+  },
+  {
+   "fips": "30085",
+   "key": "ROOSEVELT",
+   "name": "Roosevelt",
+   "spellings": [
+    "Roosevelt"
+   ]
+  },
+  {
+   "fips": "30087",
+   "key": "ROSEBUD",
+   "name": "Rosebud",
+   "spellings": [
+    "Rosebud"
+   ]
+  },
+  {
+   "fips": "30089",
+   "key": "SANDERS",
+   "name": "Sanders",
+   "spellings": [
+    "Sanders"
+   ]
+  },
+  {
+   "fips": "30091",
+   "key": "SHERIDAN",
+   "name": "Sheridan",
+   "spellings": [
+    "Sheridan"
+   ]
+  },
+  {
+   "fips": "30093",
+   "key": "SILVERBOW",
+   "name": "Silver Bow",
+   "spellings": [
+    "Silver Bow"
+   ]
+  },
+  {
+   "fips": "30095",
+   "key": "STILLWATER",
+   "name": "Stillwater",
+   "spellings": [
+    "Stillwater"
+   ]
+  },
+  {
+   "fips": "30097",
+   "key": "SWEETGRASS",
+   "name": "Sweet Grass",
+   "spellings": [
+    "Sweet Grass"
+   ]
+  },
+  {
+   "fips": "30099",
+   "key": "TETON",
+   "name": "Teton",
+   "spellings": [
+    "Teton"
+   ]
+  },
+  {
+   "fips": "30101",
+   "key": "TOOLE",
+   "name": "Toole",
+   "spellings": [
+    "Toole"
+   ]
+  },
+  {
+   "fips": "30103",
+   "key": "TREASURE",
+   "name": "Treasure",
+   "spellings": [
+    "Treasure"
+   ]
+  },
+  {
+   "fips": "30105",
+   "key": "VALLEY",
+   "name": "Valley",
+   "spellings": [
+    "Valley"
+   ]
+  },
+  {
+   "fips": "30107",
+   "key": "WHEATLAND",
+   "name": "Wheatland",
+   "spellings": [
+    "Wheatland"
+   ]
+  },
+  {
+   "fips": "30109",
+   "key": "WIBAUX",
+   "name": "Wibaux",
+   "spellings": [
+    "Wibaux"
+   ]
+  },
+  {
+   "fips": "30111",
+   "key": "YELLOWSTONE",
+   "name": "Yellowstone",
+   "spellings": [
+    "Yellowstone"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/mt-map.json, built from map-sources/); spellings from rosters/MT.json",
+ "state": "MT",
+ "unit": "county"
+}

@@ -1,0 +1,431 @@
+{
+ "counties": [
+  {
+   "fips": "38001",
+   "key": "ADAMS",
+   "name": "Adams",
+   "spellings": [
+    "Adams"
+   ]
+  },
+  {
+   "fips": "38003",
+   "key": "BARNES",
+   "name": "Barnes",
+   "spellings": [
+    "Barnes"
+   ]
+  },
+  {
+   "fips": "38005",
+   "key": "BENSON",
+   "name": "Benson",
+   "spellings": [
+    "Benson"
+   ]
+  },
+  {
+   "fips": "38007",
+   "key": "BILLINGS",
+   "name": "Billings",
+   "spellings": [
+    "Billings"
+   ]
+  },
+  {
+   "fips": "38009",
+   "key": "BOTTINEAU",
+   "name": "Bottineau",
+   "spellings": [
+    "Bottineau"
+   ]
+  },
+  {
+   "fips": "38011",
+   "key": "BOWMAN",
+   "name": "Bowman",
+   "spellings": [
+    "Bowman"
+   ]
+  },
+  {
+   "fips": "38013",
+   "key": "BURKE",
+   "name": "Burke",
+   "spellings": [
+    "Burke"
+   ]
+  },
+  {
+   "fips": "38015",
+   "key": "BURLEIGH",
+   "name": "Burleigh",
+   "spellings": [
+    "Burleigh"
+   ]
+  },
+  {
+   "fips": "38017",
+   "key": "CASS",
+   "name": "Cass",
+   "spellings": [
+    "Cass"
+   ]
+  },
+  {
+   "fips": "38019",
+   "key": "CAVALIER",
+   "name": "Cavalier",
+   "spellings": [
+    "Cavalier"
+   ]
+  },
+  {
+   "fips": "38021",
+   "key": "DICKEY",
+   "name": "Dickey",
+   "spellings": [
+    "Dickey"
+   ]
+  },
+  {
+   "fips": "38023",
+   "key": "DIVIDE",
+   "name": "Divide",
+   "spellings": [
+    "Divide"
+   ]
+  },
+  {
+   "fips": "38025",
+   "key": "DUNN",
+   "name": "Dunn",
+   "spellings": [
+    "Dunn"
+   ]
+  },
+  {
+   "fips": "38027",
+   "key": "EDDY",
+   "name": "Eddy",
+   "spellings": [
+    "Eddy"
+   ]
+  },
+  {
+   "fips": "38029",
+   "key": "EMMONS",
+   "name": "Emmons",
+   "spellings": [
+    "Emmons"
+   ]
+  },
+  {
+   "fips": "38031",
+   "key": "FOSTER",
+   "name": "Foster",
+   "spellings": [
+    "Foster"
+   ]
+  },
+  {
+   "fips": "38033",
+   "key": "GOLDENVALLEY",
+   "name": "Golden Valley",
+   "spellings": [
+    "Golden Valley"
+   ]
+  },
+  {
+   "fips": "38035",
+   "key": "GRANDFORKS",
+   "name": "Grand Forks",
+   "spellings": [
+    "Grand Forks"
+   ]
+  },
+  {
+   "fips": "38037",
+   "key": "GRANT",
+   "name": "Grant",
+   "spellings": [
+    "Grant"
+   ]
+  },
+  {
+   "fips": "38039",
+   "key": "GRIGGS",
+   "name": "Griggs",
+   "spellings": [
+    "Griggs"
+   ]
+  },
+  {
+   "fips": "38041",
+   "key": "HETTINGER",
+   "name": "Hettinger",
+   "spellings": [
+    "Hettinger"
+   ]
+  },
+  {
+   "fips": "38043",
+   "key": "KIDDER",
+   "name": "Kidder",
+   "spellings": [
+    "Kidder"
+   ]
+  },
+  {
+   "fips": "38045",
+   "key": "LAMOURE",
+   "name": "LaMoure",
+   "spellings": [
+    "LaMoure"
+   ]
+  },
+  {
+   "fips": "38047",
+   "key": "LOGAN",
+   "name": "Logan",
+   "spellings": [
+    "Logan"
+   ]
+  },
+  {
+   "fips": "38049",
+   "key": "MCHENRY",
+   "name": "McHenry",
+   "spellings": [
+    "McHenry"
+   ]
+  },
+  {
+   "fips": "38051",
+   "key": "MCINTOSH",
+   "name": "McIntosh",
+   "spellings": [
+    "McIntosh"
+   ]
+  },
+  {
+   "fips": "38053",
+   "key": "MCKENZIE",
+   "name": "McKenzie",
+   "spellings": [
+    "McKenzie"
+   ]
+  },
+  {
+   "fips": "38055",
+   "key": "MCLEAN",
+   "name": "McLean",
+   "spellings": [
+    "McLean"
+   ]
+  },
+  {
+   "fips": "38057",
+   "key": "MERCER",
+   "name": "Mercer",
+   "spellings": [
+    "Mercer"
+   ]
+  },
+  {
+   "fips": "38059",
+   "key": "MORTON",
+   "name": "Morton",
+   "spellings": [
+    "Morton"
+   ]
+  },
+  {
+   "fips": "38061",
+   "key": "MOUNTRAIL",
+   "name": "Mountrail",
+   "spellings": [
+    "Mountrail"
+   ]
+  },
+  {
+   "fips": "38063",
+   "key": "NELSON",
+   "name": "Nelson",
+   "spellings": [
+    "Nelson"
+   ]
+  },
+  {
+   "fips": "38065",
+   "key": "OLIVER",
+   "name": "Oliver",
+   "spellings": [
+    "Oliver"
+   ]
+  },
+  {
+   "fips": "38067",
+   "key": "PEMBINA",
+   "name": "Pembina",
+   "spellings": [
+    "Pembina"
+   ]
+  },
+  {
+   "fips": "38069",
+   "key": "PIERCE",
+   "name": "Pierce",
+   "spellings": [
+    "Pierce"
+   ]
+  },
+  {
+   "fips": "38071",
+   "key": "RAMSEY",
+   "name": "Ramsey",
+   "spellings": [
+    "Ramsey"
+   ]
+  },
+  {
+   "fips": "38073",
+   "key": "RANSOM",
+   "name": "Ransom",
+   "spellings": [
+    "Ransom"
+   ]
+  },
+  {
+   "fips": "38075",
+   "key": "RENVILLE",
+   "name": "Renville",
+   "spellings": [
+    "Renville"
+   ]
+  },
+  {
+   "fips": "38077",
+   "key": "RICHLAND",
+   "name": "Richland",
+   "spellings": [
+    "Richland"
+   ]
+  },
+  {
+   "fips": "38079",
+   "key": "ROLETTE",
+   "name": "Rolette",
+   "spellings": [
+    "Rolette"
+   ]
+  },
+  {
+   "fips": "38081",
+   "key": "SARGENT",
+   "name": "Sargent",
+   "spellings": [
+    "Sargent"
+   ]
+  },
+  {
+   "fips": "38083",
+   "key": "SHERIDAN",
+   "name": "Sheridan",
+   "spellings": [
+    "Sheridan"
+   ]
+  },
+  {
+   "fips": "38085",
+   "key": "SIOUX",
+   "name": "Sioux",
+   "spellings": [
+    "Sioux"
+   ]
+  },
+  {
+   "fips": "38087",
+   "key": "SLOPE",
+   "name": "Slope",
+   "spellings": [
+    "Slope"
+   ]
+  },
+  {
+   "fips": "38089",
+   "key": "STARK",
+   "name": "Stark",
+   "spellings": [
+    "Stark"
+   ]
+  },
+  {
+   "fips": "38091",
+   "key": "STEELE",
+   "name": "Steele",
+   "spellings": [
+    "Steele"
+   ]
+  },
+  {
+   "fips": "38093",
+   "key": "STUTSMAN",
+   "name": "Stutsman",
+   "spellings": [
+    "Stutsman"
+   ]
+  },
+  {
+   "fips": "38095",
+   "key": "TOWNER",
+   "name": "Towner",
+   "spellings": [
+    "Towner"
+   ]
+  },
+  {
+   "fips": "38097",
+   "key": "TRAILL",
+   "name": "Traill",
+   "spellings": [
+    "Traill"
+   ]
+  },
+  {
+   "fips": "38099",
+   "key": "WALSH",
+   "name": "Walsh",
+   "spellings": [
+    "Walsh"
+   ]
+  },
+  {
+   "fips": "38101",
+   "key": "WARD",
+   "name": "Ward",
+   "spellings": [
+    "Ward"
+   ]
+  },
+  {
+   "fips": "38103",
+   "key": "WELLS",
+   "name": "Wells",
+   "spellings": [
+    "Wells"
+   ]
+  },
+  {
+   "fips": "38105",
+   "key": "WILLIAMS",
+   "name": "Williams",
+   "spellings": [
+    "Williams"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/nd-map.json, built from map-sources/); spellings from rosters/ND.json",
+ "state": "ND",
+ "unit": "county"
+}

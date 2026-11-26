@@ -1,0 +1,421 @@
+{
+ "counties": [
+  {
+   "fips": "45001",
+   "key": "ABBEVILLE",
+   "name": "Abbeville",
+   "spellings": [
+    "ABBEVILLE",
+    "Abbeville"
+   ]
+  },
+  {
+   "fips": "45003",
+   "key": "AIKEN",
+   "name": "Aiken",
+   "spellings": [
+    "AIKEN",
+    "Aiken"
+   ]
+  },
+  {
+   "fips": "45005",
+   "key": "ALLENDALE",
+   "name": "Allendale",
+   "spellings": [
+    "ALLENDALE",
+    "Allendale"
+   ]
+  },
+  {
+   "fips": "45007",
+   "key": "ANDERSON",
+   "name": "Anderson",
+   "spellings": [
+    "ANDERSON",
+    "Anderson"
+   ]
+  },
+  {
+   "fips": "45009",
+   "key": "BAMBERG",
+   "name": "Bamberg",
+   "spellings": [
+    "BAMBERG",
+    "Bamberg"
+   ]
+  },
+  {
+   "fips": "45011",
+   "key": "BARNWELL",
+   "name": "Barnwell",
+   "spellings": [
+    "BARNWELL",
+    "Barnwell"
+   ]
+  },
+  {
+   "fips": "45013",
+   "key": "BEAUFORT",
+   "name": "Beaufort",
+   "spellings": [
+    "BEAUFORT",
+    "Beaufort"
+   ]
+  },
+  {
+   "fips": "45015",
+   "key": "BERKELEY",
+   "name": "Berkeley",
+   "spellings": [
+    "BERKELEY",
+    "Berkeley"
+   ]
+  },
+  {
+   "fips": "45017",
+   "key": "CALHOUN",
+   "name": "Calhoun",
+   "spellings": [
+    "CALHOUN",
+    "Calhoun"
+   ]
+  },
+  {
+   "fips": "45019",
+   "key": "CHARLESTON",
+   "name": "Charleston",
+   "spellings": [
+    "CHARLESTON",
+    "Charleston"
+   ]
+  },
+  {
+   "fips": "45021",
+   "key": "CHEROKEE",
+   "name": "Cherokee",
+   "spellings": [
+    "CHEROKEE",
+    "Cherokee"
+   ]
+  },
+  {
+   "fips": "45023",
+   "key": "CHESTER",
+   "name": "Chester",
+   "spellings": [
+    "CHESTER",
+    "Chester"
+   ]
+  },
+  {
+   "fips": "45025",
+   "key": "CHESTERFIELD",
+   "name": "Chesterfield",
+   "spellings": [
+    "CHESTERFIELD",
+    "Chesterfield"
+   ]
+  },
+  {
+   "fips": "45027",
+   "key": "CLARENDON",
+   "name": "Clarendon",
+   "spellings": [
+    "CLARENDON",
+    "Clarendon"
+   ]
+  },
+  {
+   "fips": "45029",
+   "key": "COLLETON",
+   "name": "Colleton",
+   "spellings": [
+    "COLLETON",
+    "Colleton"
+   ]
+  },
+  {
+   "fips": "45031",
+   "key": "DARLINGTON",
+   "name": "Darlington",
+   "spellings": [
+    "DARLINGTON",
+    "Darlington"
+   ]
+  },
+  {
+   "fips": "45033",
+   "key": "DILLON",
+   "name": "Dillon",
+   "spellings": [
+    "DILLON",
+    "Dillon"
+   ]
+  },
+  {
+   "fips": "45035",
+   "key": "DORCHESTER",
+   "name": "Dorchester",
+   "spellings": [
+    "DORCHESTER",
+    "Dorchester"
+   ]
+  },
+  {
+   "fips": "45037",
+   "key": "EDGEFIELD",
+   "name": "Edgefield",
+   "spellings": [
+    "EDGEFIELD",
+    "Edgefield"
+   ]
+  },
+  {
+   "fips": "45039",
+   "key": "FAIRFIELD",
+   "name": "Fairfield",
+   "spellings": [
+    "FAIRFIELD",
+    "Fairfield"
+   ]
+  },
+  {
+   "fips": "45041",
+   "key": "FLORENCE",
+   "name": "Florence",
+   "spellings": [
+    "FLORENCE",
+    "Florence"
+   ]
+  },
+  {
+   "fips": "45043",
+   "key": "GEORGETOWN",
+   "name": "Georgetown",
+   "spellings": [
+    "GEORGETOWN",
+    "Georgetown"
+   ]
+  },
+  {
+   "fips": "45045",
+   "key": "GREENVILLE",
+   "name": "Greenville",
+   "spellings": [
+    "GREENVILLE",
+    "Greenville"
+   ]
+  },
+  {
+   "fips": "45047",
+   "key": "GREENWOOD",
+   "name": "Greenwood",
+   "spellings": [
+    "GREENWOOD",
+    "Greenwood"
+   ]
+  },
+  {
+   "fips": "45049",
+   "key": "HAMPTON",
+   "name": "Hampton",
+   "spellings": [
+    "HAMPTON",
+    "Hampton"
+   ]
+  },
+  {
+   "fips": "45051",
+   "key": "HORRY",
+   "name": "Horry",
+   "spellings": [
+    "HORRY",
+    "Horry"
+   ]
+  },
+  {
+   "fips": "45053",
+   "key": "JASPER",
+   "name": "Jasper",
+   "spellings": [
+    "JASPER",
+    "Jasper"
+   ]
+  },
+  {
+   "fips": "45055",
+   "key": "KERSHAW",
+   "name": "Kershaw",
+   "spellings": [
+    "KERSHAW",
+    "Kershaw"
+   ]
+  },
+  {
+   "fips": "45057",
+   "key": "LANCASTER",
+   "name": "Lancaster",
+   "spellings": [
+    "LANCASTER",
+    "Lancaster"
+   ]
+  },
+  {
+   "fips": "45059",
+   "key": "LAURENS",
+   "name": "Laurens",
+   "spellings": [
+    "LAURENS",
+    "Laurens"
+   ]
+  },
+  {
+   "fips": "45061",
+   "key": "LEE",
+   "name": "Lee",
+   "spellings": [
+    "LEE",
+    "Lee"
+   ]
+  },
+  {
+   "fips": "45063",
+   "key": "LEXINGTON",
+   "name": "Lexington",
+   "spellings": [
+    "LEXINGTON",
+    "Lexington"
+   ]
+  },
+  {
+   "fips": "45065",
+   "key": "MCCORMICK",
+   "name": "McCormick",
+   "spellings": [
+    "MCCORMICK",
+    "McCormick"
+   ]
+  },
+  {
+   "fips": "45067",
+   "key": "MARION",
+   "name": "Marion",
+   "spellings": [
+    "MARION",
+    "Marion"
+   ]
+  },
+  {
+   "fips": "45069",
+   "key": "MARLBORO",
+   "name": "Marlboro",
+   "spellings": [
+    "MARLBORO",
+    "Marlboro"
+   ]
+  },
+  {
+   "fips": "45071",
+   "key": "NEWBERRY",
+   "name": "Newberry",
+   "spellings": [
+    "NEWBERRY",
+    "Newberry"
+   ]
+  },
+  {
+   "fips": "45073",
+   "key": "OCONEE",
+   "name": "Oconee",
+   "spellings": [
+    "OCONEE",
+    "Oconee"
+   ]
+  },
+  {
+   "fips": "45075",
+   "key": "ORANGEBURG",
+   "name": "Orangeburg",
+   "spellings": [
+    "ORANGEBURG",
+    "Orangeburg"
+   ]
+  },
+  {
+   "fips": "45077",
+   "key": "PICKENS",
+   "name": "Pickens",
+   "spellings": [
+    "PICKENS",
+    "Pickens"
+   ]
+  },
+  {
+   "fips": "45079",
+   "key": "RICHLAND",
+   "name": "Richland",
+   "spellings": [
+    "RICHLAND",
+    "Richland"
+   ]
+  },
+  {
+   "fips": "45081",
+   "key": "SALUDA",
+   "name": "Saluda",
+   "spellings": [
+    "SALUDA",
+    "Saluda"
+   ]
+  },
+  {
+   "fips": "45083",
+   "key": "SPARTANBURG",
+   "name": "Spartanburg",
+   "spellings": [
+    "SPARTANBURG",
+    "Spartanburg"
+   ]
+  },
+  {
+   "fips": "45085",
+   "key": "SUMTER",
+   "name": "Sumter",
+   "spellings": [
+    "SUMTER",
+    "Sumter"
+   ]
+  },
+  {
+   "fips": "45087",
+   "key": "UNION",
+   "name": "Union",
+   "spellings": [
+    "UNION",
+    "Union"
+   ]
+  },
+  {
+   "fips": "45089",
+   "key": "WILLIAMSBURG",
+   "name": "Williamsburg",
+   "spellings": [
+    "WILLIAMSBURG",
+    "Williamsburg"
+   ]
+  },
+  {
+   "fips": "45091",
+   "key": "YORK",
+   "name": "York",
+   "spellings": [
+    "YORK",
+    "York"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/sc-map.json, built from map-sources/); spellings from rosters/SC.json",
+ "state": "SC",
+ "unit": "county"
+}

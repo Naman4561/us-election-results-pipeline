@@ -77,6 +77,26 @@ class DashboardTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "every race"):
             make_payload(self.geo, {}, complete[:-1], complete[:-1])
 
+    def test_a_published_row_joins_the_map_through_its_fips_not_its_spelling(self):
+        complete = [{**self.row(), "contest_id": identity} for identity in RACES]
+        with_fips = [
+            {**r, "county_fips": "37183", "county": "Wake County (respelled)"} for r in complete
+        ]
+        payload = make_payload(self.geo, {}, with_fips, complete)
+        self.assertEqual(
+            payload["races"]["NC-SEN"]["counties"]["WAKE"]["stats"]["total_votes"]["total"], 10
+        )
+        # A FIPS the map lacks is refused, whatever the name says.
+        lost = [{**r, "county_fips": "99999"} for r in complete]
+        with self.assertRaisesRegex(ValueError, "supported geography"):
+            make_payload(self.geo, {}, lost, complete)
+        # A row without one (a publication from before FIPS) still joins by its name.
+        old = [{**r, "county_fips": ""} for r in complete]
+        self.assertEqual(
+            make_payload(self.geo, {}, old, complete)["races"]["NC-SEN"]["counties"].keys(),
+            payload["races"]["NC-SEN"]["counties"].keys(),
+        )
+
     def test_http_etag_changes_with_publication_and_restore(self):
         first = demo_payload(self.geo)
         second = copy.deepcopy(first)

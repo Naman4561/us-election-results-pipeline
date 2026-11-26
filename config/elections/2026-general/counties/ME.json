@@ -1,0 +1,135 @@
+{
+ "counties": [
+  {
+   "fips": "23001",
+   "key": "ANDROSCOGGIN",
+   "name": "Androscoggin",
+   "spellings": [
+    "Androscoggin"
+   ]
+  },
+  {
+   "fips": "23003",
+   "key": "AROOSTOOK",
+   "name": "Aroostook",
+   "spellings": [
+    "Aroostook"
+   ]
+  },
+  {
+   "fips": "23005",
+   "key": "CUMBERLAND",
+   "name": "Cumberland",
+   "spellings": [
+    "Cumberland"
+   ]
+  },
+  {
+   "fips": "23007",
+   "key": "FRANKLIN",
+   "name": "Franklin",
+   "spellings": [
+    "Franklin"
+   ]
+  },
+  {
+   "fips": "23009",
+   "key": "HANCOCK",
+   "name": "Hancock",
+   "spellings": [
+    "Hancock"
+   ]
+  },
+  {
+   "fips": "23011",
+   "key": "KENNEBEC",
+   "name": "Kennebec",
+   "spellings": [
+    "Kennebec"
+   ]
+  },
+  {
+   "fips": "23013",
+   "key": "KNOX",
+   "name": "Knox",
+   "spellings": [
+    "Knox"
+   ]
+  },
+  {
+   "fips": "23015",
+   "key": "LINCOLN",
+   "name": "Lincoln",
+   "spellings": [
+    "Lincoln"
+   ]
+  },
+  {
+   "fips": "23017",
+   "key": "OXFORD",
+   "name": "Oxford",
+   "spellings": [
+    "Oxford"
+   ]
+  },
+  {
+   "fips": "23019",
+   "key": "PENOBSCOT",
+   "name": "Penobscot",
+   "spellings": [
+    "Penobscot"
+   ]
+  },
+  {
+   "fips": "23021",
+   "key": "PISCATAQUIS",
+   "name": "Piscataquis",
+   "spellings": [
+    "Piscataquis"
+   ]
+  },
+  {
+   "fips": "23023",
+   "key": "SAGADAHOC",
+   "name": "Sagadahoc",
+   "spellings": [
+    "Sagadahoc"
+   ]
+  },
+  {
+   "fips": "23025",
+   "key": "SOMERSET",
+   "name": "Somerset",
+   "spellings": [
+    "Somerset"
+   ]
+  },
+  {
+   "fips": "23027",
+   "key": "WALDO",
+   "name": "Waldo",
+   "spellings": [
+    "Waldo"
+   ]
+  },
+  {
+   "fips": "23029",
+   "key": "WASHINGTON",
+   "name": "Washington",
+   "spellings": [
+    "Washington"
+   ]
+  },
+  {
+   "fips": "23031",
+   "key": "YORK",
+   "name": "York",
+   "spellings": [
+    "York"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/me-map.json, built from map-sources/); spellings from rosters/ME.json",
+ "state": "ME",
+ "unit": "county"
+}

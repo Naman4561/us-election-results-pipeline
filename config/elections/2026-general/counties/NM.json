@@ -1,0 +1,304 @@
+{
+ "counties": [
+  {
+   "fips": "35001",
+   "key": "BERNALILLO",
+   "name": "Bernalillo",
+   "spellings": [
+    "BERNALILLO",
+    "Bernalillo"
+   ]
+  },
+  {
+   "fips": "35003",
+   "key": "CATRON",
+   "name": "Catron",
+   "spellings": [
+    "CATRON",
+    "Catron"
+   ]
+  },
+  {
+   "fips": "35005",
+   "key": "CHAVES",
+   "name": "Chaves",
+   "spellings": [
+    "CHAVES",
+    "Chaves"
+   ]
+  },
+  {
+   "fips": "35006",
+   "key": "CIBOLA",
+   "name": "Cibola",
+   "spellings": [
+    "CIBOLA",
+    "Cibola"
+   ]
+  },
+  {
+   "fips": "35007",
+   "key": "COLFAX",
+   "name": "Colfax",
+   "spellings": [
+    "COLFAX",
+    "Colfax"
+   ]
+  },
+  {
+   "fips": "35009",
+   "key": "CURRY",
+   "name": "Curry",
+   "spellings": [
+    "CURRY",
+    "Curry"
+   ]
+  },
+  {
+   "fips": "35011",
+   "key": "DEBACA",
+   "name": "De Baca",
+   "spellings": [
+    "DE BACA",
+    "De Baca"
+   ]
+  },
+  {
+   "fips": "35013",
+   "key": "DONAANA",
+   "name": "Doña Ana",
+   "spellings": [
+    "DONA ANA",
+    "Doña Ana"
+   ]
+  },
+  {
+   "fips": "35015",
+   "key": "EDDY",
+   "name": "Eddy",
+   "spellings": [
+    "EDDY",
+    "Eddy"
+   ]
+  },
+  {
+   "fips": "35017",
+   "key": "GRANT",
+   "name": "Grant",
+   "spellings": [
+    "GRANT",
+    "Grant"
+   ]
+  },
+  {
+   "fips": "35019",
+   "key": "GUADALUPE",
+   "name": "Guadalupe",
+   "spellings": [
+    "GUADALUPE",
+    "Guadalupe"
+   ]
+  },
+  {
+   "fips": "35021",
+   "key": "HARDING",
+   "name": "Harding",
+   "spellings": [
+    "HARDING",
+    "Harding"
+   ]
+  },
+  {
+   "fips": "35023",
+   "key": "HIDALGO",
+   "name": "Hidalgo",
+   "spellings": [
+    "HIDALGO",
+    "Hidalgo"
+   ]
+  },
+  {
+   "fips": "35025",
+   "key": "LEA",
+   "name": "Lea",
+   "spellings": [
+    "LEA",
+    "Lea"
+   ]
+  },
+  {
+   "fips": "35027",
+   "key": "LINCOLN",
+   "name": "Lincoln",
+   "spellings": [
+    "LINCOLN",
+    "Lincoln"
+   ]
+  },
+  {
+   "fips": "35028",
+   "key": "LOSALAMOS",
+   "name": "Los Alamos",
+   "spellings": [
+    "LOS ALAMOS",
+    "Los Alamos"
+   ]
+  },
+  {
+   "fips": "35029",
+   "key": "LUNA",
+   "name": "Luna",
+   "spellings": [
+    "LUNA",
+    "Luna"
+   ]
+  },
+  {
+   "fips": "35031",
+   "key": "MCKINLEY",
+   "name": "McKinley",
+   "spellings": [
+    "MCKINLEY",
+    "McKinley"
+   ]
+  },
+  {
+   "fips": "35033",
+   "key": "MORA",
+   "name": "Mora",
+   "spellings": [
+    "MORA",
+    "Mora"
+   ]
+  },
+  {
+   "fips": "35035",
+   "key": "OTERO",
+   "name": "Otero",
+   "spellings": [
+    "OTERO",
+    "Otero"
+   ]
+  },
+  {
+   "fips": "35037",
+   "key": "QUAY",
+   "name": "Quay",
+   "spellings": [
+    "QUAY",
+    "Quay"
+   ]
+  },
+  {
+   "fips": "35039",
+   "key": "RIOARRIBA",
+   "name": "Rio Arriba",
+   "spellings": [
+    "RIO ARRIBA",
+    "Rio Arriba"
+   ]
+  },
+  {
+   "fips": "35041",
+   "key": "ROOSEVELT",
+   "name": "Roosevelt",
+   "spellings": [
+    "ROOSEVELT",
+    "Roosevelt"
+   ]
+  },
+  {
+   "fips": "35043",
+   "key": "SANDOVAL",
+   "name": "Sandoval",
+   "spellings": [
+    "SANDOVAL",
+    "Sandoval"
+   ]
+  },
+  {
+   "fips": "35045",
+   "key": "SANJUAN",
+   "name": "San Juan",
+   "spellings": [
+    "SAN JUAN",
+    "San Juan"
+   ]
+  },
+  {
+   "fips": "35047",
+   "key": "SANMIGUEL",
+   "name": "San Miguel",
+   "spellings": [
+    "SAN MIGUEL",
+    "San Miguel"
+   ]
+  },
+  {
+   "fips": "35049",
+   "key": "SANTAFE",
+   "name": "Santa Fe",
+   "spellings": [
+    "SANTA FE",
+    "Santa Fe"
+   ]
+  },
+  {
+   "fips": "35051",
+   "key": "SIERRA",
+   "name": "Sierra",
+   "spellings": [
+    "SIERRA",
+    "Sierra"
+   ]
+  },
+  {
+   "fips": "35053",
+   "key": "SOCORRO",
+   "name": "Socorro",
+   "spellings": [
+    "SOCORRO",
+    "Socorro"
+   ]
+  },
+  {
+   "fips": "35055",
+   "key": "TAOS",
+   "name": "Taos",
+   "spellings": [
+    "TAOS",
+    "Taos"
+   ]
+  },
+  {
+   "fips": "35057",
+   "key": "TORRANCE",
+   "name": "Torrance",
+   "spellings": [
+    "TORRANCE",
+    "Torrance"
+   ]
+  },
+  {
+   "fips": "35059",
+   "key": "UNION",
+   "name": "Union",
+   "spellings": [
+    "UNION",
+    "Union"
+   ]
+  },
+  {
+   "fips": "35061",
+   "key": "VALENCIA",
+   "name": "Valencia",
+   "spellings": [
+    "VALENCIA",
+    "Valencia"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/nm-map.json, built from map-sources/); spellings from rosters/NM.json",
+ "state": "NM",
+ "unit": "county"
+}

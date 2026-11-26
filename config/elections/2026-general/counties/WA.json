@@ -1,0 +1,319 @@
+{
+ "counties": [
+  {
+   "fips": "53001",
+   "key": "ADAMS",
+   "name": "Adams",
+   "spellings": [
+    "Adams"
+   ]
+  },
+  {
+   "fips": "53003",
+   "key": "ASOTIN",
+   "name": "Asotin",
+   "spellings": [
+    "Asotin"
+   ]
+  },
+  {
+   "fips": "53005",
+   "key": "BENTON",
+   "name": "Benton",
+   "spellings": [
+    "Benton"
+   ]
+  },
+  {
+   "fips": "53007",
+   "key": "CHELAN",
+   "name": "Chelan",
+   "spellings": [
+    "Chelan"
+   ]
+  },
+  {
+   "fips": "53009",
+   "key": "CLALLAM",
+   "name": "Clallam",
+   "spellings": [
+    "Clallam"
+   ]
+  },
+  {
+   "fips": "53011",
+   "key": "CLARK",
+   "name": "Clark",
+   "spellings": [
+    "Clark"
+   ]
+  },
+  {
+   "fips": "53013",
+   "key": "COLUMBIA",
+   "name": "Columbia",
+   "spellings": [
+    "Columbia"
+   ]
+  },
+  {
+   "fips": "53015",
+   "key": "COWLITZ",
+   "name": "Cowlitz",
+   "spellings": [
+    "Cowlitz"
+   ]
+  },
+  {
+   "fips": "53017",
+   "key": "DOUGLAS",
+   "name": "Douglas",
+   "spellings": [
+    "Douglas"
+   ]
+  },
+  {
+   "fips": "53019",
+   "key": "FERRY",
+   "name": "Ferry",
+   "spellings": [
+    "Ferry"
+   ]
+  },
+  {
+   "fips": "53021",
+   "key": "FRANKLIN",
+   "name": "Franklin",
+   "spellings": [
+    "Franklin"
+   ]
+  },
+  {
+   "fips": "53023",
+   "key": "GARFIELD",
+   "name": "Garfield",
+   "spellings": [
+    "Garfield"
+   ]
+  },
+  {
+   "fips": "53025",
+   "key": "GRANT",
+   "name": "Grant",
+   "spellings": [
+    "Grant"
+   ]
+  },
+  {
+   "fips": "53027",
+   "key": "GRAYSHARBOR",
+   "name": "Grays Harbor",
+   "spellings": [
+    "Grays Harbor"
+   ]
+  },
+  {
+   "fips": "53029",
+   "key": "ISLAND",
+   "name": "Island",
+   "spellings": [
+    "Island"
+   ]
+  },
+  {
+   "fips": "53031",
+   "key": "JEFFERSON",
+   "name": "Jefferson",
+   "spellings": [
+    "Jefferson"
+   ]
+  },
+  {
+   "fips": "53033",
+   "key": "KING",
+   "name": "King",
+   "spellings": [
+    "King"
+   ]
+  },
+  {
+   "fips": "53035",
+   "key": "KITSAP",
+   "name": "Kitsap",
+   "spellings": [
+    "Kitsap"
+   ]
+  },
+  {
+   "fips": "53037",
+   "key": "KITTITAS",
+   "name": "Kittitas",
+   "spellings": [
+    "Kittitas"
+   ]
+  },
+  {
+   "fips": "53039",
+   "key": "KLICKITAT",
+   "name": "Klickitat",
+   "spellings": [
+    "Klickitat"
+   ]
+  },
+  {
+   "fips": "53041",
+   "key": "LEWIS",
+   "name": "Lewis",
+   "spellings": [
+    "Lewis"
+   ]
+  },
+  {
+   "fips": "53043",
+   "key": "LINCOLN",
+   "name": "Lincoln",
+   "spellings": [
+    "Lincoln"
+   ]
+  },
+  {
+   "fips": "53045",
+   "key": "MASON",
+   "name": "Mason",
+   "spellings": [
+    "Mason"
+   ]
+  },
+  {
+   "fips": "53047",
+   "key": "OKANOGAN",
+   "name": "Okanogan",
+   "spellings": [
+    "Okanogan"
+   ]
+  },
+  {
+   "fips": "53049",
+   "key": "PACIFIC",
+   "name": "Pacific",
+   "spellings": [
+    "Pacific"
+   ]
+  },
+  {
+   "fips": "53051",
+   "key": "PENDOREILLE",
+   "name": "Pend Oreille",
+   "spellings": [
+    "Pend Oreille"
+   ]
+  },
+  {
+   "fips": "53053",
+   "key": "PIERCE",
+   "name": "Pierce",
+   "spellings": [
+    "Pierce"
+   ]
+  },
+  {
+   "fips": "53055",
+   "key": "SANJUAN",
+   "name": "San Juan",
+   "spellings": [
+    "San Juan"
+   ]
+  },
+  {
+   "fips": "53057",
+   "key": "SKAGIT",
+   "name": "Skagit",
+   "spellings": [
+    "Skagit"
+   ]
+  },
+  {
+   "fips": "53059",
+   "key": "SKAMANIA",
+   "name": "Skamania",
+   "spellings": [
+    "Skamania"
+   ]
+  },
+  {
+   "fips": "53061",
+   "key": "SNOHOMISH",
+   "name": "Snohomish",
+   "spellings": [
+    "Snohomish"
+   ]
+  },
+  {
+   "fips": "53063",
+   "key": "SPOKANE",
+   "name": "Spokane",
+   "spellings": [
+    "Spokane"
+   ]
+  },
+  {
+   "fips": "53065",
+   "key": "STEVENS",
+   "name": "Stevens",
+   "spellings": [
+    "Stevens"
+   ]
+  },
+  {
+   "fips": "53067",
+   "key": "THURSTON",
+   "name": "Thurston",
+   "spellings": [
+    "Thurston"
+   ]
+  },
+  {
+   "fips": "53069",
+   "key": "WAHKIAKUM",
+   "name": "Wahkiakum",
+   "spellings": [
+    "Wahkiakum"
+   ]
+  },
+  {
+   "fips": "53071",
+   "key": "WALLAWALLA",
+   "name": "Walla Walla",
+   "spellings": [
+    "Walla Walla"
+   ]
+  },
+  {
+   "fips": "53073",
+   "key": "WHATCOM",
+   "name": "Whatcom",
+   "spellings": [
+    "Whatcom"
+   ]
+  },
+  {
+   "fips": "53075",
+   "key": "WHITMAN",
+   "name": "Whitman",
+   "spellings": [
+    "Whitman"
+   ]
+  },
+  {
+   "fips": "53077",
+   "key": "YAKIMA",
+   "name": "Yakima",
+   "spellings": [
+    "Yakima"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/wa-map.json, built from map-sources/); spellings from rosters/WA.json",
+ "state": "WA",
+ "unit": "county"
+}

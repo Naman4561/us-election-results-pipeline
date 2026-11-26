@@ -1,0 +1,583 @@
+{
+ "counties": [
+  {
+   "fips": "55001",
+   "key": "ADAMS",
+   "name": "Adams",
+   "spellings": [
+    "Adams"
+   ]
+  },
+  {
+   "fips": "55003",
+   "key": "ASHLAND",
+   "name": "Ashland",
+   "spellings": [
+    "Ashland"
+   ]
+  },
+  {
+   "fips": "55005",
+   "key": "BARRON",
+   "name": "Barron",
+   "spellings": [
+    "Barron"
+   ]
+  },
+  {
+   "fips": "55007",
+   "key": "BAYFIELD",
+   "name": "Bayfield",
+   "spellings": [
+    "Bayfield"
+   ]
+  },
+  {
+   "fips": "55009",
+   "key": "BROWN",
+   "name": "Brown",
+   "spellings": [
+    "Brown"
+   ]
+  },
+  {
+   "fips": "55011",
+   "key": "BUFFALO",
+   "name": "Buffalo",
+   "spellings": [
+    "Buffalo"
+   ]
+  },
+  {
+   "fips": "55013",
+   "key": "BURNETT",
+   "name": "Burnett",
+   "spellings": [
+    "Burnett"
+   ]
+  },
+  {
+   "fips": "55015",
+   "key": "CALUMET",
+   "name": "Calumet",
+   "spellings": [
+    "Calumet"
+   ]
+  },
+  {
+   "fips": "55017",
+   "key": "CHIPPEWA",
+   "name": "Chippewa",
+   "spellings": [
+    "Chippewa"
+   ]
+  },
+  {
+   "fips": "55019",
+   "key": "CLARK",
+   "name": "Clark",
+   "spellings": [
+    "Clark"
+   ]
+  },
+  {
+   "fips": "55021",
+   "key": "COLUMBIA",
+   "name": "Columbia",
+   "spellings": [
+    "Columbia"
+   ]
+  },
+  {
+   "fips": "55023",
+   "key": "CRAWFORD",
+   "name": "Crawford",
+   "spellings": [
+    "Crawford"
+   ]
+  },
+  {
+   "fips": "55025",
+   "key": "DANE",
+   "name": "Dane",
+   "spellings": [
+    "Dane"
+   ]
+  },
+  {
+   "fips": "55027",
+   "key": "DODGE",
+   "name": "Dodge",
+   "spellings": [
+    "Dodge"
+   ]
+  },
+  {
+   "fips": "55029",
+   "key": "DOOR",
+   "name": "Door",
+   "spellings": [
+    "Door"
+   ]
+  },
+  {
+   "fips": "55031",
+   "key": "DOUGLAS",
+   "name": "Douglas",
+   "spellings": [
+    "Douglas"
+   ]
+  },
+  {
+   "fips": "55033",
+   "key": "DUNN",
+   "name": "Dunn",
+   "spellings": [
+    "Dunn"
+   ]
+  },
+  {
+   "fips": "55035",
+   "key": "EAUCLAIRE",
+   "name": "Eau Claire",
+   "spellings": [
+    "Eau Claire"
+   ]
+  },
+  {
+   "fips": "55037",
+   "key": "FLORENCE",
+   "name": "Florence",
+   "spellings": [
+    "Florence"
+   ]
+  },
+  {
+   "fips": "55039",
+   "key": "FONDDULAC",
+   "name": "Fond du Lac",
+   "spellings": [
+    "Fond du Lac"
+   ]
+  },
+  {
+   "fips": "55041",
+   "key": "FOREST",
+   "name": "Forest",
+   "spellings": [
+    "Forest"
+   ]
+  },
+  {
+   "fips": "55043",
+   "key": "GRANT",
+   "name": "Grant",
+   "spellings": [
+    "Grant"
+   ]
+  },
+  {
+   "fips": "55045",
+   "key": "GREEN",
+   "name": "Green",
+   "spellings": [
+    "Green"
+   ]
+  },
+  {
+   "fips": "55047",
+   "key": "GREENLAKE",
+   "name": "Green Lake",
+   "spellings": [
+    "Green Lake"
+   ]
+  },
+  {
+   "fips": "55049",
+   "key": "IOWA",
+   "name": "Iowa",
+   "spellings": [
+    "Iowa"
+   ]
+  },
+  {
+   "fips": "55051",
+   "key": "IRON",
+   "name": "Iron",
+   "spellings": [
+    "Iron"
+   ]
+  },
+  {
+   "fips": "55053",
+   "key": "JACKSON",
+   "name": "Jackson",
+   "spellings": [
+    "Jackson"
+   ]
+  },
+  {
+   "fips": "55055",
+   "key": "JEFFERSON",
+   "name": "Jefferson",
+   "spellings": [
+    "Jefferson"
+   ]
+  },
+  {
+   "fips": "55057",
+   "key": "JUNEAU",
+   "name": "Juneau",
+   "spellings": [
+    "Juneau"
+   ]
+  },
+  {
+   "fips": "55059",
+   "key": "KENOSHA",
+   "name": "Kenosha",
+   "spellings": [
+    "Kenosha"
+   ]
+  },
+  {
+   "fips": "55061",
+   "key": "KEWAUNEE",
+   "name": "Kewaunee",
+   "spellings": [
+    "Kewaunee"
+   ]
+  },
+  {
+   "fips": "55063",
+   "key": "LACROSSE",
+   "name": "La Crosse",
+   "spellings": [
+    "La Crosse"
+   ]
+  },
+  {
+   "fips": "55065",
+   "key": "LAFAYETTE",
+   "name": "Lafayette",
+   "spellings": [
+    "Lafayette"
+   ]
+  },
+  {
+   "fips": "55067",
+   "key": "LANGLADE",
+   "name": "Langlade",
+   "spellings": [
+    "Langlade"
+   ]
+  },
+  {
+   "fips": "55069",
+   "key": "LINCOLN",
+   "name": "Lincoln",
+   "spellings": [
+    "Lincoln"
+   ]
+  },
+  {
+   "fips": "55071",
+   "key": "MANITOWOC",
+   "name": "Manitowoc",
+   "spellings": [
+    "Manitowoc"
+   ]
+  },
+  {
+   "fips": "55073",
+   "key": "MARATHON",
+   "name": "Marathon",
+   "spellings": [
+    "Marathon"
+   ]
+  },
+  {
+   "fips": "55075",
+   "key": "MARINETTE",
+   "name": "Marinette",
+   "spellings": [
+    "Marinette"
+   ]
+  },
+  {
+   "fips": "55077",
+   "key": "MARQUETTE",
+   "name": "Marquette",
+   "spellings": [
+    "Marquette"
+   ]
+  },
+  {
+   "fips": "55078",
+   "key": "MENOMINEE",
+   "name": "Menominee",
+   "spellings": [
+    "Menominee"
+   ]
+  },
+  {
+   "fips": "55079",
+   "key": "MILWAUKEE",
+   "name": "Milwaukee",
+   "spellings": [
+    "Milwaukee"
+   ]
+  },
+  {
+   "fips": "55081",
+   "key": "MONROE",
+   "name": "Monroe",
+   "spellings": [
+    "Monroe"
+   ]
+  },
+  {
+   "fips": "55083",
+   "key": "OCONTO",
+   "name": "Oconto",
+   "spellings": [
+    "Oconto"
+   ]
+  },
+  {
+   "fips": "55085",
+   "key": "ONEIDA",
+   "name": "Oneida",
+   "spellings": [
+    "Oneida"
+   ]
+  },
+  {
+   "fips": "55087",
+   "key": "OUTAGAMIE",
+   "name": "Outagamie",
+   "spellings": [
+    "Outagamie"
+   ]
+  },
+  {
+   "fips": "55089",
+   "key": "OZAUKEE",
+   "name": "Ozaukee",
+   "spellings": [
+    "Ozaukee"
+   ]
+  },
+  {
+   "fips": "55091",
+   "key": "PEPIN",
+   "name": "Pepin",
+   "spellings": [
+    "Pepin"
+   ]
+  },
+  {
+   "fips": "55093",
+   "key": "PIERCE",
+   "name": "Pierce",
+   "spellings": [
+    "Pierce"
+   ]
+  },
+  {
+   "fips": "55095",
+   "key": "POLK",
+   "name": "Polk",
+   "spellings": [
+    "Polk"
+   ]
+  },
+  {
+   "fips": "55097",
+   "key": "PORTAGE",
+   "name": "Portage",
+   "spellings": [
+    "Portage"
+   ]
+  },
+  {
+   "fips": "55099",
+   "key": "PRICE",
+   "name": "Price",
+   "spellings": [
+    "Price"
+   ]
+  },
+  {
+   "fips": "55101",
+   "key": "RACINE",
+   "name": "Racine",
+   "spellings": [
+    "Racine"
+   ]
+  },
+  {
+   "fips": "55103",
+   "key": "RICHLAND",
+   "name": "Richland",
+   "spellings": [
+    "Richland"
+   ]
+  },
+  {
+   "fips": "55105",
+   "key": "ROCK",
+   "name": "Rock",
+   "spellings": [
+    "Rock"
+   ]
+  },
+  {
+   "fips": "55107",
+   "key": "RUSK",
+   "name": "Rusk",
+   "spellings": [
+    "Rusk"
+   ]
+  },
+  {
+   "fips": "55109",
+   "key": "STCROIX",
+   "name": "St. Croix",
+   "spellings": [
+    "St. Croix"
+   ]
+  },
+  {
+   "fips": "55111",
+   "key": "SAUK",
+   "name": "Sauk",
+   "spellings": [
+    "Sauk"
+   ]
+  },
+  {
+   "fips": "55113",
+   "key": "SAWYER",
+   "name": "Sawyer",
+   "spellings": [
+    "Sawyer"
+   ]
+  },
+  {
+   "fips": "55115",
+   "key": "SHAWANO",
+   "name": "Shawano",
+   "spellings": [
+    "Shawano"
+   ]
+  },
+  {
+   "fips": "55117",
+   "key": "SHEBOYGAN",
+   "name": "Sheboygan",
+   "spellings": [
+    "Sheboygan"
+   ]
+  },
+  {
+   "fips": "55119",
+   "key": "TAYLOR",
+   "name": "Taylor",
+   "spellings": [
+    "Taylor"
+   ]
+  },
+  {
+   "fips": "55121",
+   "key": "TREMPEALEAU",
+   "name": "Trempealeau",
+   "spellings": [
+    "Trempealeau"
+   ]
+  },
+  {
+   "fips": "55123",
+   "key": "VERNON",
+   "name": "Vernon",
+   "spellings": [
+    "Vernon"
+   ]
+  },
+  {
+   "fips": "55125",
+   "key": "VILAS",
+   "name": "Vilas",
+   "spellings": [
+    "Vilas"
+   ]
+  },
+  {
+   "fips": "55127",
+   "key": "WALWORTH",
+   "name": "Walworth",
+   "spellings": [
+    "Walworth"
+   ]
+  },
+  {
+   "fips": "55129",
+   "key": "WASHBURN",
+   "name": "Washburn",
+   "spellings": [
+    "Washburn"
+   ]
+  },
+  {
+   "fips": "55131",
+   "key": "WASHINGTON",
+   "name": "Washington",
+   "spellings": [
+    "Washington"
+   ]
+  },
+  {
+   "fips": "55133",
+   "key": "WAUKESHA",
+   "name": "Waukesha",
+   "spellings": [
+    "Waukesha"
+   ]
+  },
+  {
+   "fips": "55135",
+   "key": "WAUPACA",
+   "name": "Waupaca",
+   "spellings": [
+    "Waupaca"
+   ]
+  },
+  {
+   "fips": "55137",
+   "key": "WAUSHARA",
+   "name": "Waushara",
+   "spellings": [
+    "Waushara"
+   ]
+  },
+  {
+   "fips": "55139",
+   "key": "WINNEBAGO",
+   "name": "Winnebago",
+   "spellings": [
+    "Winnebago"
+   ]
+  },
+  {
+   "fips": "55141",
+   "key": "WOOD",
+   "name": "Wood",
+   "spellings": [
+    "Wood"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/wi-map.json, built from map-sources/); spellings from rosters/WI.json",
+ "state": "WI",
+ "unit": "county"
+}

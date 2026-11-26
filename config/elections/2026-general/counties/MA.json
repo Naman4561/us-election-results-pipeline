@@ -1,0 +1,2815 @@
+{
+ "counties": [
+  {
+   "fips": "2500103690",
+   "key": "BARNSTABLE",
+   "name": "Barnstable",
+   "spellings": [
+    "Barnstable"
+   ]
+  },
+  {
+   "fips": "2500107175",
+   "key": "BOURNE",
+   "name": "Bourne",
+   "spellings": [
+    "Bourne"
+   ]
+  },
+  {
+   "fips": "2500107980",
+   "key": "BREWSTER",
+   "name": "Brewster",
+   "spellings": [
+    "Brewster"
+   ]
+  },
+  {
+   "fips": "2500112995",
+   "key": "CHATHAM",
+   "name": "Chatham",
+   "spellings": [
+    "Chatham"
+   ]
+  },
+  {
+   "fips": "2500116775",
+   "key": "DENNIS",
+   "name": "Dennis",
+   "spellings": [
+    "Dennis"
+   ]
+  },
+  {
+   "fips": "2500119295",
+   "key": "EASTHAM",
+   "name": "Eastham",
+   "spellings": [
+    "Eastham"
+   ]
+  },
+  {
+   "fips": "2500123105",
+   "key": "FALMOUTH",
+   "name": "Falmouth",
+   "spellings": [
+    "Falmouth"
+   ]
+  },
+  {
+   "fips": "2500129020",
+   "key": "HARWICH",
+   "name": "Harwich",
+   "spellings": [
+    "Harwich"
+   ]
+  },
+  {
+   "fips": "2500139100",
+   "key": "MASHPEE",
+   "name": "Mashpee",
+   "spellings": [
+    "Mashpee"
+   ]
+  },
+  {
+   "fips": "2500151440",
+   "key": "ORLEANS",
+   "name": "Orleans",
+   "spellings": [
+    "Orleans"
+   ]
+  },
+  {
+   "fips": "2500155500",
+   "key": "PROVINCETOWN",
+   "name": "Provincetown",
+   "spellings": [
+    "Provincetown"
+   ]
+  },
+  {
+   "fips": "2500159735",
+   "key": "SANDWICH",
+   "name": "Sandwich",
+   "spellings": [
+    "Sandwich"
+   ]
+  },
+  {
+   "fips": "2500170605",
+   "key": "TRURO",
+   "name": "Truro",
+   "spellings": [
+    "Truro"
+   ]
+  },
+  {
+   "fips": "2500174385",
+   "key": "WELLFLEET",
+   "name": "Wellfleet",
+   "spellings": [
+    "Wellfleet"
+   ]
+  },
+  {
+   "fips": "2500182525",
+   "key": "YARMOUTH",
+   "name": "Yarmouth",
+   "spellings": [
+    "Yarmouth"
+   ]
+  },
+  {
+   "fips": "2500300555",
+   "key": "ADAMS",
+   "name": "Adams",
+   "spellings": [
+    "Adams"
+   ]
+  },
+  {
+   "fips": "2500300975",
+   "key": "ALFORD",
+   "name": "Alford",
+   "spellings": [
+    "Alford"
+   ]
+  },
+  {
+   "fips": "2500304545",
+   "key": "BECKET",
+   "name": "Becket",
+   "spellings": [
+    "Becket"
+   ]
+  },
+  {
+   "fips": "2500313345",
+   "key": "CHESHIRE",
+   "name": "Cheshire",
+   "spellings": [
+    "Cheshire"
+   ]
+  },
+  {
+   "fips": "2500314010",
+   "key": "CLARKSBURG",
+   "name": "Clarksburg",
+   "spellings": [
+    "Clarksburg"
+   ]
+  },
+  {
+   "fips": "2500316180",
+   "key": "DALTON",
+   "name": "Dalton",
+   "spellings": [
+    "Dalton"
+   ]
+  },
+  {
+   "fips": "2500321360",
+   "key": "EGREMONT",
+   "name": "Egremont",
+   "spellings": [
+    "Egremont"
+   ]
+  },
+  {
+   "fips": "2500324120",
+   "key": "FLORIDA",
+   "name": "Florida",
+   "spellings": [
+    "Florida"
+   ]
+  },
+  {
+   "fips": "2500326815",
+   "key": "GREATBARRINGTON",
+   "name": "Great Barrington",
+   "spellings": [
+    "Great Barrington"
+   ]
+  },
+  {
+   "fips": "2500328180",
+   "key": "HANCOCK",
+   "name": "Hancock",
+   "spellings": [
+    "Hancock"
+   ]
+  },
+  {
+   "fips": "2500330315",
+   "key": "HINSDALE",
+   "name": "Hinsdale",
+   "spellings": [
+    "Hinsdale"
+   ]
+  },
+  {
+   "fips": "2500334340",
+   "key": "LANESBOROUGH",
+   "name": "Lanesborough",
+   "spellings": [
+    "Lanesborough"
+   ]
+  },
+  {
+   "fips": "2500334655",
+   "key": "LEE",
+   "name": "Lee",
+   "spellings": [
+    "Lee"
+   ]
+  },
+  {
+   "fips": "2500334970",
+   "key": "LENOX",
+   "name": "Lenox",
+   "spellings": [
+    "Lenox"
+   ]
+  },
+  {
+   "fips": "2500342460",
+   "key": "MONTEREY",
+   "name": "Monterey",
+   "spellings": [
+    "Monterey"
+   ]
+  },
+  {
+   "fips": "2500343300",
+   "key": "MOUNTWASHINGTON",
+   "name": "Mount Washington",
+   "spellings": [
+    "Mount Washington"
+   ]
+  },
+  {
+   "fips": "2500344385",
+   "key": "NEWASHFORD",
+   "name": "New Ashford",
+   "spellings": [
+    "New Ashford"
+   ]
+  },
+  {
+   "fips": "2500345420",
+   "key": "NEWMARLBOROUGH",
+   "name": "New Marlborough",
+   "spellings": [
+    "New Marlborough"
+   ]
+  },
+  {
+   "fips": "2500346225",
+   "key": "NORTHADAMS",
+   "name": "North Adams",
+   "spellings": [
+    "North Adams"
+   ]
+  },
+  {
+   "fips": "2500351580",
+   "key": "OTIS",
+   "name": "Otis",
+   "spellings": [
+    "Otis"
+   ]
+  },
+  {
+   "fips": "2500353050",
+   "key": "PERU",
+   "name": "Peru",
+   "spellings": [
+    "Peru"
+   ]
+  },
+  {
+   "fips": "2500353960",
+   "key": "PITTSFIELD",
+   "name": "Pittsfield",
+   "spellings": [
+    "Pittsfield"
+   ]
+  },
+  {
+   "fips": "2500356795",
+   "key": "RICHMOND",
+   "name": "Richmond",
+   "spellings": [
+    "Richmond"
+   ]
+  },
+  {
+   "fips": "2500359665",
+   "key": "SANDISFIELD",
+   "name": "Sandisfield",
+   "spellings": [
+    "Sandisfield"
+   ]
+  },
+  {
+   "fips": "2500360225",
+   "key": "SAVOY",
+   "name": "Savoy",
+   "spellings": [
+    "Savoy"
+   ]
+  },
+  {
+   "fips": "2500361065",
+   "key": "SHEFFIELD",
+   "name": "Sheffield",
+   "spellings": [
+    "Sheffield"
+   ]
+  },
+  {
+   "fips": "2500367595",
+   "key": "STOCKBRIDGE",
+   "name": "Stockbridge",
+   "spellings": [
+    "Stockbridge"
+   ]
+  },
+  {
+   "fips": "2500371095",
+   "key": "TYRINGHAM",
+   "name": "Tyringham",
+   "spellings": [
+    "Tyringham"
+   ]
+  },
+  {
+   "fips": "2500373335",
+   "key": "WASHINGTON",
+   "name": "Washington",
+   "spellings": [
+    "Washington"
+   ]
+  },
+  {
+   "fips": "2500377990",
+   "key": "WESTSTOCKBRIDGE",
+   "name": "West Stockbridge",
+   "spellings": [
+    "West Stockbridge"
+   ]
+  },
+  {
+   "fips": "2500379985",
+   "key": "WILLIAMSTOWN",
+   "name": "Williamstown",
+   "spellings": [
+    "Williamstown"
+   ]
+  },
+  {
+   "fips": "2500380685",
+   "key": "WINDSOR",
+   "name": "Windsor",
+   "spellings": [
+    "Windsor"
+   ]
+  },
+  {
+   "fips": "2500500520",
+   "key": "ACUSHNET",
+   "name": "Acushnet",
+   "spellings": [
+    "Acushnet"
+   ]
+  },
+  {
+   "fips": "2500502690",
+   "key": "ATTLEBORO",
+   "name": "Attleboro",
+   "spellings": [
+    "Attleboro"
+   ]
+  },
+  {
+   "fips": "2500505280",
+   "key": "BERKLEY",
+   "name": "Berkley",
+   "spellings": [
+    "Berkley"
+   ]
+  },
+  {
+   "fips": "2500516425",
+   "key": "DARTMOUTH",
+   "name": "Dartmouth",
+   "spellings": [
+    "Dartmouth"
+   ]
+  },
+  {
+   "fips": "2500516950",
+   "key": "DIGHTON",
+   "name": "Dighton",
+   "spellings": [
+    "Dighton"
+   ]
+  },
+  {
+   "fips": "2500520100",
+   "key": "EASTON",
+   "name": "Easton",
+   "spellings": [
+    "Easton"
+   ]
+  },
+  {
+   "fips": "2500522130",
+   "key": "FAIRHAVEN",
+   "name": "Fairhaven",
+   "spellings": [
+    "Fairhaven"
+   ]
+  },
+  {
+   "fips": "2500523000",
+   "key": "FALLRIVER",
+   "name": "Fall River",
+   "spellings": [
+    "Fall River"
+   ]
+  },
+  {
+   "fips": "2500525240",
+   "key": "FREETOWN",
+   "name": "Freetown",
+   "spellings": [
+    "Freetown"
+   ]
+  },
+  {
+   "fips": "2500538225",
+   "key": "MANSFIELD",
+   "name": "Mansfield",
+   "spellings": [
+    "Mansfield"
+   ]
+  },
+  {
+   "fips": "2500545000",
+   "key": "NEWBEDFORD",
+   "name": "New Bedford",
+   "spellings": [
+    "New Bedford"
+   ]
+  },
+  {
+   "fips": "2500546598",
+   "key": "NORTHATTLEBOROUGH",
+   "name": "North Attleborough",
+   "spellings": [
+    "North Attleborough"
+   ]
+  },
+  {
+   "fips": "2500549970",
+   "key": "NORTON",
+   "name": "Norton",
+   "spellings": [
+    "Norton"
+   ]
+  },
+  {
+   "fips": "2500556060",
+   "key": "RAYNHAM",
+   "name": "Raynham",
+   "spellings": [
+    "Raynham"
+   ]
+  },
+  {
+   "fips": "2500556375",
+   "key": "REHOBOTH",
+   "name": "Rehoboth",
+   "spellings": [
+    "Rehoboth"
+   ]
+  },
+  {
+   "fips": "2500560645",
+   "key": "SEEKONK",
+   "name": "Seekonk",
+   "spellings": [
+    "Seekonk"
+   ]
+  },
+  {
+   "fips": "2500562430",
+   "key": "SOMERSET",
+   "name": "Somerset",
+   "spellings": [
+    "Somerset"
+   ]
+  },
+  {
+   "fips": "2500568750",
+   "key": "SWANSEA",
+   "name": "Swansea",
+   "spellings": [
+    "Swansea"
+   ]
+  },
+  {
+   "fips": "2500569170",
+   "key": "TAUNTON",
+   "name": "Taunton",
+   "spellings": [
+    "Taunton"
+   ]
+  },
+  {
+   "fips": "2500577570",
+   "key": "WESTPORT",
+   "name": "Westport",
+   "spellings": [
+    "Westport"
+   ]
+  },
+  {
+   "fips": "2500701585",
+   "key": "AQUINNAH",
+   "name": "Aquinnah",
+   "spellings": [
+    "Aquinnah"
+   ]
+  },
+  {
+   "fips": "2500713800",
+   "key": "CHILMARK",
+   "name": "Chilmark",
+   "spellings": [
+    "Chilmark"
+   ]
+  },
+  {
+   "fips": "2500721150",
+   "key": "EDGARTOWN",
+   "name": "Edgartown",
+   "spellings": [
+    "Edgartown"
+   ]
+  },
+  {
+   "fips": "2500726325",
+   "key": "GOSNOLD",
+   "name": "Gosnold",
+   "spellings": [
+    "Gosnold"
+   ]
+  },
+  {
+   "fips": "2500750390",
+   "key": "OAKBLUFFS",
+   "name": "Oak Bluffs",
+   "spellings": [
+    "Oak Bluffs"
+   ]
+  },
+  {
+   "fips": "2500769940",
+   "key": "TISBURY",
+   "name": "Tisbury",
+   "spellings": [
+    "Tisbury"
+   ]
+  },
+  {
+   "fips": "2500778235",
+   "key": "WESTTISBURY",
+   "name": "West Tisbury",
+   "spellings": [
+    "West Tisbury"
+   ]
+  },
+  {
+   "fips": "2500901185",
+   "key": "AMESBURY",
+   "name": "Amesbury",
+   "spellings": [
+    "Amesbury"
+   ]
+  },
+  {
+   "fips": "2500901465",
+   "key": "ANDOVER",
+   "name": "Andover",
+   "spellings": [
+    "Andover"
+   ]
+  },
+  {
+   "fips": "2500905595",
+   "key": "BEVERLY",
+   "name": "Beverly",
+   "spellings": [
+    "Beverly"
+   ]
+  },
+  {
+   "fips": "2500907420",
+   "key": "BOXFORD",
+   "name": "Boxford",
+   "spellings": [
+    "Boxford"
+   ]
+  },
+  {
+   "fips": "2500916250",
+   "key": "DANVERS",
+   "name": "Danvers",
+   "spellings": [
+    "Danvers"
+   ]
+  },
+  {
+   "fips": "2500921850",
+   "key": "ESSEX",
+   "name": "Essex",
+   "spellings": [
+    "Essex"
+   ]
+  },
+  {
+   "fips": "2500925625",
+   "key": "GEORGETOWN",
+   "name": "Georgetown",
+   "spellings": [
+    "Georgetown"
+   ]
+  },
+  {
+   "fips": "2500926150",
+   "key": "GLOUCESTER",
+   "name": "Gloucester",
+   "spellings": [
+    "Gloucester"
+   ]
+  },
+  {
+   "fips": "2500927620",
+   "key": "GROVELAND",
+   "name": "Groveland",
+   "spellings": [
+    "Groveland"
+   ]
+  },
+  {
+   "fips": "2500927900",
+   "key": "HAMILTON",
+   "name": "Hamilton",
+   "spellings": [
+    "Hamilton"
+   ]
+  },
+  {
+   "fips": "2500929405",
+   "key": "HAVERHILL",
+   "name": "Haverhill",
+   "spellings": [
+    "Haverhill"
+   ]
+  },
+  {
+   "fips": "2500932310",
+   "key": "IPSWICH",
+   "name": "Ipswich",
+   "spellings": [
+    "Ipswich"
+   ]
+  },
+  {
+   "fips": "2500934550",
+   "key": "LAWRENCE",
+   "name": "Lawrence",
+   "spellings": [
+    "Lawrence"
+   ]
+  },
+  {
+   "fips": "2500937490",
+   "key": "LYNN",
+   "name": "Lynn",
+   "spellings": [
+    "Lynn"
+   ]
+  },
+  {
+   "fips": "2500937560",
+   "key": "LYNNFIELD",
+   "name": "Lynnfield",
+   "spellings": [
+    "Lynnfield"
+   ]
+  },
+  {
+   "fips": "2500937995",
+   "key": "MANCHESTERBYTHESEA",
+   "name": "Manchester-by-the-Sea",
+   "spellings": [
+    "Manchester-by-the-Sea"
+   ]
+  },
+  {
+   "fips": "2500938400",
+   "key": "MARBLEHEAD",
+   "name": "Marblehead",
+   "spellings": [
+    "Marblehead"
+   ]
+  },
+  {
+   "fips": "2500940430",
+   "key": "MERRIMAC",
+   "name": "Merrimac",
+   "spellings": [
+    "Merrimac"
+   ]
+  },
+  {
+   "fips": "2500940675",
+   "key": "METHUEN",
+   "name": "Methuen",
+   "spellings": [
+    "Methuen"
+   ]
+  },
+  {
+   "fips": "2500941095",
+   "key": "MIDDLETON",
+   "name": "Middleton",
+   "spellings": [
+    "Middleton"
+   ]
+  },
+  {
+   "fips": "2500943580",
+   "key": "NAHANT",
+   "name": "Nahant",
+   "spellings": [
+    "Nahant"
+   ]
+  },
+  {
+   "fips": "2500945175",
+   "key": "NEWBURY",
+   "name": "Newbury",
+   "spellings": [
+    "Newbury"
+   ]
+  },
+  {
+   "fips": "2500945245",
+   "key": "NEWBURYPORT",
+   "name": "Newburyport",
+   "spellings": [
+    "Newburyport"
+   ]
+  },
+  {
+   "fips": "2500946365",
+   "key": "NORTHANDOVER",
+   "name": "North Andover",
+   "spellings": [
+    "North Andover"
+   ]
+  },
+  {
+   "fips": "2500952490",
+   "key": "PEABODY",
+   "name": "Peabody",
+   "spellings": [
+    "Peabody"
+   ]
+  },
+  {
+   "fips": "2500957880",
+   "key": "ROCKPORT",
+   "name": "Rockport",
+   "spellings": [
+    "Rockport"
+   ]
+  },
+  {
+   "fips": "2500958405",
+   "key": "ROWLEY",
+   "name": "Rowley",
+   "spellings": [
+    "Rowley"
+   ]
+  },
+  {
+   "fips": "2500959105",
+   "key": "SALEM",
+   "name": "Salem",
+   "spellings": [
+    "Salem"
+   ]
+  },
+  {
+   "fips": "2500959245",
+   "key": "SALISBURY",
+   "name": "Salisbury",
+   "spellings": [
+    "Salisbury"
+   ]
+  },
+  {
+   "fips": "2500960015",
+   "key": "SAUGUS",
+   "name": "Saugus",
+   "spellings": [
+    "Saugus"
+   ]
+  },
+  {
+   "fips": "2500968645",
+   "key": "SWAMPSCOTT",
+   "name": "Swampscott",
+   "spellings": [
+    "Swampscott"
+   ]
+  },
+  {
+   "fips": "2500970150",
+   "key": "TOPSFIELD",
+   "name": "Topsfield",
+   "spellings": [
+    "Topsfield"
+   ]
+  },
+  {
+   "fips": "2500974595",
+   "key": "WENHAM",
+   "name": "Wenham",
+   "spellings": [
+    "Wenham"
+   ]
+  },
+  {
+   "fips": "2500977150",
+   "key": "WESTNEWBURY",
+   "name": "West Newbury",
+   "spellings": [
+    "West Newbury"
+   ]
+  },
+  {
+   "fips": "2501102095",
+   "key": "ASHFIELD",
+   "name": "Ashfield",
+   "spellings": [
+    "Ashfield"
+   ]
+  },
+  {
+   "fips": "2501105560",
+   "key": "BERNARDSTON",
+   "name": "Bernardston",
+   "spellings": [
+    "Bernardston"
+   ]
+  },
+  {
+   "fips": "2501109595",
+   "key": "BUCKLAND",
+   "name": "Buckland",
+   "spellings": [
+    "Buckland"
+   ]
+  },
+  {
+   "fips": "2501112505",
+   "key": "CHARLEMONT",
+   "name": "Charlemont",
+   "spellings": [
+    "Charlemont"
+   ]
+  },
+  {
+   "fips": "2501114885",
+   "key": "COLRAIN",
+   "name": "Colrain",
+   "spellings": [
+    "Colrain"
+   ]
+  },
+  {
+   "fips": "2501115200",
+   "key": "CONWAY",
+   "name": "Conway",
+   "spellings": [
+    "Conway"
+   ]
+  },
+  {
+   "fips": "2501116670",
+   "key": "DEERFIELD",
+   "name": "Deerfield",
+   "spellings": [
+    "Deerfield"
+   ]
+  },
+  {
+   "fips": "2501121780",
+   "key": "ERVING",
+   "name": "Erving",
+   "spellings": [
+    "Erving"
+   ]
+  },
+  {
+   "fips": "2501125730",
+   "key": "GILL",
+   "name": "Gill",
+   "spellings": [
+    "Gill"
+   ]
+  },
+  {
+   "fips": "2501127060",
+   "key": "GREENFIELD",
+   "name": "Greenfield",
+   "spellings": [
+    "Greenfield"
+   ]
+  },
+  {
+   "fips": "2501129475",
+   "key": "HAWLEY",
+   "name": "Hawley",
+   "spellings": [
+    "Hawley"
+   ]
+  },
+  {
+   "fips": "2501129650",
+   "key": "HEATH",
+   "name": "Heath",
+   "spellings": [
+    "Heath"
+   ]
+  },
+  {
+   "fips": "2501135180",
+   "key": "LEVERETT",
+   "name": "Leverett",
+   "spellings": [
+    "Leverett"
+   ]
+  },
+  {
+   "fips": "2501135285",
+   "key": "LEYDEN",
+   "name": "Leyden",
+   "spellings": [
+    "Leyden"
+   ]
+  },
+  {
+   "fips": "2501142040",
+   "key": "MONROE",
+   "name": "Monroe",
+   "spellings": [
+    "Monroe"
+   ]
+  },
+  {
+   "fips": "2501142285",
+   "key": "MONTAGUE",
+   "name": "Montague",
+   "spellings": [
+    "Montague"
+   ]
+  },
+  {
+   "fips": "2501145490",
+   "key": "NEWSALEM",
+   "name": "New Salem",
+   "spellings": [
+    "New Salem"
+   ]
+  },
+  {
+   "fips": "2501147835",
+   "key": "NORTHFIELD",
+   "name": "Northfield",
+   "spellings": [
+    "Northfield"
+   ]
+  },
+  {
+   "fips": "2501151265",
+   "key": "ORANGE",
+   "name": "Orange",
+   "spellings": [
+    "Orange"
+   ]
+  },
+  {
+   "fips": "2501158335",
+   "key": "ROWE",
+   "name": "Rowe",
+   "spellings": [
+    "Rowe"
+   ]
+  },
+  {
+   "fips": "2501161135",
+   "key": "SHELBURNE",
+   "name": "Shelburne",
+   "spellings": [
+    "Shelburne"
+   ]
+  },
+  {
+   "fips": "2501161905",
+   "key": "SHUTESBURY",
+   "name": "Shutesbury",
+   "spellings": [
+    "Shutesbury"
+   ]
+  },
+  {
+   "fips": "2501168400",
+   "key": "SUNDERLAND",
+   "name": "Sunderland",
+   "spellings": [
+    "Sunderland"
+   ]
+  },
+  {
+   "fips": "2501173265",
+   "key": "WARWICK",
+   "name": "Warwick",
+   "spellings": [
+    "Warwick"
+   ]
+  },
+  {
+   "fips": "2501174525",
+   "key": "WENDELL",
+   "name": "Wendell",
+   "spellings": [
+    "Wendell"
+   ]
+  },
+  {
+   "fips": "2501179110",
+   "key": "WHATELY",
+   "name": "Whately",
+   "spellings": [
+    "Whately"
+   ]
+  },
+  {
+   "fips": "2501300840",
+   "key": "AGAWAM",
+   "name": "Agawam",
+   "spellings": [
+    "Agawam"
+   ]
+  },
+  {
+   "fips": "2501306085",
+   "key": "BLANDFORD",
+   "name": "Blandford",
+   "spellings": [
+    "Blandford"
+   ]
+  },
+  {
+   "fips": "2501308470",
+   "key": "BRIMFIELD",
+   "name": "Brimfield",
+   "spellings": [
+    "Brimfield"
+   ]
+  },
+  {
+   "fips": "2501313485",
+   "key": "CHESTER",
+   "name": "Chester",
+   "spellings": [
+    "Chester"
+   ]
+  },
+  {
+   "fips": "2501313660",
+   "key": "CHICOPEE",
+   "name": "Chicopee",
+   "spellings": [
+    "Chicopee"
+   ]
+  },
+  {
+   "fips": "2501319645",
+   "key": "EASTLONGMEADOW",
+   "name": "East Longmeadow",
+   "spellings": [
+    "East Longmeadow"
+   ]
+  },
+  {
+   "fips": "2501326675",
+   "key": "GRANVILLE",
+   "name": "Granville",
+   "spellings": [
+    "Granville"
+   ]
+  },
+  {
+   "fips": "2501328075",
+   "key": "HAMPDEN",
+   "name": "Hampden",
+   "spellings": [
+    "Hampden"
+   ]
+  },
+  {
+   "fips": "2501330665",
+   "key": "HOLLAND",
+   "name": "Holland",
+   "spellings": [
+    "Holland"
+   ]
+  },
+  {
+   "fips": "2501330840",
+   "key": "HOLYOKE",
+   "name": "Holyoke",
+   "spellings": [
+    "Holyoke"
+   ]
+  },
+  {
+   "fips": "2501336300",
+   "key": "LONGMEADOW",
+   "name": "Longmeadow",
+   "spellings": [
+    "Longmeadow"
+   ]
+  },
+  {
+   "fips": "2501337175",
+   "key": "LUDLOW",
+   "name": "Ludlow",
+   "spellings": [
+    "Ludlow"
+   ]
+  },
+  {
+   "fips": "2501342145",
+   "key": "MONSON",
+   "name": "Monson",
+   "spellings": [
+    "Monson"
+   ]
+  },
+  {
+   "fips": "2501342530",
+   "key": "MONTGOMERY",
+   "name": "Montgomery",
+   "spellings": [
+    "Montgomery"
+   ]
+  },
+  {
+   "fips": "2501352144",
+   "key": "PALMER",
+   "name": "Palmer",
+   "spellings": [
+    "Palmer"
+   ]
+  },
+  {
+   "fips": "2501358650",
+   "key": "RUSSELL",
+   "name": "Russell",
+   "spellings": [
+    "Russell"
+   ]
+  },
+  {
+   "fips": "2501365825",
+   "key": "SOUTHWICK",
+   "name": "Southwick",
+   "spellings": [
+    "Southwick"
+   ]
+  },
+  {
+   "fips": "2501367000",
+   "key": "SPRINGFIELD",
+   "name": "Springfield",
+   "spellings": [
+    "Springfield"
+   ]
+  },
+  {
+   "fips": "2501370045",
+   "key": "TOLLAND",
+   "name": "Tolland",
+   "spellings": [
+    "Tolland"
+   ]
+  },
+  {
+   "fips": "2501372390",
+   "key": "WALES",
+   "name": "Wales",
+   "spellings": [
+    "Wales"
+   ]
+  },
+  {
+   "fips": "2501376030",
+   "key": "WESTFIELD",
+   "name": "Westfield",
+   "spellings": [
+    "Westfield"
+   ]
+  },
+  {
+   "fips": "2501377890",
+   "key": "WESTSPRINGFIELD",
+   "name": "West Springfield",
+   "spellings": [
+    "West Springfield"
+   ]
+  },
+  {
+   "fips": "2501379740",
+   "key": "WILBRAHAM",
+   "name": "Wilbraham",
+   "spellings": [
+    "Wilbraham"
+   ]
+  },
+  {
+   "fips": "2501501370",
+   "key": "AMHERST",
+   "name": "Amherst",
+   "spellings": [
+    "Amherst"
+   ]
+  },
+  {
+   "fips": "2501504825",
+   "key": "BELCHERTOWN",
+   "name": "Belchertown",
+   "spellings": [
+    "Belchertown"
+   ]
+  },
+  {
+   "fips": "2501513590",
+   "key": "CHESTERFIELD",
+   "name": "Chesterfield",
+   "spellings": [
+    "Chesterfield"
+   ]
+  },
+  {
+   "fips": "2501516040",
+   "key": "CUMMINGTON",
+   "name": "Cummington",
+   "spellings": [
+    "Cummington"
+   ]
+  },
+  {
+   "fips": "2501519365",
+   "key": "EASTHAMPTON",
+   "name": "Easthampton",
+   "spellings": [
+    "Easthampton"
+   ]
+  },
+  {
+   "fips": "2501526290",
+   "key": "GOSHEN",
+   "name": "Goshen",
+   "spellings": [
+    "Goshen"
+   ]
+  },
+  {
+   "fips": "2501526535",
+   "key": "GRANBY",
+   "name": "Granby",
+   "spellings": [
+    "Granby"
+   ]
+  },
+  {
+   "fips": "2501527690",
+   "key": "HADLEY",
+   "name": "Hadley",
+   "spellings": [
+    "Hadley"
+   ]
+  },
+  {
+   "fips": "2501529265",
+   "key": "HATFIELD",
+   "name": "Hatfield",
+   "spellings": [
+    "Hatfield"
+   ]
+  },
+  {
+   "fips": "2501531785",
+   "key": "HUNTINGTON",
+   "name": "Huntington",
+   "spellings": [
+    "Huntington"
+   ]
+  },
+  {
+   "fips": "2501540990",
+   "key": "MIDDLEFIELD",
+   "name": "Middlefield",
+   "spellings": [
+    "Middlefield"
+   ]
+  },
+  {
+   "fips": "2501546330",
+   "key": "NORTHAMPTON",
+   "name": "Northampton",
+   "spellings": [
+    "Northampton"
+   ]
+  },
+  {
+   "fips": "2501552560",
+   "key": "PELHAM",
+   "name": "Pelham",
+   "spellings": [
+    "Pelham"
+   ]
+  },
+  {
+   "fips": "2501554030",
+   "key": "PLAINFIELD",
+   "name": "Plainfield",
+   "spellings": [
+    "Plainfield"
+   ]
+  },
+  {
+   "fips": "2501562745",
+   "key": "SOUTHAMPTON",
+   "name": "Southampton",
+   "spellings": [
+    "Southampton"
+   ]
+  },
+  {
+   "fips": "2501564145",
+   "key": "SOUTHHADLEY",
+   "name": "South Hadley",
+   "spellings": [
+    "South Hadley"
+   ]
+  },
+  {
+   "fips": "2501572880",
+   "key": "WARE",
+   "name": "Ware",
+   "spellings": [
+    "Ware"
+   ]
+  },
+  {
+   "fips": "2501576380",
+   "key": "WESTHAMPTON",
+   "name": "Westhampton",
+   "spellings": [
+    "Westhampton"
+   ]
+  },
+  {
+   "fips": "2501579915",
+   "key": "WILLIAMSBURG",
+   "name": "Williamsburg",
+   "spellings": [
+    "Williamsburg"
+   ]
+  },
+  {
+   "fips": "2501582175",
+   "key": "WORTHINGTON",
+   "name": "Worthington",
+   "spellings": [
+    "Worthington"
+   ]
+  },
+  {
+   "fips": "2501700380",
+   "key": "ACTON",
+   "name": "Acton",
+   "spellings": [
+    "Acton"
+   ]
+  },
+  {
+   "fips": "2501701605",
+   "key": "ARLINGTON",
+   "name": "Arlington",
+   "spellings": [
+    "Arlington"
+   ]
+  },
+  {
+   "fips": "2501701955",
+   "key": "ASHBY",
+   "name": "Ashby",
+   "spellings": [
+    "Ashby"
+   ]
+  },
+  {
+   "fips": "2501702130",
+   "key": "ASHLAND",
+   "name": "Ashland",
+   "spellings": [
+    "Ashland"
+   ]
+  },
+  {
+   "fips": "2501703005",
+   "key": "AYER",
+   "name": "Ayer",
+   "spellings": [
+    "Ayer"
+   ]
+  },
+  {
+   "fips": "2501704615",
+   "key": "BEDFORD",
+   "name": "Bedford",
+   "spellings": [
+    "Bedford"
+   ]
+  },
+  {
+   "fips": "2501705070",
+   "key": "BELMONT",
+   "name": "Belmont",
+   "spellings": [
+    "Belmont"
+   ]
+  },
+  {
+   "fips": "2501705805",
+   "key": "BILLERICA",
+   "name": "Billerica",
+   "spellings": [
+    "Billerica"
+   ]
+  },
+  {
+   "fips": "2501707350",
+   "key": "BOXBOROUGH",
+   "name": "Boxborough",
+   "spellings": [
+    "Boxborough"
+   ]
+  },
+  {
+   "fips": "2501709840",
+   "key": "BURLINGTON",
+   "name": "Burlington",
+   "spellings": [
+    "Burlington"
+   ]
+  },
+  {
+   "fips": "2501711000",
+   "key": "CAMBRIDGE",
+   "name": "Cambridge",
+   "spellings": [
+    "Cambridge"
+   ]
+  },
+  {
+   "fips": "2501711525",
+   "key": "CARLISLE",
+   "name": "Carlisle",
+   "spellings": [
+    "Carlisle"
+   ]
+  },
+  {
+   "fips": "2501713135",
+   "key": "CHELMSFORD",
+   "name": "Chelmsford",
+   "spellings": [
+    "Chelmsford"
+   ]
+  },
+  {
+   "fips": "2501715060",
+   "key": "CONCORD",
+   "name": "Concord",
+   "spellings": [
+    "Concord"
+   ]
+  },
+  {
+   "fips": "2501717475",
+   "key": "DRACUT",
+   "name": "Dracut",
+   "spellings": [
+    "Dracut"
+   ]
+  },
+  {
+   "fips": "2501717825",
+   "key": "DUNSTABLE",
+   "name": "Dunstable",
+   "spellings": [
+    "Dunstable"
+   ]
+  },
+  {
+   "fips": "2501721990",
+   "key": "EVERETT",
+   "name": "Everett",
+   "spellings": [
+    "Everett"
+   ]
+  },
+  {
+   "fips": "2501724960",
+   "key": "FRAMINGHAM",
+   "name": "Framingham",
+   "spellings": [
+    "Framingham"
+   ]
+  },
+  {
+   "fips": "2501727480",
+   "key": "GROTON",
+   "name": "Groton",
+   "spellings": [
+    "Groton"
+   ]
+  },
+  {
+   "fips": "2501730700",
+   "key": "HOLLISTON",
+   "name": "Holliston",
+   "spellings": [
+    "Holliston"
+   ]
+  },
+  {
+   "fips": "2501731085",
+   "key": "HOPKINTON",
+   "name": "Hopkinton",
+   "spellings": [
+    "Hopkinton"
+   ]
+  },
+  {
+   "fips": "2501731540",
+   "key": "HUDSON",
+   "name": "Hudson",
+   "spellings": [
+    "Hudson"
+   ]
+  },
+  {
+   "fips": "2501735215",
+   "key": "LEXINGTON",
+   "name": "Lexington",
+   "spellings": [
+    "Lexington"
+   ]
+  },
+  {
+   "fips": "2501735425",
+   "key": "LINCOLN",
+   "name": "Lincoln",
+   "spellings": [
+    "Lincoln"
+   ]
+  },
+  {
+   "fips": "2501735950",
+   "key": "LITTLETON",
+   "name": "Littleton",
+   "spellings": [
+    "Littleton"
+   ]
+  },
+  {
+   "fips": "2501737000",
+   "key": "LOWELL",
+   "name": "Lowell",
+   "spellings": [
+    "Lowell"
+   ]
+  },
+  {
+   "fips": "2501737875",
+   "key": "MALDEN",
+   "name": "Malden",
+   "spellings": [
+    "Malden"
+   ]
+  },
+  {
+   "fips": "2501738715",
+   "key": "MARLBOROUGH",
+   "name": "Marlborough",
+   "spellings": [
+    "Marlborough"
+   ]
+  },
+  {
+   "fips": "2501739625",
+   "key": "MAYNARD",
+   "name": "Maynard",
+   "spellings": [
+    "Maynard"
+   ]
+  },
+  {
+   "fips": "2501739835",
+   "key": "MEDFORD",
+   "name": "Medford",
+   "spellings": [
+    "Medford"
+   ]
+  },
+  {
+   "fips": "2501740115",
+   "key": "MELROSE",
+   "name": "Melrose",
+   "spellings": [
+    "Melrose"
+   ]
+  },
+  {
+   "fips": "2501743895",
+   "key": "NATICK",
+   "name": "Natick",
+   "spellings": [
+    "Natick"
+   ]
+  },
+  {
+   "fips": "2501745560",
+   "key": "NEWTON",
+   "name": "Newton",
+   "spellings": [
+    "Newton"
+   ]
+  },
+  {
+   "fips": "2501748955",
+   "key": "NORTHREADING",
+   "name": "North Reading",
+   "spellings": [
+    "North Reading"
+   ]
+  },
+  {
+   "fips": "2501752805",
+   "key": "PEPPERELL",
+   "name": "Pepperell",
+   "spellings": [
+    "Pepperell"
+   ]
+  },
+  {
+   "fips": "2501756130",
+   "key": "READING",
+   "name": "Reading",
+   "spellings": [
+    "Reading"
+   ]
+  },
+  {
+   "fips": "2501761380",
+   "key": "SHERBORN",
+   "name": "Sherborn",
+   "spellings": [
+    "Sherborn"
+   ]
+  },
+  {
+   "fips": "2501761590",
+   "key": "SHIRLEY",
+   "name": "Shirley",
+   "spellings": [
+    "Shirley"
+   ]
+  },
+  {
+   "fips": "2501762535",
+   "key": "SOMERVILLE",
+   "name": "Somerville",
+   "spellings": [
+    "Somerville"
+   ]
+  },
+  {
+   "fips": "2501767665",
+   "key": "STONEHAM",
+   "name": "Stoneham",
+   "spellings": [
+    "Stoneham"
+   ]
+  },
+  {
+   "fips": "2501768050",
+   "key": "STOW",
+   "name": "Stow",
+   "spellings": [
+    "Stow"
+   ]
+  },
+  {
+   "fips": "2501768260",
+   "key": "SUDBURY",
+   "name": "Sudbury",
+   "spellings": [
+    "Sudbury"
+   ]
+  },
+  {
+   "fips": "2501769415",
+   "key": "TEWKSBURY",
+   "name": "Tewksbury",
+   "spellings": [
+    "Tewksbury"
+   ]
+  },
+  {
+   "fips": "2501770360",
+   "key": "TOWNSEND",
+   "name": "Townsend",
+   "spellings": [
+    "Townsend"
+   ]
+  },
+  {
+   "fips": "2501771025",
+   "key": "TYNGSBOROUGH",
+   "name": "Tyngsborough",
+   "spellings": [
+    "Tyngsborough"
+   ]
+  },
+  {
+   "fips": "2501772215",
+   "key": "WAKEFIELD",
+   "name": "Wakefield",
+   "spellings": [
+    "Wakefield"
+   ]
+  },
+  {
+   "fips": "2501772600",
+   "key": "WALTHAM",
+   "name": "Waltham",
+   "spellings": [
+    "Waltham"
+   ]
+  },
+  {
+   "fips": "2501773405",
+   "key": "WATERTOWN",
+   "name": "Watertown",
+   "spellings": [
+    "Watertown"
+   ]
+  },
+  {
+   "fips": "2501773790",
+   "key": "WAYLAND",
+   "name": "Wayland",
+   "spellings": [
+    "Wayland"
+   ]
+  },
+  {
+   "fips": "2501776135",
+   "key": "WESTFORD",
+   "name": "Westford",
+   "spellings": [
+    "Westford"
+   ]
+  },
+  {
+   "fips": "2501777255",
+   "key": "WESTON",
+   "name": "Weston",
+   "spellings": [
+    "Weston"
+   ]
+  },
+  {
+   "fips": "2501780230",
+   "key": "WILMINGTON",
+   "name": "Wilmington",
+   "spellings": [
+    "Wilmington"
+   ]
+  },
+  {
+   "fips": "2501780510",
+   "key": "WINCHESTER",
+   "name": "Winchester",
+   "spellings": [
+    "Winchester"
+   ]
+  },
+  {
+   "fips": "2501781035",
+   "key": "WOBURN",
+   "name": "Woburn",
+   "spellings": [
+    "Woburn"
+   ]
+  },
+  {
+   "fips": "2501943790",
+   "key": "NANTUCKET",
+   "name": "Nantucket",
+   "spellings": [
+    "Nantucket"
+   ]
+  },
+  {
+   "fips": "2502102935",
+   "key": "AVON",
+   "name": "Avon",
+   "spellings": [
+    "Avon"
+   ]
+  },
+  {
+   "fips": "2502104930",
+   "key": "BELLINGHAM",
+   "name": "Bellingham",
+   "spellings": [
+    "Bellingham"
+   ]
+  },
+  {
+   "fips": "2502107740",
+   "key": "BRAINTREE",
+   "name": "Braintree",
+   "spellings": [
+    "Braintree"
+   ]
+  },
+  {
+   "fips": "2502109175",
+   "key": "BROOKLINE",
+   "name": "Brookline",
+   "spellings": [
+    "Brookline"
+   ]
+  },
+  {
+   "fips": "2502111315",
+   "key": "CANTON",
+   "name": "Canton",
+   "spellings": [
+    "Canton"
+   ]
+  },
+  {
+   "fips": "2502114640",
+   "key": "COHASSET",
+   "name": "Cohasset",
+   "spellings": [
+    "Cohasset"
+   ]
+  },
+  {
+   "fips": "2502116495",
+   "key": "DEDHAM",
+   "name": "Dedham",
+   "spellings": [
+    "Dedham"
+   ]
+  },
+  {
+   "fips": "2502117405",
+   "key": "DOVER",
+   "name": "Dover",
+   "spellings": [
+    "Dover"
+   ]
+  },
+  {
+   "fips": "2502124820",
+   "key": "FOXBOROUGH",
+   "name": "Foxborough",
+   "spellings": [
+    "Foxborough"
+   ]
+  },
+  {
+   "fips": "2502125172",
+   "key": "FRANKLIN",
+   "name": "Franklin",
+   "spellings": [
+    "Franklin"
+   ]
+  },
+  {
+   "fips": "2502130455",
+   "key": "HOLBROOK",
+   "name": "Holbrook",
+   "spellings": [
+    "Holbrook"
+   ]
+  },
+  {
+   "fips": "2502139765",
+   "key": "MEDFIELD",
+   "name": "Medfield",
+   "spellings": [
+    "Medfield"
+   ]
+  },
+  {
+   "fips": "2502139975",
+   "key": "MEDWAY",
+   "name": "Medway",
+   "spellings": [
+    "Medway"
+   ]
+  },
+  {
+   "fips": "2502141515",
+   "key": "MILLIS",
+   "name": "Millis",
+   "spellings": [
+    "Millis"
+   ]
+  },
+  {
+   "fips": "2502141690",
+   "key": "MILTON",
+   "name": "Milton",
+   "spellings": [
+    "Milton"
+   ]
+  },
+  {
+   "fips": "2502144105",
+   "key": "NEEDHAM",
+   "name": "Needham",
+   "spellings": [
+    "Needham"
+   ]
+  },
+  {
+   "fips": "2502146050",
+   "key": "NORFOLK",
+   "name": "Norfolk",
+   "spellings": [
+    "Norfolk"
+   ]
+  },
+  {
+   "fips": "2502150250",
+   "key": "NORWOOD",
+   "name": "Norwood",
+   "spellings": [
+    "Norwood"
+   ]
+  },
+  {
+   "fips": "2502154100",
+   "key": "PLAINVILLE",
+   "name": "Plainville",
+   "spellings": [
+    "Plainville"
+   ]
+  },
+  {
+   "fips": "2502155745",
+   "key": "QUINCY",
+   "name": "Quincy",
+   "spellings": [
+    "Quincy"
+   ]
+  },
+  {
+   "fips": "2502156000",
+   "key": "RANDOLPH",
+   "name": "Randolph",
+   "spellings": [
+    "Randolph"
+   ]
+  },
+  {
+   "fips": "2502160785",
+   "key": "SHARON",
+   "name": "Sharon",
+   "spellings": [
+    "Sharon"
+   ]
+  },
+  {
+   "fips": "2502167945",
+   "key": "STOUGHTON",
+   "name": "Stoughton",
+   "spellings": [
+    "Stoughton"
+   ]
+  },
+  {
+   "fips": "2502172495",
+   "key": "WALPOLE",
+   "name": "Walpole",
+   "spellings": [
+    "Walpole"
+   ]
+  },
+  {
+   "fips": "2502174175",
+   "key": "WELLESLEY",
+   "name": "Wellesley",
+   "spellings": [
+    "Wellesley"
+   ]
+  },
+  {
+   "fips": "2502178690",
+   "key": "WESTWOOD",
+   "name": "Westwood",
+   "spellings": [
+    "Westwood"
+   ]
+  },
+  {
+   "fips": "2502178972",
+   "key": "WEYMOUTH",
+   "name": "Weymouth",
+   "spellings": [
+    "Weymouth"
+   ]
+  },
+  {
+   "fips": "2502182315",
+   "key": "WRENTHAM",
+   "name": "Wrentham",
+   "spellings": [
+    "Wrentham"
+   ]
+  },
+  {
+   "fips": "2502300170",
+   "key": "ABINGTON",
+   "name": "Abington",
+   "spellings": [
+    "Abington"
+   ]
+  },
+  {
+   "fips": "2502308130",
+   "key": "BRIDGEWATER",
+   "name": "Bridgewater",
+   "spellings": [
+    "Bridgewater"
+   ]
+  },
+  {
+   "fips": "2502309000",
+   "key": "BROCKTON",
+   "name": "Brockton",
+   "spellings": [
+    "Brockton"
+   ]
+  },
+  {
+   "fips": "2502311665",
+   "key": "CARVER",
+   "name": "Carver",
+   "spellings": [
+    "Carver"
+   ]
+  },
+  {
+   "fips": "2502317895",
+   "key": "DUXBURY",
+   "name": "Duxbury",
+   "spellings": [
+    "Duxbury"
+   ]
+  },
+  {
+   "fips": "2502318455",
+   "key": "EASTBRIDGEWATER",
+   "name": "East Bridgewater",
+   "spellings": [
+    "East Bridgewater"
+   ]
+  },
+  {
+   "fips": "2502327795",
+   "key": "HALIFAX",
+   "name": "Halifax",
+   "spellings": [
+    "Halifax"
+   ]
+  },
+  {
+   "fips": "2502328285",
+   "key": "HANOVER",
+   "name": "Hanover",
+   "spellings": [
+    "Hanover"
+   ]
+  },
+  {
+   "fips": "2502328495",
+   "key": "HANSON",
+   "name": "Hanson",
+   "spellings": [
+    "Hanson"
+   ]
+  },
+  {
+   "fips": "2502330210",
+   "key": "HINGHAM",
+   "name": "Hingham",
+   "spellings": [
+    "Hingham"
+   ]
+  },
+  {
+   "fips": "2502331645",
+   "key": "HULL",
+   "name": "Hull",
+   "spellings": [
+    "Hull"
+   ]
+  },
+  {
+   "fips": "2502333220",
+   "key": "KINGSTON",
+   "name": "Kingston",
+   "spellings": [
+    "Kingston"
+   ]
+  },
+  {
+   "fips": "2502333920",
+   "key": "LAKEVILLE",
+   "name": "Lakeville",
+   "spellings": [
+    "Lakeville"
+   ]
+  },
+  {
+   "fips": "2502338540",
+   "key": "MARION",
+   "name": "Marion",
+   "spellings": [
+    "Marion"
+   ]
+  },
+  {
+   "fips": "2502338855",
+   "key": "MARSHFIELD",
+   "name": "Marshfield",
+   "spellings": [
+    "Marshfield"
+   ]
+  },
+  {
+   "fips": "2502339450",
+   "key": "MATTAPOISETT",
+   "name": "Mattapoisett",
+   "spellings": [
+    "Mattapoisett"
+   ]
+  },
+  {
+   "fips": "2502340850",
+   "key": "MIDDLEBOROUGH",
+   "name": "Middleborough",
+   "spellings": [
+    "Middleborough"
+   ]
+  },
+  {
+   "fips": "2502350145",
+   "key": "NORWELL",
+   "name": "Norwell",
+   "spellings": [
+    "Norwell"
+   ]
+  },
+  {
+   "fips": "2502352630",
+   "key": "PEMBROKE",
+   "name": "Pembroke",
+   "spellings": [
+    "Pembroke"
+   ]
+  },
+  {
+   "fips": "2502354310",
+   "key": "PLYMOUTH",
+   "name": "Plymouth",
+   "spellings": [
+    "Plymouth"
+   ]
+  },
+  {
+   "fips": "2502354415",
+   "key": "PLYMPTON",
+   "name": "Plympton",
+   "spellings": [
+    "Plympton"
+   ]
+  },
+  {
+   "fips": "2502357600",
+   "key": "ROCHESTER",
+   "name": "Rochester",
+   "spellings": [
+    "Rochester"
+   ]
+  },
+  {
+   "fips": "2502357775",
+   "key": "ROCKLAND",
+   "name": "Rockland",
+   "spellings": [
+    "Rockland"
+   ]
+  },
+  {
+   "fips": "2502360330",
+   "key": "SCITUATE",
+   "name": "Scituate",
+   "spellings": [
+    "Scituate"
+   ]
+  },
+  {
+   "fips": "2502372985",
+   "key": "WAREHAM",
+   "name": "Wareham",
+   "spellings": [
+    "Wareham"
+   ]
+  },
+  {
+   "fips": "2502375260",
+   "key": "WESTBRIDGEWATER",
+   "name": "West Bridgewater",
+   "spellings": [
+    "West Bridgewater"
+   ]
+  },
+  {
+   "fips": "2502379530",
+   "key": "WHITMAN",
+   "name": "Whitman",
+   "spellings": [
+    "Whitman"
+   ]
+  },
+  {
+   "fips": "2502507000",
+   "key": "BOSTON",
+   "name": "Boston",
+   "spellings": [
+    "Boston"
+   ]
+  },
+  {
+   "fips": "2502513205",
+   "key": "CHELSEA",
+   "name": "Chelsea",
+   "spellings": [
+    "Chelsea"
+   ]
+  },
+  {
+   "fips": "2502556585",
+   "key": "REVERE",
+   "name": "Revere",
+   "spellings": [
+    "Revere"
+   ]
+  },
+  {
+   "fips": "2502581005",
+   "key": "WINTHROP",
+   "name": "Winthrop",
+   "spellings": [
+    "Winthrop"
+   ]
+  },
+  {
+   "fips": "2502701885",
+   "key": "ASHBURNHAM",
+   "name": "Ashburnham",
+   "spellings": [
+    "Ashburnham"
+   ]
+  },
+  {
+   "fips": "2502702480",
+   "key": "ATHOL",
+   "name": "Athol",
+   "spellings": [
+    "Athol"
+   ]
+  },
+  {
+   "fips": "2502702760",
+   "key": "AUBURN",
+   "name": "Auburn",
+   "spellings": [
+    "Auburn"
+   ]
+  },
+  {
+   "fips": "2502703740",
+   "key": "BARRE",
+   "name": "Barre",
+   "spellings": [
+    "Barre"
+   ]
+  },
+  {
+   "fips": "2502705490",
+   "key": "BERLIN",
+   "name": "Berlin",
+   "spellings": [
+    "Berlin"
+   ]
+  },
+  {
+   "fips": "2502706015",
+   "key": "BLACKSTONE",
+   "name": "Blackstone",
+   "spellings": [
+    "Blackstone"
+   ]
+  },
+  {
+   "fips": "2502706365",
+   "key": "BOLTON",
+   "name": "Bolton",
+   "spellings": [
+    "Bolton"
+   ]
+  },
+  {
+   "fips": "2502707525",
+   "key": "BOYLSTON",
+   "name": "Boylston",
+   "spellings": [
+    "Boylston"
+   ]
+  },
+  {
+   "fips": "2502709105",
+   "key": "BROOKFIELD",
+   "name": "Brookfield",
+   "spellings": [
+    "Brookfield"
+   ]
+  },
+  {
+   "fips": "2502712715",
+   "key": "CHARLTON",
+   "name": "Charlton",
+   "spellings": [
+    "Charlton"
+   ]
+  },
+  {
+   "fips": "2502714395",
+   "key": "CLINTON",
+   "name": "Clinton",
+   "spellings": [
+    "Clinton"
+   ]
+  },
+  {
+   "fips": "2502717300",
+   "key": "DOUGLAS",
+   "name": "Douglas",
+   "spellings": [
+    "Douglas"
+   ]
+  },
+  {
+   "fips": "2502717685",
+   "key": "DUDLEY",
+   "name": "Dudley",
+   "spellings": [
+    "Dudley"
+   ]
+  },
+  {
+   "fips": "2502718560",
+   "key": "EASTBROOKFIELD",
+   "name": "East Brookfield",
+   "spellings": [
+    "East Brookfield"
+   ]
+  },
+  {
+   "fips": "2502723875",
+   "key": "FITCHBURG",
+   "name": "Fitchburg",
+   "spellings": [
+    "Fitchburg"
+   ]
+  },
+  {
+   "fips": "2502725485",
+   "key": "GARDNER",
+   "name": "Gardner",
+   "spellings": [
+    "Gardner"
+   ]
+  },
+  {
+   "fips": "2502726430",
+   "key": "GRAFTON",
+   "name": "Grafton",
+   "spellings": [
+    "Grafton"
+   ]
+  },
+  {
+   "fips": "2502728740",
+   "key": "HARDWICK",
+   "name": "Hardwick",
+   "spellings": [
+    "Hardwick"
+   ]
+  },
+  {
+   "fips": "2502728950",
+   "key": "HARVARD",
+   "name": "Harvard",
+   "spellings": [
+    "Harvard"
+   ]
+  },
+  {
+   "fips": "2502730560",
+   "key": "HOLDEN",
+   "name": "Holden",
+   "spellings": [
+    "Holden"
+   ]
+  },
+  {
+   "fips": "2502730945",
+   "key": "HOPEDALE",
+   "name": "Hopedale",
+   "spellings": [
+    "Hopedale"
+   ]
+  },
+  {
+   "fips": "2502731435",
+   "key": "HUBBARDSTON",
+   "name": "Hubbardston",
+   "spellings": [
+    "Hubbardston"
+   ]
+  },
+  {
+   "fips": "2502734165",
+   "key": "LANCASTER",
+   "name": "Lancaster",
+   "spellings": [
+    "Lancaster"
+   ]
+  },
+  {
+   "fips": "2502734795",
+   "key": "LEICESTER",
+   "name": "Leicester",
+   "spellings": [
+    "Leicester"
+   ]
+  },
+  {
+   "fips": "2502735075",
+   "key": "LEOMINSTER",
+   "name": "Leominster",
+   "spellings": [
+    "Leominster"
+   ]
+  },
+  {
+   "fips": "2502737420",
+   "key": "LUNENBURG",
+   "name": "Lunenburg",
+   "spellings": [
+    "Lunenburg"
+   ]
+  },
+  {
+   "fips": "2502740255",
+   "key": "MENDON",
+   "name": "Mendon",
+   "spellings": [
+    "Mendon"
+   ]
+  },
+  {
+   "fips": "2502741165",
+   "key": "MILFORD",
+   "name": "Milford",
+   "spellings": [
+    "Milford"
+   ]
+  },
+  {
+   "fips": "2502741340",
+   "key": "MILLBURY",
+   "name": "Millbury",
+   "spellings": [
+    "Millbury"
+   ]
+  },
+  {
+   "fips": "2502741585",
+   "key": "MILLVILLE",
+   "name": "Millville",
+   "spellings": [
+    "Millville"
+   ]
+  },
+  {
+   "fips": "2502745105",
+   "key": "NEWBRAINTREE",
+   "name": "New Braintree",
+   "spellings": [
+    "New Braintree"
+   ]
+  },
+  {
+   "fips": "2502746820",
+   "key": "NORTHBOROUGH",
+   "name": "Northborough",
+   "spellings": [
+    "Northborough"
+   ]
+  },
+  {
+   "fips": "2502746925",
+   "key": "NORTHBRIDGE",
+   "name": "Northbridge",
+   "spellings": [
+    "Northbridge"
+   ]
+  },
+  {
+   "fips": "2502747135",
+   "key": "NORTHBROOKFIELD",
+   "name": "North Brookfield",
+   "spellings": [
+    "North Brookfield"
+   ]
+  },
+  {
+   "fips": "2502750670",
+   "key": "OAKHAM",
+   "name": "Oakham",
+   "spellings": [
+    "Oakham"
+   ]
+  },
+  {
+   "fips": "2502751825",
+   "key": "OXFORD",
+   "name": "Oxford",
+   "spellings": [
+    "Oxford"
+   ]
+  },
+  {
+   "fips": "2502752420",
+   "key": "PAXTON",
+   "name": "Paxton",
+   "spellings": [
+    "Paxton"
+   ]
+  },
+  {
+   "fips": "2502753120",
+   "key": "PETERSHAM",
+   "name": "Petersham",
+   "spellings": [
+    "Petersham"
+   ]
+  },
+  {
+   "fips": "2502753225",
+   "key": "PHILLIPSTON",
+   "name": "Phillipston",
+   "spellings": [
+    "Phillipston"
+   ]
+  },
+  {
+   "fips": "2502755395",
+   "key": "PRINCETON",
+   "name": "Princeton",
+   "spellings": [
+    "Princeton"
+   ]
+  },
+  {
+   "fips": "2502758580",
+   "key": "ROYALSTON",
+   "name": "Royalston",
+   "spellings": [
+    "Royalston"
+   ]
+  },
+  {
+   "fips": "2502758825",
+   "key": "RUTLAND",
+   "name": "Rutland",
+   "spellings": [
+    "Rutland"
+   ]
+  },
+  {
+   "fips": "2502761800",
+   "key": "SHREWSBURY",
+   "name": "Shrewsbury",
+   "spellings": [
+    "Shrewsbury"
+   ]
+  },
+  {
+   "fips": "2502763165",
+   "key": "SOUTHBOROUGH",
+   "name": "Southborough",
+   "spellings": [
+    "Southborough"
+   ]
+  },
+  {
+   "fips": "2502763345",
+   "key": "SOUTHBRIDGE",
+   "name": "Southbridge",
+   "spellings": [
+    "Southbridge"
+   ]
+  },
+  {
+   "fips": "2502766105",
+   "key": "SPENCER",
+   "name": "Spencer",
+   "spellings": [
+    "Spencer"
+   ]
+  },
+  {
+   "fips": "2502767385",
+   "key": "STERLING",
+   "name": "Sterling",
+   "spellings": [
+    "Sterling"
+   ]
+  },
+  {
+   "fips": "2502768155",
+   "key": "STURBRIDGE",
+   "name": "Sturbridge",
+   "spellings": [
+    "Sturbridge"
+   ]
+  },
+  {
+   "fips": "2502768610",
+   "key": "SUTTON",
+   "name": "Sutton",
+   "spellings": [
+    "Sutton"
+   ]
+  },
+  {
+   "fips": "2502769275",
+   "key": "TEMPLETON",
+   "name": "Templeton",
+   "spellings": [
+    "Templeton"
+   ]
+  },
+  {
+   "fips": "2502771480",
+   "key": "UPTON",
+   "name": "Upton",
+   "spellings": [
+    "Upton"
+   ]
+  },
+  {
+   "fips": "2502771620",
+   "key": "UXBRIDGE",
+   "name": "Uxbridge",
+   "spellings": [
+    "Uxbridge"
+   ]
+  },
+  {
+   "fips": "2502773090",
+   "key": "WARREN",
+   "name": "Warren",
+   "spellings": [
+    "Warren"
+   ]
+  },
+  {
+   "fips": "2502773895",
+   "key": "WEBSTER",
+   "name": "Webster",
+   "spellings": [
+    "Webster"
+   ]
+  },
+  {
+   "fips": "2502775015",
+   "key": "WESTBOROUGH",
+   "name": "Westborough",
+   "spellings": [
+    "Westborough"
+   ]
+  },
+  {
+   "fips": "2502775155",
+   "key": "WESTBOYLSTON",
+   "name": "West Boylston",
+   "spellings": [
+    "West Boylston"
+   ]
+  },
+  {
+   "fips": "2502775400",
+   "key": "WESTBROOKFIELD",
+   "name": "West Brookfield",
+   "spellings": [
+    "West Brookfield"
+   ]
+  },
+  {
+   "fips": "2502777010",
+   "key": "WESTMINSTER",
+   "name": "Westminster",
+   "spellings": [
+    "Westminster"
+   ]
+  },
+  {
+   "fips": "2502780405",
+   "key": "WINCHENDON",
+   "name": "Winchendon",
+   "spellings": [
+    "Winchendon"
+   ]
+  },
+  {
+   "fips": "2502782000",
+   "key": "WORCESTER",
+   "name": "Worcester",
+   "spellings": [
+    "Worcester"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/ma-map.json, built from map-sources/); spellings from rosters/MA.json",
+ "state": "MA",
+ "unit": "town"
+}

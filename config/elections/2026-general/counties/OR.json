@@ -1,0 +1,295 @@
+{
+ "counties": [
+  {
+   "fips": "41001",
+   "key": "BAKER",
+   "name": "Baker",
+   "spellings": [
+    "Baker"
+   ]
+  },
+  {
+   "fips": "41003",
+   "key": "BENTON",
+   "name": "Benton",
+   "spellings": [
+    "Benton"
+   ]
+  },
+  {
+   "fips": "41005",
+   "key": "CLACKAMAS",
+   "name": "Clackamas",
+   "spellings": [
+    "Clackamas"
+   ]
+  },
+  {
+   "fips": "41007",
+   "key": "CLATSOP",
+   "name": "Clatsop",
+   "spellings": [
+    "Clatsop"
+   ]
+  },
+  {
+   "fips": "41009",
+   "key": "COLUMBIA",
+   "name": "Columbia",
+   "spellings": [
+    "Columbia"
+   ]
+  },
+  {
+   "fips": "41011",
+   "key": "COOS",
+   "name": "Coos",
+   "spellings": [
+    "Coos"
+   ]
+  },
+  {
+   "fips": "41013",
+   "key": "CROOK",
+   "name": "Crook",
+   "spellings": [
+    "Crook"
+   ]
+  },
+  {
+   "fips": "41015",
+   "key": "CURRY",
+   "name": "Curry",
+   "spellings": [
+    "Curry"
+   ]
+  },
+  {
+   "fips": "41017",
+   "key": "DESCHUTES",
+   "name": "Deschutes",
+   "spellings": [
+    "Deschutes"
+   ]
+  },
+  {
+   "fips": "41019",
+   "key": "DOUGLAS",
+   "name": "Douglas",
+   "spellings": [
+    "Douglas"
+   ]
+  },
+  {
+   "fips": "41021",
+   "key": "GILLIAM",
+   "name": "Gilliam",
+   "spellings": [
+    "Gilliam"
+   ]
+  },
+  {
+   "fips": "41023",
+   "key": "GRANT",
+   "name": "Grant",
+   "spellings": [
+    "Grant"
+   ]
+  },
+  {
+   "fips": "41025",
+   "key": "HARNEY",
+   "name": "Harney",
+   "spellings": [
+    "Harney"
+   ]
+  },
+  {
+   "fips": "41027",
+   "key": "HOODRIVER",
+   "name": "Hood River",
+   "spellings": [
+    "Hood River"
+   ]
+  },
+  {
+   "fips": "41029",
+   "key": "JACKSON",
+   "name": "Jackson",
+   "spellings": [
+    "Jackson"
+   ]
+  },
+  {
+   "fips": "41031",
+   "key": "JEFFERSON",
+   "name": "Jefferson",
+   "spellings": [
+    "Jefferson"
+   ]
+  },
+  {
+   "fips": "41033",
+   "key": "JOSEPHINE",
+   "name": "Josephine",
+   "spellings": [
+    "Josephine"
+   ]
+  },
+  {
+   "fips": "41035",
+   "key": "KLAMATH",
+   "name": "Klamath",
+   "spellings": [
+    "Klamath"
+   ]
+  },
+  {
+   "fips": "41037",
+   "key": "LAKE",
+   "name": "Lake",
+   "spellings": [
+    "Lake"
+   ]
+  },
+  {
+   "fips": "41039",
+   "key": "LANE",
+   "name": "Lane",
+   "spellings": [
+    "Lane"
+   ]
+  },
+  {
+   "fips": "41041",
+   "key": "LINCOLN",
+   "name": "Lincoln",
+   "spellings": [
+    "Lincoln"
+   ]
+  },
+  {
+   "fips": "41043",
+   "key": "LINN",
+   "name": "Linn",
+   "spellings": [
+    "Linn"
+   ]
+  },
+  {
+   "fips": "41045",
+   "key": "MALHEUR",
+   "name": "Malheur",
+   "spellings": [
+    "Malheur"
+   ]
+  },
+  {
+   "fips": "41047",
+   "key": "MARION",
+   "name": "Marion",
+   "spellings": [
+    "Marion"
+   ]
+  },
+  {
+   "fips": "41049",
+   "key": "MORROW",
+   "name": "Morrow",
+   "spellings": [
+    "Morrow"
+   ]
+  },
+  {
+   "fips": "41051",
+   "key": "MULTNOMAH",
+   "name": "Multnomah",
+   "spellings": [
+    "Multnomah"
+   ]
+  },
+  {
+   "fips": "41053",
+   "key": "POLK",
+   "name": "Polk",
+   "spellings": [
+    "Polk"
+   ]
+  },
+  {
+   "fips": "41055",
+   "key": "SHERMAN",
+   "name": "Sherman",
+   "spellings": [
+    "Sherman"
+   ]
+  },
+  {
+   "fips": "41057",
+   "key": "TILLAMOOK",
+   "name": "Tillamook",
+   "spellings": [
+    "Tillamook"
+   ]
+  },
+  {
+   "fips": "41059",
+   "key": "UMATILLA",
+   "name": "Umatilla",
+   "spellings": [
+    "Umatilla"
+   ]
+  },
+  {
+   "fips": "41061",
+   "key": "UNION",
+   "name": "Union",
+   "spellings": [
+    "Union"
+   ]
+  },
+  {
+   "fips": "41063",
+   "key": "WALLOWA",
+   "name": "Wallowa",
+   "spellings": [
+    "Wallowa"
+   ]
+  },
+  {
+   "fips": "41065",
+   "key": "WASCO",
+   "name": "Wasco",
+   "spellings": [
+    "Wasco"
+   ]
+  },
+  {
+   "fips": "41067",
+   "key": "WASHINGTON",
+   "name": "Washington",
+   "spellings": [
+    "Washington"
+   ]
+  },
+  {
+   "fips": "41069",
+   "key": "WHEELER",
+   "name": "Wheeler",
+   "spellings": [
+    "Wheeler"
+   ]
+  },
+  {
+   "fips": "41071",
+   "key": "YAMHILL",
+   "name": "Yamhill",
+   "spellings": [
+    "Yamhill"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/or-map.json, built from map-sources/); spellings from rosters/OR.json",
+ "state": "OR",
+ "unit": "county"
+}

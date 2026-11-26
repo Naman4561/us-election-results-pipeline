@@ -1,0 +1,1204 @@
+{
+ "counties": [
+  {
+   "fips": "51001",
+   "key": "ACCOMACKCOUNTY",
+   "name": "Accomack County",
+   "spellings": [
+    "ACCOMACK COUNTY",
+    "Accomack County"
+   ]
+  },
+  {
+   "fips": "51003",
+   "key": "ALBEMARLECOUNTY",
+   "name": "Albemarle County",
+   "spellings": [
+    "ALBEMARLE COUNTY",
+    "Albemarle County"
+   ]
+  },
+  {
+   "fips": "51005",
+   "key": "ALLEGHANYCOUNTY",
+   "name": "Alleghany County",
+   "spellings": [
+    "ALLEGHANY COUNTY",
+    "Alleghany County"
+   ]
+  },
+  {
+   "fips": "51007",
+   "key": "AMELIACOUNTY",
+   "name": "Amelia County",
+   "spellings": [
+    "AMELIA COUNTY",
+    "Amelia County"
+   ]
+  },
+  {
+   "fips": "51009",
+   "key": "AMHERSTCOUNTY",
+   "name": "Amherst County",
+   "spellings": [
+    "AMHERST COUNTY",
+    "Amherst County"
+   ]
+  },
+  {
+   "fips": "51011",
+   "key": "APPOMATTOXCOUNTY",
+   "name": "Appomattox County",
+   "spellings": [
+    "APPOMATTOX COUNTY",
+    "Appomattox County"
+   ]
+  },
+  {
+   "fips": "51013",
+   "key": "ARLINGTONCOUNTY",
+   "name": "Arlington County",
+   "spellings": [
+    "ARLINGTON COUNTY",
+    "Arlington County"
+   ]
+  },
+  {
+   "fips": "51015",
+   "key": "AUGUSTACOUNTY",
+   "name": "Augusta County",
+   "spellings": [
+    "AUGUSTA COUNTY",
+    "Augusta County"
+   ]
+  },
+  {
+   "fips": "51017",
+   "key": "BATHCOUNTY",
+   "name": "Bath County",
+   "spellings": [
+    "BATH COUNTY",
+    "Bath County"
+   ]
+  },
+  {
+   "fips": "51019",
+   "key": "BEDFORDCOUNTY",
+   "name": "Bedford County",
+   "spellings": [
+    "BEDFORD COUNTY",
+    "Bedford County"
+   ]
+  },
+  {
+   "fips": "51021",
+   "key": "BLANDCOUNTY",
+   "name": "Bland County",
+   "spellings": [
+    "BLAND COUNTY",
+    "Bland County"
+   ]
+  },
+  {
+   "fips": "51023",
+   "key": "BOTETOURTCOUNTY",
+   "name": "Botetourt County",
+   "spellings": [
+    "BOTETOURT COUNTY",
+    "Botetourt County"
+   ]
+  },
+  {
+   "fips": "51025",
+   "key": "BRUNSWICKCOUNTY",
+   "name": "Brunswick County",
+   "spellings": [
+    "BRUNSWICK COUNTY",
+    "Brunswick County"
+   ]
+  },
+  {
+   "fips": "51027",
+   "key": "BUCHANANCOUNTY",
+   "name": "Buchanan County",
+   "spellings": [
+    "BUCHANAN COUNTY",
+    "Buchanan County"
+   ]
+  },
+  {
+   "fips": "51029",
+   "key": "BUCKINGHAMCOUNTY",
+   "name": "Buckingham County",
+   "spellings": [
+    "BUCKINGHAM COUNTY",
+    "Buckingham County"
+   ]
+  },
+  {
+   "fips": "51031",
+   "key": "CAMPBELLCOUNTY",
+   "name": "Campbell County",
+   "spellings": [
+    "CAMPBELL COUNTY",
+    "Campbell County"
+   ]
+  },
+  {
+   "fips": "51033",
+   "key": "CAROLINECOUNTY",
+   "name": "Caroline County",
+   "spellings": [
+    "CAROLINE COUNTY",
+    "Caroline County"
+   ]
+  },
+  {
+   "fips": "51035",
+   "key": "CARROLLCOUNTY",
+   "name": "Carroll County",
+   "spellings": [
+    "CARROLL COUNTY",
+    "Carroll County"
+   ]
+  },
+  {
+   "fips": "51036",
+   "key": "CHARLESCITYCOUNTY",
+   "name": "Charles City County",
+   "spellings": [
+    "CHARLES CITY COUNTY",
+    "Charles City County"
+   ]
+  },
+  {
+   "fips": "51037",
+   "key": "CHARLOTTECOUNTY",
+   "name": "Charlotte County",
+   "spellings": [
+    "CHARLOTTE COUNTY",
+    "Charlotte County"
+   ]
+  },
+  {
+   "fips": "51041",
+   "key": "CHESTERFIELDCOUNTY",
+   "name": "Chesterfield County",
+   "spellings": [
+    "CHESTERFIELD COUNTY",
+    "Chesterfield County"
+   ]
+  },
+  {
+   "fips": "51043",
+   "key": "CLARKECOUNTY",
+   "name": "Clarke County",
+   "spellings": [
+    "CLARKE COUNTY",
+    "Clarke County"
+   ]
+  },
+  {
+   "fips": "51045",
+   "key": "CRAIGCOUNTY",
+   "name": "Craig County",
+   "spellings": [
+    "CRAIG COUNTY",
+    "Craig County"
+   ]
+  },
+  {
+   "fips": "51047",
+   "key": "CULPEPERCOUNTY",
+   "name": "Culpeper County",
+   "spellings": [
+    "CULPEPER COUNTY",
+    "Culpeper County"
+   ]
+  },
+  {
+   "fips": "51049",
+   "key": "CUMBERLANDCOUNTY",
+   "name": "Cumberland County",
+   "spellings": [
+    "CUMBERLAND COUNTY",
+    "Cumberland County"
+   ]
+  },
+  {
+   "fips": "51051",
+   "key": "DICKENSONCOUNTY",
+   "name": "Dickenson County",
+   "spellings": [
+    "DICKENSON COUNTY",
+    "Dickenson County"
+   ]
+  },
+  {
+   "fips": "51053",
+   "key": "DINWIDDIECOUNTY",
+   "name": "Dinwiddie County",
+   "spellings": [
+    "DINWIDDIE COUNTY",
+    "Dinwiddie County"
+   ]
+  },
+  {
+   "fips": "51057",
+   "key": "ESSEXCOUNTY",
+   "name": "Essex County",
+   "spellings": [
+    "ESSEX COUNTY",
+    "Essex County"
+   ]
+  },
+  {
+   "fips": "51059",
+   "key": "FAIRFAXCOUNTY",
+   "name": "Fairfax County",
+   "spellings": [
+    "FAIRFAX COUNTY",
+    "Fairfax County"
+   ]
+  },
+  {
+   "fips": "51061",
+   "key": "FAUQUIERCOUNTY",
+   "name": "Fauquier County",
+   "spellings": [
+    "FAUQUIER COUNTY",
+    "Fauquier County"
+   ]
+  },
+  {
+   "fips": "51063",
+   "key": "FLOYDCOUNTY",
+   "name": "Floyd County",
+   "spellings": [
+    "FLOYD COUNTY",
+    "Floyd County"
+   ]
+  },
+  {
+   "fips": "51065",
+   "key": "FLUVANNACOUNTY",
+   "name": "Fluvanna County",
+   "spellings": [
+    "FLUVANNA COUNTY",
+    "Fluvanna County"
+   ]
+  },
+  {
+   "fips": "51067",
+   "key": "FRANKLINCOUNTY",
+   "name": "Franklin County",
+   "spellings": [
+    "FRANKLIN COUNTY",
+    "Franklin County"
+   ]
+  },
+  {
+   "fips": "51069",
+   "key": "FREDERICKCOUNTY",
+   "name": "Frederick County",
+   "spellings": [
+    "FREDERICK COUNTY",
+    "Frederick County"
+   ]
+  },
+  {
+   "fips": "51071",
+   "key": "GILESCOUNTY",
+   "name": "Giles County",
+   "spellings": [
+    "GILES COUNTY",
+    "Giles County"
+   ]
+  },
+  {
+   "fips": "51073",
+   "key": "GLOUCESTERCOUNTY",
+   "name": "Gloucester County",
+   "spellings": [
+    "GLOUCESTER COUNTY",
+    "Gloucester County"
+   ]
+  },
+  {
+   "fips": "51075",
+   "key": "GOOCHLANDCOUNTY",
+   "name": "Goochland County",
+   "spellings": [
+    "GOOCHLAND COUNTY",
+    "Goochland County"
+   ]
+  },
+  {
+   "fips": "51077",
+   "key": "GRAYSONCOUNTY",
+   "name": "Grayson County",
+   "spellings": [
+    "GRAYSON COUNTY",
+    "Grayson County"
+   ]
+  },
+  {
+   "fips": "51079",
+   "key": "GREENECOUNTY",
+   "name": "Greene County",
+   "spellings": [
+    "GREENE COUNTY",
+    "Greene County"
+   ]
+  },
+  {
+   "fips": "51081",
+   "key": "GREENSVILLECOUNTY",
+   "name": "Greensville County",
+   "spellings": [
+    "GREENSVILLE COUNTY",
+    "Greensville County"
+   ]
+  },
+  {
+   "fips": "51083",
+   "key": "HALIFAXCOUNTY",
+   "name": "Halifax County",
+   "spellings": [
+    "HALIFAX COUNTY",
+    "Halifax County"
+   ]
+  },
+  {
+   "fips": "51085",
+   "key": "HANOVERCOUNTY",
+   "name": "Hanover County",
+   "spellings": [
+    "HANOVER COUNTY",
+    "Hanover County"
+   ]
+  },
+  {
+   "fips": "51087",
+   "key": "HENRICOCOUNTY",
+   "name": "Henrico County",
+   "spellings": [
+    "HENRICO COUNTY",
+    "Henrico County"
+   ]
+  },
+  {
+   "fips": "51089",
+   "key": "HENRYCOUNTY",
+   "name": "Henry County",
+   "spellings": [
+    "HENRY COUNTY",
+    "Henry County"
+   ]
+  },
+  {
+   "fips": "51091",
+   "key": "HIGHLANDCOUNTY",
+   "name": "Highland County",
+   "spellings": [
+    "HIGHLAND COUNTY",
+    "Highland County"
+   ]
+  },
+  {
+   "fips": "51093",
+   "key": "ISLEOFWIGHTCOUNTY",
+   "name": "Isle of Wight County",
+   "spellings": [
+    "ISLE OF WIGHT COUNTY",
+    "Isle of Wight County"
+   ]
+  },
+  {
+   "fips": "51095",
+   "key": "JAMESCITYCOUNTY",
+   "name": "James City County",
+   "spellings": [
+    "JAMES CITY COUNTY",
+    "James City County"
+   ]
+  },
+  {
+   "fips": "51097",
+   "key": "KINGANDQUEENCOUNTY",
+   "name": "King and Queen County",
+   "spellings": [
+    "KING and QUEEN COUNTY",
+    "King and Queen County"
+   ]
+  },
+  {
+   "fips": "51099",
+   "key": "KINGGEORGECOUNTY",
+   "name": "King George County",
+   "spellings": [
+    "KING GEORGE COUNTY",
+    "King George County"
+   ]
+  },
+  {
+   "fips": "51101",
+   "key": "KINGWILLIAMCOUNTY",
+   "name": "King William County",
+   "spellings": [
+    "KING WILLIAM COUNTY",
+    "King William County"
+   ]
+  },
+  {
+   "fips": "51103",
+   "key": "LANCASTERCOUNTY",
+   "name": "Lancaster County",
+   "spellings": [
+    "LANCASTER COUNTY",
+    "Lancaster County"
+   ]
+  },
+  {
+   "fips": "51105",
+   "key": "LEECOUNTY",
+   "name": "Lee County",
+   "spellings": [
+    "LEE COUNTY",
+    "Lee County"
+   ]
+  },
+  {
+   "fips": "51107",
+   "key": "LOUDOUNCOUNTY",
+   "name": "Loudoun County",
+   "spellings": [
+    "LOUDOUN COUNTY",
+    "Loudoun County"
+   ]
+  },
+  {
+   "fips": "51109",
+   "key": "LOUISACOUNTY",
+   "name": "Louisa County",
+   "spellings": [
+    "LOUISA COUNTY",
+    "Louisa County"
+   ]
+  },
+  {
+   "fips": "51111",
+   "key": "LUNENBURGCOUNTY",
+   "name": "Lunenburg County",
+   "spellings": [
+    "LUNENBURG COUNTY",
+    "Lunenburg County"
+   ]
+  },
+  {
+   "fips": "51113",
+   "key": "MADISONCOUNTY",
+   "name": "Madison County",
+   "spellings": [
+    "MADISON COUNTY",
+    "Madison County"
+   ]
+  },
+  {
+   "fips": "51115",
+   "key": "MATHEWSCOUNTY",
+   "name": "Mathews County",
+   "spellings": [
+    "MATHEWS COUNTY",
+    "Mathews County"
+   ]
+  },
+  {
+   "fips": "51117",
+   "key": "MECKLENBURGCOUNTY",
+   "name": "Mecklenburg County",
+   "spellings": [
+    "MECKLENBURG COUNTY",
+    "Mecklenburg County"
+   ]
+  },
+  {
+   "fips": "51119",
+   "key": "MIDDLESEXCOUNTY",
+   "name": "Middlesex County",
+   "spellings": [
+    "MIDDLESEX COUNTY",
+    "Middlesex County"
+   ]
+  },
+  {
+   "fips": "51121",
+   "key": "MONTGOMERYCOUNTY",
+   "name": "Montgomery County",
+   "spellings": [
+    "MONTGOMERY COUNTY",
+    "Montgomery County"
+   ]
+  },
+  {
+   "fips": "51125",
+   "key": "NELSONCOUNTY",
+   "name": "Nelson County",
+   "spellings": [
+    "NELSON COUNTY",
+    "Nelson County"
+   ]
+  },
+  {
+   "fips": "51127",
+   "key": "NEWKENTCOUNTY",
+   "name": "New Kent County",
+   "spellings": [
+    "NEW KENT COUNTY",
+    "New Kent County"
+   ]
+  },
+  {
+   "fips": "51131",
+   "key": "NORTHAMPTONCOUNTY",
+   "name": "Northampton County",
+   "spellings": [
+    "NORTHAMPTON COUNTY",
+    "Northampton County"
+   ]
+  },
+  {
+   "fips": "51133",
+   "key": "NORTHUMBERLANDCOUNTY",
+   "name": "Northumberland County",
+   "spellings": [
+    "NORTHUMBERLAND COUNTY",
+    "Northumberland County"
+   ]
+  },
+  {
+   "fips": "51135",
+   "key": "NOTTOWAYCOUNTY",
+   "name": "Nottoway County",
+   "spellings": [
+    "NOTTOWAY COUNTY",
+    "Nottoway County"
+   ]
+  },
+  {
+   "fips": "51137",
+   "key": "ORANGECOUNTY",
+   "name": "Orange County",
+   "spellings": [
+    "ORANGE COUNTY",
+    "Orange County"
+   ]
+  },
+  {
+   "fips": "51139",
+   "key": "PAGECOUNTY",
+   "name": "Page County",
+   "spellings": [
+    "PAGE COUNTY",
+    "Page County"
+   ]
+  },
+  {
+   "fips": "51141",
+   "key": "PATRICKCOUNTY",
+   "name": "Patrick County",
+   "spellings": [
+    "PATRICK COUNTY",
+    "Patrick County"
+   ]
+  },
+  {
+   "fips": "51143",
+   "key": "PITTSYLVANIACOUNTY",
+   "name": "Pittsylvania County",
+   "spellings": [
+    "PITTSYLVANIA COUNTY",
+    "Pittsylvania County"
+   ]
+  },
+  {
+   "fips": "51145",
+   "key": "POWHATANCOUNTY",
+   "name": "Powhatan County",
+   "spellings": [
+    "POWHATAN COUNTY",
+    "Powhatan County"
+   ]
+  },
+  {
+   "fips": "51147",
+   "key": "PRINCEEDWARDCOUNTY",
+   "name": "Prince Edward County",
+   "spellings": [
+    "PRINCE EDWARD COUNTY",
+    "Prince Edward County"
+   ]
+  },
+  {
+   "fips": "51149",
+   "key": "PRINCEGEORGECOUNTY",
+   "name": "Prince George County",
+   "spellings": [
+    "PRINCE GEORGE COUNTY",
+    "Prince George County"
+   ]
+  },
+  {
+   "fips": "51153",
+   "key": "PRINCEWILLIAMCOUNTY",
+   "name": "Prince William County",
+   "spellings": [
+    "PRINCE WILLIAM COUNTY",
+    "Prince William County"
+   ]
+  },
+  {
+   "fips": "51155",
+   "key": "PULASKICOUNTY",
+   "name": "Pulaski County",
+   "spellings": [
+    "PULASKI COUNTY",
+    "Pulaski County"
+   ]
+  },
+  {
+   "fips": "51157",
+   "key": "RAPPAHANNOCKCOUNTY",
+   "name": "Rappahannock County",
+   "spellings": [
+    "RAPPAHANNOCK COUNTY",
+    "Rappahannock County"
+   ]
+  },
+  {
+   "fips": "51159",
+   "key": "RICHMONDCOUNTY",
+   "name": "Richmond County",
+   "spellings": [
+    "RICHMOND COUNTY",
+    "Richmond County"
+   ]
+  },
+  {
+   "fips": "51161",
+   "key": "ROANOKECOUNTY",
+   "name": "Roanoke County",
+   "spellings": [
+    "ROANOKE COUNTY",
+    "Roanoke County"
+   ]
+  },
+  {
+   "fips": "51163",
+   "key": "ROCKBRIDGECOUNTY",
+   "name": "Rockbridge County",
+   "spellings": [
+    "ROCKBRIDGE COUNTY",
+    "Rockbridge County"
+   ]
+  },
+  {
+   "fips": "51165",
+   "key": "ROCKINGHAMCOUNTY",
+   "name": "Rockingham County",
+   "spellings": [
+    "ROCKINGHAM COUNTY",
+    "Rockingham County"
+   ]
+  },
+  {
+   "fips": "51167",
+   "key": "RUSSELLCOUNTY",
+   "name": "Russell County",
+   "spellings": [
+    "RUSSELL COUNTY",
+    "Russell County"
+   ]
+  },
+  {
+   "fips": "51169",
+   "key": "SCOTTCOUNTY",
+   "name": "Scott County",
+   "spellings": [
+    "SCOTT COUNTY",
+    "Scott County"
+   ]
+  },
+  {
+   "fips": "51171",
+   "key": "SHENANDOAHCOUNTY",
+   "name": "Shenandoah County",
+   "spellings": [
+    "SHENANDOAH COUNTY",
+    "Shenandoah County"
+   ]
+  },
+  {
+   "fips": "51173",
+   "key": "SMYTHCOUNTY",
+   "name": "Smyth County",
+   "spellings": [
+    "SMYTH COUNTY",
+    "Smyth County"
+   ]
+  },
+  {
+   "fips": "51175",
+   "key": "SOUTHAMPTONCOUNTY",
+   "name": "Southampton County",
+   "spellings": [
+    "SOUTHAMPTON COUNTY",
+    "Southampton County"
+   ]
+  },
+  {
+   "fips": "51177",
+   "key": "SPOTSYLVANIACOUNTY",
+   "name": "Spotsylvania County",
+   "spellings": [
+    "SPOTSYLVANIA COUNTY",
+    "Spotsylvania County"
+   ]
+  },
+  {
+   "fips": "51179",
+   "key": "STAFFORDCOUNTY",
+   "name": "Stafford County",
+   "spellings": [
+    "STAFFORD COUNTY",
+    "Stafford County"
+   ]
+  },
+  {
+   "fips": "51181",
+   "key": "SURRYCOUNTY",
+   "name": "Surry County",
+   "spellings": [
+    "SURRY COUNTY",
+    "Surry County"
+   ]
+  },
+  {
+   "fips": "51183",
+   "key": "SUSSEXCOUNTY",
+   "name": "Sussex County",
+   "spellings": [
+    "SUSSEX COUNTY",
+    "Sussex County"
+   ]
+  },
+  {
+   "fips": "51185",
+   "key": "TAZEWELLCOUNTY",
+   "name": "Tazewell County",
+   "spellings": [
+    "TAZEWELL COUNTY",
+    "Tazewell County"
+   ]
+  },
+  {
+   "fips": "51187",
+   "key": "WARRENCOUNTY",
+   "name": "Warren County",
+   "spellings": [
+    "WARREN COUNTY",
+    "Warren County"
+   ]
+  },
+  {
+   "fips": "51191",
+   "key": "WASHINGTONCOUNTY",
+   "name": "Washington County",
+   "spellings": [
+    "WASHINGTON COUNTY",
+    "Washington County"
+   ]
+  },
+  {
+   "fips": "51193",
+   "key": "WESTMORELANDCOUNTY",
+   "name": "Westmoreland County",
+   "spellings": [
+    "WESTMORELAND COUNTY",
+    "Westmoreland County"
+   ]
+  },
+  {
+   "fips": "51195",
+   "key": "WISECOUNTY",
+   "name": "Wise County",
+   "spellings": [
+    "WISE COUNTY",
+    "Wise County"
+   ]
+  },
+  {
+   "fips": "51197",
+   "key": "WYTHECOUNTY",
+   "name": "Wythe County",
+   "spellings": [
+    "WYTHE COUNTY",
+    "Wythe County"
+   ]
+  },
+  {
+   "fips": "51199",
+   "key": "YORKCOUNTY",
+   "name": "York County",
+   "spellings": [
+    "YORK COUNTY",
+    "York County"
+   ]
+  },
+  {
+   "fips": "51510",
+   "key": "ALEXANDRIACITY",
+   "name": "Alexandria city",
+   "spellings": [
+    "ALEXANDRIA CITY",
+    "Alexandria city"
+   ]
+  },
+  {
+   "fips": "51520",
+   "key": "BRISTOLCITY",
+   "name": "Bristol city",
+   "spellings": [
+    "BRISTOL CITY",
+    "Bristol city"
+   ]
+  },
+  {
+   "fips": "51530",
+   "key": "BUENAVISTACITY",
+   "name": "Buena Vista city",
+   "spellings": [
+    "BUENA VISTA CITY",
+    "Buena Vista city"
+   ]
+  },
+  {
+   "fips": "51540",
+   "key": "CHARLOTTESVILLECITY",
+   "name": "Charlottesville city",
+   "spellings": [
+    "CHARLOTTESVILLE CITY",
+    "Charlottesville city"
+   ]
+  },
+  {
+   "fips": "51550",
+   "key": "CHESAPEAKECITY",
+   "name": "Chesapeake city",
+   "spellings": [
+    "CHESAPEAKE CITY",
+    "Chesapeake city"
+   ]
+  },
+  {
+   "fips": "51570",
+   "key": "COLONIALHEIGHTSCITY",
+   "name": "Colonial Heights city",
+   "spellings": [
+    "COLONIAL HEIGHTS CITY",
+    "Colonial Heights city"
+   ]
+  },
+  {
+   "fips": "51580",
+   "key": "COVINGTONCITY",
+   "name": "Covington city",
+   "spellings": [
+    "COVINGTON CITY",
+    "Covington city"
+   ]
+  },
+  {
+   "fips": "51590",
+   "key": "DANVILLECITY",
+   "name": "Danville city",
+   "spellings": [
+    "DANVILLE CITY",
+    "Danville city"
+   ]
+  },
+  {
+   "fips": "51595",
+   "key": "EMPORIACITY",
+   "name": "Emporia city",
+   "spellings": [
+    "EMPORIA CITY",
+    "Emporia city"
+   ]
+  },
+  {
+   "fips": "51600",
+   "key": "FAIRFAXCITY",
+   "name": "Fairfax city",
+   "spellings": [
+    "FAIRFAX CITY",
+    "Fairfax city"
+   ]
+  },
+  {
+   "fips": "51610",
+   "key": "FALLSCHURCHCITY",
+   "name": "Falls Church city",
+   "spellings": [
+    "FALLS CHURCH CITY",
+    "Falls Church city"
+   ]
+  },
+  {
+   "fips": "51620",
+   "key": "FRANKLINCITY",
+   "name": "Franklin city",
+   "spellings": [
+    "FRANKLIN CITY",
+    "Franklin city"
+   ]
+  },
+  {
+   "fips": "51630",
+   "key": "FREDERICKSBURGCITY",
+   "name": "Fredericksburg city",
+   "spellings": [
+    "FREDERICKSBURG CITY",
+    "Fredericksburg city"
+   ]
+  },
+  {
+   "fips": "51640",
+   "key": "GALAXCITY",
+   "name": "Galax city",
+   "spellings": [
+    "GALAX CITY",
+    "Galax city"
+   ]
+  },
+  {
+   "fips": "51650",
+   "key": "HAMPTONCITY",
+   "name": "Hampton city",
+   "spellings": [
+    "HAMPTON CITY",
+    "Hampton city"
+   ]
+  },
+  {
+   "fips": "51660",
+   "key": "HARRISONBURGCITY",
+   "name": "Harrisonburg city",
+   "spellings": [
+    "HARRISONBURG CITY",
+    "Harrisonburg city"
+   ]
+  },
+  {
+   "fips": "51670",
+   "key": "HOPEWELLCITY",
+   "name": "Hopewell city",
+   "spellings": [
+    "HOPEWELL CITY",
+    "Hopewell city"
+   ]
+  },
+  {
+   "fips": "51678",
+   "key": "LEXINGTONCITY",
+   "name": "Lexington city",
+   "spellings": [
+    "LEXINGTON CITY",
+    "Lexington city"
+   ]
+  },
+  {
+   "fips": "51680",
+   "key": "LYNCHBURGCITY",
+   "name": "Lynchburg city",
+   "spellings": [
+    "LYNCHBURG CITY",
+    "Lynchburg city"
+   ]
+  },
+  {
+   "fips": "51683",
+   "key": "MANASSASCITY",
+   "name": "Manassas city",
+   "spellings": [
+    "MANASSAS CITY",
+    "Manassas city"
+   ]
+  },
+  {
+   "fips": "51685",
+   "key": "MANASSASPARKCITY",
+   "name": "Manassas Park city",
+   "spellings": [
+    "MANASSAS PARK CITY",
+    "Manassas Park city"
+   ]
+  },
+  {
+   "fips": "51690",
+   "key": "MARTINSVILLECITY",
+   "name": "Martinsville city",
+   "spellings": [
+    "MARTINSVILLE CITY",
+    "Martinsville city"
+   ]
+  },
+  {
+   "fips": "51700",
+   "key": "NEWPORTNEWSCITY",
+   "name": "Newport News city",
+   "spellings": [
+    "NEWPORT NEWS CITY",
+    "Newport News city"
+   ]
+  },
+  {
+   "fips": "51710",
+   "key": "NORFOLKCITY",
+   "name": "Norfolk city",
+   "spellings": [
+    "NORFOLK CITY",
+    "Norfolk city"
+   ]
+  },
+  {
+   "fips": "51720",
+   "key": "NORTONCITY",
+   "name": "Norton city",
+   "spellings": [
+    "NORTON CITY",
+    "Norton city"
+   ]
+  },
+  {
+   "fips": "51730",
+   "key": "PETERSBURGCITY",
+   "name": "Petersburg city",
+   "spellings": [
+    "PETERSBURG CITY",
+    "Petersburg city"
+   ]
+  },
+  {
+   "fips": "51735",
+   "key": "POQUOSONCITY",
+   "name": "Poquoson city",
+   "spellings": [
+    "POQUOSON CITY",
+    "Poquoson city"
+   ]
+  },
+  {
+   "fips": "51740",
+   "key": "PORTSMOUTHCITY",
+   "name": "Portsmouth city",
+   "spellings": [
+    "PORTSMOUTH CITY",
+    "Portsmouth city"
+   ]
+  },
+  {
+   "fips": "51750",
+   "key": "RADFORDCITY",
+   "name": "Radford city",
+   "spellings": [
+    "RADFORD CITY",
+    "Radford city"
+   ]
+  },
+  {
+   "fips": "51760",
+   "key": "RICHMONDCITY",
+   "name": "Richmond city",
+   "spellings": [
+    "RICHMOND CITY",
+    "Richmond city"
+   ]
+  },
+  {
+   "fips": "51770",
+   "key": "ROANOKECITY",
+   "name": "Roanoke city",
+   "spellings": [
+    "ROANOKE CITY",
+    "Roanoke city"
+   ]
+  },
+  {
+   "fips": "51775",
+   "key": "SALEMCITY",
+   "name": "Salem city",
+   "spellings": [
+    "SALEM CITY",
+    "Salem city"
+   ]
+  },
+  {
+   "fips": "51790",
+   "key": "STAUNTONCITY",
+   "name": "Staunton city",
+   "spellings": [
+    "STAUNTON CITY",
+    "Staunton city"
+   ]
+  },
+  {
+   "fips": "51800",
+   "key": "SUFFOLKCITY",
+   "name": "Suffolk city",
+   "spellings": [
+    "SUFFOLK CITY",
+    "Suffolk city"
+   ]
+  },
+  {
+   "fips": "51810",
+   "key": "VIRGINIABEACHCITY",
+   "name": "Virginia Beach city",
+   "spellings": [
+    "VIRGINIA BEACH CITY",
+    "Virginia Beach city"
+   ]
+  },
+  {
+   "fips": "51820",
+   "key": "WAYNESBOROCITY",
+   "name": "Waynesboro city",
+   "spellings": [
+    "WAYNESBORO CITY",
+    "Waynesboro city"
+   ]
+  },
+  {
+   "fips": "51830",
+   "key": "WILLIAMSBURGCITY",
+   "name": "Williamsburg city",
+   "spellings": [
+    "WILLIAMSBURG CITY",
+    "Williamsburg city"
+   ]
+  },
+  {
+   "fips": "51840",
+   "key": "WINCHESTERCITY",
+   "name": "Winchester city",
+   "spellings": [
+    "WINCHESTER CITY",
+    "Winchester city"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/va-map.json, built from map-sources/); spellings from rosters/VA.json",
+ "state": "VA",
+ "unit": "county"
+}

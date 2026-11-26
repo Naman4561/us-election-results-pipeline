@@ -42,6 +42,13 @@ def county_key(name):
     return re.sub(r"[^A-Z0-9]", "", name.upper())
 
 
+def place_key(row, ids):
+    """The map key of the place a published row names. A row with a FIPS is joined through it;
+    one from a publication made before FIPS was stored is joined by its name, as before."""
+    fips = row.get("county_fips") or ""
+    return ids.get(fips) if fips else county_key(row["county"])
+
+
 def party_group(party, choice):
     value = (party or "").strip().upper()
     for group, spellings in elections.parties()["groups"].items():
@@ -199,13 +206,14 @@ def make_payload(
     if not races_config or not races_config.keys() <= adapter.races.keys():
         raise ValueError("Dashboard coverage is outside the supported state contests")
     names = {f["id"]: f["name"] for f in geography["counties"]}
+    ids = {f["fips"]: f["id"] for f in geography["counties"]}
     by_race, by_county, totals = (
         defaultdict(list),
         defaultdict(lambda: defaultdict(list)),
         defaultdict(list),
     )
     for row in county_rows:
-        key = county_key(row["county"])
+        key = place_key(row, ids)
         if key not in names or row["contest_id"] not in races_config:
             raise ValueError("Published results do not match the supported geography")
         for field in methods:

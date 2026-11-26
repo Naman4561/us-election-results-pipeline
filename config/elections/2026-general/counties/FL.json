@@ -1,0 +1,610 @@
+{
+ "counties": [
+  {
+   "fips": "12001",
+   "key": "ALACHUA",
+   "name": "Alachua",
+   "spellings": [
+    "ALACHUA",
+    "Alachua"
+   ]
+  },
+  {
+   "fips": "12003",
+   "key": "BAKER",
+   "name": "Baker",
+   "spellings": [
+    "BAKER",
+    "Baker"
+   ]
+  },
+  {
+   "fips": "12005",
+   "key": "BAY",
+   "name": "Bay",
+   "spellings": [
+    "BAY",
+    "Bay"
+   ]
+  },
+  {
+   "fips": "12007",
+   "key": "BRADFORD",
+   "name": "Bradford",
+   "spellings": [
+    "BRADFORD",
+    "Bradford"
+   ]
+  },
+  {
+   "fips": "12009",
+   "key": "BREVARD",
+   "name": "Brevard",
+   "spellings": [
+    "BREVARD",
+    "Brevard"
+   ]
+  },
+  {
+   "fips": "12011",
+   "key": "BROWARD",
+   "name": "Broward",
+   "spellings": [
+    "BROWARD",
+    "Broward"
+   ]
+  },
+  {
+   "fips": "12013",
+   "key": "CALHOUN",
+   "name": "Calhoun",
+   "spellings": [
+    "CALHOUN",
+    "Calhoun"
+   ]
+  },
+  {
+   "fips": "12015",
+   "key": "CHARLOTTE",
+   "name": "Charlotte",
+   "spellings": [
+    "CHARLOTTE",
+    "Charlotte"
+   ]
+  },
+  {
+   "fips": "12017",
+   "key": "CITRUS",
+   "name": "Citrus",
+   "spellings": [
+    "CITRUS",
+    "Citrus"
+   ]
+  },
+  {
+   "fips": "12019",
+   "key": "CLAY",
+   "name": "Clay",
+   "spellings": [
+    "CLAY",
+    "Clay"
+   ]
+  },
+  {
+   "fips": "12021",
+   "key": "COLLIER",
+   "name": "Collier",
+   "spellings": [
+    "COLLIER",
+    "Collier"
+   ]
+  },
+  {
+   "fips": "12023",
+   "key": "COLUMBIA",
+   "name": "Columbia",
+   "spellings": [
+    "COLUMBIA",
+    "Columbia"
+   ]
+  },
+  {
+   "fips": "12027",
+   "key": "DESOTO",
+   "name": "DeSoto",
+   "spellings": [
+    "DESOTO",
+    "DeSoto"
+   ]
+  },
+  {
+   "fips": "12029",
+   "key": "DIXIE",
+   "name": "Dixie",
+   "spellings": [
+    "DIXIE",
+    "Dixie"
+   ]
+  },
+  {
+   "fips": "12031",
+   "key": "DUVAL",
+   "name": "Duval",
+   "spellings": [
+    "DUVAL",
+    "Duval"
+   ]
+  },
+  {
+   "fips": "12033",
+   "key": "ESCAMBIA",
+   "name": "Escambia",
+   "spellings": [
+    "ESCAMBIA",
+    "Escambia"
+   ]
+  },
+  {
+   "fips": "12035",
+   "key": "FLAGLER",
+   "name": "Flagler",
+   "spellings": [
+    "FLAGLER",
+    "Flagler"
+   ]
+  },
+  {
+   "fips": "12037",
+   "key": "FRANKLIN",
+   "name": "Franklin",
+   "spellings": [
+    "FRANKLIN",
+    "Franklin"
+   ]
+  },
+  {
+   "fips": "12039",
+   "key": "GADSDEN",
+   "name": "Gadsden",
+   "spellings": [
+    "GADSDEN",
+    "Gadsden"
+   ]
+  },
+  {
+   "fips": "12041",
+   "key": "GILCHRIST",
+   "name": "Gilchrist",
+   "spellings": [
+    "GILCHRIST",
+    "Gilchrist"
+   ]
+  },
+  {
+   "fips": "12043",
+   "key": "GLADES",
+   "name": "Glades",
+   "spellings": [
+    "GLADES",
+    "Glades"
+   ]
+  },
+  {
+   "fips": "12045",
+   "key": "GULF",
+   "name": "Gulf",
+   "spellings": [
+    "GULF",
+    "Gulf"
+   ]
+  },
+  {
+   "fips": "12047",
+   "key": "HAMILTON",
+   "name": "Hamilton",
+   "spellings": [
+    "HAMILTON",
+    "Hamilton"
+   ]
+  },
+  {
+   "fips": "12049",
+   "key": "HARDEE",
+   "name": "Hardee",
+   "spellings": [
+    "HARDEE",
+    "Hardee"
+   ]
+  },
+  {
+   "fips": "12051",
+   "key": "HENDRY",
+   "name": "Hendry",
+   "spellings": [
+    "HENDRY",
+    "Hendry"
+   ]
+  },
+  {
+   "fips": "12053",
+   "key": "HERNANDO",
+   "name": "Hernando",
+   "spellings": [
+    "HERNANDO",
+    "Hernando"
+   ]
+  },
+  {
+   "fips": "12055",
+   "key": "HIGHLANDS",
+   "name": "Highlands",
+   "spellings": [
+    "HIGHLANDS",
+    "Highlands"
+   ]
+  },
+  {
+   "fips": "12057",
+   "key": "HILLSBOROUGH",
+   "name": "Hillsborough",
+   "spellings": [
+    "HILLSBOROUGH",
+    "Hillsborough"
+   ]
+  },
+  {
+   "fips": "12059",
+   "key": "HOLMES",
+   "name": "Holmes",
+   "spellings": [
+    "HOLMES",
+    "Holmes"
+   ]
+  },
+  {
+   "fips": "12061",
+   "key": "INDIANRIVER",
+   "name": "Indian River",
+   "spellings": [
+    "INDIAN RIVER",
+    "Indian River"
+   ]
+  },
+  {
+   "fips": "12063",
+   "key": "JACKSON",
+   "name": "Jackson",
+   "spellings": [
+    "JACKSON",
+    "Jackson"
+   ]
+  },
+  {
+   "fips": "12065",
+   "key": "JEFFERSON",
+   "name": "Jefferson",
+   "spellings": [
+    "JEFFERSON",
+    "Jefferson"
+   ]
+  },
+  {
+   "fips": "12067",
+   "key": "LAFAYETTE",
+   "name": "Lafayette",
+   "spellings": [
+    "LAFAYETTE",
+    "Lafayette"
+   ]
+  },
+  {
+   "fips": "12069",
+   "key": "LAKE",
+   "name": "Lake",
+   "spellings": [
+    "LAKE",
+    "Lake"
+   ]
+  },
+  {
+   "fips": "12071",
+   "key": "LEE",
+   "name": "Lee",
+   "spellings": [
+    "LEE",
+    "Lee"
+   ]
+  },
+  {
+   "fips": "12073",
+   "key": "LEON",
+   "name": "Leon",
+   "spellings": [
+    "LEON",
+    "Leon"
+   ]
+  },
+  {
+   "fips": "12075",
+   "key": "LEVY",
+   "name": "Levy",
+   "spellings": [
+    "LEVY",
+    "Levy"
+   ]
+  },
+  {
+   "fips": "12077",
+   "key": "LIBERTY",
+   "name": "Liberty",
+   "spellings": [
+    "LIBERTY",
+    "Liberty"
+   ]
+  },
+  {
+   "fips": "12079",
+   "key": "MADISON",
+   "name": "Madison",
+   "spellings": [
+    "MADISON",
+    "Madison"
+   ]
+  },
+  {
+   "fips": "12081",
+   "key": "MANATEE",
+   "name": "Manatee",
+   "spellings": [
+    "MANATEE",
+    "Manatee"
+   ]
+  },
+  {
+   "fips": "12083",
+   "key": "MARION",
+   "name": "Marion",
+   "spellings": [
+    "MARION",
+    "Marion"
+   ]
+  },
+  {
+   "fips": "12085",
+   "key": "MARTIN",
+   "name": "Martin",
+   "spellings": [
+    "MARTIN",
+    "Martin"
+   ]
+  },
+  {
+   "fips": "12086",
+   "key": "MIAMIDADE",
+   "name": "Miami-Dade",
+   "spellings": [
+    "MIAMI-DADE",
+    "Miami-Dade"
+   ]
+  },
+  {
+   "fips": "12087",
+   "key": "MONROE",
+   "name": "Monroe",
+   "spellings": [
+    "MONROE",
+    "Monroe"
+   ]
+  },
+  {
+   "fips": "12089",
+   "key": "NASSAU",
+   "name": "Nassau",
+   "spellings": [
+    "NASSAU",
+    "Nassau"
+   ]
+  },
+  {
+   "fips": "12091",
+   "key": "OKALOOSA",
+   "name": "Okaloosa",
+   "spellings": [
+    "OKALOOSA",
+    "Okaloosa"
+   ]
+  },
+  {
+   "fips": "12093",
+   "key": "OKEECHOBEE",
+   "name": "Okeechobee",
+   "spellings": [
+    "OKEECHOBEE",
+    "Okeechobee"
+   ]
+  },
+  {
+   "fips": "12095",
+   "key": "ORANGE",
+   "name": "Orange",
+   "spellings": [
+    "ORANGE",
+    "Orange"
+   ]
+  },
+  {
+   "fips": "12097",
+   "key": "OSCEOLA",
+   "name": "Osceola",
+   "spellings": [
+    "OSCEOLA",
+    "Osceola"
+   ]
+  },
+  {
+   "fips": "12099",
+   "key": "PALMBEACH",
+   "name": "Palm Beach",
+   "spellings": [
+    "PALM BEACH",
+    "Palm Beach"
+   ]
+  },
+  {
+   "fips": "12101",
+   "key": "PASCO",
+   "name": "Pasco",
+   "spellings": [
+    "PASCO",
+    "Pasco"
+   ]
+  },
+  {
+   "fips": "12103",
+   "key": "PINELLAS",
+   "name": "Pinellas",
+   "spellings": [
+    "PINELLAS",
+    "Pinellas"
+   ]
+  },
+  {
+   "fips": "12105",
+   "key": "POLK",
+   "name": "Polk",
+   "spellings": [
+    "POLK",
+    "Polk"
+   ]
+  },
+  {
+   "fips": "12107",
+   "key": "PUTNAM",
+   "name": "Putnam",
+   "spellings": [
+    "PUTNAM",
+    "Putnam"
+   ]
+  },
+  {
+   "fips": "12109",
+   "key": "STJOHNS",
+   "name": "St. Johns",
+   "spellings": [
+    "ST. JOHNS",
+    "St. Johns"
+   ]
+  },
+  {
+   "fips": "12111",
+   "key": "STLUCIE",
+   "name": "St. Lucie",
+   "spellings": [
+    "ST. LUCIE",
+    "St. Lucie"
+   ]
+  },
+  {
+   "fips": "12113",
+   "key": "SANTAROSA",
+   "name": "Santa Rosa",
+   "spellings": [
+    "SANTA ROSA",
+    "Santa Rosa"
+   ]
+  },
+  {
+   "fips": "12115",
+   "key": "SARASOTA",
+   "name": "Sarasota",
+   "spellings": [
+    "SARASOTA",
+    "Sarasota"
+   ]
+  },
+  {
+   "fips": "12117",
+   "key": "SEMINOLE",
+   "name": "Seminole",
+   "spellings": [
+    "SEMINOLE",
+    "Seminole"
+   ]
+  },
+  {
+   "fips": "12119",
+   "key": "SUMTER",
+   "name": "Sumter",
+   "spellings": [
+    "SUMTER",
+    "Sumter"
+   ]
+  },
+  {
+   "fips": "12121",
+   "key": "SUWANNEE",
+   "name": "Suwannee",
+   "spellings": [
+    "SUWANNEE",
+    "Suwannee"
+   ]
+  },
+  {
+   "fips": "12123",
+   "key": "TAYLOR",
+   "name": "Taylor",
+   "spellings": [
+    "TAYLOR",
+    "Taylor"
+   ]
+  },
+  {
+   "fips": "12125",
+   "key": "UNION",
+   "name": "Union",
+   "spellings": [
+    "UNION",
+    "Union"
+   ]
+  },
+  {
+   "fips": "12127",
+   "key": "VOLUSIA",
+   "name": "Volusia",
+   "spellings": [
+    "VOLUSIA",
+    "Volusia"
+   ]
+  },
+  {
+   "fips": "12129",
+   "key": "WAKULLA",
+   "name": "Wakulla",
+   "spellings": [
+    "WAKULLA",
+    "Wakulla"
+   ]
+  },
+  {
+   "fips": "12131",
+   "key": "WALTON",
+   "name": "Walton",
+   "spellings": [
+    "WALTON",
+    "Walton"
+   ]
+  },
+  {
+   "fips": "12133",
+   "key": "WASHINGTON",
+   "name": "Washington",
+   "spellings": [
+    "WASHINGTON",
+    "Washington"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/fl-map.json, built from map-sources/); spellings from rosters/FL.json",
+ "state": "FL",
+ "unit": "county"
+}

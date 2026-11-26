@@ -1,0 +1,519 @@
+{
+ "counties": [
+  {
+   "fips": "08001",
+   "key": "ADAMS",
+   "name": "Adams",
+   "spellings": [
+    "Adams"
+   ]
+  },
+  {
+   "fips": "08003",
+   "key": "ALAMOSA",
+   "name": "Alamosa",
+   "spellings": [
+    "Alamosa"
+   ]
+  },
+  {
+   "fips": "08005",
+   "key": "ARAPAHOE",
+   "name": "Arapahoe",
+   "spellings": [
+    "Arapahoe"
+   ]
+  },
+  {
+   "fips": "08007",
+   "key": "ARCHULETA",
+   "name": "Archuleta",
+   "spellings": [
+    "Archuleta"
+   ]
+  },
+  {
+   "fips": "08009",
+   "key": "BACA",
+   "name": "Baca",
+   "spellings": [
+    "Baca"
+   ]
+  },
+  {
+   "fips": "08011",
+   "key": "BENT",
+   "name": "Bent",
+   "spellings": [
+    "Bent"
+   ]
+  },
+  {
+   "fips": "08013",
+   "key": "BOULDER",
+   "name": "Boulder",
+   "spellings": [
+    "Boulder"
+   ]
+  },
+  {
+   "fips": "08014",
+   "key": "BROOMFIELD",
+   "name": "Broomfield",
+   "spellings": [
+    "Broomfield"
+   ]
+  },
+  {
+   "fips": "08015",
+   "key": "CHAFFEE",
+   "name": "Chaffee",
+   "spellings": [
+    "Chaffee"
+   ]
+  },
+  {
+   "fips": "08017",
+   "key": "CHEYENNE",
+   "name": "Cheyenne",
+   "spellings": [
+    "Cheyenne"
+   ]
+  },
+  {
+   "fips": "08019",
+   "key": "CLEARCREEK",
+   "name": "Clear Creek",
+   "spellings": [
+    "Clear Creek"
+   ]
+  },
+  {
+   "fips": "08021",
+   "key": "CONEJOS",
+   "name": "Conejos",
+   "spellings": [
+    "Conejos"
+   ]
+  },
+  {
+   "fips": "08023",
+   "key": "COSTILLA",
+   "name": "Costilla",
+   "spellings": [
+    "Costilla"
+   ]
+  },
+  {
+   "fips": "08025",
+   "key": "CROWLEY",
+   "name": "Crowley",
+   "spellings": [
+    "Crowley"
+   ]
+  },
+  {
+   "fips": "08027",
+   "key": "CUSTER",
+   "name": "Custer",
+   "spellings": [
+    "Custer"
+   ]
+  },
+  {
+   "fips": "08029",
+   "key": "DELTA",
+   "name": "Delta",
+   "spellings": [
+    "Delta"
+   ]
+  },
+  {
+   "fips": "08031",
+   "key": "DENVER",
+   "name": "Denver",
+   "spellings": [
+    "Denver"
+   ]
+  },
+  {
+   "fips": "08033",
+   "key": "DOLORES",
+   "name": "Dolores",
+   "spellings": [
+    "Dolores"
+   ]
+  },
+  {
+   "fips": "08035",
+   "key": "DOUGLAS",
+   "name": "Douglas",
+   "spellings": [
+    "Douglas"
+   ]
+  },
+  {
+   "fips": "08037",
+   "key": "EAGLE",
+   "name": "Eagle",
+   "spellings": [
+    "Eagle"
+   ]
+  },
+  {
+   "fips": "08039",
+   "key": "ELBERT",
+   "name": "Elbert",
+   "spellings": [
+    "Elbert"
+   ]
+  },
+  {
+   "fips": "08041",
+   "key": "ELPASO",
+   "name": "El Paso",
+   "spellings": [
+    "El Paso"
+   ]
+  },
+  {
+   "fips": "08043",
+   "key": "FREMONT",
+   "name": "Fremont",
+   "spellings": [
+    "Fremont"
+   ]
+  },
+  {
+   "fips": "08045",
+   "key": "GARFIELD",
+   "name": "Garfield",
+   "spellings": [
+    "Garfield"
+   ]
+  },
+  {
+   "fips": "08047",
+   "key": "GILPIN",
+   "name": "Gilpin",
+   "spellings": [
+    "Gilpin"
+   ]
+  },
+  {
+   "fips": "08049",
+   "key": "GRAND",
+   "name": "Grand",
+   "spellings": [
+    "Grand"
+   ]
+  },
+  {
+   "fips": "08051",
+   "key": "GUNNISON",
+   "name": "Gunnison",
+   "spellings": [
+    "Gunnison"
+   ]
+  },
+  {
+   "fips": "08053",
+   "key": "HINSDALE",
+   "name": "Hinsdale",
+   "spellings": [
+    "Hinsdale"
+   ]
+  },
+  {
+   "fips": "08055",
+   "key": "HUERFANO",
+   "name": "Huerfano",
+   "spellings": [
+    "Huerfano"
+   ]
+  },
+  {
+   "fips": "08057",
+   "key": "JACKSON",
+   "name": "Jackson",
+   "spellings": [
+    "Jackson"
+   ]
+  },
+  {
+   "fips": "08059",
+   "key": "JEFFERSON",
+   "name": "Jefferson",
+   "spellings": [
+    "Jefferson"
+   ]
+  },
+  {
+   "fips": "08061",
+   "key": "KIOWA",
+   "name": "Kiowa",
+   "spellings": [
+    "Kiowa"
+   ]
+  },
+  {
+   "fips": "08063",
+   "key": "KITCARSON",
+   "name": "Kit Carson",
+   "spellings": [
+    "Kit Carson"
+   ]
+  },
+  {
+   "fips": "08065",
+   "key": "LAKE",
+   "name": "Lake",
+   "spellings": [
+    "Lake"
+   ]
+  },
+  {
+   "fips": "08067",
+   "key": "LAPLATA",
+   "name": "La Plata",
+   "spellings": [
+    "La Plata"
+   ]
+  },
+  {
+   "fips": "08069",
+   "key": "LARIMER",
+   "name": "Larimer",
+   "spellings": [
+    "Larimer"
+   ]
+  },
+  {
+   "fips": "08071",
+   "key": "LASANIMAS",
+   "name": "Las Animas",
+   "spellings": [
+    "Las Animas"
+   ]
+  },
+  {
+   "fips": "08073",
+   "key": "LINCOLN",
+   "name": "Lincoln",
+   "spellings": [
+    "Lincoln"
+   ]
+  },
+  {
+   "fips": "08075",
+   "key": "LOGAN",
+   "name": "Logan",
+   "spellings": [
+    "Logan"
+   ]
+  },
+  {
+   "fips": "08077",
+   "key": "MESA",
+   "name": "Mesa",
+   "spellings": [
+    "Mesa"
+   ]
+  },
+  {
+   "fips": "08079",
+   "key": "MINERAL",
+   "name": "Mineral",
+   "spellings": [
+    "Mineral"
+   ]
+  },
+  {
+   "fips": "08081",
+   "key": "MOFFAT",
+   "name": "Moffat",
+   "spellings": [
+    "Moffat"
+   ]
+  },
+  {
+   "fips": "08083",
+   "key": "MONTEZUMA",
+   "name": "Montezuma",
+   "spellings": [
+    "Montezuma"
+   ]
+  },
+  {
+   "fips": "08085",
+   "key": "MONTROSE",
+   "name": "Montrose",
+   "spellings": [
+    "Montrose"
+   ]
+  },
+  {
+   "fips": "08087",
+   "key": "MORGAN",
+   "name": "Morgan",
+   "spellings": [
+    "Morgan"
+   ]
+  },
+  {
+   "fips": "08089",
+   "key": "OTERO",
+   "name": "Otero",
+   "spellings": [
+    "Otero"
+   ]
+  },
+  {
+   "fips": "08091",
+   "key": "OURAY",
+   "name": "Ouray",
+   "spellings": [
+    "Ouray"
+   ]
+  },
+  {
+   "fips": "08093",
+   "key": "PARK",
+   "name": "Park",
+   "spellings": [
+    "Park"
+   ]
+  },
+  {
+   "fips": "08095",
+   "key": "PHILLIPS",
+   "name": "Phillips",
+   "spellings": [
+    "Phillips"
+   ]
+  },
+  {
+   "fips": "08097",
+   "key": "PITKIN",
+   "name": "Pitkin",
+   "spellings": [
+    "Pitkin"
+   ]
+  },
+  {
+   "fips": "08099",
+   "key": "PROWERS",
+   "name": "Prowers",
+   "spellings": [
+    "Prowers"
+   ]
+  },
+  {
+   "fips": "08101",
+   "key": "PUEBLO",
+   "name": "Pueblo",
+   "spellings": [
+    "Pueblo"
+   ]
+  },
+  {
+   "fips": "08103",
+   "key": "RIOBLANCO",
+   "name": "Rio Blanco",
+   "spellings": [
+    "Rio Blanco"
+   ]
+  },
+  {
+   "fips": "08105",
+   "key": "RIOGRANDE",
+   "name": "Rio Grande",
+   "spellings": [
+    "Rio Grande"
+   ]
+  },
+  {
+   "fips": "08107",
+   "key": "ROUTT",
+   "name": "Routt",
+   "spellings": [
+    "Routt"
+   ]
+  },
+  {
+   "fips": "08109",
+   "key": "SAGUACHE",
+   "name": "Saguache",
+   "spellings": [
+    "Saguache"
+   ]
+  },
+  {
+   "fips": "08111",
+   "key": "SANJUAN",
+   "name": "San Juan",
+   "spellings": [
+    "San Juan"
+   ]
+  },
+  {
+   "fips": "08113",
+   "key": "SANMIGUEL",
+   "name": "San Miguel",
+   "spellings": [
+    "San Miguel"
+   ]
+  },
+  {
+   "fips": "08115",
+   "key": "SEDGWICK",
+   "name": "Sedgwick",
+   "spellings": [
+    "Sedgwick"
+   ]
+  },
+  {
+   "fips": "08117",
+   "key": "SUMMIT",
+   "name": "Summit",
+   "spellings": [
+    "Summit"
+   ]
+  },
+  {
+   "fips": "08119",
+   "key": "TELLER",
+   "name": "Teller",
+   "spellings": [
+    "Teller"
+   ]
+  },
+  {
+   "fips": "08121",
+   "key": "WASHINGTON",
+   "name": "Washington",
+   "spellings": [
+    "Washington"
+   ]
+  },
+  {
+   "fips": "08123",
+   "key": "WELD",
+   "name": "Weld",
+   "spellings": [
+    "Weld"
+   ]
+  },
+  {
+   "fips": "08125",
+   "key": "YUMA",
+   "name": "Yuma",
+   "spellings": [
+    "Yuma"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/co-map.json, built from map-sources/); spellings from rosters/CO.json",
+ "state": "CO",
+ "unit": "county"
+}

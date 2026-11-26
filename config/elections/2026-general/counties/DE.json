@@ -1,0 +1,31 @@
+{
+ "counties": [
+  {
+   "fips": "10001",
+   "key": "KENT",
+   "name": "Kent",
+   "spellings": [
+    "Kent"
+   ]
+  },
+  {
+   "fips": "10003",
+   "key": "NEWCASTLE",
+   "name": "New Castle",
+   "spellings": [
+    "New Castle"
+   ]
+  },
+  {
+   "fips": "10005",
+   "key": "SUSSEX",
+   "name": "Sussex",
+   "spellings": [
+    "Sussex"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/de-map.json, built from map-sources/); spellings from rosters/DE.json",
+ "state": "DE",
+ "unit": "county"
+}

@@ -1,0 +1,521 @@
+{
+ "counties": [
+  {
+   "fips": "22001",
+   "key": "ACADIA",
+   "name": "Acadia",
+   "spellings": [
+    "Acadia"
+   ]
+  },
+  {
+   "fips": "22003",
+   "key": "ALLEN",
+   "name": "Allen",
+   "spellings": [
+    "Allen"
+   ]
+  },
+  {
+   "fips": "22005",
+   "key": "ASCENSION",
+   "name": "Ascension",
+   "spellings": [
+    "Ascension"
+   ]
+  },
+  {
+   "fips": "22007",
+   "key": "ASSUMPTION",
+   "name": "Assumption",
+   "spellings": [
+    "Assumption"
+   ]
+  },
+  {
+   "fips": "22009",
+   "key": "AVOYELLES",
+   "name": "Avoyelles",
+   "spellings": [
+    "Avoyelles"
+   ]
+  },
+  {
+   "fips": "22011",
+   "key": "BEAUREGARD",
+   "name": "Beauregard",
+   "spellings": [
+    "Beauregard"
+   ]
+  },
+  {
+   "fips": "22013",
+   "key": "BIENVILLE",
+   "name": "Bienville",
+   "spellings": [
+    "Bienville"
+   ]
+  },
+  {
+   "fips": "22015",
+   "key": "BOSSIER",
+   "name": "Bossier",
+   "spellings": [
+    "Bossier"
+   ]
+  },
+  {
+   "fips": "22017",
+   "key": "CADDO",
+   "name": "Caddo",
+   "spellings": [
+    "Caddo"
+   ]
+  },
+  {
+   "fips": "22019",
+   "key": "CALCASIEU",
+   "name": "Calcasieu",
+   "spellings": [
+    "Calcasieu"
+   ]
+  },
+  {
+   "fips": "22021",
+   "key": "CALDWELL",
+   "name": "Caldwell",
+   "spellings": [
+    "Caldwell"
+   ]
+  },
+  {
+   "fips": "22023",
+   "key": "CAMERON",
+   "name": "Cameron",
+   "spellings": [
+    "Cameron"
+   ]
+  },
+  {
+   "fips": "22025",
+   "key": "CATAHOULA",
+   "name": "Catahoula",
+   "spellings": [
+    "Catahoula"
+   ]
+  },
+  {
+   "fips": "22027",
+   "key": "CLAIBORNE",
+   "name": "Claiborne",
+   "spellings": [
+    "Claiborne"
+   ]
+  },
+  {
+   "fips": "22029",
+   "key": "CONCORDIA",
+   "name": "Concordia",
+   "spellings": [
+    "Concordia"
+   ]
+  },
+  {
+   "fips": "22031",
+   "key": "DESOTO",
+   "name": "De Soto",
+   "spellings": [
+    "De Soto"
+   ]
+  },
+  {
+   "fips": "22033",
+   "key": "EASTBATONROUGE",
+   "name": "East Baton Rouge",
+   "spellings": [
+    "East Baton Rouge"
+   ]
+  },
+  {
+   "fips": "22035",
+   "key": "EASTCARROLL",
+   "name": "East Carroll",
+   "spellings": [
+    "East Carroll"
+   ]
+  },
+  {
+   "fips": "22037",
+   "key": "EASTFELICIANA",
+   "name": "East Feliciana",
+   "spellings": [
+    "East Feliciana"
+   ]
+  },
+  {
+   "fips": "22039",
+   "key": "EVANGELINE",
+   "name": "Evangeline",
+   "spellings": [
+    "Evangeline"
+   ]
+  },
+  {
+   "fips": "22041",
+   "key": "FRANKLIN",
+   "name": "Franklin",
+   "spellings": [
+    "Franklin"
+   ]
+  },
+  {
+   "fips": "22043",
+   "key": "GRANT",
+   "name": "Grant",
+   "spellings": [
+    "Grant"
+   ]
+  },
+  {
+   "fips": "22045",
+   "key": "IBERIA",
+   "name": "Iberia",
+   "spellings": [
+    "Iberia"
+   ]
+  },
+  {
+   "fips": "22047",
+   "key": "IBERVILLE",
+   "name": "Iberville",
+   "spellings": [
+    "Iberville"
+   ]
+  },
+  {
+   "fips": "22049",
+   "key": "JACKSON",
+   "name": "Jackson",
+   "spellings": [
+    "Jackson"
+   ]
+  },
+  {
+   "fips": "22051",
+   "key": "JEFFERSON",
+   "name": "Jefferson",
+   "spellings": [
+    "Jefferson"
+   ]
+  },
+  {
+   "fips": "22053",
+   "key": "JEFFERSONDAVIS",
+   "name": "Jefferson Davis",
+   "spellings": [
+    "Jefferson Davis"
+   ]
+  },
+  {
+   "fips": "22055",
+   "key": "LAFAYETTE",
+   "name": "Lafayette",
+   "spellings": [
+    "Lafayette"
+   ]
+  },
+  {
+   "fips": "22057",
+   "key": "LAFOURCHE",
+   "name": "Lafourche",
+   "spellings": [
+    "Lafourche"
+   ]
+  },
+  {
+   "fips": "22059",
+   "key": "LASALLE",
+   "name": "LaSalle",
+   "spellings": [
+    "LaSalle",
+    "Lasalle"
+   ]
+  },
+  {
+   "fips": "22061",
+   "key": "LINCOLN",
+   "name": "Lincoln",
+   "spellings": [
+    "Lincoln"
+   ]
+  },
+  {
+   "fips": "22063",
+   "key": "LIVINGSTON",
+   "name": "Livingston",
+   "spellings": [
+    "Livingston"
+   ]
+  },
+  {
+   "fips": "22065",
+   "key": "MADISON",
+   "name": "Madison",
+   "spellings": [
+    "Madison"
+   ]
+  },
+  {
+   "fips": "22067",
+   "key": "MOREHOUSE",
+   "name": "Morehouse",
+   "spellings": [
+    "Morehouse"
+   ]
+  },
+  {
+   "fips": "22069",
+   "key": "NATCHITOCHES",
+   "name": "Natchitoches",
+   "spellings": [
+    "Natchitoches"
+   ]
+  },
+  {
+   "fips": "22071",
+   "key": "ORLEANS",
+   "name": "Orleans",
+   "spellings": [
+    "Orleans"
+   ]
+  },
+  {
+   "fips": "22073",
+   "key": "OUACHITA",
+   "name": "Ouachita",
+   "spellings": [
+    "Ouachita"
+   ]
+  },
+  {
+   "fips": "22075",
+   "key": "PLAQUEMINES",
+   "name": "Plaquemines",
+   "spellings": [
+    "Plaquemines"
+   ]
+  },
+  {
+   "fips": "22077",
+   "key": "POINTECOUPEE",
+   "name": "Pointe Coupee",
+   "spellings": [
+    "Pointe Coupee"
+   ]
+  },
+  {
+   "fips": "22079",
+   "key": "RAPIDES",
+   "name": "Rapides",
+   "spellings": [
+    "Rapides"
+   ]
+  },
+  {
+   "fips": "22081",
+   "key": "REDRIVER",
+   "name": "Red River",
+   "spellings": [
+    "Red River"
+   ]
+  },
+  {
+   "fips": "22083",
+   "key": "RICHLAND",
+   "name": "Richland",
+   "spellings": [
+    "Richland"
+   ]
+  },
+  {
+   "fips": "22085",
+   "key": "SABINE",
+   "name": "Sabine",
+   "spellings": [
+    "Sabine"
+   ]
+  },
+  {
+   "fips": "22087",
+   "key": "STBERNARD",
+   "name": "St. Bernard",
+   "spellings": [
+    "St. Bernard"
+   ]
+  },
+  {
+   "fips": "22089",
+   "key": "STCHARLES",
+   "name": "St. Charles",
+   "spellings": [
+    "St. Charles"
+   ]
+  },
+  {
+   "fips": "22091",
+   "key": "STHELENA",
+   "name": "St. Helena",
+   "spellings": [
+    "St. Helena"
+   ]
+  },
+  {
+   "fips": "22093",
+   "key": "STJAMES",
+   "name": "St. James",
+   "spellings": [
+    "St. James"
+   ]
+  },
+  {
+   "fips": "22095",
+   "key": "STJOHNTHEBAPTIST",
+   "name": "St. John the Baptist",
+   "spellings": [
+    "St. John The Baptist",
+    "St. John the Baptist"
+   ]
+  },
+  {
+   "fips": "22097",
+   "key": "STLANDRY",
+   "name": "St. Landry",
+   "spellings": [
+    "St. Landry"
+   ]
+  },
+  {
+   "fips": "22099",
+   "key": "STMARTIN",
+   "name": "St. Martin",
+   "spellings": [
+    "St. Martin"
+   ]
+  },
+  {
+   "fips": "22101",
+   "key": "STMARY",
+   "name": "St. Mary",
+   "spellings": [
+    "St. Mary"
+   ]
+  },
+  {
+   "fips": "22103",
+   "key": "STTAMMANY",
+   "name": "St. Tammany",
+   "spellings": [
+    "St. Tammany"
+   ]
+  },
+  {
+   "fips": "22105",
+   "key": "TANGIPAHOA",
+   "name": "Tangipahoa",
+   "spellings": [
+    "Tangipahoa"
+   ]
+  },
+  {
+   "fips": "22107",
+   "key": "TENSAS",
+   "name": "Tensas",
+   "spellings": [
+    "Tensas"
+   ]
+  },
+  {
+   "fips": "22109",
+   "key": "TERREBONNE",
+   "name": "Terrebonne",
+   "spellings": [
+    "Terrebonne"
+   ]
+  },
+  {
+   "fips": "22111",
+   "key": "UNION",
+   "name": "Union",
+   "spellings": [
+    "Union"
+   ]
+  },
+  {
+   "fips": "22113",
+   "key": "VERMILION",
+   "name": "Vermilion",
+   "spellings": [
+    "Vermilion"
+   ]
+  },
+  {
+   "fips": "22115",
+   "key": "VERNON",
+   "name": "Vernon",
+   "spellings": [
+    "Vernon"
+   ]
+  },
+  {
+   "fips": "22117",
+   "key": "WASHINGTON",
+   "name": "Washington",
+   "spellings": [
+    "Washington"
+   ]
+  },
+  {
+   "fips": "22119",
+   "key": "WEBSTER",
+   "name": "Webster",
+   "spellings": [
+    "Webster"
+   ]
+  },
+  {
+   "fips": "22121",
+   "key": "WESTBATONROUGE",
+   "name": "West Baton Rouge",
+   "spellings": [
+    "West Baton Rouge"
+   ]
+  },
+  {
+   "fips": "22123",
+   "key": "WESTCARROLL",
+   "name": "West Carroll",
+   "spellings": [
+    "West Carroll"
+   ]
+  },
+  {
+   "fips": "22125",
+   "key": "WESTFELICIANA",
+   "name": "West Feliciana",
+   "spellings": [
+    "West Feliciana"
+   ]
+  },
+  {
+   "fips": "22127",
+   "key": "WINN",
+   "name": "Winn",
+   "spellings": [
+    "Winn"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/la-map.json, built from map-sources/); spellings from rosters/LA.json",
+ "state": "LA",
+ "unit": "county"
+}

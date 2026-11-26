@@ -1,0 +1,1279 @@
+{
+ "counties": [
+  {
+   "fips": "13001",
+   "key": "APPLING",
+   "name": "Appling",
+   "spellings": [
+    "Appling"
+   ]
+  },
+  {
+   "fips": "13003",
+   "key": "ATKINSON",
+   "name": "Atkinson",
+   "spellings": [
+    "Atkinson"
+   ]
+  },
+  {
+   "fips": "13005",
+   "key": "BACON",
+   "name": "Bacon",
+   "spellings": [
+    "Bacon"
+   ]
+  },
+  {
+   "fips": "13007",
+   "key": "BAKER",
+   "name": "Baker",
+   "spellings": [
+    "Baker"
+   ]
+  },
+  {
+   "fips": "13009",
+   "key": "BALDWIN",
+   "name": "Baldwin",
+   "spellings": [
+    "Baldwin"
+   ]
+  },
+  {
+   "fips": "13011",
+   "key": "BANKS",
+   "name": "Banks",
+   "spellings": [
+    "Banks"
+   ]
+  },
+  {
+   "fips": "13013",
+   "key": "BARROW",
+   "name": "Barrow",
+   "spellings": [
+    "Barrow"
+   ]
+  },
+  {
+   "fips": "13015",
+   "key": "BARTOW",
+   "name": "Bartow",
+   "spellings": [
+    "Bartow"
+   ]
+  },
+  {
+   "fips": "13017",
+   "key": "BENHILL",
+   "name": "Ben Hill",
+   "spellings": [
+    "Ben Hill"
+   ]
+  },
+  {
+   "fips": "13019",
+   "key": "BERRIEN",
+   "name": "Berrien",
+   "spellings": [
+    "Berrien"
+   ]
+  },
+  {
+   "fips": "13021",
+   "key": "BIBB",
+   "name": "Bibb",
+   "spellings": [
+    "Bibb"
+   ]
+  },
+  {
+   "fips": "13023",
+   "key": "BLECKLEY",
+   "name": "Bleckley",
+   "spellings": [
+    "Bleckley"
+   ]
+  },
+  {
+   "fips": "13025",
+   "key": "BRANTLEY",
+   "name": "Brantley",
+   "spellings": [
+    "Brantley"
+   ]
+  },
+  {
+   "fips": "13027",
+   "key": "BROOKS",
+   "name": "Brooks",
+   "spellings": [
+    "Brooks"
+   ]
+  },
+  {
+   "fips": "13029",
+   "key": "BRYAN",
+   "name": "Bryan",
+   "spellings": [
+    "Bryan"
+   ]
+  },
+  {
+   "fips": "13031",
+   "key": "BULLOCH",
+   "name": "Bulloch",
+   "spellings": [
+    "Bulloch"
+   ]
+  },
+  {
+   "fips": "13033",
+   "key": "BURKE",
+   "name": "Burke",
+   "spellings": [
+    "Burke"
+   ]
+  },
+  {
+   "fips": "13035",
+   "key": "BUTTS",
+   "name": "Butts",
+   "spellings": [
+    "Butts"
+   ]
+  },
+  {
+   "fips": "13037",
+   "key": "CALHOUN",
+   "name": "Calhoun",
+   "spellings": [
+    "Calhoun"
+   ]
+  },
+  {
+   "fips": "13039",
+   "key": "CAMDEN",
+   "name": "Camden",
+   "spellings": [
+    "Camden"
+   ]
+  },
+  {
+   "fips": "13043",
+   "key": "CANDLER",
+   "name": "Candler",
+   "spellings": [
+    "Candler"
+   ]
+  },
+  {
+   "fips": "13045",
+   "key": "CARROLL",
+   "name": "Carroll",
+   "spellings": [
+    "Carroll"
+   ]
+  },
+  {
+   "fips": "13047",
+   "key": "CATOOSA",
+   "name": "Catoosa",
+   "spellings": [
+    "Catoosa"
+   ]
+  },
+  {
+   "fips": "13049",
+   "key": "CHARLTON",
+   "name": "Charlton",
+   "spellings": [
+    "Charlton"
+   ]
+  },
+  {
+   "fips": "13051",
+   "key": "CHATHAM",
+   "name": "Chatham",
+   "spellings": [
+    "Chatham"
+   ]
+  },
+  {
+   "fips": "13053",
+   "key": "CHATTAHOOCHEE",
+   "name": "Chattahoochee",
+   "spellings": [
+    "Chattahoochee"
+   ]
+  },
+  {
+   "fips": "13055",
+   "key": "CHATTOOGA",
+   "name": "Chattooga",
+   "spellings": [
+    "Chattooga"
+   ]
+  },
+  {
+   "fips": "13057",
+   "key": "CHEROKEE",
+   "name": "Cherokee",
+   "spellings": [
+    "Cherokee"
+   ]
+  },
+  {
+   "fips": "13059",
+   "key": "CLARKE",
+   "name": "Clarke",
+   "spellings": [
+    "Clarke"
+   ]
+  },
+  {
+   "fips": "13061",
+   "key": "CLAY",
+   "name": "Clay",
+   "spellings": [
+    "Clay"
+   ]
+  },
+  {
+   "fips": "13063",
+   "key": "CLAYTON",
+   "name": "Clayton",
+   "spellings": [
+    "Clayton"
+   ]
+  },
+  {
+   "fips": "13065",
+   "key": "CLINCH",
+   "name": "Clinch",
+   "spellings": [
+    "Clinch"
+   ]
+  },
+  {
+   "fips": "13067",
+   "key": "COBB",
+   "name": "Cobb",
+   "spellings": [
+    "Cobb"
+   ]
+  },
+  {
+   "fips": "13069",
+   "key": "COFFEE",
+   "name": "Coffee",
+   "spellings": [
+    "Coffee"
+   ]
+  },
+  {
+   "fips": "13071",
+   "key": "COLQUITT",
+   "name": "Colquitt",
+   "spellings": [
+    "Colquitt"
+   ]
+  },
+  {
+   "fips": "13073",
+   "key": "COLUMBIA",
+   "name": "Columbia",
+   "spellings": [
+    "Columbia"
+   ]
+  },
+  {
+   "fips": "13075",
+   "key": "COOK",
+   "name": "Cook",
+   "spellings": [
+    "Cook"
+   ]
+  },
+  {
+   "fips": "13077",
+   "key": "COWETA",
+   "name": "Coweta",
+   "spellings": [
+    "Coweta"
+   ]
+  },
+  {
+   "fips": "13079",
+   "key": "CRAWFORD",
+   "name": "Crawford",
+   "spellings": [
+    "Crawford"
+   ]
+  },
+  {
+   "fips": "13081",
+   "key": "CRISP",
+   "name": "Crisp",
+   "spellings": [
+    "Crisp"
+   ]
+  },
+  {
+   "fips": "13083",
+   "key": "DADE",
+   "name": "Dade",
+   "spellings": [
+    "Dade"
+   ]
+  },
+  {
+   "fips": "13085",
+   "key": "DAWSON",
+   "name": "Dawson",
+   "spellings": [
+    "Dawson"
+   ]
+  },
+  {
+   "fips": "13087",
+   "key": "DECATUR",
+   "name": "Decatur",
+   "spellings": [
+    "Decatur"
+   ]
+  },
+  {
+   "fips": "13089",
+   "key": "DEKALB",
+   "name": "DeKalb",
+   "spellings": [
+    "DeKalb"
+   ]
+  },
+  {
+   "fips": "13091",
+   "key": "DODGE",
+   "name": "Dodge",
+   "spellings": [
+    "Dodge"
+   ]
+  },
+  {
+   "fips": "13093",
+   "key": "DOOLY",
+   "name": "Dooly",
+   "spellings": [
+    "Dooly"
+   ]
+  },
+  {
+   "fips": "13095",
+   "key": "DOUGHERTY",
+   "name": "Dougherty",
+   "spellings": [
+    "Dougherty"
+   ]
+  },
+  {
+   "fips": "13097",
+   "key": "DOUGLAS",
+   "name": "Douglas",
+   "spellings": [
+    "Douglas"
+   ]
+  },
+  {
+   "fips": "13099",
+   "key": "EARLY",
+   "name": "Early",
+   "spellings": [
+    "Early"
+   ]
+  },
+  {
+   "fips": "13101",
+   "key": "ECHOLS",
+   "name": "Echols",
+   "spellings": [
+    "Echols"
+   ]
+  },
+  {
+   "fips": "13103",
+   "key": "EFFINGHAM",
+   "name": "Effingham",
+   "spellings": [
+    "Effingham"
+   ]
+  },
+  {
+   "fips": "13105",
+   "key": "ELBERT",
+   "name": "Elbert",
+   "spellings": [
+    "Elbert"
+   ]
+  },
+  {
+   "fips": "13107",
+   "key": "EMANUEL",
+   "name": "Emanuel",
+   "spellings": [
+    "Emanuel"
+   ]
+  },
+  {
+   "fips": "13109",
+   "key": "EVANS",
+   "name": "Evans",
+   "spellings": [
+    "Evans"
+   ]
+  },
+  {
+   "fips": "13111",
+   "key": "FANNIN",
+   "name": "Fannin",
+   "spellings": [
+    "Fannin"
+   ]
+  },
+  {
+   "fips": "13113",
+   "key": "FAYETTE",
+   "name": "Fayette",
+   "spellings": [
+    "Fayette"
+   ]
+  },
+  {
+   "fips": "13115",
+   "key": "FLOYD",
+   "name": "Floyd",
+   "spellings": [
+    "Floyd"
+   ]
+  },
+  {
+   "fips": "13117",
+   "key": "FORSYTH",
+   "name": "Forsyth",
+   "spellings": [
+    "Forsyth"
+   ]
+  },
+  {
+   "fips": "13119",
+   "key": "FRANKLIN",
+   "name": "Franklin",
+   "spellings": [
+    "Franklin"
+   ]
+  },
+  {
+   "fips": "13121",
+   "key": "FULTON",
+   "name": "Fulton",
+   "spellings": [
+    "Fulton"
+   ]
+  },
+  {
+   "fips": "13123",
+   "key": "GILMER",
+   "name": "Gilmer",
+   "spellings": [
+    "Gilmer"
+   ]
+  },
+  {
+   "fips": "13125",
+   "key": "GLASCOCK",
+   "name": "Glascock",
+   "spellings": [
+    "Glascock"
+   ]
+  },
+  {
+   "fips": "13127",
+   "key": "GLYNN",
+   "name": "Glynn",
+   "spellings": [
+    "Glynn"
+   ]
+  },
+  {
+   "fips": "13129",
+   "key": "GORDON",
+   "name": "Gordon",
+   "spellings": [
+    "Gordon"
+   ]
+  },
+  {
+   "fips": "13131",
+   "key": "GRADY",
+   "name": "Grady",
+   "spellings": [
+    "Grady"
+   ]
+  },
+  {
+   "fips": "13133",
+   "key": "GREENE",
+   "name": "Greene",
+   "spellings": [
+    "Greene"
+   ]
+  },
+  {
+   "fips": "13135",
+   "key": "GWINNETT",
+   "name": "Gwinnett",
+   "spellings": [
+    "Gwinnett"
+   ]
+  },
+  {
+   "fips": "13137",
+   "key": "HABERSHAM",
+   "name": "Habersham",
+   "spellings": [
+    "Habersham"
+   ]
+  },
+  {
+   "fips": "13139",
+   "key": "HALL",
+   "name": "Hall",
+   "spellings": [
+    "Hall"
+   ]
+  },
+  {
+   "fips": "13141",
+   "key": "HANCOCK",
+   "name": "Hancock",
+   "spellings": [
+    "Hancock"
+   ]
+  },
+  {
+   "fips": "13143",
+   "key": "HARALSON",
+   "name": "Haralson",
+   "spellings": [
+    "Haralson"
+   ]
+  },
+  {
+   "fips": "13145",
+   "key": "HARRIS",
+   "name": "Harris",
+   "spellings": [
+    "Harris"
+   ]
+  },
+  {
+   "fips": "13147",
+   "key": "HART",
+   "name": "Hart",
+   "spellings": [
+    "Hart"
+   ]
+  },
+  {
+   "fips": "13149",
+   "key": "HEARD",
+   "name": "Heard",
+   "spellings": [
+    "Heard"
+   ]
+  },
+  {
+   "fips": "13151",
+   "key": "HENRY",
+   "name": "Henry",
+   "spellings": [
+    "Henry"
+   ]
+  },
+  {
+   "fips": "13153",
+   "key": "HOUSTON",
+   "name": "Houston",
+   "spellings": [
+    "Houston"
+   ]
+  },
+  {
+   "fips": "13155",
+   "key": "IRWIN",
+   "name": "Irwin",
+   "spellings": [
+    "Irwin"
+   ]
+  },
+  {
+   "fips": "13157",
+   "key": "JACKSON",
+   "name": "Jackson",
+   "spellings": [
+    "Jackson"
+   ]
+  },
+  {
+   "fips": "13159",
+   "key": "JASPER",
+   "name": "Jasper",
+   "spellings": [
+    "Jasper"
+   ]
+  },
+  {
+   "fips": "13161",
+   "key": "JEFFDAVIS",
+   "name": "Jeff Davis",
+   "spellings": [
+    "Jeff Davis"
+   ]
+  },
+  {
+   "fips": "13163",
+   "key": "JEFFERSON",
+   "name": "Jefferson",
+   "spellings": [
+    "Jefferson"
+   ]
+  },
+  {
+   "fips": "13165",
+   "key": "JENKINS",
+   "name": "Jenkins",
+   "spellings": [
+    "Jenkins"
+   ]
+  },
+  {
+   "fips": "13167",
+   "key": "JOHNSON",
+   "name": "Johnson",
+   "spellings": [
+    "Johnson"
+   ]
+  },
+  {
+   "fips": "13169",
+   "key": "JONES",
+   "name": "Jones",
+   "spellings": [
+    "Jones"
+   ]
+  },
+  {
+   "fips": "13171",
+   "key": "LAMAR",
+   "name": "Lamar",
+   "spellings": [
+    "Lamar"
+   ]
+  },
+  {
+   "fips": "13173",
+   "key": "LANIER",
+   "name": "Lanier",
+   "spellings": [
+    "Lanier"
+   ]
+  },
+  {
+   "fips": "13175",
+   "key": "LAURENS",
+   "name": "Laurens",
+   "spellings": [
+    "Laurens"
+   ]
+  },
+  {
+   "fips": "13177",
+   "key": "LEE",
+   "name": "Lee",
+   "spellings": [
+    "Lee"
+   ]
+  },
+  {
+   "fips": "13179",
+   "key": "LIBERTY",
+   "name": "Liberty",
+   "spellings": [
+    "Liberty"
+   ]
+  },
+  {
+   "fips": "13181",
+   "key": "LINCOLN",
+   "name": "Lincoln",
+   "spellings": [
+    "Lincoln"
+   ]
+  },
+  {
+   "fips": "13183",
+   "key": "LONG",
+   "name": "Long",
+   "spellings": [
+    "Long"
+   ]
+  },
+  {
+   "fips": "13185",
+   "key": "LOWNDES",
+   "name": "Lowndes",
+   "spellings": [
+    "Lowndes"
+   ]
+  },
+  {
+   "fips": "13187",
+   "key": "LUMPKIN",
+   "name": "Lumpkin",
+   "spellings": [
+    "Lumpkin"
+   ]
+  },
+  {
+   "fips": "13189",
+   "key": "MCDUFFIE",
+   "name": "McDuffie",
+   "spellings": [
+    "McDuffie"
+   ]
+  },
+  {
+   "fips": "13191",
+   "key": "MCINTOSH",
+   "name": "McIntosh",
+   "spellings": [
+    "McIntosh"
+   ]
+  },
+  {
+   "fips": "13193",
+   "key": "MACON",
+   "name": "Macon",
+   "spellings": [
+    "Macon"
+   ]
+  },
+  {
+   "fips": "13195",
+   "key": "MADISON",
+   "name": "Madison",
+   "spellings": [
+    "Madison"
+   ]
+  },
+  {
+   "fips": "13197",
+   "key": "MARION",
+   "name": "Marion",
+   "spellings": [
+    "Marion"
+   ]
+  },
+  {
+   "fips": "13199",
+   "key": "MERIWETHER",
+   "name": "Meriwether",
+   "spellings": [
+    "Meriwether"
+   ]
+  },
+  {
+   "fips": "13201",
+   "key": "MILLER",
+   "name": "Miller",
+   "spellings": [
+    "Miller"
+   ]
+  },
+  {
+   "fips": "13205",
+   "key": "MITCHELL",
+   "name": "Mitchell",
+   "spellings": [
+    "Mitchell"
+   ]
+  },
+  {
+   "fips": "13207",
+   "key": "MONROE",
+   "name": "Monroe",
+   "spellings": [
+    "Monroe"
+   ]
+  },
+  {
+   "fips": "13209",
+   "key": "MONTGOMERY",
+   "name": "Montgomery",
+   "spellings": [
+    "Montgomery"
+   ]
+  },
+  {
+   "fips": "13211",
+   "key": "MORGAN",
+   "name": "Morgan",
+   "spellings": [
+    "Morgan"
+   ]
+  },
+  {
+   "fips": "13213",
+   "key": "MURRAY",
+   "name": "Murray",
+   "spellings": [
+    "Murray"
+   ]
+  },
+  {
+   "fips": "13215",
+   "key": "MUSCOGEE",
+   "name": "Muscogee",
+   "spellings": [
+    "Muscogee"
+   ]
+  },
+  {
+   "fips": "13217",
+   "key": "NEWTON",
+   "name": "Newton",
+   "spellings": [
+    "Newton"
+   ]
+  },
+  {
+   "fips": "13219",
+   "key": "OCONEE",
+   "name": "Oconee",
+   "spellings": [
+    "Oconee"
+   ]
+  },
+  {
+   "fips": "13221",
+   "key": "OGLETHORPE",
+   "name": "Oglethorpe",
+   "spellings": [
+    "Oglethorpe"
+   ]
+  },
+  {
+   "fips": "13223",
+   "key": "PAULDING",
+   "name": "Paulding",
+   "spellings": [
+    "Paulding"
+   ]
+  },
+  {
+   "fips": "13225",
+   "key": "PEACH",
+   "name": "Peach",
+   "spellings": [
+    "Peach"
+   ]
+  },
+  {
+   "fips": "13227",
+   "key": "PICKENS",
+   "name": "Pickens",
+   "spellings": [
+    "Pickens"
+   ]
+  },
+  {
+   "fips": "13229",
+   "key": "PIERCE",
+   "name": "Pierce",
+   "spellings": [
+    "Pierce"
+   ]
+  },
+  {
+   "fips": "13231",
+   "key": "PIKE",
+   "name": "Pike",
+   "spellings": [
+    "Pike"
+   ]
+  },
+  {
+   "fips": "13233",
+   "key": "POLK",
+   "name": "Polk",
+   "spellings": [
+    "Polk"
+   ]
+  },
+  {
+   "fips": "13235",
+   "key": "PULASKI",
+   "name": "Pulaski",
+   "spellings": [
+    "Pulaski"
+   ]
+  },
+  {
+   "fips": "13237",
+   "key": "PUTNAM",
+   "name": "Putnam",
+   "spellings": [
+    "Putnam"
+   ]
+  },
+  {
+   "fips": "13239",
+   "key": "QUITMAN",
+   "name": "Quitman",
+   "spellings": [
+    "Quitman"
+   ]
+  },
+  {
+   "fips": "13241",
+   "key": "RABUN",
+   "name": "Rabun",
+   "spellings": [
+    "Rabun"
+   ]
+  },
+  {
+   "fips": "13243",
+   "key": "RANDOLPH",
+   "name": "Randolph",
+   "spellings": [
+    "Randolph"
+   ]
+  },
+  {
+   "fips": "13245",
+   "key": "RICHMOND",
+   "name": "Richmond",
+   "spellings": [
+    "Richmond"
+   ]
+  },
+  {
+   "fips": "13247",
+   "key": "ROCKDALE",
+   "name": "Rockdale",
+   "spellings": [
+    "Rockdale"
+   ]
+  },
+  {
+   "fips": "13249",
+   "key": "SCHLEY",
+   "name": "Schley",
+   "spellings": [
+    "Schley"
+   ]
+  },
+  {
+   "fips": "13251",
+   "key": "SCREVEN",
+   "name": "Screven",
+   "spellings": [
+    "Screven"
+   ]
+  },
+  {
+   "fips": "13253",
+   "key": "SEMINOLE",
+   "name": "Seminole",
+   "spellings": [
+    "Seminole"
+   ]
+  },
+  {
+   "fips": "13255",
+   "key": "SPALDING",
+   "name": "Spalding",
+   "spellings": [
+    "Spalding"
+   ]
+  },
+  {
+   "fips": "13257",
+   "key": "STEPHENS",
+   "name": "Stephens",
+   "spellings": [
+    "Stephens"
+   ]
+  },
+  {
+   "fips": "13259",
+   "key": "STEWART",
+   "name": "Stewart",
+   "spellings": [
+    "Stewart"
+   ]
+  },
+  {
+   "fips": "13261",
+   "key": "SUMTER",
+   "name": "Sumter",
+   "spellings": [
+    "Sumter"
+   ]
+  },
+  {
+   "fips": "13263",
+   "key": "TALBOT",
+   "name": "Talbot",
+   "spellings": [
+    "Talbot"
+   ]
+  },
+  {
+   "fips": "13265",
+   "key": "TALIAFERRO",
+   "name": "Taliaferro",
+   "spellings": [
+    "Taliaferro"
+   ]
+  },
+  {
+   "fips": "13267",
+   "key": "TATTNALL",
+   "name": "Tattnall",
+   "spellings": [
+    "Tattnall"
+   ]
+  },
+  {
+   "fips": "13269",
+   "key": "TAYLOR",
+   "name": "Taylor",
+   "spellings": [
+    "Taylor"
+   ]
+  },
+  {
+   "fips": "13271",
+   "key": "TELFAIR",
+   "name": "Telfair",
+   "spellings": [
+    "Telfair"
+   ]
+  },
+  {
+   "fips": "13273",
+   "key": "TERRELL",
+   "name": "Terrell",
+   "spellings": [
+    "Terrell"
+   ]
+  },
+  {
+   "fips": "13275",
+   "key": "THOMAS",
+   "name": "Thomas",
+   "spellings": [
+    "Thomas"
+   ]
+  },
+  {
+   "fips": "13277",
+   "key": "TIFT",
+   "name": "Tift",
+   "spellings": [
+    "Tift"
+   ]
+  },
+  {
+   "fips": "13279",
+   "key": "TOOMBS",
+   "name": "Toombs",
+   "spellings": [
+    "Toombs"
+   ]
+  },
+  {
+   "fips": "13281",
+   "key": "TOWNS",
+   "name": "Towns",
+   "spellings": [
+    "Towns"
+   ]
+  },
+  {
+   "fips": "13283",
+   "key": "TREUTLEN",
+   "name": "Treutlen",
+   "spellings": [
+    "Treutlen"
+   ]
+  },
+  {
+   "fips": "13285",
+   "key": "TROUP",
+   "name": "Troup",
+   "spellings": [
+    "Troup"
+   ]
+  },
+  {
+   "fips": "13287",
+   "key": "TURNER",
+   "name": "Turner",
+   "spellings": [
+    "Turner"
+   ]
+  },
+  {
+   "fips": "13289",
+   "key": "TWIGGS",
+   "name": "Twiggs",
+   "spellings": [
+    "Twiggs"
+   ]
+  },
+  {
+   "fips": "13291",
+   "key": "UNION",
+   "name": "Union",
+   "spellings": [
+    "Union"
+   ]
+  },
+  {
+   "fips": "13293",
+   "key": "UPSON",
+   "name": "Upson",
+   "spellings": [
+    "Upson"
+   ]
+  },
+  {
+   "fips": "13295",
+   "key": "WALKER",
+   "name": "Walker",
+   "spellings": [
+    "Walker"
+   ]
+  },
+  {
+   "fips": "13297",
+   "key": "WALTON",
+   "name": "Walton",
+   "spellings": [
+    "Walton"
+   ]
+  },
+  {
+   "fips": "13299",
+   "key": "WARE",
+   "name": "Ware",
+   "spellings": [
+    "Ware"
+   ]
+  },
+  {
+   "fips": "13301",
+   "key": "WARREN",
+   "name": "Warren",
+   "spellings": [
+    "Warren"
+   ]
+  },
+  {
+   "fips": "13303",
+   "key": "WASHINGTON",
+   "name": "Washington",
+   "spellings": [
+    "Washington"
+   ]
+  },
+  {
+   "fips": "13305",
+   "key": "WAYNE",
+   "name": "Wayne",
+   "spellings": [
+    "Wayne"
+   ]
+  },
+  {
+   "fips": "13307",
+   "key": "WEBSTER",
+   "name": "Webster",
+   "spellings": [
+    "Webster"
+   ]
+  },
+  {
+   "fips": "13309",
+   "key": "WHEELER",
+   "name": "Wheeler",
+   "spellings": [
+    "Wheeler"
+   ]
+  },
+  {
+   "fips": "13311",
+   "key": "WHITE",
+   "name": "White",
+   "spellings": [
+    "White"
+   ]
+  },
+  {
+   "fips": "13313",
+   "key": "WHITFIELD",
+   "name": "Whitfield",
+   "spellings": [
+    "Whitfield"
+   ]
+  },
+  {
+   "fips": "13315",
+   "key": "WILCOX",
+   "name": "Wilcox",
+   "spellings": [
+    "Wilcox"
+   ]
+  },
+  {
+   "fips": "13317",
+   "key": "WILKES",
+   "name": "Wilkes",
+   "spellings": [
+    "Wilkes"
+   ]
+  },
+  {
+   "fips": "13319",
+   "key": "WILKINSON",
+   "name": "Wilkinson",
+   "spellings": [
+    "Wilkinson"
+   ]
+  },
+  {
+   "fips": "13321",
+   "key": "WORTH",
+   "name": "Worth",
+   "spellings": [
+    "Worth"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/ga-map.json, built from map-sources/); spellings from rosters/GA.json",
+ "state": "GA",
+ "unit": "county"
+}

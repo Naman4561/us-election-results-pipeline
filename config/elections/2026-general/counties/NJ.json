@@ -1,0 +1,175 @@
+{
+ "counties": [
+  {
+   "fips": "34001",
+   "key": "ATLANTIC",
+   "name": "Atlantic",
+   "spellings": [
+    "Atlantic"
+   ]
+  },
+  {
+   "fips": "34003",
+   "key": "BERGEN",
+   "name": "Bergen",
+   "spellings": [
+    "Bergen"
+   ]
+  },
+  {
+   "fips": "34005",
+   "key": "BURLINGTON",
+   "name": "Burlington",
+   "spellings": [
+    "Burlington"
+   ]
+  },
+  {
+   "fips": "34007",
+   "key": "CAMDEN",
+   "name": "Camden",
+   "spellings": [
+    "Camden"
+   ]
+  },
+  {
+   "fips": "34009",
+   "key": "CAPEMAY",
+   "name": "Cape May",
+   "spellings": [
+    "Cape May"
+   ]
+  },
+  {
+   "fips": "34011",
+   "key": "CUMBERLAND",
+   "name": "Cumberland",
+   "spellings": [
+    "Cumberland"
+   ]
+  },
+  {
+   "fips": "34013",
+   "key": "ESSEX",
+   "name": "Essex",
+   "spellings": [
+    "Essex"
+   ]
+  },
+  {
+   "fips": "34015",
+   "key": "GLOUCESTER",
+   "name": "Gloucester",
+   "spellings": [
+    "Gloucester"
+   ]
+  },
+  {
+   "fips": "34017",
+   "key": "HUDSON",
+   "name": "Hudson",
+   "spellings": [
+    "Hudson"
+   ]
+  },
+  {
+   "fips": "34019",
+   "key": "HUNTERDON",
+   "name": "Hunterdon",
+   "spellings": [
+    "Hunterdon"
+   ]
+  },
+  {
+   "fips": "34021",
+   "key": "MERCER",
+   "name": "Mercer",
+   "spellings": [
+    "Mercer"
+   ]
+  },
+  {
+   "fips": "34023",
+   "key": "MIDDLESEX",
+   "name": "Middlesex",
+   "spellings": [
+    "Middlesex"
+   ]
+  },
+  {
+   "fips": "34025",
+   "key": "MONMOUTH",
+   "name": "Monmouth",
+   "spellings": [
+    "Monmouth"
+   ]
+  },
+  {
+   "fips": "34027",
+   "key": "MORRIS",
+   "name": "Morris",
+   "spellings": [
+    "Morris"
+   ]
+  },
+  {
+   "fips": "34029",
+   "key": "OCEAN",
+   "name": "Ocean",
+   "spellings": [
+    "Ocean"
+   ]
+  },
+  {
+   "fips": "34031",
+   "key": "PASSAIC",
+   "name": "Passaic",
+   "spellings": [
+    "Passaic"
+   ]
+  },
+  {
+   "fips": "34033",
+   "key": "SALEM",
+   "name": "Salem",
+   "spellings": [
+    "Salem"
+   ]
+  },
+  {
+   "fips": "34035",
+   "key": "SOMERSET",
+   "name": "Somerset",
+   "spellings": [
+    "Somerset"
+   ]
+  },
+  {
+   "fips": "34037",
+   "key": "SUSSEX",
+   "name": "Sussex",
+   "spellings": [
+    "Sussex"
+   ]
+  },
+  {
+   "fips": "34039",
+   "key": "UNION",
+   "name": "Union",
+   "spellings": [
+    "Union"
+   ]
+  },
+  {
+   "fips": "34041",
+   "key": "WARREN",
+   "name": "Warren",
+   "spellings": [
+    "Warren"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/nj-map.json, built from map-sources/); spellings from rosters/NJ.json",
+ "state": "NJ",
+ "unit": "county"
+}

@@ -1,0 +1,239 @@
+{
+ "counties": [
+  {
+   "fips": "49001",
+   "key": "BEAVER",
+   "name": "Beaver",
+   "spellings": [
+    "Beaver"
+   ]
+  },
+  {
+   "fips": "49003",
+   "key": "BOXELDER",
+   "name": "Box Elder",
+   "spellings": [
+    "Box Elder"
+   ]
+  },
+  {
+   "fips": "49005",
+   "key": "CACHE",
+   "name": "Cache",
+   "spellings": [
+    "Cache"
+   ]
+  },
+  {
+   "fips": "49007",
+   "key": "CARBON",
+   "name": "Carbon",
+   "spellings": [
+    "Carbon"
+   ]
+  },
+  {
+   "fips": "49009",
+   "key": "DAGGETT",
+   "name": "Daggett",
+   "spellings": [
+    "Daggett"
+   ]
+  },
+  {
+   "fips": "49011",
+   "key": "DAVIS",
+   "name": "Davis",
+   "spellings": [
+    "Davis"
+   ]
+  },
+  {
+   "fips": "49013",
+   "key": "DUCHESNE",
+   "name": "Duchesne",
+   "spellings": [
+    "Duchesne"
+   ]
+  },
+  {
+   "fips": "49015",
+   "key": "EMERY",
+   "name": "Emery",
+   "spellings": [
+    "Emery"
+   ]
+  },
+  {
+   "fips": "49017",
+   "key": "GARFIELD",
+   "name": "Garfield",
+   "spellings": [
+    "Garfield"
+   ]
+  },
+  {
+   "fips": "49019",
+   "key": "GRAND",
+   "name": "Grand",
+   "spellings": [
+    "Grand"
+   ]
+  },
+  {
+   "fips": "49021",
+   "key": "IRON",
+   "name": "Iron",
+   "spellings": [
+    "Iron"
+   ]
+  },
+  {
+   "fips": "49023",
+   "key": "JUAB",
+   "name": "Juab",
+   "spellings": [
+    "Juab"
+   ]
+  },
+  {
+   "fips": "49025",
+   "key": "KANE",
+   "name": "Kane",
+   "spellings": [
+    "Kane"
+   ]
+  },
+  {
+   "fips": "49027",
+   "key": "MILLARD",
+   "name": "Millard",
+   "spellings": [
+    "Millard"
+   ]
+  },
+  {
+   "fips": "49029",
+   "key": "MORGAN",
+   "name": "Morgan",
+   "spellings": [
+    "Morgan"
+   ]
+  },
+  {
+   "fips": "49031",
+   "key": "PIUTE",
+   "name": "Piute",
+   "spellings": [
+    "Piute"
+   ]
+  },
+  {
+   "fips": "49033",
+   "key": "RICH",
+   "name": "Rich",
+   "spellings": [
+    "Rich"
+   ]
+  },
+  {
+   "fips": "49035",
+   "key": "SALTLAKE",
+   "name": "Salt Lake",
+   "spellings": [
+    "Salt Lake"
+   ]
+  },
+  {
+   "fips": "49037",
+   "key": "SANJUAN",
+   "name": "San Juan",
+   "spellings": [
+    "San Juan"
+   ]
+  },
+  {
+   "fips": "49039",
+   "key": "SANPETE",
+   "name": "Sanpete",
+   "spellings": [
+    "Sanpete"
+   ]
+  },
+  {
+   "fips": "49041",
+   "key": "SEVIER",
+   "name": "Sevier",
+   "spellings": [
+    "Sevier"
+   ]
+  },
+  {
+   "fips": "49043",
+   "key": "SUMMIT",
+   "name": "Summit",
+   "spellings": [
+    "Summit"
+   ]
+  },
+  {
+   "fips": "49045",
+   "key": "TOOELE",
+   "name": "Tooele",
+   "spellings": [
+    "Tooele"
+   ]
+  },
+  {
+   "fips": "49047",
+   "key": "UINTAH",
+   "name": "Uintah",
+   "spellings": [
+    "Uintah"
+   ]
+  },
+  {
+   "fips": "49049",
+   "key": "UTAH",
+   "name": "Utah",
+   "spellings": [
+    "Utah"
+   ]
+  },
+  {
+   "fips": "49051",
+   "key": "WASATCH",
+   "name": "Wasatch",
+   "spellings": [
+    "Wasatch"
+   ]
+  },
+  {
+   "fips": "49053",
+   "key": "WASHINGTON",
+   "name": "Washington",
+   "spellings": [
+    "Washington"
+   ]
+  },
+  {
+   "fips": "49055",
+   "key": "WAYNE",
+   "name": "Wayne",
+   "spellings": [
+    "Wayne"
+   ]
+  },
+  {
+   "fips": "49057",
+   "key": "WEBER",
+   "name": "Weber",
+   "spellings": [
+    "Weber"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/ut-map.json, built from map-sources/); spellings from rosters/UT.json",
+ "state": "UT",
+ "unit": "county"
+}

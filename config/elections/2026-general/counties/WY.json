@@ -1,0 +1,191 @@
+{
+ "counties": [
+  {
+   "fips": "56001",
+   "key": "ALBANY",
+   "name": "Albany",
+   "spellings": [
+    "Albany"
+   ]
+  },
+  {
+   "fips": "56003",
+   "key": "BIGHORN",
+   "name": "Big Horn",
+   "spellings": [
+    "Big Horn"
+   ]
+  },
+  {
+   "fips": "56005",
+   "key": "CAMPBELL",
+   "name": "Campbell",
+   "spellings": [
+    "Campbell"
+   ]
+  },
+  {
+   "fips": "56007",
+   "key": "CARBON",
+   "name": "Carbon",
+   "spellings": [
+    "Carbon"
+   ]
+  },
+  {
+   "fips": "56009",
+   "key": "CONVERSE",
+   "name": "Converse",
+   "spellings": [
+    "Converse"
+   ]
+  },
+  {
+   "fips": "56011",
+   "key": "CROOK",
+   "name": "Crook",
+   "spellings": [
+    "Crook"
+   ]
+  },
+  {
+   "fips": "56013",
+   "key": "FREMONT",
+   "name": "Fremont",
+   "spellings": [
+    "Fremont"
+   ]
+  },
+  {
+   "fips": "56015",
+   "key": "GOSHEN",
+   "name": "Goshen",
+   "spellings": [
+    "Goshen"
+   ]
+  },
+  {
+   "fips": "56017",
+   "key": "HOTSPRINGS",
+   "name": "Hot Springs",
+   "spellings": [
+    "Hot Springs"
+   ]
+  },
+  {
+   "fips": "56019",
+   "key": "JOHNSON",
+   "name": "Johnson",
+   "spellings": [
+    "Johnson"
+   ]
+  },
+  {
+   "fips": "56021",
+   "key": "LARAMIE",
+   "name": "Laramie",
+   "spellings": [
+    "Laramie"
+   ]
+  },
+  {
+   "fips": "56023",
+   "key": "LINCOLN",
+   "name": "Lincoln",
+   "spellings": [
+    "Lincoln"
+   ]
+  },
+  {
+   "fips": "56025",
+   "key": "NATRONA",
+   "name": "Natrona",
+   "spellings": [
+    "Natrona"
+   ]
+  },
+  {
+   "fips": "56027",
+   "key": "NIOBRARA",
+   "name": "Niobrara",
+   "spellings": [
+    "Niobrara"
+   ]
+  },
+  {
+   "fips": "56029",
+   "key": "PARK",
+   "name": "Park",
+   "spellings": [
+    "Park"
+   ]
+  },
+  {
+   "fips": "56031",
+   "key": "PLATTE",
+   "name": "Platte",
+   "spellings": [
+    "Platte"
+   ]
+  },
+  {
+   "fips": "56033",
+   "key": "SHERIDAN",
+   "name": "Sheridan",
+   "spellings": [
+    "Sheridan"
+   ]
+  },
+  {
+   "fips": "56035",
+   "key": "SUBLETTE",
+   "name": "Sublette",
+   "spellings": [
+    "Sublette"
+   ]
+  },
+  {
+   "fips": "56037",
+   "key": "SWEETWATER",
+   "name": "Sweetwater",
+   "spellings": [
+    "Sweetwater"
+   ]
+  },
+  {
+   "fips": "56039",
+   "key": "TETON",
+   "name": "Teton",
+   "spellings": [
+    "Teton"
+   ]
+  },
+  {
+   "fips": "56041",
+   "key": "UINTA",
+   "name": "Uinta",
+   "spellings": [
+    "Uinta"
+   ]
+  },
+  {
+   "fips": "56043",
+   "key": "WASHAKIE",
+   "name": "Washakie",
+   "spellings": [
+    "Washakie"
+   ]
+  },
+  {
+   "fips": "56045",
+   "key": "WESTON",
+   "name": "Weston",
+   "spellings": [
+    "Weston"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/wy-map.json, built from map-sources/); spellings from rosters/WY.json",
+ "state": "WY",
+ "unit": "county"
+}

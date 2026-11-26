@@ -1,0 +1,87 @@
+{
+ "counties": [
+  {
+   "fips": "33001",
+   "key": "BELKNAP",
+   "name": "Belknap",
+   "spellings": [
+    "Belknap"
+   ]
+  },
+  {
+   "fips": "33003",
+   "key": "CARROLL",
+   "name": "Carroll",
+   "spellings": [
+    "Carroll"
+   ]
+  },
+  {
+   "fips": "33005",
+   "key": "CHESHIRE",
+   "name": "Cheshire",
+   "spellings": [
+    "Cheshire"
+   ]
+  },
+  {
+   "fips": "33007",
+   "key": "COOS",
+   "name": "Coos",
+   "spellings": [
+    "Coos"
+   ]
+  },
+  {
+   "fips": "33009",
+   "key": "GRAFTON",
+   "name": "Grafton",
+   "spellings": [
+    "Grafton"
+   ]
+  },
+  {
+   "fips": "33011",
+   "key": "HILLSBOROUGH",
+   "name": "Hillsborough",
+   "spellings": [
+    "Hillsborough"
+   ]
+  },
+  {
+   "fips": "33013",
+   "key": "MERRIMACK",
+   "name": "Merrimack",
+   "spellings": [
+    "Merrimack"
+   ]
+  },
+  {
+   "fips": "33015",
+   "key": "ROCKINGHAM",
+   "name": "Rockingham",
+   "spellings": [
+    "Rockingham"
+   ]
+  },
+  {
+   "fips": "33017",
+   "key": "STRAFFORD",
+   "name": "Strafford",
+   "spellings": [
+    "Strafford"
+   ]
+  },
+  {
+   "fips": "33019",
+   "key": "SULLIVAN",
+   "name": "Sullivan",
+   "spellings": [
+    "Sullivan"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/nh-map.json, built from map-sources/); spellings from rosters/NH.json",
+ "state": "NH",
+ "unit": "county"
+}

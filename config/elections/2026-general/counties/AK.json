@@ -1,0 +1,327 @@
+{
+ "counties": [
+  {
+   "fips": "02001",
+   "key": "HOUSEDISTRICT1",
+   "name": "House District 1",
+   "spellings": [
+    "House District 1"
+   ]
+  },
+  {
+   "fips": "02002",
+   "key": "HOUSEDISTRICT2",
+   "name": "House District 2",
+   "spellings": [
+    "House District 2"
+   ]
+  },
+  {
+   "fips": "02003",
+   "key": "HOUSEDISTRICT3",
+   "name": "House District 3",
+   "spellings": [
+    "House District 3"
+   ]
+  },
+  {
+   "fips": "02004",
+   "key": "HOUSEDISTRICT4",
+   "name": "House District 4",
+   "spellings": [
+    "House District 4"
+   ]
+  },
+  {
+   "fips": "02005",
+   "key": "HOUSEDISTRICT5",
+   "name": "House District 5",
+   "spellings": [
+    "House District 5"
+   ]
+  },
+  {
+   "fips": "02006",
+   "key": "HOUSEDISTRICT6",
+   "name": "House District 6",
+   "spellings": [
+    "House District 6"
+   ]
+  },
+  {
+   "fips": "02007",
+   "key": "HOUSEDISTRICT7",
+   "name": "House District 7",
+   "spellings": [
+    "House District 7"
+   ]
+  },
+  {
+   "fips": "02008",
+   "key": "HOUSEDISTRICT8",
+   "name": "House District 8",
+   "spellings": [
+    "House District 8"
+   ]
+  },
+  {
+   "fips": "02009",
+   "key": "HOUSEDISTRICT9",
+   "name": "House District 9",
+   "spellings": [
+    "House District 9"
+   ]
+  },
+  {
+   "fips": "02010",
+   "key": "HOUSEDISTRICT10",
+   "name": "House District 10",
+   "spellings": [
+    "House District 10"
+   ]
+  },
+  {
+   "fips": "02011",
+   "key": "HOUSEDISTRICT11",
+   "name": "House District 11",
+   "spellings": [
+    "House District 11"
+   ]
+  },
+  {
+   "fips": "02012",
+   "key": "HOUSEDISTRICT12",
+   "name": "House District 12",
+   "spellings": [
+    "House District 12"
+   ]
+  },
+  {
+   "fips": "02013",
+   "key": "HOUSEDISTRICT13",
+   "name": "House District 13",
+   "spellings": [
+    "House District 13"
+   ]
+  },
+  {
+   "fips": "02014",
+   "key": "HOUSEDISTRICT14",
+   "name": "House District 14",
+   "spellings": [
+    "House District 14"
+   ]
+  },
+  {
+   "fips": "02015",
+   "key": "HOUSEDISTRICT15",
+   "name": "House District 15",
+   "spellings": [
+    "House District 15"
+   ]
+  },
+  {
+   "fips": "02016",
+   "key": "HOUSEDISTRICT16",
+   "name": "House District 16",
+   "spellings": [
+    "House District 16"
+   ]
+  },
+  {
+   "fips": "02017",
+   "key": "HOUSEDISTRICT17",
+   "name": "House District 17",
+   "spellings": [
+    "House District 17"
+   ]
+  },
+  {
+   "fips": "02018",
+   "key": "HOUSEDISTRICT18",
+   "name": "House District 18",
+   "spellings": [
+    "House District 18"
+   ]
+  },
+  {
+   "fips": "02019",
+   "key": "HOUSEDISTRICT19",
+   "name": "House District 19",
+   "spellings": [
+    "House District 19"
+   ]
+  },
+  {
+   "fips": "02020",
+   "key": "HOUSEDISTRICT20",
+   "name": "House District 20",
+   "spellings": [
+    "House District 20"
+   ]
+  },
+  {
+   "fips": "02021",
+   "key": "HOUSEDISTRICT21",
+   "name": "House District 21",
+   "spellings": [
+    "House District 21"
+   ]
+  },
+  {
+   "fips": "02022",
+   "key": "HOUSEDISTRICT22",
+   "name": "House District 22",
+   "spellings": [
+    "House District 22"
+   ]
+  },
+  {
+   "fips": "02023",
+   "key": "HOUSEDISTRICT23",
+   "name": "House District 23",
+   "spellings": [
+    "House District 23"
+   ]
+  },
+  {
+   "fips": "02024",
+   "key": "HOUSEDISTRICT24",
+   "name": "House District 24",
+   "spellings": [
+    "House District 24"
+   ]
+  },
+  {
+   "fips": "02025",
+   "key": "HOUSEDISTRICT25",
+   "name": "House District 25",
+   "spellings": [
+    "House District 25"
+   ]
+  },
+  {
+   "fips": "02026",
+   "key": "HOUSEDISTRICT26",
+   "name": "House District 26",
+   "spellings": [
+    "House District 26"
+   ]
+  },
+  {
+   "fips": "02027",
+   "key": "HOUSEDISTRICT27",
+   "name": "House District 27",
+   "spellings": [
+    "House District 27"
+   ]
+  },
+  {
+   "fips": "02028",
+   "key": "HOUSEDISTRICT28",
+   "name": "House District 28",
+   "spellings": [
+    "House District 28"
+   ]
+  },
+  {
+   "fips": "02029",
+   "key": "HOUSEDISTRICT29",
+   "name": "House District 29",
+   "spellings": [
+    "House District 29"
+   ]
+  },
+  {
+   "fips": "02030",
+   "key": "HOUSEDISTRICT30",
+   "name": "House District 30",
+   "spellings": [
+    "House District 30"
+   ]
+  },
+  {
+   "fips": "02031",
+   "key": "HOUSEDISTRICT31",
+   "name": "House District 31",
+   "spellings": [
+    "House District 31"
+   ]
+  },
+  {
+   "fips": "02032",
+   "key": "HOUSEDISTRICT32",
+   "name": "House District 32",
+   "spellings": [
+    "House District 32"
+   ]
+  },
+  {
+   "fips": "02033",
+   "key": "HOUSEDISTRICT33",
+   "name": "House District 33",
+   "spellings": [
+    "House District 33"
+   ]
+  },
+  {
+   "fips": "02034",
+   "key": "HOUSEDISTRICT34",
+   "name": "House District 34",
+   "spellings": [
+    "House District 34"
+   ]
+  },
+  {
+   "fips": "02035",
+   "key": "HOUSEDISTRICT35",
+   "name": "House District 35",
+   "spellings": [
+    "House District 35"
+   ]
+  },
+  {
+   "fips": "02036",
+   "key": "HOUSEDISTRICT36",
+   "name": "House District 36",
+   "spellings": [
+    "House District 36"
+   ]
+  },
+  {
+   "fips": "02037",
+   "key": "HOUSEDISTRICT37",
+   "name": "House District 37",
+   "spellings": [
+    "House District 37"
+   ]
+  },
+  {
+   "fips": "02038",
+   "key": "HOUSEDISTRICT38",
+   "name": "House District 38",
+   "spellings": [
+    "House District 38"
+   ]
+  },
+  {
+   "fips": "02039",
+   "key": "HOUSEDISTRICT39",
+   "name": "House District 39",
+   "spellings": [
+    "House District 39"
+   ]
+  },
+  {
+   "fips": "02040",
+   "key": "HOUSEDISTRICT40",
+   "name": "House District 40",
+   "spellings": [
+    "House District 40"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/ak-map.json, built from map-sources/); spellings from rosters/AK.json",
+ "state": "AK",
+ "unit": "house_district"
+}

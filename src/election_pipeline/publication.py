@@ -611,7 +611,7 @@ def targets(metadata):
                 "marts",
                 "county_results",
                 ("serving", "county_results"),
-                "state county contest_id choice choice_party total_votes",
+                "state county county_fips contest_id choice choice_party total_votes",
             )
         )
         if adapter.methods[1:]:
@@ -620,7 +620,7 @@ def targets(metadata):
                     "marts",
                     "county_method_results",
                     ("serving", "county_method_results"),
-                    "county contest_id choice method votes",
+                    "county county_fips contest_id choice method votes",
                 )
             )
     if adapter.ranked_choice:
@@ -650,7 +650,11 @@ def targets(metadata):
 # The parser's own totals (parsers.results.finish) beside the dbt marts that derive them.
 CROSS_CHECKS = (
     ("contest_results.csv", "contest_results", ("contest_id", "choice", "choice_party")),
-    ("county_results.csv", "county_results", ("county", "contest_id", "choice", "choice_party")),
+    (
+        "county_results.csv",
+        "county_results",
+        ("county", "county_fips", "contest_id", "choice", "choice_party"),
+    ),
 )
 
 

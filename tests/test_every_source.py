@@ -11,6 +11,8 @@ its format: the refusals of an edited capture, and the figures it reports.
 import contextlib
 import csv
 import dataclasses
+import hashlib
+import io
 import json
 import shutil
 import tempfile
@@ -21,6 +23,7 @@ from loading import copies, migrated, requires_database
 from snapshots import SNAPSHOTS, SYNTHETIC
 
 from election_pipeline import parse_report, publication
+from election_pipeline.counties import key as county_key
 from election_pipeline.dashboard.server import STATIC, make_payload, national_payload
 from election_pipeline.database import connect, load_parsed
 from election_pipeline.parsers.scope import recording
@@ -38,6 +41,50 @@ GOLDEN_OUTPUTS = json.loads(
     (ROOT / "tests/fixtures/registry/parse_outputs_2026.json").read_text(encoding="utf-8")
 )
 TIMED = {("ms_2026_general_all", "county_feeds.csv")}
+# The same files with the county_fips column (step 3.5): pinned byte for byte, and, with that
+# column dropped again, the old hashes above: nothing but the new column changed.
+GOLDEN_FIPS = json.loads(
+    (ROOT / "tests/fixtures/registry/parse_outputs_2026_fips.json").read_text(encoding="utf-8")
+)
+WITH_FIPS = ("results.csv", "county_results.csv")
+
+
+def without_fips(directory, name):
+    """SHA-256 of an output file as it was before it had a county_fips column."""
+    with (Path(directory) / name).open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.reader(handle))
+    column = rows[0].index("county_fips")
+    out = io.StringIO(newline="")
+    csv.writer(out).writerows([r[:column] + r[column + 1 :] for r in rows])
+    return hashlib.sha256(out.getvalue().encode("utf-8")).hexdigest()
+
+
+def legacy_hashes(report):
+    return {
+        name: without_fips(report["output_dir"], name) if name in WITH_FIPS else digest
+        for name, digest in report["output_sha256"].items()
+        if (report["source_id"], name) not in TIMED
+    }
+
+
+def check_fips(report, state):
+    """Each county row's FIPS is the FIPS of the map's feature the dashboard would join it to."""
+    geography = json.loads((STATIC / f"{state.lower()}-map.json").read_text(encoding="utf-8"))[
+        "counties"
+    ]
+    fips = {f["id"]: f["fips"] for f in geography}
+    seen = set()
+    for name in WITH_FIPS:
+        with (Path(report["output_dir"]) / name).open(encoding="utf-8", newline="") as handle:
+            for row in csv.DictReader(handle):
+                if row["county"]:
+                    assert row["county_fips"] == fips[county_key(row["county"])], row
+                    seen.add(row["county_fips"])
+                else:
+                    assert row["county_fips"] == "", row
+    return seen
+
+
 # What each fixture's report reads as (official status, report time and its basis,
 # reconciliations): the list of sources whose time has no known zone, or none, is what the
 # rule "newer means a later report time" must decide about (plan step 3.7).
@@ -209,8 +256,11 @@ class EverySourceTests(unittest.TestCase):
                         for name, digest in report["output_sha256"].items()
                         if (source_id, name) not in TIMED
                     },
-                    GOLDEN_OUTPUTS[source_id],
+                    GOLDEN_FIPS[source_id],
                 )
+                self.assertEqual(legacy_hashes(report), GOLDEN_OUTPUTS[source_id])
+                places = check_fips(report, source.state)
+                self.assertEqual(bool(places), adapter.county_mode != "none")
                 self.assertEqual(
                     dataclasses.asdict(parse_report.read(report)), GOLDEN_READINGS[source_id]
                 )

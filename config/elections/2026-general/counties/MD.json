@@ -1,0 +1,200 @@
+{
+ "counties": [
+  {
+   "fips": "24001",
+   "key": "ALLEGANYCOUNTY",
+   "name": "Allegany County",
+   "spellings": [
+    "Allegany County"
+   ]
+  },
+  {
+   "fips": "24003",
+   "key": "ANNEARUNDELCOUNTY",
+   "name": "Anne Arundel County",
+   "spellings": [
+    "Anne Arundel County"
+   ]
+  },
+  {
+   "fips": "24005",
+   "key": "BALTIMORECOUNTY",
+   "name": "Baltimore County",
+   "spellings": [
+    "Baltimore County"
+   ]
+  },
+  {
+   "fips": "24009",
+   "key": "CALVERTCOUNTY",
+   "name": "Calvert County",
+   "spellings": [
+    "Calvert County"
+   ]
+  },
+  {
+   "fips": "24011",
+   "key": "CAROLINECOUNTY",
+   "name": "Caroline County",
+   "spellings": [
+    "Caroline County"
+   ]
+  },
+  {
+   "fips": "24013",
+   "key": "CARROLLCOUNTY",
+   "name": "Carroll County",
+   "spellings": [
+    "Carroll County"
+   ]
+  },
+  {
+   "fips": "24015",
+   "key": "CECILCOUNTY",
+   "name": "Cecil County",
+   "spellings": [
+    "Cecil County"
+   ]
+  },
+  {
+   "fips": "24017",
+   "key": "CHARLESCOUNTY",
+   "name": "Charles County",
+   "spellings": [
+    "Charles County"
+   ]
+  },
+  {
+   "fips": "24019",
+   "key": "DORCHESTERCOUNTY",
+   "name": "Dorchester County",
+   "spellings": [
+    "Dorchester County"
+   ]
+  },
+  {
+   "fips": "24021",
+   "key": "FREDERICKCOUNTY",
+   "name": "Frederick County",
+   "spellings": [
+    "Frederick County"
+   ]
+  },
+  {
+   "fips": "24023",
+   "key": "GARRETTCOUNTY",
+   "name": "Garrett County",
+   "spellings": [
+    "Garrett County"
+   ]
+  },
+  {
+   "fips": "24025",
+   "key": "HARFORDCOUNTY",
+   "name": "Harford County",
+   "spellings": [
+    "Harford County"
+   ]
+  },
+  {
+   "fips": "24027",
+   "key": "HOWARDCOUNTY",
+   "name": "Howard County",
+   "spellings": [
+    "Howard County"
+   ]
+  },
+  {
+   "fips": "24029",
+   "key": "KENTCOUNTY",
+   "name": "Kent County",
+   "spellings": [
+    "Kent County"
+   ]
+  },
+  {
+   "fips": "24031",
+   "key": "MONTGOMERYCOUNTY",
+   "name": "Montgomery County",
+   "spellings": [
+    "Montgomery County"
+   ]
+  },
+  {
+   "fips": "24033",
+   "key": "PRINCEGEORGESCOUNTY",
+   "name": "Prince George's County",
+   "spellings": [
+    "Prince George's County"
+   ]
+  },
+  {
+   "fips": "24035",
+   "key": "QUEENANNESCOUNTY",
+   "name": "Queen Anne's County",
+   "spellings": [
+    "Queen Anne's County"
+   ]
+  },
+  {
+   "fips": "24037",
+   "key": "STMARYSCOUNTY",
+   "name": "St. Mary's County",
+   "spellings": [
+    "St. Mary's County"
+   ]
+  },
+  {
+   "fips": "24039",
+   "key": "SOMERSETCOUNTY",
+   "name": "Somerset County",
+   "spellings": [
+    "Somerset County"
+   ]
+  },
+  {
+   "fips": "24041",
+   "key": "TALBOTCOUNTY",
+   "name": "Talbot County",
+   "spellings": [
+    "Talbot County"
+   ]
+  },
+  {
+   "fips": "24043",
+   "key": "WASHINGTONCOUNTY",
+   "name": "Washington County",
+   "spellings": [
+    "Washington County"
+   ]
+  },
+  {
+   "fips": "24045",
+   "key": "WICOMICOCOUNTY",
+   "name": "Wicomico County",
+   "spellings": [
+    "Wicomico County"
+   ]
+  },
+  {
+   "fips": "24047",
+   "key": "WORCESTERCOUNTY",
+   "name": "Worcester County",
+   "spellings": [
+    "Worcester County"
+   ]
+  },
+  {
+   "fips": "24510",
+   "key": "BALTIMORECITY",
+   "name": "Baltimore city",
+   "spellings": [
+    "Baltimore City",
+    "Baltimore city"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/md-map.json, built from map-sources/); spellings from rosters/MD.json",
+ "state": "MD",
+ "unit": "county"
+}

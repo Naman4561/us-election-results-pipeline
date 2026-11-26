@@ -50,9 +50,9 @@ class DatabaseArtifactTests(unittest.TestCase):
 
         self.assertEqual([entry[1] for entry in plan], [("landing", "results")])
         self.assertEqual(len(rows), report["output_rows"])
-        # release, line, state, unit, county, precinct ... total, reporting, attributes
-        self.assertEqual(rows[0][:6], (1, 2, "NC", "precinct", "WAKE", "001"))
-        self.assertEqual(rows[0][11], 10)
+        # release, line, state, unit, county, county FIPS, precinct ... total, reporting, attributes
+        self.assertEqual(rows[0][:7], (1, 2, "NC", "precinct", "WAKE", "37183", "001"))
+        self.assertEqual(rows[0][12], 10)
         self.assertIs(rows[0][-1].obj["real_precinct"], True)
         methods = loaded[("landing", "result_methods")]
         self.assertEqual(len(methods), 4 * len(rows))

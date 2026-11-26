@@ -1,0 +1,359 @@
+{
+ "counties": [
+  {
+   "fips": "16001",
+   "key": "ADA",
+   "name": "Ada",
+   "spellings": [
+    "Ada"
+   ]
+  },
+  {
+   "fips": "16003",
+   "key": "ADAMS",
+   "name": "Adams",
+   "spellings": [
+    "Adams"
+   ]
+  },
+  {
+   "fips": "16005",
+   "key": "BANNOCK",
+   "name": "Bannock",
+   "spellings": [
+    "Bannock"
+   ]
+  },
+  {
+   "fips": "16007",
+   "key": "BEARLAKE",
+   "name": "Bear Lake",
+   "spellings": [
+    "Bear Lake"
+   ]
+  },
+  {
+   "fips": "16009",
+   "key": "BENEWAH",
+   "name": "Benewah",
+   "spellings": [
+    "Benewah"
+   ]
+  },
+  {
+   "fips": "16011",
+   "key": "BINGHAM",
+   "name": "Bingham",
+   "spellings": [
+    "Bingham"
+   ]
+  },
+  {
+   "fips": "16013",
+   "key": "BLAINE",
+   "name": "Blaine",
+   "spellings": [
+    "Blaine"
+   ]
+  },
+  {
+   "fips": "16015",
+   "key": "BOISE",
+   "name": "Boise",
+   "spellings": [
+    "Boise"
+   ]
+  },
+  {
+   "fips": "16017",
+   "key": "BONNER",
+   "name": "Bonner",
+   "spellings": [
+    "Bonner"
+   ]
+  },
+  {
+   "fips": "16019",
+   "key": "BONNEVILLE",
+   "name": "Bonneville",
+   "spellings": [
+    "Bonneville"
+   ]
+  },
+  {
+   "fips": "16021",
+   "key": "BOUNDARY",
+   "name": "Boundary",
+   "spellings": [
+    "Boundary"
+   ]
+  },
+  {
+   "fips": "16023",
+   "key": "BUTTE",
+   "name": "Butte",
+   "spellings": [
+    "Butte"
+   ]
+  },
+  {
+   "fips": "16025",
+   "key": "CAMAS",
+   "name": "Camas",
+   "spellings": [
+    "Camas"
+   ]
+  },
+  {
+   "fips": "16027",
+   "key": "CANYON",
+   "name": "Canyon",
+   "spellings": [
+    "Canyon"
+   ]
+  },
+  {
+   "fips": "16029",
+   "key": "CARIBOU",
+   "name": "Caribou",
+   "spellings": [
+    "Caribou"
+   ]
+  },
+  {
+   "fips": "16031",
+   "key": "CASSIA",
+   "name": "Cassia",
+   "spellings": [
+    "Cassia"
+   ]
+  },
+  {
+   "fips": "16033",
+   "key": "CLARK",
+   "name": "Clark",
+   "spellings": [
+    "Clark"
+   ]
+  },
+  {
+   "fips": "16035",
+   "key": "CLEARWATER",
+   "name": "Clearwater",
+   "spellings": [
+    "Clearwater"
+   ]
+  },
+  {
+   "fips": "16037",
+   "key": "CUSTER",
+   "name": "Custer",
+   "spellings": [
+    "Custer"
+   ]
+  },
+  {
+   "fips": "16039",
+   "key": "ELMORE",
+   "name": "Elmore",
+   "spellings": [
+    "Elmore"
+   ]
+  },
+  {
+   "fips": "16041",
+   "key": "FRANKLIN",
+   "name": "Franklin",
+   "spellings": [
+    "Franklin"
+   ]
+  },
+  {
+   "fips": "16043",
+   "key": "FREMONT",
+   "name": "Fremont",
+   "spellings": [
+    "Fremont"
+   ]
+  },
+  {
+   "fips": "16045",
+   "key": "GEM",
+   "name": "Gem",
+   "spellings": [
+    "Gem"
+   ]
+  },
+  {
+   "fips": "16047",
+   "key": "GOODING",
+   "name": "Gooding",
+   "spellings": [
+    "Gooding"
+   ]
+  },
+  {
+   "fips": "16049",
+   "key": "IDAHO",
+   "name": "Idaho",
+   "spellings": [
+    "Idaho"
+   ]
+  },
+  {
+   "fips": "16051",
+   "key": "JEFFERSON",
+   "name": "Jefferson",
+   "spellings": [
+    "Jefferson"
+   ]
+  },
+  {
+   "fips": "16053",
+   "key": "JEROME",
+   "name": "Jerome",
+   "spellings": [
+    "Jerome"
+   ]
+  },
+  {
+   "fips": "16055",
+   "key": "KOOTENAI",
+   "name": "Kootenai",
+   "spellings": [
+    "Kootenai"
+   ]
+  },
+  {
+   "fips": "16057",
+   "key": "LATAH",
+   "name": "Latah",
+   "spellings": [
+    "Latah"
+   ]
+  },
+  {
+   "fips": "16059",
+   "key": "LEMHI",
+   "name": "Lemhi",
+   "spellings": [
+    "Lemhi"
+   ]
+  },
+  {
+   "fips": "16061",
+   "key": "LEWIS",
+   "name": "Lewis",
+   "spellings": [
+    "Lewis"
+   ]
+  },
+  {
+   "fips": "16063",
+   "key": "LINCOLN",
+   "name": "Lincoln",
+   "spellings": [
+    "Lincoln"
+   ]
+  },
+  {
+   "fips": "16065",
+   "key": "MADISON",
+   "name": "Madison",
+   "spellings": [
+    "Madison"
+   ]
+  },
+  {
+   "fips": "16067",
+   "key": "MINIDOKA",
+   "name": "Minidoka",
+   "spellings": [
+    "Minidoka"
+   ]
+  },
+  {
+   "fips": "16069",
+   "key": "NEZPERCE",
+   "name": "Nez Perce",
+   "spellings": [
+    "Nez Perce"
+   ]
+  },
+  {
+   "fips": "16071",
+   "key": "ONEIDA",
+   "name": "Oneida",
+   "spellings": [
+    "Oneida"
+   ]
+  },
+  {
+   "fips": "16073",
+   "key": "OWYHEE",
+   "name": "Owyhee",
+   "spellings": [
+    "Owyhee"
+   ]
+  },
+  {
+   "fips": "16075",
+   "key": "PAYETTE",
+   "name": "Payette",
+   "spellings": [
+    "Payette"
+   ]
+  },
+  {
+   "fips": "16077",
+   "key": "POWER",
+   "name": "Power",
+   "spellings": [
+    "Power"
+   ]
+  },
+  {
+   "fips": "16079",
+   "key": "SHOSHONE",
+   "name": "Shoshone",
+   "spellings": [
+    "Shoshone"
+   ]
+  },
+  {
+   "fips": "16081",
+   "key": "TETON",
+   "name": "Teton",
+   "spellings": [
+    "Teton"
+   ]
+  },
+  {
+   "fips": "16083",
+   "key": "TWINFALLS",
+   "name": "Twin Falls",
+   "spellings": [
+    "Twin Falls"
+   ]
+  },
+  {
+   "fips": "16085",
+   "key": "VALLEY",
+   "name": "Valley",
+   "spellings": [
+    "Valley"
+   ]
+  },
+  {
+   "fips": "16087",
+   "key": "WASHINGTON",
+   "name": "Washington",
+   "spellings": [
+    "Washington"
+   ]
+  }
+ ],
+ "provenance": "FIPS and names from the pinned Census map (dashboard/static/id-map.json, built from map-sources/); spellings from rosters/ID.json",
+ "state": "ID",
+ "unit": "county"
+}

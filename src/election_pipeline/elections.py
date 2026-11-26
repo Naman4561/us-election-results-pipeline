@@ -199,6 +199,7 @@ def fingerprint(code, election=None, config=None):
         parts.append(b"parties\0" + json.dumps(readable, sort_keys=True).encode())
     reviewed = [
         where / "rosters" / f"{code}.json",
+        where / "counties" / f"{code}.json",
         *sorted(where.glob(f"tables/{code.lower()}-*.json")),
     ]
     parts += [
