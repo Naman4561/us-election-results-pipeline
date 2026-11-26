@@ -21,6 +21,7 @@ from election_pipeline.parsers import certified
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import row
+from election_pipeline.platforms import party_names
 
 MEMBER = "20261103_CountyResults.csv"
 HEADER = [
@@ -32,7 +33,7 @@ HEADER = [
 OFFICES = {"FOR UNITED STATES SENATOR": "OK-SEN", "FOR GOVERNOR": "OK-GOV"}
 HOUSE = re.compile(r"FOR UNITED STATES REPRESENTATIVE DISTRICT (\d\d)")
 # The parties on Oklahoma's 2026 ballot for these offices; any other is refused.
-PARTIES = {"REP", "DEM", "LIB", "IND"}
+PARTIES = set(party_names("OK"))
 COUNTIES = (
     "Adair", "Alfalfa", "Atoka", "Beaver", "Beckham", "Blaine", "Bryan", "Caddo",
     "Canadian", "Carter", "Cherokee", "Choctaw", "Cimarron", "Cleveland", "Coal",

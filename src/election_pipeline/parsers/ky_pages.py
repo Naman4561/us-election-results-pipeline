@@ -25,13 +25,11 @@ from election_pipeline.parsers.ky import contest_key
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import formatted_count, row
+from election_pipeline.platforms import party_names
 
 PAGE = "https://vrsws.sos.ky.gov/liveresults/Statewide"
 # The feed's PoliticalParties list (PartyId -> Abbreviation), from its Nov 3 capture.
-PARTIES = {
-    "1": "DEM", "2": "REP", "3": "OTH", "4": "CON", "5": "REF",
-    "6": "IND", "7": "LIB", "8": "SOC", "9": "GRN", "10": "KEN",
-}  # fmt: skip
+PARTIES = party_names("KY")
 WRITE_IN = ("write-in", "Write-in")
 EASTERN = timezone(timedelta(hours=-5))
 MAX_BYTES = 40_000_000

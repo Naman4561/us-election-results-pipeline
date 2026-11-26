@@ -21,6 +21,7 @@ import zipfile
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import row
+from election_pipeline.platforms import party_names
 
 HEADER = [
     "Election Name", "County Name", "Office Name", "District Name", "Party Name",
@@ -39,13 +40,7 @@ QUESTION = (
 )  # fmt: skip
 HOUSE = re.compile(r"(\d+)(?:st|nd|rd|th) Congressional District")
 # The parties on Pennsylvania's 2026 ballot for these offices; any other is refused.
-PARTIES = {
-    "Democratic": "DEM",
-    "Republican": "REP",
-    "Libertarian": "LIB",
-    "Green": "GRN",
-    "The Independent Party": "TIP",
-}
+PARTIES = party_names("PA")
 COUNTIES = (
     "Adams", "Allegheny", "Armstrong", "Beaver", "Bedford", "Berks", "Blair", "Bradford",
     "Bucks", "Butler", "Cambria", "Cameron", "Carbon", "Centre", "Chester", "Clarion",

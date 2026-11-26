@@ -151,6 +151,23 @@ def parties(config=None):
     return read(Path(config or CONFIG) / "parties.toml")
 
 
+def parties_for(code, election=None, config=None):
+    """The party names state ``code`` can read, and nothing else in ``parties.toml``: its
+    platform reader's table (for ENR, its own section) and its own ``[states.XX]`` table.
+    A change to another state's names does not change it."""
+    config = Path(config or CONFIG)
+    where = Path(election or folder(config))
+    names = parties(config)
+    reader = read(where / "states" / f"{code}.toml").get("platform", {}).get("reader")
+    found = {}
+    if reader == "enr":
+        found["enr"] = names.get("enr", {}).get(code)
+    elif reader:
+        found[reader] = names.get(reader)
+    found["states"] = names.get("states", {}).get(code)
+    return {k: v for k, v in found.items() if v}
+
+
 def table(name, config=None):
     """The bytes of a reviewed table of the election in force (``tables/<name>``)."""
     return (folder(config) / "tables" / name).read_bytes()
@@ -173,11 +190,10 @@ def fingerprint(code, election=None, config=None):
         json.dumps(durable(config)[code], sort_keys=True).encode(),
         (where / "election.toml").read_bytes().replace(b"\r\n", b"\n"),
     ]
-    if "platform" in read(where / "states" / f"{code}.toml"):
-        # A platform reader's party names are part of what it reads.
-        parts.append(
-            b"parties.toml\0" + (config / "parties.toml").read_bytes().replace(b"\r\n", b"\n")
-        )
+    readable = parties_for(code, where, config)
+    if readable:
+        # The party names a state's readers can see are part of what it reads.
+        parts.append(b"parties\0" + json.dumps(readable, sort_keys=True).encode())
     reviewed = [
         where / "rosters" / f"{code}.json",
         *sorted(where.glob(f"tables/{code.lower()}-*.json")),

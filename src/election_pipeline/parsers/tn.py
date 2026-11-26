@@ -20,6 +20,7 @@ from pypdf import PdfReader
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import row
+from election_pipeline.platforms import party_names
 
 MAX_PAGES = 50
 SENATE = "United States Senate"
@@ -27,7 +28,7 @@ HOUSE = re.compile(r"United States House of Representatives District (\d)")
 CANDIDATE = re.compile(r"(.+) \(([A-Z])\) - ([\d,]+)")
 PERCENT = re.compile(r"(?:✔\s*)?(\d{1,3}\.\d\d)%(.*)")
 COMPLETED = re.compile(r"Final Unof(?:fi|ﬁ)cial Results (\d+) of (\d+) Counties Completed")
-PARTIES = {"R": "REP", "D": "DEM", "I": "IND", "L": "LIB", "G": "GRN"}
+PARTIES = party_names("TN")
 
 
 def number(value):

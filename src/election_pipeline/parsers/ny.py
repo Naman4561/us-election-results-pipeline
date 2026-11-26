@@ -31,6 +31,7 @@ from pypdf import PdfReader
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import row
+from election_pipeline.platforms import party_names
 
 MAX_PAGES = 400
 # Eastern Standard Time: the page's update time is from November, after daylight time.
@@ -42,21 +43,7 @@ HEADER = re.compile(
 )
 # The counts can wrap below the label, after the registered-voter count.
 REPORTING = re.compile(r"Election Districts Reporting:.*?(?<![\d,])([\d,]+)\s+of\s+([\d,]+)")
-PARTIES = {
-    "DEM": "DEM",
-    "REP": "REP",
-    "WOR": "WOR",
-    "CON": "CON",
-    "Taxpayer Rights": "TXR",
-    "Vote Affordable": "VAF",
-    "Queens United": "QUN",
-    "Libertarian": "LIB",
-    "Our Future": "OFP",
-    "For All of Us": "FAU",
-    "Karen Ortiz": "KOP",
-    "Socialism PSL": "PSL",
-    "Speak The Truth": "STT",
-}
+PARTIES = party_names("NY")
 CLOSING = ("Blank", "Void", "Write-in", "Total Votes")
 # In the printed layout a candidate's name starts at the left margin; party labels start
 # further right, in their own column.

@@ -19,6 +19,7 @@ from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row
 from election_pipeline.parsers.workbook import Workbook
+from election_pipeline.platforms import party_names
 
 RESULTS = "certified-results.zip"
 SUMMARIES = "2026 General Results Summaries - OFFICIAL.xlsx"
@@ -30,7 +31,7 @@ OFFICES = {
     "Governor": "WY-GOV",
 }
 # The parties on Wyoming's 2026 ballot for these offices; any other is refused.
-PARTIES = {"R": "REP", "D": "DEM", "L": "LIB", "C": "CON"}
+PARTIES = party_names("WY")
 COUNTIES = (
     "Albany", "Big Horn", "Campbell", "Carbon", "Converse", "Crook", "Fremont", "Goshen",
     "Hot Springs", "Johnson", "Laramie", "Lincoln", "Natrona", "Niobrara", "Park",

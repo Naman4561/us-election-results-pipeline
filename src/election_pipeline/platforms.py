@@ -45,6 +45,12 @@ def table(code, reader, keys, optional=()):
     return found
 
 
+def party_names(code):
+    """{party as the state's site prints it: stored code} for a parser that reads its own."""
+    found = elections.parties().get("states", {}).get(code)
+    return names(found, f"states.{code} parties", code)
+
+
 def names(raw, label, code):
     """A table of text to text, with no blank or repeated entry."""
     if not isinstance(raw, dict) or not raw:

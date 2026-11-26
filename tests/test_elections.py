@@ -131,6 +131,34 @@ class FingerprintTests(unittest.TestCase):
             path.write_bytes(unix.replace(b"\n", b"\r\n"))
             self.assertEqual(fingerprint("KY", config=config), every["KY"])
 
+    def test_a_party_name_changes_only_the_states_that_read_it(self):
+        codes = ("AR", "ND", "GA", "MT", "OR", "CT", "KY", "NC")
+        with tempfile.TemporaryDirectory() as directory:
+            config = Path(directory) / "config"
+            shutil.copytree(elections.CONFIG, config)
+            names = config / "parties.toml"
+
+            def moved(old, new):
+                before = {code: fingerprint(code, config=config) for code in codes}
+                names.write_text(
+                    names.read_text(encoding="utf-8").replace(old, new, 1), encoding="utf-8"
+                )
+                return {c for c in codes if fingerprint(c, config=config) != before[c]}
+
+            # A shared platform table re-keys that platform's states; another platform's not.
+            self.assertEqual(moved('"Write-In" = "W"', '"Write-In" = "WI"'), {"AR", "ND"})
+            # One site's section re-keys that state alone, though Oregon's table looks the same.
+            self.assertEqual(
+                moved(
+                    '"Green" = "GRN"\n"Independent" = "IND"\n\n[enr.OR]',
+                    '"Green" = "GRN"\n"Independent" = "IN"\n\n[enr.OR]',
+                ),
+                {"MT"},
+            )
+            # A state's own table re-keys that state only.
+            self.assertEqual(moved("[states.CT]\n", "[states.CT]\n# reviewed\n"), set())
+            self.assertEqual(moved('"WF" = "WFP"', '"WF" = "WFX"'), {"CT"})
+
     def test_durable_facts_are_checked_as_they_load(self):
         with tempfile.TemporaryDirectory() as directory:
             config = Path(directory)

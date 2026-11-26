@@ -24,6 +24,7 @@ from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import formatted_count, text
 from election_pipeline.parsers.structured import row as result_row
+from election_pipeline.platforms import party_names
 
 MEMBERS = {
     "senate.csv": "MA-SEN",
@@ -32,7 +33,7 @@ MEMBERS = {
 }
 TAIL = ["All Others", "Blanks", "Total Votes Cast"]
 # The parties on Massachusetts's 2026 ballot for these races; any other is refused.
-PARTIES = {"Democratic": "DEM", "Republican": "REP", "Unenrolled": "IND"}
+PARTIES = party_names("MA")
 WRITE_IN = ("write-in", "Write-in")
 DIRECTIONS = {"N.": "North", "S.": "South", "E.": "East", "W.": "West"}
 

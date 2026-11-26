@@ -18,16 +18,13 @@ from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, formatted_count, row, text, unique_json
+from election_pipeline.platforms import party_names
 
 ELECTION = "GE2026"
 RACES = {"U.S. Senator": "DE-SEN", "Representative In Congress": "DE-AL"}
 STATUS = {"UNOFFICIAL RESULTS": False, "OFFICIAL RESULTS": True}
 # The parties on Delaware's 2026 general election results; any other is refused.
-PARTIES = {
-    "Democratic Party": "DEM",
-    "Republican Party": "REP",
-    "Independent Party of Delaware": "IPD",
-}
+PARTIES = party_names("DE")
 COUNTIES = ("New Castle", "Kent", "Sussex")
 
 

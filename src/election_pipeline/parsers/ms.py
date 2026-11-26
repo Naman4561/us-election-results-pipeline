@@ -13,6 +13,7 @@ from pathlib import Path
 from election_pipeline import elections
 from election_pipeline.parsers.html import Tree
 from election_pipeline.parsers.results import finish
+from election_pipeline.platforms import party_names
 from election_pipeline.storage import member_path
 
 POLICY_SHA256 = "11c75b3c04d9f0028378355e0f69816492d6a5134b7e27f1f7e6fb7033a49452"
@@ -357,7 +358,7 @@ def hart_html(raw, county, contract):
         )
         values = one(pattern, body, name)
         remainder = re.sub(pattern, "", remainder)
-        party = {"Republican": "REP", "Democrat": "DEM", "Independent": "IND"}[values[0]]
+        party = RECAP_PARTIES[values[0]]
         methods = [integer(v) for v in values[1:]]
         if party != contract["candidates"][name] or sum(methods[:-1]) != methods[-1]:
             raise ValueError("Hart candidate party/method counts disagree")
@@ -815,7 +816,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
 RECAP = "certified-recap.csv"
 RECAP_HEADER = ["County", "Office", "Candidate", "Party", "County Total", "State Total"]
 RECAP_OFFICE = "United States-Senate"
-RECAP_PARTIES = {"Democrat": "DEM", "Republican": "REP", "Independent": "IND"}
+RECAP_PARTIES = party_names("MS")
 
 
 def parse_recap(archive_path, name, source, settings, output, stats, reference=None):

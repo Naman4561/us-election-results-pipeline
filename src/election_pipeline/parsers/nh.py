@@ -25,6 +25,7 @@ from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row
 from election_pipeline.parsers.workbook import Workbook
+from election_pipeline.platforms import party_names
 
 MEMBERS = {
     "2026-ge-us-senator-summary.xlsx": ("NH-SEN", "United States Senator"),
@@ -36,7 +37,7 @@ TITLE = "State of New Hampshire - General Election"
 # The import zip's layout, for scripts/pack_import.py (election_pipeline.packing).
 PACK = {"members": tuple(MEMBERS)}
 DATE = "November 03, 2026"
-PARTIES = {"d": "DEM", "r": "REP", "l": "LIB", "c": "CON", "i": "IND", "g": "GRN"}
+PARTIES = party_names("NH")
 COUNTIES = (
     "Belknap", "Carroll", "Cheshire", "Coos", "Grafton", "Hillsborough", "Merrimack",
     "Rockingham", "Strafford", "Sullivan",
