@@ -21,3 +21,25 @@ min_interval_seconds = 600
 "contests.json" = "https://enr-results-api.totalresults.com/Contest/GetContestSearchList?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd"
 "info.json" = "https://enr-results-api.totalresults.com/Election/GetElectionInfo?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd"
 "results-statewide.json" = "https://enr-results-api.totalresults.com/Contest/GetContestResults?cId=arkansas&electionID=11b07106-031e-4d7c-911a-d01fb473d6dd&contestType=Statewide"
+
+[platform]
+reader = "tally"
+fips = "05"
+election_id = "11b07106-031e-4d7c-911a-d01fb473d6dd"
+election_name = "2026 General Election & Judical Runoff"
+
+[platform.types]                     # each race's contest type, which names its results file
+"AR-SEN" = "Federal"
+"AR-GOV" = "Statewide"
+"AR-01" = "Federal"
+"AR-02" = "Federal"
+"AR-03" = "Federal"
+"AR-04" = "Federal"
+
+[platform.titles]                    # the contest title as the site writes it, to the race
+"U.S. Senate" = "AR-SEN"
+"Governor" = "AR-GOV"
+"U.S. Congress District 01" = "AR-01"
+"U.S. Congress District 02" = "AR-02"
+"U.S. Congress District 03" = "AR-03"
+"U.S. Congress District 04" = "AR-04"

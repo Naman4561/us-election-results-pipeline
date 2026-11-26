@@ -23,7 +23,7 @@ import hashlib
 import json
 import re
 import tomllib
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, field, fields
 from datetime import date
 from pathlib import Path
 
@@ -114,6 +114,9 @@ class Election:
     sources: dict[str, Source]
     acquisition: dict[str, Acquisition]
     tls: tuple[TlsException, ...] = ()
+    # Each state's [platform] table as written: how its platform reader is set up
+    # (election_pipeline.platforms checks and reads it).
+    platforms: dict = field(default_factory=dict)
 
 
 def read(path):
@@ -143,6 +146,11 @@ def durable(config=None):
     return found
 
 
+def parties(config=None):
+    """{platform: {party name as published: party code}}, the reviewed ``config/parties.toml``."""
+    return read(Path(config or CONFIG) / "parties.toml")
+
+
 def table(name, config=None):
     """The bytes of a reviewed table of the election in force (``tables/<name>``)."""
     return (folder(config) / "tables" / name).read_bytes()
@@ -165,6 +173,11 @@ def fingerprint(code, election=None, config=None):
         json.dumps(durable(config)[code], sort_keys=True).encode(),
         (where / "election.toml").read_bytes().replace(b"\r\n", b"\n"),
     ]
+    if "platform" in read(where / "states" / f"{code}.toml"):
+        # A platform reader's party names are part of what it reads.
+        parts.append(
+            b"parties.toml\0" + (config / "parties.toml").read_bytes().replace(b"\r\n", b"\n")
+        )
     reviewed = [
         where / "rosters" / f"{code}.json",
         *sorted(where.glob(f"tables/{code.lower()}-*.json")),
@@ -217,7 +230,7 @@ def load(election=None, root=None, config=None):
         raise ValueError(f"{folder.name}/election.toml says it is {head['id']!r}")
     when = head["date"].isoformat() if isinstance(head["date"], date) else head["date"]
     settings = CollectorSettings(**head.get("collector", {}))
-    states, sources, acquisition = {}, {}, {}
+    states, sources, acquisition, platforms = {}, {}, {}, {}
     for path in sorted((folder / "states").glob("*.toml")):
         raw = read(path)
         code = raw.pop("code", None)
@@ -225,6 +238,7 @@ def load(election=None, root=None, config=None):
             raise ValueError(f"{path.name}: the file's code must be a known state's, {path.stem}")
         races, table = raw.pop("races", {}), raw.pop("source", {})
         mode = raw.pop("acquisition", {})
+        platform = raw.pop("platform", None)
         if set(races) - {"senate", "governor", "house"}:
             raise ValueError(f"{path.name}: races hold senate, governor and house only")
         unknown = set(raw) - STATE_KEYS - {"methods"}
@@ -246,6 +260,8 @@ def load(election=None, root=None, config=None):
         )
         sources[source.source_id] = source
         acquisition[source.source_id] = acquisition_of(mode)
+        if platform is not None:
+            platforms[code] = platform
     for path in sorted((folder / "datasets").glob("*.toml")):
         raw = read(path)
         source = source_of(raw["source"], raw["state"], when, path.name)
@@ -264,7 +280,7 @@ def load(election=None, root=None, config=None):
     named = [host for item in tls for host in item.hosts]
     if len(named) != len(set(named)):
         raise ValueError("A host is named in one TLS exception only")
-    return Election(head["id"], when, settings, states, sources, acquisition, tls)
+    return Election(head["id"], when, settings, states, sources, acquisition, tls, platforms)
 
 
 def plain(value):

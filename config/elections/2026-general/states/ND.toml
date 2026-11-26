@@ -20,3 +20,15 @@ min_interval_seconds = 600
 [source.files]
 "contests.json" = "https://api.resultsnd.sos.nd.gov/Contest/GetContestSearchList?cId=north-dakota&electionID=348"
 "info.json" = "https://api.resultsnd.sos.nd.gov/Election/GetElectionInfo?cId=north-dakota&electionID=348"
+
+[platform]
+reader = "tally"
+fips = "38"
+election_id = "348"
+election_name = "2026 General Election"
+
+[platform.types]                     # each race's contest type, which names its results file
+"ND-AL" = "SW"
+
+[platform.titles]                    # the contest title as the site writes it, to the race
+"Representative in Congress" = "ND-AL"

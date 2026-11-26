@@ -1,0 +1,22 @@
+# The party codes a platform's sites publish under, reviewed once, by platform.
+#
+# Each table maps a party name exactly as the platform writes it to the code stored in
+# results (DEM, REP, LIB, GRN, IND, CON ...). A reader refuses a party it does not list:
+# a new spelling is added here, with its source in the commit message, never guessed.
+# Changing this file re-keys the release check of every state whose definition has a
+# [platform] table (elections.fingerprint).
+
+[tally]
+"Republican" = "REP"
+"Democratic" = "DEM"
+"Democratic-NPL" = "DEM"
+"Libertarian" = "LIB"
+"Green" = "GRN"
+"Independent" = "IND"
+"independent nomination" = "IND"
+"Constitution" = "CON"
+"American Delta" = "ADP"
+"Write-In" = "W"
+# Stored as the code this reader has always produced for it (the name, uppercased). A
+# shorter code is a separate, reviewed change: it alters stored results.
+"Nonpartisan" = "NONPARTISAN"

@@ -7,9 +7,10 @@ definition says each state's races, source and policies; ``State`` is in ``state
 from election_pipeline import elections
 from election_pipeline.state_model import State
 
-__all__ = ["STATES", "State", "parser_for", "publication_lock", "state_adapter"]
+__all__ = ["ELECTION", "STATES", "State", "parser_for", "publication_lock", "state_adapter"]
 
-STATES = elections.load().states
+ELECTION = elections.load()
+STATES = ELECTION.states
 
 
 def state_adapter(code):
