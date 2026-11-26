@@ -18,3 +18,15 @@ primary_filename = "current_ver.txt"
 expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
 supplemental_members = ["detail.zip", "settings.json", "summary.json"]
 min_interval_seconds = 3540
+
+[platform]
+reader = "clarity"
+detail = "txt"
+
+[platform.titles]                  # the contest title as the site writes it
+"United States Representative District 1" = "IA-01"
+"United States Representative District 2" = "IA-02"
+"United States Representative District 3" = "IA-03"
+"United States Representative District 4" = "IA-04"
+"Governor and Lt. Governor" = "IA-GOV"
+"United States Senator" = "IA-SEN"

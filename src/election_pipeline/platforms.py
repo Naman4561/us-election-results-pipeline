@@ -147,3 +147,63 @@ def enhanced_voting(source):
         skip_methods=raw.get("skip_methods", False),
         county_mode=raw["county_names"],
     )
+
+
+@dataclass(frozen=True)
+class Clarity:
+    state: str
+    name: str
+    detail: str  # the detail report's kind: "xml" or "txt"
+    election_name: str  # the detail XML's ElectionName; "" for a txt report
+    vote_type: str  # the one vote type of a detail XML that publishes one
+    fold_quotes: bool  # the summary and detail write nicknames with different quote marks
+    statewide_counties: int  # counties a statewide race must cover; 0 = not checked here
+    titles: dict  # contest title as the site writes it -> race
+    workbook_titles: dict  # the same for the election-night workbook some snapshots hold
+
+    def race(self, title):
+        """The race a contest title names; the site sometimes doubles its spaces."""
+        return self.titles.get(" ".join(title.split()))
+
+    def workbook_race(self, title):
+        return self.workbook_titles.get(title)
+
+    def same_name(self, detail, summary):
+        if not self.fold_quotes:
+            return detail == summary
+
+        def fold(name):
+            return name.replace("''", '"').replace("'", '"')
+
+        return fold(detail) == fold(summary)
+
+
+def clarity(source):
+    """The Clarity reader's settings for ``source``'s state."""
+    code = source.state
+    raw = table(
+        code,
+        "clarity",
+        ("detail", "titles"),
+        ("election_name", "vote_type", "fold_quotes", "statewide_counties", "workbook_titles"),
+    )
+    if raw["detail"] not in ("xml", "txt"):
+        raise ValueError(f"{code}: Clarity detail must be xml or txt")
+    if raw["detail"] == "xml" and not raw.get("election_name"):
+        raise ValueError(f"{code}: a Clarity detail XML needs the election's name")
+    titles = names(raw["titles"], "titles", code)
+    wanted = state_adapter(code).races
+    if set(titles.values()) != set(wanted) or len(set(titles.values())) != len(titles):
+        raise ValueError(f"{code}: [platform] titles must name each of its races once")
+    extra = raw.get("workbook_titles")
+    return Clarity(
+        state=code,
+        name=state_adapter(code).name,
+        detail=raw["detail"],
+        election_name=raw.get("election_name", ""),
+        vote_type=raw.get("vote_type", ""),
+        fold_quotes=raw.get("fold_quotes", False),
+        statewide_counties=raw.get("statewide_counties", 0),
+        titles=titles,
+        workbook_titles=names(extra, "workbook_titles", code) if extra else {},
+    )

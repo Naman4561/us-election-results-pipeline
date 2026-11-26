@@ -22,10 +22,14 @@ class PlatformTests(unittest.TestCase):
         return ELECTION.sources[ELECTION.states[code].source_id]
 
     def test_every_platform_state_reads_and_names_each_race_once(self):
-        readers = {"tally": platforms.tally, "enhanced_voting": platforms.enhanced_voting}
+        readers = {
+            "tally": platforms.tally,
+            "enhanced_voting": platforms.enhanced_voting,
+            "clarity": platforms.clarity,
+        }
         self.assertEqual(
             sorted(ELECTION.platforms),
-            ["AR", "GA", "ID", "ND", "RI", "UT", "VA", "WA"],
+            ["AR", "CO", "GA", "IA", "ID", "ND", "RI", "SC", "UT", "VA", "WA", "WV"],
         )
         for code, raw in ELECTION.platforms.items():
             with self.subTest(code):
@@ -75,6 +79,23 @@ class PlatformTests(unittest.TestCase):
         self.assertIsNone(platforms.enhanced_voting(self.source("RI")).county)
         with self.assertRaises(ValueError):
             platforms.enhanced_voting(self.source("GA")).county("Fulton")
+
+    def test_clarity_titles_ignore_doubled_spaces_and_quote_folding_is_a_setting(self):
+        south_carolina = platforms.clarity(self.source("SC"))
+        self.assertEqual(south_carolina.race("U.S.  Senate"), "SC-SEN")
+        self.assertEqual(south_carolina.race("U.S. House of Representatives, District  1"), "SC-01")
+        self.assertEqual(south_carolina.workbook_race("U.S. Senate (Vote For 1)"), "SC-SEN")
+        self.assertIsNone(south_carolina.workbook_race("U.S. Senate"))
+        self.assertFalse(south_carolina.same_name("Mark 'Jr' Elworth", 'Mark "Jr" Elworth'))
+        colorado = platforms.clarity(self.source("CO"))
+        self.assertTrue(colorado.same_name("Mark 'Jr' Elworth", 'Mark "Jr" Elworth'))
+
+    def test_a_clarity_detail_xml_needs_the_elections_name(self):
+        def nameless(table):
+            table.pop("election_name")
+
+        with edited("CO", nameless), self.assertRaisesRegex(ValueError, "election's name"):
+            platforms.clarity(self.source("CO"))
 
     def test_only_a_reviewed_party_is_read(self):
         found = platforms.tally(self.source("ND"))

@@ -18,3 +18,31 @@ primary_filename = "current_ver.txt"
 expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
 supplemental_members = ["detail.zip", "settings.json", "summary.json"]
 min_interval_seconds = 600
+
+[platform]
+reader = "clarity"
+detail = "xml"
+election_name = "2026 Statewide General Election"
+statewide_counties = 46
+
+[platform.titles]                  # the contest title as the site writes it
+"U.S. House of Representatives, District 1" = "SC-01"
+"U.S. House of Representatives, District 2" = "SC-02"
+"U.S. House of Representatives, District 3" = "SC-03"
+"U.S. House of Representatives, District 4" = "SC-04"
+"U.S. House of Representatives, District 5" = "SC-05"
+"U.S. House of Representatives, District 6" = "SC-06"
+"U.S. House of Representatives, District 7" = "SC-07"
+"Governor and Lieutenant Governor" = "SC-GOV"
+"U.S. Senate" = "SC-SEN"
+
+[platform.workbook_titles]         # the election-night workbook's titles
+"U.S. House of Representatives, District 1 (Vote For 1)" = "SC-01"
+"U.S. House of Representatives, District 2 (Vote For 1)" = "SC-02"
+"U.S. House of Representatives, District 3 (Vote For 1)" = "SC-03"
+"U.S. House of Representatives, District 4 (Vote For 1)" = "SC-04"
+"U.S. House of Representatives, District 5 (Vote For 1)" = "SC-05"
+"U.S. House of Representatives, District 6 (Vote For 1)" = "SC-06"
+"U.S. House of Representatives, District 7 (Vote For 1)" = "SC-07"
+"Governor and Lieutenant Governor (Vote For 1)" = "SC-GOV"
+"U.S. Senate (Vote For 1)" = "SC-SEN"

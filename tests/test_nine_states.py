@@ -335,22 +335,26 @@ class NineStateTests(unittest.TestCase):
         raw = members("IA")["settings.json"]
         self.assertEqual(
             clarity.settings_check(
-                gzip.compress(clarity.document(raw, self.settings)), "IA", self.settings
+                gzip.compress(clarity.document(raw, self.settings)),
+                self.sources["ia_2026_general"],
+                self.settings,
             ),
-            clarity.settings_check(raw, "IA", self.settings),
+            clarity.settings_check(raw, self.sources["ia_2026_general"], self.settings),
         )
         with self.assertRaises(ValueError):
-            clarity.settings_check(raw, "CO", self.settings)
+            clarity.settings_check(raw, self.sources["co_2026_general"], self.settings)
         # Clarity began writing "no parent" as the text "null"; a county's page is refused.
         record = json.loads(clarity.document(raw, self.settings))
         for parent, valid in (("null", True), ("IA", False), ("", False)):
             with self.subTest(parent=parent):
                 changed = json.dumps({**record, "parententityname": parent}).encode()
                 if valid:
-                    clarity.settings_check(changed, "IA", self.settings)
+                    clarity.settings_check(changed, self.sources["ia_2026_general"], self.settings)
                 else:
                     with self.assertRaises(ValueError):
-                        clarity.settings_check(changed, "IA", self.settings)
+                        clarity.settings_check(
+                            changed, self.sources["ia_2026_general"], self.settings
+                        )
 
     def test_official_flags_are_read_from_each_feed_and_never_guessed(self):
         def flag(value):

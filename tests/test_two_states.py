@@ -16,7 +16,7 @@ import zipfile
 from pathlib import Path
 from unittest.mock import patch
 
-from election_pipeline import bundles
+from election_pipeline import bundles, platforms
 from election_pipeline.collect import FetchResponse
 from election_pipeline.parsers import clarity, wv
 from election_pipeline.parsing import parse_source
@@ -116,11 +116,12 @@ class TwoStateTests(unittest.TestCase):
                 "S. MARSHALL WILSON": 17139,
             },
         )
+        site = platforms.clarity(self.sources["wv_2026_general"])
         self.assertEqual(
-            wv.race("U.S. HOUSE OF REPRESENTATIVES, 2nd Congressional District"), "WV-02"
+            site.race("U.S. HOUSE OF REPRESENTATIVES, 2nd Congressional District"), "WV-02"
         )
-        self.assertIsNone(wv.race("U.S. HOUSE OF REPRESENTATIVES, 3rd Congressional District"))
-        self.assertIsNone(wv.race("STATE SENATOR, 1st Senatorial District"))
+        self.assertIsNone(site.race("U.S. HOUSE OF REPRESENTATIVES, 3rd Congressional District"))
+        self.assertIsNone(site.race("STATE SENATOR, 1st Senatorial District"))
 
     def test_wv_county_edit_summary_mismatch_and_foreign_detail_rejected(self):
         def county(raw):
@@ -174,11 +175,17 @@ class TwoStateTests(unittest.TestCase):
 
     def test_wv_settings_must_name_west_virginia_in_eastern_time(self):
         raw = members("WV")["settings.json"]
-        self.assertTrue(clarity.settings_check(raw, "WV", self.settings).endswith(" EST"))
+        self.assertTrue(
+            clarity.settings_check(raw, self.sources["wv_2026_general"], self.settings).endswith(
+                " EST"
+            )
+        )
         with self.assertRaises(ValueError):
-            clarity.settings_check(raw, "CO", self.settings)
+            clarity.settings_check(raw, self.sources["co_2026_general"], self.settings)
         with self.assertRaises(ValueError):
-            clarity.settings_check(raw.replace(b" EST", b" GMT"), "WV", self.settings)
+            clarity.settings_check(
+                raw.replace(b" EST", b" GMT"), self.sources["wv_2026_general"], self.settings
+            )
 
     def test_wv_collector_reads_only_the_current_version(self):
         source = self.sources["wv_2026_general"]
