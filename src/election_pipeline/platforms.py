@@ -295,3 +295,41 @@ def enr(source):
         county_count=raw.get("county_count", 0),
         unlisted_party=unlisted,
     )
+
+
+@dataclass(frozen=True)
+class Kentucky:
+    state: str
+    name: str
+    source_kind: str  # "saved_pages" or "feed"
+    page: str  # the saved page's address
+    page_date: str  # the election's date as the page prints it
+    page_election: str  # the election's name as the page prints it
+    titles: dict  # contest title, folded to lower case -> race
+
+    def race(self, title):
+        return self.titles.get(title.casefold())
+
+
+def kentucky(source):
+    """Kentucky's reader settings: which of its two sources the definition says it has."""
+    code = source.state
+    raw = table(code, "kentucky", ("source_kind", "page", "page_date", "page_election", "titles"))
+    if raw["source_kind"] not in ("saved_pages", "feed"):
+        raise ValueError(f"{code}: source_kind must be saved_pages or feed")
+    titles = names(raw["titles"], "titles", code)
+    wanted = state_adapter(code).races
+    if set(titles.values()) != set(wanted) or len(set(titles.values())) != len(titles):
+        raise ValueError(f"{code}: [platform] titles must name each of its races once")
+    folded = {title.casefold(): race for title, race in titles.items()}
+    if len(folded) != len(titles):
+        raise ValueError(f"{code}: two contest titles differ only in case")
+    return Kentucky(
+        state=code,
+        name=state_adapter(code).name,
+        source_kind=raw["source_kind"],
+        page=raw["page"],
+        page_date=raw["page_date"],
+        page_election=raw["page_election"],
+        titles=folded,
+    )

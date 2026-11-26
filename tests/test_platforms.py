@@ -27,6 +27,7 @@ class PlatformTests(unittest.TestCase):
             "enhanced_voting": platforms.enhanced_voting,
             "clarity": platforms.clarity,
             "enr": platforms.enr,
+            "kentucky": platforms.kentucky,
         }
         self.assertEqual(
             sorted(ELECTION.platforms),
@@ -37,6 +38,7 @@ class PlatformTests(unittest.TestCase):
                 "GA",
                 "IA",
                 "ID",
+                "KY",
                 "MT",
                 "ND",
                 "NM",
