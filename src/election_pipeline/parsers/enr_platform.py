@@ -8,6 +8,7 @@ only where a sheet explicitly prints ``*``, "not reported".
 import csv
 import io
 import re
+from datetime import datetime
 
 from election_pipeline.parsers.html import Tree
 from election_pipeline.parsers.structured import count
@@ -42,7 +43,13 @@ def page_text(page):
     return " ".join(Tree(page).root.text.split())
 
 
-def statewide_update(page, state, election):
+def update_window(source):
+    """The election's day to the end of its year: when a site's update time must fall."""
+    first = datetime.strptime(source.election_date, "%Y-%m-%d")
+    return first, datetime(first.year, 12, 31)
+
+
+def statewide_update(page, site, source):
     """Check a results page's election identity and return its 'last updated' text.
 
     None when the page shows no time: South Dakota emptied its "last updated" box on
@@ -50,14 +57,16 @@ def statewide_update(page, state, election):
     different times are refused.
     """
     body = page_text(page)
-    if f"{state} Secretary of State" not in body or election not in body:
-        raise ValueError(f"{state} results page belongs to another election")
+    if f"{site.name} Secretary of State" not in body or site.page_election not in body:
+        raise ValueError(f"{site.name} results page belongs to another election")
+    year = source.election_date[:4]
     found = re.findall(
-        r"Results last updated: ([0-9]{1,2}/[0-9]{1,2}/2026 [0-9]{1,2}:[0-9]{2} [AP]M [A-Z]{2})",
+        rf"Results last updated: ([0-9]{{1,2}}/[0-9]{{1,2}}/{year} "
+        r"[0-9]{1,2}:[0-9]{2} [AP]M [A-Z]{2})",
         body,
     )
     if len(set(found)) > 1:
-        raise ValueError(f"{state} results page shows more than one update time")
+        raise ValueError(f"{site.name} results page shows more than one update time")
     return found[0] if found else None
 
 

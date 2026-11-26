@@ -1,0 +1,38 @@
+code = "AL"
+methods = ["total_votes"]
+collection_backend = "alabama"
+
+[races]
+governor = true
+house = [1, 2, 3, 4, 5, 6, 7]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "al_2026_general"
+page = "https://www2.alabamavotes.gov/electionNight/statewideResultsByContest.aspx?ecode=1001305"
+url = "https://www2.alabamavotes.gov/electionNight/statewideResultsByContest.aspx?ecode=1001305"
+format = "bundle"
+primary_filename = "results.html"
+expected_members = ["results.html", "export.xlsx"]
+supplemental_members = ["export.xlsx"]
+min_interval_seconds = 600
+
+[platform]
+reader = "enr"
+election_code = "1001305"
+page_election = "2026 GENERAL ELECTION"
+county_count = 67
+party_codes = ["DEM", "REP", "LIB", "IND", "GRN"]
+
+[platform.titles]                  # the contest title as the site writes it
+"GOVERNOR" = "AL-GOV"
+"UNITED STATES SENATOR" = "AL-SEN"
+"UNITED STATES REPRESENTATIVE, 1ST CONGRESSIONAL DISTRICT" = "AL-01"
+"UNITED STATES REPRESENTATIVE, 2ND CONGRESSIONAL DISTRICT" = "AL-02"
+"UNITED STATES REPRESENTATIVE, 3RD CONGRESSIONAL DISTRICT" = "AL-03"
+"UNITED STATES REPRESENTATIVE, 4TH CONGRESSIONAL DISTRICT" = "AL-04"
+"UNITED STATES REPRESENTATIVE, 5TH CONGRESSIONAL DISTRICT" = "AL-05"
+"UNITED STATES REPRESENTATIVE, 6TH CONGRESSIONAL DISTRICT" = "AL-06"
+"UNITED STATES REPRESENTATIVE, 7TH CONGRESSIONAL DISTRICT" = "AL-07"

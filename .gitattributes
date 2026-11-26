@@ -14,7 +14,7 @@ tests/fixtures/illinois/ev_*.json -text whitespace=-blank-at-eol
 # These resources are pinned by their exact bytes, including line endings.
 src/election_pipeline/resources/alaska-issuers.pem text eol=lf
 src/election_pipeline/resources/florida-root.pem text eol=lf
-src/election_pipeline/resources/ak_2026_scope.json text eol=lf
-src/election_pipeline/resources/ms_2026_counties.json text eol=lf
-src/election_pipeline/resources/ms_2026_house.json text eol=lf
+config/elections/*/tables/ak-scope.json text eol=lf
+config/elections/*/tables/ms-counties.json text eol=lf
+config/elections/*/tables/ms-house.json text eol=lf
 tests/fixtures/alaska/official/* -text whitespace=-blank-at-eol

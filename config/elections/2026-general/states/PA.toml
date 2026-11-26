@@ -1,0 +1,21 @@
+code = "PA"
+methods = ["total_votes", "election_day", "mail", "provisional"]
+
+[races]
+senate = false
+governor = true
+house = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
+
+[acquisition]
+mode = "manual"
+final = false
+max_age_seconds = 21600
+
+[source]
+id = "pa_2026_general"
+page = "https://www.electionreturns.pa.gov/"
+url = "https://www.electionreturns.pa.gov/"
+format = "bundle"
+primary_filename = "results.txt"
+expected_members = ["results.txt"]
+min_interval_seconds = 600

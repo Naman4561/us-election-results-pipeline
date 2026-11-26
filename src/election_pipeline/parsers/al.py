@@ -13,13 +13,13 @@ statewide votes, and those to the page's contest total. Write-in votes are one
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.enr_platform import page_text
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row
 from election_pipeline.parsers.workbook import Workbook
 
-ELECTION = ("1001305", "2026 GENERAL ELECTION")
 HEADER = [
     "Election Code", "Election Title", "County Code", "County Name", "Contest Code",
     "Contest Title", "Candidate Number", "Candidate Name", "Votes", "Party Code",
@@ -28,23 +28,12 @@ STATISTICS = [
     "Election Code", "Election Title", "County Code", "Ballots Cast", "Total Precincts",
     "Precincts Reported", "Last Updated",
 ]  # fmt: skip
-HOUSE = re.compile(r"UNITED STATES REPRESENTATIVE, ([1-7])(?:ST|ND|RD|TH) CONGRESSIONAL DISTRICT")
-CONTESTS = {"GOVERNOR": "AL-GOV", "UNITED STATES SENATOR": "AL-SEN"}
-PARTIES = {"DEM", "REP", "LIB", "IND", "GRN"}
 WRITE_IN = ("write-in", "Write-in")
-UPDATED = re.compile(r"Last Updated: ([0-9]{2}/[0-9]{2}/2026 [0-9]{1,2}:[0-9]{2}:[0-9]{2} [AP]M)")
 COUNTIES = re.compile(r"Counties Reported: ([0-9]+) of ([0-9]+)")
 # A candidate's name never starts with a digit: the block's total does, and ends it.
 CANDIDATE = re.compile(r"([^0-9 %][^%]*?)(?: \([A-Z]{3}\))? [0-9]{1,3}\.[0-9]{2}% ([0-9,]+) ")
 # A sheet of every county's contests is about 6,000 rows; allow room to grow.
 MAX_ROWS = 20_000
-
-
-def race_name(title):
-    if title in CONTESTS:
-        return CONTESTS[title]
-    match = HOUSE.fullmatch(title)
-    return f"AL-0{match[1]}" if match else None
 
 
 def number(value, label):
@@ -74,7 +63,7 @@ def statewide(body, title):
     return found
 
 
-def table(book, sheet, header, label):
+def table(book, sheet, header, label, site):
     found = book.rows(sheet, max_rows=MAX_ROWS, decimals=True)
     rows = [r for r in found if any(v not in (None, "") for v in r)]
     if not rows or rows[0] != header:
@@ -83,31 +72,41 @@ def table(book, sheet, header, label):
         if len(values) != len(header):
             raise ValueError(f"Alabama {label} row has an unexpected width")
         record = dict(zip(header, (str(v) if v is not None else "" for v in values)))
-        if (record["Election Code"], record["Election Title"]) != ELECTION:
+        if (record["Election Code"], record["Election Title"]) != (
+            site.election_code,
+            site.page_election,
+        ):
             raise ValueError("Alabama export belongs to another election")
         yield record
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
+    from election_pipeline.platforms import enr
     from election_pipeline.states import state_adapter
 
-    if source.format != "bundle" or source.election_date != "2026-11-03" or source.state != "AL":
+    site = enr(source)
+    if source.format != "bundle":
         raise ValueError("Unsupported Alabama source/election")
+    year = source.election_date[:4]
+    updated_at = re.compile(
+        rf"Last Updated: ([0-9]{{2}}/[0-9]{{2}}/{year} "
+        r"[0-9]{1,2}:[0-9]{2}:[0-9]{2} [AP]M)"
+    )
     with zipfile.ZipFile(archive_path) as archive:
         body = page_text(archive.read(source.primary_filename).decode("utf-8", errors="replace"))
         book = Workbook(archive.read("export.xlsx"), settings)
-    updated = UPDATED.findall(body)
+    updated = updated_at.findall(body)
     reported = COUNTIES.findall(body)
     if (
-        f"Export Data {ELECTION[1]} Statewide Results" not in body
+        f"Export Data {site.page_election} Statewide Results" not in body
         or "results presented on these pages are unofficial" not in body
         or len(set(updated)) != 1
         or len(set(reported)) != 1
     ):
         raise ValueError("Alabama page lacks its election, status, update time or counts")
-    wanted = state_adapter("AL").races
+    wanted = state_adapter(source.state).races
     precincts, names = {}, {}
-    for record in table(book, "Statistics", STATISTICS, "statistics"):
+    for record in table(book, "Statistics", STATISTICS, "statistics", site):
         code = record["County Code"]
         done = number(record["Precincts Reported"], "precincts")
         total = number(record["Total Precincts"], "precincts")
@@ -115,8 +114,8 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             raise ValueError(f"Alabama county {code}: unexpected statistics")
         precincts[code] = (done, total)
     titles, counties, candidates = {}, {}, {}
-    for record in table(book, "AllResults", HEADER, "results"):
-        race = race_name(record["Contest Title"])
+    for record in table(book, "AllResults", HEADER, "results", site):
+        race = site.race(record["Contest Title"])
         if race is None:
             continue
         contest = (record["Contest Code"], record["Contest Title"])
@@ -128,7 +127,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         name, party = " ".join(record["Candidate Name"].split()), record["Party Code"]
         if (name, party) == ("Write-In", "NON"):
             key, name, party = WRITE_IN[0], WRITE_IN[1], ""
-        elif party in PARTIES and name:
+        elif party in site.party_codes and name:
             key = record["Candidate Number"]
         else:
             raise ValueError(f"{race}: unexpected Alabama candidate {name!r} ({party})")
@@ -138,9 +137,9 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         if key in place:
             raise ValueError(f"{race}: repeated Alabama candidate in {county}")
         place[key] = (number(record["Votes"], "votes"), code)
-    if set(counties) != set(wanted) or len(names) != 67:
+    if set(counties) != set(wanted) or len(names) != site.county_count:
         raise ValueError("Alabama export lacks a selected contest or a county")
-    if set(counties["AL-GOV"]) != set(names.values()):
+    if set(counties[f"{source.state}-GOV"]) != set(names.values()):
         raise ValueError("AL-GOV: Alabama export lacks a county")
     rows = []
     for race, places in counties.items():
@@ -159,7 +158,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             if contest == race:
                 rows.append(row(race, race, key, name, party, sums[name]))
         verify_scope(
-            "AL",
+            source.state,
             race,
             [n for (c, k), (n, p) in candidates.items() if c == race and k != WRITE_IN[0]],
             sorted(places),
@@ -167,7 +166,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=updated[0] + " CT",
-        official_results=False,
+        **parse_report.fields(False),
         counties_reported="{} of {}".format(*reported[0]),
         contest_total_reconciliation="passed",
     )

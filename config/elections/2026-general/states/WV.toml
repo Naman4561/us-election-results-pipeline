@@ -1,0 +1,30 @@
+code = "WV"
+methods = ["total_votes"]
+collection_backend = "clarity"
+
+[races]
+house = [1, 2]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "wv_2026_general"
+page = "https://results.enr.clarityelections.com/WV/127496/"
+url = "https://results.enr.clarityelections.com/WV/127496/current_ver.txt"
+format = "bundle"
+primary_filename = "current_ver.txt"
+expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
+supplemental_members = ["detail.zip", "settings.json", "summary.json"]
+min_interval_seconds = 600
+
+[platform]
+reader = "clarity"
+detail = "xml"
+election_name = "2026 General"
+vote_type = "Election Day"
+
+[platform.titles]                  # the contest title as the site writes it
+"U.S. HOUSE OF REPRESENTATIVES, 1st Congressional District" = "WV-01"
+"U.S. HOUSE OF REPRESENTATIVES, 2nd Congressional District" = "WV-02"
+"U.S. SENATOR" = "WV-SEN"

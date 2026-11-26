@@ -17,8 +17,9 @@ import zipfile
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import formatted_count, row, text, unique_json
+from election_pipeline.platforms import party_names
 
-PARTIES = {"Dem": "DEM", "Rep": "REP", "Lib": "LIB", "Grn": "GRN"}
+PARTIES = party_names("CA")
 REPORTING = re.compile(
     r"[0-9]{1,3}(?:\.[0-9])?% \(([0-9][0-9,]*) of ([0-9][0-9,]*)\) precincts reporting"
 )

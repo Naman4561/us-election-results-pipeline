@@ -45,17 +45,6 @@ def indexed(root, key):
     return result
 
 
-def contest_key(name):
-    if name.upper() == "UNITED STATES SENATOR":
-        return "KY-SEN"
-    match = re.fullmatch(
-        r"UNITED STATES REPRESENTATIVE in CONGRESS ([1-6])(?:st|nd|rd|th) Congressional District",
-        name,
-        re.IGNORECASE,
-    )
-    return f"KY-{int(match[1]):02}" if match else None
-
-
 # The saved pages' import zip, for scripts/pack_import.py (election_pipeline.packing).
 PACK = {
     "members": tuple(f"{race}.mhtml" for race in ("KY-SEN", *(f"KY-0{n}" for n in range(1, 7))))
@@ -64,11 +53,14 @@ PACK = {
 
 def parse(archive_path, source, settings, output, stats, reference=None):
     from election_pipeline.parsers.results import finish
+    from election_pipeline.platforms import kentucky
     from election_pipeline.states import state_adapter
 
-    # The live feed was closed to automated clients after election week; its results
-    # pages, saved by hand, are imported as one zip instead (parsers/ky_pages.py).
-    if source.primary_filename == "results.zip":
+    # The definition says which source Kentucky has: the live feed was closed to automated
+    # clients after election week, so its results pages, saved by hand, are imported as one
+    # zip instead (parsers/ky_pages.py).
+    site = kentucky(source)
+    if site.source_kind == "saved_pages":
         from election_pipeline.parsers import ky_pages
 
         return ky_pages.parse(archive_path, source, settings, output, stats, reference)
@@ -85,10 +77,10 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         units = indexed(xml_root(archive, "units.xml"), "UnitId")
         candidates = indexed(xml_root(archive, "candidates.xml"), "CandidateId")
         contests = indexed(xml_root(archive, "contests.xml"), "ContestId")
-        selected = {k: contest_key(v["ContestName"]) for k, v in contests.items()}
+        selected = {k: site.race(v["ContestName"]) for k, v in contests.items()}
         selected = {k: v for k, v in selected.items() if v}
-        if set(selected.values()) != set(state_adapter("KY").races) or len(selected) != len(
-            state_adapter("KY").races
+        if set(selected.values()) != set(state_adapter(source.state).races) or len(selected) != len(
+            state_adapter(source.state).races
         ):
             raise ValueError("Kentucky federal contest coverage is incomplete or duplicated")
 

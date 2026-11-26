@@ -20,17 +20,14 @@ import zipfile
 from datetime import datetime, timedelta, timezone
 from html import unescape
 
-from election_pipeline.parsers.ky import contest_key
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import formatted_count, row
+from election_pipeline.platforms import kentucky, party_names
 
-PAGE = "https://vrsws.sos.ky.gov/liveresults/Statewide"
 # The feed's PoliticalParties list (PartyId -> Abbreviation), from its Nov 3 capture.
-PARTIES = {
-    "1": "DEM", "2": "REP", "3": "OTH", "4": "CON", "5": "REF",
-    "6": "IND", "7": "LIB", "8": "SOC", "9": "GRN", "10": "KEN",
-}  # fmt: skip
+PARTIES = party_names("KY")
 WRITE_IN = ("write-in", "Write-in")
 EASTERN = timezone(timedelta(hours=-5))
 MAX_BYTES = 40_000_000
@@ -60,25 +57,25 @@ def lines(html, where):
     return found
 
 
-def page(raw, member):
+def page(raw, member, site):
     """The saved Statewide page's HTML."""
     message = email.message_from_bytes(raw)
     pages = [
         part
         for part in message.walk()
-        if part.get_content_type() == "text/html" and part["Content-Location"] == PAGE
+        if part.get_content_type() == "text/html" and part["Content-Location"] == site.page
     ]
     if len(pages) != 1:
         raise ValueError(f"Kentucky {member} is not a saved Statewide results page")
     return pages[0].get_payload(decode=True).decode(pages[0].get_content_charset() or "utf-8")
 
 
-def read(html, member):
+def read(html, member, site):
     """(race, update time, reporting text, statewide rows, {county: rows}) of one page."""
     if (
         "ALL RESULTS ARE UNOFFICIAL" not in html
-        or "November 03, 2026" not in html
-        or ">2026 General Election" not in html
+        or site.page_date not in html
+        or f">{site.page_election}" not in html
     ):
         raise ValueError(f"Kentucky {member} belongs to another election or status")
     updates = set(re.findall(r"Last Update: ([0-9/]+ [0-9:]+ [AP]M)", html))
@@ -93,7 +90,7 @@ def read(html, member):
     if len(titles) != 1:
         raise ValueError(f"Kentucky {member} has no single race's county results")
     title = " ".join(unescape(titles[0]).split())
-    race = contest_key(title)
+    race = site.race(title)
     if race is None or f"{race}.mhtml" != member:
         raise ValueError(f"Kentucky {member} holds {title!r}")
     counties = {}
@@ -105,7 +102,7 @@ def read(html, member):
     statewide = []
     for block in rest.split(HEAD)[1:]:
         heading = re.search(r'divTableHeadCell" style="width:60%">(.*?)<span', block, re.S)
-        if heading and contest_key(" ".join(unescape(heading[1]).split())) == race:
+        if heading and site.race(" ".join(unescape(heading[1]).split())) == race:
             statewide.append(lines(block, f"{race} statewide"))
     if len(statewide) != 1:
         raise ValueError(f"{race}: Kentucky statewide totals missing or repeated")
@@ -115,18 +112,21 @@ def read(html, member):
 def parse(archive_path, source, settings, output, stats, reference=None):
     from election_pipeline.states import state_adapter
 
-    if source.election_date != "2026-11-03" or source.state != "KY":
+    site = kentucky(source)
+    if site.source_kind != "saved_pages":
         raise ValueError("Unsupported Kentucky source/election")
     with zipfile.ZipFile(archive_path) as archive:
         raw = archive.read(source.primary_filename)
-    wanted = state_adapter("KY").races
+    wanted = state_adapter(source.state).races
     with zipfile.ZipFile(io.BytesIO(raw)) as bundle:
         entries = bundle.infolist()
         if {e.filename for e in entries} != {f"{race}.mhtml" for race in wanted} or any(
             e.file_size > MAX_BYTES or e.flag_bits & 1 for e in entries
         ):
             raise ValueError("Kentucky import needs one saved page per race, and only those")
-        pages = [read(page(bundle.read(e.filename), e.filename), e.filename) for e in entries]
+        pages = [
+            read(page(bundle.read(e.filename), e.filename, site), e.filename, site) for e in entries
+        ]
     if len({(update, reporting) for _, update, reporting, _, _ in pages}) != 1:
         raise ValueError("Kentucky pages are from different updates; save them again together")
     rows = []
@@ -155,13 +155,14 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             key, shown, party = choices[name]
             rows.append(row(race, race, key, shown, party, votes))
         names = [shown for key, shown, _ in choices.values() if key != WRITE_IN[0]]
-        verify_scope("KY", race, names, sorted(counties))
+        verify_scope(source.state, race, names, sorted(counties))
     _, update, reporting, _, _ = pages[0]
     generated = datetime.strptime(update, "%m/%d/%Y %I:%M:%S %p").replace(tzinfo=EASTERN)
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=f"Last Update: {update}; counties reporting {reporting}",
         source_generated_at=generated.isoformat(),
-        official_results=False,
+        # Saved results pages carry no official marker; certification is attested.
+        **parse_report.fields(parse_report.NOT_STATED),
         contest_total_reconciliation="passed",
     )

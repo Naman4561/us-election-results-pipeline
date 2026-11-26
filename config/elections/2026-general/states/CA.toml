@@ -1,0 +1,185 @@
+code = "CA"
+methods = ["total_votes"]
+collection_backend = "gated_files"
+county_results = false
+
+[races]
+senate = false
+governor = true
+house = [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+  29,
+  30,
+  31,
+  32,
+  33,
+  34,
+  35,
+  36,
+  37,
+  38,
+  39,
+  40,
+  41,
+  42,
+  43,
+  44,
+  45,
+  46,
+  47,
+  48,
+  49,
+  50,
+  51,
+  52,
+]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "ca_2026_general"
+page = "https://electionresults.sos.ca.gov/"
+url = "https://api.sos.ca.gov/returns/governor"
+format = "bundle"
+primary_filename = "governor.json"
+expected_members = [
+  "governor.json",
+  "us-rep-01.json",
+  "us-rep-02.json",
+  "us-rep-03.json",
+  "us-rep-04.json",
+  "us-rep-05.json",
+  "us-rep-06.json",
+  "us-rep-07.json",
+  "us-rep-08.json",
+  "us-rep-09.json",
+  "us-rep-10.json",
+  "us-rep-11.json",
+  "us-rep-12.json",
+  "us-rep-13.json",
+  "us-rep-14.json",
+  "us-rep-15.json",
+  "us-rep-16.json",
+  "us-rep-17.json",
+  "us-rep-18.json",
+  "us-rep-19.json",
+  "us-rep-20.json",
+  "us-rep-21.json",
+  "us-rep-22.json",
+  "us-rep-23.json",
+  "us-rep-24.json",
+  "us-rep-25.json",
+  "us-rep-26.json",
+  "us-rep-27.json",
+  "us-rep-28.json",
+  "us-rep-29.json",
+  "us-rep-30.json",
+  "us-rep-31.json",
+  "us-rep-32.json",
+  "us-rep-33.json",
+  "us-rep-34.json",
+  "us-rep-35.json",
+  "us-rep-36.json",
+  "us-rep-37.json",
+  "us-rep-38.json",
+  "us-rep-39.json",
+  "us-rep-40.json",
+  "us-rep-41.json",
+  "us-rep-42.json",
+  "us-rep-43.json",
+  "us-rep-44.json",
+  "us-rep-45.json",
+  "us-rep-46.json",
+  "us-rep-47.json",
+  "us-rep-48.json",
+  "us-rep-49.json",
+  "us-rep-50.json",
+  "us-rep-51.json",
+  "us-rep-52.json",
+]
+min_interval_seconds = 600
+
+[source.files]
+"us-rep-01.json" = "https://api.sos.ca.gov/returns/us-rep/district/1"
+"us-rep-02.json" = "https://api.sos.ca.gov/returns/us-rep/district/2"
+"us-rep-03.json" = "https://api.sos.ca.gov/returns/us-rep/district/3"
+"us-rep-04.json" = "https://api.sos.ca.gov/returns/us-rep/district/4"
+"us-rep-05.json" = "https://api.sos.ca.gov/returns/us-rep/district/5"
+"us-rep-06.json" = "https://api.sos.ca.gov/returns/us-rep/district/6"
+"us-rep-07.json" = "https://api.sos.ca.gov/returns/us-rep/district/7"
+"us-rep-08.json" = "https://api.sos.ca.gov/returns/us-rep/district/8"
+"us-rep-09.json" = "https://api.sos.ca.gov/returns/us-rep/district/9"
+"us-rep-10.json" = "https://api.sos.ca.gov/returns/us-rep/district/10"
+"us-rep-11.json" = "https://api.sos.ca.gov/returns/us-rep/district/11"
+"us-rep-12.json" = "https://api.sos.ca.gov/returns/us-rep/district/12"
+"us-rep-13.json" = "https://api.sos.ca.gov/returns/us-rep/district/13"
+"us-rep-14.json" = "https://api.sos.ca.gov/returns/us-rep/district/14"
+"us-rep-15.json" = "https://api.sos.ca.gov/returns/us-rep/district/15"
+"us-rep-16.json" = "https://api.sos.ca.gov/returns/us-rep/district/16"
+"us-rep-17.json" = "https://api.sos.ca.gov/returns/us-rep/district/17"
+"us-rep-18.json" = "https://api.sos.ca.gov/returns/us-rep/district/18"
+"us-rep-19.json" = "https://api.sos.ca.gov/returns/us-rep/district/19"
+"us-rep-20.json" = "https://api.sos.ca.gov/returns/us-rep/district/20"
+"us-rep-21.json" = "https://api.sos.ca.gov/returns/us-rep/district/21"
+"us-rep-22.json" = "https://api.sos.ca.gov/returns/us-rep/district/22"
+"us-rep-23.json" = "https://api.sos.ca.gov/returns/us-rep/district/23"
+"us-rep-24.json" = "https://api.sos.ca.gov/returns/us-rep/district/24"
+"us-rep-25.json" = "https://api.sos.ca.gov/returns/us-rep/district/25"
+"us-rep-26.json" = "https://api.sos.ca.gov/returns/us-rep/district/26"
+"us-rep-27.json" = "https://api.sos.ca.gov/returns/us-rep/district/27"
+"us-rep-28.json" = "https://api.sos.ca.gov/returns/us-rep/district/28"
+"us-rep-29.json" = "https://api.sos.ca.gov/returns/us-rep/district/29"
+"us-rep-30.json" = "https://api.sos.ca.gov/returns/us-rep/district/30"
+"us-rep-31.json" = "https://api.sos.ca.gov/returns/us-rep/district/31"
+"us-rep-32.json" = "https://api.sos.ca.gov/returns/us-rep/district/32"
+"us-rep-33.json" = "https://api.sos.ca.gov/returns/us-rep/district/33"
+"us-rep-34.json" = "https://api.sos.ca.gov/returns/us-rep/district/34"
+"us-rep-35.json" = "https://api.sos.ca.gov/returns/us-rep/district/35"
+"us-rep-36.json" = "https://api.sos.ca.gov/returns/us-rep/district/36"
+"us-rep-37.json" = "https://api.sos.ca.gov/returns/us-rep/district/37"
+"us-rep-38.json" = "https://api.sos.ca.gov/returns/us-rep/district/38"
+"us-rep-39.json" = "https://api.sos.ca.gov/returns/us-rep/district/39"
+"us-rep-40.json" = "https://api.sos.ca.gov/returns/us-rep/district/40"
+"us-rep-41.json" = "https://api.sos.ca.gov/returns/us-rep/district/41"
+"us-rep-42.json" = "https://api.sos.ca.gov/returns/us-rep/district/42"
+"us-rep-43.json" = "https://api.sos.ca.gov/returns/us-rep/district/43"
+"us-rep-44.json" = "https://api.sos.ca.gov/returns/us-rep/district/44"
+"us-rep-45.json" = "https://api.sos.ca.gov/returns/us-rep/district/45"
+"us-rep-46.json" = "https://api.sos.ca.gov/returns/us-rep/district/46"
+"us-rep-47.json" = "https://api.sos.ca.gov/returns/us-rep/district/47"
+"us-rep-48.json" = "https://api.sos.ca.gov/returns/us-rep/district/48"
+"us-rep-49.json" = "https://api.sos.ca.gov/returns/us-rep/district/49"
+"us-rep-50.json" = "https://api.sos.ca.gov/returns/us-rep/district/50"
+"us-rep-51.json" = "https://api.sos.ca.gov/returns/us-rep/district/51"
+"us-rep-52.json" = "https://api.sos.ca.gov/returns/us-rep/district/52"
+
+[source.collector_overrides]
+max_zip_members = 64

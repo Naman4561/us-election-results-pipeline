@@ -9,7 +9,7 @@ Michigan, Missouri, New Hampshire, New Jersey, Nevada, New York, Ohio, Oklahoma,
 Pennsylvania, Tennessee, Wisconsin and Wyoming. Each is a source whose site refuses
 automated clients, closed its feed, or posts results only county by county or as
 documents. Which sources are manual is recorded in the production catalog
-(`acquisition = "manual"`), not in `config/sources.toml`.
+(`acquisition = "manual"`); the election definition (`config/elections/<id>/states/<CODE>.toml`) declares it too, with the manual source's freshness limit and final flag, so the repository says how each source is acquired.
 
 The importer takes one file per import, the source's `primary_filename`: a state's own
 export (Ohio's `results.xml`, Michigan's `results.txt`, a PDF) or, for a state whose
@@ -55,7 +55,7 @@ Commands run from the current release (`R`, see [deployment](deployment.md)):
 ```bash
 manual() { sudo "$R/.venv/bin/python" "$R/scripts/manual_source.py" "$@"; }
 deploy register --source oh_2026_general             # a state not yet in the catalog
-manual configure --source oh_2026_general            # --max-age-hours 6, --final
+manual configure --source oh_2026_general   # the definition's freshness limit and final flag; --max-age-hours, --final override
 manual import --source oh_2026_general --file INBOX_FILE --sha256 HASH --downloaded-at UTC_TIME
 manual promote --source oh_2026_general
 ```
@@ -131,7 +131,7 @@ and its first import is the state's certified file, named for the reader that ch
 
 ```bash
 deploy register --source wy_2026_general
-manual configure --source wy_2026_general --final
+manual configure --source wy_2026_general
 manual import --source wy_2026_general --file INBOX_FILE --sha256 HASH --downloaded-at UTC_TIME     --certified-name certified-results.zip     --evidence-url https://sos.wyo.gov/Elections/Docs/2026/2026GeneralResults.aspx     --certified-on 2026-11-10 --attested-by "NAME"
 manual promote --source wy_2026_general
 ```

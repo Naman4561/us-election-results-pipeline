@@ -22,6 +22,7 @@ and its position in the official list (e.g. ``1000-2``); the reviewed roster pin
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.parsers import clarity
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
@@ -33,15 +34,6 @@ VERSION_FILES = {
     "detail.zip": "reports/detailtxt.zip",
 }
 METHODS = ("election_day", "absentee_combined")
-TITLES = {
-    "United States Senator": "IA-SEN",
-    "Governor and Lt. Governor": "IA-GOV",
-    **{f"United States Representative District {n}": f"IA-0{n}" for n in range(1, 5)},
-}
-
-
-def race(name):
-    return TITLES.get(name)
 
 
 def cells(line):
@@ -76,13 +68,13 @@ def group(day, absentee, total):
     return integer(day), integer(absentee), integer(total)
 
 
-def blocks(report):
+def blocks(report, titles):
     """{title: (candidate names, [(county, [(day, absentee, total), ...], contest total)])}."""
     lines = report.decode("utf-8-sig").splitlines()
     found, index = {}, 0
     while index < len(lines):
         match = re.fullmatch(r"(.+?) \( ?([0-9]+)\)", lines[index].strip())
-        if not match or match[1] not in TITLES:
+        if not match or match[1] not in titles:
             index += 1
             continue
         title = match[1]
@@ -123,19 +115,25 @@ def blocks(report):
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
+    from election_pipeline.platforms import clarity as clarity_site
     from election_pipeline.states import state_adapter
 
-    if source.format != "bundle" or source.election_date != "2026-11-03" or source.state != "IA":
+    if source.format != "bundle":
         raise ValueError("Unsupported Iowa source/election")
-    wanted = state_adapter("IA").races
+    site = clarity_site(source)
+    wanted = state_adapter(source.state).races
     with zipfile.ZipFile(archive_path) as archive:
-        updated = clarity.settings_check(archive.read("settings.json"), "IA", settings)
+        updated = clarity.settings_check(archive.read("settings.json"), source, settings)
         final = clarity.final_upload(archive.read("settings.json"), settings)
-        official = clarity.summary(archive.read("summary.json"), race, settings)
-        report = blocks(clarity.detail_member(archive.read("detail.zip"), settings, "txt"))
+        official = clarity.summary(archive.read("summary.json"), site, settings)
+        report = blocks(
+            clarity.detail_member(archive.read("detail.zip"), settings, site.detail), site.titles
+        )
     if set(official) != set(wanted):
         raise ValueError("Iowa summary lacks a selected contest")
-    tables = {TITLES[title]: table for title, table in report.items() if TITLES[title] in wanted}
+    tables = {
+        site.titles[title]: table for title, table in report.items() if site.titles[title] in wanted
+    }
     if set(tables) != set(wanted):
         raise ValueError("Iowa detail report lacks a selected contest")
     rows = []
@@ -169,10 +167,10 @@ def parse(archive_path, source, settings, output, stats, reference=None):
                         "absentee_combined": absentee,
                     }
                 )
-        verify_scope("IA", identity, candidates, sorted(seen))
+        verify_scope(source.state, identity, candidates, sorted(seen))
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=updated,
-        official_results=final,
+        **parse_report.fields(final),
         contest_total_reconciliation="passed",
     )

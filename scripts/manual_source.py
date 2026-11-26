@@ -18,8 +18,15 @@ def main():
     sub = parser.add_subparsers(dest="action", required=True)
     setup = sub.add_parser("configure")
     setup.add_argument("--source", required=True)
-    setup.add_argument("--max-age-hours", type=int, default=6)
-    setup.add_argument("--final", action="store_true", help="The source no longer updates")
+    setup.add_argument(
+        "--max-age-hours", type=int, help="Override the election definition's freshness limit"
+    )
+    setup.add_argument(
+        "--final",
+        action="store_true",
+        default=None,
+        help="The source no longer updates (default: the election definition's)",
+    )
     local = sub.add_parser("import")
     local.add_argument("--source", required=True)
     local.add_argument("--file", type=Path, required=True)
@@ -49,7 +56,10 @@ def main():
         path = Path(config["CATALOG_FILE"])
         if args.action == "configure":
             result = configure(
-                path, args.source, max_age_seconds=args.max_age_hours * 3600, final=args.final
+                path,
+                args.source,
+                max_age_seconds=args.max_age_hours * 3600 if args.max_age_hours else None,
+                final=args.final,
             )
         elif args.action == "final":
             result = mark_final(path, args.source)

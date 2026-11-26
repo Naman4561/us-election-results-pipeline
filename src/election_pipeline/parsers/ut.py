@@ -5,34 +5,16 @@ feed. Utah has no U.S. Senate or governor race in 2026; all four U.S. House seat
 covered. Like Washington, Utah leaves the "vote for" field empty, so it is not checked;
 each is a single-seat contest. The site's jurisdiction short name is "Utah" while its
 API path uses "utah".
+The site's identity, contest titles and county names are in the election definition
+(``[platform]`` of ``states/UT.toml``).
 """
-
-import re
 
 from election_pipeline.parsers import enhanced_voting as ev
 
 
-def race(name):
-    match = re.fullmatch(r"U\.S\. House District ([1-4])", name)
-    return f"UT-0{match[1]}" if match else None
-
-
-# Utah's site names each party but gives no abbreviation.
-PARTIES = {
-    "Democratic": "DEM",
-    "Republican": "REP",
-    "Libertarian": "LIB",
-    "Constitution": "CON",
-    "Forward": "FWD",
-    "Independent American": "IAP",
-    "Unaffiliated": "UNA",
-}
-SITE = ev.Site("UT", "Utah", "Utah", "General11032026", (), race, ev.strip_county, parties=PARTIES)
-
-
 def ballot_items(raw, source):
-    return ev.ballot_items(raw, source, SITE)
+    return ev.ballot_items(raw, source)
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
-    ev.parse_site(SITE, archive_path, source, settings, output, stats, reference)
+    ev.parse_site(archive_path, source, settings, output, stats, reference)

@@ -17,6 +17,7 @@ from election_pipeline.collect import FetchResponse
 from election_pipeline.database import verify
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import CollectorSettings, load_config
+from election_pipeline.states import ELECTION
 from election_pipeline.storage import ArchiveStore
 
 
@@ -37,6 +38,11 @@ class KentuckyTests(unittest.TestCase):
         # The live feed as collected until election week (no longer configured).
         _, sources = load_config(Path(__file__).resolve().parent / "fixtures/kentucky/feed.toml")
         self.source = sources["ky_2026_general"]
+        # The definition in force says Kentucky's source is saved pages; this test reads the feed.
+        feed = {**ELECTION.platforms["KY"], "source_kind": "feed"}
+        patcher = patch.dict(ELECTION.platforms, {"KY": feed})
+        patcher.start()
+        self.addCleanup(patcher.stop)
         self.settings = CollectorSettings()
         self.store = ArchiveStore(self.root, self.source)
         self.units = [{"UnitId": 1, "UnitType": "State", "UnitName": "Kentucky", "ParentId": 0}]

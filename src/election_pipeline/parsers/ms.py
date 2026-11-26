@@ -8,11 +8,12 @@ import re
 import zipfile
 from datetime import datetime, timedelta, timezone
 from html.parser import HTMLParser
-from importlib.resources import files
 from pathlib import Path
 
+from election_pipeline import elections
 from election_pipeline.parsers.html import Tree
 from election_pipeline.parsers.results import finish
+from election_pipeline.platforms import party_names
 from election_pipeline.storage import member_path
 
 POLICY_SHA256 = "11c75b3c04d9f0028378355e0f69816492d6a5134b7e27f1f7e6fb7033a49452"
@@ -56,7 +57,7 @@ HOUSE_SHA256 = "30b07c8c0c65e1312b1998b54e51453d3499b919dbc39893ca4f7f16b293cfa6
 
 def house_policy():
     """Each district's candidates and each county's district, for certified House counts."""
-    raw = files("election_pipeline").joinpath("resources/ms_2026_house.json").read_bytes()
+    raw = elections.table("ms-house.json")
     raw = raw.replace(b"\r\n", b"\n")
     if hashlib.sha256(raw).hexdigest() != HOUSE_SHA256:
         raise ValueError("Mississippi House contract fingerprint changed")
@@ -73,7 +74,7 @@ def house_policy():
 
 
 def policy():
-    raw = files("election_pipeline").joinpath("resources/ms_2026_counties.json").read_bytes()
+    raw = elections.table("ms-counties.json")
     # Git may write CRLF when applying a patch that also introduces its LF attribute.
     # Canonicalize this textual policy only; original county-report hashes stay byte-exact.
     raw = raw.replace(b"\r\n", b"\n")
@@ -357,7 +358,7 @@ def hart_html(raw, county, contract):
         )
         values = one(pattern, body, name)
         remainder = re.sub(pattern, "", remainder)
-        party = {"Republican": "REP", "Democrat": "DEM", "Independent": "IND"}[values[0]]
+        party = RECAP_PARTIES[values[0]]
         methods = [integer(v) for v in values[1:]]
         if party != contract["candidates"][name] or sum(methods[:-1]) != methods[-1]:
             raise ValueError("Hart candidate party/method counts disagree")
@@ -815,7 +816,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
 RECAP = "certified-recap.csv"
 RECAP_HEADER = ["County", "Office", "Candidate", "Party", "County Total", "State Total"]
 RECAP_OFFICE = "United States-Senate"
-RECAP_PARTIES = {"Democrat": "DEM", "Republican": "REP", "Independent": "IND"}
+RECAP_PARTIES = party_names("MS")
 
 
 def parse_recap(archive_path, name, source, settings, output, stats, reference=None):

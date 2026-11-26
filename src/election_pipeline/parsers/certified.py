@@ -27,8 +27,8 @@ import zipfile
 from pathlib import Path
 
 from election_pipeline.parsers.results import finish
+from election_pipeline.parsers.rosters import ROSTERS
 from election_pipeline.parsers.scope import verify_scope
-from election_pipeline.parsers.scope_2026 import ROSTERS
 from election_pipeline.parsers.structured import count, row
 
 PREFIX = "certified-"

@@ -1,0 +1,20 @@
+code = "IN"
+methods = ["total_votes"]
+collection_backend = "indiana"
+
+[races]
+senate = false
+house = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "in_2026_general"
+page = "https://enr.indianavoters.in.gov/site/index.html"
+url = "https://enr.indianavoters.in.gov/site/data/settings.json"
+format = "bundle"
+primary_filename = "settings.json"
+expected_members = ["settings.json", "house.json"]
+supplemental_members = ["house.json"]
+min_interval_seconds = 600

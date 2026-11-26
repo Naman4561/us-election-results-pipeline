@@ -7,9 +7,9 @@ official summary. Governor tickets are shown as "Governor / Lieutenant Governor"
 published. The summary writes nicknames with single quotes where the detail report uses
 double quotes (``'Marky Jr'`` / ``"Marky Jr"``); names are compared with quotes folded and
 stored as the detail report prints them.
+The site's identity, contest titles and vote type are in the election definition
+(``[platform]`` of ``states/CO.toml``).
 """
-
-import re
 
 from election_pipeline.parsers import clarity
 
@@ -20,36 +20,7 @@ VERSION_FILES = {
 }
 
 
-def race(name):
-    if name == "United States Senator":
-        return "CO-SEN"
-    if name == "Governor / Lieutenant Governor":
-        return "CO-GOV"
-    match = re.fullmatch(
-        r"Representative to the 120th United States Congress - District ([1-8])", name
-    )
-    return f"CO-0{match[1]}" if match else None
-
-
-def same_name(detail, summary):
-    def fold(name):
-        return name.replace("''", '"').replace("'", '"')
-
-    return fold(detail) == fold(summary)
-
-
 def parse(archive_path, source, settings, output, stats, reference=None):
-    if source.format != "bundle" or source.election_date != "2026-11-03" or source.state != "CO":
+    if source.format != "bundle":
         raise ValueError("Unsupported Colorado source/election")
-    clarity.parse_detail_xml(
-        archive_path,
-        source,
-        settings,
-        output,
-        stats,
-        reference,
-        state="Colorado",
-        race=race,
-        vote_type="Total Votes",
-        same_name=same_name,
-    )
+    clarity.parse_detail_xml(archive_path, source, settings, output, stats, reference)

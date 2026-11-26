@@ -519,7 +519,7 @@ def main():
                 result = backup(
                     ROOT,
                     data,
-                    ROOT / "config/sources.toml",
+                    ROOT / "config",
                     db,
                     args.destination,
                     "db",

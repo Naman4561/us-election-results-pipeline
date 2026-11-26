@@ -22,6 +22,7 @@ and Baltimore City exist), with "Saint Mary's" written "St. Mary's" as the Censu
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.html import Node, Tree
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
@@ -156,7 +157,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats.update(
         source_update_text="; ".join(sorted(set(times.values()))),
         source_update_times=times,
-        official_results=statuses.pop(),
+        **parse_report.fields(statuses.pop()),
         contest_total_reconciliation="passed",
         vote_method_status="reported_not_stored",
     )

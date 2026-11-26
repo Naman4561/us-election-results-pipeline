@@ -20,7 +20,7 @@ def main():
     parser.add_argument("--publication-id", required=True)
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
-    settings, sources = load_config(root / "config/sources.toml")
+    settings, sources = load_config(root / "config")
     try:
         report = reproduce(
             root,

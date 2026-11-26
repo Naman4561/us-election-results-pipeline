@@ -86,7 +86,7 @@ class FiveStateTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.settings, self.sources = load_config(ROOT / "config/sources.toml")
+        self.settings, self.sources = load_config(ROOT / "config")
 
     def members(self, code):
         return {

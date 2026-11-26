@@ -1,0 +1,59 @@
+code = "TX"
+methods = ["total_votes"]
+county_results = false
+
+[races]
+governor = true
+house = [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+  29,
+  30,
+  31,
+  32,
+  33,
+  34,
+  35,
+  36,
+  37,
+  38,
+]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "tx_2026_general_all"
+page = "https://goelect.txelections.civixapps.com/ivis-enr-ui/races"
+url = "https://goelect.txelections.civixapps.com/api-ivis-system/api/s3/enr/election/53815"
+format = "bundle"
+primary_filename = "results.json"
+expected_members = ["results.json"]
+collect_hours_utc = [1, 4, 7, 10, 13, 16, 19, 22]
+min_interval_seconds = 600

@@ -10,12 +10,14 @@ election-night workbook and its fallback index page instead, and still parse.
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.collectors.sc import latest_report
 from election_pipeline.parsers import clarity
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, party, row, text, xml
 from election_pipeline.parsers.workbook import Workbook
+from election_pipeline.platforms import clarity as clarity_site
 from election_pipeline.states import state_adapter
 
 VERSION_FILES = {
@@ -34,23 +36,6 @@ METHODS = (
 )
 
 
-def race_name(name):
-    name = text(name)
-    if name in {"U.S. Senate (Vote For 1)", "Governor and Lieutenant Governor (Vote For 1)"}:
-        return "SC-SEN" if name.startswith("U.S.") else "SC-GOV"
-    match = re.fullmatch(r"U\.S\. House of Representatives, District (\d+) \(Vote For 1\)", name)
-    return f"SC-{int(match[1]):02}" if match else None
-
-
-def clarity_race(name):
-    # The site doubles some spaces ("U.S.  Senate", "District  1").
-    name = " ".join(name.split())
-    if name in {"U.S. Senate", "Governor and Lieutenant Governor"}:
-        return "SC-SEN" if name.startswith("U.S.") else "SC-GOV"
-    match = re.fullmatch(r"U\.S\. House of Representatives, District ([1-7])", name)
-    return f"SC-0{match[1]}" if match else None
-
-
 def label_party(label):
     """A choice label is its party code and name ("REP Alan Wilson"); write-ins have none."""
     if label == "Write-In":
@@ -62,7 +47,7 @@ def label_party(label):
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
-    if source.format != "bundle" or source.election_date != "2026-11-03":
+    if source.format != "bundle":
         raise ValueError("Unsupported South Carolina source/election")
     with zipfile.ZipFile(archive_path) as archive:
         workbook = "results.xlsx" in archive.namelist()
@@ -73,15 +58,15 @@ def parse(archive_path, source, settings, output, stats, reference=None):
 
 
 def parse_clarity(archive_path, source, settings, output, stats, reference):
-    wanted = state_adapter("SC").races
+    site = clarity_site(source)
+    code = source.state
+    wanted = state_adapter(code).races
     with zipfile.ZipFile(archive_path) as archive:
-        updated = clarity.settings_check(archive.read("settings.json"), "SC", settings)
+        updated = clarity.settings_check(archive.read("settings.json"), source, settings)
         final = clarity.final_upload(archive.read("settings.json"), settings)
-        official = clarity.summary(archive.read("summary.json"), clarity_race, settings)
+        official = clarity.summary(archive.read("summary.json"), site, settings)
         root = xml(clarity.detail_member(archive.read("detail.zip"), settings, "xml"))
-    found = clarity.detail_contests(
-        root, wanted, clarity_race, "SC", "South Carolina", "2026 Statewide General Election"
-    )
+    found = clarity.detail_contests(root, site, source)
     if set(official) != set(wanted):
         raise ValueError("South Carolina summary lacks a selected contest")
     rows = []
@@ -92,12 +77,13 @@ def parse_clarity(archive_path, source, settings, output, stats, reference):
         precincts = {}
         for county in contest.findall("ParticipatingCounties/County"):
             name = text(county.get("name"), "county").upper()
-            done = clarity.number(county.get("precinctsReported"), "precinct count", "SC")
-            total = clarity.number(county.get("precinctsParticipating"), "precinct count", "SC")
+            done = clarity.number(county.get("precinctsReported"), "precinct count", code)
+            total = clarity.number(county.get("precinctsParticipating"), "precinct count", code)
             if name in precincts or done > total:
                 raise ValueError(f"{race}: invalid county reporting status")
             precincts[name] = (done, total)
-        if race in {"SC-SEN", "SC-GOV"} and len(precincts) != 46:
+        statewide = race.endswith(("-SEN", "-GOV"))
+        if statewide and site.statewide_counties and len(precincts) != site.statewide_counties:
             raise ValueError(f"{race}: missing SC county coverage")
         choices = contest.findall("Choice")
         if len(choices) != len(expected):
@@ -109,7 +95,7 @@ def parse_clarity(archive_path, source, settings, output, stats, reference):
             if (
                 label != listed
                 or (choice.get("party") or "").strip() != listed_party
-                or clarity.number(choice.get("totalVotes"), "vote count", "SC") != votes
+                or clarity.number(choice.get("totalVotes"), "vote count", code) != votes
             ):
                 raise ValueError(f"{race}: detail and summary candidate totals differ")
             types = choice.findall("VoteType")
@@ -124,14 +110,14 @@ def parse_clarity(archive_path, source, settings, output, stats, reference):
                     if place in seen or place not in precincts:
                         raise ValueError(f"{race}: unexpected or duplicate county {place}")
                     seen.add(place)
-                    votes_here = clarity.number(county.get("votes"), "vote count", "SC")
+                    votes_here = clarity.number(county.get("votes"), "vote count", code)
                     by_county[place] += votes_here
                     method_total += votes_here
                 if seen != set(precincts):
                     raise ValueError(f"{race}: a vote method lacks a participating county")
-                if clarity.number(kind.get("votes"), "vote count", "SC") != method_total:
+                if clarity.number(kind.get("votes"), "vote count", code) != method_total:
                     raise ValueError(f"{race}: SC county votes disagree with a method total")
-            if sum(clarity.number(t.get("votes"), "vote count", "SC") for t in types) != votes:
+            if sum(clarity.number(t.get("votes"), "vote count", code) for t in types) != votes:
                 raise ValueError(f"{race}: SC vote methods disagree with candidate total")
             labels.append(label)
             rows.append(row(race, key, label, name, affiliation, votes))
@@ -150,18 +136,19 @@ def parse_clarity(archive_path, source, settings, output, stats, reference):
                         total=total,
                     )
                 )
-        verify_scope("SC", race, labels, set(precincts))
+        verify_scope(code, race, labels, set(precincts))
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=updated,
         source_timestamp=text(root.findtext("Timestamp"), "timestamp"),
-        official_results=final,
+        **parse_report.fields(final),
         contest_total_reconciliation="passed",
         vote_method_reconciliation="passed",
     )
 
 
 def parse_workbook(archive_path, source, settings, output, stats, reference):
+    site = clarity_site(source)
     with zipfile.ZipFile(archive_path) as archive:
         report_url = latest_report(archive.read("index.html").decode("utf-8-sig"), source)
         book = Workbook(archive.read(source.primary_filename), settings)
@@ -171,8 +158,8 @@ def parse_workbook(archive_path, source, settings, output, stats, reference):
         for entry in toc:
             if len(entry) != 2 or not isinstance(entry[1], str):
                 continue
-            race = race_name(entry[1])
-            if race not in state_adapter("SC").races:
+            race = site.workbook_race(text(entry[1]))
+            if race not in state_adapter(source.state).races:
                 continue
             if race in seen:
                 raise ValueError("Duplicate SC contest in workbook index")
@@ -246,7 +233,9 @@ def parse_workbook(archive_path, source, settings, output, stats, reference):
                 or (race in {"SC-SEN", "SC-GOV"} and len(counties) != 46)
             ):
                 raise ValueError("Missing SC county coverage or official total")
-            verify_scope("SC", race, [c[1] for c in candidates], {c.upper() for c in counties})
+            verify_scope(
+                source.state, race, [c[1] for c in candidates], {c.upper() for c in counties}
+            )
     finally:
         book.close()
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)

@@ -1,0 +1,21 @@
+code = "VT"
+methods = ["total_votes"]
+collection_backend = "vermont"
+
+[races]
+senate = false
+governor = true
+house = [0]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "vt_2026_general"
+page = "https://electionresults.vermont.gov/"
+url = "https://static.electionresults.vermont.gov/elections/68d61e96-1d28-4210-8c1d-8e90512ae105.json"
+format = "bundle"
+primary_filename = "index.json"
+expected_members = ["index.json", "federal.json", "statewide.json"]
+supplemental_members = ["federal.json", "statewide.json"]
+min_interval_seconds = 600

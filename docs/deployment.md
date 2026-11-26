@@ -65,7 +65,7 @@ the image it started on.
    scripts, the package modules reachable from them and from the source's own parser and
    collector, `states.py` as far as it concerns the source's state, and the reviewed
    data other than other states' (a state's `<slug>_*.json` and its roster
-   `rosters_2026/<STATE>.json` are its own). A dbt model counts for the builds its
+   `rosters/<STATE>.json` and its tables in the election definition are its own). A dbt model counts for the builds its
    folder's tag selects and a dbt test for its own tags (`publication.dbt_tags`), so
    Mississippi's county-feed models and tests count for Mississippi alone; a tag no
    checked source builds counts for every source, since dbt parses the whole project.
@@ -143,7 +143,7 @@ sudo systemctl daemon-reload && sudo systemctl enable --now election-reproduce.t
 
 ## Adding a state in production
 
-The state's source is in the release's `sources.toml` and starts disabled and private.
+The state's definition (`config/elections/<id>/states/<CODE>.toml`) is in the release and its source starts disabled and private.
 Its first publication is checked before it becomes public. One command does all of it:
 
 ```bash

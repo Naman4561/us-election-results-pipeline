@@ -59,7 +59,7 @@ class IllinoisBundleTests(unittest.TestCase):
         return out
 
     def parse(self, path):
-        settings, sources = load_config(ROOT / "config/sources.toml")
+        settings, sources = load_config(ROOT / "config")
         source = sources["il_2026_general"]
         outer = io.BytesIO()
         with zipfile.ZipFile(outer, "w") as archive:

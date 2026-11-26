@@ -22,6 +22,7 @@ import zipfile
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import row, text
+from election_pipeline.platforms import party_names
 
 HEADER = [
     "#Contest ID",
@@ -52,7 +53,7 @@ TITLES = {
     "U.S. Representative, Dist II": "HI-02",
 }
 METHODS = ("mail", "in_person")
-PARTIES = {"D": "DEM", "R": "REP", "G": "GRN", "L": "LIB"}
+PARTIES = party_names("HI")
 
 
 def integer(value, label):

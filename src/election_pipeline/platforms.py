@@ -1,0 +1,335 @@
+"""How each platform reader is set up for a source, read from the election definition.
+
+A state whose results come from a shared platform (Tally, and in time Clarity, Enhanced
+Voting and the ASP.NET ENR sites) says so in a ``[platform]`` table of its state file:
+which reader, the site's identity and the contest titles the site writes. The readers
+hold the format; nothing about one election or one state is written in code. A table
+that names something the reader does not know, or leaves a race of the state without a
+title, is refused when it is read, so a wrong definition fails on the first parse and
+never as a silently skipped contest.
+"""
+
+import re
+from dataclasses import dataclass
+
+from election_pipeline import elections
+from election_pipeline.states import ELECTION, state_adapter
+
+
+@dataclass(frozen=True)
+class Tally:
+    state: str
+    name: str
+    fips: str  # the state's two-digit FIPS code, prefixing its county location IDs
+    election_id: str
+    election_name: str
+    types: dict  # race -> contest type code, which names its results member
+    titles: dict  # contest title as the site writes it -> race
+    parties: dict  # party name as the site writes it -> stored party code
+
+    def race(self, title):
+        return self.titles.get(title)
+
+
+def table(code, reader, keys, optional=()):
+    """The state's ``[platform]`` table, checked to be for ``reader``: every one of ``keys`` and
+    no key beyond them and ``optional``."""
+    raw = ELECTION.platforms.get(code)
+    if raw is None:
+        raise ValueError(f"{code}: the election definition has no [platform] table")
+    found = dict(raw)
+    if found.pop("reader", None) != reader:
+        raise ValueError(f"{code}: its [platform] table is not for the {reader} reader")
+    if not set(keys) <= set(found) <= {*keys, *optional}:
+        raise ValueError(f"{code}: [platform] holds {sorted(keys)}, not {sorted(found)}")
+    return found
+
+
+def party_names(code):
+    """{party as the state's site prints it: stored code} for a parser that reads its own."""
+    found = elections.parties().get("states", {}).get(code)
+    return names(found, f"states.{code} parties", code)
+
+
+def names(raw, label, code):
+    """A table of text to text, with no blank or repeated entry."""
+    if not isinstance(raw, dict) or not raw:
+        raise ValueError(f"{code}: [platform.{label}] must be a table with entries")
+    if not all(isinstance(k, str) and isinstance(v, str) and k and v for k, v in raw.items()):
+        raise ValueError(f"{code}: [platform.{label}] holds text to text entries")
+    return dict(raw)
+
+
+def tally(source):
+    """The Tally reader's settings for ``source``'s state."""
+    code = source.state
+    raw = table(code, "tally", ("fips", "election_id", "election_name", "types", "titles"))
+    types, titles = names(raw["types"], "types", code), names(raw["titles"], "titles", code)
+    wanted = state_adapter(code).races
+    if set(types) != set(wanted) or set(titles.values()) != set(wanted):
+        raise ValueError(f"{code}: [platform] types and titles must cover exactly its races")
+    if len(set(titles.values())) != len(titles):
+        raise ValueError(f"{code}: a race has more than one contest title")
+    return Tally(
+        state=code,
+        name=state_adapter(code).name,
+        fips=raw["fips"],
+        election_id=raw["election_id"],
+        election_name=raw["election_name"],
+        types=types,
+        titles=titles,
+        parties=names(elections.parties().get("tally"), "tally parties", code),
+    )
+
+
+def strip_county(name):
+    match = re.fullmatch(r"(.+?) County", name)
+    if not match:
+        raise ValueError(f"Unexpected county name {name!r}")
+    return match[1]
+
+
+def county_or_city(name):
+    """A Virginia locality keeps its suffix: several names exist as both."""
+    if not re.fullmatch(r"[A-Z][A-Za-z .'-]+ (COUNTY|CITY)", name):
+        raise ValueError(f"Unexpected locality {name!r}")
+    return name
+
+
+# How a site's locality name becomes the stored county name; a state names its mode.
+COUNTY_NAMES = {"strip_county": strip_county, "county_or_city": county_or_city, "none": None}
+
+
+@dataclass(frozen=True)
+class EnhancedVoting:
+    state: str
+    name: str
+    jurisdiction: str
+    election_id: str
+    vote_for: tuple  # the accepted "vote for" texts; empty where the site's field is not one
+    titles: dict  # contest title as the site writes it -> race
+    methods: dict  # the site's method group -> stored method column
+    parties: dict  # party name -> code, for a site that gives none; else empty
+    skip_methods: bool  # method detail incomplete on the site: only totals are kept
+    county_mode: str
+
+    def race(self, title):
+        return self.titles.get(title)
+
+    @property
+    def county(self):
+        """The function turning a locality name into a county name; None for a site whose
+        localities are not counties (Rhode Island's towns)."""
+        return COUNTY_NAMES[self.county_mode]
+
+
+def enhanced_voting(source):
+    """The Enhanced Voting reader's settings for ``source``'s state."""
+    code = source.state
+    raw = table(
+        code,
+        "enhanced_voting",
+        ("jurisdiction", "election_id", "county_names", "titles"),
+        ("vote_for", "methods", "skip_methods", "party_names"),
+    )
+    titles = names(raw["titles"], "titles", code)
+    wanted = state_adapter(code).races
+    if set(titles.values()) != set(wanted) or len(set(titles.values())) != len(titles):
+        raise ValueError(f"{code}: [platform] titles must name each of its races once")
+    if raw["county_names"] not in COUNTY_NAMES:
+        raise ValueError(f"{code}: unknown county_names {raw['county_names']!r}")
+    methods = names(raw["methods"], "methods", code) if "methods" in raw else {}
+    return EnhancedVoting(
+        state=code,
+        name=state_adapter(code).name,
+        jurisdiction=raw["jurisdiction"],
+        election_id=raw["election_id"],
+        vote_for=tuple(raw.get("vote_for", ())),
+        titles=titles,
+        methods=methods,
+        parties=names(elections.parties().get("enhanced_voting"), "enhanced_voting parties", code)
+        if raw.get("party_names")
+        else {},
+        skip_methods=raw.get("skip_methods", False),
+        county_mode=raw["county_names"],
+    )
+
+
+@dataclass(frozen=True)
+class Clarity:
+    state: str
+    name: str
+    detail: str  # the detail report's kind: "xml" or "txt"
+    election_name: str  # the detail XML's ElectionName; "" for a txt report
+    vote_type: str  # the one vote type of a detail XML that publishes one
+    fold_quotes: bool  # the summary and detail write nicknames with different quote marks
+    statewide_counties: int  # counties a statewide race must cover; 0 = not checked here
+    titles: dict  # contest title as the site writes it -> race
+    workbook_titles: dict  # the same for the election-night workbook some snapshots hold
+
+    def race(self, title):
+        """The race a contest title names; the site sometimes doubles its spaces."""
+        return self.titles.get(" ".join(title.split()))
+
+    def workbook_race(self, title):
+        return self.workbook_titles.get(title)
+
+    def same_name(self, detail, summary):
+        if not self.fold_quotes:
+            return detail == summary
+
+        def fold(name):
+            return name.replace("''", '"').replace("'", '"')
+
+        return fold(detail) == fold(summary)
+
+
+def clarity(source):
+    """The Clarity reader's settings for ``source``'s state."""
+    code = source.state
+    raw = table(
+        code,
+        "clarity",
+        ("detail", "titles"),
+        ("election_name", "vote_type", "fold_quotes", "statewide_counties", "workbook_titles"),
+    )
+    if raw["detail"] not in ("xml", "txt"):
+        raise ValueError(f"{code}: Clarity detail must be xml or txt")
+    if raw["detail"] == "xml" and not raw.get("election_name"):
+        raise ValueError(f"{code}: a Clarity detail XML needs the election's name")
+    titles = names(raw["titles"], "titles", code)
+    wanted = state_adapter(code).races
+    if set(titles.values()) != set(wanted) or len(set(titles.values())) != len(titles):
+        raise ValueError(f"{code}: [platform] titles must name each of its races once")
+    extra = raw.get("workbook_titles")
+    return Clarity(
+        state=code,
+        name=state_adapter(code).name,
+        detail=raw["detail"],
+        election_name=raw.get("election_name", ""),
+        vote_type=raw.get("vote_type", ""),
+        fold_quotes=raw.get("fold_quotes", False),
+        statewide_counties=raw.get("statewide_counties", 0),
+        titles=titles,
+        workbook_titles=names(extra, "workbook_titles", code) if extra else {},
+    )
+
+
+@dataclass(frozen=True)
+class Enr:
+    """The ASP.NET election-night platform (SD, NM, MT, OR) and Alabama's page and workbook.
+    Each state's file uses the settings its site prints; the rest are empty."""
+
+    state: str
+    name: str
+    state_line: str  # the workbook's "State of ..." line
+    workbook_title: str  # the workbook's title, with {} for Official / Unofficial
+    status_label: str  # the page's results label, with {} for Official / Unofficial
+    page_election: str  # the text of the election on its page
+    page_identity: (
+        str  # the state office the page names, where it is not "<name> Secretary of State"
+    )
+    election_code: str  # the election's code in an export (Alabama)
+    titles: dict  # contest title as the site writes it -> race
+    parties: dict  # party name -> code, for a site whose exports give names
+    party_codes: tuple  # the party codes an export may carry (Alabama)
+    counties: tuple  # the counties a site's exports name, in its spelling
+    county_count: int  # how many counties an export must cover (Alabama)
+    unlisted_party: str  # "refuse" a party not in ``parties``, or "uppercase" its name
+
+    def race(self, title):
+        return self.titles.get(title)
+
+    def party(self, name):
+        if name in self.parties:
+            return self.parties[name]
+        if self.unlisted_party == "uppercase":
+            return name.upper()
+        raise ValueError(f"{self.name} party {name!r} is not in the reviewed party list")
+
+
+def enr(source):
+    """The ENR reader's settings for ``source``'s state."""
+    code = source.state
+    raw = table(
+        code,
+        "enr",
+        ("titles",),
+        (
+            "state_line",
+            "workbook_title",
+            "status_label",
+            "page_election",
+            "page_identity",
+            "election_code",
+            "party_names",
+            "party_codes",
+            "counties",
+            "county_count",
+            "unlisted_party",
+        ),
+    )
+    titles = names(raw["titles"], "titles", code)
+    wanted = state_adapter(code).races
+    if set(titles.values()) != set(wanted) or len(set(titles.values())) != len(titles):
+        raise ValueError(f"{code}: [platform] titles must name each of its races once")
+    unlisted = raw.get("unlisted_party", "refuse")
+    if unlisted not in ("refuse", "uppercase"):
+        raise ValueError(f"{code}: unlisted_party must be refuse or uppercase")
+    named = elections.parties().get("enr", {}).get(code) if raw.get("party_names") else None
+    if raw.get("party_names"):
+        named = names(named, f"enr.{code} parties", code)
+    return Enr(
+        state=code,
+        name=state_adapter(code).name,
+        state_line=raw.get("state_line", ""),
+        workbook_title=raw.get("workbook_title", ""),
+        status_label=raw.get("status_label", ""),
+        page_election=raw.get("page_election", ""),
+        page_identity=raw.get("page_identity", ""),
+        election_code=raw.get("election_code", ""),
+        titles=titles,
+        parties=named or {},
+        party_codes=tuple(raw.get("party_codes", ())),
+        counties=tuple(raw.get("counties", ())),
+        county_count=raw.get("county_count", 0),
+        unlisted_party=unlisted,
+    )
+
+
+@dataclass(frozen=True)
+class Kentucky:
+    state: str
+    name: str
+    source_kind: str  # "saved_pages" or "feed"
+    page: str  # the saved page's address
+    page_date: str  # the election's date as the page prints it
+    page_election: str  # the election's name as the page prints it
+    titles: dict  # contest title, folded to lower case -> race
+
+    def race(self, title):
+        return self.titles.get(title.casefold())
+
+
+def kentucky(source):
+    """Kentucky's reader settings: which of its two sources the definition says it has."""
+    code = source.state
+    raw = table(code, "kentucky", ("source_kind", "page", "page_date", "page_election", "titles"))
+    if raw["source_kind"] not in ("saved_pages", "feed"):
+        raise ValueError(f"{code}: source_kind must be saved_pages or feed")
+    titles = names(raw["titles"], "titles", code)
+    wanted = state_adapter(code).races
+    if set(titles.values()) != set(wanted) or len(set(titles.values())) != len(titles):
+        raise ValueError(f"{code}: [platform] titles must name each of its races once")
+    folded = {title.casefold(): race for title, race in titles.items()}
+    if len(folded) != len(titles):
+        raise ValueError(f"{code}: two contest titles differ only in case")
+    return Kentucky(
+        state=code,
+        name=state_adapter(code).name,
+        source_kind=raw["source_kind"],
+        page=raw["page"],
+        page_date=raw["page_date"],
+        page_election=raw["page_election"],
+        titles=folded,
+    )

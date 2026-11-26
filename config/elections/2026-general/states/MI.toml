@@ -1,0 +1,20 @@
+code = "MI"
+methods = ["total_votes"]
+
+[races]
+governor = true
+house = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+
+[acquisition]
+mode = "manual"
+final = true
+max_age_seconds = 21600
+
+[source]
+id = "mi_2026_general"
+page = "https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026"
+url = "https://mvic.sos.state.mi.us/votehistory/Index?type=C&electionDate=11-3-2026"
+format = "bundle"
+primary_filename = "results.txt"
+expected_members = ["results.txt"]
+min_interval_seconds = 600

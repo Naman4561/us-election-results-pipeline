@@ -20,9 +20,9 @@ def main(argv: list[str] | None = None) -> int:
     listing = commands.add_parser(
         "list-sources", help="Display configured sources without fetching"
     )
-    listing.add_argument("--config", type=Path, default=Path("config/sources.toml"))
+    listing.add_argument("--config", type=Path, default=Path("config"))
     collecting = commands.add_parser("collect", help="Collect one source or all configured sources")
-    collecting.add_argument("--config", type=Path, default=Path("config/sources.toml"))
+    collecting.add_argument("--config", type=Path, default=Path("config"))
     collecting.add_argument("--data-dir", type=Path, default=Path("data"))
     selection = collecting.add_mutually_exclusive_group(required=True)
     selection.add_argument("--source", help="Source identifier in the TOML configuration")
@@ -41,7 +41,7 @@ def main(argv: list[str] | None = None) -> int:
     parsing.add_argument(
         "--config",
         type=Path,
-        default=Path("config/sources.toml"),
+        default=Path("config"),
     )
     parsing.add_argument(
         "--data-dir",
@@ -62,7 +62,7 @@ def main(argv: list[str] | None = None) -> int:
         "load",
         help="Load one verified parser output into PostgreSQL",
     )
-    loading.add_argument("--config", type=Path, default=Path("config/sources.toml"))
+    loading.add_argument("--config", type=Path, default=Path("config"))
     loading.add_argument("--data-dir", type=Path, default=Path("data"))
     loading.add_argument("--env-file", type=Path, default=Path(".env"))
     loading.add_argument("--source", required=True)
@@ -75,7 +75,7 @@ def main(argv: list[str] | None = None) -> int:
     running.add_argument(
         "--config",
         type=Path,
-        default=Path("config/sources.toml"),
+        default=Path("config"),
     )
     running.add_argument("--data-dir", type=Path, default=Path("data"))
     running.add_argument("--env-file", type=Path, default=Path(".env"))
@@ -104,7 +104,7 @@ def main(argv: list[str] | None = None) -> int:
 
     for name in ("import-county", "county-template"):
         command = commands.add_parser(name)
-        command.add_argument("--config", type=Path, default=Path("config/sources.toml"))
+        command.add_argument("--config", type=Path, default=Path("config"))
         command.add_argument("--source", required=True)
         command.add_argument("--county", required=True)
         command.add_argument("--file", type=Path, required=True)
@@ -115,7 +115,7 @@ def main(argv: list[str] | None = None) -> int:
             command.add_argument("--output", type=Path, required=True)
 
     house = commands.add_parser("ms-house", help="Turn Mississippi's House districts on or off")
-    house.add_argument("--config", type=Path, default=Path("config/sources.toml"))
+    house.add_argument("--config", type=Path, default=Path("config"))
     house.add_argument("--source", required=True)
     house.add_argument("--data-dir", type=Path, default=Path("data"))
     switch = house.add_mutually_exclusive_group(required=True)

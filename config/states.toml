@@ -1,0 +1,203 @@
+# What is true of a state in every election (docs/architecture/election-definition.md).
+
+[AK]
+name = "Alaska"
+local_unit = "house_district"
+
+[AL]
+name = "Alabama"
+local_unit = "county"
+
+[AR]
+name = "Arkansas"
+local_unit = "county"
+
+[AZ]
+name = "Arizona"
+local_unit = "county"
+
+[CA]
+name = "California"
+local_unit = "county"
+
+[CO]
+name = "Colorado"
+local_unit = "county"
+
+[CT]
+name = "Connecticut"
+local_unit = "town"
+
+[DE]
+name = "Delaware"
+local_unit = "county"
+
+[FL]
+name = "Florida"
+local_unit = "county"
+
+[GA]
+name = "Georgia"
+local_unit = "county"
+
+[HI]
+name = "Hawaii"
+local_unit = "county"
+
+[IA]
+name = "Iowa"
+local_unit = "county"
+
+[ID]
+name = "Idaho"
+local_unit = "county"
+
+[IL]
+name = "Illinois"
+local_unit = "county"
+
+[IN]
+name = "Indiana"
+local_unit = "county"
+parser_module = "indiana"
+
+[KS]
+name = "Kansas"
+local_unit = "county"
+
+[KY]
+name = "Kentucky"
+local_unit = "county"
+
+[LA]
+name = "Louisiana"
+local_unit = "county"
+
+[MA]
+name = "Massachusetts"
+local_unit = "town"
+
+[MD]
+name = "Maryland"
+local_unit = "county"
+
+[ME]
+name = "Maine"
+local_unit = "county"
+
+[MI]
+name = "Michigan"
+local_unit = "county"
+
+[MN]
+name = "Minnesota"
+local_unit = "county"
+
+[MO]
+name = "Missouri"
+local_unit = "county"
+
+[MS]
+name = "Mississippi"
+local_unit = "county"
+
+[MT]
+name = "Montana"
+local_unit = "county"
+
+[NC]
+name = "North Carolina"
+local_unit = "county"
+
+[ND]
+name = "North Dakota"
+local_unit = "county"
+
+[NE]
+name = "Nebraska"
+local_unit = "county"
+
+[NH]
+name = "New Hampshire"
+local_unit = "county"
+
+[NJ]
+name = "New Jersey"
+local_unit = "county"
+
+[NM]
+name = "New Mexico"
+local_unit = "county"
+
+[NV]
+name = "Nevada"
+local_unit = "county"
+
+[NY]
+name = "New York"
+local_unit = "county"
+
+[OH]
+name = "Ohio"
+local_unit = "county"
+
+[OK]
+name = "Oklahoma"
+local_unit = "county"
+
+[OR]
+name = "Oregon"
+local_unit = "county"
+parser_module = "oregon"
+
+[PA]
+name = "Pennsylvania"
+local_unit = "county"
+
+[RI]
+name = "Rhode Island"
+local_unit = "county"
+
+[SC]
+name = "South Carolina"
+local_unit = "county"
+
+[SD]
+name = "South Dakota"
+local_unit = "county"
+
+[TN]
+name = "Tennessee"
+local_unit = "county"
+
+[TX]
+name = "Texas"
+local_unit = "county"
+
+[UT]
+name = "Utah"
+local_unit = "county"
+
+[VA]
+name = "Virginia"
+local_unit = "county"
+
+[VT]
+name = "Vermont"
+local_unit = "town"
+
+[WA]
+name = "Washington"
+local_unit = "county"
+
+[WI]
+name = "Wisconsin"
+local_unit = "county"
+
+[WV]
+name = "West Virginia"
+local_unit = "county"
+
+[WY]
+name = "Wyoming"
+local_unit = "county"

@@ -35,12 +35,15 @@ def read_json(path):
 
 def official_available(data, name):
     """Whether the latest run parsed a snapshot its state marks as official."""
+    from election_pipeline import parse_report
+
     try:
         run = read_json(data / "runs" / name / "latest.json")
     except (OSError, ValueError):
         return False
     return any(
-        s.get("stage") == "parse" and (s.get("result") or {}).get("official_results") is True
+        s.get("stage") == "parse"
+        and parse_report.read(s.get("result") or {}).official == parse_report.OFFICIAL
         for s in run.get("stages", [])
     )
 
@@ -126,9 +129,15 @@ def assess(prod, config, now):
                 issues["deployment/handoff"] = "Dashboard handoff requires recovery"
         except (ValueError, OSError, TypeError, KeyError):
             issues["deployment/handoff"] = "Dashboard handoff journal is invalid"
+    declared = registry.acquisition()
     for name in names:
         source = configured[name]
         entry = catalog["sources"][name]
+        if name in declared and declared[name].mode != entry["acquisition"]:
+            issues[f"acquisition/{name}"] = (
+                f"The catalog acquires it by {entry['acquisition']}; the election definition "
+                f"says {declared[name].mode}"
+            )
         if entry["acquisition"] == "manual":
             try:
                 receipt = entry["manual_snapshot"]

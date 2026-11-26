@@ -1,0 +1,89 @@
+code = "MT"
+methods = ["total_votes"]
+collection_backend = "montana"
+
+[races]
+house = [1, 2]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "mt_2026_general"
+page = "https://electionresults.mt.gov/"
+url = "https://electionresults.mt.gov/ResultsExport.aspx"
+format = "bundle"
+primary_filename = "export.html"
+expected_members = ["export.html", "statewide.xlsx"]
+supplemental_members = ["statewide.xlsx"]
+min_interval_seconds = 600
+
+[platform]
+reader = "enr"
+state_line = "State of Montana"
+workbook_title = "2026 {} General Election Results"
+page_election = "2026 General Election - November 3, 2026"
+party_names = true
+counties = [
+  "Beaverhead",
+  "Big Horn",
+  "Blaine",
+  "Broadwater",
+  "Carbon",
+  "Carter",
+  "Cascade",
+  "Chouteau",
+  "Custer",
+  "Daniels",
+  "Dawson",
+  "Deer Lodge",
+  "Fallon",
+  "Fergus",
+  "Flathead",
+  "Gallatin",
+  "Garfield",
+  "Glacier",
+  "Golden Valley",
+  "Granite",
+  "Hill",
+  "Jefferson",
+  "Judith Basin",
+  "Lake",
+  "Lewis and Clark",
+  "Liberty",
+  "Lincoln",
+  "Madison",
+  "McCone",
+  "Meagher",
+  "Mineral",
+  "Missoula",
+  "Musselshell",
+  "Park",
+  "Petroleum",
+  "Phillips",
+  "Pondera",
+  "Powder River",
+  "Powell",
+  "Prairie",
+  "Ravalli",
+  "Richland",
+  "Roosevelt",
+  "Rosebud",
+  "Sanders",
+  "Sheridan",
+  "Silver Bow",
+  "Stillwater",
+  "Sweet Grass",
+  "Teton",
+  "Toole",
+  "Treasure",
+  "Valley",
+  "Wheatland",
+  "Wibaux",
+  "Yellowstone",
+]
+
+[platform.titles]                  # the contest title as the site writes it
+"UNITED STATES SENATOR" = "MT-SEN"
+"UNITED STATES REPRESENTATIVE 1ST CONGRESSIONAL" = "MT-01"
+"UNITED STATES REPRESENTATIVE 2ND CONGRESSIONAL" = "MT-02"

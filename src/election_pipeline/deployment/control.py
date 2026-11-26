@@ -492,23 +492,20 @@ def check_keys(release_path, value, prod, names):
     a recorded pass need not be checked again (see ``release`` for its snapshot). The key
     covers the release files its check runs (build inputs, dbt, migrations, job scripts,
     the modules ``check_modules`` finds, reviewed data other than other states', the dbt
-    files its build selects), and the source's configuration and status. A source without
+    files its build selects), the state's own part of the election definition, and the
+    source's configuration and status. A source without
     a snapshot gets no key."""
+    from election_pipeline import elections
     from election_pipeline.settings import load_config
-    from election_pipeline.states import STATES, own_registry
 
     root = Path(release_path)
-    settings, sources = load_config(root / "config/sources.toml")
+    settings, sources = load_config(root / "config")
     resources = root / "src/election_pipeline/resources"
-    registry = root / "src/election_pipeline/states.py"
     # The dashboard's own files (styles, maps, its script) are served, never read by a check.
     static = root / "src/election_pipeline/dashboard/static"
-    # A state's own data (``<slug>_*.json``) and its roster (``rosters_2026/<STATE>.json``,
-    # read on first use by parsers.scope_2026) are read by its parser alone.
-    owners = {item: item.stem for item in (resources / "rosters_2026").glob("*.json")}
-    for code, state in STATES.items():
-        for item in resources.glob(f"{state.slug}_*.json"):
-            owners[item] = code
+    # A state's roster and reviewed tables are its own, in the election definition
+    # (``elections.fingerprint``); what is left under resources/ (the packaged certificates)
+    # is shared by every source.
     keyed, imported = {}, manual(value)
     for name in names:
         source = sources[name]
@@ -545,17 +542,17 @@ def check_keys(release_path, value, prod, names):
         used = [
             text
             for item, text in files.items()
-            if item != registry
-            and static not in item.parents
+            if static not in item.parents
             and (item not in tagged or tagged[item] & tags)
             and (
                 item.suffix != ".py" or item in modules[source.state]
                 if resources not in item.parents
-                else owners.get(item, source.state) == source.state
+                else True
             )
         ]
-        # The registry counts only as far as it concerns this state.
-        used.append(own_registry(registry, source.state))
+        # The election definition counts only as far as it concerns this state: its file, its
+        # durable facts, its roster and its reviewed tables.
+        used.append(elections.fingerprint(source.state, config=root / "config"))
         digest = hashlib.sha256()
         for part in (source.signature(settings), value["sources"][name]["status"], *used):
             digest.update(str(part).encode() + b"\0")
@@ -780,7 +777,7 @@ def configured_sources(release_path):
     """The source names a release's configuration defines."""
     from election_pipeline.settings import load_config
 
-    return set(load_config(Path(release_path) / "config/sources.toml")[1])
+    return set(load_config(Path(release_path) / "config")[1])
 
 
 def reproduce(path, prod, config, names=None, check_all=False):

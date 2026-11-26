@@ -18,37 +18,14 @@ stored here; counts are totals only.
 
 import re
 import zipfile
-from dataclasses import dataclass
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row, text, unique_json
 
 INFO = "info.json"
 CONTESTS = "contests.json"
-PARTIES = {
-    "Republican": "REP",
-    "Democratic": "DEM",
-    "Democratic-NPL": "DEM",
-    "Libertarian": "LIB",
-    "Green": "GRN",
-    "Independent": "IND",
-    "independent nomination": "IND",
-    "Constitution": "CON",
-    "American Delta": "ADP",
-    "Write-In": "W",
-}
-
-
-@dataclass(frozen=True)
-class Site:
-    state: str
-    name: str
-    fips: str  # the state's two-digit FIPS code, prefixing its county location IDs
-    election_id: str
-    election_name: str
-    race: object  # contest name -> contest ID or None
-    types: dict  # contest ID -> contest type code, naming its results member
 
 
 def results_member(kind):
@@ -72,7 +49,10 @@ def party(record, parties, site):
     found = parties.get(record.get("partyID"))
     if not isinstance(found, dict):
         raise ValueError(f"{site.name} candidate has an unknown party")
-    return PARTIES.get(found.get("partyName"), text(found.get("partyName"), "party").upper())
+    name = text(found.get("partyName"), "party")
+    if name not in site.parties:
+        raise ValueError(f"{site.name} party {name!r} is not in the reviewed party list")
+    return site.parties[name]
 
 
 def candidate_name(name, code):
@@ -81,14 +61,14 @@ def candidate_name(name, code):
     return name[len(code) + 1 :] if name.startswith(code + " ") else name
 
 
-def parse_site(site, archive_path, source, settings, output, stats, reference=None):
+def parse_site(archive_path, source, settings, output, stats, reference=None):
+    from election_pipeline.platforms import tally
     from election_pipeline.states import state_adapter
 
-    if source.format != "bundle" or source.election_date != "2026-11-03":
+    site = tally(source)
+    if source.format != "bundle":
         raise ValueError(f"Unsupported {site.name} source/election")
     wanted = state_adapter(site.state).races
-    if set(site.types) != set(wanted):
-        raise ValueError(f"{site.name} contest types do not cover its races")
     versions = set()
     with zipfile.ZipFile(archive_path) as archive:
         info, version = envelope(archive.read(INFO), site, "election")
@@ -105,7 +85,7 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
     election = info["response"]
     if (
         text(election.get("name"), "election name") != site.election_name
-        or election.get("date") != "2026-11-03T00:00:00"
+        or election.get("date") != f"{source.election_date}T00:00:00"
     ):
         raise ValueError(f"{site.name} election belongs to another date or name")
     parties = election["parties"]
@@ -184,7 +164,7 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
     stats.update(
         source_version=published,
         source_update_text=text(info.get("lastUpdated"), "update time"),
-        official_results=official,
+        **parse_report.fields(official),
         contest_total_reconciliation="passed",
         vote_methods="reported_not_stored",
     )

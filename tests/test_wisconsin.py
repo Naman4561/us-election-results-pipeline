@@ -78,7 +78,7 @@ class WisconsinTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.settings, sources = load_config(ROOT / "config/sources.toml")
+        self.settings, sources = load_config(ROOT / "config")
         self.source = sources["wi_2026_general"]
 
     def imported(self, raw):

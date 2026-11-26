@@ -1,6 +1,6 @@
 # Data collection
 
-Each registered source in `config/sources.toml` names one official URL (or a bundle of
+Each registered source in the election definition (`config/elections/<id>/states/<CODE>.toml`) names one official URL (or a bundle of
 URLs) for one state. A collection run downloads it through one bounded client, stores
 the bytes by hash, and records what happened.
 
@@ -46,7 +46,9 @@ read county Clarity sites inside their manual imports.
 
 Some states need one-off handling: Texas reads the Civix API (`parsers/tx.py`),
 Alaska pins its issuer certificates (`resources/alaska-issuers.pem`), and Florida's file
-host alone also trusts one reviewed root the image lacks (`resources/florida-root.pem`).
+host alone also trusts one reviewed root the image lacks (`resources/florida-root.pem`);
+each exception, with the exact hosts, the certificate's SHA-256 and the reason, is declared
+in the election definition (`[[tls]]` in `config/elections/<id>/election.toml`).
 
 ## One collection run
 

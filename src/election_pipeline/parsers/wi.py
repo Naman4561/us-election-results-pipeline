@@ -41,14 +41,13 @@ import re
 import zipfile
 from datetime import datetime
 from html import unescape
-from importlib.resources import files
 
 from pypdf import PdfReader
 
-from election_pipeline import reviews
+from election_pipeline import elections, parse_report, reviews
 from election_pipeline.parsers.results import finish
+from election_pipeline.parsers.rosters import ROSTERS
 from election_pipeline.parsers.scope import verify_scope
-from election_pipeline.parsers.scope_2026 import ROSTERS
 from election_pipeline.parsers.structured import count, row
 
 WRITE_IN = ("write-in", "Write-in")
@@ -74,7 +73,7 @@ FORMATS = (
 
 
 def table():
-    raw = files("election_pipeline").joinpath("resources/wi_2026_contests.json").read_text("utf-8")
+    raw = elections.table("wi-contests.json").decode("utf-8")
     return json.loads(raw)
 
 
@@ -444,7 +443,8 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             f"{len(results)} of 72 counties ({canvassed} canvassed, "
             f"{len(results) - canvassed} unofficial); newest county report {max(times).isoformat()}"
         ),
-        official_results=False,
+        # County reports, some canvassed: no statewide marker; certification is attested.
+        **parse_report.fields(parse_report.NOT_STATED),
         contest_total_reconciliation="passed",
         county_reports={
             county: {k: manifest[county][k] for k in ("report", "format", "url", "report_time")}

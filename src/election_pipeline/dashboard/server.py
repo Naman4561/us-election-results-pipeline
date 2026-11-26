@@ -11,7 +11,6 @@ import re
 import time
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from importlib.resources import files
 from pathlib import Path
 from threading import Lock, Thread
 
@@ -25,7 +24,8 @@ from fastapi.staticfiles import StaticFiles
 from psycopg import sql
 from psycopg.rows import dict_row
 
-from election_pipeline.parsers.scope_2026 import ROSTERS
+from election_pipeline import elections
+from election_pipeline.parsers.rosters import ROSTERS
 from election_pipeline.states import STATES, state_adapter
 
 STATIC = Path(__file__).with_name("static")
@@ -44,10 +44,9 @@ def county_key(name):
 
 def party_group(party, choice):
     value = (party or "").strip().upper()
-    if value in ("DEM", "D", "DEMOCRATIC", "DEMOCRAT", "DFL", "DEM/NON"):
-        return "DEM"
-    if value in ("REP", "R", "REPUBLICAN"):
-        return "REP"
+    for group, spellings in elections.parties()["groups"].items():
+        if value in spellings:
+            return group
     if value or "WRITE" in choice.upper():
         return "OTHER"
     return "UNKNOWN"
@@ -767,11 +766,7 @@ def summary(state):
 
 
 def national_payload(providers, demo=False, detail=False):
-    calendar = json.loads(
-        files("election_pipeline")
-        .joinpath("resources/elections_2026.json")
-        .read_text(encoding="utf-8")
-    )
+    calendar = json.loads(elections.table("election-facts.json").decode("utf-8"))
     states = {}
     for code, provider in providers.items():
         adapter = state_adapter(code)

@@ -1,0 +1,39 @@
+code = "CO"
+methods = ["total_votes"]
+collection_backend = "clarity"
+
+[races]
+governor = true
+house = [1, 2, 3, 4, 5, 6, 7, 8]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "co_2026_general"
+page = "https://results.enr.clarityelections.com/CO/127407/"
+url = "https://results.enr.clarityelections.com/CO/127407/current_ver.txt"
+format = "bundle"
+primary_filename = "current_ver.txt"
+expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
+supplemental_members = ["detail.zip", "settings.json", "summary.json"]
+min_interval_seconds = 600
+
+[platform]
+reader = "clarity"
+detail = "xml"
+election_name = "2026 General"
+vote_type = "Total Votes"
+fold_quotes = true
+
+[platform.titles]                  # the contest title as the site writes it
+"Representative to the 120th United States Congress - District 1" = "CO-01"
+"Representative to the 120th United States Congress - District 2" = "CO-02"
+"Representative to the 120th United States Congress - District 3" = "CO-03"
+"Representative to the 120th United States Congress - District 4" = "CO-04"
+"Representative to the 120th United States Congress - District 5" = "CO-05"
+"Representative to the 120th United States Congress - District 6" = "CO-06"
+"Representative to the 120th United States Congress - District 7" = "CO-07"
+"Representative to the 120th United States Congress - District 8" = "CO-08"
+"Governor / Lieutenant Governor" = "CO-GOV"
+"United States Senator" = "CO-SEN"

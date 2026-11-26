@@ -18,10 +18,12 @@ Vermont elects no senator in 2026. Counts are totals only.
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, text, unique_json
 from election_pipeline.parsers.structured import row as result_row
+from election_pipeline.platforms import party_names
 
 OFFICES = {
     ("federal.json", "REPRESENTATIVE TO CONGRESS"): "VT-AL",
@@ -31,14 +33,7 @@ STATEWIDE = "STATE WIDE"
 SHARED = {"BARRE", "NEWPORT", "RUTLAND", "ST. ALBANS"}
 # The parties on Vermont's 2026 ballot for these offices; any other is refused. A
 # candidate nominated by both Democrats and Progressives is listed "DEM/PROG".
-PARTIES = {
-    "DEMOCRATIC": "DEM",
-    "DEM/PROG": "DEM",
-    "REPUBLICAN": "REP",
-    "INDEPENDENT": "IND",
-    "PEACE AND JUSTICE": "PJ",
-    "FREEDOM AND UNITY": "FU",
-}
+PARTIES = party_names("VT")
 WRITE_IN = ("write-in", "Write-in")
 
 
@@ -133,6 +128,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         raise ValueError("Vermont results lack a selected contest")
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
-        official_results=official,
+        **parse_report.fields(official),
         contest_total_reconciliation="passed",
     )

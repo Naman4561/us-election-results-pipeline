@@ -1,0 +1,24 @@
+code = "AK"
+methods = ["total_votes"]
+statewide_only_votes = "overseas federal absentee ballots, reported in no House district"
+vote_basis = "first_choice_listed_candidates"
+
+[races]
+governor = true
+house = [0]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "ak_2026_general"
+page = "https://www.elections.alaska.gov/election-results/e/?id=26genr"
+url = "https://www.elections.alaska.gov/enr/26GENR/results/GA_ENR_Precinct_State_of_Alaska.csv"
+format = "bundle"
+primary_filename = "results.csv"
+expected_members = ["election.html", "results.csv", "rcv-usrep.pdf"]
+min_interval_seconds = 600
+
+[source.files]
+"election.html" = "https://www.elections.alaska.gov/election-results/e/?id=26genr"
+"rcv-usrep.pdf" = "https://www.elections.alaska.gov/enr/26GENR/results/RCV-USRep.pdf"

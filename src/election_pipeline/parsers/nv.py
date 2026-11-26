@@ -21,6 +21,7 @@ import re
 import zipfile
 from datetime import datetime
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row, unique_json
@@ -173,7 +174,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats.update(
         source_update_text=f"release {manifest['sequence']}, {manifest['generatedAtUtc']}",
         source_generated_at=generated.isoformat(),
-        official_results=election["resultsStatus"] == "Official",
+        **parse_report.fields(election["resultsStatus"] == "Official"),
         masked_counties=masked,
         contest_total_reconciliation="passed",
     )

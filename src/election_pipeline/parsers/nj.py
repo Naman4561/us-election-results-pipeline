@@ -27,10 +27,10 @@ import logging
 import re
 import zipfile
 from datetime import datetime, timedelta, timezone
-from importlib.resources import files
 
 from pypdf import PdfReader
 
+from election_pipeline import elections, parse_report
 from election_pipeline.parsers import clarity
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
@@ -51,7 +51,7 @@ COUNT = r"[0-9]{1,3}(?:,[0-9]{3})*"
 
 
 def table():
-    raw = files("election_pipeline").joinpath("resources/nj_2026_contests.json").read_text("utf-8")
+    raw = elections.table("nj-contests.json").decode("utf-8")
     return json.loads(raw)
 
 
@@ -333,6 +333,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats.update(
         source_generated_at=max(times).isoformat(),
         source_update_text=f"newest county update {max(times).isoformat()}",
-        official_results=False,
+        # County reports: no statewide marker; certification is attested.
+        **parse_report.fields(parse_report.NOT_STATED),
         contest_total_reconciliation="passed",
     )

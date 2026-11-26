@@ -1,0 +1,20 @@
+code = "WY"
+methods = ["total_votes"]
+
+[races]
+governor = true
+house = [0]
+
+[acquisition]
+mode = "manual"
+final = true
+max_age_seconds = 21600
+
+[source]
+id = "wy_2026_general"
+page = "https://sos.wyo.gov/Elections/Docs/2026/2026GeneralResults.aspx"
+url = "https://sos.wyo.gov/Elections/Docs/2026/Results/General/2026_Wyoming_General_Results.zip"
+format = "bundle"
+primary_filename = "results.zip"
+expected_members = ["results.zip"]
+min_interval_seconds = 3540

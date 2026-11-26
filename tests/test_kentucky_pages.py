@@ -21,8 +21,10 @@ from election_pipeline.manual import import_file
 from election_pipeline.parsers import ky_pages
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
+from election_pipeline.states import ELECTION
 
 ROOT = Path(__file__).resolve().parents[1]
+PAGE = ELECTION.platforms["KY"]["page"]
 FIXTURE = ROOT / "tests/fixtures/kentucky_pages"
 DOWNLOADED = "2026-11-20T15:54:00+00:00"
 EXPECTED = {
@@ -62,9 +64,9 @@ def edited(raw, change):
     """A saved page with ``change`` applied to its Statewide page's HTML."""
     message = email.message_from_bytes(raw, policy=email.policy.default)
     for part in message.walk():
-        if part.get_content_type() == "text/html" and part["Content-Location"] == ky_pages.PAGE:
+        if part.get_content_type() == "text/html" and part["Content-Location"] == PAGE:
             part.set_content(change(part.get_content()), subtype="html", cte="quoted-printable")
-            part["Content-Location"] = ky_pages.PAGE
+            part["Content-Location"] = PAGE
     return message.as_bytes()
 
 
@@ -73,7 +75,7 @@ class KentuckyPagesTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.settings, sources = load_config(ROOT / "config/sources.toml")
+        self.settings, sources = load_config(ROOT / "config")
         self.source = sources["ky_2026_general"]
 
     def imported(self, raw):

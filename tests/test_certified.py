@@ -17,6 +17,7 @@ from pathlib import Path
 from loading import migrated, requires_database
 from test_new_states import members
 
+from election_pipeline import parse_report
 from election_pipeline.manual import import_file
 from election_pipeline.parsers.certified import HEADER, TRANSCRIPTION
 from election_pipeline.parsing import parse_source
@@ -31,7 +32,7 @@ class CertifiedFileTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.settings, sources = load_config(ROOT / "config/sources.toml")
+        self.settings, sources = load_config(ROOT / "config")
         self.source = sources["sd_2026_general"]
         self.rows = self.feed_rows()
 
@@ -95,7 +96,9 @@ class CertifiedFileTests(unittest.TestCase):
         self.assertEqual(report["outcome"], "parsed", report)
         self.assertEqual(report["certified_file"], TRANSCRIPTION)
         self.assertEqual(report["contest_total_reconciliation"], "passed")
-        self.assertNotIn("official_results", report)  # the attestation makes it official
+        # The transcription carries no marker of its own: the attestation makes it official.
+        self.assertEqual(parse_report.read(report).official, parse_report.NOT_STATED)
+        self.assertIsNot(report["official_results"], True)
 
     def test_statewide_only_certificates_are_accepted(self):
         statewide = [r for r in self.rows if not r["county"]]

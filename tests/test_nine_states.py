@@ -65,7 +65,7 @@ class NineStateTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.settings, self.sources = load_config(ROOT / "config/sources.toml")
+        self.settings, self.sources = load_config(ROOT / "config")
 
     def parse(self, code, mutate=None):
         self.source = self.sources[code.lower() + "_2026_general"]
@@ -335,22 +335,26 @@ class NineStateTests(unittest.TestCase):
         raw = members("IA")["settings.json"]
         self.assertEqual(
             clarity.settings_check(
-                gzip.compress(clarity.document(raw, self.settings)), "IA", self.settings
+                gzip.compress(clarity.document(raw, self.settings)),
+                self.sources["ia_2026_general"],
+                self.settings,
             ),
-            clarity.settings_check(raw, "IA", self.settings),
+            clarity.settings_check(raw, self.sources["ia_2026_general"], self.settings),
         )
         with self.assertRaises(ValueError):
-            clarity.settings_check(raw, "CO", self.settings)
+            clarity.settings_check(raw, self.sources["co_2026_general"], self.settings)
         # Clarity began writing "no parent" as the text "null"; a county's page is refused.
         record = json.loads(clarity.document(raw, self.settings))
         for parent, valid in (("null", True), ("IA", False), ("", False)):
             with self.subTest(parent=parent):
                 changed = json.dumps({**record, "parententityname": parent}).encode()
                 if valid:
-                    clarity.settings_check(changed, "IA", self.settings)
+                    clarity.settings_check(changed, self.sources["ia_2026_general"], self.settings)
                 else:
                     with self.assertRaises(ValueError):
-                        clarity.settings_check(changed, "IA", self.settings)
+                        clarity.settings_check(
+                            changed, self.sources["ia_2026_general"], self.settings
+                        )
 
     def test_official_flags_are_read_from_each_feed_and_never_guessed(self):
         def flag(value):
@@ -521,7 +525,9 @@ class NineStateTests(unittest.TestCase):
     def test_or_exports_choose_the_pages_own_csv_option(self):
         page = members("OR")["export.html"].decode("utf-8", errors="replace")
         (self.root / "export.html").write_text(page, encoding="utf-8")
-        plan = OREGON.exports({"export.html": self.root / "export.html"}, None)
+        plan = OREGON.exports(
+            {"export.html": self.root / "export.html"}, self.sources["or_2026_general"]
+        )
         self.assertEqual(len(plan), 38)
         self.assertTrue(all(entry[3] == OREGON.CSV_OPTION for entry in plan))
         url = "https://results.oregonvotes.gov/ResultsExport.aspx"

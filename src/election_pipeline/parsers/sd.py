@@ -11,6 +11,7 @@ import re
 import zipfile
 from datetime import datetime
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.enr_platform import (
     county_sheet,
     export_target,
@@ -18,6 +19,7 @@ from election_pipeline.parsers.enr_platform import (
     page_text,
     read_csv,
     statewide_update,
+    update_window,
 )
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
@@ -29,22 +31,15 @@ HEADER = (
     "RaceID,RaceName,PartyCode,AreaType,AreaNum,OfficeSeqNo,BallotOrder,CandidateID,"
     "CandidateName,CurrentDateTime,VoteFor,CandidateVotes,CandidatePercentage,PrecinctsReporting"
 ).split(",")
-RACES = {
-    "United States Senator": "SD-SEN",
-    "United States Representative": "SD-AL",
-    "Governor and Lieutenant Governor": "SD-GOV",
-}
 CHANGE_MEMBERS = ("results.csv",)
 EXPORT = "statewide.xlsx"
-TITLE = "2026 {} General Election Results"
-LABEL = "{} Results General Election November 3, 2026"
 
 
-def races(raw, wanted):
+def races(raw, site, wanted):
     """Statewide CSV rows for the selected races, keyed by contest."""
     found = {}
     for line, values in read_csv(raw, HEADER, "South Dakota"):
-        race = RACES.get(" ".join(values["RaceName"].split()))
+        race = site.race(" ".join(values["RaceName"].split()))
         if race not in wanted:
             continue
         if values["AreaType"] or values["AreaNum"] or values["VoteFor"] != "1":
@@ -64,25 +59,24 @@ def exports(paths, source):
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
+    from election_pipeline.platforms import enr
     from election_pipeline.states import state_adapter
 
-    if source.format != "bundle" or source.election_date != "2026-11-03" or source.state != "SD":
+    site = enr(source)
+    if source.format != "bundle":
         raise ValueError("Unsupported South Dakota source/election")
-    wanted = state_adapter("SD").races
+    wanted = state_adapter(source.state).races
     with zipfile.ZipFile(archive_path) as archive:
         page = archive.read("export.html").decode("utf-8", errors="replace")
-        updated = statewide_update(page, "South Dakota", "General Election November 3, 2026")
-        official = results_status(page_text(page), LABEL, "South Dakota")
-        found = races(archive.read(source.primary_filename), wanted)
+        updated = statewide_update(page, site, source)
+        official = results_status(page_text(page), site.status_label, site.name)
+        found = races(archive.read(source.primary_filename), site, wanted)
         book = Workbook(archive.read(EXPORT), settings)
     stamps = {r["CurrentDateTime"] for rows in found.values() for r in rows}
     if len(stamps) != 1:
         raise ValueError("South Dakota races carry different update times")
-    if not (
-        datetime(2026, 11, 3)
-        <= datetime.strptime(stamps.pop(), "%m/%d/%Y %I:%M:%S %p")
-        <= datetime(2026, 12, 31)
-    ):
+    first, last = update_window(source)
+    if not first <= datetime.strptime(stamps.pop(), "%m/%d/%Y %I:%M:%S %p") <= last:
         raise ValueError("South Dakota update time is outside this election's window")
     output_rows = []
     for race, csv_rows in found.items():
@@ -116,10 +110,10 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             find_sheet(book, race_id, race_name),
             race_name,
             {name: int(votes) for name, (_, _, votes) in candidates.items()},
-            title=(TITLE.format("Official" if official else "Unofficial"),),
-            state_line="State of South Dakota",
+            title=(site.workbook_title.format("Official" if official else "Unofficial"),),
+            state_line=site.state_line,
         )
-        verify_scope("SD", race, [c[0] for c in candidates.values()], counties)
+        verify_scope(source.state, race, [c[0] for c in candidates.values()], counties)
         for county, votes in counties.items():
             for name, count in votes.items():
                 identity, party, _ = candidates[name]
@@ -127,6 +121,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     finish(output_rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=updated,
-        official_results=official,
+        **parse_report.fields(official),
         contest_total_reconciliation="passed",
     )

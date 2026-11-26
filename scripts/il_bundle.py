@@ -202,7 +202,7 @@ def check(args):
     from election_pipeline.storage import ArchiveStore
 
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
-    settings, sources = load_config(ROOT / "config/sources.toml")
+    settings, sources = load_config(ROOT / "config")
     source = sources["il_2026_general"]
     with tempfile.TemporaryDirectory() as directory:
         root = Path(directory)

@@ -51,7 +51,7 @@ def verify_release(path, image):
 
 
 def package_hash(path):
-    return collector_code_hash(Path(path) / "src/election_pipeline")
+    return collector_code_hash(Path(path) / "src/election_pipeline", Path(path) / "config")
 
 
 def limits(config, cpus=None):

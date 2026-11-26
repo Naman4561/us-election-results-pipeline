@@ -1,0 +1,12 @@
+state = "NC"
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "nc_absentee_early_demographics_2026"
+url = "https://s3.amazonaws.com/dl.ncsbe.gov/ENRS/2026_11_03/absentee_counts_county_20261103.csv"
+format = "csv"
+primary_filename = "results.xml"
+expected_columns = ["county_name", "abs_request_type", "party_cd", "gender", "race", "ethnicity", "0"]
+dataset = "absentee_early_demographics"

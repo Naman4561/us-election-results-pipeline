@@ -1,0 +1,81 @@
+code = "GA"
+methods = ["total_votes"]
+collection_backend = "enhanced_voting"
+
+[races]
+governor = true
+house = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "ga_2026_general"
+page = "https://results.sos.ga.gov/results/public/Georgia/elections/11032026GeneralAndSpecialElection"
+url = "https://results.sos.ga.gov/results/public/api/elections/Georgia/11032026GeneralAndSpecialElection/data"
+format = "bundle"
+primary_filename = "results.json"
+expected_members = [
+  "results.json",
+  "item-ga-sen.json",
+  "item-ga-gov.json",
+  "item-ga-01.json",
+  "item-ga-02.json",
+  "item-ga-03.json",
+  "item-ga-04.json",
+  "item-ga-05.json",
+  "item-ga-06.json",
+  "item-ga-07.json",
+  "item-ga-08.json",
+  "item-ga-09.json",
+  "item-ga-10.json",
+  "item-ga-11.json",
+  "item-ga-12.json",
+  "item-ga-13.json",
+  "item-ga-14.json",
+]
+supplemental_members = [
+  "item-ga-sen.json",
+  "item-ga-gov.json",
+  "item-ga-01.json",
+  "item-ga-02.json",
+  "item-ga-03.json",
+  "item-ga-04.json",
+  "item-ga-05.json",
+  "item-ga-06.json",
+  "item-ga-07.json",
+  "item-ga-08.json",
+  "item-ga-09.json",
+  "item-ga-10.json",
+  "item-ga-11.json",
+  "item-ga-12.json",
+  "item-ga-13.json",
+  "item-ga-14.json",
+]
+min_interval_seconds = 600
+
+[platform]
+reader = "enhanced_voting"
+jurisdiction = "Georgia"
+election_id = "11032026GeneralAndSpecialElection"
+vote_for = ["Vote for 1"]
+county_names = "strip_county"
+skip_methods = true
+
+[platform.titles]                  # the contest title as the site writes it
+"US House of Representatives - District 1" = "GA-01"
+"US House of Representatives - District 2" = "GA-02"
+"US House of Representatives - District 3" = "GA-03"
+"US House of Representatives - District 4" = "GA-04"
+"US House of Representatives - District 5" = "GA-05"
+"US House of Representatives - District 6" = "GA-06"
+"US House of Representatives - District 7" = "GA-07"
+"US House of Representatives - District 8" = "GA-08"
+"US House of Representatives - District 9" = "GA-09"
+"US House of Representatives - District 10" = "GA-10"
+"US House of Representatives - District 11" = "GA-11"
+"US House of Representatives - District 12" = "GA-12"
+"US House of Representatives - District 13" = "GA-13"
+"US House of Representatives - District 14" = "GA-14"
+"Governor" = "GA-GOV"
+"US Senate" = "GA-SEN"

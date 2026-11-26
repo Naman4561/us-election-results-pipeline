@@ -16,6 +16,7 @@ senator and six U.S. House members in 2026; no governor. Counts are totals only.
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row, text, unique_json
@@ -212,6 +213,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=text(races.get("WriteTime"), "update time"),
-        official_results=final,
+        **parse_report.fields(final),
         contest_total_reconciliation="passed",
     )

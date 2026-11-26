@@ -1,0 +1,548 @@
+{
+ "ak_2026_general": {
+  "official": "official",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed",
+   "vote_method_reconciliation": "passed"
+  }
+ },
+ "al_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "11/04/2026 11:16:06 AM CT",
+  "reported_at": "2026-11-04T11:16:06-06:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "ar_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "2026-11-09T21:11:09.6845338Z",
+  "reported_at": "2026-11-09T21:11:09.684533+00:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "az_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": "2026-11-18T15:42:07.7170166Z",
+  "reported_at": "2026-11-18T15:42:07.717016+00:00",
+  "reported_at_basis": "iso",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "ca_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": "November 5, 2026, 6:58 p.m.",
+  "reported_at": null,
+  "reported_at_basis": "no_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "not_available",
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "co_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "11/5/2026 8:04:54 PM MST",
+  "reported_at": "2026-11-05T20:04:54-07:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "ct_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "version 55530",
+  "reported_at": null,
+  "reported_at_basis": "version",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed",
+   "party_line_reconciliation": "passed"
+  }
+ },
+ "de_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "2026-11-04T03:03:18.364-05:00",
+  "reported_at": "2026-11-04T03:03:18.364000-05:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "fl_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "ga_2026_general": {
+  "official": "official",
+  "reported_at_text": "2026-11-20T15:50:56.8414116Z",
+  "reported_at": "2026-11-20T15:50:56.841411+00:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "hi_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "contest_total_reconciliation": "not_available",
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "ia_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "11/4/2026 12:25:40 PM CST",
+  "reported_at": "2026-11-04T12:25:40-06:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "id_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "2026-11-09T18:48:10.2302686Z",
+  "reported_at": "2026-11-09T18:48:10.230268+00:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "il_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": "4 of 102 counties (6 of 108 election authorities, 1 canvassed); partial counts: McLean, Winnebago; newest results 2026-11-18T15:08:27-06:00",
+  "reported_at": "2026-11-18T15:08:27-06:00",
+  "reported_at_basis": "iso",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "in_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "2026-11-09T23:05:08.39",
+  "reported_at": null,
+  "reported_at_basis": "no_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "ks_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": "11/03/2026 8:41 PM",
+  "reported_at": "2026-11-03T20:41:00-06:00",
+  "reported_at_basis": "iso",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "ky_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": "Last Update: 11/20/2026 10:42:18 AM; counties reporting 120 / 120",
+  "reported_at": "2026-11-20T10:42:18-05:00",
+  "reported_at_basis": "iso",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "la_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "2026-11-09T09:59:20.137",
+  "reported_at": null,
+  "reported_at_basis": "no_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "ma_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "md_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "11/05/2026 10:56:33 PM",
+  "reported_at": null,
+  "reported_at_basis": "no_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "me_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "mi_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "mn_2026_general_all": {
+  "official": "not_stated",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "mo_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "as of 11/18/2026 10:53:42 PM",
+  "reported_at": "2026-11-18T22:53:42-06:00",
+  "reported_at_basis": "iso",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "ms_2026_general_all": {
+  "official": "not_stated",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "mt_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "11/19/2026 11:50:20 AM MT",
+  "reported_at": "2026-11-19T11:50:20-07:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "nc_2026_general_all": {
+  "official": "not_stated",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "nd_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "2026-11-10T04:21:27.8328636Z",
+  "reported_at": "2026-11-10T04:21:27.832863+00:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "ne_2026_general_all": {
+  "official": "unofficial",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "nh_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "nj_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": "newest county update 2026-11-19T13:06:59-05:00",
+  "reported_at": "2026-11-19T13:06:59-05:00",
+  "reported_at_basis": "iso",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "nm_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "11/5/2026 9:18 AM MT",
+  "reported_at": "2026-11-05T09:18:00-07:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed_except_privacy_masked_counties",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "nv_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "release 90, 2026-11-13T23:36:19.4065457Z",
+  "reported_at": "2026-11-13T23:36:19.406545+00:00",
+  "reported_at_basis": "iso",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "ny_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": "11/18/2026 3:50:10 PM",
+  "reported_at": "2026-11-18T15:50:10-05:00",
+  "reported_at_basis": "iso",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed",
+   "party_line_reconciliation": "passed"
+  }
+ },
+ "oh_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": "2026-11-04T02:42:36Z",
+  "reported_at": "2026-11-04T02:42:36+00:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "not_available",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "ok_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": "20261103_CountyResults.csv dated 2026-11-11 01:58:16 UTC",
+  "reported_at": "2026-11-11T01:58:16+00:00",
+  "reported_at_basis": "iso",
+  "reconciliation": {
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "or_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "11/5/2026 | 9:00 PM PT",
+  "reported_at": "2026-11-05T21:00:00-08:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "pa_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "ri_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "2026-11-09T19:29:55.693011Z",
+  "reported_at": "2026-11-09T19:29:55.693011+00:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed",
+   "locality_reconciliation": "passed"
+  }
+ },
+ "sc_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "11/6/2026 6:26:12 PM EST",
+  "reported_at": "2026-11-06T18:26:12-05:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed",
+   "vote_method_reconciliation": "passed"
+  }
+ },
+ "sd_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "11/5/2026 6:45 PM CT",
+  "reported_at": "2026-11-05T18:45:00-06:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "tn_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed",
+   "percentage_reconciliation": "passed"
+  }
+ },
+ "tx_2026_general_all": {
+  "official": "unofficial",
+  "reported_at_text": "Nov 04, 2026 01:28:46",
+  "reported_at": null,
+  "reported_at_basis": "no_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "not_available",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "ut_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "2026-11-10T00:51:40.7483194Z",
+  "reported_at": "2026-11-10T00:51:40.748319+00:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "va_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "2026-11-06T04:53:34.7587411Z",
+  "reported_at": "2026-11-06T04:53:34.758741+00:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "vt_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "wa_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "2026-11-06T03:50:14.4491696Z",
+  "reported_at": "2026-11-06T03:50:14.449169+00:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "wi_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": "6 of 72 counties (4 canvassed, 2 unofficial); newest county report 2026-11-17T11:00:02-06:00",
+  "reported_at": "2026-11-17T11:00:02-06:00",
+  "reported_at_basis": "iso",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "wv_2026_general": {
+  "official": "unofficial",
+  "reported_at_text": "11/4/2026 3:05:06 PM EST",
+  "reported_at": "2026-11-04T15:05:06-05:00",
+  "reported_at_basis": "stated_zone",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ },
+ "wy_2026_general": {
+  "official": "not_stated",
+  "reported_at_text": null,
+  "reported_at": null,
+  "reported_at_basis": "none",
+  "reconciliation": {
+   "contest_total_reconciliation": "passed",
+   "county_reconciliation": "passed",
+   "internal_reconciliation": "passed"
+  }
+ }
+}

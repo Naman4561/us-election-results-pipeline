@@ -1,0 +1,32 @@
+code = "IA"
+methods = ["total_votes", "election_day", "absentee_combined"]
+collection_backend = "clarity"
+
+[races]
+governor = true
+house = [1, 2, 3, 4]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "ia_2026_general"
+page = "https://results.enr.clarityelections.com/IA/127077/"
+url = "https://results.enr.clarityelections.com/IA/127077/current_ver.txt"
+format = "bundle"
+primary_filename = "current_ver.txt"
+expected_members = ["current_ver.txt", "detail.zip", "settings.json", "summary.json"]
+supplemental_members = ["detail.zip", "settings.json", "summary.json"]
+min_interval_seconds = 3540
+
+[platform]
+reader = "clarity"
+detail = "txt"
+
+[platform.titles]                  # the contest title as the site writes it
+"United States Representative District 1" = "IA-01"
+"United States Representative District 2" = "IA-02"
+"United States Representative District 3" = "IA-03"
+"United States Representative District 4" = "IA-04"
+"Governor and Lt. Governor" = "IA-GOV"
+"United States Senator" = "IA-SEN"

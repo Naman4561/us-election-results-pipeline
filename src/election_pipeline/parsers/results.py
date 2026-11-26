@@ -16,6 +16,8 @@ import csv
 import json
 from collections import defaultdict
 
+from election_pipeline import parse_report
+
 FIELDS = (
     "source_line",
     "election_date",
@@ -202,6 +204,10 @@ def finish(
         vote_methods=list(methods),
         **({"reporting_unit_rows": len(units)} if units else {}),
     )
+    # A source whose parser declares nothing has no official marker. A parser's own
+    # declaration (parse_report.fields), made before or after this, stands.
+    if "official_status" not in stats:
+        stats.update(**parse_report.fields(parse_report.NOT_STATED))
 
 
 def write_units(units, source, output):

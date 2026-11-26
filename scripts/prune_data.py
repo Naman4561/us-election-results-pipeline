@@ -117,7 +117,7 @@ def prune_data(data_dir, sources, keep_days=7, apply=False, now=None):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-dir", type=Path, default=ROOT / "data")
-    parser.add_argument("--config", type=Path, default=ROOT / "config/sources.toml")
+    parser.add_argument("--config", type=Path, default=ROOT / "config")
     parser.add_argument("--keep-days", type=int, default=7)
     parser.add_argument("--apply", action="store_true", help="Delete; otherwise only plan")
     parser.add_argument("--list", action="store_true", help="Print every planned path")

@@ -1,0 +1,20 @@
+code = "HI"
+methods = ["total_votes", "mail", "in_person"]
+county_results = false
+
+[races]
+senate = false
+governor = true
+house = [1, 2]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "hi_2026_general"
+page = "https://elections.hawaii.gov/election-results/"
+url = "https://elections.hawaii.gov/wp-content/results/2026%20General/summary.txt"
+format = "bundle"
+primary_filename = "summary.txt"
+expected_members = ["summary.txt"]
+min_interval_seconds = 3540

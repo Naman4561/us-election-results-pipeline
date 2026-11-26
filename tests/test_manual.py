@@ -23,6 +23,7 @@ from election_pipeline import manual
 from election_pipeline.dashboard.server import create_app
 from election_pipeline.deployment import catalog, containers, control
 from election_pipeline.deployment import manual as deployment_manual
+from election_pipeline.elections import Acquisition
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
 from election_pipeline.storage import ArchiveStore, atomic_json
@@ -40,7 +41,7 @@ class ManualTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.settings, sources = load_config(ROOT / "config/sources.toml")
+        self.settings, sources = load_config(ROOT / "config")
         self.source = sources["oh_2026_general"]
         self.raw = gzip.decompress(
             (ROOT / "tests/fixtures/five_states/oh-results.xml.gz").read_bytes()
@@ -145,7 +146,7 @@ class ManualTests(unittest.TestCase):
             self.acquire(downloaded_at="2026-11-03T23:00:00+00:00")
 
     def test_kansas_page_imports_with_its_central_time_as_the_generation_time(self):
-        self.source = load_config(ROOT / "config/sources.toml")[1]["ks_2026_general"]
+        self.source = load_config(ROOT / "config")[1]["ks_2026_general"]
         raw = gzip.decompress((ROOT / "tests/fixtures/five_states/ks.html.gz").read_bytes())
         receipt = self.acquire(raw)
         # The page says 11/03/2026 8:41 PM, printed in CST.
@@ -203,7 +204,7 @@ class ManualDeploymentTests(unittest.TestCase):
         self.root = Path(temporary.name)
         self.path = self.root / "catalog.json"
         self.value = fixture(self.root)
-        self.settings, sources = load_config(ROOT / "config/sources.toml")
+        self.settings, sources = load_config(ROOT / "config")
         self.source = sources["oh_2026_general"]
         self.image = self.value["release"]["image_id"]
         self.revision = self.value["release"]["revision"]
@@ -247,6 +248,45 @@ class ManualDeploymentTests(unittest.TestCase):
             deployment_manual.configure(self.path, self.source.source_id)
         with self.assertRaisesRegex(ValueError, "single-file"):
             deployment_manual.configure(self.path, "mn_2026_general_all")
+
+    def test_configure_follows_the_acquisition_the_election_definition_declares(self):
+        def run(name, **options):
+            # The catalog's own update takes a host file lock; apply the change in memory.
+            self.value["sources"][name] = {
+                "enabled": False,
+                "public": False,
+                "status": "unofficial",
+                "acquisition": "http",
+            }
+            with patch.object(
+                catalog, "update", side_effect=lambda path, change: change(self.value)
+            ):
+                deployment_manual.configure(self.path, name, **options)
+            return self.value["sources"][name]
+
+        # Ohio and Oklahoma are declared manual and final, with the freshness limit each has.
+        ohio = run("oh_2026_general")
+        self.assertEqual(
+            (ohio["acquisition"], ohio["manual_final"], ohio["manual_max_age_seconds"]),
+            ("manual", True, 21600),
+        )
+        self.assertEqual(run("ok_2026_general")["manual_max_age_seconds"], 172800)
+        # The operator may override what is declared, within the allowed range.
+        kentucky = run("ky_2026_general", max_age_seconds=3600, final=True)
+        self.assertEqual(
+            (kentucky["manual_max_age_seconds"], kentucky["manual_final"]), (3600, True)
+        )
+        with self.assertRaisesRegex(ValueError, "between 15 minutes"):
+            run("ky_2026_general", max_age_seconds=60)
+        # A source the definition acquires over HTTP is refused, whatever the catalog holds.
+        with self.assertRaisesRegex(ValueError, "does not declare tx_2026_general_all manual"):
+            run("tx_2026_general_all")
+        declared = {"oh_2026_general": Acquisition("http")}
+        with (
+            patch.object(catalog, "acquisition", return_value=declared),
+            self.assertRaisesRegex(ValueError, "says http"),
+        ):
+            run("oh_2026_general")
 
     @unittest.skipIf(os.name == "nt", "Linux host catalog lock")
     def test_a_public_manual_source_can_be_marked_final_and_nothing_else_changes(self):
@@ -476,9 +516,18 @@ class ManualDeploymentTests(unittest.TestCase):
             },
         }
 
+        # This test's catalog polls North Carolina and Kentucky and imports Ohio; its subject
+        # is the freshness of manual imports, not what the election definition declares.
+        acquired = {
+            "nc_2026_general_all": Acquisition("http"),
+            "ky_2026_general": Acquisition("http"),
+            "oh_2026_general": Acquisition("manual"),
+        }
+
         def assess():
             self.save()
             with (
+                patch.object(catalog, "acquisition", return_value=acquired),
                 patch.object(containers, "inspect_image", return_value=(self.image, self.revision)),
                 patch.object(
                     monitor, "systemd", side_effect=lambda action, unit: action == "is-active"

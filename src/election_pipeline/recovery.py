@@ -697,7 +697,10 @@ def backup(
                         "Missing/corrupt raw archive for snapshot: " + row["raw_sha256"]
                     )
 
-            shutil.copy2(config, temporary / "sources.toml")
+            # The configuration the backup was taken under: every election's definition
+            # and the states' durable facts (older backups hold a single sources.toml).
+            shutil.copytree(Path(config) / "elections", temporary / "config/elections")
+            shutil.copy2(Path(config) / "states.toml", temporary / "config/states.toml")
 
             if catalog is not None:
                 atomic_json(temporary / "deployment-catalog.json", catalog)

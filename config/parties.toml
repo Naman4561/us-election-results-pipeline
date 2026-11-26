@@ -1,0 +1,192 @@
+# The party codes a platform's sites publish under, reviewed once, by platform.
+#
+# Each table maps a party name exactly as the platform writes it to the code stored in
+# results (DEM, REP, LIB, GRN, IND, CON ...). A reader refuses a party it does not list:
+# a new spelling is added here, with its source in the commit message, never guessed.
+# Changing this file re-keys the release check of every state whose definition has a
+# [platform] table (elections.fingerprint).
+
+[tally]
+"Republican" = "REP"
+"Democratic" = "DEM"
+"Democratic-NPL" = "DEM"
+"Libertarian" = "LIB"
+"Green" = "GRN"
+"Independent" = "IND"
+"independent nomination" = "IND"
+"Constitution" = "CON"
+"American Delta" = "ADP"
+"Write-In" = "W"
+# Stored as the code this reader has always produced for it (the name, uppercased). A
+# shorter code is a separate, reviewed change: it alters stored results.
+"Nonpartisan" = "NONPARTISAN"
+
+[enhanced_voting]                    # for a site that names its parties without abbreviations
+"Democratic" = "DEM"                 # (party_names = true in its [platform]): Utah's
+"Republican" = "REP"
+"Libertarian" = "LIB"
+"Constitution" = "CON"
+"Forward" = "FWD"
+"Independent American" = "IAP"
+"Unaffiliated" = "UNA"
+
+[enr.MT]                             # Montana's export prints each party's name
+"Republican" = "REP"
+"Democrat" = "DEM"
+"Libertarian" = "LIB"
+"Green" = "GRN"
+"Independent" = "IND"
+
+[enr.OR]                             # Oregon's nominating-party names
+"Democrat" = "DEM"
+"Republican" = "REP"
+"Libertarian" = "LIB"
+"Pacific Green" = "GRN"
+
+# A state whose own parser reads party names or letters: what its site prints, to the
+# code stored. Each parser reads only its own state's table (platforms.party_names).
+
+[states.AZ]
+"Democratic" = "DEM"
+"Republican" = "REP"
+"Libertarian" = "LIB"
+"Green" = "GRN"
+"Independent" = "IND"
+"No Labels" = "NOL"
+"Other" = "OTH"
+
+[states.CA]
+"Dem" = "DEM"
+"Rep" = "REP"
+"Lib" = "LIB"
+"Grn" = "GRN"
+
+[states.CT]
+"D" = "DEM"
+"R" = "REP"
+"WF" = "WFP"
+"IND" = "IND"
+"G" = "GRN"
+"LI" = "LIB"
+
+[states.DE]
+"Democratic Party" = "DEM"
+"Republican Party" = "REP"
+"Independent Party of Delaware" = "IPD"
+
+[states.HI]
+"D" = "DEM"
+"R" = "REP"
+"G" = "GRN"
+"L" = "LIB"
+
+[states.KY]
+"1" = "DEM"
+"2" = "REP"
+"3" = "OTH"
+"4" = "CON"
+"5" = "REF"
+"6" = "IND"
+"7" = "LIB"
+"8" = "SOC"
+"9" = "GRN"
+"10" = "KEN"
+
+[states.MA]
+"Democratic" = "DEM"
+"Republican" = "REP"
+"Unenrolled" = "IND"
+
+[states.ME]
+"Democratic" = "DEM"
+"Republican" = "REP"
+"Independent" = "IND"
+
+[states.MI]
+"DEMOCRATIC" = "DEM"
+"REPUBLICAN" = "REP"
+"LIBERTARIAN" = "LIB"
+"GREEN" = "GRN"
+"U.S. TAXPAYERS" = "UST"
+"NATURAL LAW" = "NLP"
+"WORKING CLASS PARTY" = "WCP"
+"NO PARTY AFFILIATION" = "NPA"
+
+[states.MO]
+"Republican" = "REP"
+"Democratic" = "DEM"
+"Libertarian" = "LIB"
+"Green" = "GRN"
+"Constitution" = "CST"
+
+[states.MS]
+"Democrat" = "DEM"
+"Republican" = "REP"
+"Independent" = "IND"
+
+[states.NH]
+"d" = "DEM"
+"r" = "REP"
+"l" = "LIB"
+"c" = "CON"
+"i" = "IND"
+"g" = "GRN"
+
+[states.NY]
+"DEM" = "DEM"
+"REP" = "REP"
+"WOR" = "WOR"
+"CON" = "CON"
+"Taxpayer Rights" = "TXR"
+"Vote Affordable" = "VAF"
+"Queens United" = "QUN"
+"Libertarian" = "LIB"
+"Our Future" = "OFP"
+"For All of Us" = "FAU"
+"Karen Ortiz" = "KOP"
+"Socialism PSL" = "PSL"
+"Speak The Truth" = "STT"
+
+[states.OK]
+"DEM" = "DEM"
+"IND" = "IND"
+"LIB" = "LIB"
+"REP" = "REP"
+
+[states.PA]
+"Democratic" = "DEM"
+"Republican" = "REP"
+"Libertarian" = "LIB"
+"Green" = "GRN"
+"The Independent Party" = "TIP"
+
+[states.TN]
+"R" = "REP"
+"D" = "DEM"
+"I" = "IND"
+"L" = "LIB"
+"G" = "GRN"
+
+[states.VT]
+"DEMOCRATIC" = "DEM"
+"DEM/PROG" = "DEM"
+"REPUBLICAN" = "REP"
+"INDEPENDENT" = "IND"
+"PEACE AND JUSTICE" = "PJ"
+"FREEDOM AND UNITY" = "FU"
+
+[states.WY]
+"R" = "REP"
+"D" = "DEM"
+"L" = "LIB"
+"C" = "CON"
+
+[letters]                            # structured.party: a one-letter code to the stored code;
+"R" = "REP"                          # any other value is stored as its upper-case self
+"D" = "DEM"
+"L" = "LIB"
+"G" = "GRN"
+
+[groups]                             # the dashboard's two named parties: every stored code or
+DEM = ["DEM", "D", "DEMOCRATIC", "DEMOCRAT", "DFL", "DEM/NON"]   # spelling that counts as each
+REP = ["REP", "R", "REPUBLICAN"]     # anything else is OTHER, and no party at all UNKNOWN

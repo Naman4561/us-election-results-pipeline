@@ -20,11 +20,10 @@ from urllib.parse import parse_qs
 
 from test_new_states import locate, relabel, set_cells
 
-from election_pipeline import bundles
+from election_pipeline import bundles, platforms
 from election_pipeline.collect import FetchFailure, FetchResponse
 from election_pipeline.collectors import montana
 from election_pipeline.dashboard.server import STATIC
-from election_pipeline.parsers import mt
 from election_pipeline.parsing import parse_source
 from election_pipeline.settings import load_config
 from election_pipeline.storage import ArchiveStore
@@ -58,7 +57,7 @@ class MontanaTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.settings, sources = load_config(ROOT / "config/sources.toml")
+        self.settings, sources = load_config(ROOT / "config")
         self.source = sources["mt_2026_general"]
 
     def parse(self, mutate=None):
@@ -101,7 +100,8 @@ class MontanaTests(unittest.TestCase):
             self.assertEqual(statewide[race], expected)
         counties = self.read(report, "county_results.csv")
         self.assertEqual(
-            {r["county"] for r in counties if r["contest_id"] == "MT-SEN"}, set(mt.COUNTIES)
+            {r["county"] for r in counties if r["contest_id"] == "MT-SEN"},
+            set(platforms.enr(self.source).counties),
         )
         rows = self.read(report, "results.csv")
         senate = [r for r in rows if r["contest_id"] == "MT-SEN" and not r["county"]]
@@ -112,7 +112,7 @@ class MontanaTests(unittest.TestCase):
         # Every county is drawn on the map under the same key.
         geo = json.loads((STATIC / "mt-map.json").read_text())
         self.assertEqual(
-            {re.sub(r"[^A-Z0-9]", "", c.upper()) for c in mt.COUNTIES},
+            {re.sub(r"[^A-Z0-9]", "", c.upper()) for c in platforms.enr(self.source).counties},
             {f["id"] for f in geo["counties"]},
         )
         self.assertEqual(len(geo["districts"]), 2)
@@ -153,7 +153,7 @@ class MontanaCollectorTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
-        self.settings, sources = load_config(ROOT / "config/sources.toml")
+        self.settings, sources = load_config(ROOT / "config")
         self.source = sources["mt_2026_general"]
         self.workbook = members()["statewide.xlsx"]
 

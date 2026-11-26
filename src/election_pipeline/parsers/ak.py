@@ -19,9 +19,9 @@ import json
 import re
 import zipfile
 from collections import Counter, defaultdict
-from importlib.resources import files
 from urllib.parse import urljoin
 
+from election_pipeline import elections, parse_report
 from election_pipeline.parsers import ak_rcv
 from election_pipeline.parsers.common import integer
 from election_pipeline.parsers.html import Tree
@@ -107,7 +107,7 @@ def validate_source(source):
 
 
 def scope():
-    raw = files("election_pipeline").joinpath("resources/ak_2026_scope.json").read_bytes()
+    raw = elections.table("ak-scope.json")
     if hashlib.sha256(raw).hexdigest() != SCOPE_SHA256:
         raise ValueError("Alaska scope resource failed its integrity check")
     return json.loads(raw)
@@ -334,7 +334,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
         selected_rows=len(seen),
         vote_basis="first_choice_listed_candidates",
         vote_round=1,
-        official_results=official,
+        **parse_report.fields(official),
         reporting_unit_counts={r: sum(race == r for race, _ in identities) for r in wanted},
         candidate_roster="matched_reviewed_capture",
         reporting_unit_roster="matched_reviewed_capture",

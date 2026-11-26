@@ -24,19 +24,12 @@ from datetime import datetime, timezone
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row, unique_json
+from election_pipeline.platforms import party_names
 
 ELECTION = ("2026-11-03", "2026 General Election")
 GOVERNOR = "Governor and Lieutenant Governor"
 HOUSE = re.compile(r"U\.S\. Representative in Congress - District No\. (\d)")
-PARTIES = {
-    "Democratic": "DEM",
-    "Republican": "REP",
-    "Libertarian": "LIB",
-    "Green": "GRN",
-    "Independent": "IND",
-    "No Labels": "NOL",
-    "Other": "OTH",
-}
+PARTIES = party_names("AZ")
 GROUPS = {
     "Early Voting": "early_ballot",
     "Early A.R.S. 16-579": "early_ars_16_579",

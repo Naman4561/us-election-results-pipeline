@@ -14,19 +14,17 @@ Delaware elects a senator and its at-large U.S. House member in 2026; no governo
 
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, formatted_count, row, text, unique_json
+from election_pipeline.platforms import party_names
 
 ELECTION = "GE2026"
 RACES = {"U.S. Senator": "DE-SEN", "Representative In Congress": "DE-AL"}
 STATUS = {"UNOFFICIAL RESULTS": False, "OFFICIAL RESULTS": True}
 # The parties on Delaware's 2026 general election results; any other is refused.
-PARTIES = {
-    "Democratic Party": "DEM",
-    "Republican Party": "REP",
-    "Independent Party of Delaware": "IPD",
-}
+PARTIES = party_names("DE")
 COUNTIES = ("New Castle", "Kent", "Sussex")
 
 
@@ -129,7 +127,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=text(times.pop(), "report time"),
-        official_results=STATUS[statuses.pop()],
+        **parse_report.fields(STATUS[statuses.pop()]),
         contest_total_reconciliation="passed",
         vote_methods="reported_not_stored",
     )

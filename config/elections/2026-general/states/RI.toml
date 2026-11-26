@@ -1,0 +1,39 @@
+code = "RI"
+methods = ["total_votes", "election_day", "early_voting", "absentee_by_mail"]
+collection_backend = "enhanced_voting"
+county_results = false
+
+[races]
+governor = true
+house = [1, 2]
+
+[acquisition]
+mode = "http"
+
+[source]
+id = "ri_2026_general"
+page = "https://electionresults.ri.gov/results/public/rhodeisland/elections/2026StatewideGeneralElection"
+url = "https://electionresults.ri.gov/results/public/api/elections/rhodeisland/2026StatewideGeneralElection/data"
+format = "bundle"
+primary_filename = "data.json"
+expected_members = ["data.json", "item-ri-sen.json", "item-ri-gov.json", "item-ri-01.json", "item-ri-02.json"]
+supplemental_members = ["item-ri-sen.json", "item-ri-gov.json", "item-ri-01.json", "item-ri-02.json"]
+min_interval_seconds = 600
+
+[platform]
+reader = "enhanced_voting"
+jurisdiction = "RhodeIsland"
+election_id = "2026StatewideGeneralElection"
+vote_for = ["Vote for 1"]
+county_names = "none"
+
+[platform.methods]               # the site's method group -> stored column
+"Election Day" = "election_day"
+"Early Voting" = "early_voting"
+"Mail Ballots" = "absentee_by_mail"
+
+[platform.titles]                  # the contest title as the site writes it
+"Representative in Congress District 1" = "RI-01"
+"Representative in Congress District 2" = "RI-02"
+"Governor" = "RI-GOV"
+"Senator in Congress" = "RI-SEN"

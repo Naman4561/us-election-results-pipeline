@@ -1,0 +1,38 @@
+code = "KY"
+methods = ["total_votes"]
+
+[races]
+house = [1, 2, 3, 4, 5, 6]
+
+[acquisition]
+mode = "manual"
+final = false
+max_age_seconds = 21600
+
+[source]
+id = "ky_2026_general"
+page = "https://vrsws.sos.ky.gov/liveresults/"
+url = "https://vrsws.sos.ky.gov/liveresults/Statewide"
+format = "bundle"
+primary_filename = "results.zip"
+expected_members = ["results.zip"]
+min_interval_seconds = 600
+
+[platform]
+reader = "kentucky"
+# What the source delivers: "saved_pages" (the operator's saved results pages, since the live
+# feed refused automated clients after election week) or "feed" (the feed's XML bundle, which
+# the reader still reads for the archives of election week).
+source_kind = "saved_pages"
+page = "https://vrsws.sos.ky.gov/liveresults/Statewide"
+page_date = "November 03, 2026"
+page_election = "2026 General Election"
+
+[platform.titles]                    # matched ignoring case, as the site's capitals vary
+"United States Senator" = "KY-SEN"
+"UNITED STATES REPRESENTATIVE in CONGRESS 1st Congressional District" = "KY-01"
+"UNITED STATES REPRESENTATIVE in CONGRESS 2nd Congressional District" = "KY-02"
+"UNITED STATES REPRESENTATIVE in CONGRESS 3rd Congressional District" = "KY-03"
+"UNITED STATES REPRESENTATIVE in CONGRESS 4th Congressional District" = "KY-04"
+"UNITED STATES REPRESENTATIVE in CONGRESS 5th Congressional District" = "KY-05"
+"UNITED STATES REPRESENTATIVE in CONGRESS 6th Congressional District" = "KY-06"

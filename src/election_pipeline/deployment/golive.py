@@ -182,12 +182,16 @@ def go_live(
             if entry and entry["public"] and entry["enabled"]:
                 journal.finish("done", note="already public")
                 return {"outcome": "already_public", "source_id": name}
+            # How the source is acquired is the election definition's to say.
+            mode = catalog.acquisition()[name].mode
+            if acquire is not None and mode != "manual":
+                raise ValueError(f"The election definition acquires {name} over {mode}: no file")
             step("register", lambda: control.register(path, name), needed=entry is None)
             entry = catalog.read(path)["sources"][name]
             step(
                 "configure",
-                lambda: manual.configure(path, name, final=final),
-                needed=acquire is not None and entry["acquisition"] != "manual",
+                lambda: manual.configure(path, name, final=final or None),
+                needed=mode == "manual" and entry["acquisition"] != "manual",
             )
             entry = catalog.read(path)["sources"][name]
             first = not entry.get("publication_id") and not entry.get("candidate_id")

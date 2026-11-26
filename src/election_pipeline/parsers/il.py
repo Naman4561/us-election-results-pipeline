@@ -59,13 +59,12 @@ import re
 import zipfile
 from datetime import datetime, timedelta, timezone
 from html import unescape
-from importlib.resources import files
 
-from election_pipeline import reviews
+from election_pipeline import elections, parse_report, reviews
 from election_pipeline.parsers import clarity
 from election_pipeline.parsers.results import finish
+from election_pipeline.parsers.rosters import ROSTERS
 from election_pipeline.parsers.scope import verify_scope
-from election_pipeline.parsers.scope_2026 import ROSTERS
 from election_pipeline.parsers.structured import (
     count,
     formatted_count,
@@ -106,7 +105,7 @@ CLARITY_PARENTS = {"il", "wrc"}
 
 
 def table():
-    raw = files("election_pipeline").joinpath("resources/il_2026_contests.json").read_text("utf-8")
+    raw = elections.table("il-contests.json").decode("utf-8")
     return json.loads(raw)
 
 
@@ -647,7 +646,8 @@ def parse(archive_path, source, settings, output, stats, reference=None):
             f"{canvassed} canvassed); partial counts: {', '.join(sorted(partial)) or 'none'}; "
             f"newest results {newest.isoformat()}"
         ),
-        official_results=False,
+        # County reports, some canvassed: no statewide marker; certification is attested.
+        **parse_report.fields(parse_report.NOT_STATED),
         contest_total_reconciliation="passed",
         counties_waiting=waiting,
         authority_reports={

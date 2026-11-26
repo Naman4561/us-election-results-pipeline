@@ -28,7 +28,7 @@ def main():
     create.add_argument(
         "--config",
         type=Path,
-        default=root / "config/sources.toml",
+        default=root / "config",
     )
 
     restore = commands.add_parser("check-restore")

@@ -14,6 +14,7 @@ import re
 import zipfile
 from datetime import datetime
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row, text, unique_json, xml
@@ -31,8 +32,10 @@ def document(raw, settings):
     return body
 
 
-def settings_check(raw, state, settings):
-    """The site's own state code and update time, which must fall in the election window."""
+def settings_check(raw, source, settings):
+    """The site's own state code and update time, which must fall in the election window:
+    from the election's day to the end of its year."""
+    state = source.state
     record = unique_json(document(raw, settings))
     # A county's page names its state as parent. A state's own page has none, written as
     # JSON null, or since Nov 9, 2026 as the text "null".
@@ -43,7 +46,8 @@ def settings_check(raw, state, settings):
     if not match:
         raise ValueError("Unexpected Clarity update time")
     when = datetime.strptime(match[1], "%m/%d/%Y %I:%M:%S %p")
-    if not datetime(2026, 11, 3) <= when <= datetime(2026, 12, 31):
+    first = datetime.strptime(source.election_date, "%Y-%m-%d")
+    if not first <= when <= datetime(first.year, 12, 31):
         raise ValueError("Clarity update time is outside this election's window")
     return updated
 
@@ -57,14 +61,14 @@ def final_upload(raw, settings):
     return flag
 
 
-def summary(raw, races, settings):
+def summary(raw, site, settings):
     """Statewide summary rows for the selected races: {race: (key, [(name, party, votes)])}."""
     found = {}
     rows = unique_json(document(raw, settings))
     if not isinstance(rows, list):
         raise ValueError("Clarity summary is not a contest list")
     for contest in rows:
-        race = races(text(contest["C"], "contest name"))
+        race = site.race(text(contest["C"], "contest name"))
         if race is None:
             continue
         if race in found:
@@ -116,16 +120,21 @@ def choice_key(value, state):
     return int(value)
 
 
-def detail_contests(root, wanted, race, code, state, election="2026 General"):
+def detail_contests(root, site, source):
+    from election_pipeline.states import state_adapter
+
+    wanted, state = state_adapter(source.state).races, site.name
+    day = datetime.strptime(source.election_date, "%Y-%m-%d")
     if (
-        text(root.findtext("ElectionName"), "election name") != election
-        or text(root.findtext("ElectionDate"), "election date") != "11/3/2026"
-        or text(root.findtext("Region"), "region") != code
+        text(root.findtext("ElectionName"), "election name") != site.election_name
+        or text(root.findtext("ElectionDate"), "election date")
+        != f"{day.month}/{day.day}/{day.year}"
+        or text(root.findtext("Region"), "region") != source.state
     ):
         raise ValueError(f"{state} detail report belongs to another election")
     found = {}
     for contest in root.findall("Contest"):
-        identity = race(text(contest.get("text"), "contest name"))
+        identity = site.race(text(contest.get("text"), "contest name"))
         if identity not in wanted:
             continue
         if (
@@ -140,22 +149,22 @@ def detail_contests(root, wanted, race, code, state, election="2026 General"):
     return found
 
 
-def parse_detail_xml(
-    archive_path, source, settings, output, stats, reference, *, state, race, vote_type, same_name
-):
+def parse_detail_xml(archive_path, source, settings, output, stats, reference):
     """Totals by county from the "Detail XML" report of a state that publishes one vote
     type. Each county's candidate counts must add up to the statewide count, which must
     equal the official summary."""
+    from election_pipeline.platforms import clarity
     from election_pipeline.states import state_adapter
 
-    code = source.state
+    site = clarity(source)
+    code, state = source.state, site.name
     wanted = state_adapter(code).races
     with zipfile.ZipFile(archive_path) as archive:
-        updated = settings_check(archive.read("settings.json"), code, settings)
+        updated = settings_check(archive.read("settings.json"), source, settings)
         final = final_upload(archive.read("settings.json"), settings)
-        official = summary(archive.read("summary.json"), race, settings)
+        official = summary(archive.read("summary.json"), site, settings)
         root = xml(detail_member(archive.read("detail.zip"), settings, "xml"))
-    found = detail_contests(root, wanted, race, code, state)
+    found = detail_contests(root, site, source)
     if set(official) != set(wanted):
         raise ValueError(f"{state} summary lacks a selected contest")
     rows = []
@@ -179,13 +188,13 @@ def parse_detail_xml(
             identity_key = f"{key}-{choice_key(choice.get('key'), state)}"
             name = text(choice.get("text"), "candidate")
             if (
-                not same_name(name, listed)
+                not site.same_name(name, listed)
                 or (choice.get("party") or "").strip() != party
                 or number(choice.get("totalVotes"), "vote count", state) != votes
             ):
                 raise ValueError(f"{identity}: detail and summary candidate totals differ")
             types = choice.findall("VoteType")
-            if [t.get("name") for t in types] != [vote_type]:
+            if [t.get("name") for t in types] != [site.vote_type]:
                 raise ValueError(f"{identity}: unexpected {state} vote types")
             if number(types[0].get("votes"), "vote count", state) != votes:
                 raise ValueError(f"{identity}: vote type total differs from candidate total")
@@ -218,6 +227,6 @@ def parse_detail_xml(
     stats.update(
         source_update_text=updated,
         source_timestamp=text(root.findtext("Timestamp"), "timestamp"),
-        official_results=final,
+        **parse_report.fields(final),
         contest_total_reconciliation="passed",
     )

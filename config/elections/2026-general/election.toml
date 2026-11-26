@@ -1,0 +1,40 @@
+# The 2026 general election (docs/architecture/election-definition.md).
+id = "2026-general"
+date = "2026-11-03"
+
+[collector]
+timeout_seconds = 30
+max_download_seconds = 120
+max_attempts = 3
+backoff_seconds = 2
+max_retry_wait_seconds = 30
+max_download_bytes = 52428800
+max_uncompressed_bytes = 268435456
+max_zip_members = 20
+max_csv_rows = 2000000
+user_agent = "US-Election-Results-Pipeline/0.1"
+
+# Hosts that need more than the platform's default TLS, and nothing more: certificate and
+# hostname verification are never turned off (election_pipeline.tls applies these, and
+# tests/test_tls.py shows each stays verified). A host is named in one entry; a certificate
+# is a packaged file under resources/ with the SHA-256 its bytes must have.
+
+[[tls]]
+kind = "issuer_bundle"
+hosts = ["elections.alaska.gov", "www.elections.alaska.gov"]
+certificate = "alaska-issuers.pem"
+sha256 = "d843cd9900279123e130f0c9ac443451f5a9963254c7f199d61df0e8628f0aa0"
+reason = "Alaska serves an incomplete issuer chain; reviewed, packaged issuer certificates complete it, and a chain to a root in the platform store is still required (resources/alaska-issuers.json)."
+
+[[tls]]
+kind = "legacy_cbc"
+hosts = ["www.co.hinds.ms.us"]
+suites = ["ECDHE-RSA-AES256-SHA", "ECDHE-RSA-AES128-SHA"]
+reason = "Hinds County's IIS server negotiates only ECDHE-RSA CBC suites with SHA-1 MACs, which Python's default list excludes, so it resets the connection; only these two forward-secret suites are added back, for this exact host."
+
+[[tls]]
+kind = "trusted_root"
+hosts = ["flelectionfiles.floridados.gov"]
+certificate = "florida-root.pem"
+sha256 = "471c59d5851cb2be394bce8fc814301233cdd7a92e513d8a3360dfe52965cc62"
+reason = "Florida's file host chains to GoDaddy TLS Root CA - R1 (2025), which the image's trust store does not carry yet; that one reviewed, packaged root is trusted beside the platform store, for this exact host (resources/florida-root.json records how it was checked)."

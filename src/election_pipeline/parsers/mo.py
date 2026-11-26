@@ -18,9 +18,11 @@ from datetime import datetime, timedelta, timezone
 
 from pypdf import PdfReader
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import row
+from election_pipeline.platforms import party_names
 
 ELECTION = "State of Missouri - General Election, November 03, 2026"
 # Central Standard Time: the report is from November, after daylight time ended.
@@ -29,13 +31,7 @@ MAX_PAGES = 200
 RACE = re.compile(
     r"U\.S\. Representative - District (\d)\s+([\d,]+) of ([\d,]+) Precincts Reported"
 )
-PARTIES = {
-    "Republican": "REP",
-    "Democratic": "DEM",
-    "Libertarian": "LIB",
-    "Green": "GRN",
-    "Constitution": "CST",
-}
+PARTIES = party_names("MO")
 CANDIDATE = re.compile(r"(.+?) (Republican|Democratic|Libertarian|Green|Constitution|Write-in)"
                        r" ([\d,]+) (\d+\.\d+)%")  # fmt: skip
 TOTAL = re.compile(r"Total Votes: ([\d,]+)")
@@ -128,6 +124,6 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     stats.update(
         source_update_text=stamp[0],
         source_generated_at=generated.isoformat(),
-        official_results=status == "Official Results",
+        **parse_report.fields(status == "Official Results"),
         contest_total_reconciliation="passed",
     )

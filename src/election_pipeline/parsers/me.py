@@ -32,6 +32,7 @@ from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row
 from election_pipeline.parsers.workbook import Workbook
+from election_pipeline.platforms import party_names
 
 MEMBERS = {
     "US Senate - FINAL.xlsx": ("ME-SEN", "US Senate", "Statewide Total"),
@@ -48,7 +49,7 @@ COUNTIES = {
     "PEN": "Penobscot", "PIS": "Piscataquis", "SAG": "Sagadahoc", "SOM": "Somerset",
     "WAL": "Waldo", "WAS": "Washington", "YOR": "York",
 }  # fmt: skip
-PARTIES = {"Democratic": "DEM", "Republican": "REP", "Independent": "IND"}
+PARTIES = party_names("ME")
 WRITE_IN = ("write-in", "Write-in")
 MAX_BYTES = 5_000_000
 

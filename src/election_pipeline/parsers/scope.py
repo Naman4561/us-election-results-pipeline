@@ -3,7 +3,7 @@
 from contextlib import contextmanager
 from contextvars import ContextVar
 
-from election_pipeline.parsers.scope_2026 import ROSTERS
+from election_pipeline.parsers.rosters import ROSTERS
 
 _recording = ContextVar("roster_recording", default=None)
 

@@ -16,15 +16,17 @@ the state's own, so the version number is recorded instead.
 import re
 import zipfile
 
+from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row, unique_json
+from election_pipeline.platforms import party_names
 
 ELECTION = ("108", "11/03/2026", "2026 General Election")
 GOVERNOR = "Governor and Lieutenant Governor"
 HOUSE = re.compile(r"Representative in Congress ([1-5])")
 # The parties of these offices' candidate lines; any other is refused.
-PARTIES = {"D": "DEM", "R": "REP", "WF": "WFP", "IND": "IND", "G": "GRN", "LI": "LIB"}
+PARTIES = party_names("CT")
 MAJOR = ("DEM", "REP")
 WRITE_IN_PARTY = "WI"
 WRITE_IN = ("write-in", "Write-in")
@@ -162,7 +164,7 @@ def parse(archive_path, source, settings, output, stats, reference=None):
     finish(rows, source, settings, output, stats, reference=reference, reconcile=True)
     stats.update(
         source_update_text=f"version {number}",
-        official_results=official == {True},
+        **parse_report.fields(official == {True}),
         contest_total_reconciliation="passed",
         party_line_reconciliation="passed",
     )

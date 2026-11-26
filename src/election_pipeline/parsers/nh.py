@@ -19,12 +19,13 @@ import io
 import json
 import re
 import zipfile
-from importlib.resources import files
 
+from election_pipeline import elections
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, row
 from election_pipeline.parsers.workbook import Workbook
+from election_pipeline.platforms import party_names
 
 MEMBERS = {
     "2026-ge-us-senator-summary.xlsx": ("NH-SEN", "United States Senator"),
@@ -36,7 +37,7 @@ TITLE = "State of New Hampshire - General Election"
 # The import zip's layout, for scripts/pack_import.py (election_pipeline.packing).
 PACK = {"members": tuple(MEMBERS)}
 DATE = "November 03, 2026"
-PARTIES = {"d": "DEM", "r": "REP", "l": "LIB", "c": "CON", "i": "IND", "g": "GRN"}
+PARTIES = party_names("NH")
 COUNTIES = (
     "Belknap", "Carroll", "Cheshire", "Coos", "Grafton", "Hillsborough", "Merrimack",
     "Rockingham", "Strafford", "Sullivan",
@@ -46,7 +47,7 @@ MAX_BYTES = 5_000_000
 
 
 def towns():
-    raw = files("election_pipeline").joinpath("resources/nh_2026_towns.json").read_text("utf-8")
+    raw = elections.table("nh-towns.json").decode("utf-8")
     table = json.loads(raw)["towns"]
     if set(table.values()) != set(COUNTIES):
         raise ValueError("New Hampshire town table names an unknown county")

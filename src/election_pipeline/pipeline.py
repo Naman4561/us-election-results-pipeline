@@ -57,15 +57,23 @@ def next_collection(source, last_checked: datetime, now: datetime) -> datetime:
     return max(due, slot)
 
 
-def collector_code_hash(package_dir: Path | None = None) -> str:
+def collector_code_hash(package_dir: Path | None = None, config: Path | None = None) -> str:
     """Identify the shipped Python sources and reviewed parser data, without needing Git."""
+    from election_pipeline import elections
+
     digest = hashlib.sha256()
     package_dir = package_dir if package_dir is not None else Path(__file__).parent
-    # Reviewed data the parsers check against (rosters, county lists) counts as code.
     sources = [*package_dir.rglob("*.py"), *(package_dir / "resources").rglob("*.json")]
     for path in sorted(sources):
         name = path.relative_to(package_dir).as_posix()
         digest.update(name.encode() + b"\0" + path.read_bytes() + b"\0")
+    # Reviewed data the parsers check against (rosters, county lists) counts as code.
+    election = elections.folder(config)
+    for path in sorted(
+        [*(election / "rosters").glob("*.json"), *(election / "tables").glob("*.json")]
+    ):
+        name = path.relative_to(election).as_posix()
+        digest.update(b"election/" + name.encode() + b"\0" + path.read_bytes() + b"\0")
     return digest.hexdigest()
 
 
