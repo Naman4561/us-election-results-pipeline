@@ -18,3 +18,16 @@ primary_filename = "data.json"
 expected_members = ["data.json", "item-id-sen.json", "item-id-gov.json", "item-id-01.json", "item-id-02.json"]
 supplemental_members = ["item-id-sen.json", "item-id-gov.json", "item-id-01.json", "item-id-02.json"]
 min_interval_seconds = 600
+
+[platform]
+reader = "enhanced_voting"
+jurisdiction = "id"
+election_id = "nov2026"
+vote_for = ["Vote for 1"]
+county_names = "strip_county"
+
+[platform.titles]                  # the contest title as the site writes it
+"United States Representative District 1" = "ID-01"
+"United States Representative District 2" = "ID-02"
+"Governor" = "ID-GOV"
+"United States Senator" = "ID-SEN"

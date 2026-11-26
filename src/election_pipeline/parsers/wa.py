@@ -6,24 +6,16 @@ ten U.S. House seats are covered. Washington's site fills the "vote for" field w
 category label ("Congressional") rather than a seat count, so it is not checked; each is
 a single-seat, top-two general election contest.
 Write-in votes are reported as one "Write-in" line and kept as a candidate, as published.
+The site's identity, contest titles and county names are in the election definition
+(``[platform]`` of ``states/WA.toml``).
 """
-
-import re
 
 from election_pipeline.parsers import enhanced_voting as ev
 
 
-def race(name):
-    match = re.fullmatch(r"Congressional District ([1-9]|10) - U\.S\. Representative", name)
-    return f"WA-{int(match[1]):02}" if match else None
-
-
-SITE = ev.Site("WA", "Washington", "washington", "20261103", (), race, ev.strip_county)
-
-
 def ballot_items(raw, source):
-    return ev.ballot_items(raw, source, SITE)
+    return ev.ballot_items(raw, source)
 
 
 def parse(archive_path, source, settings, output, stats, reference=None):
-    ev.parse_site(SITE, archive_path, source, settings, output, stats, reference)
+    ev.parse_site(archive_path, source, settings, output, stats, reference)

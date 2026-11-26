@@ -52,3 +52,31 @@ supplemental_members = [
 ]
 min_interval_seconds = 600
 prefer_ipv6 = true
+
+[platform]
+reader = "enhanced_voting"
+jurisdiction = "virginia"
+election_id = "2026-November-General"
+vote_for = ["Vote for only one"]
+county_names = "county_or_city"
+
+[platform.methods]               # the site's method group -> stored column
+"Early Voting" = "early_voting"
+"Election Day" = "election_day"
+"Mailed Absentee" = "absentee_by_mail"
+"Provisional" = "provisional"
+"Post-Election" = "post_election"
+
+[platform.titles]                  # the contest title as the site writes it
+"Member, House of Representatives (1st District)" = "VA-01"
+"Member, House of Representatives (2nd District)" = "VA-02"
+"Member, House of Representatives (3rd District)" = "VA-03"
+"Member, House of Representatives (4th District)" = "VA-04"
+"Member, House of Representatives (5th District)" = "VA-05"
+"Member, House of Representatives (6th District)" = "VA-06"
+"Member, House of Representatives (7th District)" = "VA-07"
+"Member, House of Representatives (8th District)" = "VA-08"
+"Member, House of Representatives (9th District)" = "VA-09"
+"Member, House of Representatives (10th District)" = "VA-10"
+"Member, House of Representatives (11th District)" = "VA-11"
+"Member, United States Senate" = "VA-SEN"

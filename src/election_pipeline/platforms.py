@@ -9,6 +9,7 @@ title, is refused when it is read, so a wrong definition fails on the first pars
 never as a silently skipped contest.
 """
 
+import re
 from dataclasses import dataclass
 
 from election_pipeline import elections
@@ -30,15 +31,16 @@ class Tally:
         return self.titles.get(title)
 
 
-def table(code, reader, keys):
-    """The state's ``[platform]`` table, checked to be for ``reader`` with exactly ``keys``."""
+def table(code, reader, keys, optional=()):
+    """The state's ``[platform]`` table, checked to be for ``reader``: every one of ``keys`` and
+    no key beyond them and ``optional``."""
     raw = ELECTION.platforms.get(code)
     if raw is None:
         raise ValueError(f"{code}: the election definition has no [platform] table")
     found = dict(raw)
     if found.pop("reader", None) != reader:
         raise ValueError(f"{code}: its [platform] table is not for the {reader} reader")
-    if set(found) != set(keys):
+    if not set(keys) <= set(found) <= {*keys, *optional}:
         raise ValueError(f"{code}: [platform] holds {sorted(keys)}, not {sorted(found)}")
     return found
 
@@ -71,4 +73,77 @@ def tally(source):
         types=types,
         titles=titles,
         parties=names(elections.parties().get("tally"), "tally parties", code),
+    )
+
+
+def strip_county(name):
+    match = re.fullmatch(r"(.+?) County", name)
+    if not match:
+        raise ValueError(f"Unexpected county name {name!r}")
+    return match[1]
+
+
+def county_or_city(name):
+    """A Virginia locality keeps its suffix: several names exist as both."""
+    if not re.fullmatch(r"[A-Z][A-Za-z .'-]+ (COUNTY|CITY)", name):
+        raise ValueError(f"Unexpected locality {name!r}")
+    return name
+
+
+# How a site's locality name becomes the stored county name; a state names its mode.
+COUNTY_NAMES = {"strip_county": strip_county, "county_or_city": county_or_city, "none": None}
+
+
+@dataclass(frozen=True)
+class EnhancedVoting:
+    state: str
+    name: str
+    jurisdiction: str
+    election_id: str
+    vote_for: tuple  # the accepted "vote for" texts; empty where the site's field is not one
+    titles: dict  # contest title as the site writes it -> race
+    methods: dict  # the site's method group -> stored method column
+    parties: dict  # party name -> code, for a site that gives none; else empty
+    skip_methods: bool  # method detail incomplete on the site: only totals are kept
+    county_mode: str
+
+    def race(self, title):
+        return self.titles.get(title)
+
+    @property
+    def county(self):
+        """The function turning a locality name into a county name; None for a site whose
+        localities are not counties (Rhode Island's towns)."""
+        return COUNTY_NAMES[self.county_mode]
+
+
+def enhanced_voting(source):
+    """The Enhanced Voting reader's settings for ``source``'s state."""
+    code = source.state
+    raw = table(
+        code,
+        "enhanced_voting",
+        ("jurisdiction", "election_id", "county_names", "titles"),
+        ("vote_for", "methods", "skip_methods", "party_names"),
+    )
+    titles = names(raw["titles"], "titles", code)
+    wanted = state_adapter(code).races
+    if set(titles.values()) != set(wanted) or len(set(titles.values())) != len(titles):
+        raise ValueError(f"{code}: [platform] titles must name each of its races once")
+    if raw["county_names"] not in COUNTY_NAMES:
+        raise ValueError(f"{code}: unknown county_names {raw['county_names']!r}")
+    methods = names(raw["methods"], "methods", code) if "methods" in raw else {}
+    return EnhancedVoting(
+        state=code,
+        name=state_adapter(code).name,
+        jurisdiction=raw["jurisdiction"],
+        election_id=raw["election_id"],
+        vote_for=tuple(raw.get("vote_for", ())),
+        titles=titles,
+        methods=methods,
+        parties=names(elections.parties().get("enhanced_voting"), "enhanced_voting parties", code)
+        if raw.get("party_names")
+        else {},
+        skip_methods=raw.get("skip_methods", False),
+        county_mode=raw["county_names"],
     )

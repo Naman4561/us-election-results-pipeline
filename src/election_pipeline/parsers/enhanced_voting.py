@@ -17,34 +17,12 @@ groups. Nothing is estimated: a contest the site has not broken down by county f
 parse and the previous publication stays live.
 """
 
-import re
 import zipfile
-from dataclasses import dataclass, field
 
 from election_pipeline import parse_report
 from election_pipeline.parsers.results import finish
 from election_pipeline.parsers.scope import verify_scope
 from election_pipeline.parsers.structured import count, party, row, text, unique_json
-
-
-@dataclass(frozen=True)
-class Site:
-    state: str
-    name: str
-    jurisdiction: str
-    election_id: str
-    vote_for: tuple
-    race: object  # English contest name -> contest ID or None
-    # English locality name -> stored county name. None for a site whose localities are
-    # not counties (Rhode Island's cities, towns and its "Federal" ballots): they must
-    # add up to the statewide counts, and only statewide rows are kept.
-    county: object
-    methods: dict = field(default_factory=dict)  # English group name -> method column
-    # English party name -> code, for a site that names parties without abbreviations.
-    parties: dict = field(default_factory=dict)
-    # A site whose vote-method detail is incomplete (blank in some counties): its groups
-    # are not read, and only totals are kept.
-    skip_methods: bool = False
 
 
 def english(values, label="name"):
@@ -107,9 +85,11 @@ def selected(data, site, wanted):
     return found
 
 
-def ballot_items(raw, source, site):
+def ballot_items(raw, source):
+    from election_pipeline.platforms import enhanced_voting
     from election_pipeline.states import state_adapter
 
+    site = enhanced_voting(source)
     data = unique_json(raw)
     election(data, site, source)
     wanted = state_adapter(site.state).races
@@ -153,10 +133,12 @@ def reporting(status, label):
     return done, total
 
 
-def parse_site(site, archive_path, source, settings, output, stats, reference=None):
+def parse_site(archive_path, source, settings, output, stats, reference=None):
+    from election_pipeline.platforms import enhanced_voting
     from election_pipeline.states import state_adapter
 
-    if source.format != "bundle" or source.election_date != "2026-11-03":
+    site = enhanced_voting(source)
+    if source.format != "bundle":
         raise ValueError(f"Unsupported {site.name} source/election")
     wanted = state_adapter(site.state).races
     # A state that keeps no county results publishes statewide rows only; its localities
@@ -256,10 +238,3 @@ def parse_site(site, archive_path, source, settings, output, stats, reference=No
         **parse_report.fields(record.get("isOfficialResults") is True),
         contest_total_reconciliation="passed",
     )
-
-
-def strip_county(name):
-    match = re.fullmatch(r"(.+?) County", name)
-    if not match:
-        raise ValueError(f"Unexpected county name {name!r}")
-    return match[1]

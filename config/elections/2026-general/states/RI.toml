@@ -19,3 +19,21 @@ primary_filename = "data.json"
 expected_members = ["data.json", "item-ri-sen.json", "item-ri-gov.json", "item-ri-01.json", "item-ri-02.json"]
 supplemental_members = ["item-ri-sen.json", "item-ri-gov.json", "item-ri-01.json", "item-ri-02.json"]
 min_interval_seconds = 600
+
+[platform]
+reader = "enhanced_voting"
+jurisdiction = "RhodeIsland"
+election_id = "2026StatewideGeneralElection"
+vote_for = ["Vote for 1"]
+county_names = "none"
+
+[platform.methods]               # the site's method group -> stored column
+"Election Day" = "election_day"
+"Early Voting" = "early_voting"
+"Mail Ballots" = "absentee_by_mail"
+
+[platform.titles]                  # the contest title as the site writes it
+"Representative in Congress District 1" = "RI-01"
+"Representative in Congress District 2" = "RI-02"
+"Governor" = "RI-GOV"
+"Senator in Congress" = "RI-SEN"

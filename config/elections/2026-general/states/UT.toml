@@ -18,3 +18,17 @@ primary_filename = "data.json"
 expected_members = ["data.json", "item-ut-01.json", "item-ut-02.json", "item-ut-03.json", "item-ut-04.json"]
 supplemental_members = ["item-ut-01.json", "item-ut-02.json", "item-ut-03.json", "item-ut-04.json"]
 min_interval_seconds = 600
+
+[platform]
+reader = "enhanced_voting"
+jurisdiction = "Utah"
+election_id = "General11032026"
+vote_for = []
+county_names = "strip_county"
+party_names = true
+
+[platform.titles]                  # the contest title as the site writes it
+"U.S. House District 1" = "UT-01"
+"U.S. House District 2" = "UT-02"
+"U.S. House District 3" = "UT-03"
+"U.S. House District 4" = "UT-04"

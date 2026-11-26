@@ -20,3 +20,12 @@
 # Stored as the code this reader has always produced for it (the name, uppercased). A
 # shorter code is a separate, reviewed change: it alters stored results.
 "Nonpartisan" = "NONPARTISAN"
+
+[enhanced_voting]                    # for a site that names its parties without abbreviations
+"Democratic" = "DEM"                 # (party_names = true in its [platform]): Utah's
+"Republican" = "REP"
+"Libertarian" = "LIB"
+"Constitution" = "CON"
+"Forward" = "FWD"
+"Independent American" = "IAP"
+"Unaffiliated" = "UNA"
