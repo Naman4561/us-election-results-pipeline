@@ -77,6 +77,63 @@ def collector_code_hash(package_dir: Path | None = None, config: Path | None = N
     return digest.hexdigest()
 
 
+def imported_modules(package_dir: Path, roots) -> list[Path]:
+    """The package files ``roots`` import, directly or through each other, found from their
+    import statements (also those inside functions); a module loaded by a name built at run
+    time is not followed, so each state's parser module is named as a root."""
+    import ast
+
+    def module(name):
+        if name.split(".")[0] != "election_pipeline":
+            return None
+        relative = name.split(".")[1:]
+        for candidate in (
+            package_dir.joinpath(*relative).with_suffix(".py"),
+            package_dir.joinpath(*relative, "__init__.py"),
+        ):
+            if candidate.is_file():
+                return candidate
+
+    seen, todo = set(), list(roots)
+    while todo:
+        path = todo.pop()
+        if path in seen:
+            continue
+        seen.add(path)
+        for node in ast.walk(ast.parse(path.read_bytes())):
+            names = []
+            if isinstance(node, ast.Import):
+                names = [alias.name for alias in node.names]
+            elif isinstance(node, ast.ImportFrom) and node.module and node.level == 0:
+                names = [node.module, *(f"{node.module}.{a.name}" for a in node.names)]
+            todo += [found for found in map(module, names) if found]
+    return sorted(seen)
+
+
+def parse_code_hash(state: str, package_dir: Path | None = None, config: Path | None = None) -> str:
+    """Identify the code and reviewed data parsing ``state``'s sources depends on: its parser
+    module and the modules that and the parse step import, the package's resource files, and
+    the election definition's slice for the state (``elections.fingerprint``). Another
+    state's parser, roster or county table is not part of it, so changing one reparses only
+    that state, and a change to shared code reparses every state that uses it."""
+    from election_pipeline import elections
+    from election_pipeline.states import state_adapter
+
+    package_dir = package_dir if package_dir is not None else Path(__file__).parent
+    adapter = state_adapter(state)
+    parser = package_dir / "parsers" / f"{adapter.parser_module or adapter.slug}.py"
+    digest = hashlib.sha256()
+    sources = [
+        *imported_modules(package_dir, [parser, package_dir / "parsing.py"]),
+        *(package_dir / "resources").rglob("*.json"),
+    ]
+    for path in sorted(set(sources)):
+        name = path.relative_to(package_dir).as_posix()
+        digest.update(name.encode() + b"\0" + path.read_bytes() + b"\0")
+    digest.update(b"election\0" + elections.fingerprint(state, config=config).encode())
+    return digest.hexdigest()
+
+
 def retry_after_seconds(value: str | None) -> float | None:
     if value is None:
         return None

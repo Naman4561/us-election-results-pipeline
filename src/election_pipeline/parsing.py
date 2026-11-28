@@ -13,7 +13,7 @@ from pathlib import Path
 
 from election_pipeline.checks import validate_payload
 from election_pipeline.parsers.common import integer, records
-from election_pipeline.pipeline import collector_code_hash
+from election_pipeline.pipeline import parse_code_hash
 from election_pipeline.settings import CollectorSettings, Source
 from election_pipeline.storage import ArchiveStore, atomic_json, file_hash, utc_now
 
@@ -115,7 +115,7 @@ def parse_source(
         identity = {
             "raw_sha256": sha256,
             "source_signature": source.signature(settings),
-            "code_sha256": collector_code_hash(),
+            "code_sha256": parse_code_hash(source.state),
             "reference_sha256": file_hash(reference) if reference is not None else None,
         }
 

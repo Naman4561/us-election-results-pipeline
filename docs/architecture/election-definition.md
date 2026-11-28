@@ -5,7 +5,7 @@ released.** The definition and its loader (`election_pipeline.elections`) are te
 a golden record of today's registry. The registry (`STATES`), `load_config` and every source
 now read it; `config/sources.toml` is gone. TLS exceptions and each source's acquisition are
 declared in it. The rosters and the reviewed per-state tables sit beside it
-(`rosters/`, `tables/`), where the parse code hash and each state's release key include
+(`rosters/`, `tables/`), where each state's parse code hash and release key include
 them. This page says what is per-election, where it lives, what the definition holds, and
 how each step proves it changed nothing.
 
@@ -168,6 +168,12 @@ to reproduce it, including how each source arrives. County units stay a
    proof is the whole suite, the golden test, and the nightly reproduction: all 50 live
    publications must re-create with identical parse output hashes, though the code hash
    differs.
+   A parse is identified by `pipeline.parse_code_hash(state)` (R-015): the state's parser module,
+   every package module that and the parse step import (found from their import statements), the
+   package's resource files, and `elections.fingerprint(state)`. Another state's parser, roster
+   or county table is no part of it, so changing one reparses only that state; shared code still
+   reparses every state that imports it. `collector_code_hash` (the whole package) remains the
+   identity of a release and of a collection or load run.
 4. **Parsers change last and one platform at a time** (3.3, 3.4): each parser's output files
    must hash the same before and after, shown on its fixture and by reproduction.
 
