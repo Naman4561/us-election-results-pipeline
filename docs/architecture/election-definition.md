@@ -86,6 +86,9 @@ senate = false
 governor = true
 house = [1, 2, 3, 4, 5]
 
+[races.special]                    # optional: a special election beside a regular one
+"SEN-S" = "U.S. Senate (special)"    # its contest ID is CT-SEN-S
+
 [acquisition]
 mode = "http"                        # http | manual (R-014)
 # a manual source also has: final = true, max_age_seconds = 21600
@@ -101,6 +104,16 @@ min_interval_seconds = 600
 ```
 
 A source's election date is the election's.
+
+Two lists the schema used to hold are data too. The vote methods a state's results may be split
+into are named once, with what each means, in `config/methods.toml`: the definition refuses a state
+that lists another, and the database checks only the shape of a name, so a state with groups of its
+own needs one reviewed line there and no migration (R-032). A special race is listed under
+`[races.special]` as a suffix and a name; its contest ID is the state, the seat and the suffix
+(`GA-SEN-S` beside `GA-SEN`), a release must always have it, and the schema accepts that form (R-033).
+The dashboard's front-end does not yet let a viewer choose between two races of one office, so a
+special is stored, published and served by the API but would be listed among the House races until
+that is built: do it before a special is ever configured.
 
 `election.toml` also declares each host that needs more than the platform's default TLS
 (R-017): its exact hosts, what is added (`issuer_bundle`, `trusted_root` or `legacy_cbc`), the

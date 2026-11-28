@@ -146,6 +146,14 @@ def durable(config=None):
     return found
 
 
+def methods(config=None):
+    """{vote method: what it means}, the reviewed ``config/methods.toml``."""
+    found = read(Path(config or CONFIG) / "methods.toml")
+    if not all(isinstance(v, dict) and v.get("meaning") for v in found.values()):
+        raise ValueError("methods.toml: each vote method needs a meaning")
+    return {name: entry["meaning"] for name, entry in found.items()}
+
+
 def parties(config=None):
     """{platform: {party name as published: party code}}, the reviewed ``config/parties.toml``."""
     return read(Path(config or CONFIG) / "parties.toml")
@@ -243,6 +251,7 @@ def load(election=None, root=None, config=None):
     election = election or current(config)
     folder = Path(root or config / "elections") / election
     facts = durable(config)
+    vocabulary = methods(config)
     head = read(folder / "election.toml")
     if set(head) - {"id", "date", "collector", "tls"}:
         raise ValueError("election.toml holds id, date, collector and tls only")
@@ -259,17 +268,21 @@ def load(election=None, root=None, config=None):
         races, table = raw.pop("races", {}), raw.pop("source", {})
         mode = raw.pop("acquisition", {})
         platform = raw.pop("platform", None)
-        if set(races) - {"senate", "governor", "house"}:
-            raise ValueError(f"{path.name}: races hold senate, governor and house only")
+        if set(races) - {"senate", "governor", "house", "special"}:
+            raise ValueError(f"{path.name}: races hold senate, governor, house and special only")
         unknown = set(raw) - STATE_KEYS - {"methods"}
         if unknown:
             raise ValueError(f"{path.name}: unknown state settings {sorted(unknown)}")
+        unknown = [m for m in raw["methods"] if m not in vocabulary]
+        if unknown:
+            raise ValueError(f"{path.name}: vote methods {unknown} are not in methods.toml")
         source = source_of(table, code, when, path.name)
         states[code] = State(
             code=code,
             name=facts[code]["name"],
             source_id=source.source_id,
             house=tuple(races.get("house", ())),
+            specials=tuple(sorted(races.get("special", {}).items())),
             methods=tuple(raw["methods"]),
             senate=races.get("senate", True),
             governor=races.get("governor", False),

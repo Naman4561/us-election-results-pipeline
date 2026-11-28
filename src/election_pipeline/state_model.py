@@ -5,10 +5,14 @@ The facts true of a state in every election (its name, parser module, kind of pl
 see ``election_pipeline.elections``), which builds these entries.
 """
 
+import re
 from dataclasses import dataclass
 from importlib import import_module
 
 LOCAL_UNITS = ("county", "town", "house_district")
+# A special election held beside a regular one names its seat and a suffix: SEN-S is a
+# special Senate race, which the registry and the schema list next to SEN.
+SPECIAL = re.compile(r"(SEN|GOV|AL|[0-9]{2})-[A-Z0-9]{1,4}")
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -52,6 +56,9 @@ class State:
     # statewide votes are theirs alone. A House district is published once one of its
     # counties is in, and is complete once every county in it is.
     collected_counties: bool = False
+    # Races held in addition to the regular ones, as (suffix, name): a special Senate election
+    # beside the regular seat is ("SEN-S", "U.S. Senate (special)"), contest ID GA-SEN-S.
+    specials: tuple[tuple[str, str], ...] = ()
 
     def __post_init__(self):
         def refuse(reason):
@@ -69,7 +76,12 @@ class State:
             refuse("a vote method is listed twice")
         if list(self.house) != sorted(set(self.house)) or any(n < 0 for n in self.house):
             refuse("its House districts must be sorted, unique numbers (0 is at large)")
-        if not (self.senate or self.governor or self.house):
+        for suffix, label in self.specials:
+            if not SPECIAL.fullmatch(suffix) or not label:
+                refuse(f"a special race is a suffix like SEN-S and a name, not {suffix!r}")
+        if len({suffix for suffix, _ in self.specials}) != len(self.specials):
+            refuse("a special race is listed twice")
+        if not (self.senate or self.governor or self.house or self.specials):
             refuse("it elects no Senator, Governor or Representative")
         if self.local_unit not in LOCAL_UNITS:
             refuse(f"its local unit must be one of {LOCAL_UNITS}")
@@ -102,6 +114,7 @@ class State:
         return {
             **({f"{self.code}-SEN": "U.S. Senate"} if self.senate else {}),
             **({f"{self.code}-GOV": "Governor"} if self.governor else {}),
+            **{f"{self.code}-{suffix}": label for suffix, label in self.specials},
             **{
                 (
                     identity := self.code + ("-AL" if n == 0 else f"-{n:02}")
@@ -115,7 +128,8 @@ class State:
         """The races a release must have; the House is left out where it is optional."""
         if not (self.optional_house or self.collected_counties):
             return self.races
-        return {k: v for k, v in self.races.items() if k.endswith(("-SEN", "-GOV"))}
+        house = {self.code + ("-AL" if n == 0 else f"-{n:02}") for n in self.house}
+        return {k: v for k, v in self.races.items() if k not in house}
 
     def accepts(self, contests):
         """A release's contests are every race, or (House optional) every base race, or

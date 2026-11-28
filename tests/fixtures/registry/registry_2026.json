@@ -37,7 +37,8 @@
    "local_unit": "house_district",
    "statewide_only_votes": "overseas federal absentee ballots, reported in no House district",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "AL": {
    "code": "AL",
@@ -68,7 +69,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "AR": {
    "code": "AR",
@@ -96,7 +98,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "AZ": {
    "code": "AZ",
@@ -134,7 +137,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "CA": {
    "code": "CA",
@@ -210,7 +214,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "CO": {
    "code": "CO",
@@ -242,7 +247,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "CT": {
    "code": "CT",
@@ -271,7 +277,8 @@
    "local_unit": "town",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "DE": {
    "code": "DE",
@@ -296,7 +303,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "FL": {
    "code": "FL",
@@ -347,7 +355,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "GA": {
    "code": "GA",
@@ -385,7 +394,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "HI": {
    "code": "HI",
@@ -413,7 +423,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "IA": {
    "code": "IA",
@@ -443,7 +454,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "ID": {
    "code": "ID",
@@ -469,7 +481,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "IL": {
    "code": "IL",
@@ -510,7 +523,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": true
+   "collected_counties": true,
+   "specials": []
   },
   "IN": {
    "code": "IN",
@@ -543,7 +557,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "KS": {
    "code": "KS",
@@ -571,7 +586,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "KY": {
    "code": "KY",
@@ -601,7 +617,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "LA": {
    "code": "LA",
@@ -631,7 +648,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "MA": {
    "code": "MA",
@@ -664,7 +682,8 @@
    "local_unit": "town",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "MD": {
    "code": "MD",
@@ -696,7 +715,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "ME": {
    "code": "ME",
@@ -722,7 +742,8 @@
    "local_unit": "county",
    "statewide_only_votes": "military and overseas (UOCAVA) ballots, reported in no county",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "MI": {
    "code": "MI",
@@ -759,7 +780,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "MN": {
    "code": "MN",
@@ -791,7 +813,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "MO": {
    "code": "MO",
@@ -823,7 +846,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "MS": {
    "code": "MS",
@@ -851,7 +875,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": true,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "MT": {
    "code": "MT",
@@ -877,7 +902,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "NC": {
    "code": "NC",
@@ -919,7 +945,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "ND": {
    "code": "ND",
@@ -944,7 +971,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "NE": {
    "code": "NE",
@@ -971,7 +999,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "NH": {
    "code": "NH",
@@ -997,7 +1026,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "NJ": {
    "code": "NJ",
@@ -1033,7 +1063,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "NM": {
    "code": "NM",
@@ -1060,7 +1091,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "NV": {
    "code": "NV",
@@ -1088,7 +1120,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "NY": {
    "code": "NY",
@@ -1138,7 +1171,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "OH": {
    "code": "OH",
@@ -1177,7 +1211,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "OK": {
    "code": "OK",
@@ -1209,7 +1244,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "OR": {
    "code": "OR",
@@ -1239,7 +1275,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "PA": {
    "code": "PA",
@@ -1283,7 +1320,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "RI": {
    "code": "RI",
@@ -1312,7 +1350,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "SC": {
    "code": "SC",
@@ -1343,7 +1382,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "SD": {
    "code": "SD",
@@ -1368,7 +1408,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "TN": {
    "code": "TN",
@@ -1401,7 +1442,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "TX": {
    "code": "TX",
@@ -1463,7 +1505,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "UT": {
    "code": "UT",
@@ -1491,7 +1534,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "VA": {
    "code": "VA",
@@ -1531,7 +1575,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "VT": {
    "code": "VT",
@@ -1556,7 +1601,8 @@
    "local_unit": "town",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "WA": {
    "code": "WA",
@@ -1590,7 +1636,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "WI": {
    "code": "WI",
@@ -1622,7 +1669,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": true
+   "collected_counties": true,
+   "specials": []
   },
   "WV": {
    "code": "WV",
@@ -1648,7 +1696,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   },
   "WY": {
    "code": "WY",
@@ -1673,7 +1722,8 @@
    "local_unit": "county",
    "statewide_only_votes": "",
    "optional_house": false,
-   "collected_counties": false
+   "collected_counties": false,
+   "specials": []
   }
  },
  "sources": {

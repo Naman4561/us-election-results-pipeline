@@ -154,6 +154,28 @@ class DatabaseTests(unittest.TestCase):
         report["output_sha256"][name] = file_hash(path)
         report_path.write_text(json.dumps(report), encoding="utf-8")
 
+    def test_the_schema_keeps_only_the_shape_of_contest_ids_and_method_names(self):
+        _, directory = self.parsed()
+        self.load(directory)
+        one_method = (
+            "UPDATE landing.result_methods SET method = %s WHERE source_line = 2 AND method = "
+            "(SELECT min(method) FROM landing.result_methods WHERE source_line = 2)"
+        )
+        with connect(self.db) as conn:
+            # A special race's ID and a method no state used before need no migration.
+            conn.execute(
+                "UPDATE landing.results SET contest_id = state || '-SEN-S' WHERE source_line = 2"
+            )
+            conn.execute(one_method, ("a_method_no_state_used_before",))
+        for bad in ("NC-SEN-", "NC-SEN-TOOLONG", "NC-sen", "SEN"):
+            with self.subTest(contest_id=bad), self.assertRaises(psycopg.errors.CheckViolation):
+                with connect(self.db) as conn:
+                    conn.execute("UPDATE landing.results SET contest_id = %s", (bad,))
+        for bad in ("Bad Method", "x", "9lives", ""):
+            with self.subTest(method=bad), self.assertRaises(psycopg.errors.CheckViolation):
+                with connect(self.db) as conn:
+                    conn.execute(one_method, (bad,))
+
     def test_load_and_repeat_do_not_duplicate_votes(self):
         _, directory = self.parsed()
         first, second = self.load(directory), self.load(directory)

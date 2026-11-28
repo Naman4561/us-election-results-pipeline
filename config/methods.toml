@@ -1,0 +1,45 @@
+# The ways a state's votes may be split ("vote methods"), reviewed once.
+#
+# A state's definition lists the methods its results are split into (``methods`` in its state
+# file, always starting with total_votes). Each must be named here: the election definition
+# refuses a state that names another, and the database checks only a method's format. Adding a
+# method a new state needs is a reviewed change to this file, with no migration.
+#
+# Each entry says what the group is, in the words of the state that publishes it, because the
+# names are shared between states that do not mean quite the same thing.
+
+[total_votes]
+meaning = "The candidate's total, every ballot counted however it was cast. Every state has it, first."
+
+[election_day]
+meaning = "Ballots cast in person on Election Day."
+
+[early_voting]
+meaning = "Ballots cast in person at an early voting site before Election Day."
+
+[absentee_by_mail]
+meaning = "Absentee ballots returned by mail."
+
+[absentee_combined]
+meaning = "Absentee ballots of every kind, where a state publishes them as one group (Iowa: early in-person absentee and mailed ballots together)."
+
+[provisional]
+meaning = "Provisional ballots."
+
+[post_election]
+meaning = "Absentee ballots received and counted after Election Day (Virginia's Post-Election group)."
+
+[mail]
+meaning = "Ballots returned by mail, as a group of its own."
+
+[in_person]
+meaning = "Ballots cast in person, early or on the day, as one group."
+
+[early_ballot]
+meaning = "Arizona's 'Early Voting' group: early ballots mailed, dropped off or cast at an early voting site, together. It is neither in-person early voting nor mail alone."
+
+[early_ars_16_579]
+meaning = "Arizona's 'Early A.R.S. 16-579' group."
+
+[late_early]
+meaning = "Arizona's 'Late Early*' group."
