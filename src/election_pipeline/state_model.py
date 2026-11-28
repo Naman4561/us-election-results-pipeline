@@ -7,6 +7,7 @@ see ``election_pipeline.elections``), which builds these entries.
 
 import re
 from dataclasses import dataclass
+from datetime import date
 from importlib import import_module
 
 LOCAL_UNITS = ("county", "town", "house_district")
@@ -62,6 +63,13 @@ class State:
     # ID GA-SEN-S, and a runoff of House district 5 is ("05-R", ..., "Runoff"). The dashboard
     # shows a seat with such races as tabs, each labelled with its tab.
     specials: tuple[tuple[str, str, str], ...] = ()
+    # Races whose election-day count goes to a runoff not yet held, as (suffix, date): the
+    # dashboard marks the race "Runoff pending". ("05", "2026-12-12") is LA-05.
+    runoffs: tuple[tuple[str, str], ...] = ()
+    # House seats nobody opposed. The state leaves them off the ballot and out of its results,
+    # so they have no vote counts and are no part of ``races``; they are listed on the page
+    # as seats, as (suffix, winner, party, basis, source): ("10", "A B", "DEM", why, url).
+    uncontested: tuple[tuple[str, str, str, str, str], ...] = ()
 
     def __post_init__(self):
         def refuse(reason):
@@ -84,6 +92,24 @@ class State:
                 refuse(f"a special race is a suffix like SEN-S, a name and a tab, not {suffix!r}")
         if len({suffix for suffix, _, _ in self.specials}) != len(self.specials):
             refuse("a special race is listed twice")
+        for suffix, day in self.runoffs:
+            if f"{self.code}-{suffix}" not in self.races:
+                refuse(f"its runoff {suffix!r} is not one of its races")
+            try:
+                date.fromisoformat(day)
+            except ValueError:
+                refuse(f"its runoff {suffix!r} needs an ISO date, not {day!r}")
+        for suffix, winner, party, basis, source in self.uncontested:
+            if not re.fullmatch(r"AL|[0-9]{2}", suffix):
+                refuse(f"an uncontested seat is a House district like 10 or AL, not {suffix!r}")
+            if (0 if suffix == "AL" else int(suffix)) in self.house:
+                refuse(f"uncontested seat {suffix} is also one of its contested House races")
+            if not (winner and basis and re.fullmatch(r"[A-Z]{3}", party)):
+                refuse(f"uncontested seat {suffix} needs a winner, a party code and a basis")
+            if not source.startswith("https://"):
+                refuse(f"uncontested seat {suffix} needs the https address of its source")
+        if len({s for s, *_ in self.uncontested}) != len(self.uncontested):
+            refuse("an uncontested seat is listed twice")
         if not (self.senate or self.governor or self.house or self.specials):
             refuse("it elects no Senator, Governor or Representative")
         if self.local_unit not in LOCAL_UNITS:
@@ -133,6 +159,24 @@ class State:
             return self.races
         house = {self.code + ("-AL" if n == 0 else f"-{n:02}") for n in self.house}
         return {k: v for k, v in self.races.items() if k not in house}
+
+    @property
+    def runoff_dates(self):
+        """{race ID: the date of its pending runoff}."""
+        return {f"{self.code}-{suffix}": day for suffix, day in self.runoffs}
+
+    @property
+    def uncontested_races(self):
+        """{race ID: its winner, party, basis and source} for each seat nobody opposed."""
+        return {
+            f"{self.code}-{suffix}": {
+                "winner": winner,
+                "party": party,
+                "basis": basis,
+                "source": source,
+            }
+            for suffix, winner, party, basis, source in self.uncontested
+        }
 
     @property
     def variants(self):

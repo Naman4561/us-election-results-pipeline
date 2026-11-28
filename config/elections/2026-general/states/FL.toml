@@ -33,6 +33,12 @@ house = [
   28,
 ]
 
+[races.uncontested."10"]
+winner = "Maxwell Alejandro Frost"
+party = "DEM"
+basis = "Unopposed, so under Florida Statutes 101.151(7) not on the general election ballot and in no vote count; the Division of Elections' candidate listing shows the incumbent as Elected."
+source = "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN"
+
 [acquisition]
 mode = "http"
 

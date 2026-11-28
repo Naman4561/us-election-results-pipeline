@@ -5,6 +5,10 @@ method_note = "Louisiana's U.S. House races are open to every candidate; one wit
 [races]
 house = [1, 2, 3, 4, 5, 6]
 
+[races.runoff]                      # the November 3 count goes to a runoff on this date
+"05" = "2026-12-12"
+"06" = "2026-12-12"
+
 [acquisition]
 mode = "http"
 

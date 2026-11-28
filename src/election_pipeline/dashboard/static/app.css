@@ -331,12 +331,30 @@ h2 {
   font-size: 10px;
   color: #51667c;
 }
+.legend .unopposed {
+  background: #fff;
+  border: 1.5px dashed #3b4f66;
+}
 .legend .partial {
   background: repeating-linear-gradient(0deg, #d5e1ed 0 4px, #627f9d 4px 6px);
 }
 .feature[data-stale="true"] {
   stroke: #a46c22;
   stroke-dasharray: 4 3;
+}
+/* A seat nobody opposed: coloured by its winner's party, with a dashed outline. */
+.feature[data-uncontested="true"] {
+  stroke: #3b4f66;
+  stroke-dasharray: 2 2;
+}
+.uncontested-winner {
+  font-weight: 700;
+  margin: 14px 0 6px;
+}
+.uncontested-note {
+  font-size: 13px;
+  line-height: 1.7;
+  margin: 0 0 8px;
 }
 .legend span {
   display: flex;

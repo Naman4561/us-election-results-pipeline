@@ -6,19 +6,21 @@ const { execFileSync } = require("node:child_process");
 const base = path.join(__dirname, "../src/election_pipeline/dashboard/static/");
 const { test } = require("node:test");
 
-// A seat held more than once (a special election beside the regular race, a runoff beside the
-// November one) is shown as tabs, like the rounds of a ranked-choice race.
-test("a seat with a special election or a runoff is shown as tabs", async (t) => {
-  const payload = JSON.parse(
-    execFileSync(
-      process.env.PYTHON || "python",
-      [
-        "-c",
-        "import json; from fastapi.testclient import TestClient; from election_pipeline.dashboard.server import create_app; c = TestClient(create_app(demo=True)); n = c.get('/api/national').json(); print(json.dumps({'national': n, 'states': {k: c.get('/api/states/' + k).json() for k in n['states']}}))",
-      ],
-      { encoding: "utf8", maxBuffer: 10 * 1024 * 1024 },
-    ),
+// The demo payloads of every state, as the page would fetch them (one slow Python call).
+let demo;
+const demoPayload = () => {
+  demo ||= execFileSync(
+    process.env.PYTHON || "python",
+    [
+      "-c",
+      "import json; from fastapi.testclient import TestClient; from election_pipeline.dashboard.server import create_app; c = TestClient(create_app(demo=True)); n = c.get('/api/national').json(); print(json.dumps({'national': n, 'states': {k: c.get('/api/states/' + k).json() for k in n['states']}}))",
+    ],
+    { encoding: "utf8", maxBuffer: 10 * 1024 * 1024 },
   );
+  return JSON.parse(demo);
+};
+// The page, loaded over those payloads (which the test may change before a refresh).
+async function loadPage(t, payload) {
   const dom = new JSDOM(fs.readFileSync(base + "index.html", "utf8"), {
     runScripts: "outside-only",
     url: "http://localhost/",
@@ -50,6 +52,14 @@ test("a seat with a special election or a runoff is shown as tabs", async (t) =>
       new w.MouseEvent("click", { bubbles: true }),
     );
   };
+  return { w, d, click, settle };
+}
+
+// A seat held more than once (a special election beside the regular race, a runoff beside the
+// November one) is shown as tabs, like the rounds of a ranked-choice race.
+test("a seat with a special election or a runoff is shown as tabs", async (t) => {
+  const payload = demoPayload();
+  const { w, d, click, settle } = await loadPage(t, payload);
   const tabs = () =>
     [...d.querySelectorAll(".variant-tabs button")].map((b) => [
       b.textContent,
@@ -158,4 +168,72 @@ test("a seat with a special election or a runoff is shown as tabs", async (t) =>
       .join(),
     house,
   );
+});
+
+// A House seat nobody opposed (Florida's District 10) is listed as a seat: no ballot, no votes.
+// The demo payloads cannot cover every Florida race, so a district of a demo state is taken off
+// its ballot here; the definition's real seat is checked in tests/test_uncontested.py.
+test("an uncontested seat is counted, drawn and explained", async (t) => {
+  const payload = demoPayload();
+  const district = (id) => /-(AL|[0-9]{2})$/.test(id);
+  const code = Object.keys(payload.national.coverage).find(
+    (c) =>
+      !Object.values(payload.states[c].races).some((r) => r.ranked_choice) &&
+      payload.national.coverage[c].filter(district).length >= 2,
+  );
+  assert(code, "a demo state with two House districts");
+  const id = payload.national.coverage[code].find(district);
+  const other = payload.national.coverage[code].find(
+    (c) => district(c) && c !== id,
+  );
+  const seat = {
+    winner: "Pat Example",
+    party: "DEM",
+    basis: "Unopposed, so not on the ballot.",
+    source: "https://example.org/listing",
+  };
+  for (const states of [payload.national.states, payload.states]) {
+    delete states[code].races[id];
+    states[code].uncontested = { [id]: seat };
+  }
+  payload.national.coverage[code] = payload.national.coverage[code].filter(
+    (c) => c !== id,
+  );
+  const { d, click, settle } = await loadPage(t, payload);
+  click('[data-office="house"]');
+  await settle();
+  const feature = d.querySelector(`path[data-id="${id}"]`);
+  assert(feature, "the district is on the map");
+  // Coloured by its winner's party, marked, and named in its tooltip.
+  assert.equal(feature.dataset.status, "DEM");
+  assert.equal(feature.dataset.uncontested, "true");
+  const tip = feature.querySelector("title").textContent;
+  assert(tip.includes("Pat Example") && tip.includes("unopposed"), tip);
+  // The count includes it and says so.
+  const label = d.querySelector("#coverage-label").textContent;
+  assert(label.includes("(1 uncontested)"), label);
+  // Opening it explains it, links the official source, and lists it among the state's seats.
+  click(`path[data-id="${id}"]`);
+  await settle();
+  assert.equal(
+    d.querySelector("h1").textContent,
+    payload.national.states[code].name,
+  );
+  const panel = d.querySelector("#result-content");
+  assert(panel.textContent.includes("Pat Example (DEM) · unopposed"));
+  assert(panel.textContent.includes("No votes were cast or counted"));
+  assert.equal(panel.querySelector("a").href, seat.source);
+  const listed = [...d.querySelectorAll("#race-list button")].map(
+    (b) => b.textContent,
+  );
+  assert(listed.includes(`${id} · unopposed`), listed.join());
+  assert(listed.includes(other), listed.join());
+  // A contested district of the same state is unchanged: no marker, its own results.
+  click(`path[data-id="${other}"]`);
+  await settle();
+  assert.equal(
+    d.querySelector(`path[data-id="${other}"]`).dataset.uncontested,
+    undefined,
+  );
+  assert(!d.querySelector("#result-content").textContent.includes("unopposed"));
 });

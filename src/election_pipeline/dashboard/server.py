@@ -31,11 +31,6 @@ from election_pipeline.states import STATES, state_adapter
 STATIC = Path(__file__).with_name("static")
 # A county feed not checked successfully within this long is shown as overdue.
 COUNTY_STALE_SECONDS = 3600
-# Races whose November 3 count goes to a later runoff, with the runoff's date. The
-# dashboard marks them "Runoff pending"; kept here, not in the state registry, because
-# it changes no result a release check reads.
-RUNOFFS = {"LA-05": "2026-12-12", "LA-06": "2026-12-12"}
-METHODS = ("total_votes", "election_day", "early_voting", "absentee_by_mail", "provisional")
 
 
 def county_key(name):
@@ -267,8 +262,9 @@ def make_payload(
         }
         if masked:
             races[identity]["county_privacy_masked"] = True
-        if identity in RUNOFFS:
-            races[identity]["runoff"] = RUNOFFS[identity]
+        # A race whose count goes to a runoff not yet held, its date from the definition.
+        if identity in adapter.runoff_dates:
+            races[identity]["runoff"] = adapter.runoff_dates[identity]
         if identity in adapter.variants:
             # A seat held more than once is shown as tabs: this race's seat and its tab.
             seat, tab = adapter.variants[identity]
@@ -292,6 +288,8 @@ def make_payload(
         "publication": metadata,
         "map_version": geography["version"],
         "races": races,
+        # House seats nobody opposed: no votes were cast, so no race above, but listed.
+        **({"uncontested": adapter.uncontested_races} if adapter.uncontested else {}),
     }
     if collected and not certified_file(metadata):
         return with_collected_counties(payload, geography)

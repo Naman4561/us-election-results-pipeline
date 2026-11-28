@@ -1,8 +1,8 @@
 {
  "file": "registry_2026.json",
- "sha256": "8deb488d99f45b60f4963934b30820634870f3edad69739ce2c8b42e5153ab80",
- "bytes": 92621,
- "made": "written for the tests: every State and Source field of the 2026 general election, the collector's limits and how each source is acquired, dumped by election_pipeline.elections.describe; step 3.6 added the field specials (races held beside the regular ones), [] for every state",
+ "sha256": "65fa1fd3997245a61173e41ae7f3722d893adc499dfccdb88f7cecd479fb61dc",
+ "bytes": 95055,
+ "made": "written for the tests: every State and Source field of the 2026 general election, the collector's limits and how each source is acquired, dumped by election_pipeline.elections.describe; step 3.6 added the field specials (races held beside the regular ones), [] for every state; step 3.8 added the fields runoffs (Louisiana's two December 12 runoffs, which the dashboard server held) and uncontested (Florida's District 10), [] for every other state",
  "from": "states.STATES and config/sources.toml at af2ee88 (before the election definition existed); acquisition from production's catalog on 2026-11-25 (17 manual sources, with their final flags and 21600 s freshness limits)",
  "purpose": "the golden record the definition in config/elections/2026-general must reproduce exactly (tests/test_elections.py)",
  "parse_outputs": {

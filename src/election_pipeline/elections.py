@@ -230,6 +230,18 @@ def special_races(table, where):
     return tuple(found)
 
 
+def uncontested_races(table, where):
+    """(suffix, winner, party, basis, source) for each seat under ``[races.uncontested]``."""
+    found = []
+    for suffix, entry in sorted(table.items()):
+        if not isinstance(entry, dict) or set(entry) != {"winner", "party", "basis", "source"}:
+            raise ValueError(
+                f"{where}: uncontested seat {suffix} is a winner, party, basis and source"
+            )
+        found.append((suffix, entry["winner"], entry["party"], entry["basis"], entry["source"]))
+    return tuple(found)
+
+
 def source_of(raw, state, election_date, where):
     """The ``Source`` a definition's ``[source]`` table describes."""
     table = dict(raw)
@@ -280,8 +292,10 @@ def load(election=None, root=None, config=None):
         races, table = raw.pop("races", {}), raw.pop("source", {})
         mode = raw.pop("acquisition", {})
         platform = raw.pop("platform", None)
-        if set(races) - {"senate", "governor", "house", "special"}:
-            raise ValueError(f"{path.name}: races hold senate, governor, house and special only")
+        if set(races) - {"senate", "governor", "house", "special", "runoff", "uncontested"}:
+            raise ValueError(
+                f"{path.name}: races hold senate, governor, house, special, runoff, uncontested"
+            )
         unknown = set(raw) - STATE_KEYS - {"methods"}
         if unknown:
             raise ValueError(f"{path.name}: unknown state settings {sorted(unknown)}")
@@ -295,6 +309,8 @@ def load(election=None, root=None, config=None):
             source_id=source.source_id,
             house=tuple(races.get("house", ())),
             specials=special_races(races.get("special", {}), path.name),
+            runoffs=tuple(sorted(races.get("runoff", {}).items())),
+            uncontested=uncontested_races(races.get("uncontested", {}), path.name),
             methods=tuple(raw["methods"]),
             senate=races.get("senate", True),
             governor=races.get("governor", False),

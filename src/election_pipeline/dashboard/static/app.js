@@ -114,25 +114,43 @@ function variantOf(code, id) {
 function seatOf(code, id) {
   return variantOf(code, id)?.seat || id;
 }
+function inOffice(id) {
+  return view.office === "senate"
+    ? id.endsWith("-SEN")
+    : view.office === "governor"
+      ? id.endsWith("-GOV")
+      : !/-SEN$|-GOV$/.test(id);
+}
 // The seats a state's office covers: a special or runoff race is a tab of its seat.
 function racesFor(code) {
   return (data.coverage[code] || []).filter(
-    (id) =>
-      seatOf(code, id) === id &&
-      (view.office === "senate"
-        ? id.endsWith("-SEN")
-        : view.office === "governor"
-          ? id.endsWith("-GOV")
-          : !/-SEN$|-GOV$/.test(id)),
+    (id) => seatOf(code, id) === id && inOffice(id),
   );
 }
+// Seats nobody opposed (Florida's District 10): no ballot, no votes, listed as seats.
+function uncontestedFor(code) {
+  return Object.keys(data.states[code]?.uncontested || {}).filter(inOffice);
+}
+// Every seat of the office the page can show: those with results, then those without.
+function seatsFor(code) {
+  return [...racesFor(code), ...uncontestedFor(code)].sort();
+}
+function isSeat(code, id) {
+  return (
+    !!data.coverage[code]?.includes(id) || uncontestedFor(code).includes(id)
+  );
+}
+const partyGroup = (party) =>
+  party === "DEM" || party === "REP" ? party : "OTHER";
+const uncontestedText = (name, seat) =>
+  `${name}: ${seat.winner} (${seat.party}) · unopposed, not on the ballot`;
 // The race shown: its seat's regular race, or the tab chosen for the seat (view.race).
 function raceFor(code) {
   const seat =
     view.office === "house"
-      ? racesFor(code).includes(seatOf(code, view.race))
+      ? seatsFor(code).includes(seatOf(code, view.race))
         ? seatOf(code, view.race)
-        : racesFor(code)[0]
+        : seatsFor(code)[0]
       : code + (view.office === "senate" ? "-SEN" : "-GOV");
   return view.race &&
     seatOf(code, view.race) === seat &&
@@ -172,6 +190,9 @@ function roundStats(round) {
 }
 function statusFor(code, race, county = null) {
   if (!isElection(code)) return { status: "no_election" };
+  const unopposed = data.states[code]?.uncontested?.[race];
+  if (unopposed)
+    return { status: partyGroup(unopposed.party), uncontested: unopposed };
   if (!(data.coverage[code] || []).includes(race))
     return {
       status: awaitingCertified(code) ? "awaiting_certified" : "not_covered",
@@ -296,14 +317,13 @@ function featureStatus(f) {
 }
 function activateFeature(f) {
   if (view.scope === "US") {
-    if (view.office === "house" && !data.coverage[f.state]?.includes(f.id))
-      return;
+    if (view.office === "house" && !isSeat(f.state, f.id)) return;
     selectState(
       view.office === "house" ? f.state : f.id,
       view.office === "house" ? f.id : null,
     );
   } else if (view.office === "house") {
-    if (racesFor(view.scope).includes(f.id)) {
+    if (seatsFor(view.scope).includes(f.id)) {
       view.race = f.id;
       view.county = null;
       writeLocation();
@@ -350,10 +370,10 @@ function drawMap() {
     const clickable =
       view.scope === "US"
         ? view.office === "house"
-          ? !!data.coverage[f.state]?.includes(f.id)
+          ? isSeat(f.state, f.id)
           : !!data.coverage[f.id]
         : view.office === "house"
-          ? racesFor(view.scope).includes(f.id)
+          ? seatsFor(view.scope).includes(f.id)
           : data.states[view.scope].county_detail !== false;
     p.setAttribute("d", f.path);
     p.setAttribute("fill", colors[result.status]);
@@ -365,6 +385,7 @@ function drawMap() {
     );
     p.dataset.id = f.id;
     p.dataset.status = result.status;
+    if (result.uncontested) p.dataset.uncontested = "true";
     if (result.staleCounty) p.dataset.stale = "true";
     const code =
       view.scope === "US"
@@ -380,7 +401,9 @@ function drawMap() {
         ? ` · ${partial.with_results}/${partial.expected} counties with accepted counts`
         : "";
     const runoff = view.office === "house" ? runoffText(code, f.id) : "";
-    const description = `${f.name}: ${descriptions[result.status]}${runoff ? " · " + runoff : ""}${partialText}${result.staleCounty ? " · stale county source" : ""}${result.stats?.round ? " · ranked-choice round " + result.stats.round : firstChoice ? " · listed candidates, first choice only" : ""}${result.stats?.total ? " · " + number(result.stats.total) + " votes" : ""}`;
+    const description = result.uncontested
+      ? uncontestedText(f.name, result.uncontested)
+      : `${f.name}: ${descriptions[result.status]}${runoff ? " · " + runoff : ""}${partialText}${result.staleCounty ? " · stale county source" : ""}${result.stats?.round ? " · ranked-choice round " + result.stats.round : firstChoice ? " · listed candidates, first choice only" : ""}${result.stats?.total ? " · " + number(result.stats.total) + " votes" : ""}`;
     const title = document.createElementNS(ns, "title");
     title.textContent = description;
     p.append(title);
@@ -540,6 +563,27 @@ function renderStatePanel() {
   if (tabs) target.append(tabs);
   const result = statusFor(code, race, view.county),
     stats = result.stats;
+  if (result.uncontested) {
+    const seat = result.uncontested;
+    target.append(
+      element(
+        "p",
+        `${seat.winner} (${seat.party}) · unopposed`,
+        "uncontested-winner",
+      ),
+      element(
+        "p",
+        `${seat.basis} No votes were cast or counted for this seat.`,
+        "uncontested-note",
+      ),
+    );
+    const link = element("a", "Official candidate listing ↗", "text-button");
+    link.href = seat.source;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    target.append(link);
+    return;
+  }
   if (result.status === "no_election") {
     target.append(
       element(
@@ -1081,9 +1125,9 @@ function renderControls() {
   const options = currentFeatures.filter((f) =>
     national
       ? view.office === "house"
-        ? !!data.coverage[f.state]?.includes(f.id)
+        ? isSeat(f.state, f.id)
         : !!data.coverage[f.id]
-      : view.office !== "house" || racesFor(view.scope).includes(f.id),
+      : view.office !== "house" || seatsFor(view.scope).includes(f.id),
   );
   $("area").replaceChildren(
     new Option(
@@ -1112,18 +1156,19 @@ function renderControls() {
   $("coverage-footer").textContent =
     "Refreshes every 15 seconds · Coverage: " +
     Object.keys(data.coverage).join(", ");
+  const unopposed = Object.keys(data.coverage).flatMap(uncontestedFor).length;
   $("coverage-label").textContent = national
-    ? `${Object.keys(data.coverage).length} states covered · ${Object.keys(data.coverage).flatMap(racesFor).length} races for this office`
+    ? `${Object.keys(data.coverage).length} states covered · ${Object.keys(data.coverage).flatMap(seatsFor).length} races for this office${unopposed ? ` (${unopposed} uncontested)` : ""}`
     : state.county_collection && view.office === "senate"
       ? `${state.name} · ${state.county_collection.with_results}/${state.county_collection.expected} counties with accepted counts`
-      : `${state.name} · ${racesFor(view.scope).length} covered races for this office`;
+      : `${state.name} · ${racesFor(view.scope).length} covered races for this office${uncontestedFor(view.scope).length ? ` · ${uncontestedFor(view.scope).length} unopposed` : ""}`;
   const list = $("race-list");
   list.replaceChildren();
   if (!national && view.office === "house")
-    for (const id of racesFor(view.scope)) {
+    for (const id of seatsFor(view.scope)) {
       const b = element(
         "button",
-        id,
+        uncontestedFor(view.scope).includes(id) ? `${id} · unopposed` : id,
         id === seatOf(view.scope, raceFor(view.scope)) ? "active" : "",
       );
       b.addEventListener("click", () => {

@@ -38,7 +38,9 @@
    "statewide_only_votes": "overseas federal absentee ballots, reported in no House district",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "AL": {
    "code": "AL",
@@ -70,7 +72,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "AR": {
    "code": "AR",
@@ -99,7 +103,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "AZ": {
    "code": "AZ",
@@ -138,7 +144,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "CA": {
    "code": "CA",
@@ -215,7 +223,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "CO": {
    "code": "CO",
@@ -248,7 +258,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "CT": {
    "code": "CT",
@@ -278,7 +290,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "DE": {
    "code": "DE",
@@ -304,7 +318,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "FL": {
    "code": "FL",
@@ -356,7 +372,17 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": [
+    [
+     "10",
+     "Maxwell Alejandro Frost",
+     "DEM",
+     "Unopposed, so under Florida Statutes 101.151(7) not on the general election ballot and in no vote count; the Division of Elections' candidate listing shows the incumbent as Elected.",
+     "https://dos.elections.myflorida.com/candidates/CanList.asp?elecid=20261103-GEN"
+    ]
+   ]
   },
   "GA": {
    "code": "GA",
@@ -395,7 +421,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "HI": {
    "code": "HI",
@@ -424,7 +452,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "IA": {
    "code": "IA",
@@ -455,7 +485,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "ID": {
    "code": "ID",
@@ -482,7 +514,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "IL": {
    "code": "IL",
@@ -524,7 +558,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": true,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "IN": {
    "code": "IN",
@@ -558,7 +594,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "KS": {
    "code": "KS",
@@ -587,7 +625,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "KY": {
    "code": "KY",
@@ -618,7 +658,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "LA": {
    "code": "LA",
@@ -649,7 +691,18 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [
+    [
+     "05",
+     "2026-12-12"
+    ],
+    [
+     "06",
+     "2026-12-12"
+    ]
+   ],
+   "uncontested": []
   },
   "MA": {
    "code": "MA",
@@ -683,7 +736,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "MD": {
    "code": "MD",
@@ -716,7 +771,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "ME": {
    "code": "ME",
@@ -743,7 +800,9 @@
    "statewide_only_votes": "military and overseas (UOCAVA) ballots, reported in no county",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "MI": {
    "code": "MI",
@@ -781,7 +840,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "MN": {
    "code": "MN",
@@ -814,7 +875,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "MO": {
    "code": "MO",
@@ -847,7 +910,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "MS": {
    "code": "MS",
@@ -876,7 +941,9 @@
    "statewide_only_votes": "",
    "optional_house": true,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "MT": {
    "code": "MT",
@@ -903,7 +970,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "NC": {
    "code": "NC",
@@ -946,7 +1015,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "ND": {
    "code": "ND",
@@ -972,7 +1043,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "NE": {
    "code": "NE",
@@ -1000,7 +1073,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "NH": {
    "code": "NH",
@@ -1027,7 +1102,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "NJ": {
    "code": "NJ",
@@ -1064,7 +1141,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "NM": {
    "code": "NM",
@@ -1092,7 +1171,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "NV": {
    "code": "NV",
@@ -1121,7 +1202,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "NY": {
    "code": "NY",
@@ -1172,7 +1255,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "OH": {
    "code": "OH",
@@ -1212,7 +1297,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "OK": {
    "code": "OK",
@@ -1245,7 +1332,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "OR": {
    "code": "OR",
@@ -1276,7 +1365,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "PA": {
    "code": "PA",
@@ -1321,7 +1412,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "RI": {
    "code": "RI",
@@ -1351,7 +1444,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "SC": {
    "code": "SC",
@@ -1383,7 +1478,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "SD": {
    "code": "SD",
@@ -1409,7 +1506,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "TN": {
    "code": "TN",
@@ -1443,7 +1542,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "TX": {
    "code": "TX",
@@ -1506,7 +1607,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "UT": {
    "code": "UT",
@@ -1535,7 +1638,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "VA": {
    "code": "VA",
@@ -1576,7 +1681,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "VT": {
    "code": "VT",
@@ -1602,7 +1709,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "WA": {
    "code": "WA",
@@ -1637,7 +1746,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "WI": {
    "code": "WI",
@@ -1670,7 +1781,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": true,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "WV": {
    "code": "WV",
@@ -1697,7 +1810,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   },
   "WY": {
    "code": "WY",
@@ -1723,7 +1838,9 @@
    "statewide_only_votes": "",
    "optional_house": false,
    "collected_counties": false,
-   "specials": []
+   "specials": [],
+   "runoffs": [],
+   "uncontested": []
   }
  },
  "sources": {

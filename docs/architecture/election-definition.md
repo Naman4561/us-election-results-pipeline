@@ -90,6 +90,15 @@ house = [1, 2, 3, 4, 5]
 "SEN-S" = "U.S. Senate (special)"    # its contest ID is CT-SEN-S, its tab "Special"
 "05-R" = { name = "U.S. House runoff", tab = "Runoff" }   # CT-05-R
 
+[races.runoff]                     # optional: a race whose count goes to a runoff not yet held
+"05" = "2026-12-12"                # the dashboard marks CT-05 "Runoff pending"
+
+[races.uncontested."10"]           # optional: a House seat nobody opposed (no ballot, no votes)
+winner = "A. Name"
+party = "DEM"
+basis = "What the statute and the state say"
+source = "https://..."             # the state's own record of it
+
 [acquisition]
 mode = "http"                        # http | manual (R-014)
 # a manual source also has: final = true, max_age_seconds = 21600
@@ -118,6 +127,15 @@ tab), and the dashboard shows the seat as tabs, the way it shows the rounds of a
 the regular race first ("Regular", or "General" beside a runoff), then each special or runoff. The
 chosen tab is in the page address. The Senate and Governor maps and the national view still show the
 regular race; a House district is listed once, whatever its tabs.
+
+A runoff not yet held is listed under `[races.runoff]` with its date (Louisiana's two December 12
+runoffs were held in the dashboard server's code, R-041; the server now reads them from the
+definition), and a seat nobody opposed under `[races.uncontested]` (R-018): the state leaves it off
+the ballot and out of its results, so it is no part of `State.races` and has no votes, but the
+payload lists it (`uncontested`), the map draws it in its winner's party colour with a dashed
+outline, the House list names it "unopposed", and the national count reads, for 2026, 435 races,
+one uncontested. Its winner, party, basis and source are all required, and the basis must say what
+the sources say and no more.
 
 `election.toml` also declares each host that needs more than the platform's default TLS
 (R-017): its exact hosts, what is added (`issuer_bundle`, `trusted_root` or `legacy_cbc`), the

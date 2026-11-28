@@ -97,7 +97,12 @@ zero.
   Oregon's pages change on every request, so each collection repeats all 38 exports;
   its "0 of N precincts" while mail is counted is not stored. A candidate nominated by
   several parties keeps the first party for map colours.
-- **Florida:** District 10 was uncontested and is not on the ballot. Statewide totals are
+- **Florida:** District 10 was uncontested: its incumbent, Maxwell Alejandro Frost (DEM), was
+  unopposed, so under Florida Statutes 101.151(7) he is not on the general election ballot or
+  in the results file, and the Division of Elections' candidate listing shows him as Elected. The
+  election definition declares it (`[races.uncontested]` in `states/FL.toml`); the dashboard lists
+  it as an unopposed seat, so the House reads 435 races, one uncontested, with no vote counts.
+  Statewide totals are
   the sum of the official county rows; the file has no report time, so releases are
   ordered by the file's own timestamps and an older file served again cannot replace
   newer results.
