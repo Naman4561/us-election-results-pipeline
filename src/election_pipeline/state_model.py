@@ -10,8 +10,9 @@ from dataclasses import dataclass
 from importlib import import_module
 
 LOCAL_UNITS = ("county", "town", "house_district")
-# A special election held beside a regular one names its seat and a suffix: SEN-S is a
-# special Senate race, which the registry and the schema list next to SEN.
+# A race held beside a regular one (a special election, a runoff) names its seat and a
+# suffix: SEN-S is a special Senate race, 05-R a runoff of district 5, which the registry
+# and the schema list next to SEN and 05.
 SPECIAL = re.compile(r"(SEN|GOV|AL|[0-9]{2})-[A-Z0-9]{1,4}")
 
 
@@ -56,9 +57,11 @@ class State:
     # statewide votes are theirs alone. A House district is published once one of its
     # counties is in, and is complete once every county in it is.
     collected_counties: bool = False
-    # Races held in addition to the regular ones, as (suffix, name): a special Senate election
-    # beside the regular seat is ("SEN-S", "U.S. Senate (special)"), contest ID GA-SEN-S.
-    specials: tuple[tuple[str, str], ...] = ()
+    # Races held in addition to the regular ones, as (suffix, name, tab): a special Senate
+    # election beside the regular seat is ("SEN-S", "U.S. Senate (special)", "Special"), contest
+    # ID GA-SEN-S, and a runoff of House district 5 is ("05-R", ..., "Runoff"). The dashboard
+    # shows a seat with such races as tabs, each labelled with its tab.
+    specials: tuple[tuple[str, str, str], ...] = ()
 
     def __post_init__(self):
         def refuse(reason):
@@ -76,10 +79,10 @@ class State:
             refuse("a vote method is listed twice")
         if list(self.house) != sorted(set(self.house)) or any(n < 0 for n in self.house):
             refuse("its House districts must be sorted, unique numbers (0 is at large)")
-        for suffix, label in self.specials:
-            if not SPECIAL.fullmatch(suffix) or not label:
-                refuse(f"a special race is a suffix like SEN-S and a name, not {suffix!r}")
-        if len({suffix for suffix, _ in self.specials}) != len(self.specials):
+        for suffix, label, tab in self.specials:
+            if not SPECIAL.fullmatch(suffix) or not label or not tab:
+                refuse(f"a special race is a suffix like SEN-S, a name and a tab, not {suffix!r}")
+        if len({suffix for suffix, _, _ in self.specials}) != len(self.specials):
             refuse("a special race is listed twice")
         if not (self.senate or self.governor or self.house or self.specials):
             refuse("it elects no Senator, Governor or Representative")
@@ -114,7 +117,7 @@ class State:
         return {
             **({f"{self.code}-SEN": "U.S. Senate"} if self.senate else {}),
             **({f"{self.code}-GOV": "Governor"} if self.governor else {}),
-            **{f"{self.code}-{suffix}": label for suffix, label in self.specials},
+            **{f"{self.code}-{suffix}": label for suffix, label, _ in self.specials},
             **{
                 (
                     identity := self.code + ("-AL" if n == 0 else f"-{n:02}")
@@ -130,6 +133,21 @@ class State:
             return self.races
         house = {self.code + ("-AL" if n == 0 else f"-{n:02}") for n in self.house}
         return {k: v for k, v in self.races.items() if k not in house}
+
+    @property
+    def variants(self):
+        """{race ID: (its seat's regular race ID, its tab)} for every race of a seat that has a
+        special or runoff race beside its regular one, the regular race included. A seat with
+        one race is not here. The regular race's tab is "General" beside a runoff, else
+        "Regular"."""
+        found = {}
+        for suffix, _, tab in self.specials:
+            seat = f"{self.code}-{suffix.split('-')[0]}"
+            found[f"{self.code}-{suffix}"] = (seat, tab)
+        runoff_seats = {seat for seat, tab in found.values() if tab == "Runoff"}
+        for seat in {seat for seat, _ in found.values()}:
+            found[seat] = (seat, "General" if seat in runoff_seats else "Regular")
+        return found
 
     def accepts(self, contests):
         """A release's contests are every race, or (House optional) every base race, or

@@ -269,6 +269,10 @@ def make_payload(
             races[identity]["county_privacy_masked"] = True
         if identity in RUNOFFS:
             races[identity]["runoff"] = RUNOFFS[identity]
+        if identity in adapter.variants:
+            # A seat held more than once is shown as tabs: this race's seat and its tab.
+            seat, tab = adapter.variants[identity]
+            races[identity]["variant"] = {"seat": seat, "tab": tab}
         # A publication made before its state's tabulation was imported has no rounds.
         tabulated = [r for r in rcv_rows if r["contest_id"] == identity]
         if tabulated:

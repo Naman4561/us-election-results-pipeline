@@ -218,6 +218,18 @@ def fingerprint(code, election=None, config=None):
     return hashlib.sha256(b"\0".join(parts)).hexdigest()
 
 
+def special_races(table, where):
+    """(suffix, name, tab) for each race under ``[races.special]``: its name alone, or a table
+    with a name and the tab the dashboard labels it with (default "Special")."""
+    found = []
+    for suffix, value in sorted(table.items()):
+        entry = {"name": value} if isinstance(value, str) else dict(value)
+        if set(entry) - {"name", "tab"} or not entry.get("name"):
+            raise ValueError(f"{where}: special race {suffix} is a name and an optional tab")
+        found.append((suffix, entry["name"], entry.get("tab", "Special")))
+    return tuple(found)
+
+
 def source_of(raw, state, election_date, where):
     """The ``Source`` a definition's ``[source]`` table describes."""
     table = dict(raw)
@@ -282,7 +294,7 @@ def load(election=None, root=None, config=None):
             name=facts[code]["name"],
             source_id=source.source_id,
             house=tuple(races.get("house", ())),
-            specials=tuple(sorted(races.get("special", {}).items())),
+            specials=special_races(races.get("special", {}), path.name),
             methods=tuple(raw["methods"]),
             senate=races.get("senate", True),
             governor=races.get("governor", False),

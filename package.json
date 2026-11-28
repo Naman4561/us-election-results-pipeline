@@ -2,8 +2,8 @@
   "name": "election-dashboard-checks",
   "private": true,
   "scripts": {
-    "test": "node --test tests/dashboard.test.cjs",
-    "format:check": "prettier --check src/election_pipeline/dashboard/static/app.js src/election_pipeline/dashboard/static/app.css src/election_pipeline/dashboard/static/index.html tests/dashboard.test.cjs"
+    "test": "node --test tests/dashboard.test.cjs tests/dashboard_tabs.test.cjs",
+    "format:check": "prettier --check src/election_pipeline/dashboard/static/app.js src/election_pipeline/dashboard/static/app.css src/election_pipeline/dashboard/static/index.html tests/dashboard.test.cjs tests/dashboard_tabs.test.cjs"
   },
   "devDependencies": {
     "jsdom": "30.1.3",

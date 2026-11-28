@@ -106,21 +106,39 @@ function writeLocation() {
     .replace(/\/+$/, "");
   if (location.hash.slice(1) !== hash) history.pushState(null, "", "#" + hash);
 }
+// A seat held more than once (a special election, or a runoff beside the November
+// race) is shown as tabs, one per race. A race's variant names its seat and its tab.
+function variantOf(code, id) {
+  return data.states[code]?.races?.[id]?.variant;
+}
+function seatOf(code, id) {
+  return variantOf(code, id)?.seat || id;
+}
+// The seats a state's office covers: a special or runoff race is a tab of its seat.
 function racesFor(code) {
-  return (data.coverage[code] || []).filter((id) =>
-    view.office === "senate"
-      ? id.endsWith("-SEN")
-      : view.office === "governor"
-        ? id.endsWith("-GOV")
-        : !/-SEN$|-GOV$/.test(id),
+  return (data.coverage[code] || []).filter(
+    (id) =>
+      seatOf(code, id) === id &&
+      (view.office === "senate"
+        ? id.endsWith("-SEN")
+        : view.office === "governor"
+          ? id.endsWith("-GOV")
+          : !/-SEN$|-GOV$/.test(id)),
   );
 }
+// The race shown: its seat's regular race, or the tab chosen for the seat (view.race).
 function raceFor(code) {
-  return view.office === "house"
-    ? racesFor(code).includes(view.race)
-      ? view.race
-      : racesFor(code)[0]
-    : code + (view.office === "senate" ? "-SEN" : "-GOV");
+  const seat =
+    view.office === "house"
+      ? racesFor(code).includes(seatOf(code, view.race))
+        ? seatOf(code, view.race)
+        : racesFor(code)[0]
+      : code + (view.office === "senate" ? "-SEN" : "-GOV");
+  return view.race &&
+    seatOf(code, view.race) === seat &&
+    data.coverage[code]?.includes(view.race)
+    ? view.race
+    : seat;
 }
 // No election-night source is collected; results come from the certified canvass.
 function awaitingCertified(code) {
@@ -253,7 +271,7 @@ async function selectState(code, race = null) {
 function selectedFeature(f) {
   if (view.scope === "US") return false;
   return view.office === "house"
-    ? f.id === raceFor(view.scope)
+    ? f.id === seatOf(view.scope, raceFor(view.scope))
     : f.id === view.county;
 }
 function featureStatus(f) {
@@ -518,6 +536,8 @@ function renderStatePanel() {
   $("result-runoff").hidden = !runoff;
   const target = $("result-content");
   target.replaceChildren();
+  const tabs = variantTabs(code, race);
+  if (tabs) target.append(tabs);
   const result = statusFor(code, race, view.county),
     stats = result.stats;
   if (result.status === "no_election") {
@@ -854,6 +874,33 @@ function renderStatePanel() {
       ),
     );
 }
+// The tabs of a seat held more than once: its regular race, then each special election
+// or runoff, labelled as the election definition names them. Choosing one shows that race
+// (view.race, so the address holds it). A seat with one race has none.
+function variantTabs(code, race) {
+  const seat = seatOf(code, race);
+  const ids = (data.coverage[code] || [])
+    .filter((id) => seatOf(code, id) === seat)
+    .sort((a, b) => (b === seat) - (a === seat));
+  if (ids.length < 2) return null;
+  const tabs = element("div", undefined, "tabs variant-tabs");
+  tabs.setAttribute("role", "tablist");
+  tabs.setAttribute("aria-label", "Elections for this seat");
+  for (const id of ids) {
+    const button = element("button", variantOf(code, id)?.tab || id);
+    button.setAttribute("role", "tab");
+    button.setAttribute("aria-selected", String(id === race));
+    button.dataset.race = id;
+    button.addEventListener("click", () => {
+      view.race = id;
+      view.county = null;
+      writeLocation();
+      render();
+    });
+    tabs.append(button);
+  }
+  return tabs;
+}
 // The round tabs of a ranked-choice race: each round of the tabulation, then the
 // precinct first choices. The choice is kept per race while the page is open.
 function roundTabs(race, ranked, tab) {
@@ -1059,7 +1106,7 @@ function renderControls() {
   $("area").value = national
     ? ""
     : view.office === "house"
-      ? raceFor(view.scope)
+      ? seatOf(view.scope, raceFor(view.scope))
       : view.county || "";
   $("area").disabled = aggregate;
   $("coverage-footer").textContent =
@@ -1077,7 +1124,7 @@ function renderControls() {
       const b = element(
         "button",
         id,
-        id === raceFor(view.scope) ? "active" : "",
+        id === seatOf(view.scope, raceFor(view.scope)) ? "active" : "",
       );
       b.addEventListener("click", () => {
         view.race = id;

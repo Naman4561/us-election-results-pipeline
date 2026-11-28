@@ -79,7 +79,9 @@ class MethodVocabularyTests(unittest.TestCase):
 
 class SpecialRaceTests(unittest.TestCase):
     def special(self, code="GA", suffix="SEN-S"):
-        return dataclasses.replace(STATES[code], specials=((suffix, "U.S. Senate (special)"),))
+        return dataclasses.replace(
+            STATES[code], specials=((suffix, "U.S. Senate (special)", "Special"),)
+        )
 
     def test_a_special_race_is_listed_beside_the_regular_ones_and_is_always_required(self):
         georgia = self.special()
@@ -106,7 +108,9 @@ class SpecialRaceTests(unittest.TestCase):
             with self.subTest(bad), self.assertRaisesRegex(ValueError, "special race"):
                 self.special(suffix=bad)
         with self.assertRaisesRegex(ValueError, "listed twice"):
-            dataclasses.replace(STATES["GA"], specials=(("SEN-S", "A"), ("SEN-S", "B")))
+            dataclasses.replace(
+                STATES["GA"], specials=(("SEN-S", "A", "Special"), ("SEN-S", "B", "Special"))
+            )
 
     def test_the_definition_lists_a_special_race_under_races(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -122,7 +126,7 @@ class SpecialRaceTests(unittest.TestCase):
                 encoding="utf-8",
             )
             georgia = elections.load(config=config).states["GA"]
-            self.assertEqual(georgia.specials, (("SEN-S", "U.S. Senate (special)"),))
+            self.assertEqual(georgia.specials, (("SEN-S", "U.S. Senate (special)", "Special"),))
             self.assertIn("GA-SEN-S", georgia.races)
 
     def test_finish_writes_a_special_race_beside_the_regular_one(self):
