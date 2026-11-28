@@ -143,7 +143,18 @@ stateDiagram-v2
 ```
 
 A per-state advisory lock stops two publications for one state from overlapping;
-different states publish in parallel. Florida orders releases by the official file's
-own timestamps, so an older file served again by the state cannot replace newer
-results; Iowa treats byte-different Clarity bundles of one results version as the
-same release.
+different states publish in parallel.
+
+A release is older than the live one by the report time its source printed, where that time
+carries its zone (an ISO time, or a stated zone such as CST: 29 of the 2026 sources). Where a
+source prints no time, only a clock without its zone, or only a version, it is older when its
+snapshot was first collected before the live one's: that also catches an old file a state
+serves again, whose bytes were seen before, and the replay of an old snapshot, which gets a
+new release number but keeps its collection time. An older release is refused unless it is an
+explicit restore. An equal time, or no way to tell, falls back to load order (a higher release
+number is accepted, so a correction under the same stamp goes through), and a release whose
+parsed results are identical to the live one's is never an older one (Washington serves
+byte-different copies of one version). Manual imports also refuse an older report time at
+import. Florida still orders its releases by the official file's own timestamps and Iowa treats
+byte-different Clarity bundles of one results version as the same release; both follow the
+election definition's source for the state, not a source ID written in code.

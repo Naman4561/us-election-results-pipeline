@@ -12,6 +12,7 @@ import subprocess
 import sys
 import uuid
 from collections import Counter
+from datetime import datetime
 from email.utils import parsedate_to_datetime
 from importlib.metadata import version
 from pathlib import Path
@@ -23,8 +24,10 @@ from election_pipeline import elections, parse_report
 from election_pipeline.database import connect
 from election_pipeline.states import publication_lock, state_adapter
 
-FLORIDA_SOURCE = "fl_2026_general"
-IOWA_SOURCE = "ia_2026_general"
+# Florida and Iowa have release-ordering rules of their own (below). They follow the election
+# definition's source for each, so a new election's source IDs keep them in force.
+FLORIDA_SOURCE = state_adapter("FL").source_id
+IOWA_SOURCE = state_adapter("IA").source_id
 SAME_OUTPUT_KEYS = ("output_sha256", "output_rows", "contests")
 # Mississippi's county feed health (when each county was last checked) changes with every
 # collection while the votes do not; it is refreshed in place, not republished.
@@ -330,6 +333,51 @@ def current_publication(conn, source_id):
     ).fetchone()
 
 
+def reported_at(report):
+    """The time a parse report's source printed with its zone (a datetime), or None."""
+    try:
+        found = parse_report.read(report or {}).reported_at
+        return datetime.fromisoformat(found) if found else None
+    except (ValueError, TypeError, KeyError, AttributeError):
+        return None
+
+
+def first_collected(conn, snapshot_id):
+    """When a snapshot's bytes were first seen (downloaded or imported), or None."""
+    row = conn.execute(
+        "SELECT min(finished_at) AS at FROM ops.fetch_attempts "
+        "WHERE snapshot_id = %s AND outcome IN ('downloaded', 'manual_imported')",
+        (snapshot_id,),
+    ).fetchone()
+    found = row.get("at") if row else None
+    return found if isinstance(found, datetime) else None
+
+
+def compare_to_live(conn, current, metadata):
+    """-1 when the incoming release's data is older than the live release's, 1 when newer,
+    0 when equal or not known to differ.
+
+    By the report time both sources printed with a zone; where either has none (a source that
+    prints no time, only a clock without its zone, or a version), by when each snapshot was first
+    collected, which also catches an old file a site serves again, whose bytes were seen before.
+    """
+    incoming, live = (
+        reported_at(metadata.get("parser_report")),
+        reported_at(parser_report(conn, current["release_id"])),
+    )
+    if incoming and live and incoming.tzinfo and live.tzinfo:
+        return (incoming > live) - (incoming < live)
+    incoming_snapshot, live_snapshot = metadata.get("snapshot_id"), current.get("snapshot_id")
+    if incoming_snapshot is None or live_snapshot is None or incoming_snapshot == live_snapshot:
+        return 0
+    seen = metadata.get("first_observed_at")
+    seen = seen if isinstance(seen, datetime) else first_collected(conn, incoming_snapshot)
+    before = first_collected(conn, live_snapshot)
+    if seen and before:
+        return (seen > before) - (seen < before)
+    return 0
+
+
 def require_forward_release(conn, current, metadata):
     if current is None:
         return
@@ -349,10 +397,20 @@ def require_forward_release(conn, current, metadata):
                     return
         if metadata["snapshot_id"] < current["snapshot_id"]:
             raise ValueError("An earlier release requires an explicit restore")
-    if current["release_id"] > metadata["release_id"]:
-        if metadata["source_id"] not in (FLORIDA_SOURCE, IOWA_SOURCE) and same_parsed_release(
+
+    def same_data():
+        # Florida and Iowa keep their own, stricter rules for byte-different copies.
+        return metadata["source_id"] not in (FLORIDA_SOURCE, IOWA_SOURCE) and same_parsed_release(
             conn, metadata, current
-        ):
+        )
+
+    order = compare_to_live(conn, current, metadata)
+    if order < 0 and not same_data():
+        raise ValueError("An earlier release requires an explicit restore: its data is older")
+    if order > 0:
+        return
+    if current["release_id"] > metadata["release_id"]:
+        if same_data():
             return
         raise ValueError("An earlier release requires an explicit restore")
 

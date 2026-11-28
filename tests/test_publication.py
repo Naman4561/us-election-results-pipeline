@@ -19,6 +19,7 @@ from election_pipeline import publication
 from election_pipeline.database import connect, load_parsed
 from election_pipeline.parsers.nc import CONTESTS
 from election_pipeline.publication import checked_results, publish, restore
+from election_pipeline.states import state_adapter
 
 
 class PublicationArtifactTests(unittest.TestCase):
@@ -282,6 +283,99 @@ class PublicationArtifactTests(unittest.TestCase):
             publication.require_forward_release(
                 conn, current, {**incoming, "source_id": publication.IOWA_SOURCE}
             )
+
+    def ledger(self, reports, collected=None):
+        """A connection answering the two lookups an ordering check makes: a release's parse
+        report, and when a snapshot's bytes were first collected."""
+        conn = MagicMock()
+
+        def execute(statement, parameters=()):
+            cursor = MagicMock()
+            if "fetch_attempts" in statement:
+                cursor.fetchone.return_value = {"at": (collected or {}).get(parameters[0])}
+            else:
+                cursor.fetchone.return_value = {"parser_report": reports.get(parameters[0], {})}
+            return cursor
+
+        conn.execute.side_effect = execute
+        return conn
+
+    def release(self, report, release_id, snapshot_id, source_id="wa_2026_general"):
+        return {
+            "source_id": source_id,
+            "release_id": release_id,
+            "snapshot_id": snapshot_id,
+            "parser_report": report,
+        }
+
+    def test_a_report_time_decides_which_release_is_newer_not_the_load_order(self):
+        live = {"source_update_text": "2026-11-05T21:00:00Z", "output_rows": 10}
+        older = {"source_update_text": "2026-11-05T20:00:00Z", "output_rows": 9}
+        newer = {"source_update_text": "2026-11-05T22:00:00Z", "output_rows": 11}
+        current = {"release_id": 10, "snapshot_id": 1}
+        conn = self.ledger({10: live})
+        # Loaded later, so a higher release number, but the report it holds is older.
+        with self.assertRaisesRegex(ValueError, "earlier release.*older"):
+            publication.require_forward_release(conn, current, self.release(older, 11, 2))
+        # Loaded earlier, a lower release number, but the report is newer.
+        publication.require_forward_release(conn, current, self.release(newer, 9, 2))
+        # The same report time falls back to load order: a correction loaded later is accepted.
+        same = {**live, "output_rows": 12}
+        publication.require_forward_release(conn, current, self.release(same, 11, 2))
+        with self.assertRaisesRegex(ValueError, "earlier release"):
+            publication.require_forward_release(conn, current, self.release(same, 9, 2))
+
+    def test_without_a_report_time_the_snapshots_first_collection_decides(self):
+        current = {"release_id": 10, "snapshot_id": 1}
+        collected = {1: datetime(2026, 11, 5, 20, tzinfo=timezone.utc)}
+        conn = self.ledger({10: {}}, collected)
+        # A replay of an older snapshot gets a new, higher release number but was collected first.
+        collected[2] = datetime(2026, 11, 5, 19, tzinfo=timezone.utc)
+        with self.assertRaisesRegex(ValueError, "earlier release.*older"):
+            publication.require_forward_release(conn, current, self.release({}, 11, 2))
+        # A snapshot collected after the live one is newer, whatever its release number.
+        collected[2] = datetime(2026, 11, 5, 21, tzinfo=timezone.utc)
+        publication.require_forward_release(conn, current, self.release({}, 9, 2))
+        # When it cannot be told, the load order decides, as before.
+        collected[2] = None
+        publication.require_forward_release(conn, current, self.release({}, 11, 2))
+        with self.assertRaisesRegex(ValueError, "earlier release"):
+            publication.require_forward_release(conn, current, self.release({}, 9, 2))
+
+    def test_a_clock_time_with_no_zone_is_not_read_as_a_report_time(self):
+        text = {"source_update_text": "11/5/2026 2:04 PM", "output_rows": 5}
+        current = {"release_id": 10, "snapshot_id": 1}
+        collected = {
+            1: datetime(2026, 11, 5, 20, tzinfo=timezone.utc),
+            2: datetime(2026, 11, 5, 19, tzinfo=timezone.utc),
+        }
+        conn = self.ledger({10: text}, collected)
+        later_text = {**text, "source_update_text": "11/5/2026 3:04 PM"}
+        with self.assertRaisesRegex(ValueError, "earlier release.*older"):
+            publication.require_forward_release(conn, current, self.release(later_text, 11, 2))
+
+    def test_an_older_copy_of_the_live_results_is_no_rollback(self):
+        live = {
+            "output_sha256": {"results.csv": "a" * 64},
+            "output_rows": 5,
+            "contests": ["WA-01"],
+            "source_update_text": "11/5/2026 2:04 PM",
+        }
+        collected = {
+            1: datetime(2026, 11, 5, 20, tzinfo=timezone.utc),
+            2: datetime(2026, 11, 5, 19, tzinfo=timezone.utc),
+        }
+        conn = self.ledger({10: live}, collected)
+        current = {"release_id": 10, "snapshot_id": 1}
+        # Byte-different copy, seen first but holding the same results: accepted, as before.
+        publication.require_forward_release(conn, current, self.release(dict(live), 12, 2))
+        different = {**live, "output_rows": 4}
+        with self.assertRaisesRegex(ValueError, "earlier release"):
+            publication.require_forward_release(conn, current, self.release(different, 12, 2))
+
+    def test_floridas_and_iowas_rules_follow_the_election_definitions_sources(self):
+        self.assertEqual(publication.FLORIDA_SOURCE, state_adapter("FL").source_id)
+        self.assertEqual(publication.IOWA_SOURCE, state_adapter("IA").source_id)
 
     def test_florida_orders_distinct_snapshots_by_separated_file_time_ranges(self):
         earlier = datetime(2026, 11, 4, 15, 0, 3, tzinfo=timezone.utc)
